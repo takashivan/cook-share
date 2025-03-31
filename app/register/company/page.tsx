@@ -1,10 +1,12 @@
 "use client";
 
+import type React from "react";
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -12,15 +14,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/contexts/AuthContext";
-import { login } from "@/lib/api/user";
+import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
+import { register } from "@/lib/api/companyUser";
 import { toast } from "@/hooks/use-toast";
+import API from "@/lib/api";
 
-export default function LoginPage() {
+export default function CompanyRegisterPage() {
   const router = useRouter();
-  const { login: setUser } = useAuth();
+  const { login } = useCompanyAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -30,24 +32,27 @@ export default function LoginPage() {
     try {
       const formData = new FormData(e.currentTarget);
       const data = {
+        name: formData.get("name") as string,
         email: formData.get("email") as string,
         password: formData.get("password") as string,
+        company_name: formData.get("company_name") as string,
       };
 
-      const response = await login(data);
-      await setUser(response.token, response.user);
+      const response = await register(data);
+      console.log("Registration response:", response);
+      await login(response.authToken, response.user);
 
       toast({
-        title: "ログインしました",
-        description: "ダッシュボードに移動します。",
+        title: "登録が完了しました",
+        description: "会社プロフィールの登録に進みましょう。",
       });
 
-      router.push("/");
+      router.push("/register/company-profile");
     } catch (error) {
-      console.error("Login failed:", error);
+      console.error("Registration failed:", error);
       toast({
         title: "エラーが発生しました",
-        description: "メールアドレスまたはパスワードが正しくありません。",
+        description: "登録に失敗しました。もう一度お試しください。",
         variant: "destructive",
       });
     } finally {
@@ -70,64 +75,68 @@ export default function LoginPage() {
             <span className="font-bold">CookChef</span>
             <span className="text-xs text-gray-500">(仮)</span>
           </Link>
-          <Link href="/register/chef">
-            <Button variant="outline" size="sm" className="border-gray-300">
-              シェフ登録
-            </Button>
-          </Link>
         </div>
       </header>
 
-      <main className="flex-1 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold">シェフログイン</CardTitle>
+      <main className="flex-1 container mx-auto py-8 px-4">
+        <Card className="max-w-md mx-auto">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold">
+              会社ユーザー登録
+            </CardTitle>
             <CardDescription>
-              アカウントにログインして、求人に応募しましょう
+              会社の情報を入力して、シェフとマッチングしましょう
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">お名前</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  type="text"
+                  required
+                  placeholder="山田 太郎"
+                />
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="email">メールアドレス</Label>
                 <Input
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="example@cookchef.jp"
                   required
+                  placeholder="example@company.com"
                 />
               </div>
+
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">パスワード</Label>
-                  <Link
-                    href="/forgot-password"
-                    className="text-xs text-primary underline underline-offset-4">
-                    パスワードをお忘れですか？
-                  </Link>
-                </div>
-                <Input id="password" name="password" type="password" required />
+                <Label htmlFor="password">パスワード</Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                />
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="company_name">会社名</Label>
+                <Input
+                  id="company_name"
+                  name="company_name"
+                  type="text"
+                  required
+                  placeholder="株式会社〇〇"
+                />
+              </div>
+
               <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? "ログイン中..." : "ログイン"}
+                {isSubmitting ? "登録中..." : "登録する"}
               </Button>
-              <div className="text-center text-sm text-muted-foreground">
-                シェフアカウントをお持ちでないですか？{" "}
-                <Link
-                  href="/register/chef"
-                  className="text-primary underline underline-offset-4">
-                  シェフ登録
-                </Link>
-              </div>
-              <div className="text-center text-sm text-muted-foreground">
-                企業の方はこちら{" "}
-                <Link
-                  href="/login/company"
-                  className="text-primary underline underline-offset-4">
-                  企業ログイン
-                </Link>
-              </div>
             </form>
           </CardContent>
         </Card>

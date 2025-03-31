@@ -19,8 +19,14 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Upload, User } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/contexts/AuthContext";
+import { updateUserProfile } from "@/lib/api/user";
+import { toast } from "@/hooks/use-toast";
 
 export default function ChefProfilePage() {
+  const router = useRouter();
+  const { isAuthenticated, user } = useAuth();
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [selectedCertificates, setSelectedCertificates] = useState<string[]>(
     []
@@ -28,6 +34,7 @@ export default function ChefProfilePage() {
   const [otherCertificate, setOtherCertificate] = useState("");
   const [showOtherCertificate, setShowOtherCertificate] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const skills = [
     { id: "fish-cutting", label: "魚が捌ける" },
@@ -80,18 +87,62 @@ export default function ChefProfilePage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // ここでフォームデータを処理し、APIに送信する
-    console.log({
-      skills: selectedSkills,
-      certificates: selectedCertificates,
-      otherCertificate,
-      profileImage,
-      // フォームの他のフィールドもここで取得
-    });
-    // 登録完了後、ダッシュボードなどにリダイレクト
-    // router.push('/dashboard')
+
+    if (!user?.id) {
+      toast({
+        title: "エラーが発生しました",
+        description: "ユーザー情報が見つかりません。",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // バリデーション
+    if (selectedSkills.length === 0) {
+      toast({
+        title: "スキルを選択してください",
+        description: "少なくとも1つのスキルを選択する必要があります。",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const formData = new FormData(e.currentTarget);
+      const profileData = {
+        name: user.name,
+        email: user.email,
+        skills: selectedSkills,
+        certifications: selectedCertificates,
+        bio: formData.get("bio") as string,
+        experience_level: formData.get("experience_level") as string,
+        photo: profileImage,
+      };
+      console.log("profileData", profileData);
+
+      await updateUserProfile(user.id, profileData);
+
+      toast({
+        title: "プロフィールを更新しました",
+        description: "シェフプロフィールの更新が完了しました。",
+      });
+
+      router.push("/");
+    } catch (error) {
+      console.error("Profile update failed:", error);
+      toast({
+        title: "エラーが発生しました",
+        description:
+          "プロフィールの更新に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -146,7 +197,7 @@ export default function ChefProfilePage() {
               {/* 経験年数 */}
               <div className="space-y-3">
                 <Label className="text-base">調理経験年数</Label>
-                <RadioGroup defaultValue="3-5">
+                <RadioGroup defaultValue="3-5" name="experience_level">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="10+" id="exp-10" />
@@ -211,8 +262,10 @@ export default function ChefProfilePage() {
                 </Label>
                 <Textarea
                   id="bio"
+                  name="bio"
                   placeholder="あなたの経験やスキル、得意な料理などをアピールしてください"
                   className="min-h-[120px]"
+                  required
                 />
               </div>
 
@@ -257,7 +310,12 @@ export default function ChefProfilePage() {
                 <Button variant="outline" type="button" asChild>
                   <Link href="/register">戻る</Link>
                 </Button>
-                <Button type="submit">登録を完了する</Button>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isSubmitting}>
+                  {isSubmitting ? "更新中..." : "プロフィールを更新"}
+                </Button>
               </div>
             </form>
           </CardContent>

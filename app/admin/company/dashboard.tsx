@@ -1,4 +1,7 @@
-import Link from "next/link"
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   Building,
   CreditCard,
@@ -10,43 +13,86 @@ import {
   Plus,
   Store,
   Users,
-} from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { getRestaurants } from "@/lib/api/restaurant";
+import type { Restaurant } from "@/lib/api/restaurant";
+import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
+import { getCompanyById } from "@/lib/api/company";
+import type { Company } from "@/lib/api/company";
 
 export function CompanyDashboard() {
-  const stores = [
-    {
-      id: 1,
-      name: "洋食 黒船亭 上野店",
-      address: "東京都台東区上野",
-      type: "洋食",
-      status: "営業中",
-      jobCount: 5,
-      staffCount: 8,
-    },
-    {
-      id: 2,
-      name: "和食 さくら 新宿店",
-      address: "東京都新宿区新宿",
-      type: "和食",
-      status: "営業中",
-      jobCount: 3,
-      staffCount: 6,
-    },
-    {
-      id: 3,
-      name: "イタリアン ベラ 渋谷店",
-      address: "東京都渋谷区渋谷",
-      type: "イタリアン",
-      status: "営業中",
-      jobCount: 4,
-      staffCount: 7,
-    },
-  ]
+  const { user, isLoading: isAuthLoading } = useCompanyAuth();
+  const [restaurants, setRestaurants] = useState<Array<Restaurant>>([]);
+  const [companyInfo, setCompanyInfo] = useState<Company | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (isAuthLoading) return;
+
+      console.log("Fetching data for user:", user);
+      try {
+        if (user?.companies_id) {
+          console.log("Fetching data for company ID:", user.companies_id);
+
+          // まず会社情報を取得
+          const companyData = await getCompanyById(user.companies_id);
+          console.log("Fetched company data:", companyData);
+          setCompanyInfo(companyData);
+
+          // 会社情報が取得できたら、レストラン情報を取得
+          if (companyData) {
+            const restaurantsData = await getRestaurants();
+            console.log("Fetched restaurants data:", restaurantsData);
+
+            // 会社IDでフィルタリング
+            const companyRestaurants = restaurantsData.filter(
+              (restaurant) => restaurant.companies_id === user.companies_id
+            );
+            console.log("Filtered restaurants:", companyRestaurants);
+            setRestaurants(companyRestaurants);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchData();
+    }
+  }, [user, isAuthLoading]);
+
+  // データが更新されたときのログ
+  useEffect(() => {
+    console.log("Company info updated:", companyInfo);
+    console.log("Restaurants updated:", restaurants);
+  }, [companyInfo, restaurants]);
 
   const recentJobs = [
     {
@@ -73,7 +119,7 @@ export function CompanyDashboard() {
       applicants: 2,
       status: "公開中",
     },
-  ]
+  ];
 
   const recentStaff = [
     {
@@ -97,14 +143,22 @@ export function CompanyDashboard() {
       role: "一般ユーザー",
       department: "マーケティング部",
     },
-  ]
+  ];
+
+  if (isAuthLoading || isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">会社ダッシュボード</h2>
-          <p className="text-muted-foreground">株式会社サンプルの管理画面へようこそ</p>
+          <h2 className="text-2xl font-bold tracking-tight">
+            会社ダッシュボード
+          </h2>
+          <p className="text-muted-foreground">
+            {companyInfo?.name || "読み込み中..."}の管理画面へようこそ
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button>
@@ -131,8 +185,8 @@ export function CompanyDashboard() {
             <Store className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12</div>
-            <p className="text-xs text-muted-foreground">先月比 +2店舗</p>
+            <div className="text-2xl font-bold">{restaurants.length}</div>
+            <p className="text-xs text-muted-foreground">登録店舗数</p>
           </CardContent>
         </Card>
         <Card>
@@ -183,35 +237,32 @@ export function CompanyDashboard() {
                     <TableHead>住所</TableHead>
                     <TableHead>ジャンル</TableHead>
                     <TableHead>ステータス</TableHead>
-                    <TableHead>求人数</TableHead>
-                    <TableHead>スタッフ数</TableHead>
                     <TableHead className="w-[100px]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {stores.map((store) => (
-                    <TableRow key={store.id}>
+                  {restaurants.map((restaurant) => (
+                    <TableRow key={restaurant.id}>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center">
                             <Store className="h-4 w-4 text-gray-500" />
                           </div>
-                          {store.name}
+                          {restaurant.name}
                         </div>
                       </TableCell>
-                      <TableCell>{store.address}</TableCell>
-                      <TableCell>{store.type}</TableCell>
+                      <TableCell>{restaurant.address}</TableCell>
+                      <TableCell>{restaurant.cuisine_type}</TableCell>
                       <TableCell>
                         <div
                           className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                            store.status === "営業中" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
-                          }`}
-                        >
-                          {store.status}
+                            restaurant.is_active
+                              ? "bg-green-100 text-green-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}>
+                          {restaurant.is_active ? "営業中" : "準備中"}
                         </div>
                       </TableCell>
-                      <TableCell>{store.jobCount}</TableCell>
-                      <TableCell>{store.staffCount}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -222,7 +273,9 @@ export function CompanyDashboard() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem>
-                              <Link href={`/admin/company/stores`} className="w-full flex items-center">
+                              <Link
+                                href={`/admin/company/stores/${restaurant.id}`}
+                                className="w-full flex items-center">
                                 <ExternalLink className="h-4 w-4 mr-2" />
                                 詳細を表示
                               </Link>
@@ -243,8 +296,8 @@ export function CompanyDashboard() {
 
           {/* Mobile View */}
           <div className="grid gap-4 md:hidden">
-            {stores.map((store) => (
-              <Card key={store.id}>
+            {restaurants.map((restaurant) => (
+              <Card key={restaurant.id}>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -252,8 +305,10 @@ export function CompanyDashboard() {
                         <Store className="h-5 w-5 text-gray-500" />
                       </div>
                       <div>
-                        <p className="font-medium">{store.name}</p>
-                        <p className="text-sm text-muted-foreground">{store.address}</p>
+                        <p className="font-medium">{restaurant.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {restaurant.address}
+                        </p>
                       </div>
                     </div>
                     <DropdownMenu>
@@ -265,7 +320,9 @@ export function CompanyDashboard() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem>
-                          <Link href={`/admin/company/stores`} className="w-full flex items-center">
+                          <Link
+                            href={`/admin/company/stores/${restaurant.id}`}
+                            className="w-full flex items-center">
                             <ExternalLink className="h-4 w-4 mr-2" />
                             詳細を表示
                           </Link>
@@ -280,29 +337,22 @@ export function CompanyDashboard() {
                   <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
                     <div>
                       <p className="text-muted-foreground">ジャンル</p>
-                      <p>{store.type}</p>
+                      <p>{restaurant.cuisine_type}</p>
                     </div>
                     <div>
                       <p className="text-muted-foreground">ステータス</p>
                       <div
                         className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          store.status === "営業中" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
-                        {store.status}
+                          restaurant.is_active
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}>
+                        {restaurant.is_active ? "営業中" : "準備中"}
                       </div>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">求人数</p>
-                      <p>{store.jobCount}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">スタッフ数</p>
-                      <p>{store.staffCount}</p>
                     </div>
                   </div>
                   <div className="mt-3">
-                    <Link href={`/admin/company/stores`}>
+                    <Link href={`/admin/company/stores/${restaurant.id}`}>
                       <Button variant="outline" size="sm" className="w-full">
                         詳細を表示
                       </Button>
@@ -355,10 +405,9 @@ export function CompanyDashboard() {
                             job.status === "公開中"
                               ? "bg-green-100 text-green-800"
                               : job.status === "下書き"
-                                ? "bg-gray-100 text-gray-800"
-                                : "bg-yellow-100 text-yellow-800"
-                          }`}
-                        >
+                              ? "bg-gray-100 text-gray-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}>
                           {job.status}
                         </div>
                       </TableCell>
@@ -373,7 +422,9 @@ export function CompanyDashboard() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem>
-                              <Link href={`/admin/job`} className="w-full flex items-center">
+                              <Link
+                                href={`/admin/job`}
+                                className="w-full flex items-center">
                                 <ExternalLink className="h-4 w-4 mr-2" />
                                 詳細を表示
                               </Link>
@@ -400,7 +451,9 @@ export function CompanyDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">{job.title}</p>
-                      <p className="text-sm text-muted-foreground">{job.store}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {job.store}
+                      </p>
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -411,7 +464,9 @@ export function CompanyDashboard() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem>
-                          <Link href={`/admin/job`} className="w-full flex items-center">
+                          <Link
+                            href={`/admin/job`}
+                            className="w-full flex items-center">
                             <ExternalLink className="h-4 w-4 mr-2" />
                             詳細を表示
                           </Link>
@@ -435,10 +490,9 @@ export function CompanyDashboard() {
                           job.status === "公開中"
                             ? "bg-green-100 text-green-800"
                             : job.status === "下書き"
-                              ? "bg-gray-100 text-gray-800"
-                              : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
+                            ? "bg-gray-100 text-gray-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}>
                         {job.status}
                       </div>
                     </div>
@@ -494,7 +548,9 @@ export function CompanyDashboard() {
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-                            <span className="text-sm font-medium">{staff.name.charAt(0)}</span>
+                            <span className="text-sm font-medium">
+                              {staff.name.charAt(0)}
+                            </span>
                           </div>
                           {staff.name}
                         </div>
@@ -512,7 +568,9 @@ export function CompanyDashboard() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem>
-                              <Link href={`/admin/company/staff`} className="w-full flex items-center">
+                              <Link
+                                href={`/admin/company/staff`}
+                                className="w-full flex items-center">
                                 <ExternalLink className="h-4 w-4 mr-2" />
                                 詳細を表示
                               </Link>
@@ -539,11 +597,15 @@ export function CompanyDashboard() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                        <span className="text-sm font-medium">{staff.name.charAt(0)}</span>
+                        <span className="text-sm font-medium">
+                          {staff.name.charAt(0)}
+                        </span>
                       </div>
                       <div>
                         <p className="font-medium">{staff.name}</p>
-                        <p className="text-sm text-muted-foreground">{staff.email}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {staff.email}
+                        </p>
                       </div>
                     </div>
                     <DropdownMenu>
@@ -555,7 +617,9 @@ export function CompanyDashboard() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem>
-                          <Link href={`/admin/company/staff`} className="w-full flex items-center">
+                          <Link
+                            href={`/admin/company/staff`}
+                            className="w-full flex items-center">
                             <ExternalLink className="h-4 w-4 mr-2" />
                             詳細を表示
                           </Link>
@@ -611,12 +675,16 @@ export function CompanyDashboard() {
                     <CreditCard className="h-6 w-6 text-gray-500" />
                   </div>
                   <div className="flex-1 space-y-1">
-                    <p className="text-sm font-medium leading-none">請求 #{202400 + i}</p>
+                    <p className="text-sm font-medium leading-none">
+                      請求 #{202400 + i}
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       ¥{45000 + i * 5000} - 2024/0{i}/01
                     </p>
                   </div>
-                  <div className="rounded-full px-2 py-1 text-xs bg-green-100 text-green-800">支払済</div>
+                  <div className="rounded-full px-2 py-1 text-xs bg-green-100 text-green-800">
+                    支払済
+                  </div>
                 </div>
               ))}
               <div className="mt-4">
@@ -659,11 +727,17 @@ export function CompanyDashboard() {
               ].map((activity, i) => (
                 <div key={i} className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-                    <span className="text-sm font-medium">{activity.user.charAt(0)}</span>
+                    <span className="text-sm font-medium">
+                      {activity.user.charAt(0)}
+                    </span>
                   </div>
                   <div className="flex-1 space-y-1">
-                    <p className="text-sm font-medium leading-none">{activity.action}</p>
-                    <p className="text-sm text-muted-foreground">{activity.target}</p>
+                    <p className="text-sm font-medium leading-none">
+                      {activity.action}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {activity.target}
+                    </p>
                     <p className="text-xs text-muted-foreground">
                       {activity.user} - {activity.time}
                     </p>
@@ -675,6 +749,5 @@ export function CompanyDashboard() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
-

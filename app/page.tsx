@@ -1,55 +1,46 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Clock, MapPin, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { getAllJobs } from "@/lib/api/job";
+import { Header } from "@/components/layout/header";
+import { Job } from "@/lib/api/company";
 
-// TypeScriptの型定義を修正
-interface Job {
-  id: number;
-  title: string;
-  description: string;
-  work_date: string;
-  start_time: number;
-  end_time: number;
-  hourly_rate: number;
-  status: string;
-  image: string;
-  task: string;
-  skill: string;
-  whattotake: string;
-  note: string;
-  point: string;
-  transportation: string;
-}
+export default function Home() {
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string>(
+    new Date().toLocaleDateString("ja-JP", { month: "2-digit", day: "2-digit" })
+  );
 
-// サーバーコンポーネントに変更
-export default async function Home() {
-  // APIからデータを取得
-  const jobs = await getAllJobs();
+  // 次の7日分の日付を生成
+  const dates = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() + i);
+    return {
+      date: date.toLocaleDateString("ja-JP", {
+        month: "2-digit",
+        day: "2-digit",
+      }),
+      day: date.toLocaleDateString("ja-JP", { weekday: "short" }),
+    };
+  });
+
+  // データ取得
+  useEffect(() => {
+    const fetchJobs = async () => {
+      const jobsData = await getAllJobs();
+      setJobs(jobsData);
+    };
+    fetchJobs();
+  }, []);
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-b">
-        <div className="container mx-auto flex items-center justify-between p-4">
-          <div className="flex items-center gap-2">
-            <Image
-              src="/placeholder.svg?height=30&width=30"
-              alt="CookChef Logo"
-              width={30}
-              height={30}
-              className="text-orange-500"
-            />
-            <span className="font-bold">CookChef</span>
-            <span className="text-xs text-gray-500">(仮)</span>
-          </div>
-          <Button variant="outline" size="sm" className="border-gray-300">
-            ログイン
-          </Button>
-        </div>
-      </header>
-
+      <Header />
       <main className="flex-1">
         {/* Hero Section */}
         <section className="border-b">
@@ -145,35 +136,40 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* Date Selector */}
-        <section className="py-4 border-b">
+        {/* 日付選択 */}
+        <section className="bg-white py-4">
           <div className="container mx-auto px-4">
-            <h2 className="text-sm font-medium mb-4">日付で絞り込む</h2>
+            <div className="mb-2 font-medium">日付で絞り込む</div>
+            <div className="flex items-center">
+              <div className="mr-4 text-sm">今日</div>
+              <div className="flex items-center overflow-x-auto whitespace-nowrap">
+                <button className="p-2">
+                  <ChevronLeft size={20} />
+                </button>
 
-            <div className="flex items-center gap-2 overflow-x-auto pb-2">
-              <div className="flex flex-col items-center min-w-[60px]">
-                <span className="text-xs text-gray-500">今日</span>
-                <span className="text-sm font-medium">03/31</span>
+                {dates.map((item) => (
+                  <button
+                    key={item.date}
+                    className={`flex flex-col items-center mx-2 ${
+                      selectedDate === item.date ? "font-bold" : ""
+                    }`}
+                    onClick={() => setSelectedDate(item.date)}>
+                    <div className="text-sm">{item.date}</div>
+                    <div
+                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs mt-1 ${
+                        selectedDate === item.date
+                          ? "bg-black text-white"
+                          : "text-black"
+                      }`}>
+                      {item.day}
+                    </div>
+                  </button>
+                ))}
+
+                <button className="p-2">
+                  <ChevronRight size={20} />
+                </button>
               </div>
-
-              <button className="rounded-full bg-black text-white p-1">
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-
-              {["04/01", "04/02", "04/03", "04/04", "04/05", "04/06"].map(
-                (date, index) => (
-                  <div
-                    key={index}
-                    className="flex flex-col items-center min-w-[60px]">
-                    <span className="text-xs text-gray-500">&nbsp;</span>
-                    <span className="text-sm">{date}</span>
-                  </div>
-                )
-              )}
-
-              <button className="rounded-full bg-black text-white p-1">
-                <ChevronRight className="h-4 w-4" />
-              </button>
             </div>
           </div>
         </section>
@@ -195,11 +191,12 @@ export default async function Home() {
                       className="object-cover"
                     />
                     <div className="absolute bottom-0 left-0 bg-white px-2 py-1 text-xs">
-                      {new Date(job.work_date).toLocaleDateString("ja-JP", {
-                        month: "2-digit",
-                        day: "2-digit",
-                        weekday: "short",
-                      })}
+                      {job.work_date &&
+                        new Date(job.work_date).toLocaleDateString("ja-JP", {
+                          month: "2-digit",
+                          day: "2-digit",
+                          weekday: "short",
+                        })}
                     </div>
                   </div>
 
@@ -212,15 +209,17 @@ export default async function Home() {
                     <div className="flex items-center text-xs text-gray-500 mb-1">
                       <Clock className="h-3 w-3 mr-1" />
                       <span>
-                        {new Date(job.start_time).toLocaleTimeString("ja-JP", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}{" "}
+                        {job.start_time &&
+                          new Date(job.start_time).toLocaleTimeString("ja-JP", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}{" "}
                         〜{" "}
-                        {new Date(job.end_time).toLocaleTimeString("ja-JP", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {job.end_time &&
+                          new Date(job.end_time).toLocaleTimeString("ja-JP", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
                       </span>
                     </div>
 
@@ -238,7 +237,7 @@ export default async function Home() {
                         variant="outline"
                         size="sm"
                         className="text-xs rounded-full">
-                        時給{job.hourly_rate.toLocaleString()}円
+                        時給{job.hourly_rate?.toLocaleString()}円
                       </Button>
                       {job.transportation && (
                         <Button
