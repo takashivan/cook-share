@@ -1,6 +1,12 @@
 // lib/api/companyUser.ts - 会社ユーザー関連 API
 
-import { API_CONFIG, apiRequest, setAuthToken, clearAuthToken } from "./config";
+import {
+  API_CONFIG,
+  apiRequest,
+  setAuthToken,
+  clearAuthToken,
+  setCurrentUser,
+} from "./config";
 import {
   Company,
   Location,
@@ -46,15 +52,15 @@ type QueryParams = Record<string, string>;
 // 認証関連
 export const login = async (
   credentials: Credentials
-): Promise<{ token: string; user: CompanyUser }> => {
+): Promise<{ authToken: string; user: CompanyUser }> => {
   try {
-    const response = await apiRequest<{ token: string; user: CompanyUser }>(
+    const response = await apiRequest<{ authToken: string; user: CompanyUser }>(
       `${AUTH_URL}/login`,
       "POST",
       credentials
     );
-    if (response.token) {
-      setAuthToken(response.token, "company");
+    if (response.authToken) {
+      setAuthToken(response.authToken, "company");
     }
     return response;
   } catch (error) {
@@ -90,6 +96,8 @@ export const register = async (
     is_active: true,
     is_verified: true,
   };
+
+  setCurrentUser(transformedUser, "company");
 
   return {
     authToken: response.authToken,
@@ -336,27 +344,9 @@ export const updateSettings = (
   return apiRequest(`${BASE_URL}/settings`, "PUT", settingsData);
 };
 
-export async function updateCompanyUser(
+export const updateCompanyUser = (
   userId: string,
-  data: Partial<CompanyUser>
-): Promise<CompanyUser> {
-  try {
-    const response = await fetch(`${BASE_URL}/${userId}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("company_auth_token")}`,
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to update company user");
-    }
-
-    return response.json();
-  } catch (error) {
-    console.error("Error updating company user:", error);
-    throw error;
-  }
-}
+  userData: Partial<CompanyUser>
+): Promise<CompanyUser> => {
+  return apiRequest<CompanyUser>(`${BASE_URL}/${userId}`, "PATCH", userData);
+};

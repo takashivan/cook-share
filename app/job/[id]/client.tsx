@@ -19,7 +19,7 @@ interface Restaurant {
   access: string;
 }
 
-export interface JobDetail {
+interface JobDetail {
   job: {
     id: number;
     title: string;

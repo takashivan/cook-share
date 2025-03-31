@@ -81,7 +81,7 @@ export default function CompanyProfilePage() {
       console.log("Updated user:", updatedUser);
 
       // ユーザー情報を更新して再ログイン
-      const token = getAuthToken();
+      const token = getAuthToken("company");
       if (!token) {
         throw new Error("認証トークンが見つかりません");
       }
@@ -191,7 +191,7 @@ export default function CompanyProfilePage() {
 
               {/* 会社ロゴ */}
               <div className="space-y-3">
-                <Label className="text-base">会社ロゴ</Label>
+                <Label className="text-base">会社ロゴ（任意）</Label>
                 <div className="flex items-center gap-4">
                   <div className="relative w-24 h-24 border rounded-lg overflow-hidden flex items-center justify-center bg-gray-50">
                     {profileImage ? (
@@ -220,7 +220,7 @@ export default function CompanyProfilePage() {
                       onChange={handleImageChange}
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      JPG、PNG形式、5MB以下の画像をアップロードしてください
+                      会社ロゴは任意です。JPG、PNG形式、5MB以下の画像をアップロードできます
                     </p>
                   </div>
                 </div>

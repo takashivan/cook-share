@@ -1,6 +1,12 @@
 // lib/api/user.ts - シェフユーザー関連 API
 
-import { API_CONFIG, apiRequest, setAuthToken, clearAuthToken } from "./config";
+import {
+  API_CONFIG,
+  apiRequest,
+  setAuthToken,
+  clearAuthToken,
+  clearCurrentUser,
+} from "./config";
 
 const AUTH_URL = API_CONFIG.baseURLs.auth;
 const USER_URL = API_CONFIG.baseURLs.user;
@@ -64,10 +70,10 @@ interface SettingsData {
 // 認証関連
 export const login = async (
   credentials: Credentials
-): Promise<{ token: string; user: UserProfile }> => {
+): Promise<{ authToken: string; user: UserProfile }> => {
   try {
     const response = await apiRequest<{
-      token: string;
+      authToken: string;
       user: {
         id: string;
         email: string;
@@ -82,12 +88,12 @@ export const login = async (
       };
     }>(`${AUTH_URL}/login`, "POST", credentials);
 
-    if (response.token) {
-      setAuthToken(response.token, "chef");
+    if (response.authToken) {
+      setAuthToken(response.authToken, "chef");
     }
 
     return {
-      token: response.token,
+      authToken: response.authToken,
       user: {
         ...response.user,
         created_at: undefined,
@@ -138,6 +144,7 @@ export const getCurrentUser = async (): Promise<UserProfile> => {
 
 export const logout = () => {
   clearAuthToken("chef");
+  clearCurrentUser("chef");
   return Promise.resolve({ success: true });
 };
 

@@ -14,21 +14,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
 export function Header() {
-  const {
-    isAuthenticated: isChefAuthenticated,
-    user: chefUser,
-    logout: chefLogout,
-  } = useAuth();
-  const {
-    isAuthenticated: isCompanyAuthenticated,
-    user: companyUser,
-    logout: companyLogout,
-  } = useCompanyAuth();
+  const { user: chefUser, logout: chefLogout } = useAuth();
+  const { user: companyUser, logout: companyLogout } = useCompanyAuth();
 
-  const isAuthenticated = isChefAuthenticated || isCompanyAuthenticated;
+  const isAuthenticated = !!chefUser || !!companyUser;
   const user = chefUser || companyUser;
-  const logout = isChefAuthenticated ? chefLogout : companyLogout;
-  const userType = isChefAuthenticated ? "chef" : "company";
+  const logout = chefUser ? chefLogout : companyLogout;
+  const userType = chefUser ? "chef" : "company";
+
+  console.log("Auth state:", { chefUser, companyUser, isAuthenticated });
 
   return (
     <header className="border-b">
@@ -54,10 +48,7 @@ export function Header() {
                   className="relative h-10 w-10 rounded-full">
                   <Avatar className="h-10 w-10">
                     <AvatarImage
-                      src={
-                        (isChefAuthenticated && (user as any).profile_image) ||
-                        ""
-                      }
+                      src={(chefUser && (chefUser as any).profile_image) || ""}
                       alt={user.name}
                     />
                     <AvatarFallback>

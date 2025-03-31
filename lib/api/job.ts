@@ -102,7 +102,7 @@ export const searchJobs = (params: JobSearchParams = {}): Promise<Job[]> => {
 };
 
 // ジョブの詳細情報取得
-export const getJobDetails = (jobId: string): Promise<JobDetail> => {
+export const getJobDetails = (jobId: string): Promise<Job> => {
   return apiRequest(`${BASE_URL}/${jobId}`, "GET");
 };
 

@@ -8,7 +8,12 @@ import {
   ReactNode,
 } from "react";
 import API from "@/lib/api";
-import { getCurrentUser, setCurrentUser } from "@/lib/api/config";
+import {
+  getCurrentUser,
+  setCurrentUser,
+  setAuthToken,
+  clearAuthToken,
+} from "@/lib/api/config";
 import type { UserProfile } from "@/lib/api/user";
 
 interface AuthContextType {
@@ -34,13 +39,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (token: string, userData: UserProfile) => {
     setUser(userData);
-    setCurrentUser(userData);
+    setCurrentUser(userData, "chef");
+    setAuthToken(token, "chef");
     setIsAuthenticated(true);
   };
 
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
+    clearAuthToken("chef");
     localStorage.removeItem("current_user");
   };
 

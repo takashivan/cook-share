@@ -120,7 +120,7 @@ export default function ChefProfilePage() {
         certifications: selectedCertificates,
         bio: formData.get("bio") as string,
         experience_level: formData.get("experience_level") as string,
-        photo: profileImage,
+        photo: profileImage || null,
       };
       console.log("profileData", profileData);
 
@@ -269,14 +269,14 @@ export default function ChefProfilePage() {
                 />
               </div>
 
-              {/* プロフィール写真 */}
+              {/* プロフィール画像 */}
               <div className="space-y-3">
-                <Label className="text-base">プロフィール写真</Label>
+                <Label className="text-base">プロフィール画像（任意）</Label>
                 <div className="flex items-center gap-4">
-                  <div className="relative w-24 h-24 border rounded-full overflow-hidden flex items-center justify-center bg-gray-50">
+                  <div className="relative w-24 h-24 border rounded-lg overflow-hidden flex items-center justify-center bg-gray-50">
                     {profileImage ? (
                       <Image
-                        src={profileImage || "/placeholder.svg"}
+                        src={profileImage}
                         alt="Profile preview"
                         fill
                         className="object-cover"
@@ -290,7 +290,7 @@ export default function ChefProfilePage() {
                       htmlFor="profile-image"
                       className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 border rounded-md hover:bg-gray-50">
                       <Upload className="h-4 w-4" />
-                      写真をアップロード
+                      画像をアップロード
                     </Label>
                     <Input
                       id="profile-image"
@@ -300,7 +300,7 @@ export default function ChefProfilePage() {
                       onChange={handleImageChange}
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      JPG、PNG形式、5MB以下の画像をアップロードしてください
+                      プロフィール画像は任意です。JPG、PNG形式、5MB以下の画像をアップロードできます
                     </p>
                   </div>
                 </div>

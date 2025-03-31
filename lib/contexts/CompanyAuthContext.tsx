@@ -17,17 +17,15 @@ import {
   clearAuthToken,
   getCurrentUser,
   setCurrentUser,
-  getAuthToken,
-  clearCurrentUser,
 } from "@/lib/api/config";
 import type { CompanyUser } from "@/lib/api/companyUser";
 
-interface CompanyAuthContextType {
-  isAuthenticated: boolean;
+export interface CompanyAuthContextType {
   user: CompanyUser | null;
-  login: (token: string, userData: CompanyUser) => Promise<void>;
-  logout: () => void;
   isLoading: boolean;
+  isAuthenticated: boolean;
+  login: (token: string, user: CompanyUser) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const CompanyAuthContext = createContext<CompanyAuthContextType | undefined>(
@@ -40,55 +38,52 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const initializeAuth = async () => {
+    const initializeUser = async () => {
       try {
-        const token = getAuthToken("company");
-        if (token) {
-          const currentUser = getCurrentUser("company");
-          if (currentUser) {
-            setUser(currentUser as CompanyUser);
-            setIsAuthenticated(true);
-          }
+        const currentUser = await getCurrentUser("company");
+        console.log("Initial company user from storage:", currentUser);
+        if (currentUser) {
+          setUser(currentUser as CompanyUser);
+          setIsAuthenticated(true);
         }
       } catch (error) {
-        console.error("Error initializing auth:", error);
+        console.error("Error initializing user:", error);
+        localStorage.removeItem("company_current_user");
       } finally {
         setIsLoading(false);
       }
     };
 
-    initializeAuth();
+    initializeUser();
   }, []);
 
   const login = async (token: string, userData: CompanyUser) => {
-    try {
-      console.log("Login called with user:", userData);
-      setAuthToken(token, "company");
-      setCurrentUser(userData, "company");
-      setUser(userData);
-      setIsAuthenticated(true);
-      console.log("User state after login:", userData);
-    } catch (error) {
-      console.error("Error during login:", error);
-      throw error;
-    }
+    console.log("Login called with user:", userData);
+    setAuthToken(token, "company");
+    setUser(userData);
+    setCurrentUser(userData, "company");
+    setIsAuthenticated(true);
+    setIsLoading(false);
+    console.log("User state after login:", userData);
   };
 
-  const logout = () => {
+  const logout = async () => {
     setUser(null);
     setIsAuthenticated(false);
+    setIsLoading(true);
     clearAuthToken("company");
-    clearCurrentUser("company");
+    localStorage.removeItem("company_current_user");
+    setIsLoading(false);
   };
 
   return (
     <CompanyAuthContext.Provider
       value={{
-        isAuthenticated,
         user,
+        isLoading,
+        isAuthenticated: !!user,
         login,
         logout,
-        isLoading,
       }}>
       {children}
     </CompanyAuthContext.Provider>

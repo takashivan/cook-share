@@ -40,7 +40,7 @@ import {
 import { getRestaurants } from "@/lib/api/restaurant";
 import type { Restaurant } from "@/lib/api/restaurant";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
-import { getCompanyById } from "@/lib/api/company";
+import { getCompany } from "@/lib/api/company";
 import type { Company } from "@/lib/api/company";
 
 export function CompanyDashboard() {
@@ -59,7 +59,7 @@ export function CompanyDashboard() {
           console.log("Fetching data for company ID:", user.companies_id);
 
           // まず会社情報を取得
-          const companyData = await getCompanyById(user.companies_id);
+          const companyData = await getCompany(user.companies_id);
           console.log("Fetched company data:", companyData);
           setCompanyInfo(companyData);
 

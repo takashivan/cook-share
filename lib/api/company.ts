@@ -287,8 +287,3 @@ export const updateSettings = (
 ): Promise<CompanySettings> => {
   return apiRequest(`${BASE_URL}/settings`, "PUT", settingsData);
 };
-
-// 会社情報を取得
-export const getCompanyById = (companyId: string): Promise<Company> => {
-  return apiRequest(`${BASE_URL}/${companyId}`, "GET");
-};
