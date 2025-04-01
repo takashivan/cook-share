@@ -43,7 +43,7 @@ export default function CompanyLoginPage() {
         description: "ダッシュボードに移動します。",
       });
 
-      router.push("/admin/company/dashboard");
+      router.push("/admin/company");
     } catch (error) {
       console.error("Login failed:", error);
       toast({

@@ -1,7 +1,20 @@
-import Link from "next/link"
-import { Building, CreditCard, DollarSign, MessageSquare, Store, Users } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import Link from "next/link";
+import {
+  Building,
+  CreditCard,
+  DollarSign,
+  MessageSquare,
+  Store,
+  Users,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export default function AdminDashboard() {
   return (
@@ -16,16 +29,6 @@ export default function AdminDashboard() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">総売上</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">¥450,000</div>
-            <p className="text-xs text-muted-foreground">先月比 +20.1%</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">店舗数</CardTitle>
             <Store className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -34,16 +37,7 @@ export default function AdminDashboard() {
             <p className="text-xs text-muted-foreground">先月比 +2店舗</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">スタッフ数</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">24</div>
-            <p className="text-xs text-muted-foreground">先月比 +3人</p>
-          </CardContent>
-        </Card>
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">掲載求人数</CardTitle>
@@ -69,7 +63,9 @@ export default function AdminDashboard() {
               </div>
               <div className="flex-1">
                 <h3 className="font-medium">会社情報</h3>
-                <p className="text-sm text-muted-foreground">会社の基本情報を管理します</p>
+                <p className="text-sm text-muted-foreground">
+                  会社の基本情報を管理します
+                </p>
               </div>
             </div>
             <Link href="/admin/company">
@@ -92,7 +88,9 @@ export default function AdminDashboard() {
               </div>
               <div className="flex-1">
                 <h3 className="font-medium">店舗一覧</h3>
-                <p className="text-sm text-muted-foreground">登録されている店舗を管理します</p>
+                <p className="text-sm text-muted-foreground">
+                  登録されている店舗を管理します
+                </p>
               </div>
             </div>
             <Link href="/admin/stores">
@@ -115,7 +113,9 @@ export default function AdminDashboard() {
               </div>
               <div className="flex-1">
                 <h3 className="font-medium">求人一覧</h3>
-                <p className="text-sm text-muted-foreground">掲載中の求人を管理します</p>
+                <p className="text-sm text-muted-foreground">
+                  掲載中の求人を管理します
+                </p>
               </div>
             </div>
             <Link href="/admin/jobs">
@@ -138,7 +138,9 @@ export default function AdminDashboard() {
               </div>
               <div className="flex-1">
                 <h3 className="font-medium">請求一覧</h3>
-                <p className="text-sm text-muted-foreground">請求履歴を確認します</p>
+                <p className="text-sm text-muted-foreground">
+                  請求履歴を確認します
+                </p>
               </div>
             </div>
             <Link href="/admin/company/billing">
@@ -150,6 +152,5 @@ export default function AdminDashboard() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
-

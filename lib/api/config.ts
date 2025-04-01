@@ -10,6 +10,10 @@ export const API_CONFIG = {
     companyUser: "https://x8ki-letl-twmt.n7.xano.io/api:3LZoUG6X/companyuser",
     company: "https://x8ki-letl-twmt.n7.xano.io/api:3LZoUG6X/companies",
     job: "https://x8ki-letl-twmt.n7.xano.io/api:Mv5jTolf/job",
+    application: "https://x8ki-letl-twmt.n7.xano.io/api:MJ8mZ3fN/application",
+    restaurant: "https://x8ki-letl-twmt.n7.xano.io/api:Mv5jTolf/restaurant",
+    operator: "https://x8ki-letl-twmt.n7.xano.io/api:grw3Vlqa/operator",
+    operatorAuth: "https://x8ki-letl-twmt.n7.xano.io/api:grw3Vlqa/auth",
   },
   // 共通ヘッダー
   headers: {
@@ -25,6 +29,10 @@ const STORAGE_KEYS = {
   company: {
     token: "company_auth_token",
     user: "company_current_user",
+  },
+  operator: {
+    token: "operator_token",
+    user: "operator_current_user",
   },
 };
 
@@ -42,7 +50,7 @@ const isLocalStorageAvailable = () => {
 
 // 認証トークン管理
 export const getAuthToken = (
-  userType: "chef" | "company" = "chef"
+  userType: "chef" | "company" | "operator" = "chef"
 ): string | null => {
   if (typeof window !== "undefined") {
     return localStorage.getItem(STORAGE_KEYS[userType].token);
@@ -53,7 +61,7 @@ export const getAuthToken = (
 // 認証トークンを設定する関数
 export const setAuthToken = (
   token: string,
-  userType: "chef" | "company" = "chef"
+  userType: "chef" | "company" | "operator" = "chef"
 ) => {
   if (typeof window !== "undefined") {
     localStorage.setItem(STORAGE_KEYS[userType].token, token);
@@ -61,7 +69,9 @@ export const setAuthToken = (
 };
 
 // 認証トークンをクリアする関数
-export const clearAuthToken = (userType: "chef" | "company" = "chef") => {
+export const clearAuthToken = (
+  userType: "chef" | "company" | "operator" = "chef"
+) => {
   if (typeof window !== "undefined") {
     localStorage.removeItem(STORAGE_KEYS[userType].token);
   }
@@ -71,9 +81,10 @@ export const clearAuthToken = (userType: "chef" | "company" = "chef") => {
 export async function apiRequest<T>(
   url: string,
   method: string = "GET",
-  data?: any
+  data?: any,
+  userType: "chef" | "company" | "operator" = "chef"
 ): Promise<T> {
-  const token = getAuthToken();
+  const token = getAuthToken(userType);
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     Accept: "application/json",
