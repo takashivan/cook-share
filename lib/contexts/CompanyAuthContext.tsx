@@ -17,6 +17,8 @@ import {
   clearAuthToken,
   getCurrentUser,
   setCurrentUser,
+  getAuthToken,
+  clearCurrentUser,
 } from "@/lib/api/config";
 import type { CompanyUser } from "@/lib/api/companyUser";
 
@@ -40,15 +42,50 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const initializeUser = async () => {
       try {
-        const currentUser = await getCurrentUser("company");
-        console.log("Initial company user from storage:", currentUser);
-        if (currentUser) {
-          setUser(currentUser as CompanyUser);
-          setIsAuthenticated(true);
+        const token = getAuthToken("company");
+        console.log("Checking company auth token:", token);
+
+        if (!token) {
+          console.log("No company auth token found");
+          setIsLoading(false);
+          return;
+        }
+
+        try {
+          // localStorageからユーザー情報を取得
+          const storedUser = getCurrentUser("company");
+
+          if (storedUser) {
+            // APIから最新のユーザー情報を取得して検証
+            const profile = await getCompanyProfile();
+            console.log("Fetched company profile:", profile);
+
+            if (profile && profile.id === storedUser.id) {
+              setAuthToken(token, "company");
+              setUser(storedUser);
+              setIsAuthenticated(true);
+              console.log("Company user authenticated:", storedUser);
+            } else {
+              console.log(
+                "Company profile validation failed, clearing auth state"
+              );
+              clearAuthToken("company");
+              clearCurrentUser("company");
+            }
+          } else {
+            console.log("No stored user found, clearing auth state");
+            clearAuthToken("company");
+            clearCurrentUser("company");
+          }
+        } catch (error) {
+          console.error("Error validating company profile:", error);
+          clearAuthToken("company");
+          clearCurrentUser("company");
         }
       } catch (error) {
-        console.error("Error initializing user:", error);
-        localStorage.removeItem("company_current_user");
+        console.error("Error initializing company user:", error);
+        clearAuthToken("company");
+        clearCurrentUser("company");
       } finally {
         setIsLoading(false);
       }
@@ -58,33 +95,33 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (token: string, userData: CompanyUser) => {
-    console.log("Login called with user:", userData);
+    console.log("Company login called with user:", userData);
     setAuthToken(token, "company");
     setUser(userData);
     setCurrentUser(userData, "company");
     setIsAuthenticated(true);
     setIsLoading(false);
-    console.log("User state after login:", userData);
+    console.log("Company user state after login:", userData);
   };
 
   const logout = async () => {
     setUser(null);
     setIsAuthenticated(false);
-    setIsLoading(true);
-    clearAuthToken("company");
-    localStorage.removeItem("company_current_user");
     setIsLoading(false);
+    clearAuthToken("company");
+    clearCurrentUser("company");
+  };
+
+  const value = {
+    user,
+    isLoading,
+    isAuthenticated,
+    login,
+    logout,
   };
 
   return (
-    <CompanyAuthContext.Provider
-      value={{
-        user,
-        isLoading,
-        isAuthenticated: !!user,
-        login,
-        logout,
-      }}>
+    <CompanyAuthContext.Provider value={value}>
       {children}
     </CompanyAuthContext.Provider>
   );

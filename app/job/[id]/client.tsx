@@ -6,12 +6,15 @@ import { ChevronRight, Clock, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useMobile } from "@/hooks/use-mobile";
+import { ApplyJobModal } from "@/components/modals/ApplyJobModal";
+import { applicationApi } from "@/lib/api/application";
+import { useAuth } from "@/lib/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface Restaurant {
-  id: number;
+  id: string;
   name: string;
   address: string;
-  cuisine_type: string;
   business_hours: string;
   contact_info: string;
   profile_image: string;
@@ -44,7 +47,46 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
   const [activeTab, setActiveTab] = useState<"details" | "store" | "access">(
     "details"
   );
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const isMobile = useMobile();
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  const handleApply = async (data: { notes: string }) => {
+    console.log("user", user);
+    try {
+      if (!user?.id) {
+        console.error("User not logged in");
+        return;
+      }
+
+      setIsSubmitting(true);
+      const applicationData = {
+        job_id: jobDetail.job.id,
+        notes: data.notes,
+        status: "pending",
+        user_id: user.id,
+        application_date: new Date().toISOString(),
+      };
+      console.log("Sending application data:", applicationData);
+      await applicationApi.createApplication(applicationData);
+      setIsApplyModalOpen(false);
+      toast({
+        title: "応募完了",
+        description: `${jobDetail.restaurant.name}の求人に応募しました。`,
+      });
+    } catch (error) {
+      console.error("Failed to apply:", error);
+      toast({
+        title: "エラー",
+        description: "応募に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -52,7 +94,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
         <div className="container mx-auto flex items-center justify-between p-4">
           <Link href="/" className="flex items-center gap-2">
             <Image
-              src="/placeholder.svg?height=30&width=30"
+              src="/chef_illust/chef_logo.png?height=200&width=400"
               alt="CookChef Logo"
               width={30}
               height={30}
@@ -65,24 +107,12 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
             <Link
               href="#"
               className="hidden md:flex items-center gap-2 text-sm border rounded-md px-3 py-1.5">
-              <Image
-                src="/placeholder.svg?height=20&width=20"
-                alt="Restaurant Icon"
-                width={20}
-                height={20}
-              />
               飲食業社のご登録・ご相談
             </Link>
             <Link
               href="#"
               className="flex items-center gap-2 text-sm border rounded-md px-3 py-1.5">
-              <Image
-                src="/placeholder.svg?height=20&width=20"
-                alt="Chef Icon"
-                width={20}
-                height={20}
-              />
-              シェフの皆様にご登録
+              シェフの皆様のご登録
             </Link>
           </div>
         </div>
@@ -168,7 +198,9 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                 </p>
 
                 <div className="flex justify-center mt-6">
-                  <Button className="bg-orange-600 hover:bg-orange-700 text-white rounded-md px-8 py-2 flex items-center gap-2">
+                  <Button
+                    onClick={() => setIsApplyModalOpen(true)}
+                    className="w-full bg-orange-600 hover:bg-orange-700 text-white rounded-md py-2 flex items-center justify-center gap-2">
                     応募する
                     <ChevronRight className="h-4 w-4" />
                   </Button>
@@ -318,12 +350,6 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                             </p>
                             <div className="flex justify-center mb-2">
                               <Button className="bg-white border border-red-500 text-red-500 hover:bg-red-50 rounded-md px-4 py-2 flex items-center gap-2">
-                                <Image
-                                  src="/placeholder.svg?height=20&width=20"
-                                  alt="Chef Icon"
-                                  width={20}
-                                  height={20}
-                                />
                                 シェフの皆様にご登録
                                 <ChevronRight className="h-4 w-4" />
                               </Button>
@@ -331,12 +357,6 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                             <Link
                               href="#"
                               className="text-sm text-gray-500 flex items-center justify-center gap-1">
-                              <Image
-                                src="/placeholder.svg?height=16&width=16"
-                                alt="Login Icon"
-                                width={16}
-                                height={16}
-                              />
                               ログインはこちら
                             </Link>
                           </div>
@@ -540,7 +560,9 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                   <h3 className="font-medium">アクセス</h3>
                 </div>
 
-                <Button className="w-full bg-orange-600 hover:bg-orange-700 text-white rounded-md py-2 flex items-center justify-center gap-2">
+                <Button
+                  onClick={() => setIsApplyModalOpen(true)}
+                  className="w-full bg-orange-600 hover:bg-orange-700 text-white rounded-md py-2 flex items-center justify-center gap-2">
                   応募する
                   <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -593,6 +615,14 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
           </div>
         </div>
       </footer>
+
+      <ApplyJobModal
+        isOpen={isApplyModalOpen}
+        onClose={() => setIsApplyModalOpen(false)}
+        job={jobDetail.job}
+        onSubmit={handleApply}
+        isSubmitting={isSubmitting}
+      />
     </div>
   );
 }

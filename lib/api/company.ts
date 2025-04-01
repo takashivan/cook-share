@@ -74,28 +74,26 @@ export interface CompanySettings {
 }
 
 export interface Job {
-  id: string;
-  company_id: string;
+  id: number;
+  created_at: number;
   title: string;
   description: string;
-  location: string;
-  salary_range?: string;
-  employment_type: string;
-  requirements?: string[];
-  status: "draft" | "published" | "closed";
-  created_at?: string;
-  updated_at?: string;
-  image?: string;
-  work_date?: string;
-  start_time?: string;
-  end_time?: string;
-  hourly_rate?: number;
-  transportation?: string;
-  task?: string;
-  skill?: string;
-  whattotake?: string;
-  note?: string;
-  point?: string;
+  work_date: string;
+  start_time: number;
+  end_time: number;
+  hourly_rate: number;
+  required_skills: string[];
+  status: string;
+  updated_at: number;
+  restaurant_id: number;
+  image: string;
+  creator_id: number;
+  task: string;
+  skill: string;
+  whattotake: string;
+  note: string;
+  point: string;
+  transportation: string;
 }
 
 type QueryParams = Record<string, string>;

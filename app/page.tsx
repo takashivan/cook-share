@@ -6,15 +6,26 @@ import { ChevronLeft, ChevronRight, Clock, MapPin, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { getAllJobs } from "@/lib/api/job";
+import { getAllJobs, Job } from "@/lib/api/job";
 import { Header } from "@/components/layout/header";
-import { Job } from "@/lib/api/company";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "@/lib/redux/store";
+import { fetchJobs } from "@/lib/redux/slices/jobsSlice";
+import { Card } from "@/components/ui/card";
 
 export default function Home() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toLocaleDateString("ja-JP", { month: "2-digit", day: "2-digit" })
   );
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const dispatch = useDispatch<AppDispatch>();
+  const {
+    jobs: reduxJobs,
+    loading: isLoading,
+    error,
+  } = useSelector((state: RootState) => state.jobs);
 
   // 次の7日分の日付を生成
   const dates = Array.from({ length: 7 }, (_, i) => {
@@ -31,12 +42,38 @@ export default function Home() {
 
   // データ取得
   useEffect(() => {
-    const fetchJobs = async () => {
-      const jobsData = await getAllJobs();
-      setJobs(jobsData);
+    // セッションの存在をチェック
+    const checkSession = () => {
+      const hasSession = !!localStorage.getItem("auth_token");
+      setIsLoggedIn(hasSession);
     };
-    fetchJobs();
-  }, []);
+    checkSession();
+
+    // jobsが空の場合のみデータを取得
+    if (reduxJobs.length === 0 && !isLoading) {
+      dispatch(fetchJobs());
+    }
+  }, [dispatch, reduxJobs.length, isLoading]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center text-red-600">
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -62,42 +99,14 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="hidden md:block col-span-1 border rounded-lg p-4 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="flex justify-center mb-2">
-                    <Image
-                      src="/placeholder.svg?height=80&width=80"
-                      alt="Chef Icon"
-                      width={80}
-                      height={80}
-                    />
-                  </div>
-                  <p className="text-sm">シェフのご登録はこちら</p>
-                </div>
-              </div>
-
-              <div className="hidden md:block col-span-1">
+              <div>
                 <Image
-                  src="/placeholder.svg?height=200&width=400"
+                  src="/chef_illust/chef_illust.png?height=800&width=1200"
                   alt="Chef Illustrations"
-                  width={400}
-                  height={200}
+                  width={1200}
+                  height={1100}
                   className="w-full h-auto"
                 />
-              </div>
-
-              <div className="hidden md:block col-span-1 border rounded-lg p-4 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="flex justify-center mb-2">
-                    <Image
-                      src="/placeholder.svg?height=80&width=80"
-                      alt="Restaurant Icon"
-                      width={80}
-                      height={80}
-                    />
-                  </div>
-                  <p className="text-sm">飲食店様のご登録・ご相談はこちら</p>
-                </div>
               </div>
             </div>
           </div>
@@ -177,78 +186,82 @@ export default function Home() {
         {/* Job Listings */}
         <section className="py-6">
           <div className="container mx-auto px-4">
+            <h1 className="text-2xl font-bold mb-6">新着求人</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {jobs.map((job: Job) => (
+              {reduxJobs.map((job: Job) => (
                 <Link
                   key={job.id}
                   href={`/job/${job.id}`}
-                  className="block border rounded-md overflow-hidden hover:shadow-md transition-shadow">
-                  <div className="relative aspect-[16/9]">
-                    <Image
-                      src={job.image || "/placeholder.svg?height=200&width=400"}
-                      alt={job.title}
-                      fill
-                      className="object-cover"
-                    />
-                    <div className="absolute bottom-0 left-0 bg-white px-2 py-1 text-xs">
-                      {job.work_date &&
-                        new Date(job.work_date).toLocaleDateString("ja-JP", {
-                          month: "2-digit",
-                          day: "2-digit",
-                          weekday: "short",
-                        })}
+                  className="block p-6 bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+                  <Card className="h-full hover:shadow-lg transition-shadow">
+                    <div className="relative h-48">
+                      <Image
+                        src={job.image || "/images/default-job.jpg"}
+                        alt={job.title}
+                        fill
+                        className="object-cover rounded-t-lg"
+                      />
                     </div>
-                  </div>
+                    <div className="p-4">
+                      <div className="text-xs text-gray-500 mb-1">
+                        求人 飲食店
+                      </div>
+                      <h3 className="font-bold text-sm mb-2">{job.title}</h3>
 
-                  <div className="p-4">
-                    <div className="text-xs text-gray-500 mb-1">
-                      求人 飲食店
-                    </div>
-                    <h3 className="font-bold text-sm mb-2">{job.title}</h3>
+                      <div className="flex items-center text-xs text-gray-500 mb-1">
+                        <Clock className="h-3 w-3 mr-1" />
+                        <span>
+                          {new Date(job.start_time * 1000).toLocaleTimeString(
+                            "ja-JP",
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )}
+                          {" 〜 "}
+                          {new Date(job.end_time * 1000).toLocaleTimeString(
+                            "ja-JP",
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )}
+                        </span>
+                      </div>
 
-                    <div className="flex items-center text-xs text-gray-500 mb-1">
-                      <Clock className="h-3 w-3 mr-1" />
-                      <span>
-                        {job.start_time &&
-                          new Date(job.start_time).toLocaleTimeString("ja-JP", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}{" "}
-                        〜{" "}
-                        {job.end_time &&
-                          new Date(job.end_time).toLocaleTimeString("ja-JP", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                      </span>
-                    </div>
+                      <div className="flex items-center text-xs text-gray-500 mb-1">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        <span>東京都台東区</span>
+                      </div>
 
-                    <div className="flex items-center text-xs text-gray-500 mb-1">
-                      <MapPin className="h-3 w-3 mr-1" />
-                      <span>東京都渋谷区</span> {/* APIからの位置情報が必要 */}
-                    </div>
+                      <div className="flex items-center text-xs text-gray-500 mb-3">
+                        <span>時給 {job.hourly_rate.toLocaleString()}円</span>
+                      </div>
 
-                    <div className="flex items-center text-xs text-gray-500 mb-3">
-                      <span>※詳細するにはログインしてください</span>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-xs rounded-full">
-                        時給{job.hourly_rate?.toLocaleString()}円
-                      </Button>
-                      {job.transportation && (
+                      <div className="flex gap-2">
                         <Button
                           variant="outline"
                           size="sm"
                           className="text-xs rounded-full">
-                          交通費あり
+                          日本料理
                         </Button>
-                      )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs rounded-full">
+                          時給
+                        </Button>
+                        {job.transportation && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-xs rounded-full">
+                            交通費
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  </Card>
                 </Link>
               ))}
             </div>
@@ -270,9 +283,9 @@ export default function Home() {
             <div className="flex flex-col md:flex-row justify-center gap-4">
               <div className="hidden md:block">
                 <Image
-                  src="/placeholder.svg?height=100&width=300"
+                  src="/chef_illust/chef_illust.png?height=200&width=400"
                   alt="Chef Illustrations"
-                  width={300}
+                  width={500}
                   height={100}
                   className="h-auto"
                 />
@@ -301,7 +314,7 @@ export default function Home() {
           <div className="flex justify-center mb-6">
             <div className="flex items-center gap-2">
               <Image
-                src="/placeholder.svg?height=30&width=30"
+                src="/chef_illust/chef_logo.png?height=200&width=400"
                 alt="CookChef Logo"
                 width={30}
                 height={30}

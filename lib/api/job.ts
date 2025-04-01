@@ -1,8 +1,7 @@
 // lib/api/job.ts - ジョブ関連 API
 
 import { API_CONFIG, apiRequest } from "./config";
-import { Job } from "./company";
-import { JobDetail } from "@/app/job/[id]/client";
+import type { Restaurant } from "@/lib/api/restaurant";
 
 const BASE_URL = API_CONFIG.baseURLs.job;
 
@@ -81,15 +80,70 @@ interface ReportData {
 
 type QueryParams = Record<string, string>;
 
+interface JobDetail {
+  job: {
+    id: number;
+    title: string;
+    description: string;
+    work_date: string;
+    start_time: number;
+    end_time: number;
+    hourly_rate: number;
+    status: string;
+    image: string;
+    task: string;
+    skill: string;
+    whattotake: string;
+    note: string;
+    point: string;
+    transportation: string;
+  };
+  restaurant: {
+    id: string;
+    name: string;
+    address: string;
+    business_hours: string;
+    contact_info: string;
+    profile_image: string;
+    station: string;
+    access: string;
+  };
+}
+
+export interface Job {
+  id: number;
+  created_at: string;
+  title: string;
+  description: string;
+  work_date: string;
+  start_time: number;
+  end_time: number;
+  hourly_rate: number;
+  required_skills: string[];
+  status: string;
+  updated_at: string;
+  restaurant_id: number;
+  image: string | null;
+  creator_id: number;
+  task: string | null;
+  skill: string | null;
+  whattotake: string | null;
+  note: string | null;
+  point: string | null;
+  transportation: string;
+}
+
+export interface GetJobsResponse {
+  jobs: Job[];
+}
+
 // ジョブ一覧取得
-export const getAllJobs = (params: JobSearchParams = {}): Promise<Job[]> => {
-  // パラメータがある場合のみクエリ文字列を追加
-  if (Object.keys(params).length > 0) {
-    const queryParams = new URLSearchParams(params as QueryParams).toString();
-    return apiRequest(`${BASE_URL}?${queryParams}`, "GET");
-  }
-  // パラメータがない場合はシンプルなGETリクエスト
-  return apiRequest(`${BASE_URL}`, "GET");
+export const getAllJobs = async (): Promise<Job[]> => {
+  const response = await apiRequest<GetJobsResponse>(
+    `${API_CONFIG.baseURLs.job}`,
+    "GET"
+  );
+  return response.jobs || [];
 };
 
 // ジョブ検索・フィルタリング
@@ -102,7 +156,7 @@ export const searchJobs = (params: JobSearchParams = {}): Promise<Job[]> => {
 };
 
 // ジョブの詳細情報取得
-export const getJobDetails = (jobId: string): Promise<Job> => {
+export const getJobDetails = (jobId: string): Promise<JobDetail> => {
   return apiRequest(`${BASE_URL}/${jobId}`, "GET");
 };
 
@@ -259,4 +313,151 @@ export const reportJob = (
   reportData: ReportData
 ): Promise<void> => {
   return apiRequest(`${BASE_URL}/${jobId}/report`, "POST", reportData);
+};
+
+export type CreateJobParams = {
+  title: string;
+  description: string;
+  work_date: string;
+  start_time: string;
+  end_time: string;
+  hourly_rate: number;
+  required_skills: string[];
+  status?: string;
+  restaurant_id: number;
+  image?: string;
+  creator_id: number;
+  task?: string;
+  skill?: string;
+  whattotake?: string;
+  note?: string;
+  point?: string;
+  transportation?: string;
+};
+
+export type UpdateJobParams = Partial<CreateJobParams>;
+
+export type GetJobResponse = Job;
+export type CreateJobResponse = Job;
+export type UpdateJobResponse = Job;
+export type DeleteJobResponse = void;
+
+export const jobApi = {
+  getJobs: async (): Promise<GetJobsResponse> => {
+    const response = await fetch(`${BASE_URL}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch jobs");
+    }
+
+    return response.json();
+  },
+
+  getJob: async (id: string): Promise<GetJobResponse> => {
+    const response = await fetch(`${BASE_URL}/${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch job");
+    }
+
+    return response.json();
+  },
+
+  getJobsByRestaurant: async (
+    restaurantId: string
+  ): Promise<GetJobsResponse> => {
+    const response = await fetch(`${BASE_URL}/restaurant/${restaurantId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch restaurant jobs");
+    }
+
+    return response.json();
+  },
+
+  getJobsByCompany: async (companyId: string): Promise<GetJobsResponse> => {
+    const response = await fetch(`${BASE_URL}/company/${companyId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch company jobs");
+    }
+
+    return response.json();
+  },
+
+  createJob: async (params: CreateJobParams): Promise<CreateJobResponse> => {
+    const response = await fetch(`${BASE_URL}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to create job");
+    }
+
+    return response.json();
+  },
+
+  updateJob: async (
+    id: string,
+    params: UpdateJobParams
+  ): Promise<UpdateJobResponse> => {
+    const response = await fetch(`${BASE_URL}/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to update job");
+    }
+
+    return response.json();
+  },
+
+  deleteJob: async (id: string): Promise<DeleteJobResponse> => {
+    const response = await fetch(`${BASE_URL}/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to delete job");
+    }
+  },
+
+  getJobsByCompanyId: async (companyId: string): Promise<Job[]> => {
+    const response = await apiRequest<GetJobsResponse>(
+      `${BASE_URL}/company/${companyId}`,
+      "GET"
+    );
+    return response.jobs;
+  },
 };

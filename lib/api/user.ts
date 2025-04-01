@@ -341,3 +341,8 @@ export const updateSettings = (
     settingsData
   );
 };
+
+// 全シェフユーザー取得
+export const getAllChefs = async (): Promise<UserProfile[]> => {
+  return apiRequest<UserProfile[]>(`${USER_URL}`, "GET");
+};
