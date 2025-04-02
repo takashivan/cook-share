@@ -51,6 +51,7 @@ import Link from "next/link";
 
 export default function JobDetailPage() {
   const params = useParams();
+  const dispatch = useDispatch<AppDispatch>();
   const [hasMounted, setHasMounted] = useState(false);
   const [selectedApplicant, setSelectedApplicant] = useState<number | null>(
     null
@@ -87,6 +88,13 @@ export default function JobDetailPage() {
   useEffect(() => {
     setHasMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!hasMounted || !params.id) return;
+    const jobId = Array.isArray(params.id) ? params.id[0] : params.id;
+    dispatch(fetchJobById(jobId));
+    dispatch(fetchApplicationsByJob(jobId));
+  }, [dispatch, params.id, hasMounted]);
 
   if (!hasMounted) {
     return (
