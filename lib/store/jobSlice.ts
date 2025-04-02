@@ -92,7 +92,7 @@ export const fetchApplicationsByJob = createAsyncThunk(
       return state.jobs.applications;
     }
     await delay(RATE_LIMIT_DELAY);
-    const response = await applicationApi.getApplicationsByJob(jobId);
+    const response = await applicationApi.getApplicationsByJob(Number(jobId));
     return response;
   }
 );
