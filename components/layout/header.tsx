@@ -43,19 +43,33 @@ export function Header() {
           {isAuthenticated && user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="relative h-10 w-10 rounded-full">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage
-                      src={(chefUser && (chefUser as any).profile_image) || ""}
-                      alt={user.name}
-                    />
-                    <AvatarFallback>
-                      {user.name?.slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    className="relative h-10 w-10 rounded-full">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage
+                        src={
+                          (chefUser && (chefUser as any).profile_image) || ""
+                        }
+                        alt={user.name}
+                      />
+                      <AvatarFallback>
+                        {user.name?.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                  <div
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      userType === "company"
+                        ? "bg-blue-100 text-blue-800"
+                        : "bg-green-100 text-green-800"
+                    }`}>
+                    {userType === "company"
+                      ? "企業アカウント"
+                      : "シェフアカウント"}
+                  </div>
+                </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end">
                 <DropdownMenuItem className="font-semibold">
@@ -66,6 +80,13 @@ export function Header() {
                 </DropdownMenuItem>
                 <DropdownMenuItem className="text-sm text-muted-foreground">
                   {userType === "company" ? user.name : "シェフ"}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-sm text-muted-foreground"
+                  asChild>
+                  <Link href={userType === "company" ? "/admin" : "/mypage"}>
+                    {userType === "company" ? "管理画面" : "マイページ"}
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="text-red-600 cursor-pointer"

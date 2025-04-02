@@ -50,7 +50,7 @@ export const applicationApi = {
   },
 
   getApplicationsByJob: async (
-    jobId: string
+    jobId: number
   ): Promise<GetApplicationsResponse> => {
     const response = await fetch(`${API_URL}/job/${jobId}`, {
       method: "GET",

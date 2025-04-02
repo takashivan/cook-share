@@ -172,7 +172,11 @@ export default function JobsPage() {
                       <div className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center">
                         <Briefcase className="h-4 w-4 text-gray-500" />
                       </div>
-                      {job.title}
+                      <Link
+                        href={`/admin/job/${job.id}`}
+                        className="hover:underline">
+                        {job.title}
+                      </Link>
                     </div>
                   </TableCell>
                   <TableCell>{job.restaurant_id}</TableCell>
@@ -209,7 +213,7 @@ export default function JobsPage() {
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem asChild>
                           <Link
-                            href={`/admin/jobs/${job.id}`}
+                            href={`/admin/job/${job.id}`}
                             className="w-full flex items-center">
                             <ExternalLink className="h-4 w-4 mr-2" />
                             詳細を表示
@@ -217,7 +221,7 @@ export default function JobsPage() {
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                           <Link
-                            href={`/admin/jobs/${job.id}/edit`}
+                            href={`/admin/job/${job.id}/edit`}
                             className="w-full flex items-center">
                             <Edit className="h-4 w-4 mr-2" />
                             編集
@@ -244,7 +248,11 @@ export default function JobsPage() {
                     <Briefcase className="h-5 w-5 text-gray-500" />
                   </div>
                   <div>
-                    <p className="font-medium">{job.title}</p>
+                    <Link
+                      href={`/admin/job/${job.id}`}
+                      className="font-medium hover:underline">
+                      {job.title}
+                    </Link>
                     <p className="text-sm text-muted-foreground">
                       {job.restaurant_id}
                     </p>
@@ -260,7 +268,7 @@ export default function JobsPage() {
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
                       <Link
-                        href={`/admin/jobs/${job.id}`}
+                        href={`/admin/job/${job.id}`}
                         className="w-full flex items-center">
                         <ExternalLink className="h-4 w-4 mr-2" />
                         詳細を表示
@@ -268,7 +276,7 @@ export default function JobsPage() {
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link
-                        href={`/admin/jobs/${job.id}/edit`}
+                        href={`/admin/job/${job.id}/edit`}
                         className="w-full flex items-center">
                         <Edit className="h-4 w-4 mr-2" />
                         編集
@@ -309,7 +317,7 @@ export default function JobsPage() {
                 </div>
               </div>
               <div className="mt-3">
-                <Link href={`/admin/jobs/${job.id}`}>
+                <Link href={`/admin/job/${job.id}`}>
                   <Button variant="outline" size="sm" className="w-full">
                     詳細を表示
                   </Button>
