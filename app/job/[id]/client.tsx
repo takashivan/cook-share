@@ -50,13 +50,14 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isMobile = useMobile();
-  const { user } = useAuth();
+  const { user: chefUser } = useAuth();
+  const isChefLoggedIn = !!chefUser;
   const { toast } = useToast();
 
   const handleApply = async (data: { notes: string }) => {
-    console.log("user", user);
+    console.log("user", chefUser);
     try {
-      if (!user?.id) {
+      if (!chefUser?.id) {
         console.error("User not logged in");
         return;
       }
@@ -66,7 +67,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
         job_id: jobDetail.job.id,
         notes: data.notes,
         status: "pending",
-        user_id: user.id,
+        user_id: chefUser.id,
         application_date: new Date().toISOString(),
       };
       console.log("Sending application data:", applicationData);
@@ -200,8 +201,15 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                 <div className="flex justify-center mt-6">
                   <Button
                     onClick={() => setIsApplyModalOpen(true)}
-                    className="w-full bg-orange-600 hover:bg-orange-700 text-white rounded-md py-2 flex items-center justify-center gap-2">
-                    応募する
+                    disabled={!isChefLoggedIn}
+                    className={`w-full rounded-md py-2 flex items-center justify-center gap-2 ${
+                      isChefLoggedIn
+                        ? "bg-orange-600 hover:bg-orange-700 text-white"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    }`}>
+                    {isChefLoggedIn
+                      ? "応募する"
+                      : "シェフとしてログインして応募する"}
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
@@ -252,9 +260,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                     <div className="space-y-6">
                       {/* Working Hours */}
                       <div className="flex">
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center mr-2">
-                          <span className="text-white text-xs">●</span>
-                        </div>
+                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
                         <div>
                           <h3 className="font-medium mb-1">勤務時間</h3>
                           <p className="text-sm">
@@ -280,9 +286,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
 
                       {/* Specific Shift */}
                       <div className="flex">
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center mr-2">
-                          <span className="text-white text-xs">●</span>
-                        </div>
+                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
                         <div>
                           <h3 className="font-medium mb-1">
                             想定の勤務時間・終了時間
@@ -310,9 +314,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                       {/* Hourly Wage */}
                       <div className="border border-red-500 p-4 rounded-md">
                         <div className="flex">
-                          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center mr-2">
-                            <span className="text-white text-xs">●</span>
-                          </div>
+                          <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
                           <div>
                             <h3 className="font-medium mb-1">
                               時間あたりの報酬額
@@ -322,9 +324,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                         </div>
 
                         <div className="flex mt-4">
-                          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center mr-2">
-                            <span className="text-white text-xs">●</span>
-                          </div>
+                          <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
                           <div>
                             <h3 className="font-medium mb-1">
                               時間あたりの店舗報酬額
@@ -334,9 +334,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                         </div>
 
                         <div className="flex mt-4">
-                          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center mr-2">
-                            <span className="text-white text-xs">●</span>
-                          </div>
+                          <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
                           <div>
                             <h3 className="font-medium mb-1">想定報酬総額</h3>
                             <p className="text-sm">****円</p>
@@ -365,9 +363,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
 
                       {/* Transportation */}
                       <div className="flex">
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center mr-2">
-                          <span className="text-white text-xs">●</span>
-                        </div>
+                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
                         <div>
                           <h3 className="font-medium mb-1">交通費</h3>
                           <p className="text-sm">
@@ -379,9 +375,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
 
                       {/* Job Details */}
                       <div className="flex">
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center mr-2">
-                          <span className="text-white text-xs">●</span>
-                        </div>
+                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
                         <div>
                           <h3 className="font-medium mb-1">
                             想定の業務委託内容
@@ -394,9 +388,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
 
                       {/* Appeal Points */}
                       <div className="flex">
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center mr-2">
-                          <span className="text-white text-xs">●</span>
-                        </div>
+                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
                         <div>
                           <h3 className="font-medium mb-1">アピールポイント</h3>
                           <div className="text-sm space-y-1 whitespace-pre-wrap">
@@ -407,9 +399,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
 
                       {/* Required Skills */}
                       <div className="flex">
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center mr-2">
-                          <span className="text-white text-xs">●</span>
-                        </div>
+                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
                         <div>
                           <h3 className="font-medium mb-1">
                             必要なスキル・経験
@@ -422,9 +412,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
 
                       {/* Dress Code */}
                       <div className="flex">
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center mr-2">
-                          <span className="text-white text-xs">●</span>
-                        </div>
+                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
                         <div>
                           <h3 className="font-medium mb-1">持ち物</h3>
                           <div className="text-sm space-y-1">
@@ -435,9 +423,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
 
                       {/* Dress Regulations */}
                       <div className="flex">
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center mr-2">
-                          <span className="text-white text-xs">●</span>
-                        </div>
+                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
                         <div>
                           <h3 className="font-medium mb-1">服装規定</h3>
                           <div className="text-sm space-y-1">
@@ -448,9 +434,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
 
                       {/* Contract Type */}
                       <div className="flex">
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center mr-2">
-                          <span className="text-white text-xs">●</span>
-                        </div>
+                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
                         <div></div>
                       </div>
                     </div>
@@ -467,9 +451,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
 
                     <div className="space-y-6">
                       <div className="flex">
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center mr-2">
-                          <span className="text-white text-xs">●</span>
-                        </div>
+                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
                         <div>
                           <h3 className="font-medium mb-1">店舗名</h3>
                           <p className="text-sm">{jobDetail.restaurant.name}</p>
@@ -477,9 +459,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                       </div>
 
                       <div className="flex">
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center mr-2">
-                          <span className="text-white text-xs">●</span>
-                        </div>
+                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
                         <div>
                           <h3 className="font-medium mb-1">住所</h3>
                           <p className="text-sm">
@@ -489,9 +469,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                       </div>
 
                       <div className="flex">
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center mr-2">
-                          <span className="text-white text-xs">●</span>
-                        </div>
+                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
                         <div>
                           <h3 className="font-medium mb-1">営業時間</h3>
                           <p className="text-sm">
@@ -513,9 +491,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
 
                     <div className="space-y-6">
                       <div className="flex">
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center mr-2">
-                          <span className="text-white text-xs">●</span>
-                        </div>
+                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
                         <div>
                           <h3 className="font-medium mb-1">最寄り駅</h3>
                           <p className="text-sm">
@@ -525,9 +501,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                       </div>
 
                       <div className="flex">
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center mr-2">
-                          <span className="text-white text-xs">●</span>
-                        </div>
+                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
                         <div>
                           <h3 className="font-medium mb-1">アクセス方法</h3>
                           <p className="text-sm">
@@ -562,8 +536,15 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
 
                 <Button
                   onClick={() => setIsApplyModalOpen(true)}
-                  className="w-full bg-orange-600 hover:bg-orange-700 text-white rounded-md py-2 flex items-center justify-center gap-2">
-                  応募する
+                  disabled={!isChefLoggedIn}
+                  className={`w-full rounded-md py-2 flex items-center justify-center gap-2 ${
+                    isChefLoggedIn
+                      ? "bg-orange-600 hover:bg-orange-700 text-white"
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}>
+                  {isChefLoggedIn
+                    ? "応募する"
+                    : "シェフとしてログインして応募する"}
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>

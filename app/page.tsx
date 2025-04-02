@@ -189,10 +189,7 @@ export default function Home() {
             <h1 className="text-2xl font-bold mb-6">新着求人</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {reduxJobs.map((job: Job) => (
-                <Link
-                  key={job.id}
-                  href={`/job/${job.id}`}
-                  className="block p-6 bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+                <Link key={job.id} href={`/job/${job.id}`} className="">
                   <Card className="h-full hover:shadow-lg transition-shadow">
                     <div className="relative h-48">
                       <Image

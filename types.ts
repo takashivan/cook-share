@@ -29,12 +29,26 @@ export interface Application {
   notes?: string;
   updated_at: string;
   job_id: number;
-  chef_id: string;
   user_id: string;
   message?: string;
-  chef?: {
-    id: string;
-    name: string;
-    profile_image?: string;
-  };
+  user: User;
+}
+
+export interface User {
+  id: string;
+  created_at: number;
+  name: string;
+  email: string;
+  password: string;
+  user_type: string;
+  status: string;
+  last_login_at: number | null;
+  updated_at: number | null;
+  skills: string[];
+  experience_level: string;
+  bio: string;
+  certifications: string[];
+  dateofbirth: number | null;
+  profile_image: string;
+  is_approved: boolean;
 }

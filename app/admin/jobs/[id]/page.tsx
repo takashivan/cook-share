@@ -5,6 +5,11 @@ import { useParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/lib/store/store";
 import { fetchJobById, fetchApplicationsByJob } from "@/lib/store/jobSlice";
+import type { Job } from "@/lib/api/job";
+import type { Application } from "@/types";
+import { jobApi } from "@/lib/api/job";
+import { applicationApi } from "@/lib/api/application";
+import useSWR from "swr";
 import {
   Calendar,
   Clock,
@@ -46,30 +51,44 @@ import Link from "next/link";
 
 export default function JobDetailPage() {
   const params = useParams();
-  const dispatch = useDispatch<AppDispatch>();
-  const {
-    selectedJob: job,
-    applications,
-    loading,
-    error,
-  } = useSelector((state: RootState) => state.jobs);
   const [hasMounted, setHasMounted] = useState(false);
   const [selectedApplicant, setSelectedApplicant] = useState<number | null>(
     null
+  );
+
+  const { data: job, error: jobError } = useSWR<Job>(
+    params.id ? [`job`, params.id] : null,
+    async ([_, id]) => {
+      const result = await jobApi.getJob(id as string);
+      return result;
+    },
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 10000,
+    }
+  );
+
+  const { data: applications, error: applicationsError } = useSWR<
+    Application[]
+  >(
+    params.id ? [`applications`, params.id] : null,
+    async ([_, id]) => {
+      const result = await applicationApi.getApplicationsByJob(Number(id));
+      return result;
+    },
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 10000,
+    }
   );
 
   useEffect(() => {
     setHasMounted(true);
   }, []);
 
-  useEffect(() => {
-    if (!hasMounted || !params.id) return;
-    const jobId = Array.isArray(params.id) ? params.id[0] : params.id;
-    dispatch(fetchJobById(jobId));
-    dispatch(fetchApplicationsByJob(jobId));
-  }, [dispatch, params.id, hasMounted]);
-
-  if (!hasMounted || loading) {
+  if (!hasMounted) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -79,11 +98,11 @@ export default function JobDetailPage() {
     );
   }
 
-  if (error) {
+  if (jobError) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center text-red-600">
-          <p>{error}</p>
+          <p>{jobError.message}</p>
         </div>
       </div>
     );
@@ -217,11 +236,11 @@ export default function JobDetailPage() {
         <Card className="lg:col-span-1">
           <CardHeader className="px-4 py-3">
             <CardTitle className="text-lg">応募者一覧</CardTitle>
-            <CardDescription>全 {applications.length} 名</CardDescription>
+            <CardDescription>全 {applications?.length ?? 0} 名</CardDescription>
           </CardHeader>
           <CardContent className="p-0">
             <div className="divide-y">
-              {applications.map((applicant) => (
+              {applications?.map((applicant) => (
                 <div
                   key={applicant.id}
                   className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
@@ -232,19 +251,19 @@ export default function JobDetailPage() {
                     <Avatar className="h-10 w-10">
                       <AvatarImage
                         src={
-                          applicant.chef?.profile_image ||
+                          applicant.user?.profile_image ||
                           "/placeholder.svg?height=40&width=40"
                         }
-                        alt={applicant.chef?.name || "応募者"}
+                        alt={applicant.user?.name || "応募者"}
                       />
                       <AvatarFallback>
-                        {(applicant.chef?.name || "応募者").charAt(0)}
+                        {(applicant.user?.name || "応募者").charAt(0)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <p className="font-medium">
-                          {applicant.chef?.name || "応募者"}
+                          {applicant.user?.name || "応募者"}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {new Date(
@@ -305,18 +324,18 @@ export default function JobDetailPage() {
                   <Avatar className="h-10 w-10">
                     <AvatarImage
                       src={
-                        selectedApplicantData.chef?.profile_image ||
+                        selectedApplicantData.user?.profile_image ||
                         "/placeholder.svg?height=40&width=40"
                       }
-                      alt={selectedApplicantData.chef?.name || "応募者"}
+                      alt={selectedApplicantData.user?.name || "応募者"}
                     />
                     <AvatarFallback>
-                      {(selectedApplicantData.chef?.name || "応募者").charAt(0)}
+                      {(selectedApplicantData.user?.name || "応募者").charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                   <div>
                     <CardTitle className="text-lg">
-                      {selectedApplicantData.chef?.name || "応募者"}
+                      {selectedApplicantData.user?.name || "応募者"}
                     </CardTitle>
                     <Badge
                       className={`
@@ -368,20 +387,20 @@ export default function JobDetailPage() {
                           <Avatar className="h-16 w-16">
                             <AvatarImage
                               src={
-                                selectedApplicantData.chef?.profile_image ||
+                                selectedApplicantData.user?.profile_image ||
                                 "/placeholder.svg?height=40&width=40"
                               }
-                              alt={selectedApplicantData.chef?.name || "応募者"}
+                              alt={selectedApplicantData.user?.name || "応募者"}
                             />
                             <AvatarFallback>
                               {(
-                                selectedApplicantData.chef?.name || "応募者"
+                                selectedApplicantData.user?.name || "応募者"
                               ).charAt(0)}
                             </AvatarFallback>
                           </Avatar>
                           <div>
                             <h3 className="text-lg font-medium">
-                              {selectedApplicantData.chef?.name || "応募者"}
+                              {selectedApplicantData.user?.name || "応募者"}
                             </h3>
                             <p className="text-sm text-muted-foreground">
                               30歳・男性

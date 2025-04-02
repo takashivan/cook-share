@@ -47,7 +47,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     const initAuth = async () => {
       try {
         // ローカルストレージからトークンを確認
-        const token = localStorage.getItem("auth_token");
+        const token = localStorage.getItem("company_auth_token");
         if (!token) {
           router.push("/login/company");
           return;
@@ -55,11 +55,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
         // 認証状態が確定するまで待機
         if (isAuthenticated === undefined) {
-          return;
-        }
-
-        if (!isAuthenticated) {
-          router.push("/login/company");
           return;
         }
 
