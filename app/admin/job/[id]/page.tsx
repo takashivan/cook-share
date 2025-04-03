@@ -38,7 +38,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Application } from "@/types/index";
+import { Application } from "@/types";
 import { GetApplicationsResponse } from "@/lib/api/application";
 
 export default function JobDetailPage({ params }: { params: { id: string } }) {
@@ -97,13 +97,13 @@ export default function JobDetailPage({ params }: { params: { id: string } }) {
     <div className="container mx-auto py-8">
       <div className="space-y-6">
         <div className="flex items-center gap-4">
-          <Link
-            href={`/admin/stores/${job?.restaurant_id}`}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => window.history.back()}
             className="hover:opacity-80">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
           <div>
             <h2 className="text-2xl font-bold tracking-tight">
               {job?.title || "求人詳細"}
