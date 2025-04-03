@@ -10,6 +10,7 @@ import { ApplyJobModal } from "@/components/modals/ApplyJobModal";
 import { applicationApi } from "@/lib/api/application";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { Header } from "@/components/layout/header";
 
 interface Restaurant {
   id: string;
@@ -92,31 +93,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="border-b">
-        <div className="container mx-auto flex items-center justify-between p-4">
-          <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/chef_illust/chef_logo.png?height=200&width=400"
-              alt="CookChef Logo"
-              width={30}
-              height={30}
-              className="text-orange-500"
-            />
-            <span className="font-bold">CookChef</span>
-            <span className="text-xs text-gray-500">(仮)</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link
-              href="#"
-              className="hidden md:flex items-center gap-2 text-sm border rounded-md px-3 py-1.5">
-              飲食業社のご登録・ご相談
-            </Link>
-            <Link
-              href="#"
-              className="flex items-center gap-2 text-sm border rounded-md px-3 py-1.5">
-              シェフの皆様のご登録
-            </Link>
-          </div>
-        </div>
+        <Header />
       </header>
 
       <main className="flex-1 bg-gray-50">

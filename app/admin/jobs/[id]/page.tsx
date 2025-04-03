@@ -324,10 +324,10 @@ export default function JobDetailPage() {
         </Card>
 
         {/* Chat Area */}
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 bg-white">
           {selectedApplicantData ? (
             <>
-              <CardHeader className="px-4 py-3 flex-row items-center justify-between space-y-0 border-b">
+              <CardHeader className="px-4 py-3 flex-row items-center justify-between space-y-0 border-b bg-white">
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
                     <AvatarImage
@@ -483,11 +483,11 @@ export default function JobDetailPage() {
                   </DropdownMenu>
                 </div>
               </CardHeader>
-              <CardContent className="p-4 h-[400px] flex flex-col">
-                <div className="flex-1 overflow-y-auto mb-4 space-y-4">
+              <CardContent className="p-4 h-[400px] flex flex-col bg-white">
+                <div className="flex-1 overflow-y-auto mb-4 space-y-4 bg-white">
                   {/* Chat messages would be populated here */}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 bg-white">
                   <Input placeholder="メッセージを入力..." className="flex-1" />
                   <Button size="icon">
                     <Send className="h-4 w-4" />
@@ -497,7 +497,7 @@ export default function JobDetailPage() {
               </CardContent>
             </>
           ) : (
-            <CardContent className="p-8 flex flex-col items-center justify-center h-[500px] text-center">
+            <CardContent className="p-8 flex flex-col items-center justify-center h-[500px] text-center bg-white">
               <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
                 <MessageSquare className="h-8 w-8 text-muted-foreground" />
               </div>

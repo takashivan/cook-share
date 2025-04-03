@@ -1,17 +1,43 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Calendar, Clock, MapPin, MoreHorizontal, Phone, Send, User, MessageSquare } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { useState } from "react";
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  MoreHorizontal,
+  Phone,
+  Send,
+  User,
+  MessageSquare,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export default function JobApplicants() {
-  const [selectedApplicant, setSelectedApplicant] = useState<number | null>(1)
+  const [selectedApplicant, setSelectedApplicant] = useState<number | null>(1);
 
   const applicants = [
     {
@@ -19,7 +45,8 @@ export default function JobApplicants() {
       name: "佐藤 健太",
       avatar: "/placeholder.svg?height=40&width=40&text=佐",
       status: "応募済み",
-      lastMessage: "はじめまして、佐藤と申します。求人に応募させていただきました。",
+      lastMessage:
+        "はじめまして、佐藤と申します。求人に応募させていただきました。",
       lastMessageTime: "10:30",
       unread: true,
     },
@@ -46,11 +73,12 @@ export default function JobApplicants() {
       name: "高橋 由美",
       avatar: "/placeholder.svg?height=40&width=40&text=高",
       status: "不採用",
-      lastMessage: "ご連絡ありがとうございました。また機会がありましたらよろしくお願いいたします。",
+      lastMessage:
+        "ご連絡ありがとうございました。また機会がありましたらよろしくお願いいたします。",
       lastMessageTime: "1週間前",
       unread: false,
     },
-  ]
+  ];
 
   const messages = [
     {
@@ -83,15 +111,18 @@ export default function JobApplicants() {
       text: "はい、その時間帯であれば問題ありません。月・水・金であれば毎週出勤可能です。",
       time: "10:50",
     },
-  ]
+  ];
 
-  const selectedApplicantData = applicants.find((a) => a.id === selectedApplicant) || null
+  const selectedApplicantData =
+    applicants.find((a) => a.id === selectedApplicant) || null;
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold tracking-tight">応募者管理</h2>
-        <p className="text-muted-foreground">【明治創業】上野駅徒歩5分、老舗洋食店での勤務</p>
+        <p className="text-muted-foreground">
+          【明治創業】上野駅徒歩5分、老舗洋食店での勤務
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -109,32 +140,57 @@ export default function JobApplicants() {
                   className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
                     selectedApplicant === applicant.id ? "bg-gray-50" : ""
                   }`}
-                  onClick={() => setSelectedApplicant(applicant.id)}
-                >
+                  onClick={() => setSelectedApplicant(applicant.id)}>
                   <div className="flex items-start gap-3">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={applicant.avatar} alt={applicant.name} />
-                      <AvatarFallback>{applicant.name.charAt(0)}</AvatarFallback>
+                      <AvatarImage
+                        src={applicant.avatar}
+                        alt={applicant.name}
+                      />
+                      <AvatarFallback>
+                        {applicant.name.charAt(0)}
+                      </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <p className="font-medium">{applicant.name}</p>
-                        <p className="text-xs text-muted-foreground">{applicant.lastMessageTime}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {applicant.lastMessageTime}
+                        </p>
                       </div>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge
                           className={`
-                          ${applicant.status === "応募済み" ? "bg-blue-100 text-blue-800" : ""}
-                          ${applicant.status === "面接調整中" ? "bg-purple-100 text-purple-800" : ""}
-                          ${applicant.status === "採用決定" ? "bg-green-100 text-green-800" : ""}
-                          ${applicant.status === "不採用" ? "bg-gray-100 text-gray-800" : ""}
-                        `}
-                        >
+                          ${
+                            applicant.status === "応募済み"
+                              ? "bg-blue-100 text-blue-800"
+                              : ""
+                          }
+                          ${
+                            applicant.status === "面接調整中"
+                              ? "bg-purple-100 text-purple-800"
+                              : ""
+                          }
+                          ${
+                            applicant.status === "採用決定"
+                              ? "bg-green-100 text-green-800"
+                              : ""
+                          }
+                          ${
+                            applicant.status === "不採用"
+                              ? "bg-gray-100 text-gray-800"
+                              : ""
+                          }
+                        `}>
                           {applicant.status}
                         </Badge>
-                        {applicant.unread && <div className="w-2 h-2 rounded-full bg-red-500"></div>}
+                        {applicant.unread && (
+                          <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                        )}
                       </div>
-                      <p className="text-sm text-muted-foreground truncate mt-1">{applicant.lastMessage}</p>
+                      <p className="text-sm text-muted-foreground truncate mt-1">
+                        {applicant.lastMessage}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -150,19 +206,41 @@ export default function JobApplicants() {
               <CardHeader className="px-4 py-3 flex-row items-center justify-between space-y-0 border-b">
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src={selectedApplicantData.avatar} alt={selectedApplicantData.name} />
-                    <AvatarFallback>{selectedApplicantData.name.charAt(0)}</AvatarFallback>
+                    <AvatarImage
+                      src={selectedApplicantData.avatar}
+                      alt={selectedApplicantData.name}
+                    />
+                    <AvatarFallback>
+                      {selectedApplicantData.name.charAt(0)}
+                    </AvatarFallback>
                   </Avatar>
                   <div>
-                    <CardTitle className="text-lg">{selectedApplicantData.name}</CardTitle>
+                    <CardTitle className="text-lg">
+                      {selectedApplicantData.name}
+                    </CardTitle>
                     <Badge
                       className={`
-                      ${selectedApplicantData.status === "応募済み" ? "bg-blue-100 text-blue-800" : ""}
-                      ${selectedApplicantData.status === "面接調整中" ? "bg-purple-100 text-purple-800" : ""}
-                      ${selectedApplicantData.status === "採用決定" ? "bg-green-100 text-green-800" : ""}
-                      ${selectedApplicantData.status === "不採用" ? "bg-gray-100 text-gray-800" : ""}
-                    `}
-                    >
+                      ${
+                        selectedApplicantData.status === "応募済み"
+                          ? "bg-blue-100 text-blue-800"
+                          : ""
+                      }
+                      ${
+                        selectedApplicantData.status === "面接調整中"
+                          ? "bg-purple-100 text-purple-800"
+                          : ""
+                      }
+                      ${
+                        selectedApplicantData.status === "採用決定"
+                          ? "bg-green-100 text-green-800"
+                          : ""
+                      }
+                      ${
+                        selectedApplicantData.status === "不採用"
+                          ? "bg-gray-100 text-gray-800"
+                          : ""
+                      }
+                    `}>
                       {selectedApplicantData.status}
                     </Badge>
                   </div>
@@ -182,12 +260,21 @@ export default function JobApplicants() {
                       <div className="py-4">
                         <div className="flex items-center gap-4 mb-4">
                           <Avatar className="h-16 w-16">
-                            <AvatarImage src={selectedApplicantData.avatar} alt={selectedApplicantData.name} />
-                            <AvatarFallback>{selectedApplicantData.name.charAt(0)}</AvatarFallback>
+                            <AvatarImage
+                              src={selectedApplicantData.avatar}
+                              alt={selectedApplicantData.name}
+                            />
+                            <AvatarFallback>
+                              {selectedApplicantData.name.charAt(0)}
+                            </AvatarFallback>
                           </Avatar>
                           <div>
-                            <h3 className="text-lg font-medium">{selectedApplicantData.name}</h3>
-                            <p className="text-sm text-muted-foreground">30歳・男性</p>
+                            <h3 className="text-lg font-medium">
+                              {selectedApplicantData.name}
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                              30歳・男性
+                            </p>
                           </div>
                         </div>
 
@@ -201,7 +288,9 @@ export default function JobApplicants() {
                           </div>
 
                           <div>
-                            <h4 className="text-sm font-medium mb-1">希望勤務日</h4>
+                            <h4 className="text-sm font-medium mb-1">
+                              希望勤務日
+                            </h4>
                             <div className="text-sm flex items-center gap-2">
                               <Calendar className="h-4 w-4 text-muted-foreground" />
                               月・水・金
@@ -209,7 +298,9 @@ export default function JobApplicants() {
                           </div>
 
                           <div>
-                            <h4 className="text-sm font-medium mb-1">希望勤務時間</h4>
+                            <h4 className="text-sm font-medium mb-1">
+                              希望勤務時間
+                            </h4>
                             <div className="text-sm flex items-center gap-2">
                               <Clock className="h-4 w-4 text-muted-foreground" />
                               11:00〜15:00
@@ -225,7 +316,9 @@ export default function JobApplicants() {
                           </div>
 
                           <div>
-                            <h4 className="text-sm font-medium mb-1">経歴・スキル</h4>
+                            <h4 className="text-sm font-medium mb-1">
+                              経歴・スキル
+                            </h4>
                             <p className="text-sm">
                               洋食店で2年ほど調理補助として勤務。ハンバーグやオムライスなどの基本的な調理が可能。接客経験もあり。
                             </p>
@@ -245,7 +338,9 @@ export default function JobApplicants() {
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem>面接を設定</DropdownMenuItem>
                       <DropdownMenuItem>採用する</DropdownMenuItem>
-                      <DropdownMenuItem className="text-red-600">不採用にする</DropdownMenuItem>
+                      <DropdownMenuItem className="text-red-600">
+                        不採用にする
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -255,19 +350,24 @@ export default function JobApplicants() {
                   {messages.map((message) => (
                     <div
                       key={message.id}
-                      className={`flex ${message.senderId === "admin" ? "justify-end" : "justify-start"}`}
-                    >
+                      className={`flex ${
+                        message.senderId === "admin"
+                          ? "justify-end"
+                          : "justify-start"
+                      }`}>
                       <div
                         className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                          message.senderId === "admin" ? "bg-primary text-primary-foreground" : "bg-muted"
-                        }`}
-                      >
+                          message.senderId === "admin"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted"
+                        }`}>
                         <p className="text-sm">{message.text}</p>
                         <p
                           className={`text-xs mt-1 ${
-                            message.senderId === "admin" ? "text-primary-foreground/70" : "text-muted-foreground"
-                          }`}
-                        >
+                            message.senderId === "admin"
+                              ? "text-primary-foreground/70"
+                              : "text-muted-foreground"
+                          }`}>
                           {message.time}
                         </p>
                       </div>
@@ -288,13 +388,16 @@ export default function JobApplicants() {
               <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
                 <MessageSquare className="h-8 w-8 text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-medium mb-2">応募者を選択してください</h3>
-              <p className="text-muted-foreground">左側のリストから応募者を選択すると、チャット履歴が表示されます。</p>
+              <h3 className="text-lg font-medium mb-2">
+                応募者を選択してください
+              </h3>
+              <p className="text-muted-foreground">
+                左側のリストから応募者を選択すると、チャット履歴が表示されます。
+              </p>
             </CardContent>
           )}
         </Card>
       </div>
     </div>
-  )
+  );
 }
-
