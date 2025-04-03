@@ -155,10 +155,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
               <div className="mb-6">
                 <div className="relative aspect-[16/9]">
                   <Image
-                    src={
-                      jobDetail.job.image ||
-                      "/placeholder.svg?height=400&width=800"
-                    }
+                    src={jobDetail.job.image || "/placeholder.svg"}
                     alt={jobDetail.job.title}
                     fill
                     className="object-cover rounded-md"
@@ -535,7 +532,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
           <div className="flex justify-center mb-6">
             <div className="flex items-center gap-2">
               <Image
-                src="/placeholder.svg?height=30&width=30"
+                src="/chef_illust/chef_logo.png"
                 alt="CookChef Logo"
                 width={30}
                 height={30}
