@@ -13,6 +13,8 @@ export const API_CONFIG = {
     application: "https://x8ki-letl-twmt.n7.xano.io/api:MJ8mZ3fN/application",
     restaurant: "https://x8ki-letl-twmt.n7.xano.io/api:Mv5jTolf/restaurant",
     operator: "https://x8ki-letl-twmt.n7.xano.io/api:grw3Vlqa/operator",
+    cuisines: "https://x8ki-letl-twmt.n7.xano.io/api:grw3Vlqa/cuisines",
+    skills: "https://x8ki-letl-twmt.n7.xano.io/api:grw3Vlqa/skills",
     operatorAuth: "https://x8ki-letl-twmt.n7.xano.io/api:grw3Vlqa/auth",
   },
   // 共通ヘッダー
