@@ -66,7 +66,7 @@ export default function CompanyRegisterPage() {
         <div className="container mx-auto flex items-center justify-between p-4">
           <Link href="/" className="flex items-center gap-2">
             <Image
-              src="/placeholder.svg?height=30&width=30"
+              src="/chef_illust/chef_logo.png?height=200&width=400"
               alt="CookChef Logo"
               width={30}
               height={30}
