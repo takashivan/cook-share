@@ -13,6 +13,8 @@ import {
   CreditCard,
   Users,
   LogOut,
+  Utensils,
+  Award,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -116,6 +118,24 @@ function OperatorLayout({ children }: { children: React.ReactNode }) {
             )}>
             <Users className="w-5 h-5 mr-2" />
             スタッフ管理
+          </Link>
+          <Link
+            href="/operator/categories"
+            className={cn(
+              "flex items-center px-4 py-2 text-gray-300 hover:bg-gray-800",
+              pathname === "/operator/categories" && "bg-gray-800"
+            )}>
+            <Utensils className="w-5 h-5 mr-2" />
+            カテゴリ管理
+          </Link>
+          <Link
+            href="/operator/skills"
+            className={cn(
+              "flex items-center px-4 py-2 text-gray-300 hover:bg-gray-800",
+              pathname === "/operator/skills" && "bg-gray-800"
+            )}>
+            <Award className="w-5 h-5 mr-2" />
+            スキル管理
           </Link>
         </nav>
         <div className="absolute bottom-0 w-64 p-4">
