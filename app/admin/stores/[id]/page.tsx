@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
@@ -52,11 +52,12 @@ const fetcher = async (url: string) => {
   return res.json();
 };
 
-export default function RestaurantDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function RestaurantDetailPage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = use(props.params);
   const { data: restaurant, error: restaurantError } = useSWR(
     [`restaurant`, params.id],
     ([_, id]) => getRestaurantById(id),
