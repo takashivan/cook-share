@@ -15,7 +15,7 @@ export const API_CONFIG = {
     operator: "https://x8ki-letl-twmt.n7.xano.io/api:grw3Vlqa/operator",
     cuisines:
       "https://x8ki-letl-twmt.n7.xano.io/api:grw3Vlqa/restaurant_cuisine",
-    skills: "https://x8ki-letl-twmt.n7.xano.io/api:grw3Vlqa/skills",
+    skill: "https://x8ki-letl-twmt.n7.xano.io/api:grw3Vlqa/chef_skill",
     operatorAuth: "https://x8ki-letl-twmt.n7.xano.io/api:grw3Vlqa/auth",
   },
   // 共通ヘッダー
