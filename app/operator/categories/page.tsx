@@ -33,28 +33,14 @@ export default function CategoriesPage() {
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">カテゴリ一覧</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {cuisines.map((cuisine: Cuisine) => (
           <Card key={cuisine.id}>
             <CardContent className="p-4">
               <div className="flex items-center space-x-4">
-                <Avatar>
-                  {cuisine.is_primary ? (
-                    <AvatarImage
-                      src={cuisine.category}
-                      alt={cuisine.category}
-                    />
-                  ) : (
-                    <AvatarFallback>{cuisine.category[0]}</AvatarFallback>
-                  )}
-                </Avatar>
                 <div>
                   <h2 className="text-lg font-semibold">{cuisine.category}</h2>
                   <p className="text-sm text-gray-500">{cuisine.is_primary}</p>
-
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    <Badge variant="default"></Badge>
-                  </div>
                 </div>
               </div>
             </CardContent>
