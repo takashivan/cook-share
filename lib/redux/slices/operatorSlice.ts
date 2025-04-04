@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { operatorApi } from "@/lib/api/operator";
 import { getAllChefs, UserProfile } from "@/lib/api/user";
 import { getAllJobs, Job } from "@/lib/api/job";
+import { getCuisines } from "@/lib/api/cuisines";
 
 // Async Thunks
 export const fetchCompanies = createAsyncThunk(
@@ -16,6 +17,14 @@ export const fetchChefs = createAsyncThunk("operator/fetchChefs", async () => {
   const response = await getAllChefs();
   return response;
 });
+
+export const fetchCuisines = createAsyncThunk(
+  "operator/fetchCuisines",
+  async () => {
+    const response = await getCuisines();
+    return response;
+  }
+);
 
 export const fetchOperatorJobs = createAsyncThunk(
   "operator/fetchJobs",
@@ -47,6 +56,7 @@ export const fetchStaff = createAsyncThunk("operator/fetchStaff", async () => {
 interface OperatorState {
   companies: any[];
   chefs: any[];
+  cuisines: any[];
   jobs: {
     data: Job[];
     loading: boolean;
@@ -60,6 +70,7 @@ interface OperatorState {
     jobs: boolean;
     billing: boolean;
     staff: boolean;
+    cuisines: boolean;
   };
   error: {
     companies: string | null;
@@ -67,6 +78,7 @@ interface OperatorState {
     jobs: string | null;
     billing: string | null;
     staff: string | null;
+    cuisines: string | null;
   };
 }
 
@@ -78,6 +90,7 @@ const initialState: OperatorState = {
     loading: false,
     error: null,
   },
+  cuisines: [],
   billing: null,
   staff: [],
   loading: {
@@ -86,6 +99,7 @@ const initialState: OperatorState = {
     jobs: false,
     billing: false,
     staff: false,
+    cuisines: false,
   },
   error: {
     companies: null,
@@ -93,6 +107,7 @@ const initialState: OperatorState = {
     jobs: null,
     billing: null,
     staff: null,
+    cuisines: null,
   },
 };
 
@@ -149,6 +164,21 @@ const operatorSlice = createSlice({
         state.jobs.error = action.error.message || "エラーが発生しました";
         state.loading.jobs = false;
         state.error.jobs = action.error.message || "エラーが発生しました";
+      });
+
+    // Cuisines
+    builder
+      .addCase(fetchCuisines.pending, (state) => {
+        state.loading.cuisines = true;
+        state.error.cuisines = null;
+      })
+      .addCase(fetchCuisines.fulfilled, (state, action) => {
+        state.cuisines = action.payload;
+        state.loading.cuisines = false;
+      })
+      .addCase(fetchCuisines.rejected, (state, action) => {
+        state.loading.cuisines = false;
+        state.error.cuisines = action.error.message || "エラーが発生しました";
       });
 
     // Billing
