@@ -3,7 +3,7 @@ import { operatorApi } from "@/lib/api/operator";
 import { getAllChefs, UserProfile } from "@/lib/api/user";
 import { getAllJobs, Job } from "@/lib/api/job";
 import { getCuisines } from "@/lib/api/cuisines";
-
+import { getSkills } from "@/lib/api/skill";
 // Async Thunks
 export const fetchCompanies = createAsyncThunk(
   "operator/fetchCompanies",
@@ -53,10 +53,19 @@ export const fetchStaff = createAsyncThunk("operator/fetchStaff", async () => {
   return response;
 });
 
+export const fetchSkills = createAsyncThunk(
+  "operator/fetchSkills",
+  async () => {
+    const response = await getSkills();
+    return response;
+  }
+);
+
 interface OperatorState {
   companies: any[];
   chefs: any[];
   cuisines: any[];
+  skills: any[];
   jobs: {
     data: Job[];
     loading: boolean;
@@ -71,6 +80,7 @@ interface OperatorState {
     billing: boolean;
     staff: boolean;
     cuisines: boolean;
+    skills: boolean;
   };
   error: {
     companies: string | null;
@@ -79,6 +89,7 @@ interface OperatorState {
     billing: string | null;
     staff: string | null;
     cuisines: string | null;
+    skills: string | null;
   };
 }
 
@@ -91,6 +102,7 @@ const initialState: OperatorState = {
     error: null,
   },
   cuisines: [],
+  skills: [],
   billing: null,
   staff: [],
   loading: {
@@ -100,6 +112,7 @@ const initialState: OperatorState = {
     billing: false,
     staff: false,
     cuisines: false,
+    skills: false,
   },
   error: {
     companies: null,
@@ -108,6 +121,7 @@ const initialState: OperatorState = {
     billing: null,
     staff: null,
     cuisines: null,
+    skills: null,
   },
 };
 
@@ -181,6 +195,20 @@ const operatorSlice = createSlice({
         state.error.cuisines = action.error.message || "エラーが発生しました";
       });
 
+    // Skills
+    builder
+      .addCase(fetchSkills.pending, (state) => {
+        state.loading.skills = true;
+        state.error.skills = null;
+      })
+      .addCase(fetchSkills.fulfilled, (state, action) => {
+        state.skills = action.payload;
+        state.loading.skills = false;
+      })
+      .addCase(fetchSkills.rejected, (state, action) => {
+        state.loading.skills = false;
+        state.error.skills = action.error.message || "エラーが発生しました";
+      });
     // Billing
     builder
       .addCase(fetchBilling.pending, (state) => {
