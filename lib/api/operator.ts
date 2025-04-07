@@ -73,7 +73,7 @@ export const operatorApi = {
   // シェフ管理
   getChefs: async (): Promise<any[]> => {
     return apiRequest(
-      `${API_CONFIG.baseURLs.operator}/chefs`,
+      `${API_CONFIG.baseURLs.user}`,
       "GET",
       undefined,
       "operator"
@@ -85,6 +85,71 @@ export const operatorApi = {
       `${API_CONFIG.baseURLs.operator}/chefs/${id}`,
       "GET",
       undefined,
+      "operator"
+    );
+  },
+
+  // シェフのBAN
+  banChef: async (id: string, reason: string): Promise<any> => {
+    return apiRequest(
+      `${API_CONFIG.baseURLs.operator}/user/ban`,
+      "PATCH",
+      {
+        user_id: id,
+        reason: reason,
+      },
+      "operator"
+    );
+  },
+
+  // シェフの承認
+  approveChef: async (id: string): Promise<any> => {
+    return apiRequest(
+      `${API_CONFIG.baseURLs.operator}/user/approve`,
+      "PATCH",
+      {
+        user_id: id,
+      },
+      "operator"
+    );
+  },
+
+  //求人のBAN
+  banJob: async (id: number, reason: string): Promise<any> => {
+    return apiRequest(
+      `${API_CONFIG.baseURLs.operator}/job/ban`,
+      "PATCH",
+      { job_id: id, reason: reason },
+      "operator"
+    );
+  },
+
+  // 求人の承認
+  approveJob: async (id: number, reason: string): Promise<any> => {
+    return apiRequest(
+      `${API_CONFIG.baseURLs.operator}/job/approve`,
+      "PATCH",
+      { job_id: id, reason: reason },
+      "operator"
+    );
+  },
+
+  //レストランのBAN
+  banRestaurant: async (id: string, reason: string): Promise<any> => {
+    return apiRequest(
+      `${API_CONFIG.baseURLs.operator}/restaurant/ban`,
+      "PATCH",
+      { restaurant_id: id, reason: reason },
+      "operator"
+    );
+  },
+
+  // レストランの承認
+  approveRestaurant: async (id: string, reason: string): Promise<any> => {
+    return apiRequest(
+      `${API_CONFIG.baseURLs.operator}/restaurant/approve`,
+      "PATCH",
+      { restaurant_id: id, reason: reason },
       "operator"
     );
   },

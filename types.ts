@@ -19,6 +19,7 @@ export interface Job {
   note: string;
   point: string;
   transportation: string;
+  is_approved: boolean;
 }
 
 export interface Application {

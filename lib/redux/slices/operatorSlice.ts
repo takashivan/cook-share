@@ -4,6 +4,8 @@ import { getAllChefs, UserProfile } from "@/lib/api/user";
 import { getAllJobs, Job } from "@/lib/api/job";
 import { getCuisines } from "@/lib/api/cuisines";
 import { getSkills } from "@/lib/api/skill";
+import { getRestaurants } from "@/lib/api/restaurant";
+import { Restaurant } from "@/types/restaurant";
 // Async Thunks
 export const fetchCompanies = createAsyncThunk(
   "operator/fetchCompanies",
@@ -13,10 +15,17 @@ export const fetchCompanies = createAsyncThunk(
   }
 );
 
-export const fetchChefs = createAsyncThunk("operator/fetchChefs", async () => {
-  const response = await getAllChefs();
-  return response;
-});
+export const fetchChefs = createAsyncThunk(
+  "operator/fetchChefs",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await operatorApi.getChefs();
+      return response;
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
 
 export const fetchCuisines = createAsyncThunk(
   "operator/fetchCuisines",
@@ -33,9 +42,7 @@ export const fetchOperatorJobs = createAsyncThunk(
       const jobs = await getAllJobs();
       return jobs;
     } catch (error) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "求人の取得に失敗しました"
-      );
+      return rejectWithValue((error as Error).message);
     }
   }
 );
@@ -61,9 +68,113 @@ export const fetchSkills = createAsyncThunk(
   }
 );
 
+export const banChef = createAsyncThunk(
+  "operator/banChef",
+  async (
+    { id, reason }: { id: string; reason: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await operatorApi.banChef(id, reason);
+      return response;
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
+export const approveChef = createAsyncThunk(
+  "operator/approveChef",
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const response = await operatorApi.approveChef(id);
+      return response;
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
+export const fetchRestaurants = createAsyncThunk<
+  Restaurant[],
+  void,
+  { rejectValue: string }
+>("operator/fetchRestaurants", async (_, { rejectWithValue }) => {
+  try {
+    const response = await getRestaurants();
+    return response;
+  } catch (error) {
+    return rejectWithValue((error as Error).message);
+  }
+});
+
+export const banRestaurant = createAsyncThunk(
+  "operator/banRestaurant",
+  async (
+    { id, reason }: { id: string; reason: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await operatorApi.banRestaurant(id, reason);
+      return response;
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
+export const approveRestaurant = createAsyncThunk(
+  "operator/approveRestaurant",
+  async (
+    { id, reason }: { id: string; reason: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await operatorApi.approveRestaurant(id, reason);
+      return response;
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
+export const banJob = createAsyncThunk(
+  "operator/banJob",
+  async (
+    { id, reason }: { id: number; reason: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await operatorApi.banJob(id, reason);
+      return response;
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
+export const approveJob = createAsyncThunk(
+  "operator/approveJob",
+  async (
+    { id, reason }: { id: number; reason: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await operatorApi.approveJob(id, reason);
+      return response;
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
 interface OperatorState {
   companies: any[];
-  chefs: any[];
+  chefs: {
+    data: UserProfile[];
+    loading: boolean;
+    error: string | null;
+  };
   cuisines: any[];
   skills: any[];
   jobs: {
@@ -91,11 +202,20 @@ interface OperatorState {
     cuisines: string | null;
     skills: string | null;
   };
+  restaurants: {
+    data: Restaurant[];
+    loading: boolean;
+    error: string | null;
+  };
 }
 
 const initialState: OperatorState = {
   companies: [],
-  chefs: [],
+  chefs: {
+    data: [],
+    loading: false,
+    error: null,
+  },
   jobs: {
     data: [],
     loading: false,
@@ -123,6 +243,11 @@ const initialState: OperatorState = {
     cuisines: null,
     skills: null,
   },
+  restaurants: {
+    data: [],
+    loading: false,
+    error: null,
+  },
 };
 
 const operatorSlice = createSlice({
@@ -148,16 +273,16 @@ const operatorSlice = createSlice({
     // Chefs
     builder
       .addCase(fetchChefs.pending, (state) => {
-        state.loading.chefs = true;
-        state.error.chefs = null;
+        state.chefs.loading = true;
+        state.chefs.error = null;
       })
       .addCase(fetchChefs.fulfilled, (state, action) => {
-        state.chefs = action.payload;
-        state.loading.chefs = false;
+        state.chefs.loading = false;
+        state.chefs.data = action.payload;
       })
       .addCase(fetchChefs.rejected, (state, action) => {
-        state.loading.chefs = false;
-        state.error.chefs = action.error.message || "エラーが発生しました";
+        state.chefs.loading = false;
+        state.chefs.error = action.payload as string;
       });
 
     // Jobs
@@ -237,6 +362,105 @@ const operatorSlice = createSlice({
       .addCase(fetchStaff.rejected, (state, action) => {
         state.loading.staff = false;
         state.error.staff = action.error.message || "エラーが発生しました";
+      });
+
+    // Ban Chef
+    builder
+      .addCase(banChef.pending, (state) => {
+        state.chefs.loading = true;
+        state.chefs.error = null;
+      })
+      .addCase(banChef.fulfilled, (state) => {
+        state.chefs.loading = false;
+      })
+      .addCase(banChef.rejected, (state, action) => {
+        state.chefs.loading = false;
+        state.chefs.error = action.payload as string;
+      });
+
+    // Approve Chef
+    builder
+      .addCase(approveChef.pending, (state) => {
+        state.chefs.loading = true;
+        state.chefs.error = null;
+      })
+      .addCase(approveChef.fulfilled, (state) => {
+        state.chefs.loading = false;
+      })
+      .addCase(approveChef.rejected, (state, action) => {
+        state.chefs.loading = false;
+        state.chefs.error = action.payload as string;
+      });
+
+    // Fetch Restaurants
+    builder
+      .addCase(fetchRestaurants.pending, (state) => {
+        state.restaurants.loading = true;
+        state.restaurants.error = null;
+      })
+      .addCase(fetchRestaurants.fulfilled, (state, action) => {
+        state.restaurants.loading = false;
+        state.restaurants.data = action.payload as Restaurant[];
+      })
+      .addCase(fetchRestaurants.rejected, (state, action) => {
+        state.restaurants.loading = false;
+        state.restaurants.error = action.payload as string;
+      });
+
+    // Ban Restaurant
+    builder
+      .addCase(banRestaurant.pending, (state) => {
+        state.restaurants.loading = true;
+        state.restaurants.error = null;
+      })
+      .addCase(banRestaurant.fulfilled, (state) => {
+        state.restaurants.loading = false;
+      })
+      .addCase(banRestaurant.rejected, (state, action) => {
+        state.restaurants.loading = false;
+        state.restaurants.error = action.payload as string;
+      });
+
+    // Approve Restaurant
+    builder
+      .addCase(approveRestaurant.pending, (state) => {
+        state.restaurants.loading = true;
+        state.restaurants.error = null;
+      })
+      .addCase(approveRestaurant.fulfilled, (state) => {
+        state.restaurants.loading = false;
+      })
+      .addCase(approveRestaurant.rejected, (state, action) => {
+        state.restaurants.loading = false;
+        state.restaurants.error = action.payload as string;
+      });
+
+    // Ban Job
+    builder
+      .addCase(banJob.pending, (state) => {
+        state.jobs.loading = true;
+        state.jobs.error = null;
+      })
+      .addCase(banJob.fulfilled, (state) => {
+        state.jobs.loading = false;
+      })
+      .addCase(banJob.rejected, (state, action) => {
+        state.jobs.loading = false;
+        state.jobs.error = action.payload as string;
+      });
+
+    // Approve Job
+    builder
+      .addCase(approveJob.pending, (state) => {
+        state.jobs.loading = true;
+        state.jobs.error = null;
+      })
+      .addCase(approveJob.fulfilled, (state) => {
+        state.jobs.loading = false;
+      })
+      .addCase(approveJob.rejected, (state, action) => {
+        state.jobs.loading = false;
+        state.jobs.error = action.payload as string;
       });
   },
 });
