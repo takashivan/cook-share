@@ -21,7 +21,14 @@ export default function JobsPage() {
     loading: state.operator.jobs.loading,
     error: state.operator.jobs.error,
   }));
-  console.log(jobs);
+  console.log(
+    "Jobs data:",
+    jobs?.map((job) => ({
+      id: job.id,
+      title: job.title,
+      is_approved: job.is_approved,
+    }))
+  );
   const [searchTerm, setSearchTerm] = useState("");
   const [showSuspendedOnly, setShowSuspendedOnly] = useState(false);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
