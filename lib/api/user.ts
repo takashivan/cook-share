@@ -39,6 +39,7 @@ export interface UserProfile {
   certifications?: string[];
   dateofbirth?: string;
   status?: string;
+  is_approved?: boolean;
   created_at?: string;
   updated_at?: string;
 }

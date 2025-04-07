@@ -131,6 +131,7 @@ export interface Job {
   note: string | null;
   point: string | null;
   transportation: string;
+  is_approved: boolean;
 }
 
 export interface GetJobsResponse {
