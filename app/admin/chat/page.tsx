@@ -30,7 +30,7 @@ export default function ChatPage() {
         </div>
 
         <ChatComponent
-          instanceUrl="https://x8ki-letl-twmt.n7.xano.io/"
+          instanceUrl="https://xcti-onox-8bdw.n7e.xano.io/"
           connectionHash="NHjYDPivFvrmrFLc5lyYZubMyrc"
           channelName="chat-room"
           allowAnonymous={false}
