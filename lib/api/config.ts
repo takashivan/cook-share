@@ -4,19 +4,21 @@
 export const API_CONFIG = {
   // Xanoの各APIカテゴリのベースURL
   baseURLs: {
-    user: "https://x8ki-letl-twmt.n7.xano.io/api:Mv5jTolf/user",
-    auth: "https://x8ki-letl-twmt.n7.xano.io/api:xaJlLYDj/auth", // シェフユーザー用
-    companyAuth: "https://x8ki-letl-twmt.n7.xano.io/api:3LZoUG6X/auth", // 会社ユーザー用
-    companyUser: "https://x8ki-letl-twmt.n7.xano.io/api:3LZoUG6X/companyuser",
-    company: "https://x8ki-letl-twmt.n7.xano.io/api:3LZoUG6X/companies",
-    job: "https://x8ki-letl-twmt.n7.xano.io/api:Mv5jTolf/job",
-    application: "https://x8ki-letl-twmt.n7.xano.io/api:MJ8mZ3fN/application",
-    restaurant: "https://x8ki-letl-twmt.n7.xano.io/api:Mv5jTolf/restaurant",
-    operator: "https://x8ki-letl-twmt.n7.xano.io/api:grw3Vlqa/operator",
+
+    user: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/user",
+    auth: "https://xcti-onox-8bdw.n7e.xano.io/api:xaJlLYDj/auth", // シェフユーザー用
+    companyAuth: "https://xcti-onox-8bdw.n7e.xano.io/api:3LZoUG6X/auth", // 会社ユーザー用
+    companyUser: "https://xcti-onox-8bdw.n7e.xano.io/api:3LZoUG6X/companyuser",
+    company: "https://xcti-onox-8bdw.n7e.xano.io/api:3LZoUG6X/companies",
+    job: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/job",
+    application: "https://xcti-onox-8bdw.n7e.xano.io/api:MJ8mZ3fN/application",
+    restaurant: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/restaurant",
+    operator: "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/operator",
     cuisines:
-      "https://x8ki-letl-twmt.n7.xano.io/api:grw3Vlqa/restaurant_cuisine",
-    skills: "https://x8ki-letl-twmt.n7.xano.io/api:grw3Vlqa/skills",
-    operatorAuth: "https://x8ki-letl-twmt.n7.xano.io/api:grw3Vlqa/auth",
+      "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/restaurant_cuisine",
+    skill: "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/chef_skill",
+    operatorAuth: "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/auth",
+
   },
   // 共通ヘッダー
   headers: {

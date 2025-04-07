@@ -39,8 +39,16 @@ export default function CategoriesPage() {
             <CardContent className="p-4">
               <div className="flex items-center space-x-4">
                 <div>
-                  <h2 className="text-lg font-semibold">{cuisine.category}</h2>
+                  <h3 className="text-lg font-semibold">{cuisine.category}</h3>
                   <p className="text-sm text-gray-500">{cuisine.is_primary}</p>
+
+
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {cuisine.is_primary && (
+                      <Badge variant="default">プライマリー</Badge>
+                    )}
+                  </div>
+
                 </div>
               </div>
             </CardContent>
