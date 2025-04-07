@@ -29,7 +29,7 @@ export const CreateRestaurantModal = ({
     reset,
   } = useForm<CreateRestaurantData>({
     defaultValues: {
-      companies_id: companyId.toString(),
+      company_id: companyId.toString(),
       is_active: false,
       name: "",
       address: "",

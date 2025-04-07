@@ -1,6 +1,7 @@
 import { apiRequest } from "./config";
 import { API_CONFIG } from "./config";
 import { getCompany } from "./company";
+import { Restaurant as RestaurantType } from "@/types/restaurant";
 
 const BASE_URL = API_CONFIG.baseURLs.restaurant;
 
@@ -18,20 +19,22 @@ export interface Company {
 
 export interface Restaurant {
   id: string;
-  companies_id: string;
+  company_id: string;
   name: string;
   description?: string;
   address: string;
   phone?: string;
   cuisine_type: string;
   is_active: boolean;
+  is_approved: boolean;
+  email: string;
   created_at?: string;
   updated_at?: string;
   company?: Company;
 }
 
 export type CreateRestaurantData = {
-  companies_id: string;
+  company_id: string;
   name: string;
   description?: string;
   address: string;
@@ -50,7 +53,7 @@ export const getRestaurants = async (): Promise<Restaurant[]> => {
 // 特定のレストラン情報を取得（会社情報付き）
 export const getRestaurant = async (id: string): Promise<Restaurant> => {
   const restaurant = await apiRequest<Restaurant>(`${BASE_URL}/${id}`, "GET");
-  const company = await getCompany(restaurant.companies_id);
+  const company = await getCompany(restaurant.company_id);
   return { ...restaurant, company };
 };
 
@@ -60,11 +63,11 @@ export const createRestaurant = async (
 ): Promise<Restaurant> => {
   // companies_idがUUID形式であることを確認
   if (
-    !restaurantData.companies_id.match(
+    !restaurantData.company_id.match(
       /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
     )
   ) {
-    throw new Error("Invalid UUID format for companies_id");
+    throw new Error("Invalid UUID format for company_id");
   }
 
   return apiRequest(`${BASE_URL}`, "POST", {
