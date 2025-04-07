@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/lib/redux/store";
 import {
-  fetchChefs,
-  banChef,
-  approveChef,
+  fetchRestaurants,
+  banRestaurant,
+  approveRestaurant,
 } from "@/lib/redux/slices/operatorSlice";
-import { UserProfile } from "@/types/user";
+import { Restaurant } from "@/types/restaurant";
 import {
   Table,
   TableBody,
@@ -31,38 +31,40 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Search } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-export default function ChefsPage() {
+export default function RestaurantsPage() {
   const dispatch = useDispatch<AppDispatch>();
-  const { chefs, loading, error } = useSelector((state: RootState) => ({
-    chefs: state.operator.chefs.data,
-    loading: state.operator.chefs.loading,
-    error: state.operator.chefs.error,
+  const { restaurants, loading, error } = useSelector((state: RootState) => ({
+    restaurants: state.operator.restaurants.data,
+    loading: state.operator.restaurants.loading,
+    error: state.operator.restaurants.error,
   }));
-  const [selectedChef, setSelectedChef] = useState<UserProfile | null>(null);
+  const [selectedRestaurant, setSelectedRestaurant] =
+    useState<Restaurant | null>(null);
   const [banReason, setBanReason] = useState("");
   const [showSuspendedOnly, setShowSuspendedOnly] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
-    dispatch(fetchChefs());
+    dispatch(fetchRestaurants());
   }, [dispatch]);
 
   const handleBan = async () => {
-    if (!selectedChef || !banReason) return;
+    if (!selectedRestaurant || !banReason) return;
 
     try {
       await dispatch(
-        banChef({ id: selectedChef.id, reason: banReason })
+        banRestaurant({ id: selectedRestaurant.id, reason: banReason })
       ).unwrap();
       toast({
-        title: "シェフをBANしました",
-        description: `${selectedChef.name}をBANしました。`,
+        title: "レストランをBANしました",
+        description: `${selectedRestaurant.name}をBANしました。`,
       });
-      setSelectedChef(null);
+      setSelectedRestaurant(null);
       setBanReason("");
-      dispatch(fetchChefs());
+      dispatch(fetchRestaurants());
     } catch (error) {
       toast({
         title: "エラー",
@@ -72,14 +74,16 @@ export default function ChefsPage() {
     }
   };
 
-  const handleApprove = async (chef: UserProfile) => {
+  const handleApprove = async (restaurant: Restaurant) => {
     try {
-      await dispatch(approveChef(chef.id)).unwrap();
+      await dispatch(
+        approveRestaurant({ id: restaurant.id, reason: "承認" })
+      ).unwrap();
       toast({
-        title: "シェフを承認しました",
-        description: `${chef.name}を承認しました。`,
+        title: "レストランを承認しました",
+        description: `${restaurant.name}を承認しました。`,
       });
-      dispatch(fetchChefs());
+      dispatch(fetchRestaurants());
     } catch (error) {
       toast({
         title: "エラー",
@@ -89,13 +93,12 @@ export default function ChefsPage() {
     }
   };
 
-  const filteredChefs = chefs.filter((chef) => {
-    // フィルター条件を組み合わせる
+  const filteredRestaurants = restaurants.filter((restaurant) => {
     const matchesSearch =
       searchQuery === "" ||
-      chef.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      chef.email.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = !showSuspendedOnly || !chef.is_approved;
+      restaurant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      restaurant.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = !showSuspendedOnly || !restaurant.is_approved;
     return matchesSearch && matchesStatus;
   });
 
@@ -111,7 +114,7 @@ export default function ChefsPage() {
     <div className="p-4">
       <div className="flex flex-col gap-4 mb-4">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">シェフ一覧</h1>
+          <h1 className="text-2xl font-bold">レストラン一覧</h1>
           <div className="flex items-center space-x-2">
             <Switch
               id="suspended-filter"
@@ -124,7 +127,7 @@ export default function ChefsPage() {
         <div className="relative">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="名前やメールアドレスで検索..."
+            placeholder="店舗名やメールアドレスで検索..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-8"
@@ -135,21 +138,34 @@ export default function ChefsPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>名前</TableHead>
+              <TableHead className="w-[50px]"></TableHead>
+              <TableHead>店舗名</TableHead>
               <TableHead>メール</TableHead>
-              <TableHead>経験レベル</TableHead>
+              <TableHead>住所</TableHead>
               <TableHead>ステータス</TableHead>
               <TableHead>操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredChefs.map((chef: UserProfile) => (
-              <TableRow key={chef.id}>
-                <TableCell>{chef.name}</TableCell>
-                <TableCell>{chef.email}</TableCell>
-                <TableCell>{chef.experience_level || "-"}</TableCell>
+            {filteredRestaurants.map((restaurant: Restaurant) => (
+              <TableRow key={restaurant.id}>
                 <TableCell>
-                  {chef.is_approved ? (
+                  <Avatar>
+                    {restaurant.image_url ? (
+                      <AvatarImage
+                        src={restaurant.image_url}
+                        alt={restaurant.name}
+                      />
+                    ) : (
+                      <AvatarFallback>{restaurant.name[0]}</AvatarFallback>
+                    )}
+                  </Avatar>
+                </TableCell>
+                <TableCell>{restaurant.name}</TableCell>
+                <TableCell>{restaurant.email}</TableCell>
+                <TableCell>{restaurant.address || "-"}</TableCell>
+                <TableCell>
+                  {restaurant.is_approved ? (
                     <Badge variant="default">承認済み</Badge>
                   ) : (
                     <Badge variant="destructive">一時停止中</Badge>
@@ -160,44 +176,48 @@ export default function ChefsPage() {
                     <DialogTrigger asChild>
                       <Button
                         variant="outline"
-                        onClick={() => setSelectedChef(chef)}>
+                        onClick={() => setSelectedRestaurant(restaurant)}>
                         詳細
                       </Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>シェフ詳細</DialogTitle>
+                        <DialogTitle>レストラン詳細</DialogTitle>
                       </DialogHeader>
                       <div className="space-y-4">
-                        <div>
-                          <h3 className="font-semibold">基本情報</h3>
-                          <p>名前: {chef.name}</p>
-                          <p>メール: {chef.email}</p>
-                          <p>経験レベル: {chef.experience_level || "-"}</p>
-                          <p>
-                            ステータス:{" "}
-                            {chef.is_approved ? "承認済み" : "一時停止中"}
-                          </p>
-                        </div>
-                        <div>
-                          <h3 className="font-semibold">スキル</h3>
-                          <div className="flex flex-wrap gap-2">
-                            {chef.skills?.map((skill: string) => (
-                              <span
-                                key={skill}
-                                className="px-2 py-1 bg-gray-100 rounded">
-                                {skill}
-                              </span>
-                            ))}
+                        <div className="flex items-center space-x-4">
+                          <Avatar className="h-20 w-20">
+                            {restaurant.image_url ? (
+                              <AvatarImage
+                                src={restaurant.image_url}
+                                alt={restaurant.name}
+                              />
+                            ) : (
+                              <AvatarFallback>
+                                {restaurant.name[0]}
+                              </AvatarFallback>
+                            )}
+                          </Avatar>
+                          <div>
+                            <h3 className="font-semibold">基本情報</h3>
+                            <p>店舗名: {restaurant.name}</p>
+                            <p>メール: {restaurant.email}</p>
+                            <p>住所: {restaurant.address || "-"}</p>
+                            <p>
+                              ステータス:{" "}
+                              {restaurant.is_approved
+                                ? "承認済み"
+                                : "一時停止中"}
+                            </p>
                           </div>
                         </div>
-                        {!chef.is_approved ? (
+                        {!restaurant.is_approved ? (
                           <div>
                             <h3 className="font-semibold mb-2">承認</h3>
                             <Button
                               variant="default"
                               className="w-full"
-                              onClick={() => handleApprove(chef)}>
+                              onClick={() => handleApprove(restaurant)}>
                               承認する
                             </Button>
                           </div>
