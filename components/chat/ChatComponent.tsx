@@ -78,6 +78,57 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
 
   // 初期化と接続
   useEffect(() => {
+    const initializeXanoClient = async () => {
+      if (!instanceUrl || !connectionHash) {
+        setError("XanoのURLとconnectionHashが必要です");
+        return;
+      }
+
+      try {
+        setIsConnecting(true);
+        setError(null);
+
+        // Xanoクライアントの初期化
+        xanoClient.current = new XanoClient({
+          instanceBaseUrl: instanceUrl,
+          realtimeConnectionHash: connectionHash,
+        });
+
+        // チャンネルの設定
+        channel.current = xanoClient.current.channel(channelName);
+
+        // 接続イベントのリスナー
+        channel.current.on("connected", () => {
+          setIsConnected(true);
+          setIsConnecting(false);
+          onConnect();
+        });
+
+        // 切断イベントのリスナー
+        channel.current.on("disconnected", () => {
+          setIsConnected(false);
+          setIsConnecting(false);
+          onDisconnect();
+        });
+
+        // メッセージ受信イベントのリスナー
+        channel.current.on("message", (message: XanoRealtimeMessage) => {
+          if (message.action === "chat") {
+            const chatMessage = message.payload as ChatMessage;
+            setMessages((prev) => [...prev, chatMessage]);
+            onMessageReceived(chatMessage);
+          }
+        });
+
+        // 接続
+        await channel.current.connect();
+      } catch (err) {
+        setError("接続に失敗しました");
+        setIsConnecting(false);
+        console.error("Xano接続エラー:", err);
+      }
+    };
+
     initializeXanoClient();
 
     // クリーンアップ
@@ -91,125 +142,33 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
       setIsConnected(false);
       setIsConnecting(false);
     };
-  }, [instanceUrl, connectionHash]); // 依存配列に接続情報を追加
-
-  // Xanoクライアント初期化
-  const initializeXanoClient = async () => {
-    if (!instanceUrl || !connectionHash) {
-      setError("XanoのURLとconnectionHashが必要です");
-      return;
-    }
-
-    if (isConnecting) {
-      console.log("接続処理中のため、新しい接続は開始しません");
-      return;
-    }
-
-    console.log("Xanoクライアント初期化開始");
-    setIsConnecting(true);
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // 既存の接続をクリーンアップ
-      if (channel.current) {
-        try {
-          channel.current = null;
-        } catch (e) {
-          console.error("既存のチャンネルのクリーンアップに失敗:", e);
-        }
-      }
-
-      if (xanoClient.current) {
-        try {
-          xanoClient.current = null;
-        } catch (e) {
-          console.error("既存のクライアントのクリーンアップに失敗:", e);
-        }
-      }
-
-      // 新しいクライアントを作成
-      const client = new XanoClient({
-        instanceBaseUrl: instanceUrl,
-        realtimeConnectionHash: connectionHash,
-      });
-
-      xanoClient.current = client;
-      console.log("Xanoクライアント作成完了");
-
-      // チャンネルの作成
-      const chatChannel = client.channel(channelName);
-      channel.current = chatChannel;
-      console.log("チャンネル作成完了");
-
-      // メッセージハンドラーの設定
-      chatChannel.on((message: any) => {
-        console.log("メッセージ受信:", message);
-        if (message.text && message.user) {
-          setMessages((prev) => [...prev, message]);
-        }
-      });
-
-      setIsConnected(true);
-      setIsConnecting(false);
-      setError(null);
-
-      onConnect();
-    } catch (error) {
-      console.error("接続エラー:", error);
-      setError("接続に失敗しました - 再接続します");
-      setIsLoading(false);
-      setIsConnecting(false);
-
-      // 3秒後に再接続を試みる
-      setTimeout(() => {
-        console.log("再接続を試みます");
-        initializeXanoClient();
-      }, 3000);
-    }
-  };
+  }, [
+    instanceUrl,
+    connectionHash,
+    channelName,
+    onConnect,
+    onDisconnect,
+    onMessageReceived,
+  ]);
 
   // メッセージ送信処理
   const handleSendMessage = async () => {
-    if (!inputMessage.trim()) {
-      return;
-    }
-
-    if (!channel.current) {
-      console.error("チャンネルが初期化されていません");
-      setError("チャンネルが初期化されていません");
-      await initializeXanoClient();
-      return;
-    }
-
-    if (!isConnected) {
-      console.error("WebSocket接続が確立されていません");
-      setError("WebSocket接続が確立されていません");
-      return;
-    }
+    if (!inputMessage.trim() || !isConnected) return;
 
     try {
-      setIsLoading(true);
-      const messageData = {
-        text: inputMessage.trim(),
-        user: username || "Anonymous",
+      const message: ChatMessage = {
+        text: inputMessage,
+        user: username || "匿名ユーザー",
         timestamp: new Date().toISOString(),
       };
 
-      // メッセージを送信
-      console.log("Sending message:", messageData);
-      await channel.current.message(messageData);
-      console.log("Message sent successfully");
-
-      // 送信成功後にメッセージを表示
-      setMessages((prev) => [...prev, messageData]);
+      await channel.current?.send("chat", message);
+      setMessages((prev) => [...prev, message]);
       setInputMessage("");
-      onMessageSent(messageData);
-    } catch (error) {
-      console.error("メッセージ送信エラー:", error);
+      onMessageSent(message);
+    } catch (err) {
       setError("メッセージの送信に失敗しました");
-    } finally {
-      setIsLoading(false);
+      console.error("メッセージ送信エラー:", err);
     }
   };
 
