@@ -4,6 +4,7 @@
 export const API_CONFIG = {
   // Xanoの各APIカテゴリのベースURL
   baseURLs: {
+
     user: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/user",
     auth: "https://xcti-onox-8bdw.n7e.xano.io/api:xaJlLYDj/auth", // シェフユーザー用
     companyAuth: "https://xcti-onox-8bdw.n7e.xano.io/api:3LZoUG6X/auth", // 会社ユーザー用
@@ -17,6 +18,7 @@ export const API_CONFIG = {
       "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/restaurant_cuisine",
     skill: "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/chef_skill",
     operatorAuth: "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/auth",
+
   },
   // 共通ヘッダー
   headers: {
