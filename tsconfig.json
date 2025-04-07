@@ -24,9 +24,10 @@
     "paths": {
       "@/*": [
         "./*"
-      ]
+      ],
     },
-    "target": "ES2017"
+    "target": "ES2022",
+    "types": ["vitest/globals"],
   },
   "include": [
     "next-env.d.ts",
@@ -35,6 +36,7 @@
     ".next/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
-  ]
+    "node_modules",
+    "vitest.config.mts",
+  ],
 }
