@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, use } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -41,7 +41,8 @@ import {
 import { Application } from "@/types";
 import { GetApplicationsResponse } from "@/lib/api/application";
 
-export default function JobDetailPage({ params }: { params: { id: string } }) {
+export default function JobDetailPage(props: { params: Promise<{ id: string }> }) {
+  const params = use(props.params);
   const [selectedApplicant, setSelectedApplicant] = useState<number | null>(
     null
   );
