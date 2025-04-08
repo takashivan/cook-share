@@ -313,12 +313,10 @@ export default function Home() {
               <Image
                 src="/chef_illust/chef_logo.png?height=200&width=400"
                 alt="CookChef Logo"
-                width={30}
+                width={120}
                 height={30}
                 className="text-white"
               />
-              <span className="font-bold">CookChef</span>
-              <span className="text-xs text-gray-400">(仮)</span>
             </div>
           </div>
 

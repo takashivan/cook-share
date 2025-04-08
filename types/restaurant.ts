@@ -4,6 +4,6 @@ export interface Restaurant {
   email: string;
   image_url?: string;
   address?: string;
-  company_id: string;
+  companies_id: string;
   is_approved: boolean;
 }

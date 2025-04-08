@@ -52,6 +52,7 @@ import {
   getCompanyUserByCompanyId,
   type CompanyUser,
 } from "@/lib/api/companyUser";
+import { toast } from "@/hooks/use-toast";
 
 export function CompanyDashboard() {
   const dispatch = useDispatch<AppDispatch>();
@@ -132,36 +133,58 @@ export function CompanyDashboard() {
     console.log("Restaurants updated:", restaurants);
   }, [companyInfo, restaurants]);
 
-  const handleCreateRestaurant = async (data: CreateRestaurantData) => {
+  const handleCreateRestaurant = async (data: FormData) => {
     try {
       if (!user?.companies_id) {
         throw new Error("会社IDが見つかりません");
       }
 
       // UUIDの形式を確認
-      const companyId = user.companies_id;
       if (
-        !companyId.match(
+        !user.companies_id.match(
           /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
         )
       ) {
         throw new Error("会社IDの形式が正しくありません");
       }
 
-      const restaurantData = {
-        ...data,
-        companies_id: companyId,
-        name: data.name.trim(),
-        address: data.address.trim(),
-        cuisine_type: data.cuisine_type.trim(),
-      };
+      // FormDataの内容を確認（デバッグ用）
+      console.log("Submitting FormData:");
+      for (let [key, value] of data.entries()) {
+        console.log(`${key}: ${value instanceof File ? value.name : value}`);
+      }
 
-      await createRestaurant(restaurantData);
-      // 店舗リストを更新
-      dispatch(fetchRestaurantsByCompanyId(companyId));
+      // レストラン作成APIを呼び出し
+      const response = await createRestaurant(data);
+
+      if (!response) {
+        throw new Error("店舗の作成に失敗しました");
+      }
+
+      // 店舗一覧を再取得
+      await dispatch(fetchRestaurantsByCompanyId(user.companies_id));
+
+      // モーダルを閉じる
       setIsCreateRestaurantModalOpen(false);
+
+      // 成功通知
+      toast({
+        title: "店舗を追加しました",
+        description: "新しい店舗の登録が完了しました。",
+      });
     } catch (error) {
       console.error("Failed to create restaurant:", error);
+
+      // エラー通知
+      toast({
+        title: "エラーが発生しました",
+        description:
+          error instanceof Error
+            ? error.message
+            : "店舗の追加に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
+
       throw error;
     }
   };
@@ -343,7 +366,7 @@ export function CompanyDashboard() {
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem>
                                 <Link
-                                  href={`/admin/company/stores/${restaurant.id}`}
+                                  href={`/admin/stores/${restaurant.id}`}
                                   className="w-full flex items-center">
                                   <ExternalLink className="h-4 w-4 mr-2" />
                                   詳細を表示
@@ -390,7 +413,7 @@ export function CompanyDashboard() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem>
                             <Link
-                              href={`/admin/company/stores/${restaurant.id}`}
+                              href={`/admin/stores/${restaurant.id}`}
                               className="w-full flex items-center">
                               <ExternalLink className="h-4 w-4 mr-2" />
                               詳細を表示
