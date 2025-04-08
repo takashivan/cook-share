@@ -15,7 +15,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import ChatComponent from "@/components/chat/ChatComponent";
 
 export default function AdminDashboard() {
   return (
