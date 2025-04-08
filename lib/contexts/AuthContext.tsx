@@ -13,6 +13,7 @@ import {
   setCurrentUser,
   setAuthToken,
   clearAuthToken,
+  getAuthToken,
 } from "@/lib/api/config";
 import type { UserProfile } from "@/lib/api/user";
 
@@ -30,8 +31,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
+    // ページロード時に localStorage から認証状態を復元
+    const token = getAuthToken();
     const currentUser = getCurrentUser();
-    if (currentUser) {
+
+    if (token && currentUser) {
       setUser(currentUser as UserProfile);
       setIsAuthenticated(true);
     }

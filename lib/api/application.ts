@@ -51,6 +51,23 @@ export const applicationApi = {
     return response.json();
   },
 
+  getApplicationsByUser: async (
+    userId: string
+  ): Promise<GetApplicationsResponse> => {
+    const response = await fetch(`${API_URL}/my/${userId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch applications by user");
+    }
+
+    return response.json();
+  },
+
   getApplicationsByJob: async (
     jobId: number
   ): Promise<GetApplicationsResponse> => {
