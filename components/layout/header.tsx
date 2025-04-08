@@ -31,12 +31,10 @@ export function Header() {
           <Image
             src="/chef_illust/chef_logo.png?height=40&width=40"
             alt="CookChef Logo"
-            width={30}
+            width={120}
             height={30}
             className="text-orange-500"
           />
-          <span className="font-bold">CookChef</span>
-          <span className="text-xs text-gray-500">(仮)</span>
         </Link>
 
         <div className="flex items-center gap-4">
