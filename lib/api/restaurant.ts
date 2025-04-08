@@ -19,7 +19,7 @@ export interface Company {
 
 export interface Restaurant {
   id: string;
-  company_id: string;
+  companies_id: string;
   name: string;
   description?: string;
   address: string;
@@ -34,7 +34,7 @@ export interface Restaurant {
 }
 
 export type CreateRestaurantData = {
-  company_id: string;
+  companies_id: string;
   name: string;
   description?: string;
   address: string;
@@ -53,30 +53,25 @@ export const getRestaurants = async (): Promise<Restaurant[]> => {
 // 特定のレストラン情報を取得（会社情報付き）
 export const getRestaurant = async (id: string): Promise<Restaurant> => {
   const restaurant = await apiRequest<Restaurant>(`${BASE_URL}/${id}`, "GET");
-  const company = await getCompany(restaurant.company_id);
+  const company = await getCompany(restaurant.companies_id);
   return { ...restaurant, company };
 };
 
 // レストランを新規作成
 export const createRestaurant = async (
-  restaurantData: CreateRestaurantData
+  formData: FormData
 ): Promise<Restaurant> => {
+  const companies_id = formData.get("companies_id") as string;
   // companies_idがUUID形式であることを確認
   if (
-    !restaurantData.company_id.match(
+    !companies_id.match(
       /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
     )
   ) {
-    throw new Error("Invalid UUID format for company_id");
+    throw new Error("Invalid UUID format for companies_id");
   }
 
-  return apiRequest(`${BASE_URL}`, "POST", {
-    ...restaurantData,
-    // 必須フィールドが空でないことを確認
-    name: restaurantData.name.trim(),
-    address: restaurantData.address.trim(),
-    cuisine_type: restaurantData.cuisine_type.trim(),
-  });
+  return apiRequest(`${BASE_URL}`, "POST", formData);
 };
 
 // レストラン情報を更新

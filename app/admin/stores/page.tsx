@@ -6,11 +6,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/lib/store/store";
 import { fetchRestaurantsByCompanyId } from "@/lib/store/restaurantSlice";
 import { CreateRestaurantModal } from "@/components/modals/CreateRestaurantModal";
-import {
-  CreateRestaurantData,
-  createRestaurant,
-  type Restaurant,
-} from "@/lib/api/restaurant";
+import { createRestaurant } from "@/lib/api/restaurant";
+import { toast } from "@/hooks/use-toast";
 import {
   Card,
   CardContent,
@@ -76,7 +73,7 @@ export default function StoresPage() {
   }, [hasMounted]);
 
   const handleCreateRestaurant = useCallback(
-    async (data: CreateRestaurantData) => {
+    async (data: FormData) => {
       if (!hasMounted || !user?.companies_id) return;
 
       try {
@@ -89,19 +86,34 @@ export default function StoresPage() {
           throw new Error("会社IDの形式が正しくありません");
         }
 
-        const restaurantData = {
-          ...data,
-          companies_id: companyId,
-          name: data.name.trim(),
-          address: data.address.trim(),
-          cuisine_type: data.cuisine_type.trim(),
-        };
+        const result = await createRestaurant(data);
+        if (!result) {
+          throw new Error("店舗の作成に失敗しました");
+        }
 
-        await createRestaurant(restaurantData);
-        await dispatch(fetchRestaurantsByCompanyId(companyId));
+        // 店舗一覧を再取得
+        const refreshResult = await dispatch(
+          fetchRestaurantsByCompanyId(companyId)
+        );
+        if (refreshResult.type.endsWith("/rejected")) {
+          throw new Error("店舗一覧の更新に失敗しました");
+        }
+
         handleCloseRestaurantModal();
+        toast({
+          title: "店舗を追加しました",
+          description: "新しい店舗の登録が完了しました。",
+        });
       } catch (error) {
         console.error("Failed to create restaurant:", error);
+        toast({
+          title: "エラーが発生しました",
+          description:
+            error instanceof Error
+              ? error.message
+              : "店舗の追加に失敗しました。もう一度お試しください。",
+          variant: "destructive",
+        });
         throw error;
       }
     },
