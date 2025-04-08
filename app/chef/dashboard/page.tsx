@@ -2,11 +2,16 @@
 
 import Link from "next/link";
 import { MessageSquare, Star, Edit } from "lucide-react";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 export default function ChefDashboard() {
+  const { user } = useAuth();
+
   return (
     <div className="container mx-auto px-4 py-6 max-w-md">
-      <h1 className="text-2xl font-bold mb-8">ダッシュボード</h1>
+      <h1 className="text-2xl font-bold mb-6">
+        ようこそ、{user?.name || "ゲスト"}さん
+      </h1>
 
       {/* 次のお仕事 */}
       <section className="mb-10">
