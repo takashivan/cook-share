@@ -19,16 +19,28 @@ export default function ChefLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
-    // ログインしていない場合はログインページにリダイレクト
-    if (!isAuthenticated && pathname !== "/login") {
-      router.push("/login");
+    // 初期ロード時は何もしない
+    if (isInitialLoad) {
+      setIsInitialLoad(false);
+      return;
     }
-  }, [isAuthenticated, router, pathname]);
 
-  // 認証チェック中は何も表示しない
-  if (!isAuthenticated) {
+    // 初期ロード後、未認証の場合のみリダイレクト
+    if (!isAuthenticated && pathname.startsWith("/chef")) {
+      router.replace("/login");
+    }
+  }, [isAuthenticated, router, pathname, isInitialLoad]);
+
+  // 初期ロード時は表示を維持
+  if (isInitialLoad) {
+    return null;
+  }
+
+  // 初期ロード後、未認証の場合は何も表示しない
+  if (!isAuthenticated && pathname.startsWith("/chef")) {
     return null;
   }
 

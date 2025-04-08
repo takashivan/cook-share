@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { use } from "react";
+
 import {
   ChevronLeft,
   Calendar,
@@ -17,9 +17,7 @@ type PageProps = {
   }>;
 };
 
-export default function JobDetail({ params }: PageProps) {
-  const { id } = use(params);
-
+export default function MessageDetail({ params }: PageProps) {
   return (
     <div className="container mx-auto px-4 py-6 max-w-md">
       <div className="flex items-center mb-6">
