@@ -4,12 +4,12 @@
 export const API_CONFIG = {
   // Xanoの各APIカテゴリのベースURL
   baseURLs: {
-
     user: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/user",
     auth: "https://xcti-onox-8bdw.n7e.xano.io/api:xaJlLYDj/auth", // シェフユーザー用
     companyAuth: "https://xcti-onox-8bdw.n7e.xano.io/api:3LZoUG6X/auth", // 会社ユーザー用
     companyUser: "https://xcti-onox-8bdw.n7e.xano.io/api:3LZoUG6X/companyuser",
     company: "https://xcti-onox-8bdw.n7e.xano.io/api:3LZoUG6X/companies",
+    workSession: "https://xcti-onox-8bdw.n7e.xano.io/api:3LZoUG6X/worksession",
     job: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/job",
     application: "https://xcti-onox-8bdw.n7e.xano.io/api:MJ8mZ3fN/application",
     restaurant: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/restaurant",
@@ -18,7 +18,6 @@ export const API_CONFIG = {
       "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/restaurant_cuisine",
     skill: "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/chef_skill",
     operatorAuth: "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/auth",
-
   },
   // 共通ヘッダー
   headers: {
@@ -91,7 +90,9 @@ export async function apiRequest<T>(
 ): Promise<T> {
   const token = getAuthToken(userType);
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
+    ...(!(data instanceof FormData) && {
+      "Content-Type": "application/json",
+    }),
     Accept: "application/json",
   };
 
@@ -102,17 +103,19 @@ export async function apiRequest<T>(
   const requestOptions: RequestInit = {
     method,
     headers,
+    body: data instanceof FormData ? data : JSON.stringify(data),
   };
-
-  if (data) {
-    requestOptions.body = JSON.stringify(data);
-  }
 
   console.log("API Request:", {
     url,
     method,
     headers,
-    data: data ? JSON.stringify(data) : "No data",
+    data:
+      data instanceof FormData
+        ? "FormData"
+        : data
+        ? JSON.stringify(data)
+        : "No data",
   });
 
   try {
