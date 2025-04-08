@@ -45,6 +45,8 @@ import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import type { Job } from "@/lib/api/job";
 import useSWR from "swr";
+import { CreateJobModal } from "@/components/modals/CreateJobModal";
+import { toast } from "@/hooks/use-toast";
 
 const fetcher = async (url: string) => {
   const res = await fetch(url);
@@ -52,12 +54,13 @@ const fetcher = async (url: string) => {
   return res.json();
 };
 
-export default function RestaurantDetailPage(
-  props: {
-    params: Promise<{ id: string }>;
-  }
-) {
+export default function RestaurantDetailPage(props: {
+  params: Promise<{ id: string }>;
+}) {
   const params = use(props.params);
+  const [formattedJobs, setFormattedJobs] = useState<
+    (Job & { formattedWorkDate: string; formattedTime: string })[]
+  >([]);
   const { data: restaurant, error: restaurantError } = useSWR(
     [`restaurant`, params.id],
     ([_, id]) => getRestaurantById(id),
@@ -69,8 +72,8 @@ export default function RestaurantDetailPage(
   );
 
   const { data: jobs, error: jobsError } = useSWR(
-    restaurant ? [`jobs`, params.id] : null,
-    ([_, id]) => jobApi.getJobsByRestaurant(id),
+    restaurant ? `/api/restaurants/${params.id}/jobs` : null,
+    () => jobApi.getJobsByRestaurant(params.id),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
@@ -78,12 +81,51 @@ export default function RestaurantDetailPage(
     }
   );
 
+  useEffect(() => {
+    if (jobs && Array.isArray(jobs)) {
+      const formatted = jobs.map((job: Job) => ({
+        ...job,
+        formattedWorkDate: format(new Date(job.work_date), "yyyy年MM月dd日", {
+          locale: ja,
+        }),
+        formattedTime: `${format(
+          new Date(job.start_time * 1000),
+          "HH:mm"
+        )} 〜 ${format(new Date(job.end_time * 1000), "HH:mm")}`,
+      }));
+      setFormattedJobs(formatted);
+    }
+  }, [jobs]);
+
   console.log("Restaurant data:", restaurant);
-  console.log("Jobs data:", jobs);
+  console.log("Raw jobs response:", jobs);
+  console.log("Formatted jobs:", formattedJobs);
   console.log("Errors:", { restaurantError, jobsError });
 
   const error = restaurantError || jobsError;
   const isLoading = !restaurant && !error;
+
+  const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
+
+  const handleCreateJob = async (data: FormData) => {
+    try {
+      await jobApi.createJob(data);
+      // 求人リストを更新
+      // TODO: 求人リストの更新処理を追加
+      setIsCreateJobModalOpen(false);
+      toast({
+        title: "求人を追加しました",
+        description: "新しい求人の登録が完了しました。",
+      });
+    } catch (error) {
+      console.error("Failed to create job:", error);
+      toast({
+        title: "エラーが発生しました",
+        description: "求人の追加に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="container mx-auto py-8">
@@ -195,15 +237,15 @@ export default function RestaurantDetailPage(
             <TabsContent value="jobs" className="space-y-4">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-medium">掲載中の求人</h3>
-                <Button size="sm">
+                <Button size="sm" onClick={() => setIsCreateJobModalOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   求人を追加
                 </Button>
               </div>
 
               <div className="grid gap-4">
-                {Array.isArray(jobs) &&
-                  jobs.map((job: Job) => (
+                {Array.isArray(formattedJobs) &&
+                  formattedJobs.map((job) => (
                     <Link
                       href={`/admin/job/${job.id}`}
                       key={job.id}
@@ -228,19 +270,12 @@ export default function RestaurantDetailPage(
                           <div className="space-y-2">
                             <div className="flex items-center text-sm text-gray-500">
                               <span className="mr-4">
-                                勤務日:{" "}
-                                {format(
-                                  new Date(job.work_date),
-                                  "yyyy年MM月dd日",
-                                  { locale: ja }
-                                )}
+                                勤務日: {job.formattedWorkDate}
                               </span>
                               <span>時給: {job.hourly_rate}円</span>
                             </div>
                             <div className="text-sm">
-                              勤務時間:{" "}
-                              {format(new Date(job.start_time), "HH:mm")} 〜{" "}
-                              {format(new Date(job.end_time), "HH:mm")}
+                              勤務時間: {job.formattedTime}
                             </div>
                           </div>
                         </CardContent>
@@ -252,6 +287,13 @@ export default function RestaurantDetailPage(
           </Tabs>
         </div>
       )}
+
+      <CreateJobModal
+        isOpen={isCreateJobModalOpen}
+        onClose={() => setIsCreateJobModalOpen(false)}
+        onSubmit={handleCreateJob}
+        restaurantId={parseInt(params.id)}
+      />
     </div>
   );
 }

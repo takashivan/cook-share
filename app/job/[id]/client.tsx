@@ -534,12 +534,10 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
               <Image
                 src="/chef_illust/chef_logo.png"
                 alt="CookChef Logo"
-                width={30}
+                width={120}
                 height={30}
                 className="text-white"
               />
-              <span className="font-bold">CookChef</span>
-              <span className="text-xs text-gray-400">(仮)</span>
             </div>
           </div>
 
