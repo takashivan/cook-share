@@ -2,6 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { MoreHorizontal, MessageSquare, Send, ChevronDown } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -59,6 +64,57 @@ export default function SchedulePage() {
   const { user } = useAuth();
   const [applications, setApplications] = useState<ApplicationWithJob[]>([]);
   const [activeTab, setActiveTab] = useState("applied");
+  const [newMessage, setNewMessage] = useState("");
+  const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
+  const selectedJob = selectedJobId
+    ? applications.find((app) => app.job?.id === selectedJobId)?.job
+    : null;
+
+  const jobMessages = {
+    1: [
+      {
+        id: 1,
+        sender: "store",
+        text: "はじめまして。この度はご応募いただきありがとうございます。ご経験やスキルについて教えていただけますか？",
+        time: "10:35",
+      },
+      {
+        id: 2,
+        sender: "chef",
+        text: "はじめまして。応募させていただきました佐藤と申します。以前、洋食店で2年ほど調理補助として働いていました。ハンバーグやオムライスなどの基本的な調理は問題なくできます。",
+        time: "10:40",
+      },
+      {
+        id: 3,
+        sender: "store",
+        text: "ありがとうございます。当店では特にランチタイムの繁忙時間帯にお手伝いいただきたいと考えています。11時から15時の間で週3日程度の勤務は可能でしょうか？",
+        time: "10:45",
+      },
+    ],
+    2: [
+      {
+        id: 1,
+        sender: "store",
+        text: "ご応募ありがとうございます。当店での勤務を希望される理由を教えていただけますか？",
+        time: "14:20",
+      },
+    ],
+  };
+
+  const openChat = (jobId: number) => {
+    setSelectedJobId(jobId);
+  };
+
+  const closeChat = () => {
+    setSelectedJobId(null);
+  };
+
+  const handleSendMessage = () => {
+    if (newMessage.trim() && selectedJobId) {
+      // 実際のアプリではここでメッセージを送信する処理を行う
+      setNewMessage("");
+    }
+  };
 
   useEffect(() => {
     const fetchApplications = async () => {
@@ -131,55 +187,58 @@ export default function SchedulePage() {
     const endTime = format(new Date(application.job.end_time * 1000), "HH:mm");
 
     return (
-      <Link href={`/chef/job/${application.job.id}`} key={application.id}>
-        <Card className="mb-4 hover:bg-gray-50 transition-colors">
-          <CardContent className="p-4">
-            <div className="flex justify-between items-start mb-2">
-              <div className="flex items-center gap-2">
-                <span className="font-medium">{workDate}</span>
-                <span className="text-gray-500">|</span>
-                <span className="text-gray-500">
-                  {startTime} 〜 {endTime}
-                </span>
-              </div>
-              <Badge
-                variant={
-                  application.status === "APPLIED"
-                    ? "secondary"
-                    : application.status === "ACCEPTED"
-                    ? "default"
-                    : application.status === "REJECTED"
-                    ? "destructive"
-                    : application.status === "CANCELED"
-                    ? "outline"
-                    : "outline"
-                }>
-                {application.status === "APPLIED"
-                  ? "応募中"
+      <Card
+        className="mb-4 hover:bg-gray-50 transition-colors"
+        onClick={() => openChat(application.job!.id)}>
+        <CardContent className="p-4">
+          <div className="flex justify-between items-start mb-2">
+            <div className="flex items-center gap-2">
+              <span className="font-medium">{workDate}</span>
+              <span className="text-gray-500">|</span>
+              <span className="text-gray-500">
+                {startTime} 〜 {endTime}
+              </span>
+            </div>
+            <button className="p-1" onClick={(e) => e.stopPropagation()}>
+              <MoreHorizontal className="h-5 w-5 text-gray-500" />
+            </button>
+            <Badge
+              variant={
+                application.status === "APPLIED"
+                  ? "secondary"
                   : application.status === "ACCEPTED"
-                  ? "確定"
+                  ? "default"
                   : application.status === "REJECTED"
-                  ? "不採用"
+                  ? "destructive"
                   : application.status === "CANCELED"
-                  ? "キャンセル"
-                  : "完了"}
-              </Badge>
+                  ? "outline"
+                  : "outline"
+              }>
+              {application.status === "APPLIED"
+                ? "応募中"
+                : application.status === "ACCEPTED"
+                ? "確定"
+                : application.status === "REJECTED"
+                ? "不採用"
+                : application.status === "CANCELED"
+                ? "キャンセル"
+                : "完了"}
+            </Badge>
+          </div>
+          <div className="text-gray-500 mb-1">
+            {application.job.restaurant.name}
+          </div>
+          <div className="text-xs text-gray-400 mb-2">
+            {application.job.restaurant.address}
+          </div>
+          <div className="font-medium">{application.job.title}</div>
+          {application.notes && (
+            <div className="text-sm text-gray-500 mt-2">
+              {application.notes}
             </div>
-            <div className="text-gray-500 mb-1">
-              {application.job.restaurant.name}
-            </div>
-            <div className="text-xs text-gray-400 mb-2">
-              {application.job.restaurant.address}
-            </div>
-            <div className="font-medium">{application.job.title}</div>
-            {application.notes && (
-              <div className="text-sm text-gray-500 mt-2">
-                {application.notes}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </Link>
+          )}
+        </CardContent>
+      </Card>
     );
   };
 
@@ -227,6 +286,96 @@ export default function SchedulePage() {
           )}
         </TabsContent>
       </Tabs>
+      {/* チャットシート - 下から表示 */}
+      <Sheet
+        open={selectedJobId !== null}
+        onOpenChange={(open) => !open && closeChat()}>
+        <SheetContent side="bottom" className="p-0 h-[80vh] rounded-t-xl">
+          {selectedJob && (
+            <div className="flex flex-col h-full">
+              {/* ヘッダー */}
+              <div className="border-b p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage
+                        src="/placeholder.svg?height=40&width=40&text=洋"
+                        alt={selectedJob.restaurant.name}
+                      />
+                      <AvatarFallback>洋</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h3 className="font-medium">
+                        {selectedJob.restaurant.name}
+                      </h3>
+                      <p className="text-xs text-gray-500">
+                        {format(
+                          new Date(selectedJob.work_date),
+                          "yyyy年MM月dd日"
+                        )}{" "}
+                        {format(
+                          new Date(selectedJob.start_time * 1000),
+                          "HH:mm"
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  <button onClick={closeChat} className="p-2">
+                    <ChevronDown className="h-6 w-6" />
+                  </button>
+                </div>
+              </div>
+
+              {/* メッセージエリア */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {jobMessages[1]?.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex ${
+                      message.sender === "chef"
+                        ? "justify-end"
+                        : "justify-start"
+                    }`}>
+                    <div
+                      className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                        message.sender === "chef"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-gray-100"
+                      }`}>
+                      <p className="text-sm">{message.text}</p>
+                      <p
+                        className={`text-xs mt-1 ${
+                          message.sender === "chef"
+                            ? "text-primary-foreground/70"
+                            : "text-gray-500"
+                        }`}>
+                        {message.time}
+                      </p>
+                    </div>
+                  </div>
+                )) || (
+                  <div className="text-center text-gray-500 py-4">
+                    メッセージはまだありません
+                  </div>
+                )}
+              </div>
+
+              {/* 入力エリア */}
+              <div className="border-t p-4 flex gap-2">
+                <Input
+                  placeholder="メッセージを入力..."
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  className="flex-1"
+                />
+                <Button size="icon" onClick={handleSendMessage}>
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
