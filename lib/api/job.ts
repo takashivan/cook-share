@@ -406,13 +406,17 @@ export const jobApi = {
     return response.json();
   },
 
-  createJob: async (params: CreateJobParams): Promise<CreateJobResponse> => {
+  createJob: async (
+    params: CreateJobParams | FormData
+  ): Promise<CreateJobResponse> => {
     const response = await fetch(`${BASE_URL}`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        ...(!(params instanceof FormData) && {
+          "Content-Type": "application/json",
+        }),
       },
-      body: JSON.stringify(params),
+      body: params instanceof FormData ? params : JSON.stringify(params),
     });
 
     if (!response.ok) {

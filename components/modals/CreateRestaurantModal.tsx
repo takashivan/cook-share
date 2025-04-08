@@ -1,18 +1,19 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment } from "react";
+import { Fragment, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Store, Upload } from "lucide-react";
+import { Store, Upload, X } from "lucide-react";
 import { createRestaurant, CreateRestaurantData } from "@/lib/api/restaurant";
 import { toast } from "@/hooks/use-toast";
+import Image from "next/image";
 
 interface CreateRestaurantModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: CreateRestaurantData) => void;
+  onSubmit: (data: FormData) => void;
   companyId: string;
 }
 
@@ -22,6 +23,10 @@ export const CreateRestaurantModal = ({
   onSubmit,
   companyId,
 }: CreateRestaurantModalProps) => {
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -29,31 +34,82 @@ export const CreateRestaurantModal = ({
     reset,
   } = useForm<CreateRestaurantData>({
     defaultValues: {
-      company_id: companyId.toString(),
+      companies_id: companyId,
       is_active: false,
       name: "",
       address: "",
       cuisine_type: "",
     },
+    mode: "onBlur",
   });
 
-  const onSubmitHandler = async (data: CreateRestaurantData) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setPreviewImage(null);
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const onSubmitHandler = handleSubmit(async (data) => {
     try {
-      await onSubmit(data);
+      console.log("Form data received:", data); // 受け取ったデータを確認
+
+      const formData = new FormData();
+
+      // 必須フィールドを追加（trim()を適用）
+      formData.append("companies_id", companyId);
+      formData.append("name", data.name.trim());
+      formData.append("address", data.address.trim());
+      formData.append("cuisine_type", data.cuisine_type.trim());
+      formData.append("is_active", String(data.is_active));
+
+      // オプショナルフィールドを追加（値が存在する場合のみ、trim()を適用）
+      if (data.phone?.trim()) formData.append("phone", data.phone.trim());
+      if (data.description?.trim())
+        formData.append("description", data.description.trim());
+
+      // 画像を追加
+      if (selectedFile) {
+        formData.append("photo", selectedFile);
+      }
+
+      // FormDataの内容を確認
+      console.log("FormData entries:");
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value instanceof File ? value.name : value}`);
+      }
+
+      await onSubmit(formData);
       reset();
+      setPreviewImage(null);
+      setSelectedFile(null);
       onClose();
       toast({
         title: "店舗を追加しました",
         description: "新しい店舗の登録が完了しました。",
       });
     } catch (error) {
+      console.error("Error submitting form:", error);
       toast({
         title: "エラーが発生しました",
         description: "店舗の追加に失敗しました。もう一度お試しください。",
         variant: "destructive",
       });
     }
-  };
+  });
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -87,9 +143,7 @@ export const CreateRestaurantModal = ({
                   新しい店舗を追加
                 </Dialog.Title>
 
-                <form
-                  onSubmit={handleSubmit(onSubmitHandler)}
-                  className="space-y-6">
+                <form onSubmit={onSubmitHandler} className="space-y-6">
                   <div className="space-y-4">
                     <div>
                       <Label htmlFor="name">店舗名 *</Label>
@@ -162,26 +216,47 @@ export const CreateRestaurantModal = ({
                     <div className="col-span-full">
                       <Label htmlFor="photo">店舗画像</Label>
                       <div className="mt-1 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-                        <div className="text-center">
-                          <Upload className="mx-auto h-12 w-12 text-gray-300" />
-                          <div className="mt-4 flex text-sm leading-6 text-gray-600">
-                            <label
-                              htmlFor="file-upload"
-                              className="relative cursor-pointer rounded-md bg-white font-semibold text-orange-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-orange-600 focus-within:ring-offset-2 hover:text-orange-500">
-                              <span>画像をアップロード</span>
-                              <input
-                                id="file-upload"
-                                name="file-upload"
-                                type="file"
-                                className="sr-only"
-                              />
-                            </label>
-                            <p className="pl-1">またはドラッグ＆ドロップ</p>
+                        {previewImage ? (
+                          <div className="relative">
+                            <Image
+                              src={previewImage}
+                              alt="プレビュー画像"
+                              width={200}
+                              height={200}
+                              className="rounded-lg object-cover"
+                            />
+                            <button
+                              type="button"
+                              onClick={removeImage}
+                              className="absolute -top-2 -right-2 rounded-full bg-red-500 p-1 text-white hover:bg-red-600">
+                              <X className="h-4 w-4" />
+                            </button>
                           </div>
-                          <p className="text-xs leading-5 text-gray-600">
-                            PNG, JPG, GIF up to 10MB
-                          </p>
-                        </div>
+                        ) : (
+                          <div className="text-center">
+                            <Upload className="mx-auto h-12 w-12 text-gray-300" />
+                            <div className="mt-4 flex text-sm leading-6 text-gray-600">
+                              <label
+                                htmlFor="file-upload"
+                                className="relative cursor-pointer rounded-md bg-white font-semibold text-orange-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-orange-600 focus-within:ring-offset-2 hover:text-orange-500">
+                                <span>画像をアップロード</span>
+                                <input
+                                  id="file-upload"
+                                  name="file-upload"
+                                  type="file"
+                                  accept="image/*"
+                                  className="sr-only"
+                                  ref={fileInputRef}
+                                  onChange={handleImageChange}
+                                />
+                              </label>
+                              <p className="pl-1">またはドラッグ＆ドロップ</p>
+                            </div>
+                            <p className="text-xs leading-5 text-gray-600">
+                              PNG, JPG, GIF up to 10MB
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
