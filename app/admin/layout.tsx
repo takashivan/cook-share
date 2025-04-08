@@ -182,11 +182,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <Image
                   src="/chef_illust/chef_logo.png?height=200&width=400"
                   alt="CookChef Logo"
-                  width={30}
+                  width={120}
                   height={30}
                 />
-                <span className="font-bold">CookChef</span>
-                <span className="text-xs text-gray-500">(仮)</span>
+
                 <span className="text-xs bg-gray-200 px-2 py-0.5 rounded-full ml-auto">
                   管理画面
                 </span>
@@ -261,11 +260,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <Image
                 src="/chef_illust/chef_logo.png?height=200&width=400"
                 alt="CookChef Logo"
-                width={30}
+                width={120}
                 height={30}
               />
-              <span className="font-bold">CookChef</span>
-              <span className="text-xs text-gray-500">(仮)</span>
+
               <span className="text-xs bg-gray-200 px-2 py-0.5 rounded-full ml-auto">
                 管理画面
               </span>
