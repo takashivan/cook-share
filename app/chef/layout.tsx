@@ -2,20 +2,35 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ChevronRight, Menu } from "lucide-react";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 export default function ChefLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { isAuthenticated, user } = useAuth();
+  const router = useRouter();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  useEffect(() => {
+    // ログインしていない場合はログインページにリダイレクト
+    if (!isAuthenticated && pathname !== "/login") {
+      router.push("/login");
+    }
+  }, [isAuthenticated, router, pathname]);
+
+  // 認証チェック中は何も表示しない
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="flex min-h-screen flex-col">

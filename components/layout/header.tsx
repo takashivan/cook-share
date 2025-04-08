@@ -82,7 +82,10 @@ export function Header() {
                 <DropdownMenuItem
                   className="text-sm text-muted-foreground"
                   asChild>
-                  <Link href={userType === "company" ? "/admin" : "/mypage"}>
+                  <Link
+                    href={
+                      userType === "company" ? "/admin" : "/chef/dashboard"
+                    }>
                     {userType === "company" ? "管理画面" : "マイページ"}
                   </Link>
                 </DropdownMenuItem>
