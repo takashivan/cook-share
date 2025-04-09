@@ -9,10 +9,11 @@ export const API_CONFIG = {
     companyAuth: "https://xcti-onox-8bdw.n7e.xano.io/api:3LZoUG6X/auth", // 会社ユーザー用
     companyUser: "https://xcti-onox-8bdw.n7e.xano.io/api:3LZoUG6X/companyuser",
     company: "https://xcti-onox-8bdw.n7e.xano.io/api:3LZoUG6X/companies",
-    workSession: "https://xcti-onox-8bdw.n7e.xano.io/api:3LZoUG6X/worksession",
+    workSession: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/worksession",
     job: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/job",
     application: "https://xcti-onox-8bdw.n7e.xano.io/api:MJ8mZ3fN/application",
     restaurant: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/restaurant",
+    message: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/message",
     operator: "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/operator",
     cuisines:
       "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/restaurant_cuisine",

@@ -14,7 +14,10 @@ import { ja } from "date-fns/locale";
 import { applicationApi } from "@/lib/api/application";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import type { Application, Job } from "@/types";
+import type { Application, Job, Message, WorkSession } from "@/types";
+import { messageApi, CreateMessageParams } from "@/lib/api/message";
+import { workSessionApi } from "@/lib/api/workSession";
+import useSWR from "swr";
 
 // APIレスポンスの型
 interface ApplicationResponse extends Omit<Application, "job"> {
@@ -64,41 +67,59 @@ export default function SchedulePage() {
   const { user } = useAuth();
   const [applications, setApplications] = useState<ApplicationWithJob[]>([]);
   const [activeTab, setActiveTab] = useState("applied");
-  const [newMessage, setNewMessage] = useState("");
+  const [messageInput, setMessageInput] = useState("");
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
-  const selectedJob = selectedJobId
-    ? applications.find((app) => app.job?.id === selectedJobId)?.job
+  const selectedApplication = selectedJobId
+    ? applications.find((app) => app.job?.id === selectedJobId)
     : null;
 
-  const jobMessages = {
-    1: [
-      {
-        id: 1,
-        sender: "store",
-        text: "はじめまして。この度はご応募いただきありがとうございます。ご経験やスキルについて教えていただけますか？",
-        time: "10:35",
-      },
-      {
-        id: 2,
-        sender: "chef",
-        text: "はじめまして。応募させていただきました佐藤と申します。以前、洋食店で2年ほど調理補助として働いていました。ハンバーグやオムライスなどの基本的な調理は問題なくできます。",
-        time: "10:40",
-      },
-      {
-        id: 3,
-        sender: "store",
-        text: "ありがとうございます。当店では特にランチタイムの繁忙時間帯にお手伝いいただきたいと考えています。11時から15時の間で週3日程度の勤務は可能でしょうか？",
-        time: "10:45",
-      },
-    ],
-    2: [
-      {
-        id: 1,
-        sender: "store",
-        text: "ご応募ありがとうございます。当店での勤務を希望される理由を教えていただけますか？",
-        time: "14:20",
-      },
-    ],
+  // ワークセッションの取得
+  const { data: workSession } = useSWR<WorkSession | null>(
+    selectedApplication?.status === "ACCEPTED"
+      ? `workSession-${selectedApplication.id}`
+      : null,
+    async () => {
+      if (!selectedApplication) return null;
+      const result = (await workSessionApi.getWorkSessions()) as WorkSession[];
+      // 選択された応募に紐づくワークセッションを探す
+      const matchingWorkSession = result.find(
+        (ws) => ws.application_id === selectedApplication.id.toString()
+      );
+      console.log("Debug - Selected application:", selectedApplication.id);
+      console.log("Debug - Found work session:", matchingWorkSession);
+      return matchingWorkSession || null;
+    }
+  );
+
+  // メッセージの取得
+  const { data: messages, mutate: mutateMessages } = useSWR<Message[]>(
+    workSession ? `messages-${workSession.id}` : null,
+    async () => {
+      if (!workSession) return [];
+      const result = await messageApi.getMessagesByWorkSessionId(
+        workSession.id
+      );
+      return result as Message[];
+    }
+  );
+
+  const handleSendMessage = async () => {
+    if (!messageInput.trim() || !workSession || !selectedApplication) return;
+
+    try {
+      const messageParams: CreateMessageParams = {
+        content: messageInput,
+        worksession_id: workSession.id,
+        application_id: selectedApplication.id.toString(),
+        sender_type: "chef",
+      };
+
+      await messageApi.createMessage(messageParams);
+      setMessageInput(""); // 入力をクリア
+      mutateMessages(); // メッセージ一覧を更新
+    } catch (error) {
+      console.error("Failed to send message:", error);
+    }
   };
 
   const openChat = (jobId: number) => {
@@ -107,13 +128,6 @@ export default function SchedulePage() {
 
   const closeChat = () => {
     setSelectedJobId(null);
-  };
-
-  const handleSendMessage = () => {
-    if (newMessage.trim() && selectedJobId) {
-      // 実際のアプリではここでメッセージを送信する処理を行う
-      setNewMessage("");
-    }
   };
 
   useEffect(() => {
@@ -291,7 +305,7 @@ export default function SchedulePage() {
         open={selectedJobId !== null}
         onOpenChange={(open) => !open && closeChat()}>
         <SheetContent side="bottom" className="p-0 h-[80vh] rounded-t-xl">
-          {selectedJob && (
+          {selectedApplication?.job && (
             <div className="flex flex-col h-full">
               {/* ヘッダー */}
               <div className="border-b p-4">
@@ -299,22 +313,27 @@ export default function SchedulePage() {
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
                       <AvatarImage
-                        src="/placeholder.svg?height=40&width=40&text=洋"
-                        alt={selectedJob.restaurant.name}
+                        src={
+                          selectedApplication.job.restaurant.image ||
+                          "/placeholder.svg"
+                        }
+                        alt={selectedApplication.job.restaurant.name}
                       />
-                      <AvatarFallback>洋</AvatarFallback>
+                      <AvatarFallback>
+                        {selectedApplication.job.restaurant.name.charAt(0)}
+                      </AvatarFallback>
                     </Avatar>
                     <div>
                       <h3 className="font-medium">
-                        {selectedJob.restaurant.name}
+                        {selectedApplication.job.restaurant.name}
                       </h3>
                       <p className="text-xs text-gray-500">
                         {format(
-                          new Date(selectedJob.work_date),
+                          new Date(selectedApplication.job.work_date),
                           "yyyy年MM月dd日"
                         )}{" "}
                         {format(
-                          new Date(selectedJob.start_time * 1000),
+                          new Date(selectedApplication.job.start_time * 1000),
                           "HH:mm"
                         )}
                       </p>
@@ -328,32 +347,34 @@ export default function SchedulePage() {
 
               {/* メッセージエリア */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {jobMessages[1]?.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${
-                      message.sender === "chef"
-                        ? "justify-end"
-                        : "justify-start"
-                    }`}>
+                {messages && messages.length > 0 ? (
+                  messages.map((message) => (
                     <div
-                      className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                        message.sender === "chef"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-gray-100"
+                      key={message.id}
+                      className={`flex ${
+                        message.sender_type === "chef"
+                          ? "justify-end"
+                          : "justify-start"
                       }`}>
-                      <p className="text-sm">{message.text}</p>
-                      <p
-                        className={`text-xs mt-1 ${
-                          message.sender === "chef"
-                            ? "text-primary-foreground/70"
-                            : "text-gray-500"
+                      <div
+                        className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                          message.sender_type === "chef"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-gray-100"
                         }`}>
-                        {message.time}
-                      </p>
+                        <p className="text-sm">{message.content}</p>
+                        <p
+                          className={`text-xs mt-1 ${
+                            message.sender_type === "chef"
+                              ? "text-primary-foreground/70"
+                              : "text-gray-500"
+                          }`}>
+                          {format(new Date(message.created_at), "HH:mm")}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                )) || (
+                  ))
+                ) : (
                   <div className="text-center text-gray-500 py-4">
                     メッセージはまだありません
                   </div>
@@ -364,11 +385,20 @@ export default function SchedulePage() {
               <div className="border-t p-4 flex gap-2">
                 <Input
                   placeholder="メッセージを入力..."
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
+                  value={messageInput}
+                  onChange={(e) => setMessageInput(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
+                  }}
                   className="flex-1"
                 />
-                <Button size="icon" onClick={handleSendMessage}>
+                <Button
+                  size="icon"
+                  onClick={handleSendMessage}
+                  disabled={!messageInput.trim()}>
                   <Send className="h-4 w-4" />
                 </Button>
               </div>
