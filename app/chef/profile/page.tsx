@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -11,8 +13,21 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
+import { ja } from "date-fns/locale";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 export default function ChefProfile() {
+  const { user } = useAuth();
+
+  if (!user) {
+    return (
+      <div className="container mx-auto px-4 py-6 max-w-md">
+        <p className="text-center text-red-500">ユーザーが見つかりません</p>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-6 max-w-md">
       <h1 className="text-2xl font-bold mb-8">プロフィール</h1>
@@ -21,7 +36,12 @@ export default function ChefProfile() {
         <div className="flex items-center gap-4 mb-6">
           <div className="relative">
             <Image
-              src="/placeholder.svg?height=80&width=80&text=山"
+              src={
+                user.profile_image ||
+                `/placeholder.svg?height=80&width=80&text=${user.name.charAt(
+                  0
+                )}`
+              }
               alt="Profile"
               width={80}
               height={80}
@@ -32,8 +52,10 @@ export default function ChefProfile() {
             </button>
           </div>
           <div>
-            <h2 className="text-xl font-bold">山田 太郎</h2>
-            <p className="text-gray-500">30歳・男性</p>
+            <h2 className="text-xl font-bold">{user.name}</h2>
+            <p className="text-gray-500">
+              {user.age}歳・{user.gender}
+            </p>
           </div>
         </div>
 
@@ -42,7 +64,7 @@ export default function ChefProfile() {
             <Phone className="h-5 w-5 text-gray-400 mt-0.5" />
             <div>
               <h3 className="text-sm text-gray-500">電話番号</h3>
-              <p>090-1234-5678</p>
+              <p>{user.phone}</p>
             </div>
           </div>
 
@@ -50,7 +72,7 @@ export default function ChefProfile() {
             <Mail className="h-5 w-5 text-gray-400 mt-0.5" />
             <div>
               <h3 className="text-sm text-gray-500">メールアドレス</h3>
-              <p>yamada@example.com</p>
+              <p>{user.email}</p>
             </div>
           </div>
 
@@ -58,7 +80,7 @@ export default function ChefProfile() {
             <MapPin className="h-5 w-5 text-gray-400 mt-0.5" />
             <div>
               <h3 className="text-sm text-gray-500">住所</h3>
-              <p>東京都新宿区新宿1-1-1</p>
+              <p>{user.address}</p>
             </div>
           </div>
 
@@ -66,7 +88,13 @@ export default function ChefProfile() {
             <Calendar className="h-5 w-5 text-gray-400 mt-0.5" />
             <div>
               <h3 className="text-sm text-gray-500">登録日</h3>
-              <p>2023年10月15日</p>
+              <p>
+                {user.created_at
+                  ? format(user.created_at, "yyyy年MM月dd日", {
+                      locale: ja,
+                    })
+                  : "未設定"}
+              </p>
             </div>
           </div>
         </div>
@@ -85,36 +113,34 @@ export default function ChefProfile() {
           <div>
             <h3 className="text-sm text-gray-500 mb-2">スキル</h3>
             <div className="flex flex-wrap gap-2">
-              <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">
-                和食
-              </Badge>
-              <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">
-                魚が捌ける
-              </Badge>
-              <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">
-                洋食
-              </Badge>
+              {user.skills?.map((skill: string, index: number) => (
+                <Badge
+                  key={index}
+                  className="bg-gray-100 text-gray-800 hover:bg-gray-100">
+                  {skill}
+                </Badge>
+              ))}
             </div>
           </div>
 
           <div>
             <h3 className="text-sm text-gray-500 mb-2">経験年数</h3>
-            <p>10年以上</p>
+            <p>{user.experience_level}</p>
           </div>
 
           <div>
             <h3 className="text-sm text-gray-500 mb-2">保有資格</h3>
-            <div className="flex items-center gap-2">
-              <Award className="h-4 w-4 text-yellow-500" />
-              <span>調理師免許</span>
-            </div>
+            {user.certifications?.map((cert: string, index: number) => (
+              <div key={index} className="flex items-center gap-2">
+                <Award className="h-4 w-4 text-yellow-500" />
+                <span>{cert}</span>
+              </div>
+            ))}
           </div>
 
           <div>
             <h3 className="text-sm text-gray-500 mb-2">自己紹介</h3>
-            <p className="text-sm">
-              都内の有名和食店で10年間勤務後、独立。魚の捌き方には自信があります。和食を中心に、洋食のメニューも提供できます。丁寧な仕事を心がけています。
-            </p>
+            <p className="text-sm">{user.bio}</p>
           </div>
         </div>
       </div>
