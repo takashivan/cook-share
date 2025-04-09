@@ -26,6 +26,7 @@ import { jobApi } from "@/lib/api/job";
 import { applicationApi } from "@/lib/api/application";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import { ChefReviewModal } from "@/components/modals/ChefReviewModal";
 import {
   Dialog,
   DialogContent,
@@ -112,6 +113,7 @@ export default function JobDetailPage(props: {
   const [selectedApplicant, setSelectedApplicant] = useState<number | null>(
     null
   );
+  console.log("selectedApplicant", selectedApplicant);
   const [isAcceptDialogOpen, setIsAcceptDialogOpen] = useState(false);
   const [acceptMessage, setAcceptMessage] = useState(
     "この度は、ご応募いただき、ありがとうございます！\n\n当日、何卒よろしくお願いいたします。"
