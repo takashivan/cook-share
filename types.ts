@@ -22,6 +22,10 @@ export interface Job {
   is_approved: boolean;
 }
 
+export interface JobWithRestaurant extends Job {
+  restaurant: Restaurant;
+}
+
 export interface Application {
   id: number;
   created_at: string;
@@ -52,6 +56,10 @@ export interface User {
   dateofbirth: number | null;
   profile_image: string;
   is_approved: boolean;
+  age?: number;
+  gender?: string;
+  phone?: string;
+  address?: string;
 }
 
 export interface WorkSession {
@@ -61,6 +69,30 @@ export interface WorkSession {
   status: string;
   created_at: string;
   updated_at: string;
+  check_in_time: number;
+  check_out_time: number;
+  restaurant_name: string;
+}
+
+export interface WorkSessionWithJob extends WorkSession {
+  id: number;
+  application_id: string;
+  user_id: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  check_in_time: number;
+  check_out_time: number;
+  restaurant_name: string;
+  job: JobWithRestaurant;
+}
+
+export interface CuisineCategory {
+  id: number;
+  category: string;
+  created_at: string;
+  updated_at: string;
+  is_primary: boolean;
 }
 
 export interface Message {
@@ -68,8 +100,20 @@ export interface Message {
   content: string;
   created_at: string;
   chef_id: string;
+  is_read: boolean;
   sender_type: string;
   restaurant_id: number;
   worksession_id: number;
   application_id: string;
+}
+
+export interface Restaurant {
+  id: string;
+  name: string;
+  email: string;
+  image_url?: string;
+  address?: string;
+  companies_id: string;
+  is_approved: boolean;
+  cuisine_categories: CuisineCategory[];
 }
