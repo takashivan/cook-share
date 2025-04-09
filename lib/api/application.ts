@@ -20,6 +20,10 @@ export type DeleteApplicationResponse = void;
 export type AcceptApplicationResponse = void;
 export type RejectApplicationResponse = void;
 
+export type AcceptApplicationParams = {
+  message?: string;
+};
+
 export const applicationApi = {
   getApplications: async (): Promise<GetApplicationsResponse> => {
     const response = await fetch(`${API_URL}`, {
@@ -137,7 +141,7 @@ export const applicationApi = {
 
   acceptApplication: async (
     id: string,
-    user_id: string
+    params?: AcceptApplicationParams
   ): Promise<AcceptApplicationResponse> => {
     const response = await fetch(`${API_URL}/${id}/accept`, {
       method: "PATCH",
@@ -146,7 +150,7 @@ export const applicationApi = {
       },
       body: JSON.stringify({
         application_id: id,
-        user_id: user_id,
+        ...params,
       }),
     });
 
