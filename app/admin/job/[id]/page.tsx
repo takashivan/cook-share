@@ -13,6 +13,7 @@ import {
   Send,
   MessageSquare,
   MoreHorizontal,
+  QrCode,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,7 @@ import { useRouter } from "next/navigation";
 import { workSessionApi } from "@/lib/api/workSession";
 import { messageApi, CreateMessageParams } from "@/lib/api/message";
 import { Message, WorkSession } from "@/types";
+import { QRCodeSVG } from "qrcode.react";
 
 interface ApplicantCardProps {
   application: Application;
@@ -116,6 +118,7 @@ export default function JobDetailPage(props: {
   );
   const router = useRouter();
   const [messageInput, setMessageInput] = useState("");
+  const [isQrDialogOpen, setIsQrDialogOpen] = useState(false);
 
   const { data: job, error: jobError } = useSWR(
     [`job`, params.id],
@@ -637,6 +640,39 @@ export default function JobDetailPage(props: {
                             </div>
                           </DialogContent>
                         </Dialog>
+                        {selectedApplicantData.status === "ACCEPTED" && (
+                          <Dialog
+                            open={isQrDialogOpen}
+                            onOpenChange={setIsQrDialogOpen}>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                <QrCode className="h-4 w-4 mr-2" />
+                                QRコード
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>勤務開始用QRコード</DialogTitle>
+                                <DialogDescription>
+                                  シェフにこのQRコードを提示してください
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="flex flex-col items-center justify-center p-4">
+                                <div className="bg-white p-4 rounded-lg shadow-md">
+                                  <QRCodeSVG
+                                    value={selectedApplicantData.id.toString()}
+                                    size={200}
+                                    level="H"
+                                    includeMargin={true}
+                                  />
+                                </div>
+                                <p className="text-sm text-gray-500 mt-4">
+                                  シェフがこのQRコードをスキャンすると、勤務開始が可能になります
+                                </p>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        )}
                         {selectedApplicantData.status === "APPLIED" && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
