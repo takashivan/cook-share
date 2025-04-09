@@ -162,7 +162,7 @@ export default function SchedulePage() {
             return { ...app, job: jobWithNumberTimestamps };
           });
           console.log("Final applications:", applicationsWithJobs);
-          setApplications(applicationsWithJobs);
+          setApplications(applicationsWithJobs as ApplicationWithJob[]);
         } catch (error) {
           console.error("Failed to fetch applications:", error);
         }
