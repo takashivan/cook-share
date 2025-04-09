@@ -9,10 +9,11 @@ export const API_CONFIG = {
     companyAuth: "https://xcti-onox-8bdw.n7e.xano.io/api:3LZoUG6X/auth", // 会社ユーザー用
     companyUser: "https://xcti-onox-8bdw.n7e.xano.io/api:3LZoUG6X/companyuser",
     company: "https://xcti-onox-8bdw.n7e.xano.io/api:3LZoUG6X/companies",
-    workSession: "https://xcti-onox-8bdw.n7e.xano.io/api:3LZoUG6X/worksession",
+    workSession: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/worksession",
     job: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/job",
     application: "https://xcti-onox-8bdw.n7e.xano.io/api:MJ8mZ3fN/application",
     restaurant: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/restaurant",
+    message: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/message",
     operator: "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/operator",
     cuisines:
       "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/restaurant_cuisine",
@@ -56,10 +57,14 @@ const isLocalStorageAvailable = () => {
 export const getAuthToken = (
   userType: "chef" | "company" | "operator" = "chef"
 ): string | null => {
-  if (typeof window !== "undefined") {
-    return localStorage.getItem(STORAGE_KEYS[userType].token);
+  if (typeof window === "undefined") return null;
+  try {
+    const token = localStorage.getItem(STORAGE_KEYS[userType].token);
+    return token;
+  } catch (error) {
+    console.error("Error getting auth token:", error);
+    return null;
   }
-  return null;
 };
 
 // 認証トークンを設定する関数
@@ -67,8 +72,11 @@ export const setAuthToken = (
   token: string,
   userType: "chef" | "company" | "operator" = "chef"
 ) => {
-  if (typeof window !== "undefined") {
+  if (typeof window === "undefined") return;
+  try {
     localStorage.setItem(STORAGE_KEYS[userType].token, token);
+  } catch (error) {
+    console.error("Error setting auth token:", error);
   }
 };
 
@@ -76,8 +84,11 @@ export const setAuthToken = (
 export const clearAuthToken = (
   userType: "chef" | "company" | "operator" = "chef"
 ) => {
-  if (typeof window !== "undefined") {
+  if (typeof window === "undefined") return;
+  try {
     localStorage.removeItem(STORAGE_KEYS[userType].token);
+  } catch (error) {
+    console.error("Error clearing auth token:", error);
   }
 };
 
@@ -167,11 +178,14 @@ if (typeof window !== "undefined") {
 
 // 現在のユーザー情報を取得
 export const getCurrentUser = (userType: "chef" | "company" = "chef") => {
-  if (typeof window !== "undefined") {
+  if (typeof window === "undefined") return null;
+  try {
     const userData = localStorage.getItem(STORAGE_KEYS[userType].user);
     return userData ? JSON.parse(userData) : null;
+  } catch (error) {
+    console.error("Error getting current user:", error);
+    return null;
   }
-  return null;
 };
 
 // ユーザー情報を保存
@@ -179,8 +193,11 @@ export const setCurrentUser = (
   userData: any,
   userType: "chef" | "company" = "chef"
 ) => {
-  if (typeof window !== "undefined") {
+  if (typeof window === "undefined") return;
+  try {
     localStorage.setItem(STORAGE_KEYS[userType].user, JSON.stringify(userData));
+  } catch (error) {
+    console.error("Error setting current user:", error);
   }
 };
 

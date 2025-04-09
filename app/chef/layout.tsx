@@ -2,20 +2,47 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ChevronRight, Menu } from "lucide-react";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 export default function ChefLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { isAuthenticated, user } = useAuth();
+  const router = useRouter();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  useEffect(() => {
+    // 初期ロード時は何もしない
+    if (isInitialLoad) {
+      setIsInitialLoad(false);
+      return;
+    }
+
+    // 初期ロード後、未認証の場合のみリダイレクト
+    if (!isAuthenticated && pathname.startsWith("/chef")) {
+      router.replace("/login");
+    }
+  }, [isAuthenticated, router, pathname, isInitialLoad]);
+
+  // 初期ロード時は表示を維持
+  if (isInitialLoad) {
+    return null;
+  }
+
+  // 初期ロード後、未認証の場合は何も表示しない
+  if (!isAuthenticated && pathname.startsWith("/chef")) {
+    return null;
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
