@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, use, useState } from "react";
+import { useEffect, use, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   ChevronLeft,
@@ -30,7 +30,8 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import QrScanner from "react-qr-scanner";
+import { BrowserQRCodeReader } from "@zxing/browser";
+import { Result } from "@zxing/library";
 
 interface JobDetail {
   job: {
@@ -76,6 +77,8 @@ export default function JobDetail({ params }: PageProps) {
   const [isCheckInDialogOpen, setIsCheckInDialogOpen] = useState(false);
   const [isQrScanned, setIsQrScanned] = useState(false);
   const [scannedData, setScannedData] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const codeReaderRef = useRef<BrowserQRCodeReader | null>(null);
 
   // 応募情報の取得
   const { data: application } = useSWR<Application>(
@@ -120,6 +123,30 @@ export default function JobDetail({ params }: PageProps) {
     messages?.filter((msg) => msg.sender_type === "restaurant" && !msg.is_read)
       .length || 0;
 
+  useEffect(() => {
+    if (isCheckInDialogOpen && !isQrScanned && videoRef.current) {
+      codeReaderRef.current = new BrowserQRCodeReader();
+      codeReaderRef.current
+        .decodeFromVideoDevice(undefined, videoRef.current, (result, error) => {
+          if (result) {
+            handleQrScan(result.getText());
+          }
+          if (error) {
+            console.error("QRコードのスキャンに失敗しました:", error);
+          }
+        })
+        .catch((error) => {
+          console.error("カメラの初期化に失敗しました:", error);
+        });
+    }
+
+    return () => {
+      if (codeReaderRef.current) {
+        codeReaderRef.current.stop();
+      }
+    };
+  }, [isCheckInDialogOpen, isQrScanned]);
+
   if (!job) {
     return (
       <div className="container mx-auto px-4 py-6 max-w-md">
@@ -150,15 +177,15 @@ export default function JobDetail({ params }: PageProps) {
     setIsCheckInDialogOpen(true);
   };
 
-  const handleQrScan = async (data: string) => {
+  const handleQrScan = async (decodedText: string) => {
     try {
       // QRコードからアプリケーションIDを取得
-      const scannedApplicationId = parseInt(data);
+      const scannedApplicationId = parseInt(decodedText);
 
       // 現在のアプリケーションIDと一致するか確認
       if (application?.id === scannedApplicationId) {
         setIsQrScanned(true);
-        setScannedData(data);
+        setScannedData(decodedText);
         // ワークセッションのステータスを更新
         if (workSession) {
           // ワークセッションの更新処理を実装
@@ -333,19 +360,10 @@ export default function JobDetail({ params }: PageProps) {
               </p>
               <div className="flex justify-center items-center h-48 bg-gray-100 rounded-lg overflow-hidden">
                 {!isQrScanned && (
-                  <QrScanner
-                    onResult={(result: { getText: () => string }) => {
-                      if (result) {
-                        handleQrScan(result.getText());
-                      }
-                    }}
-                    onError={(error: Error) => {
-                      console.error("QRコードのスキャンに失敗しました:", error);
-                    }}
-                    constraints={{
-                      facingMode: "environment",
-                    }}
+                  <video
+                    ref={videoRef}
                     className="w-full h-full object-cover"
+                    playsInline
                   />
                 )}
                 {isQrScanned && (
@@ -365,12 +383,18 @@ export default function JobDetail({ params }: PageProps) {
                 setIsCheckInDialogOpen(false);
                 setIsQrScanned(false);
                 setScannedData(null);
+                if (codeReaderRef.current) {
+                  codeReaderRef.current.stop();
+                }
               }}>
               キャンセル
             </Button>
             <Button
               onClick={() => {
                 setIsCheckInDialogOpen(false);
+                if (codeReaderRef.current) {
+                  codeReaderRef.current.stop();
+                }
               }}
               disabled={!isQrScanned}>
               勤務開始
