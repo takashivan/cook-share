@@ -67,7 +67,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
       const applicationData = {
         job_id: jobDetail.job.id,
         notes: data.notes,
-        status: "pending",
+        status: "APPLIED",
         user_id: chefUser.id,
         application_date: new Date().toISOString(),
       };
