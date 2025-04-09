@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Calendar,
   Clock,
@@ -35,86 +35,97 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { applicationApi } from "@/lib/api/application";
+import { jobApi } from "@/lib/api/job";
+import { useParams } from "next/navigation";
+import type { Application } from "@/types";
+import type { UserProfile } from "@/types/user";
+import type { Job } from "@/types";
+
+interface ApplicationWithUser extends Omit<Application, "user"> {
+  user: UserProfile;
+}
+
+interface Message {
+  id: number;
+  content: string;
+  sender_type: "USER" | "RESTAURANT";
+  created_at: string;
+}
 
 export default function JobApplicants() {
-  const [selectedApplicant, setSelectedApplicant] = useState<number | null>(1);
+  const params = useParams();
+  const jobId = params.id as string;
+  const [selectedApplicant, setSelectedApplicant] = useState<number | null>(
+    null
+  );
+  const [applications, setApplications] = useState<ApplicationWithUser[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [job, setJob] = useState<Job | null>(null);
 
-  const applicants = [
-    {
-      id: 1,
-      name: "佐藤 健太",
-      avatar: "/placeholder.svg?height=40&width=40&text=佐",
-      status: "応募済み",
-      lastMessage:
-        "はじめまして、佐藤と申します。求人に応募させていただきました。",
-      lastMessageTime: "10:30",
-      unread: true,
-    },
-    {
-      id: 2,
-      name: "田中 美咲",
-      avatar: "/placeholder.svg?height=40&width=40&text=田",
-      status: "面接調整中",
-      lastMessage: "面接の日程ですが、来週の水曜日は都合がよろしいでしょうか？",
-      lastMessageTime: "昨日",
-      unread: false,
-    },
-    {
-      id: 3,
-      name: "鈴木 大輔",
-      avatar: "/placeholder.svg?height=40&width=40&text=鈴",
-      status: "採用決定",
-      lastMessage: "ありがとうございます。当日はよろしくお願いいたします。",
-      lastMessageTime: "3日前",
-      unread: false,
-    },
-    {
-      id: 4,
-      name: "高橋 由美",
-      avatar: "/placeholder.svg?height=40&width=40&text=高",
-      status: "不採用",
-      lastMessage:
-        "ご連絡ありがとうございました。また機会がありましたらよろしくお願いいたします。",
-      lastMessageTime: "1週間前",
-      unread: false,
-    },
-  ];
+  const fetchJob = async () => {
+    try {
+      const response = await jobApi.getJob(jobId);
+      const jobData: Job = {
+        ...response,
+        created_at: new Date(response.created_at).getTime(),
+        updated_at: new Date(response.updated_at).getTime(),
+        image: response.image || "",
+        task: response.task || "",
+        skill: response.skill || "",
+        whattotake: response.whattotake || "",
+        note: response.note || "",
+        point: response.point || "",
+      };
+      setJob(jobData);
+    } catch (error) {
+      console.error("Failed to fetch job:", error);
+    }
+  };
 
-  const messages = [
-    {
-      id: 1,
-      senderId: 1,
-      text: "はじめまして、佐藤と申します。求人に応募させていただきました。",
-      time: "10:30",
-    },
-    {
-      id: 2,
-      senderId: "admin",
-      text: "佐藤様、応募ありがとうございます。ご経験やスキルについて教えていただけますか？",
-      time: "10:35",
-    },
-    {
-      id: 3,
-      senderId: 1,
-      text: "以前、洋食店で2年ほど調理補助として働いていました。ハンバーグやオムライスなどの基本的な調理は問題なくできます。",
-      time: "10:40",
-    },
-    {
-      id: 4,
-      senderId: "admin",
-      text: "ありがとうございます。当店では特にランチタイムの繁忙時間帯にお手伝いいただきたいと考えています。11時から15時の間で週3日程度の勤務は可能でしょうか？",
-      time: "10:45",
-    },
-    {
-      id: 5,
-      senderId: 1,
-      text: "はい、その時間帯であれば問題ありません。月・水・金であれば毎週出勤可能です。",
-      time: "10:50",
-    },
-  ];
+  const fetchApplications = async () => {
+    try {
+      setLoading(true);
+      const response = await applicationApi.getApplicationsByJob(
+        parseInt(jobId, 10)
+      );
+      setApplications(response as ApplicationWithUser[]);
+      // 最初の応募者を選択
+      if (response.length > 0 && !selectedApplicant) {
+        setSelectedApplicant(response[0].id);
+      }
+    } catch (error) {
+      console.error("Failed to fetch applications:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchJob();
+    fetchApplications();
+  }, [jobId]);
 
   const selectedApplicantData =
-    applicants.find((a) => a.id === selectedApplicant) || null;
+    applications.find((a) => a.id === selectedApplicant) || null;
+
+  const handleAcceptApplication = async (applicationId: string) => {
+    if (!job) {
+      console.error("Job information is not available");
+      return;
+    }
+    try {
+      // 応募一覧を再取得
+      await fetchApplications();
+    } catch (error) {
+      console.error("Failed to accept application:", error);
+    }
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -130,66 +141,66 @@ export default function JobApplicants() {
         <Card className="lg:col-span-1">
           <CardHeader className="px-4 py-3">
             <CardTitle className="text-lg">応募者一覧</CardTitle>
-            <CardDescription>全 {applicants.length} 名</CardDescription>
+            <CardDescription>全 {applications.length} 名</CardDescription>
           </CardHeader>
           <CardContent className="p-0">
             <div className="divide-y">
-              {applicants.map((applicant) => (
+              {applications.map((application) => (
                 <div
-                  key={applicant.id}
+                  key={application.id}
                   className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
-                    selectedApplicant === applicant.id ? "bg-gray-50" : ""
+                    selectedApplicant === application.id ? "bg-gray-50" : ""
                   }`}
-                  onClick={() => setSelectedApplicant(applicant.id)}>
+                  onClick={() => setSelectedApplicant(application.id)}>
                   <div className="flex items-start gap-3">
                     <Avatar className="h-10 w-10">
                       <AvatarImage
-                        src={applicant.avatar}
-                        alt={applicant.name}
+                        src={application.user?.avatar_url || "/placeholder.svg"}
+                        alt={application.user?.name || ""}
                       />
                       <AvatarFallback>
-                        {applicant.name.charAt(0)}
+                        {application.user?.name?.charAt(0) || "U"}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <p className="font-medium">{applicant.name}</p>
+                        <p className="font-medium">{application.user?.name}</p>
                         <p className="text-xs text-muted-foreground">
-                          {applicant.lastMessageTime}
+                          {new Date(
+                            application.created_at
+                          ).toLocaleDateString()}
                         </p>
                       </div>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge
                           className={`
                           ${
-                            applicant.status === "応募済み"
+                            application.status === "APPLIED"
                               ? "bg-blue-100 text-blue-800"
                               : ""
                           }
                           ${
-                            applicant.status === "面接調整中"
-                              ? "bg-purple-100 text-purple-800"
-                              : ""
-                          }
-                          ${
-                            applicant.status === "採用決定"
+                            application.status === "ACCEPTED"
                               ? "bg-green-100 text-green-800"
                               : ""
                           }
                           ${
-                            applicant.status === "不採用"
-                              ? "bg-gray-100 text-gray-800"
+                            application.status === "REJECTED"
+                              ? "bg-red-100 text-red-800"
                               : ""
                           }
                         `}>
-                          {applicant.status}
+                          {application.status === "APPLIED"
+                            ? "応募済み"
+                            : application.status === "ACCEPTED"
+                            ? "採用決定"
+                            : application.status === "REJECTED"
+                            ? "不採用"
+                            : application.status}
                         </Badge>
-                        {applicant.unread && (
-                          <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                        )}
                       </div>
                       <p className="text-sm text-muted-foreground truncate mt-1">
-                        {applicant.lastMessage}
+                        {application.notes || "メッセージはありません"}
                       </p>
                     </div>
                   </div>
@@ -207,41 +218,45 @@ export default function JobApplicants() {
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
                     <AvatarImage
-                      src={selectedApplicantData.avatar}
-                      alt={selectedApplicantData.name}
+                      src={
+                        selectedApplicantData.user?.avatar_url ||
+                        "/placeholder.svg"
+                      }
+                      alt={selectedApplicantData.user?.name || ""}
                     />
                     <AvatarFallback>
-                      {selectedApplicantData.name.charAt(0)}
+                      {selectedApplicantData.user?.name?.charAt(0) || "U"}
                     </AvatarFallback>
                   </Avatar>
                   <div>
                     <CardTitle className="text-lg">
-                      {selectedApplicantData.name}
+                      {selectedApplicantData.user?.name}
                     </CardTitle>
                     <Badge
                       className={`
-                      ${
-                        selectedApplicantData.status === "応募済み"
-                          ? "bg-blue-100 text-blue-800"
-                          : ""
-                      }
-                      ${
-                        selectedApplicantData.status === "面接調整中"
-                          ? "bg-purple-100 text-purple-800"
-                          : ""
-                      }
-                      ${
-                        selectedApplicantData.status === "採用決定"
-                          ? "bg-green-100 text-green-800"
-                          : ""
-                      }
-                      ${
-                        selectedApplicantData.status === "不採用"
-                          ? "bg-gray-100 text-gray-800"
-                          : ""
-                      }
-                    `}>
-                      {selectedApplicantData.status}
+                        ${
+                          selectedApplicantData.status === "APPLIED"
+                            ? "bg-blue-100 text-blue-800"
+                            : ""
+                        }
+                        ${
+                          selectedApplicantData.status === "ACCEPTED"
+                            ? "bg-green-100 text-green-800"
+                            : ""
+                        }
+                        ${
+                          selectedApplicantData.status === "REJECTED"
+                            ? "bg-red-100 text-red-800"
+                            : ""
+                        }
+                      `}>
+                      {selectedApplicantData.status === "APPLIED"
+                        ? "応募済み"
+                        : selectedApplicantData.status === "ACCEPTED"
+                        ? "採用決定"
+                        : selectedApplicantData.status === "REJECTED"
+                        ? "不採用"
+                        : selectedApplicantData.status}
                     </Badge>
                   </div>
                 </div>
@@ -261,16 +276,20 @@ export default function JobApplicants() {
                         <div className="flex items-center gap-4 mb-4">
                           <Avatar className="h-16 w-16">
                             <AvatarImage
-                              src={selectedApplicantData.avatar}
-                              alt={selectedApplicantData.name}
+                              src={
+                                selectedApplicantData.user?.avatar_url ||
+                                "/placeholder.svg"
+                              }
+                              alt={selectedApplicantData.user?.name || ""}
                             />
                             <AvatarFallback>
-                              {selectedApplicantData.name.charAt(0)}
+                              {selectedApplicantData.user?.name?.charAt(0) ||
+                                "U"}
                             </AvatarFallback>
                           </Avatar>
                           <div>
                             <h3 className="text-lg font-medium">
-                              {selectedApplicantData.name}
+                              {selectedApplicantData.user?.name}
                             </h3>
                             <p className="text-sm text-muted-foreground">
                               30歳・男性
@@ -337,7 +356,14 @@ export default function JobApplicants() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem>面接を設定</DropdownMenuItem>
-                      <DropdownMenuItem>採用する</DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          handleAcceptApplication(
+                            selectedApplicantData.id.toString()
+                          )
+                        }>
+                        採用する
+                      </DropdownMenuItem>
                       <DropdownMenuItem className="text-red-600">
                         不採用にする
                       </DropdownMenuItem>
@@ -347,32 +373,38 @@ export default function JobApplicants() {
               </CardHeader>
               <CardContent className="p-4 h-[400px] flex flex-col">
                 <div className="flex-1 overflow-y-auto mb-4 space-y-4">
-                  {messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`flex ${
-                        message.senderId === "admin"
-                          ? "justify-end"
-                          : "justify-start"
-                      }`}>
+                  {messages.length > 0 ? (
+                    messages.map((message) => (
                       <div
-                        className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                          message.senderId === "admin"
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted"
+                        key={message.id}
+                        className={`flex ${
+                          message.sender_type === "RESTAURANT"
+                            ? "justify-end"
+                            : "justify-start"
                         }`}>
-                        <p className="text-sm">{message.text}</p>
-                        <p
-                          className={`text-xs mt-1 ${
-                            message.senderId === "admin"
-                              ? "text-primary-foreground/70"
-                              : "text-muted-foreground"
+                        <div
+                          className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                            message.sender_type === "RESTAURANT"
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted"
                           }`}>
-                          {message.time}
-                        </p>
+                          <p className="text-sm">{message.content}</p>
+                          <p
+                            className={`text-xs mt-1 ${
+                              message.sender_type === "RESTAURANT"
+                                ? "text-primary-foreground/70"
+                                : "text-muted-foreground"
+                            }`}>
+                            {new Date(message.created_at).toLocaleTimeString()}
+                          </p>
+                        </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="text-center text-gray-500 py-4">
+                      メッセージはまだありません
                     </div>
-                  ))}
+                  )}
                 </div>
                 <div className="flex gap-2">
                   <Input placeholder="メッセージを入力..." className="flex-1" />

@@ -53,3 +53,23 @@ export interface User {
   profile_image: string;
   is_approved: boolean;
 }
+
+export interface WorkSession {
+  id: number;
+  application_id: string;
+  user_id: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Message {
+  id: string;
+  content: string;
+  created_at: string;
+  chef_id: string;
+  sender_type: string;
+  restaurant_id: number;
+  worksession_id: number;
+  application_id: string;
+}
