@@ -8,7 +8,7 @@ import {
   banJob,
   approveJob,
 } from "@/lib/redux/slices/operatorSlice";
-import { Job } from "@/lib/api/job";
+import { JobWithRestaurant } from "@/types";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,7 +31,9 @@ export default function JobsPage() {
   );
   const [searchTerm, setSearchTerm] = useState("");
   const [showSuspendedOnly, setShowSuspendedOnly] = useState(false);
-  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [selectedJob, setSelectedJob] = useState<JobWithRestaurant | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
@@ -121,7 +123,7 @@ export default function JobsPage() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredJobs?.map((job: Job) => (
+            {filteredJobs?.map((job: JobWithRestaurant) => (
               <tr key={job.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <button

@@ -1,11 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { operatorApi } from "@/lib/api/operator";
 import { getAllChefs, UserProfile } from "@/lib/api/user";
-import { getAllJobs, Job } from "@/lib/api/job";
+import { getAllJobs } from "@/lib/api/job";
 import { getCuisines } from "@/lib/api/cuisines";
 import { getSkills } from "@/lib/api/skill";
-import { getRestaurants } from "@/lib/api/restaurant";
-import { Restaurant } from "@/types/restaurant";
+import { getRestaurants, Restaurant } from "@/lib/api/restaurant";
+import { JobWithRestaurant } from "@/types";
 // Async Thunks
 export const fetchCompanies = createAsyncThunk(
   "operator/fetchCompanies",
@@ -178,7 +178,7 @@ interface OperatorState {
   cuisines: any[];
   skills: any[];
   jobs: {
-    data: Job[];
+    data: JobWithRestaurant[];
     loading: boolean;
     error: string | null;
   };

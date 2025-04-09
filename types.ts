@@ -108,12 +108,20 @@ export interface Message {
 }
 
 export interface Restaurant {
-  id: string;
+  id: number;
   name: string;
-  email: string;
-  image_url?: string;
-  address?: string;
+  address: string;
+  access: string;
+  business_hours: string;
   companies_id: string;
+  contact_info: string;
+  created_at: number;
+  cuisine_category: CuisineCategory[][];
+  cuisine_type: string;
+  is_active: boolean;
   is_approved: boolean;
-  cuisine_categories: CuisineCategory[];
+  profile_image: string;
+  rating: number;
+  station: string;
+  updated_at: number;
 }

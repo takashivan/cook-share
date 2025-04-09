@@ -1,8 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getAllJobs, Job } from "@/lib/api/job";
+import { getAllJobs } from "@/lib/api/job";
+import type { JobWithRestaurant } from "@/types";
 
 interface JobsState {
-  jobs: Job[];
+  jobs: JobWithRestaurant[];
   loading: boolean;
   error: string | null;
   lastFetch: number | null;
@@ -24,28 +25,29 @@ const isCacheValid = (lastFetch: number | null): boolean => {
   return Date.now() - lastFetch < CACHE_DURATION;
 };
 
-export const fetchJobs = createAsyncThunk<Job[], void, { rejectValue: string }>(
-  "jobs/fetchAll",
-  async (_, { getState, rejectWithValue }) => {
-    try {
-      const state = getState() as { jobs: JobsState };
+export const fetchJobs = createAsyncThunk<
+  JobWithRestaurant[],
+  void,
+  { rejectValue: string }
+>("jobs/fetchAll", async (_, { getState, rejectWithValue }) => {
+  try {
+    const state = getState() as { jobs: JobsState };
 
-      // キャッシュが有効な場合は既存のデータを使用
-      if (isCacheValid(state.jobs.lastFetch) && state.jobs.jobs.length > 0) {
-        return state.jobs.jobs;
-      }
-
-      // キャッシュが無効な場合は新しいデータを取得
-      console.log("Fetching fresh jobs data...");
-      const jobs = await getAllJobs();
-      return jobs;
-    } catch (error) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "求人の取得に失敗しました"
-      );
+    // キャッシュが有効な場合は既存のデータを使用
+    if (isCacheValid(state.jobs.lastFetch) && state.jobs.jobs.length > 0) {
+      return state.jobs.jobs;
     }
+
+    // キャッシュが無効な場合は新しいデータを取得
+    console.log("Fetching fresh jobs data...");
+    const jobs = await getAllJobs();
+    return jobs;
+  } catch (error) {
+    return rejectWithValue(
+      error instanceof Error ? error.message : "求人の取得に失敗しました"
+    );
   }
-);
+});
 
 const jobsSlice = createSlice({
   name: "jobs",
