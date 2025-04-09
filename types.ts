@@ -52,6 +52,10 @@ export interface User {
   dateofbirth: number | null;
   profile_image: string;
   is_approved: boolean;
+  age?: number;
+  gender?: string;
+  phone?: string;
+  address?: string;
 }
 
 export interface WorkSession {
@@ -68,6 +72,7 @@ export interface Message {
   content: string;
   created_at: string;
   chef_id: string;
+  is_read: boolean;
   sender_type: string;
   restaurant_id: number;
   worksession_id: number;
