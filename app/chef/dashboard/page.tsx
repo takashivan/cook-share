@@ -7,7 +7,9 @@ import useSWR from "swr";
 import { applicationApi } from "@/lib/api/application";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import type { Application, Job } from "@/types";
+import type { Application, Job, WorkSessionWithJob } from "@/types";
+import { useEffect, useState } from "react";
+import { workSessionApi } from "@/lib/api/workSession";
 
 interface ApplicationWithJob extends Application {
   job?: Job & {
@@ -22,6 +24,7 @@ interface ApplicationWithJob extends Application {
 
 export default function ChefDashboard() {
   const { user } = useAuth();
+  const [workSessions, setWorkSessions] = useState<WorkSessionWithJob[]>([]);
 
   const { data: applications } = useSWR<ApplicationWithJob[]>(
     user ? ["applications", user.id.toString()] : null,
@@ -48,6 +51,26 @@ export default function ChefDashboard() {
         new Date(b.job!.work_date).getTime()
     )
     .filter((app) => new Date(app.job!.work_date) >= new Date());
+
+  useEffect(() => {
+    const fetchWorkSessions = async () => {
+      if (!user?.id) return;
+      try {
+        const sessions = (await workSessionApi.getWorkSessionsToDoByUserId(
+          user.id
+        )) as WorkSessionWithJob[];
+        // IN_PROGRESS ステータスのものだけをフィルタリング
+        const inProgressSessions = sessions.filter(
+          (session: WorkSessionWithJob) => session.status === "IN_PROGRESS"
+        );
+        setWorkSessions(inProgressSessions);
+      } catch (error) {
+        console.error("Failed to fetch work sessions:", error);
+      }
+    };
+
+    fetchWorkSessions();
+  }, [user?.id]);
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-md">
@@ -82,12 +105,12 @@ export default function ChefDashboard() {
                           <span className="text-gray-500">|</span>
                           <span className="text-gray-500">
                             {format(
-                              new Date(application.job.start_time * 1000),
+                              new Date(application.job.start_time),
                               "HH:mm"
                             )}{" "}
                             〜{" "}
                             {format(
-                              new Date(application.job.end_time * 1000),
+                              new Date(application.job.end_time),
                               "HH:mm"
                             )}
                           </span>
@@ -113,39 +136,41 @@ export default function ChefDashboard() {
       <section className="mb-10">
         <h2 className="text-xl font-bold mb-4">やること</h2>
         <div className="space-y-4">
-          <div className="bg-white rounded-lg shadow-md p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Star className="h-5 w-5 text-gray-700" />
-              <div className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm">
-                店舗レビュー
+          {workSessions.map((session) => (
+            <Link
+              key={session.id}
+              href={`/chef/job/${session.application_id}`}
+              className="block">
+              <div
+                key={session.id}
+                className="bg-white rounded-lg shadow-md p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Edit className="h-5 w-5 text-gray-700" />
+                  <div className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">
+                    完了報告
+                  </div>
+                </div>
+                <div className="flex justify-between items-center mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">
+                      {format(new Date(session.created_at), "MM/dd (E)", {
+                        locale: ja,
+                      })}
+                    </span>
+                    <span className="text-gray-500">|</span>
+                    <span className="text-gray-500">
+                      {format(new Date(session.check_in_time), "HH:mm")} 〜{" "}
+                      {format(new Date(session.check_out_time), "HH:mm")}
+                    </span>
+                  </div>
+                </div>
+                <div className="text-gray-500 mb-1">
+                  {session.job.restaurant.name}
+                </div>
+                <div className="font-medium">{session.job.title}</div>
               </div>
-            </div>
-            <div className="flex justify-between items-center mb-2">
-              <div className="flex items-center gap-2">
-                <span className="font-medium">03 / 28 (金)</span>
-                <span className="text-gray-500">|</span>
-                <span className="text-gray-500">09:00 〜 22:00</span>
-              </div>
-            </div>
-            <div className="font-medium">COOKBIZ CAFE 八丁堀本店</div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Edit className="h-5 w-5 text-gray-700" />
-              <div className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">
-                完了報告
-              </div>
-            </div>
-            <div className="flex justify-between items-center mb-2">
-              <div className="flex items-center gap-2">
-                <span className="font-medium">03 / 29 (土)</span>
-                <span className="text-gray-500">|</span>
-                <span className="text-gray-500">15:00 〜 23:30</span>
-              </div>
-            </div>
-            <div className="font-medium">くっくぴざすし</div>
-          </div>
+            </Link>
+          ))}
         </div>
       </section>
 

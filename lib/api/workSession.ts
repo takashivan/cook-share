@@ -7,6 +7,13 @@ export const workSessionApi = {
     const response = await apiRequest(WORK_SESSION_URL, "GET");
     return response;
   },
+  getWorkSessionsToDoByUserId: async (userId: string) => {
+    const response = await apiRequest(
+      `${WORK_SESSION_URL}/user_todo/${userId}`,
+      "GET"
+    );
+    return response;
+  },
 };
 
 export const createWorkSession = async (workSessionData: any) => {
@@ -61,6 +68,36 @@ export const getWorkSessionByApplicationId = async (
     `${WORK_SESSION_URL}/application/${applicationId}`,
     "GET",
     { application_id: applicationId, user_id: userId }
+  );
+  return response;
+};
+
+export const updateWorkSessionToCheckIn = async (workSessionId: string) => {
+  const response = await apiRequest(
+    `${WORK_SESSION_URL}/${workSessionId}/start`,
+    "PATCH",
+    {
+      worksession_id: workSessionId,
+      check_in_time: Date.now(), // Unix timestamp in seconds
+    }
+  );
+  return response;
+};
+
+export const updateWorkSessionToCheckOut = async (
+  workSessionId: string,
+  feedback: string,
+  rating: number
+) => {
+  const response = await apiRequest(
+    `${WORK_SESSION_URL}/${workSessionId}/finish`,
+    "PATCH",
+    {
+      worksession_id: workSessionId,
+      check_out_time: Date.now(), // Unix timestamp in seconds
+      feedback: feedback,
+      rating: rating,
+    }
   );
   return response;
 };
