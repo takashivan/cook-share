@@ -5,11 +5,10 @@ declare module "react-qr-scanner" {
     onResult: (result: { getText: () => string }) => void;
     onError: (error: Error) => void;
     constraints?: {
-      facingMode?: "user" | "environment";
+      facingMode?: string;
     };
     className?: string;
   }
 
-  const QrScanner: React.FC<QrScannerProps>;
-  export default QrScanner;
+  export default class QrScanner extends Component<QrScannerProps> {}
 }

@@ -150,15 +150,17 @@ export default function JobDetail({ params }: PageProps) {
     setIsCheckInDialogOpen(true);
   };
 
-  const handleQrScan = async (data: string) => {
+  const handleQrScan = async (result: { getText: () => string }) => {
+    if (!result) return;
+
     try {
       // QRコードからアプリケーションIDを取得
-      const scannedApplicationId = parseInt(data);
+      const scannedApplicationId = parseInt(result.getText());
 
       // 現在のアプリケーションIDと一致するか確認
       if (application?.id === scannedApplicationId) {
         setIsQrScanned(true);
-        setScannedData(data);
+        setScannedData(result.getText());
         // ワークセッションのステータスを更新
         if (workSession) {
           // ワークセッションの更新処理を実装
@@ -334,11 +336,7 @@ export default function JobDetail({ params }: PageProps) {
               <div className="flex justify-center items-center h-48 bg-gray-100 rounded-lg overflow-hidden">
                 {!isQrScanned && (
                   <QrScanner
-                    onResult={(result: { getText: () => string }) => {
-                      if (result) {
-                        handleQrScan(result.getText());
-                      }
-                    }}
+                    onResult={handleQrScan}
                     onError={(error: Error) => {
                       console.error("QRコードのスキャンに失敗しました:", error);
                     }}
