@@ -40,8 +40,13 @@ export interface UserProfile {
   dateofbirth?: string;
   status?: string;
   is_approved?: boolean;
-  created_at?: string;
-  updated_at?: string;
+  created_at?: Date;
+  updated_at?: Date;
+  profile_image?: string;
+  age?: number;
+  gender?: string;
+  phone?: string;
+  address?: string;
 }
 
 // 共通の型定義
