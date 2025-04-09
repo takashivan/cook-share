@@ -2,6 +2,7 @@
 
 import { API_CONFIG, apiRequest } from "./config";
 import type { Restaurant } from "@/lib/api/restaurant";
+import type { JobWithRestaurant } from "@/types";
 
 const BASE_URL = API_CONFIG.baseURLs.job;
 
@@ -80,7 +81,7 @@ interface ReportData {
 
 type QueryParams = Record<string, string>;
 
-interface JobDetail {
+export interface JobDetail {
   job: {
     id: number;
     title: string;
@@ -139,8 +140,8 @@ export interface GetJobsResponse {
 }
 
 // ジョブ一覧取得
-export const getAllJobs = async (): Promise<Job[]> => {
-  const response = await apiRequest<GetJobsResponse>(
+export const getAllJobs = async (): Promise<JobWithRestaurant[]> => {
+  const response = await apiRequest<{ jobs: JobWithRestaurant[] }>(
     `${API_CONFIG.baseURLs.job}`,
     "GET"
   );
