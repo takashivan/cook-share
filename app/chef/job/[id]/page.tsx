@@ -30,7 +30,8 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Html5QrcodeScanner } from "html5-qrcode";
+import { BrowserQRCodeReader } from "@zxing/browser";
+import { Result } from "@zxing/library";
 
 interface JobDetail {
   job: {
@@ -76,7 +77,8 @@ export default function JobDetail({ params }: PageProps) {
   const [isCheckInDialogOpen, setIsCheckInDialogOpen] = useState(false);
   const [isQrScanned, setIsQrScanned] = useState(false);
   const [scannedData, setScannedData] = useState<string | null>(null);
-  const qrScannerRef = useRef<Html5QrcodeScanner | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const codeReaderRef = useRef<BrowserQRCodeReader | null>(null);
 
   // 応募情報の取得
   const { data: application } = useSWR<Application>(
@@ -122,29 +124,25 @@ export default function JobDetail({ params }: PageProps) {
       .length || 0;
 
   useEffect(() => {
-    if (isCheckInDialogOpen && !isQrScanned) {
-      qrScannerRef.current = new Html5QrcodeScanner(
-        "qr-reader",
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-        },
-        false
-      );
-
-      qrScannerRef.current.render(
-        (decodedText) => {
-          handleQrScan(decodedText);
-        },
-        (error) => {
-          console.error("QRコードのスキャンに失敗しました:", error);
-        }
-      );
+    if (isCheckInDialogOpen && !isQrScanned && videoRef.current) {
+      codeReaderRef.current = new BrowserQRCodeReader();
+      codeReaderRef.current
+        .decodeFromVideoDevice(undefined, videoRef.current, (result, error) => {
+          if (result) {
+            handleQrScan(result.getText());
+          }
+          if (error) {
+            console.error("QRコードのスキャンに失敗しました:", error);
+          }
+        })
+        .catch((error) => {
+          console.error("カメラの初期化に失敗しました:", error);
+        });
     }
 
     return () => {
-      if (qrScannerRef.current) {
-        qrScannerRef.current.clear();
+      if (codeReaderRef.current) {
+        codeReaderRef.current.stop();
       }
     };
   }, [isCheckInDialogOpen, isQrScanned]);
@@ -362,7 +360,11 @@ export default function JobDetail({ params }: PageProps) {
               </p>
               <div className="flex justify-center items-center h-48 bg-gray-100 rounded-lg overflow-hidden">
                 {!isQrScanned && (
-                  <div id="qr-reader" className="w-full h-full" />
+                  <video
+                    ref={videoRef}
+                    className="w-full h-full object-cover"
+                    playsInline
+                  />
                 )}
                 {isQrScanned && (
                   <div className="flex flex-col items-center justify-center">
@@ -381,8 +383,8 @@ export default function JobDetail({ params }: PageProps) {
                 setIsCheckInDialogOpen(false);
                 setIsQrScanned(false);
                 setScannedData(null);
-                if (qrScannerRef.current) {
-                  qrScannerRef.current.clear();
+                if (codeReaderRef.current) {
+                  codeReaderRef.current.stop();
                 }
               }}>
               キャンセル
@@ -390,8 +392,8 @@ export default function JobDetail({ params }: PageProps) {
             <Button
               onClick={() => {
                 setIsCheckInDialogOpen(false);
-                if (qrScannerRef.current) {
-                  qrScannerRef.current.clear();
+                if (codeReaderRef.current) {
+                  codeReaderRef.current.stop();
                 }
               }}
               disabled={!isQrScanned}>
