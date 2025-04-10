@@ -58,24 +58,6 @@ export default function Home() {
     if (reduxJobs.length === 0 && !isLoading) {
       dispatch(fetchJobs());
     }
-
-    // デバッグ用
-    if (reduxJobs.length > 0) {
-      console.log("First Job:", reduxJobs[0]);
-      console.log("First Job Restaurant:", reduxJobs[0].restaurant);
-      console.log(
-        "First Job Cuisine Category:",
-        reduxJobs[0].restaurant.cuisine_category
-      );
-      console.log(
-        "First Job Cuisine Category Type:",
-        typeof reduxJobs[0].restaurant.cuisine_category
-      );
-      console.log(
-        "First Job Cuisine Category Length:",
-        reduxJobs[0].restaurant.cuisine_category?.length
-      );
-    }
   }, [dispatch, reduxJobs.length, isLoading]);
 
   if (isLoading) {
@@ -263,9 +245,9 @@ export default function Home() {
                       <div className="flex items-center text-xs text-gray-500 mb-3">
                         <span>
                           {job.restaurant.cuisine_category &&
-                          job.restaurant.cuisine_category[0]
-                            ? job.restaurant.cuisine_category[0]
-                                .map((item) => item.category)
+                          job.restaurant.cuisine_category.length > 0
+                            ? job.restaurant.cuisine_category
+                                .map((cat) => cat.category)
                                 .join(", ")
                             : "ジャンル未設定"}
                         </span>

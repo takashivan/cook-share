@@ -27,8 +27,8 @@ export default function AdminDashboard() {
       </div>
 
       <div className="">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <Card className="mb-4">
+          <CardHeader className="flex flex-row items-center justify-between space-y- pb-2 ">
             <CardTitle className="text-sm font-medium">店舗数</CardTitle>
             <Store className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -69,7 +69,7 @@ export default function AdminDashboard() {
               </div>
             </div>
             <Link href="/admin/company">
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full mt-2">
                 会社情報を管理
               </Button>
             </Link>
@@ -94,7 +94,7 @@ export default function AdminDashboard() {
               </div>
             </div>
             <Link href="/admin/stores">
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full mt-2">
                 店舗一覧を表示
               </Button>
             </Link>
@@ -119,7 +119,7 @@ export default function AdminDashboard() {
               </div>
             </div>
             <Link href="/admin/jobs">
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full mt-2">
                 求人一覧を表示
               </Button>
             </Link>
@@ -144,7 +144,7 @@ export default function AdminDashboard() {
               </div>
             </div>
             <Link href="/admin/company/billing">
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full mt-2">
                 請求一覧を表示
               </Button>
             </Link>
