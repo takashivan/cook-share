@@ -3,7 +3,6 @@ const { apiConfig, generateResponses, config } = it;
 %>
 
 import type { AxiosInstance, AxiosRequestConfig, HeadersDefaults, ResponseType, AxiosResponse } from "axios";
-import axios from "axios";
 
 export type QueryParamsType = Record<string | number, any>;
 
@@ -25,6 +24,7 @@ export interface FullRequestParams extends Omit<AxiosRequestConfig, "data" | "pa
 export type RequestParams = Omit<FullRequestParams, "body" | "method" | "query" | "path">;
 
 export interface ApiConfig<SecurityDataType = unknown> extends Omit<AxiosRequestConfig, "data" | "cancelToken"> {
+  axiosInstance: AxiosInstance;
   securityWorker?: (securityData: SecurityDataType | null) => Promise<AxiosRequestConfig | void> | AxiosRequestConfig | void;
   secure?: boolean;
   format?: ResponseType;
@@ -44,8 +44,9 @@ export class HttpClient<SecurityDataType = unknown> {
     private secure?: boolean;
     private format?: ResponseType;
 
-    constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "<%~ apiConfig.baseUrl %>" })
+    constructor({ axiosInstance, securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
+        this.instance = axiosInstance;
+        this.instance.defaults.baseURL = "<%~ apiConfig.baseUrl %>";
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;

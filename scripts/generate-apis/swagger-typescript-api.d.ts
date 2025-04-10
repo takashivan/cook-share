@@ -7,9 +7,10 @@ declare module 'swagger-typescript-api' {
     extractResponseError?: boolean;
     httpClientType?: string;
     modular?: boolean;
-    name: string;
+    name?: string;
     nameCase?: string;
     output: string;
+    templates?: string;
     unionEnums?: boolean;
     url: string;
   }): Promise<void>;

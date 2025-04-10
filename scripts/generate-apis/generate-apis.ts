@@ -2,34 +2,28 @@ import path from "path";
 import { generateApi } from "swagger-typescript-api";
 
 type ApiDefinition = {
-  name: string;
   outputDir: string;
   url: string;
 };
 
 const aPIs: ApiDefinition[] = [
   {
-    name: "application.ts",
     outputDir: "application",
     url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:MJ8mZ3fN?type=json&token=REMOVED_SECRET",
   },
   {
-    name: "authentication.ts",
     outputDir: "authentication",
     url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:xaJlLYDj?type=json&token=",
   },
   {
-    name: "chef-connect.ts",
     outputDir: "chef-connect",
     url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:Mv5jTolf?type=json&token=",
   },
   {
-    name: "company.ts",
     outputDir: "company",
     url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:3LZoUG6X?type=json&token=",
   },
   {
-    name: "operator.ts",
     outputDir: "operator",
     url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:grw3Vlqa?type=json&token=",
   },
@@ -45,16 +39,16 @@ const baseConfig = {
   httpClientType: "axios" as const,
   modular: true,
   nameCase: 'camel',
+  templates: path.resolve(process.cwd(), "scripts/generate-apis/templates"),
   unionEnums: true,
 };
 
 const generateApiTypes = async () => {
   try {
     await Promise.all(
-      aPIs.map(({ name, url, outputDir }) =>
+      aPIs.map(({ url, outputDir }) =>
         generateApi({
           ...baseConfig,
-          name,
           url,
           output: path.resolve(process.cwd(), "api/__generated__", outputDir),
         })
