@@ -56,7 +56,7 @@ const generateApiTypes = async () => {
           ...baseConfig,
           name,
           url,
-          output: path.resolve(process.cwd(), "api", outputDir),
+          output: path.resolve(process.cwd(), "api/__generated__", outputDir),
         })
       )
     );
