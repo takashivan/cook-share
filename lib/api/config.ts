@@ -15,6 +15,10 @@ export const API_CONFIG = {
     restaurant: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/restaurant",
     restaurantReview:
       "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/restaurant_review",
+    companyUserNotification:
+      "https://xcti-onox-8bdw.n7e.xano.io/api:1k5jblUW/companyuser_notification",
+    chefNotification:
+      "https://xcti-onox-8bdw.n7e.xano.io/api:1k5jblUW/chef_notification",
     chefReview: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/chef_review",
     message: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/message",
     operator: "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/operator",
