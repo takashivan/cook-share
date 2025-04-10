@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { getAllJobs, jobApi, Job } from "@/lib/api/job";
-import { getCurrentUser } from "@/lib/api/config";
+import { Job } from "@/lib/api/job";
+import { getApi } from "@/api/api-factory";
+import { Job as JobApi } from "@/api/__generated__/chef-connect/Job";
 
 interface CompanyJobsState {
   jobs: Job[];
@@ -18,7 +19,7 @@ export const fetchCompanyJobs = createAsyncThunk<any, void>(
   "companyJobs/fetch",
   async (_, { rejectWithValue }) => {
     try {
-      const response = (await jobApi.getJobs()).jobs;
+      const response = (await getApi(JobApi).getJob2()).data.jobs;
       console.log("API Response in company slice:", response);
       return response;
     } catch (error) {
