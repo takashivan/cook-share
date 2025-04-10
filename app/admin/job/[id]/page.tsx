@@ -14,8 +14,10 @@ import {
   MessageSquare,
   MoreHorizontal,
   QrCode,
+  CheckCircle,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -50,6 +52,14 @@ import { workSessionApi } from "@/lib/api/workSession";
 import { messageApi, CreateMessageParams } from "@/lib/api/message";
 import { Message, WorkSession } from "@/types";
 import { QRCodeSVG } from "qrcode.react";
+import { useEffect } from "react";
+import { useParams } from "next/navigation";
+import { Job } from "@/types";
+import { WorkSessionWithJob, WorkSessionWithUser } from "@/types";
+import { RestaurantReviewModal } from "@/components/modals/RestaurantReviewModal";
+import { chefReviewApi } from "@/lib/api/chefReview";
+import { ChefReview } from "@/types";
+import { FaStar } from "react-icons/fa";
 
 interface ApplicantCardProps {
   application: Application;
@@ -121,6 +131,11 @@ export default function JobDetailPage(props: {
   const router = useRouter();
   const [messageInput, setMessageInput] = useState("");
   const [isQrDialogOpen, setIsQrDialogOpen] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [selectedWorkSession, setSelectedWorkSession] =
+    useState<WorkSessionWithUser | null>(null);
+  const [isChefReviewModalOpen, setIsChefReviewModalOpen] = useState(false);
+  const [chefReview, setChefReview] = useState<ChefReview | null>(null);
 
   const { data: job, error: jobError } = useSWR(
     [`job`, params.id],
@@ -146,9 +161,28 @@ export default function JobDetailPage(props: {
       }
     );
 
+  const {
+    data: workSessions,
+    error: workSessionsError,
+    mutate,
+  } = useSWR<WorkSessionWithUser[]>(
+    params.id ? [`workSessions`, params.id] : null,
+    async ([_, id]: [string, string]) => {
+      const result = await workSessionApi.getWorkSessionsToDoByJobId(id);
+      return result as WorkSessionWithUser[];
+    },
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 10000,
+    }
+  );
+
   const isLoading =
-    (!job && !jobError) || (!applications && !applicationsError);
-  const error = jobError || applicationsError;
+    (!job && !jobError) ||
+    (!applications && !applicationsError) ||
+    (!workSessions && !workSessionsError);
+  const error = jobError || applicationsError || workSessionsError;
 
   const selectedApplicantData = applications?.find(
     (a) => a.id === selectedApplicant
@@ -209,6 +243,10 @@ export default function JobDetailPage(props: {
       await applicationApi.rejectApplication(applicationId);
       // ページをリフレッシュして最新の状態を取得
       router.refresh();
+      toast({
+        title: "不採用にしました",
+        description: "応募者を不採用にしました",
+      });
     } catch (error) {
       console.error("Failed to reject application:", error);
     }
@@ -230,6 +268,41 @@ export default function JobDetailPage(props: {
       mutateMessages();
     } catch (error) {
       console.error("Failed to send message:", error);
+    }
+  };
+
+  const handleReviewSubmit = async (
+    rating: number,
+    comment: string,
+    approved: boolean
+  ) => {
+    if (!selectedWorkSession) return;
+
+    try {
+      await workSessionApi.updateWorkSessionToVerify(
+        selectedWorkSession.id,
+        rating,
+        comment
+      );
+
+      // シェフの評価を取得
+      const review = (await chefReviewApi.getChefReviewsBySessionId(
+        selectedWorkSession.id
+      )) as ChefReview;
+      console.log("review", review);
+
+      setChefReview(review);
+      setIsChefReviewModalOpen(true);
+
+      // Refresh work sessions
+      mutate();
+    } catch (err) {
+      console.error("Failed to submit review:", err);
+      toast({
+        title: "Error",
+        description: "評価の送信に失敗しました",
+        variant: "destructive",
+      });
     }
   };
 
@@ -267,59 +340,108 @@ export default function JobDetailPage(props: {
 
         <Tabs defaultValue="applicants">
           <TabsList>
+            <TabsTrigger value="todo">やること</TabsTrigger>
             <TabsTrigger value="applicants">応募者管理</TabsTrigger>
             <TabsTrigger value="detail">求人詳細</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="detail">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>求人詳細</CardTitle>
-                  <Badge variant="outline">{job?.status}</Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground mb-1">
-                      勤務日時
-                    </h3>
-                    <p>
-                      {format(
-                        job?.work_date ? new Date(job.work_date) : new Date(),
-                        "yyyy年MM月dd日",
-                        { locale: ja }
-                      )}
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {format(
-                        job?.start_time ? new Date(job.start_time) : new Date(),
-                        "HH:mm"
-                      )}{" "}
-                      〜{" "}
-                      {format(
-                        job?.end_time ? new Date(job.end_time) : new Date(),
-                        "HH:mm"
-                      )}
-                    </p>
+          <TabsContent value="todo">
+            <div className="space-y-4">
+              {workSessions?.map((session) => (
+                <div
+                  key={session.id}
+                  className="bg-white rounded-lg shadow-md p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Edit className="h-5 w-5 text-gray-700" />
+                      <div
+                        className={`px-3 py-1 rounded-full text-sm ${
+                          session.status === "SCHEDULED"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-red-100 text-red-800"
+                        }`}>
+                        {session.status === "SCHEDULED"
+                          ? "お仕事開始前"
+                          : "完了報告"}
+                      </div>
+                    </div>
+                    {session.status === "SCHEDULED" ? (
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <QrCode className="h-4 w-4 mr-2" />
+                            チェックインQR
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>チェックインQRコード</DialogTitle>
+                            <DialogDescription>
+                              シェフにこのQRコードを提示してください
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="flex flex-col items-center justify-center p-4">
+                            <div className="bg-white p-4 rounded-lg shadow-md">
+                              <QRCodeSVG
+                                value={session.application_id}
+                                size={200}
+                                level="H"
+                                includeMargin={true}
+                              />
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    ) : (
+                      <Dialog>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedWorkSession(session);
+                            setIsReviewModalOpen(true);
+                          }}>
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          完了報告を確認
+                        </Button>
+                      </Dialog>
+                    )}
                   </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground mb-1">
-                      給与
-                    </h3>
-                    <p>時給 {job?.hourly_rate}円</p>
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">
+                        {format(new Date(session.created_at), "MM/dd (E)", {
+                          locale: ja,
+                        })}
+                      </span>
+                      <span className="text-gray-500">|</span>
+                      <span className="text-gray-500">
+                        {format(new Date(session.check_in_time), "HH:mm")} 〜{" "}
+                        {format(new Date(session.check_out_time), "HH:mm")}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={session.user.profile_image || "/default-avatar.png"}
+                      alt={session.user.name}
+                      className="w-8 h-8 rounded-full"
+                    />
+                    <div>
+                      <div className="font-medium">{session.user.name}</div>
+                      <div className="text-sm text-gray-500">
+                        {session.user.skills.join(", ")}
+                      </div>
+                    </div>
                   </div>
                 </div>
-
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">
-                    仕事内容
-                  </h3>
-                  <p className="whitespace-pre-wrap">{job?.description}</p>
+              ))}
+              {workSessions?.length === 0 && (
+                <div className="text-center text-gray-500 py-4">
+                  現在、完了報告待ちの勤務はありません
                 </div>
-              </CardContent>
-            </Card>
+              )}
+            </div>
           </TabsContent>
 
           <TabsContent value="applicants">
@@ -717,7 +839,15 @@ export default function JobDetailPage(props: {
                               onClick={() => setIsAcceptDialogOpen(true)}>
                               採用する
                             </Button>
-                            <Button variant="destructive">不採用にする</Button>
+                            <Button
+                              variant="destructive"
+                              onClick={() =>
+                                handleRejectApplication(
+                                  selectedApplicantData.id.toString()
+                                )
+                              }>
+                              不採用にする
+                            </Button>
                           </div>
                         </div>
                       ) : selectedApplicantData.status === "ACCEPTED" ? (
@@ -815,6 +945,57 @@ export default function JobDetailPage(props: {
               </Card>
             </div>
           </TabsContent>
+
+          <TabsContent value="detail">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>求人詳細</CardTitle>
+                  <Badge variant="outline">{job?.status}</Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                      勤務日時
+                    </h3>
+                    <p>
+                      {format(
+                        job?.work_date ? new Date(job.work_date) : new Date(),
+                        "yyyy年MM月dd日",
+                        { locale: ja }
+                      )}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {format(
+                        job?.start_time ? new Date(job.start_time) : new Date(),
+                        "HH:mm"
+                      )}{" "}
+                      〜{" "}
+                      {format(
+                        job?.end_time ? new Date(job.end_time) : new Date(),
+                        "HH:mm"
+                      )}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                      給与
+                    </h3>
+                    <p>時給 {job?.hourly_rate}円</p>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                    仕事内容
+                  </h3>
+                  <p className="whitespace-pre-wrap">{job?.description}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
 
@@ -851,6 +1032,68 @@ export default function JobDetailPage(props: {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog
+        open={isChefReviewModalOpen}
+        onOpenChange={setIsChefReviewModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>お疲れ様でした！</DialogTitle>
+            <DialogDescription>
+              シェフからの評価が届いています
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {chefReview ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <FaStar
+                        key={i}
+                        className={`h-5 w-5 ${
+                          i < chefReview.rating
+                            ? "text-yellow-400"
+                            : "text-gray-300"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    ({chefReview.rating}点)
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">シェフからのコメント</h3>
+                  <p className="text-sm">{chefReview.comment}</p>
+                </div>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                シェフからの評価はまだありません
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setIsChefReviewModalOpen(false)}>
+              閉じる
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <RestaurantReviewModal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        onSubmit={handleReviewSubmit}
+        chefName={selectedWorkSession?.user.name || ""}
+        chefImage={selectedWorkSession?.user.profile_image}
+        jobTitle={selectedWorkSession?.job.title || ""}
+        jobDate={new Date(
+          selectedWorkSession?.job.work_date || ""
+        ).toLocaleDateString()}
+        jobTime={`${selectedWorkSession?.job.start_time}:00 - ${selectedWorkSession?.job.end_time}:00`}
+      />
     </div>
   );
 }

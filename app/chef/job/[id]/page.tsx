@@ -232,7 +232,7 @@ export default function JobDetail({ params }: PageProps) {
         if (workSession) {
           try {
             console.log("チェックイン処理を開始します");
-            await updateWorkSessionToCheckIn(workSession.id.toString());
+            await updateWorkSessionToCheckIn(workSession.id);
             console.log("チェックインが完了しました");
 
             // ワークセッションのデータを更新
