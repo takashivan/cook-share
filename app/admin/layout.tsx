@@ -186,7 +186,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   height={30}
                 />
 
-                <span className="text-xs bg-gray-200 px-2 py-0.5 rounded-full ml-auto">
+                <span className="text-xs bg-gray-200 px-2 py-0.5 rounded-full ">
                   管理画面
                 </span>
               </div>
@@ -263,7 +263,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 width={120}
                 height={30}
               />
-
               <span className="text-xs bg-gray-200 px-2 py-0.5 rounded-full ml-auto">
                 管理画面
               </span>
