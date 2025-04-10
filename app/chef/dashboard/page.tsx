@@ -11,6 +11,8 @@ import type { Application, Job, WorkSessionWithJob } from "@/types";
 import { useEffect, useState } from "react";
 import { workSessionApi } from "@/lib/api/workSession";
 import { Button } from "@/components/ui/button";
+import { RestaurantNotificationDropdown } from "@/components/notifications/RestaurantNotificationDropdown";
+import { ChefNotificationDropdown } from "@/components/notifications/ChefNotificationDropdown";
 
 interface ApplicationWithJob extends Application {
   job?: Job & {
@@ -70,9 +72,16 @@ export default function ChefDashboard() {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-md">
-      <h1 className="text-2xl font-bold mb-6">
-        ようこそ、{user?.name || "ゲスト"}さん
-      </h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">
+          ようこそ、{user?.name || "ゲスト"}さん
+        </h1>
+        <ChefNotificationDropdown
+          notifications={[]}
+          onMarkAsRead={() => {}}
+          onMarkAllAsRead={() => {}}
+        />
+      </div>
 
       {/* 次のお仕事 */}
       <section className="mb-10">
