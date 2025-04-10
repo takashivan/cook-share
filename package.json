@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "generate_apis": "tsx scripts/generate-apis/generate-apis.ts"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.0",
@@ -60,7 +61,9 @@
     "eslint-config-next": "15.2.4",
     "jsdom": "^26.0.0",
     "postcss": "^8",
+    "swagger-typescript-api": "^13.0.28",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.19.3",
     "typescript": "^5",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.1.1"
