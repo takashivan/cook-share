@@ -14,7 +14,7 @@ import { Star, Clock, Calendar } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 
-interface StoreReviewModalProps {
+interface RestaurantReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (rating: number, comment: string, approved: boolean) => void;
@@ -27,7 +27,7 @@ interface StoreReviewModalProps {
   chefRating?: number;
 }
 
-export function StoreReviewModal({
+export function RestaurantReviewModal({
   isOpen,
   onClose,
   onSubmit,
@@ -38,7 +38,7 @@ export function StoreReviewModal({
   jobTime,
   chefComment,
   chefRating,
-}: StoreReviewModalProps) {
+}: RestaurantReviewModalProps) {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");

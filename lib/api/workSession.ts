@@ -1,4 +1,5 @@
 import { API_CONFIG, apiRequest } from "./config";
+import { WorkSessionWithUser, WorkSessionWithJob } from "@/types";
 
 const WORK_SESSION_URL = API_CONFIG.baseURLs.workSession;
 
@@ -11,6 +12,28 @@ export const workSessionApi = {
     const response = await apiRequest(
       `${WORK_SESSION_URL}/user_todo/${userId}`,
       "GET"
+    );
+    return response;
+  },
+  getWorkSessionsToDoByJobId: async (
+    jobId: string
+  ): Promise<WorkSessionWithUser[]> => {
+    return apiRequest(`${WORK_SESSION_URL}/restaurant_todo/${jobId}`, "GET");
+  },
+
+  updateWorkSessionToVerify: async (
+    workSessionId: number,
+    rating: number,
+    feedback: string
+  ) => {
+    const response = await apiRequest(
+      `${WORK_SESSION_URL}/${workSessionId}/verify`,
+      "PATCH",
+      {
+        worksession_id: workSessionId,
+        feedback: feedback,
+        rating: rating,
+      }
     );
     return response;
   },
@@ -72,7 +95,7 @@ export const getWorkSessionByApplicationId = async (
   return response;
 };
 
-export const updateWorkSessionToCheckIn = async (workSessionId: string) => {
+export const updateWorkSessionToCheckIn = async (workSessionId: number) => {
   const response = await apiRequest(
     `${WORK_SESSION_URL}/${workSessionId}/start`,
     "PATCH",

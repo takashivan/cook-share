@@ -85,6 +85,16 @@ export interface WorkSessionWithJob extends WorkSession {
   check_out_time: number;
   restaurant_name: string;
   job: JobWithRestaurant;
+  user: User;
+  user_comment?: string;
+  user_rating?: number;
+  restaurant_comment?: string;
+  restaurant_rating?: number;
+}
+
+export interface WorkSessionWithUser extends WorkSession {
+  user: User;
+  job: Job;
 }
 
 export interface CuisineCategory {
@@ -93,6 +103,34 @@ export interface CuisineCategory {
   created_at: string;
   updated_at: string;
   is_primary: boolean;
+}
+
+export interface ChefReview {
+  id: number;
+  created_at: string;
+  updated_at: string;
+  rating: number;
+  comment: string;
+  worksession_id: number;
+  reviewer_id: string;
+  reviewee_id: number;
+  user: User;
+  restaurant: Restaurant;
+  worksession: WorkSession;
+}
+
+export interface RestaurantReview {
+  id: number;
+  created_at: string;
+  updated_at: string;
+  rating: number;
+  comment: string;
+  worksession_id: number;
+  reviewer_id: number;
+  reviewee_id: string;
+  user: User;
+  restaurant: Restaurant;
+  worksession: WorkSession;
 }
 
 export interface Message {
@@ -108,20 +146,12 @@ export interface Message {
 }
 
 export interface Restaurant {
-  id: number;
+  id: string;
   name: string;
-  address: string;
-  access: string;
-  business_hours: string;
+  email: string;
+  image_url?: string;
+  address?: string;
   companies_id: string;
-  contact_info: string;
-  created_at: number;
-  cuisine_category: CuisineCategory[][];
-  cuisine_type: string;
-  is_active: boolean;
   is_approved: boolean;
-  profile_image: string;
-  rating: number;
-  station: string;
-  updated_at: number;
+  cuisine_category: CuisineCategory[];
 }
