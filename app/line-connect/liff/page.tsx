@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckLineUser } from "@/lib/api/line";
+import Image from "next/image";
 
 export default function LiffPage() {
   const router = useRouter();
@@ -30,7 +31,7 @@ export default function LiffPage() {
         const response = await CheckLineUser(lineUserId);
 
         if (response) {
-          router.push("/line-connect/link");
+          router.push("/chef/dashboard");
         } else {
           router.push(
             `/line-connect/link?line_user_id=${encodeURIComponent(lineUserId || "")}&name=${encodeURIComponent(name || "")}&picture=${encodeURIComponent(picture || "")}`
@@ -46,5 +47,40 @@ export default function LiffPage() {
     run();
   }, [router]);
 
-  return <div>{loaded ? "リダイレクト中..." : "Loading..."}</div>;
+  return (
+    <div className="min-h-screen bg-[#06C755] flex flex-col items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
+        <div className="mb-6">
+          <Image
+            src="/chef_illust/chef_logo.png"
+            alt="CookChef Logo"
+            width={200}
+            height={50}
+            className="mx-auto"
+          />
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex justify-center">
+            <div className="w-16 h-16 border-4 border-[#06C755] border-t-transparent rounded-full animate-spin"></div>
+          </div>
+
+          <div className="space-y-2">
+            <h2 className="text-xl font-bold text-gray-800">
+              {loaded ? "アカウント連携中..." : "LINEログイン中..."}
+            </h2>
+            <p className="text-gray-600 text-sm">
+              {loaded
+                ? "アカウントの連携を処理しています。少々お待ちください..."
+                : "LINEアカウントでログインしています。少々お待ちください..."}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-8 text-xs text-gray-500">
+          <p>Powered by LINE</p>
+        </div>
+      </div>
+    </div>
+  );
 }
