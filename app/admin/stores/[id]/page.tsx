@@ -14,7 +14,13 @@ import {
   Store,
   Users,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -40,6 +46,7 @@ import { getRestaurant } from "@/lib/api/restaurant";
 import type { Restaurant } from "@/lib/api/restaurant";
 import { EditStoreModal } from "@/components/modals/EditStoreModal";
 import { getRestaurantById } from "@/lib/api/restaurant";
+import { getRestaurantStaff } from "@/lib/api/company";
 import { jobApi } from "@/lib/api/job";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
@@ -47,6 +54,21 @@ import type { Job } from "@/lib/api/job";
 import useSWR from "swr";
 import { CreateJobModal } from "@/components/modals/CreateJobModal";
 import { toast } from "@/hooks/use-toast";
+import { AddRestaurantStaffModal } from "@/components/modals/AddRestaurantStaff";
+import { restaurantStaffInvite } from "@/lib/api/restaurant";
+import { StaffsListData } from "@/api/__generated__/company/data-contracts";
+import { apiRequest } from "@/lib/api/config";
+import { Staff } from "@/types/staff";
+
+interface StaffData {
+  id: string;
+  companyuser_id: string | null;
+  companyuser: {
+    name: string;
+    email: string;
+    is_active: boolean;
+  };
+}
 
 const fetcher = async (url: string) => {
   const res = await fetch(url);
@@ -81,6 +103,27 @@ export default function RestaurantDetailPage(props: {
     }
   );
 
+  const { data: staffs, mutate: mutateStaffs } = useSWR<StaffData[]>(
+    [`restaurant-staff`, params.id],
+    async ([_, id]: [string, string]) => {
+      const response = await getRestaurantStaff(parseInt(id));
+      return response.admin.map((staff) => ({
+        id: staff.id,
+        companyuser_id: staff.companies_id,
+        companyuser: {
+          name: staff.name,
+          email: staff.email,
+          is_active: true, // APIレスポンスにis_activeが含まれていないため、デフォルトでtrueとする
+        },
+      }));
+    },
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 10000,
+    }
+  );
+
   useEffect(() => {
     if (jobs && Array.isArray(jobs)) {
       const formatted = jobs.map((job: Job) => ({
@@ -106,6 +149,7 @@ export default function RestaurantDetailPage(props: {
   const isLoading = !restaurant && !error;
 
   const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
+  const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
 
   const handleCreateJob = async (data: FormData) => {
     try {
@@ -122,6 +166,49 @@ export default function RestaurantDetailPage(props: {
       toast({
         title: "エラーが発生しました",
         description: "求人の追加に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleAddStaff = async (
+    email: string,
+    permissions: { canEdit: boolean; canManageJobs: boolean }
+  ) => {
+    if (!restaurant?.id) {
+      toast({
+        title: "エラーが発生しました",
+        description: "店舗情報が見つかりません。",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      console.log("restaurant", restaurant);
+      console.log("email", email);
+      console.log("restaurant.id", restaurant.id);
+      console.log("restaurant.companies_id", restaurant.companies_id);
+      console.log("permissions.canEdit", permissions.canEdit);
+      console.log("permissions.canManageJobs", permissions.canManageJobs);
+      console.log("restaurant.name", restaurant.name);
+      await restaurantStaffInvite(
+        email,
+        restaurant.id as unknown as number,
+        restaurant.companies_id,
+        permissions.canEdit,
+        permissions.canManageJobs,
+        restaurant.name
+      );
+      toast({
+        title: "招待を送信しました",
+        description: `${email}に招待メールを送信しました。`,
+      });
+    } catch (error) {
+      console.error("Failed to invite staff:", error);
+      toast({
+        title: "エラーが発生しました",
+        description: "招待の送信に失敗しました。もう一度お試しください。",
         variant: "destructive",
       });
     }
@@ -284,6 +371,39 @@ export default function RestaurantDetailPage(props: {
                   ))}
               </div>
             </TabsContent>
+
+            <TabsContent value="staff">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-medium">スタッフ一覧</h3>
+                <Button onClick={() => setIsAddStaffModalOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  スタッフを追加
+                </Button>
+              </div>
+
+              <div className="space-y-4">
+                {staffs?.map((staff: StaffData) => (
+                  <Card key={staff.companyuser_id || staff.id}>
+                    <CardHeader>
+                      <CardTitle>{staff.companyuser.name}</CardTitle>
+                      <CardDescription>
+                        {staff.companyuser.email}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Badge
+                        variant={
+                          staff.companyuser.is_active ? "default" : "secondary"
+                        }>
+                        {staff.companyuser.is_active
+                          ? "アクティブ"
+                          : "非アクティブ"}
+                      </Badge>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
           </Tabs>
         </div>
       )}
@@ -293,6 +413,13 @@ export default function RestaurantDetailPage(props: {
         onClose={() => setIsCreateJobModalOpen(false)}
         onSubmit={handleCreateJob}
         restaurantId={parseInt(params.id)}
+      />
+
+      <AddRestaurantStaffModal
+        isOpen={isAddStaffModalOpen}
+        onClose={() => setIsAddStaffModalOpen(false)}
+        onSubmit={handleAddStaff}
+        restaurantName={restaurant?.name ?? ""}
       />
     </div>
   );
