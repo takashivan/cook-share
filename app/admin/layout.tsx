@@ -30,6 +30,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { RestaurantNotificationDropdown } from "@/components/notifications/RestaurantNotificationDropdown";
+import {
+  getCompanyUserNotificationsByCompanyUserId,
+  markCompanyUserNotificationAsRead,
+  markAllCompanyUserNotificationsAsRead,
+  CompanyUserNotification,
+} from "@/lib/api/companyUserNotification";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -41,6 +48,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const { user, isAuthenticated, logout } = useCompanyAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [notifications, setNotifications] = useState<CompanyUserNotification[]>(
+    []
+  );
 
   useEffect(() => {
     // 認証状態の初期化を待つ
@@ -67,6 +77,43 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
     initAuth();
   }, [isAuthenticated, router]);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      if (user?.id) {
+        try {
+          const data = await getCompanyUserNotificationsByCompanyUserId(
+            user.id
+          );
+          setNotifications(data);
+        } catch (error) {
+          console.error("Failed to fetch notifications:", error);
+        }
+      }
+    };
+
+    fetchNotifications();
+  }, [user?.id]);
+
+  const handleMarkAsRead = async (notificationId: number) => {
+    try {
+      await markCompanyUserNotificationAsRead(notificationId);
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
+      );
+    } catch (error) {
+      console.error("Failed to mark notification as read:", error);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await markAllCompanyUserNotificationsAsRead();
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    } catch (error) {
+      console.error("Failed to mark all notifications as read:", error);
+    }
+  };
 
   // ローディング中は早期リターン
   if (isLoading) {
@@ -186,7 +233,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   height={30}
                 />
 
-                <span className="text-xs bg-gray-200 px-2 py-0.5 rounded-full ml-auto">
+                <span className="text-xs bg-gray-200 px-2 py-0.5 rounded-full ">
                   管理画面
                 </span>
               </div>
@@ -263,7 +310,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 width={120}
                 height={30}
               />
-
               <span className="text-xs bg-gray-200 px-2 py-0.5 rounded-full ml-auto">
                 管理画面
               </span>
@@ -434,6 +480,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               )}
             </div>
           </div>
+          <RestaurantNotificationDropdown
+            notifications={notifications}
+            onMarkAsRead={handleMarkAsRead}
+            onMarkAllAsRead={handleMarkAllAsRead}
+          />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">

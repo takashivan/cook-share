@@ -10,6 +10,9 @@ import { ja } from "date-fns/locale";
 import type { Application, Job, WorkSessionWithJob } from "@/types";
 import { useEffect, useState } from "react";
 import { workSessionApi } from "@/lib/api/workSession";
+import { Button } from "@/components/ui/button";
+import { RestaurantNotificationDropdown } from "@/components/notifications/RestaurantNotificationDropdown";
+import { ChefNotificationDropdown } from "@/components/notifications/ChefNotificationDropdown";
 
 interface ApplicationWithJob extends Application {
   job?: Job & {
@@ -24,109 +27,102 @@ interface ApplicationWithJob extends Application {
 
 export default function ChefDashboard() {
   const { user } = useAuth();
-  const [workSessions, setWorkSessions] = useState<WorkSessionWithJob[]>([]);
+  const [isUpcomingJob, setIsUpcomingJob] = useState(false);
 
-  const { data: applications } = useSWR<ApplicationWithJob[]>(
-    user ? ["applications", user.id.toString()] : null,
-    async ([_, userId]: [string, string]) => {
-      const result = await applicationApi.getApplicationsByUser(userId);
-      return result.map((app: any) => ({
-        ...app,
-        job: app.job
-          ? {
-              ...app.job,
-              restaurant: app.job._restaurant,
-            }
-          : undefined,
-      }));
+  const { data: workSessions = [] } = useSWR<WorkSessionWithJob[]>(
+    "workSessions",
+    async () => {
+      const result = await workSessionApi.getWorkSessionsToDoByUserId(
+        user?.id.toString() || ""
+      );
+      return result as WorkSessionWithJob[];
     }
   );
 
-  // 次のお仕事（確定済みの仕事）
-  const upcomingJobs = applications
-    ?.filter((app) => app.status === "ACCEPTED" && app.job)
-    .sort(
-      (a, b) =>
-        new Date(a.job!.work_date).getTime() -
-        new Date(b.job!.work_date).getTime()
-    )
-    .filter((app) => new Date(app.job!.work_date) >= new Date());
+  const upcomingJobs = workSessions.filter(
+    (session) => session.status === "SCHEDULED"
+  );
+
+  const inProgressJobs = workSessions.filter(
+    (session) => session.status === "IN_PROGRESS"
+  );
 
   useEffect(() => {
-    const fetchWorkSessions = async () => {
-      if (!user?.id) return;
-      try {
-        const sessions = (await workSessionApi.getWorkSessionsToDoByUserId(
-          user.id
-        )) as WorkSessionWithJob[];
-        // IN_PROGRESS ステータスのものだけをフィルタリング
-        const inProgressSessions = sessions.filter(
-          (session: WorkSessionWithJob) => session.status === "IN_PROGRESS"
-        );
-        setWorkSessions(inProgressSessions);
-      } catch (error) {
-        console.error("Failed to fetch work sessions:", error);
-      }
-    };
+    const hasUpcomingJob = workSessions.some(
+      (session) => session.status === "SCHEDULED"
+    );
+    setIsUpcomingJob(hasUpcomingJob);
+  }, [workSessions]);
 
-    fetchWorkSessions();
-  }, [user?.id]);
+  // const { data: applications } = useSWR<ApplicationWithJob[]>(
+  //   user ? ["applications", user.id.toString()] : null,
+  //   async ([_, userId]: [string, string]) => {
+  //     const result = await applicationApi.getApplicationsByUser(userId);
+  //     return result.map((app: any) => ({
+  //       ...app,
+  //       job: app.job
+  //         ? {
+  //             ...app.job,
+  //             restaurant: app.job._restaurant,
+  //           }
+  //         : undefined,
+  //     }));
+  //   }
+  // );
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-md">
-      <h1 className="text-2xl font-bold mb-6">
-        ようこそ、{user?.name || "ゲスト"}さん
-      </h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">
+          ようこそ、{user?.name || "ゲスト"}さん
+        </h1>
+        <ChefNotificationDropdown
+          notifications={[]}
+          onMarkAsRead={() => {}}
+          onMarkAllAsRead={() => {}}
+        />
+      </div>
 
       {/* 次のお仕事 */}
       <section className="mb-10">
         <h2 className="text-xl font-bold mb-4">次のお仕事</h2>
         <div className="space-y-4">
           {upcomingJobs && upcomingJobs.length > 0 ? (
-            upcomingJobs.map(
-              (application) =>
-                application.job && (
-                  <Link
-                    key={application.id}
-                    href={`/chef/job/${application.id}`}
-                    className="block">
-                    <div className="bg-white rounded-lg shadow-md p-4">
-                      <div className="flex justify-between items-center mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">
-                            {format(
-                              new Date(application.job.work_date),
-                              "MM/dd (E)",
-                              {
-                                locale: ja,
-                              }
-                            )}
-                          </span>
-                          <span className="text-gray-500">|</span>
-                          <span className="text-gray-500">
-                            {format(
-                              new Date(application.job.start_time),
-                              "HH:mm"
-                            )}{" "}
-                            〜{" "}
-                            {format(
-                              new Date(application.job.end_time),
-                              "HH:mm"
-                            )}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="text-gray-500 mb-1">
-                        {application.job.restaurant.name}
-                      </div>
-                      <div className="font-medium">{application.job.title}</div>
+            upcomingJobs.map((session) => (
+              <Link
+                key={session.id}
+                href={`/chef/job/${session.application_id}`}
+                className="block">
+                <div className="bg-white rounded-lg shadow-md p-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">
+                        {format(new Date(session.job.work_date), "MM/dd (E)", {
+                          locale: ja,
+                        })}
+                      </span>
+                      <span className="text-gray-500">|</span>
+                      <span className="text-gray-500">
+                        {format(new Date(session.job.start_time), "HH:mm")} 〜{" "}
+                        {format(new Date(session.job.end_time), "HH:mm")}
+                      </span>
                     </div>
-                  </Link>
-                )
-            )
+                  </div>
+                  <div className="text-gray-500 mb-1">
+                    {session.job.restaurant.name}
+                  </div>
+                  <div className="font-medium">{session.job.title}</div>
+                </div>
+              </Link>
+            ))
           ) : (
-            <div className="bg-gray-50 rounded-lg p-8 text-center text-gray-500">
-              次のお仕事は未定です
+            <div className="bg-gray-50 rounded-lg p-8 text-center space-y-4">
+              <p className="text-gray-500">次のお仕事は未定です</p>
+              <Link href="/">
+                <Button variant="outline" className="w-full">
+                  お仕事を探す
+                </Button>
+              </Link>
             </div>
           )}
         </div>
@@ -136,41 +132,47 @@ export default function ChefDashboard() {
       <section className="mb-10">
         <h2 className="text-xl font-bold mb-4">やること</h2>
         <div className="space-y-4">
-          {workSessions.map((session) => (
-            <Link
-              key={session.id}
-              href={`/chef/job/${session.application_id}`}
-              className="block">
-              <div
+          {inProgressJobs.length > 0 ? (
+            inProgressJobs.map((session) => (
+              <Link
                 key={session.id}
-                className="bg-white rounded-lg shadow-md p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Edit className="h-5 w-5 text-gray-700" />
-                  <div className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">
-                    完了報告
+                href={`/chef/job/${session.application_id}`}
+                className="block">
+                <div
+                  key={session.id}
+                  className="bg-white rounded-lg shadow-md p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Edit className="h-5 w-5 text-gray-700" />
+                    <div className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">
+                      完了報告
+                    </div>
                   </div>
-                </div>
-                <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">
-                      {format(new Date(session.created_at), "MM/dd (E)", {
-                        locale: ja,
-                      })}
-                    </span>
-                    <span className="text-gray-500">|</span>
-                    <span className="text-gray-500">
-                      {format(new Date(session.check_in_time), "HH:mm")} 〜{" "}
-                      {format(new Date(session.check_out_time), "HH:mm")}
-                    </span>
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">
+                        {format(new Date(session.created_at), "MM/dd (E)", {
+                          locale: ja,
+                        })}
+                      </span>
+                      <span className="text-gray-500">|</span>
+                      <span className="text-gray-500">
+                        {format(new Date(session.check_in_time), "HH:mm")} 〜{" "}
+                        {format(new Date(session.check_out_time), "HH:mm")}
+                      </span>
+                    </div>
                   </div>
+                  <div className="text-gray-500 mb-1">
+                    {session.job.restaurant.name}
+                  </div>
+                  <div className="font-medium">{session.job.title}</div>
                 </div>
-                <div className="text-gray-500 mb-1">
-                  {session.job.restaurant.name}
-                </div>
-                <div className="font-medium">{session.job.title}</div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))
+          ) : (
+            <div className="bg-gray-50 rounded-lg p-8 text-center text-gray-500">
+              お疲れ様です！今はやることはありません。ゆっくり休んでください。
+            </div>
+          )}
         </div>
       </section>
 

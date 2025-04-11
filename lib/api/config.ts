@@ -13,6 +13,13 @@ export const API_CONFIG = {
     job: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/job",
     application: "https://xcti-onox-8bdw.n7e.xano.io/api:MJ8mZ3fN/application",
     restaurant: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/restaurant",
+    restaurantReview:
+      "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/restaurant_review",
+    companyUserNotification:
+      "https://xcti-onox-8bdw.n7e.xano.io/api:1k5jblUW/companyuser_notification",
+    chefNotification:
+      "https://xcti-onox-8bdw.n7e.xano.io/api:1k5jblUW/chef_notification",
+    chefReview: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/chef_review",
     message: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/message",
     operator: "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/operator",
     cuisines:

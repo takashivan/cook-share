@@ -6,7 +6,8 @@ import { ChevronLeft, ChevronRight, Clock, MapPin, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { getAllJobs, Job } from "@/lib/api/job";
+import { getAllJobs, getJobDetails } from "@/lib/api/job";
+import type { Job, JobWithRestaurant } from "@/types";
 import { Header } from "@/components/layout/header";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/lib/redux/store";
@@ -14,7 +15,7 @@ import { fetchJobs } from "@/lib/redux/slices/jobsSlice";
 import { Card } from "@/components/ui/card";
 
 export default function Home() {
-  const [jobs, setJobs] = useState<Job[]>([]);
+  const [jobs, setJobs] = useState<JobWithRestaurant[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toLocaleDateString("ja-JP", { month: "2-digit", day: "2-digit" })
   );
@@ -25,7 +26,11 @@ export default function Home() {
     jobs: reduxJobs,
     loading: isLoading,
     error,
-  } = useSelector((state: RootState) => state.jobs);
+  } = useSelector((state: RootState) => state.jobs) as {
+    jobs: JobWithRestaurant[];
+    loading: boolean;
+    error: string | null;
+  };
 
   // 次の7日分の日付を生成
   const dates = Array.from({ length: 7 }, (_, i) => {
@@ -85,9 +90,9 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
               <div className="col-span-1 md:col-span-3 py-8">
                 <h1 className="text-xl font-bold mb-2">
-                  なんかキャッチコピーとか
+                  料理人が自由に輝き、
                   <br className="md:hidden" />
-                  入れたくはある
+                  創造性あふれる食の世界を創る
                 </h1>
                 <div className="flex gap-2 mt-4">
                   <Button variant="outline" size="sm" className="rounded-full">
@@ -188,7 +193,7 @@ export default function Home() {
           <div className="container mx-auto px-4">
             <h1 className="text-2xl font-bold mb-6">新着求人</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {reduxJobs.map((job: Job) => (
+              {reduxJobs.map((job: JobWithRestaurant) => (
                 <Link key={job.id} href={`/job/${job.id}`} className="">
                   <Card className="h-full hover:shadow-lg transition-shadow">
                     <div className="relative h-48">
@@ -198,10 +203,17 @@ export default function Home() {
                         fill
                         className="object-cover rounded-t-lg"
                       />
+                      <div className="absolute bottom-4 left-4 bg-white text-black px-3 py-2 rounded-lg text-sm font-bold shadow-md">
+                        {new Date(job.work_date).toLocaleDateString("ja-JP", {
+                          month: "2-digit",
+                          day: "2-digit",
+                          weekday: "short",
+                        })}
+                      </div>
                     </div>
                     <div className="p-4">
                       <div className="text-xs text-gray-500 mb-1">
-                        求人 飲食店
+                        {job.restaurant.name}
                       </div>
                       <h3 className="font-bold text-sm mb-2">{job.title}</h3>
 
@@ -228,35 +240,24 @@ export default function Home() {
 
                       <div className="flex items-center text-xs text-gray-500 mb-1">
                         <MapPin className="h-3 w-3 mr-1" />
-                        <span>東京都台東区</span>
+                        <span>{job.restaurant.address}</span>
+                      </div>
+                      <div className="flex items-center text-xs text-gray-500 mb-3">
+                        <span>
+                          {job.restaurant.cuisine_category &&
+                          job.restaurant.cuisine_category.length > 0
+                            ? job.restaurant.cuisine_category
+                                .map((cat) => cat.category)
+                                .join(", ")
+                            : "ジャンル未設定"}
+                        </span>
                       </div>
 
                       <div className="flex items-center text-xs text-gray-500 mb-3">
                         <span>時給 {job.hourly_rate.toLocaleString()}円</span>
                       </div>
 
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-xs rounded-full">
-                          日本料理
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-xs rounded-full">
-                          時給
-                        </Button>
-                        {job.transportation && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-xs rounded-full">
-                            交通費
-                          </Button>
-                        )}
-                      </div>
+                      <div className="flex gap-2"></div>
                     </div>
                   </Card>
                 </Link>
