@@ -148,6 +148,10 @@ export const getCurrentUser = async (): Promise<UserProfile> => {
   return apiRequest<UserProfile>(`${AUTH_URL}/me`, "GET");
 };
 
+export const verifyEmail = async (token: string, user_id: string) => {
+  return apiRequest(`${AUTH_URL}/verify-email`, "POST", { token, user_id });
+};
+
 export const logout = () => {
   clearAuthToken("chef");
   clearCurrentUser("chef");

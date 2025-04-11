@@ -66,7 +66,7 @@ export default function ChefLayout({
             </SheetTrigger>
             <SheetContent side="right" className="p-0 w-full max-w-xs">
               <div className="flex flex-col h-full">
-                <div className="p-6 space-y-6">
+                <div className="p-6 space-y-6 mt-10">
                   <Link
                     href="/chef/dashboard"
                     className="flex items-center justify-between py-4 border-b"
