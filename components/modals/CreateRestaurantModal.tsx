@@ -104,7 +104,10 @@ export const CreateRestaurantModal = ({
       formData.append("companies_id", companyId);
       formData.append("name", data.name);
       formData.append("address", data.address);
-      formData.append("restaurant_cuisine_id", selectedCuisines.join(","));
+      // 配列として送信
+      selectedCuisines.forEach((id) => {
+        formData.append("restaurant_cuisine_id[]", id.toString());
+      });
       formData.append("is_active", String(data.is_active));
 
       // オプショナルフィールドを追加（値が存在する場合のみ）
