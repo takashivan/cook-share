@@ -24,6 +24,10 @@ const aPIs: ApiDefinition[] = [
     url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:3LZoUG6X?type=json&token=",
   },
   {
+    outputDir: "notification",
+    url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:1k5jblUW?type=json&token=",
+  },
+  {
     outputDir: "operator",
     url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:grw3Vlqa?type=json&token=",
   },
