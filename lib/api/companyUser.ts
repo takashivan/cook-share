@@ -105,6 +105,10 @@ export const register = async (
   };
 };
 
+export const verifyEmail = async (token: string, user_id: string) => {
+  return apiRequest(`${AUTH_URL}/verify-email`, "POST", { token, user_id });
+};
+
 export const getCurrentUser = async (): Promise<CompanyUser> => {
   const response = await apiRequest<{
     id: string;
@@ -153,10 +157,10 @@ export const getCompanyUserByCompanyId = (
 };
 
 export const updateCompanyUser = async (
-  userId: string,
+  companyuser_id: string,
   userData: Partial<CompanyUser>
 ): Promise<CompanyUser> => {
-  return apiRequest(`${BASE_URL}/users/${userId}`, "PATCH", userData);
+  return apiRequest(`${BASE_URL}/${companyuser_id}`, "PATCH", userData);
 };
 
 export const getCompanyProfile = async (): Promise<Company> => {

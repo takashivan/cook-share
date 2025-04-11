@@ -1,6 +1,7 @@
 // lib/api/company.ts - 会社関連 API
 
 import { API_CONFIG, apiRequest } from "./config";
+import { CompanyUser } from "./companyUser";
 
 const BASE_URL = API_CONFIG.baseURLs.company;
 
@@ -17,6 +18,11 @@ export interface Company {
   updated_at?: string;
   status: string;
   business_registration_number: string;
+}
+
+export interface initializeCompanyResponse {
+  company: Company;
+  companyUser: CompanyUser;
 }
 
 export interface Location {
@@ -148,6 +154,18 @@ export const updateLocation = (
 
 export const deleteLocation = (locationId: string): Promise<void> => {
   return apiRequest(`${BASE_URL}/locations/${locationId}`, "DELETE");
+};
+
+export const initializeCompany = (
+  companyuser_id: string,
+  photo: string,
+  companyData: Partial<Company>
+): Promise<initializeCompanyResponse> => {
+  return apiRequest(`${BASE_URL}/initial`, "POST", {
+    companyUser_id: companyuser_id,
+    photo: photo,
+    ...companyData,
+  });
 };
 
 // ジョブ関連
