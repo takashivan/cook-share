@@ -26,33 +26,35 @@ interface ApplicationWithJob extends Application {
   };
 }
 
-useEffect(() => {
-  const initLiff = async () => {
-    try {
-      await liff.init({
-        liffId: "2007239287-yqkpjQBl",
-        withLoginOnExternalBrowser: true, // ← これめっちゃ重要！
-      });
-
-      if (!liff.isLoggedIn()) {
-        liff.login(); // 自動でログイン画面に遷移
-        return;
-      }
-
-      const profile = await liff.getProfile();
-      console.log("LINE userId:", profile.userId);
-    } catch (err) {
-      console.error("LIFF init error", err);
-    }
-  };
-
-  initLiff();
-}, []);
 export default function ChefDashboard() {
   const { user } = useAuth();
+  const [workSessions, setWorkSessions] = useState<WorkSessionWithJob[]>([]);
   const [isUpcomingJob, setIsUpcomingJob] = useState(false);
 
-  const { data: workSessions = [] } = useSWR<WorkSessionWithJob[]>(
+  useEffect(() => {
+    const initLiff = async () => {
+      try {
+        await liff.init({
+          liffId: "2007239287-yqkpjQBl",
+          withLoginOnExternalBrowser: true,
+        });
+
+        if (!liff.isLoggedIn()) {
+          liff.login();
+          return;
+        }
+
+        const profile = await liff.getProfile();
+        console.log("LINE userId:", profile.userId);
+      } catch (err) {
+        console.error("LIFF init error", err);
+      }
+    };
+
+    initLiff();
+  }, []);
+
+  const { data: workSessionsData = [] } = useSWR<WorkSessionWithJob[]>(
     "workSessions",
     async () => {
       const result = await workSessionApi.getWorkSessionsToDoByUserId(
@@ -62,20 +64,20 @@ export default function ChefDashboard() {
     }
   );
 
-  const upcomingJobs = workSessions.filter(
+  const upcomingJobs = workSessionsData.filter(
     (session) => session.status === "SCHEDULED"
   );
 
-  const inProgressJobs = workSessions.filter(
+  const inProgressJobs = workSessionsData.filter(
     (session) => session.status === "IN_PROGRESS"
   );
 
   useEffect(() => {
-    const hasUpcomingJob = workSessions.some(
+    const hasUpcomingJob = workSessionsData.some(
       (session) => session.status === "SCHEDULED"
     );
     setIsUpcomingJob(hasUpcomingJob);
-  }, [workSessions]);
+  }, [workSessionsData]);
 
   // const { data: applications } = useSWR<ApplicationWithJob[]>(
   //   user ? ["applications", user.id.toString()] : null,
