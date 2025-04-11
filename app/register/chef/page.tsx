@@ -123,6 +123,13 @@ export default function ChefRegisterPage() {
             </form>
             <div className="mt-4 text-center">
               <Link
+                href="/login"
+                className="text-sm text-primary hover:underline">
+                シェフアカウントをお持ちの方はこちら
+              </Link>
+            </div>
+            <div className="mt-4 text-center">
+              <Link
                 href="/register/company"
                 className="text-sm text-primary hover:underline">
                 企業アカウントの登録はこちら

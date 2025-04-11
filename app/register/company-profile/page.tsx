@@ -84,12 +84,13 @@ export default function CompanyProfilePage() {
       );
       console.log("Initialized company:", initializedCompany);
 
-      // // ユーザー情報を更新して再ログイン
-      // const token = getAuthToken("company");
-      // if (!token) {
-      //   throw new Error("認証トークンが見つかりません");
-      // }
-      // await login(token, initializedCompany.companyUser);
+      // ユーザー情報を更新して再ログイン
+      const token = getAuthToken("company");
+      if (!token) {
+        throw new Error("認証トークンが見つかりません");
+      }
+      // 修正後
+      await login(token, initializedCompany.companyUser);
 
       toast({
         title: "会社情報を登録しました",
