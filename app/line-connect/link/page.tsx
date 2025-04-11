@@ -8,9 +8,11 @@ import { getAuthToken } from "@/lib/api/config";
 export default function LinkPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const lineUserId = searchParams.get("line_user_id");
-  const name = searchParams.get("name");
-  const picture = searchParams.get("picture");
+
+  const lineUserId = searchParams.get("line_user_id") || "";
+  const name = searchParams.get("name") || "";
+  const picture = searchParams.get("picture") || "";
+
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLink = async () => {
@@ -24,7 +26,7 @@ export default function LinkPage() {
         return;
       }
 
-      await LinkLineId(lineUserId, name, picture || "");
+      await LinkLineId(lineUserId, name, picture);
       router.push("/chef/mypage");
     } catch (error) {
       console.error("Failed to link line account:", error);
