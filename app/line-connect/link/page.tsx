@@ -1,19 +1,38 @@
 "use client";
-
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { LinkLineId } from "@/lib/api/line";
 import { getAuthToken } from "@/lib/api/config";
 
 export default function LinkPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const lineUserId = searchParams.get("line_user_id") || "";
-  const name = searchParams.get("name") || "";
-  const picture = searchParams.get("picture") || "";
-
+  const [lineUserId, setLineUserId] = useState("");
+  const [name, setName] = useState("");
+  const [picture, setPicture] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        const liff = (await import("@line/liff")).default;
+        await liff.init({
+          liffId: "実際のLIFF ID",
+          withLoginOnExternalBrowser: true,
+        });
+        if (!liff.isLoggedIn()) {
+          liff.login();
+          return;
+        }
+        const profile = await liff.getProfile();
+        setLineUserId(profile.userId);
+        setName(profile.displayName);
+        setPicture(profile.pictureUrl || "");
+      } catch (err) {
+        console.error("LIFF初期化エラー:", err);
+      }
+    };
+    init();
+  }, []);
 
   const handleLink = async () => {
     if (!lineUserId || !name) return;
