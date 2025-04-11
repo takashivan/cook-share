@@ -29,10 +29,14 @@ export default function LiffPage() {
         const picture = profile.pictureUrl;
 
         const response = await CheckLineUser(lineUserId);
+        console.log("CheckLineUser response:", response); // デバッグ用
 
-        if (response) {
+        // レスポンスの構造に応じて条件を修正
+        if (response && response.count > 0) {
+          // 既に連携されている場合
           router.push("/chef/dashboard");
         } else {
+          // 未連携の場合
           router.push(
             `/line-connect/link?line_user_id=${encodeURIComponent(lineUserId || "")}&name=${encodeURIComponent(name || "")}&picture=${encodeURIComponent(picture || "")}`
           );
