@@ -102,10 +102,10 @@ const ApplicantCard = ({
             {application.status === "APPLIED"
               ? "応募中"
               : application.status === "ACCEPTED"
-              ? "採用"
-              : application.status === "REJECTED"
-              ? "不採用"
-              : application.status}
+                ? "採用"
+                : application.status === "REJECTED"
+                  ? "不採用"
+                  : application.status}
           </Badge>
         </div>
         <p className="text-sm text-muted-foreground truncate mt-1">
@@ -192,16 +192,19 @@ export default function JobDetailPage(props: {
 
   const { data: workSession } = useSWR<WorkSession | null>(
     selectedApplicantData?.status === "ACCEPTED"
-      ? [`workSession-${selectedApplicantData.id}`]
+      ? [`workSession`, selectedApplicantData.id]
       : null,
-    async ([_]) => {
-      if (!selectedApplicantData) return null;
-      const result = (await workSessionApi.getWorkSessions()) as WorkSession[];
-      // 選択された応募者のワークセッションをフィルタリング
-      const applicantWorkSession = result.find(
-        (ws) => ws.application_id === selectedApplicantData.id.toString()
+    async ([_, applicantId]) => {
+      if (!applicantId) return null;
+      const result = await workSessionApi.getWorkSessionsToDoByJobId(params.id);
+      const workSession = result.find(
+        (ws) => ws.application_id === applicantId.toString()
       );
-      return applicantWorkSession || null;
+      return workSession || null;
+    },
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 10000,
     }
   );
 
@@ -410,7 +413,7 @@ export default function JobDetailPage(props: {
                   <div className="flex justify-between items-center mb-2">
                     <div className="flex items-center gap-2">
                       <span className="font-medium">
-                        {format(new Date(session.created_at), "MM/dd (E)", {
+                        {format(new Date(session.job.work_date), "MM/dd (E)", {
                           locale: ja,
                         })}
                       </span>
@@ -665,8 +668,8 @@ export default function JobDetailPage(props: {
                             {selectedApplicantData.status === "APPLIED"
                               ? "応募中"
                               : selectedApplicantData.status === "ACCEPTED"
-                              ? "採用"
-                              : "不採用"}
+                                ? "採用"
+                                : "不採用"}
                           </Badge>
                         </div>
                       </div>
