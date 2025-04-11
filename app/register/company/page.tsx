@@ -138,6 +138,20 @@ export default function CompanyRegisterPage() {
             </form>
           </CardContent>
         </Card>
+        <div className="mt-4 text-center">
+          <Link
+            href="/login/company"
+            className="text-sm text-primary hover:underline">
+            企業アカウントをお持ちの方はこちら
+          </Link>
+        </div>
+        <div className="mt-4 text-center">
+          <Link
+            href="/register/chef"
+            className="text-sm text-primary hover:underline">
+            シェフアカウントの登録はこちら
+          </Link>
+        </div>
       </main>
 
       <footer className="border-t py-6">

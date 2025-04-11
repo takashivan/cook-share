@@ -2,6 +2,7 @@
 
 import { API_CONFIG, apiRequest } from "./config";
 import { CompanyUser } from "./companyUser";
+import { Staff } from "@/types/staff";
 
 const BASE_URL = API_CONFIG.baseURLs.company;
 
@@ -270,6 +271,37 @@ export const getBillingHistory = (
     ? `${BASE_URL}/billing?${queryParams}`
     : `${BASE_URL}/billing`;
   return apiRequest(url, "GET");
+};
+
+export const companyStaffInvite = (email: string, companies_id: string) => {
+  return apiRequest(`${BASE_URL}/staff/invite`, "POST", {
+    email,
+    companies_id,
+  });
+};
+
+interface RestaurantStaffResponse {
+  company: {
+    id: string;
+    created_at: number;
+    name: string;
+    address: string;
+    phone: string;
+  };
+  admin: Array<{
+    id: string;
+    created_at: number;
+    companies_id: string;
+    name: string;
+    email: string;
+  }>;
+}
+
+export const getRestaurantStaff = (restaurant_id: number) => {
+  return apiRequest<RestaurantStaffResponse>(
+    `https://xcti-onox-8bdw.n7e.xano.io/api:3LZoUG6X/restaurant/companyusers/${restaurant_id}`,
+    "GET"
+  );
 };
 
 // 通知関連

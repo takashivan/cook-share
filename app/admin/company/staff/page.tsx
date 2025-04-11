@@ -30,6 +30,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Edit, ExternalLink, MoreHorizontal, Plus, Users } from "lucide-react";
 import Link from "next/link";
+import { AddCompanyStaffModal } from "@/components/modals/AddCompanyStaff";
+import { companyStaffInvite } from "@/lib/api/company";
+import { toast } from "@/hooks/use-toast";
 
 export default function StaffPage() {
   const { user } = useCompanyAuth();
@@ -37,6 +40,7 @@ export default function StaffPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hasMounted, setHasMounted] = useState(false);
+  const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
 
   useEffect(() => {
     setHasMounted(true);
@@ -84,6 +88,23 @@ export default function StaffPage() {
     };
   }, [user?.companies_id, hasMounted]);
 
+  const handleAddStaff = async (email: string) => {
+    try {
+      await companyStaffInvite(email, user?.companies_id.toString() ?? "");
+      toast({
+        title: "招待を送信しました",
+        description: `${email}に招待メールを送信しました。`,
+      });
+    } catch (error) {
+      console.error("Failed to invite staff:", error);
+      toast({
+        title: "エラーが発生しました",
+        description: "招待の送信に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (!hasMounted) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -116,18 +137,25 @@ export default function StaffPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">スタッフ管理</h2>
           <p className="text-muted-foreground">
             スタッフの追加、編集、権限管理を行えます
           </p>
         </div>
-        <Button>
+        <Button onClick={() => setIsAddStaffModalOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           スタッフを追加
         </Button>
       </div>
+
+      <AddCompanyStaffModal
+        isOpen={isAddStaffModalOpen}
+        onClose={() => setIsAddStaffModalOpen(false)}
+        onSubmit={handleAddStaff}
+        companyName="あなたの会社名" // 実際の会社名を渡す
+      />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>

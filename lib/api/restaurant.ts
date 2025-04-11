@@ -74,6 +74,24 @@ export const createRestaurant = async (
   return apiRequest(`${BASE_URL}`, "POST", formData, "company");
 };
 
+export const restaurantStaffInvite = (
+  email: string,
+  restaurant_id: number,
+  companies_id: string,
+  can_edit: boolean,
+  can_manage_jobs: boolean,
+  restaurant_name: string
+) => {
+  return apiRequest(`${BASE_URL}/staff/invite`, "POST", {
+    email,
+    restaurant_id,
+    companies_id,
+    can_edit,
+    can_manage_jobs,
+    restaurant_name,
+  });
+};
+
 // レストラン情報を更新
 export const updateRestaurant = async (
   id: string,
@@ -101,4 +119,12 @@ export const getRestaurantsByCompanyId = async (
   companyId: string
 ): Promise<Restaurant[]> => {
   return apiRequest(`${BASE_URL}/company/${companyId}`, "GET");
+};
+
+export const getRestaurantStaff = async (restaurantId: string) => {
+  const response = await apiRequest(
+    `/restaurants/${restaurantId}/staff`,
+    "GET"
+  );
+  return response;
 };
