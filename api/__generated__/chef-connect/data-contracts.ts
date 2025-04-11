@@ -144,6 +144,9 @@ export type ByRestaurantDetailData = {
     dateofbirth?: string | null;
     profile_image?: string;
     is_approved?: boolean;
+    line_user_id?: string;
+    line_display_name?: string;
+    line_notification_enabled?: boolean;
   };
 }[];
 
@@ -262,6 +265,9 @@ export interface BySessionDetailData {
     dateofbirth?: string | null;
     profile_image?: string;
     is_approved?: boolean;
+    line_user_id?: string;
+    line_display_name?: string;
+    line_notification_enabled?: boolean;
   };
 }
 
@@ -1691,6 +1697,9 @@ export type ByRestaurantDetailResult = {
     dateofbirth?: string | null;
     profile_image?: string;
     is_approved?: boolean;
+    line_user_id?: string;
+    line_display_name?: string;
+    line_notification_enabled?: boolean;
   };
 }[];
 
@@ -1782,6 +1791,9 @@ export interface BySessionDetailResult {
     dateofbirth?: string | null;
     profile_image?: string;
     is_approved?: boolean;
+    line_user_id?: string;
+    line_display_name?: string;
+    line_notification_enabled?: boolean;
   };
   restaurant?: {
     /** @format int64 */
@@ -2023,6 +2035,9 @@ export interface UserDetailData {
   dateofbirth?: string | null;
   profile_image?: string;
   is_approved?: boolean;
+  line_user_id?: string;
+  line_display_name?: string;
+  line_notification_enabled?: boolean;
 }
 
 export interface UserPartialUpdatePayload {
@@ -2043,6 +2058,9 @@ export interface UserPartialUpdatePayload {
   dateofbirth?: string | null;
   profile_image?: string;
   is_approved?: boolean;
+  line_user_id?: string;
+  line_display_name?: string;
+  line_notification_enabled?: boolean;
   /** @format binary */
   photo?: File | null;
 }
@@ -2076,6 +2094,9 @@ export type UserListData = {
   dateofbirth?: string | null;
   profile_image?: string;
   is_approved?: boolean;
+  line_user_id?: string;
+  line_display_name?: string;
+  line_notification_enabled?: boolean;
 }[];
 
 export interface UserCreatePayload {
@@ -2096,6 +2117,9 @@ export interface UserCreatePayload {
   dateofbirth?: string | null;
   profile_image?: string;
   is_approved?: boolean;
+  line_user_id?: string;
+  line_display_name?: string;
+  line_notification_enabled?: boolean;
 }
 
 export interface UserCreateData {
@@ -2125,6 +2149,9 @@ export interface UserCreateData {
   dateofbirth?: string | null;
   profile_image?: string;
   is_approved?: boolean;
+  line_user_id?: string;
+  line_display_name?: string;
+  line_notification_enabled?: boolean;
 }
 
 export interface ApplicationDetailParams {
@@ -2269,6 +2296,9 @@ export type RestaurantTodoDetailData = {
     dateofbirth?: string | null;
     profile_image?: string;
     is_approved?: boolean;
+    line_user_id?: string;
+    line_display_name?: string;
+    line_notification_enabled?: boolean;
   };
   job?: {
     /** @format int64 */
