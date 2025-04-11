@@ -153,5 +153,5 @@ export interface Restaurant {
   address?: string;
   companies_id: string;
   is_approved: boolean;
-  cuisine_category: CuisineCategory[];
+  restaurant_cuisine_id: CuisineCategory[];
 }

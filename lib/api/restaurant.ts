@@ -71,7 +71,7 @@ export const createRestaurant = async (
     throw new Error("Invalid UUID format for companies_id");
   }
 
-  return apiRequest(`${BASE_URL}`, "POST", formData);
+  return apiRequest(`${BASE_URL}`, "POST", formData, "company");
 };
 
 // レストラン情報を更新
