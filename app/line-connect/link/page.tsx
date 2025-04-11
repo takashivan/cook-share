@@ -16,7 +16,7 @@ export default function LinkPage() {
       try {
         const liff = (await import("@line/liff")).default;
         await liff.init({
-          liffId: "実際のLIFF ID",
+          liffId: "2007239287-yqkpjQBl",
           withLoginOnExternalBrowser: true,
         });
         if (!liff.isLoggedIn()) {
