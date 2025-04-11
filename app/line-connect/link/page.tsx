@@ -1,14 +1,18 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LinkLineId } from "@/lib/api/line";
-import { getAuthToken } from "@/lib/api/config";
+import { login } from "@/lib/api/user";
 
 export default function LinkPage() {
   const router = useRouter();
+
   const [lineUserId, setLineUserId] = useState("");
   const [name, setName] = useState("");
   const [picture, setPicture] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -35,20 +39,22 @@ export default function LinkPage() {
   }, []);
 
   const handleLink = async () => {
-    if (!lineUserId || !name) return;
+    if (!lineUserId || !name || !email || !password) return;
 
     setIsLoading(true);
     try {
-      const token = getAuthToken();
-      if (!token) {
-        router.push("/login");
+      // ① メール＋パスワードでログイン
+      const loginRes = await login({ email, password });
+      if (!loginRes.authToken) {
+        alert("ログイン失敗しました");
         return;
       }
 
-      await LinkLineId(lineUserId, name, picture);
+      // ② LINE IDを紐づける（トークン付きで）
+      await LinkLineId(lineUserId, name, picture, loginRes.authToken);
       router.push("/chef/mypage");
     } catch (error) {
-      console.error("Failed to link line account:", error);
+      console.error("連携失敗:", error);
     } finally {
       setIsLoading(false);
     }
@@ -57,7 +63,21 @@ export default function LinkPage() {
   return (
     <div>
       <h1>LINEアカウント連携</h1>
-      {name && <p>ようこそ、{name}さん</p>}
+      {name && <p>こんにちは、{name}さん</p>}
+
+      <input
+        type="email"
+        placeholder="登録済みのメールアドレス"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <input
+        type="password"
+        placeholder="パスワード"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+
       <button onClick={handleLink} disabled={isLoading}>
         {isLoading ? "連携中..." : "連携する"}
       </button>
