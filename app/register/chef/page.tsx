@@ -121,6 +121,13 @@ export default function ChefRegisterPage() {
                 {isSubmitting ? "登録中..." : "登録する"}
               </Button>
             </form>
+            <div className="mt-4 text-center">
+              <Link
+                href="/register/company"
+                className="text-sm text-primary hover:underline">
+                企業アカウントの登録はこちら
+              </Link>
+            </div>
           </CardContent>
         </Card>
       </main>
