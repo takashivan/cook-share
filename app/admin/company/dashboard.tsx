@@ -509,14 +509,14 @@ export function CompanyDashboard() {
                                   job.status === "published"
                                     ? "bg-green-100 text-green-800"
                                     : job.status === "draft"
-                                    ? "bg-gray-100 text-gray-800"
-                                    : "bg-yellow-100 text-yellow-800"
+                                      ? "bg-gray-100 text-gray-800"
+                                      : "bg-yellow-100 text-yellow-800"
                                 }`}>
                                 {job.status === "published"
                                   ? "公開中"
                                   : job.status === "draft"
-                                  ? "下書き"
-                                  : "終了"}
+                                    ? "下書き"
+                                    : "終了"}
                               </div>
                             </TableCell>
                             <TableCell>-</TableCell>
@@ -604,14 +604,14 @@ export function CompanyDashboard() {
                                 job.status === "published"
                                   ? "bg-green-100 text-green-800"
                                   : job.status === "draft"
-                                  ? "bg-gray-100 text-gray-800"
-                                  : "bg-yellow-100 text-yellow-800"
+                                    ? "bg-gray-100 text-gray-800"
+                                    : "bg-yellow-100 text-yellow-800"
                               }`}>
                               {job.status === "published"
                                 ? "公開中"
                                 : job.status === "draft"
-                                ? "下書き"
-                                : "終了"}
+                                  ? "下書き"
+                                  : "終了"}
                             </div>
                           </div>
                         </div>
