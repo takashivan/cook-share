@@ -13,7 +13,7 @@ export default function LiffPage() {
       try {
         const liff = (await import("@line/liff")).default;
         await liff.init({
-          liffId: "YOUR_LIFF_ID",
+          liffId: "2007239287-yqkpjQBl",
           withLoginOnExternalBrowser: true,
         });
 
@@ -30,10 +30,10 @@ export default function LiffPage() {
         const response = await CheckLineUser(lineUserId);
 
         if (response) {
-          router.push("/chef/line-connect/link");
+          router.push("/line-connect/link");
         } else {
           router.push(
-            `/chef/line-connect/link?line_user_id=${encodeURIComponent(lineUserId || "")}&name=${encodeURIComponent(name || "")}&picture=${encodeURIComponent(picture || "")}`
+            `/line-connect/link?line_user_id=${encodeURIComponent(lineUserId || "")}&name=${encodeURIComponent(name || "")}&picture=${encodeURIComponent(picture || "")}`
           );
         }
       } catch (error) {
