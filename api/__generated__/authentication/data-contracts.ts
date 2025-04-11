@@ -61,6 +61,9 @@ export interface GetAuthData {
   dateofbirth?: string | null;
   profile_image?: string;
   is_approved?: boolean;
+  line_user_id?: string;
+  line_display_name?: string;
+  line_notification_enabled?: boolean;
 }
 
 export interface SignupCreatePayload {
@@ -99,5 +102,8 @@ export interface SignupCreateData {
     dateofbirth?: string | null;
     profile_image?: string;
     is_approved?: boolean;
+    line_user_id?: string;
+    line_display_name?: string;
+    line_notification_enabled?: boolean;
   };
 }
