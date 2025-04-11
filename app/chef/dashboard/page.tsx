@@ -13,7 +13,6 @@ import { workSessionApi } from "@/lib/api/workSession";
 import { Button } from "@/components/ui/button";
 import { RestaurantNotificationDropdown } from "@/components/notifications/RestaurantNotificationDropdown";
 import { ChefNotificationDropdown } from "@/components/notifications/ChefNotificationDropdown";
-import { liff } from "@line/liff";
 
 interface ApplicationWithJob extends Application {
   job?: Job & {
@@ -30,29 +29,6 @@ export default function ChefDashboard() {
   const { user } = useAuth();
   const [workSessions, setWorkSessions] = useState<WorkSessionWithJob[]>([]);
   const [isUpcomingJob, setIsUpcomingJob] = useState(false);
-
-  useEffect(() => {
-    const initLiff = async () => {
-      try {
-        await liff.init({
-          liffId: "2007239287-yqkpjQBl",
-          withLoginOnExternalBrowser: true,
-        });
-
-        if (!liff.isLoggedIn()) {
-          liff.login();
-          return;
-        }
-
-        const profile = await liff.getProfile();
-        console.log("LINE userId:", profile.userId);
-      } catch (err) {
-        console.error("LIFF init error", err);
-      }
-    };
-
-    initLiff();
-  }, []);
 
   const { data: workSessionsData = [] } = useSWR<WorkSessionWithJob[]>(
     "workSessions",

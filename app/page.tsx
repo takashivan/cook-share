@@ -244,9 +244,9 @@ export default function Home() {
                       </div>
                       <div className="flex items-center text-xs text-gray-500 mb-3">
                         <span>
-                          {job.restaurant.cuisine_category &&
-                          job.restaurant.cuisine_category.length > 0
-                            ? job.restaurant.cuisine_category
+                          {job.restaurant.restaurant_cuisine_id &&
+                          job.restaurant.restaurant_cuisine_id.length > 0
+                            ? job.restaurant.restaurant_cuisine_id
                                 .map((cat) => cat.category)
                                 .join(", ")
                             : "ジャンル未設定"}

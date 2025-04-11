@@ -20,6 +20,10 @@ import { useRouter } from "next/navigation";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { createCompany } from "@/lib/api/company";
 import { updateCompanyUser } from "@/lib/api/companyUser";
+import {
+  initializeCompany,
+  initializeCompanyResponse,
+} from "@/lib/api/company";
 import { getAuthToken } from "@/lib/api/config";
 import { toast } from "@/hooks/use-toast";
 
@@ -57,7 +61,7 @@ export default function CompanyProfilePage() {
     try {
       const formData = new FormData(e.currentTarget);
       const companyData = {
-        name: (formData.get("name") as string) || user.name,
+        name: formData.get("company_name") as string,
         description: formData.get("description") as string,
         address: formData.get("address") as string,
         phone: formData.get("phone") as string,
@@ -71,21 +75,21 @@ export default function CompanyProfilePage() {
       console.log("Creating company with data:", companyData);
 
       // 会社を作成
-      const createdCompany = await createCompany(companyData);
-      console.log("Created company:", createdCompany);
+      // const createdCompany = await createCompany(companyData);
+      // console.log("Created company:", createdCompany);
+      const initializedCompany = await initializeCompany(
+        user.id,
+        profileImage || "",
+        companyData
+      );
+      console.log("Initialized company:", initializedCompany);
 
-      // ユーザーのcompanies_idを更新
-      const updatedUser = await updateCompanyUser(user.id, {
-        companies_id: createdCompany.id,
-      });
-      console.log("Updated user:", updatedUser);
-
-      // ユーザー情報を更新して再ログイン
-      const token = getAuthToken("company");
-      if (!token) {
-        throw new Error("認証トークンが見つかりません");
-      }
-      await login(token, updatedUser);
+      // // ユーザー情報を更新して再ログイン
+      // const token = getAuthToken("company");
+      // if (!token) {
+      //   throw new Error("認証トークンが見つかりません");
+      // }
+      // await login(token, initializedCompany.companyUser);
 
       toast({
         title: "会社情報を登録しました",
@@ -133,6 +137,18 @@ export default function CompanyProfilePage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* 社名 */}
+              <div className="space-y-3">
+                <Label htmlFor="address" className="text-base">
+                  社名
+                </Label>
+                <Input
+                  id="company_name"
+                  name="company_name"
+                  placeholder="株式会社CHEFDOM"
+                  required
+                />
+              </div>
               {/* 会社概要 */}
               <div className="space-y-3">
                 <Label htmlFor="description" className="text-base">
