@@ -31,6 +31,8 @@ export interface Restaurant {
   created_at?: string;
   updated_at?: string;
   company?: Company;
+  photo?: string;
+  restaurant_cuisine_id?: number[] | number;
 }
 
 export type CreateRestaurantData = {
