@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -16,9 +17,11 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { ChefProfileEditModal } from "@/components/modals/ChefProfileEditModal";
 
 export default function ChefProfile() {
   const { user } = useAuth();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   if (!user) {
     return (
@@ -27,6 +30,27 @@ export default function ChefProfile() {
       </div>
     );
   }
+
+  const handleEditModalClose = () => {
+    setIsEditModalOpen(false);
+  };
+
+  const handleSave = (data: any) => {
+    console.log(data);
+  };
+
+  const demoProfileData = {
+    name: user.name,
+    email: user.email,
+    gender: user.gender || "未設定",
+    phone: user.phone || "未設定",
+    address: user.address || "未設定",
+    skills: ["和食", "洋食", "中華"],
+    experience: user.experience_level || "未設定",
+    certifications: ["調理師免許", "食品衛生責任者"],
+    bio: user.bio || "自己紹介が未設定です",
+    profileImage: user.profile_image || "",
+  };
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-md">
@@ -103,11 +127,23 @@ export default function ChefProfile() {
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold">スキル・経験</h2>
-          <Button variant="ghost" size="sm">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setIsEditModalOpen(true);
+            }}>
             <Edit className="h-4 w-4 mr-2" />
             編集
           </Button>
         </div>
+
+        <ChefProfileEditModal
+          isOpen={isEditModalOpen}
+          onClose={handleEditModalClose}
+          onSave={handleSave}
+          profileData={demoProfileData}
+        />
 
         <div className="space-y-4">
           <div>
