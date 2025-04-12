@@ -47,6 +47,10 @@ export interface UserProfile {
   gender?: string;
   phone?: string;
   address?: string;
+  is_active?: boolean;
+  is_verified?: boolean;
+  experience?: string;
+  profileImage?: string;
 }
 
 // 共通の型定義
