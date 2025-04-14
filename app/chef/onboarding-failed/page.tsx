@@ -13,7 +13,7 @@ import { AlertTriangle, ArrowLeft, HelpCircle } from "lucide-react";
 
 export default function OnboardingFailedPage() {
   return (
-    <div className="container max-w-md py-12">
+    <div className="container mx-auto max-w-md py-12">
       <Card className="border-2 border-red-200">
         <CardHeader className="text-center pb-4">
           <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
