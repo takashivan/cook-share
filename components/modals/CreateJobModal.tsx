@@ -133,7 +133,7 @@ export const CreateJobModal = ({
                           required: "タイトルは必須です",
                         })}
                         className="mt-1"
-                        placeholder="例：【週2日～】ホールスタッフ募集！"
+                        placeholder="例：超人気店で仕込みのお手伝いをしてください！"
                       />
                       {errors.title && (
                         <p className="mt-1 text-sm text-red-600">
@@ -186,8 +186,8 @@ export const CreateJobModal = ({
                           {...register("hourly_rate", {
                             required: "時給は必須です",
                             min: {
-                              value: 1000,
-                              message: "時給は1000円以上で設定してください",
+                              value: 1800,
+                              message: "時給は1800円以上で設定してください",
                             },
                           })}
                           className="mt-1"
@@ -254,7 +254,7 @@ export const CreateJobModal = ({
                         id="skill"
                         {...register("skill")}
                         className="mt-1"
-                        placeholder="例：接客経験、調理師免許"
+                        placeholder="例：調理師免許"
                       />
                     </div>
 
@@ -295,7 +295,7 @@ export const CreateJobModal = ({
                         id="point"
                         {...register("point")}
                         className="mt-1"
-                        placeholder="例：未経験者歓迎、研修制度あり"
+                        placeholder="例：美味しいまかないがあります！"
                       />
                     </div>
 
