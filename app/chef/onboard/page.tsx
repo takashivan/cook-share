@@ -35,8 +35,8 @@ export default function OnboardPage() {
       }
       const res = await createStripeAccountLink(user_id);
 
-      if (res.url) {
-        window.location.href = res.url;
+      if (res.response.result.url) {
+        window.location.href = res.response.result.url;
       } else {
         throw new Error("リンク取得に失敗しました");
       }
