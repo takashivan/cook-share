@@ -17,6 +17,7 @@ import {
   CreditCard,
   DollarSign,
   Shield,
+  JapaneseYenIcon,
 } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from "@/lib/contexts/AuthContext";
@@ -30,6 +31,7 @@ export default function OnboardPage() {
     try {
       // 実際の実装では、認証済みユーザーからchef_idを取得します
       const user_id = user?.id;
+      console.log(user_id);
       if (!user_id) {
         throw new Error("ユーザーIDが見つかりません");
       }
@@ -52,7 +54,7 @@ export default function OnboardPage() {
   }
 
   return (
-    <div className="container max-w-4xl py-12">
+    <div className="container mx-auto max-w-4xl py-12">
       <div className="mb-12 text-center">
         <h1 className="text-3xl font-bold tracking-tight mb-2">
           お支払い情報の登録
@@ -67,10 +69,10 @@ export default function OnboardPage() {
           <CardHeader>
             <div className="flex items-center justify-between mb-2">
               <div className="p-2 rounded-full bg-primary/10">
-                <DollarSign className="h-6 w-6 text-primary" />
+                <JapaneseYenIcon className="h-6 w-6 text-primary" />
               </div>
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/CHEFDOM-58fBNWcjVI9fsYpOIcRycTBIZDyZAX.png"
+                src="/chef_illust/chef_logo.png?height=200&width=400"
                 alt="CHEFDOM"
                 width={100}
                 height={40}

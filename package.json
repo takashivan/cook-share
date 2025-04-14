@@ -30,8 +30,6 @@
     "@reduxjs/toolkit": "^2.6.1",
     "@types/axios": "^0.9.36",
     "@xano/js-sdk": "^2.0.1",
-    "@zxing/browser": "^0.1.5",
-    "@zxing/library": "^0.21.3",
     "axios": "^1.8.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
