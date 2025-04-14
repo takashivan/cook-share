@@ -61,7 +61,7 @@ export default function OnboardingCompletePage() {
   }
 
   return (
-    <div className="container max-w-md py-12">
+    <div className="container mx-auto max-w-md py-12">
       <Card className="border-2">
         <CardHeader className="text-center pb-4">
           <div className="mx-auto mb-4">
