@@ -178,6 +178,22 @@ export const getUserProfile = (userId: UserId): Promise<UserProfile> => {
   return apiRequest<UserProfile>(`${USER_URL}/${userId}`, "GET");
 };
 
+//ストライプ関連
+export const createStripeAccount = async (userId: UserId): Promise<void> => {
+  return apiRequest(`${USER_URL}/${userId}/stripe/create-account`, "POST");
+};
+
+export const createStripeAccountLink = async (
+  user_id: string
+): Promise<{ url: string }> => {
+  const response = await apiRequest<{ url: string }>(
+    `${USER_URL}/stripe/create-account-link`,
+    "POST",
+    { user_id }
+  );
+  return response;
+};
+
 export const updateUserProfile = (
   userId: UserId,
   profileData: ProfileData

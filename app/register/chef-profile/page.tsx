@@ -131,7 +131,7 @@ export default function ChefProfilePage() {
         description: "シェフプロフィールの更新が完了しました。",
       });
 
-      router.push("/");
+      router.push("/chef/onboard");
     } catch (error) {
       console.error("Profile update failed:", error);
       toast({
