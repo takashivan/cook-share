@@ -185,12 +185,10 @@ export const createStripeAccount = async (userId: UserId): Promise<void> => {
 
 export const createStripeAccountLink = async (
   user_id: string
-): Promise<{ url: string }> => {
-  const response = await apiRequest<{ url: string }>(
-    `${USER_URL}/stripe/create-account-link`,
-    "POST",
-    { user_id }
-  );
+): Promise<{ response: { result: { url: string } } }> => {
+  const response = await apiRequest<{
+    response: { result: { url: string } };
+  }>(`${USER_URL}/stripe/create-account-link`, "POST", { user_id });
   return response;
 };
 
