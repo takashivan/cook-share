@@ -5,11 +5,11 @@ const API_URL = API_CONFIG.baseURLs.companyUserNotification;
 export type CompanyUserNotification = {
   id: number;
   company_user_id: number;
-  notification_type: string;
-  message: string;
+  type: string;
+  content: string;
   read: boolean;
-  created_at: string;
-  updated_at: string;
+  created_at: number;
+  updated_at: number;
 };
 
 export type CompanyUserNotificationType =

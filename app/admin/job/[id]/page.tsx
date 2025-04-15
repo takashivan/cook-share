@@ -453,13 +453,15 @@ export default function JobDetailPage(props: {
                 <CardHeader className="px-4 py-3">
                   <CardTitle className="text-lg">応募者一覧</CardTitle>
                   <Tabs
-                    defaultValue="APPLIED"
+                    defaultValue="ACCEPTED"
                     className="w-full"
                     onValueChange={() => setSelectedApplicant(null)}>
-                    <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="APPLIED">応募中</TabsTrigger>
-                      <TabsTrigger value="ACCEPTED">採用</TabsTrigger>
-                      <TabsTrigger value="REJECTED">不採用</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-2">
+                      {/* <TabsTrigger value="APPLIED">応募中</TabsTrigger> */}
+                      <TabsTrigger value="ACCEPTED">
+                        来てくれるシェフ
+                      </TabsTrigger>
+                      <TabsTrigger value="CENCELLED">キャンセル</TabsTrigger>
                     </TabsList>
                     <TabsContent value="APPLIED" className="mt-4">
                       <div className="divide-y">
