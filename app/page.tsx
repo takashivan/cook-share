@@ -14,6 +14,7 @@ import { RootState, AppDispatch } from "@/lib/redux/store";
 import { fetchJobs } from "@/lib/redux/slices/jobsSlice";
 import { Card } from "@/components/ui/card";
 import { LoadingScreen } from "@/components/LoadingScreen";
+import { Badge } from "@/components/ui/badge";
 
 export default function Home() {
   const [jobs, setJobs] = useState<JobWithRestaurant[]>([]);
@@ -251,9 +252,15 @@ export default function Home() {
                             : "ジャンル未設定"}
                         </span>
                       </div>
-
                       <div className="flex items-center text-xs text-gray-500 mb-3">
-                        <span>時給 {job.hourly_rate.toLocaleString()}円</span>
+                        <Badge
+                          variant="secondary"
+                          className="bg-black text-white">
+                          残り{job.number_of_spots}名募集中
+                        </Badge>
+                      </div>
+                      <div className="flex items-center text-xs text-gray-500 mb-3">
+                        <span>報酬額 {job.fee.toLocaleString()}円</span>
                       </div>
 
                       <div className="flex gap-2"></div>

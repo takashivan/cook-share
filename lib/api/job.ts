@@ -98,6 +98,8 @@ export interface JobDetail {
     note: string;
     point: string;
     transportation: string;
+    number_of_spots: number;
+    fee: number;
   };
   restaurant: {
     id: string;
@@ -133,6 +135,8 @@ export interface Job {
   point: string | null;
   transportation: string;
   is_approved: boolean;
+  number_of_spots: number;
+  fee: number;
 }
 
 export interface GetJobsResponse {
