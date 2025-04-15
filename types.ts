@@ -13,6 +13,8 @@ export interface Job {
   restaurant_id: number;
   image: string;
   creator_id: number;
+  number_of_spots: number;
+  fee: number;
   task: string;
   skill: string;
   whattotake: string;

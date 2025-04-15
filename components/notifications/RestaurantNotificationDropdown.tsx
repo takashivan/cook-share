@@ -124,16 +124,26 @@ export function RestaurantNotificationDropdown({
                   <div className="flex gap-3 w-full">
                     <div
                       className={`w-9 h-9 rounded-full flex items-center justify-center ${getNotificationColor(
-                        notification.notification_type
+                        notification.type
                       )}`}>
-                      {getNotificationIcon(notification.notification_type)}
+                      {getNotificationIcon(notification.type)}
                     </div>
                     <div className="flex-1 space-y-1">
                       <p className="text-sm font-medium leading-none">
-                        {notification.message}
+                        {notification.content}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {notification.created_at}
+                        {new Date(notification.created_at).toLocaleDateString(
+                          "ja-JP",
+                          {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                            weekday: "short",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }
+                        )}
                       </p>
                     </div>
                     {!notification.read && (

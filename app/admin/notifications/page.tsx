@@ -88,8 +88,7 @@ export default function RestaurantNotificationsPage() {
   // 通知をフィルタリングする
   const filteredNotifications = notifications.filter((notification) => {
     if (activeTab === "unread" && notification.read) return false;
-    if (filter !== "all" && notification.notification_type !== filter)
-      return false;
+    if (filter !== "all" && notification.type !== filter) return false;
     return true;
   });
 
@@ -165,28 +164,37 @@ export default function RestaurantNotificationsPage() {
                       <div className="flex gap-3">
                         <div
                           className={`w-10 h-10 rounded-full flex items-center justify-center ${getNotificationColor(
-                            notification.notification_type as CompanyUserNotificationType
+                            notification.type as CompanyUserNotificationType
                           )}`}>
                           {getNotificationIcon(
-                            notification.notification_type as CompanyUserNotificationType
+                            notification.type as CompanyUserNotificationType
                           )}
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-1">
                             <h3 className="font-medium">
-                              {notification.message}
+                              {notification.content}
                             </h3>
                             <span className="text-sm text-muted-foreground">
-                              {notification.created_at}
+                              {new Date(
+                                notification.created_at
+                              ).toLocaleDateString("ja-JP", {
+                                year: "numeric",
+                                month: "2-digit",
+                                day: "2-digit",
+                                weekday: "short",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
                             </span>
                           </div>
                           <Badge
                             variant="outline"
                             className={`text-xs ${getNotificationColor(
-                              notification.notification_type as CompanyUserNotificationType
+                              notification.type as CompanyUserNotificationType
                             )}`}>
                             {getNotificationTypeLabel(
-                              notification.notification_type as CompanyUserNotificationType
+                              notification.type as CompanyUserNotificationType
                             )}
                           </Badge>
                         </div>
@@ -211,28 +219,37 @@ export default function RestaurantNotificationsPage() {
                       <div className="flex gap-3">
                         <div
                           className={`w-10 h-10 rounded-full flex items-center justify-center ${getNotificationColor(
-                            notification.notification_type as CompanyUserNotificationType
+                            notification.type as CompanyUserNotificationType
                           )}`}>
                           {getNotificationIcon(
-                            notification.notification_type as CompanyUserNotificationType
+                            notification.type as CompanyUserNotificationType
                           )}
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-1">
                             <h3 className="font-medium">
-                              {notification.message}
+                              {notification.content}
                             </h3>
                             <span className="text-sm text-muted-foreground">
-                              {notification.created_at}
+                              {new Date(
+                                notification.created_at
+                              ).toLocaleDateString("ja-JP", {
+                                year: "numeric",
+                                month: "2-digit",
+                                day: "2-digit",
+                                weekday: "short",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
                             </span>
                           </div>
                           <Badge
                             variant="outline"
                             className={`text-xs ${getNotificationColor(
-                              notification.notification_type as CompanyUserNotificationType
+                              notification.type as CompanyUserNotificationType
                             )}`}>
                             {getNotificationTypeLabel(
-                              notification.notification_type as CompanyUserNotificationType
+                              notification.type as CompanyUserNotificationType
                             )}
                           </Badge>
                         </div>
