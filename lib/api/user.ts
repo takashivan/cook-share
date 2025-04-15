@@ -47,6 +47,10 @@ export interface UserProfile {
   gender?: string;
   phone?: string;
   address?: string;
+  is_active?: boolean;
+  is_verified?: boolean;
+  experience?: string;
+  profileImage?: string;
 }
 
 // 共通の型定義
@@ -172,6 +176,20 @@ export const resetPassword = (token: string, newPassword: string) => {
 // ユーザープロフィール関連
 export const getUserProfile = (userId: UserId): Promise<UserProfile> => {
   return apiRequest<UserProfile>(`${USER_URL}/${userId}`, "GET");
+};
+
+//ストライプ関連
+export const createStripeAccount = async (userId: UserId): Promise<void> => {
+  return apiRequest(`${USER_URL}/${userId}/stripe/create-account`, "POST");
+};
+
+export const createStripeAccountLink = async (
+  user_id: string
+): Promise<{ response: { result: { url: string } } }> => {
+  const response = await apiRequest<{
+    response: { result: { url: string } };
+  }>(`${USER_URL}/stripe/create-account-link`, "POST", { user_id });
+  return response;
 };
 
 export const updateUserProfile = (

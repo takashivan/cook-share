@@ -1,11 +1,32 @@
-import Link from "next/link"
-import { BarChart3, Calendar, Edit, ExternalLink, MessageSquare, MoreHorizontal, Plus, Users } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
+import Link from "next/link";
+import {
+  BarChart3,
+  Calendar,
+  Edit,
+  ExternalLink,
+  MessageSquare,
+  MoreHorizontal,
+  Plus,
+  Users,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 
 export default function StoreDetail() {
   // 店舗情報（実際のアプリではAPIから取得）
@@ -19,8 +40,9 @@ export default function StoreDetail() {
     email: "info@kurofune.example.com",
     manager: "田中 次郎",
     openingHours: "11:00〜22:00（L.O. 21:30）",
-    description: "明治創業の老舗洋食店。デミグラスソースは自家製で、昔ながらに愛されてきた洋食を提供しています。",
-  }
+    description:
+      "明治創業の老舗洋食店。デミグラスソースは自家製で、昔ながらに愛されてきた洋食を提供しています。",
+  };
 
   const jobs = [
     {
@@ -50,7 +72,7 @@ export default function StoreDetail() {
       applicants: 2,
       newMessages: 1,
     },
-  ]
+  ];
 
   const staff = [
     {
@@ -81,7 +103,7 @@ export default function StoreDetail() {
       status: "休止中",
       joinedDate: "2023/08/20",
     },
-  ]
+  ];
 
   return (
     <div className="space-y-6">
@@ -137,7 +159,9 @@ export default function StoreDetail() {
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{jobs.reduce((total, job) => total + job.applicants, 0)}</div>
+            <div className="text-2xl font-bold">
+              {jobs.reduce((total, job) => total + job.applicants, 0)}
+            </div>
             <p className="text-xs text-muted-foreground">先月比 +5人</p>
           </CardContent>
         </Card>
@@ -151,49 +175,68 @@ export default function StoreDetail() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-1">店舗名</h3>
+                <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                  店舗名
+                </h3>
                 <p>{store.name}</p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-1">住所</h3>
+                <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                  住所
+                </h3>
                 <p>{store.address}</p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-1">電話番号</h3>
+                <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                  電話番号
+                </h3>
                 <p>{store.phone}</p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-1">メールアドレス</h3>
+                <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                  メールアドレス
+                </h3>
                 <p>{store.email}</p>
               </div>
             </div>
             <div className="space-y-4">
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-1">店舗責任者</h3>
+                <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                  店舗責任者
+                </h3>
                 <p>{store.manager}</p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-1">営業時間</h3>
+                <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                  営業時間
+                </h3>
                 <p>{store.openingHours}</p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-1">ジャンル</h3>
+                <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                  ジャンル
+                </h3>
                 <p>{store.type}</p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-1">ステータス</h3>
+                <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                  ステータス
+                </h3>
                 <div
                   className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                    store.status === "営業中" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
-                  }`}
-                >
+                    store.status === "営業中"
+                      ? "bg-green-100 text-green-800"
+                      : "bg-yellow-100 text-yellow-800"
+                  }`}>
                   {store.status}
                 </div>
               </div>
             </div>
           </div>
           <div className="mt-6">
-            <h3 className="text-sm font-medium text-muted-foreground mb-1">店舗説明</h3>
+            <h3 className="text-sm font-medium text-muted-foreground mb-1">
+              店舗説明
+            </h3>
             <p>{store.description}</p>
           </div>
         </CardContent>
@@ -235,7 +278,9 @@ export default function StoreDetail() {
                         <div className="flex items-center gap-2">
                           {job.title}
                           {job.newMessages > 0 && (
-                            <Badge variant="secondary" className="bg-red-100 text-red-800 hover:bg-red-100">
+                            <Badge
+                              variant="secondary"
+                              className="bg-red-100 text-red-800 hover:bg-red-100">
                               新着 {job.newMessages}
                             </Badge>
                           )}
@@ -251,8 +296,7 @@ export default function StoreDetail() {
                               : job.status === "下書き"
                                 ? "bg-gray-100 text-gray-800"
                                 : "bg-yellow-100 text-yellow-800"
-                          }`}
-                        >
+                          }`}>
                           {job.status}
                         </div>
                       </TableCell>
@@ -267,7 +311,9 @@ export default function StoreDetail() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem>
-                              <Link href={`/admin/job`} className="w-full flex items-center">
+                              <Link
+                                href={`/admin/job`}
+                                className="w-full flex items-center">
                                 <ExternalLink className="h-4 w-4 mr-2" />
                                 応募者一覧を表示
                               </Link>
@@ -296,7 +342,9 @@ export default function StoreDetail() {
                       <div className="flex items-center gap-2">
                         <p className="font-medium">{job.title}</p>
                         {job.newMessages > 0 && (
-                          <Badge variant="secondary" className="bg-red-100 text-red-800 hover:bg-red-100">
+                          <Badge
+                            variant="secondary"
+                            className="bg-red-100 text-red-800 hover:bg-red-100">
                             新着 {job.newMessages}
                           </Badge>
                         )}
@@ -314,7 +362,9 @@ export default function StoreDetail() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem>
-                          <Link href={`/admin/job`} className="w-full flex items-center">
+                          <Link
+                            href={`/admin/job`}
+                            className="w-full flex items-center">
                             <ExternalLink className="h-4 w-4 mr-2" />
                             応募者一覧を表示
                           </Link>
@@ -336,8 +386,7 @@ export default function StoreDetail() {
                             : job.status === "下書き"
                               ? "bg-gray-100 text-gray-800"
                               : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
+                        }`}>
                         {job.status}
                       </div>
                     </div>
@@ -387,7 +436,9 @@ export default function StoreDetail() {
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-                            <span className="text-sm font-medium">{person.name.charAt(0)}</span>
+                            <span className="text-sm font-medium">
+                              {person.name.charAt(0)}
+                            </span>
                           </div>
                           {person.name}
                         </div>
@@ -399,8 +450,7 @@ export default function StoreDetail() {
                             person.status === "アクティブ"
                               ? "bg-green-100 text-green-800"
                               : "bg-yellow-100 text-yellow-800"
-                          }`}
-                        >
+                          }`}>
                           {person.status}
                         </div>
                       </TableCell>
@@ -436,11 +486,15 @@ export default function StoreDetail() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                        <span className="text-sm font-medium">{person.name.charAt(0)}</span>
+                        <span className="text-sm font-medium">
+                          {person.name.charAt(0)}
+                        </span>
                       </div>
                       <div>
                         <p className="font-medium">{person.name}</p>
-                        <p className="text-sm text-muted-foreground">{person.role}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {person.role}
+                        </p>
                       </div>
                     </div>
                     <DropdownMenu>
@@ -466,8 +520,7 @@ export default function StoreDetail() {
                           person.status === "アクティブ"
                             ? "bg-green-100 text-green-800"
                             : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
+                        }`}>
                         {person.status}
                       </div>
                     </div>
@@ -483,6 +536,5 @@ export default function StoreDetail() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }
-

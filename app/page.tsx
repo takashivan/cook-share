@@ -13,6 +13,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/lib/redux/store";
 import { fetchJobs } from "@/lib/redux/slices/jobsSlice";
 import { Card } from "@/components/ui/card";
+import { LoadingScreen } from "@/components/LoadingScreen";
 
 export default function Home() {
   const [jobs, setJobs] = useState<JobWithRestaurant[]>([]);
@@ -63,9 +64,7 @@ export default function Home() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p>Loading...</p>
-        </div>
+        <LoadingScreen message="読み込み中" />
       </div>
     );
   }

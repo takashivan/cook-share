@@ -177,9 +177,7 @@ export default function SchedulePage() {
   const filteredApplications = {
     applied: applications.filter((app) => app.status === "APPLIED"),
     upcoming: applications.filter((app) => app.status === "ACCEPTED"),
-    completed: applications.filter((app) =>
-      ["DONE", "REJECTED", "CANCELED"].includes(app.status)
-    ),
+    completed: applications.filter((app) => ["DONE"].includes(app.status)),
   };
 
   console.log("Filtered applications:", filteredApplications);
@@ -213,7 +211,7 @@ export default function SchedulePage() {
                 {startTime} 〜 {endTime}
               </span>
             </div>
-            <button className="p-1" onClick={(e) => e.stopPropagation()}>
+            {/* <button className="p-1" onClick={(e) => e.stopPropagation()}>
               <MoreHorizontal className="h-5 w-5 text-gray-500" />
             </button>
             <Badge
@@ -237,7 +235,7 @@ export default function SchedulePage() {
                 : application.status === "CANCELED"
                 ? "キャンセル"
                 : "完了"}
-            </Badge>
+            </Badge> */}
           </div>
           <div className="text-gray-500 mb-1">
             {application.job.restaurant.name}

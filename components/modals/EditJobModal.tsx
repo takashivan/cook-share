@@ -8,35 +8,57 @@ import { Textarea } from "@/components/ui/textarea";
 import { Upload, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import Image from "next/image";
-import { CreateJobParams } from "@/lib/api/job";
+import { Job } from "@/lib/api/job";
+import { format } from "date-fns";
 
-interface CreateJobModalProps {
+interface EditJobModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: FormData) => Promise<void>;
-  restaurantId: number;
+  job: Job;
 }
 
-export const CreateJobModal = ({
+export const EditJobModal = ({
   isOpen,
   onClose,
   onSubmit,
-  restaurantId,
-}: CreateJobModalProps) => {
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  job,
+}: EditJobModalProps) => {
+  const [previewImage, setPreviewImage] = useState<string | null>(
+    job.image || null
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  // 日付と時間のフォーマット
+  const formatDate = (dateString: string) => {
+    return format(new Date(dateString), "yyyy-MM-dd");
+  };
+
+  const formatTime = (timestamp: number) => {
+    return format(new Date(timestamp * 1000), "HH:mm");
+  };
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    reset,
-  } = useForm<CreateJobParams>({
+  } = useForm({
     defaultValues: {
-      restaurant_id: restaurantId,
-      status: "draft",
-      required_skills: [],
+      title: job.title,
+      description: job.description,
+      work_date: formatDate(job.work_date),
+      hourly_rate: job.hourly_rate,
+      start_time: formatTime(job.start_time),
+      end_time: formatTime(job.end_time),
+      task: job.task || "",
+      skill: job.skill || "",
+      whattotake: job.whattotake || "",
+      transportation: job.transportation || "",
+      note: job.note || "",
+      point: job.point || "",
+      status: job.status,
+      required_skills: job.required_skills || [],
     },
   });
 
@@ -63,30 +85,33 @@ export const CreateJobModal = ({
   const onSubmitHandler = handleSubmit(async (data) => {
     try {
       const formData = new FormData();
+
+      // 必須フィールドを追加
+      formData.append("id", job.id.toString());
+      formData.append("restaurant_id", job.restaurant_id.toString());
+
       Object.entries(data).forEach(([key, value]) => {
         if (Array.isArray(value)) {
           value.forEach((item) => formData.append(key + "[]", item.toString()));
-        } else {
+        } else if (value !== undefined && value !== null) {
           formData.append(key, value.toString());
         }
       });
+
       if (selectedFile) {
         formData.append("image", selectedFile);
       }
 
       await onSubmit(formData);
-      reset();
-      setPreviewImage(null);
-      setSelectedFile(null);
       onClose();
       toast({
-        title: "求人を追加しました",
-        description: "新しい求人の登録が完了しました。",
+        title: "求人を更新しました",
+        description: "求人情報の更新が完了しました。",
       });
     } catch (error) {
       toast({
         title: "エラーが発生しました",
-        description: "求人の追加に失敗しました。もう一度お試しください。",
+        description: "求人の更新に失敗しました。もう一度お試しください。",
         variant: "destructive",
       });
     }
@@ -120,7 +145,7 @@ export const CreateJobModal = ({
                 <Dialog.Title
                   as="h3"
                   className="text-xl font-semibold leading-6 text-gray-900 mb-6">
-                  新しい求人を追加
+                  求人を編集
                 </Dialog.Title>
 
                 <form onSubmit={onSubmitHandler} className="space-y-6">
@@ -133,7 +158,7 @@ export const CreateJobModal = ({
                           required: "タイトルは必須です",
                         })}
                         className="mt-1"
-                        placeholder="例：超人気店で仕込みのお手伝いをしてください！"
+                        placeholder="例：【週2日～】ホールスタッフ募集！"
                       />
                       {errors.title && (
                         <p className="mt-1 text-sm text-red-600">
@@ -186,8 +211,8 @@ export const CreateJobModal = ({
                           {...register("hourly_rate", {
                             required: "時給は必須です",
                             min: {
-                              value: 1800,
-                              message: "時給は1800円以上で設定してください",
+                              value: 1000,
+                              message: "時給は1000円以上で設定してください",
                             },
                           })}
                           className="mt-1"
@@ -254,7 +279,7 @@ export const CreateJobModal = ({
                         id="skill"
                         {...register("skill")}
                         className="mt-1"
-                        placeholder="例：調理師免許"
+                        placeholder="例：接客経験、調理師免許"
                       />
                     </div>
 
@@ -295,11 +320,11 @@ export const CreateJobModal = ({
                         id="point"
                         {...register("point")}
                         className="mt-1"
-                        placeholder="例：美味しいまかないがあります！"
+                        placeholder="例：未経験者歓迎、研修制度あり"
                       />
                     </div>
 
-                    {/* <div className="col-span-full">
+                    <div className="col-span-full">
                       <Label htmlFor="photo">求人画像</Label>
                       <div className="mt-1 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
                         {previewImage ? (
@@ -344,7 +369,7 @@ export const CreateJobModal = ({
                           </div>
                         )}
                       </div>
-                    </div> */}
+                    </div>
                   </div>
 
                   <div className="mt-6 flex justify-end gap-3">
@@ -356,7 +381,7 @@ export const CreateJobModal = ({
                       キャンセル
                     </Button>
                     <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting ? "登録中..." : "求人を登録"}
+                      {isSubmitting ? "更新中..." : "変更を保存"}
                     </Button>
                   </div>
                 </form>

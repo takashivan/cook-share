@@ -12,6 +12,11 @@ import {
   MessageSquare,
   MapPinIcon,
   QrCode,
+  ArrowRight,
+  CheckCircle,
+  CreditCard,
+  DollarSign,
+  Shield,
 } from "lucide-react";
 import { jobApi, getJobDetails } from "@/lib/api/job";
 import {
@@ -34,9 +39,16 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { BrowserQRCodeReader } from "@zxing/browser";
-import { Result } from "@zxing/library";
+import { Html5QrcodeScanner } from "html5-qrcode";
 import { ChefReviewModal } from "@/components/modals/ChefReviewModal";
+import { toast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface JobDetail {
   job: {
@@ -79,20 +91,10 @@ export default function JobDetail({ params }: PageProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const from = searchParams.get("from") || "schedule";
-  const [isCheckInDialogOpen, setIsCheckInDialogOpen] = useState(false);
   const [isQrScanned, setIsQrScanned] = useState(false);
   const [scannedData, setScannedData] = useState<string | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const codeReaderRef = useRef<BrowserQRCodeReader | null>(null);
-  const [cameraError, setCameraError] = useState<string | null>(null);
-  const [isScanning, setIsScanning] = useState(false);
+  const [scanner, setScanner] = useState<Html5QrcodeScanner | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [scanningPromise, setScanningPromise] = useState<Promise<void> | null>(
-    null
-  );
-  const isMounted = useRef(true);
-  const streamRef = useRef<MediaStream | null>(null);
-  const hasScanned = useRef(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   // 応募情報の取得
@@ -138,138 +140,172 @@ export default function JobDetail({ params }: PageProps) {
     messages?.filter((msg) => msg.sender_type === "restaurant" && !msg.is_read)
       .length || 0;
 
-  useEffect(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-      stopScanning();
-    };
-  }, []);
-
-  const stopScanning = () => {
-    console.log("スキャン停止処理を開始します");
-
-    if (scanningPromise) {
-      console.log("スキャン処理を停止します");
-      scanningPromise.catch(() => {}); // エラーを無視
-      setScanningPromise(null);
-    }
-
-    if (codeReaderRef.current) {
-      console.log("QRコードリーダーを停止します");
-      try {
-        // @ts-ignore - stopメソッドは存在するが型定義に含まれていない
-        codeReaderRef.current.stop();
-      } catch (error) {
-        console.error("QRコードリーダーの停止に失敗しました:", error);
-      }
-      codeReaderRef.current = null;
-    }
-
-    if (streamRef.current) {
-      console.log("カメラストリームを停止します");
-      const tracks = streamRef.current.getTracks();
-      tracks.forEach((track) => {
-        track.stop();
-        console.log(`トラック ${track.kind} を停止しました`);
-      });
-      streamRef.current = null;
-    }
-
-    if (videoRef.current) {
-      console.log("ビデオ要素のソースをクリアします");
-      if (videoRef.current.srcObject) {
-        const stream = videoRef.current.srcObject as MediaStream;
-        stream.getTracks().forEach((track) => {
-          track.stop();
-          console.log(`ビデオ要素のトラック ${track.kind} を停止しました`);
-        });
-      }
-      videoRef.current.srcObject = null;
-      videoRef.current.pause();
-      console.log("ビデオ要素を停止しました");
-    }
-
-    setIsScanning(false);
-    console.log("スキャン停止処理が完了しました");
-  };
-
   const handleOpenDialog = () => {
     setIsDialogOpen(true);
   };
 
   const handleCloseDialog = () => {
-    console.log("ダイアログを閉じます");
     setIsDialogOpen(false);
     setIsQrScanned(false);
     setScannedData(null);
-    setCameraError(null);
-    hasScanned.current = false;
-    stopScanning();
+    if (scanner) {
+      scanner.clear();
+    }
   };
 
-  const handleQrScan = async (decodedText: string) => {
-    try {
-      // すでにスキャン済みの場合は処理をスキップ
-      if (hasScanned.current) {
-        console.log("すでにスキャン済みです");
-        return;
-      }
+  const handleStartWork = () => {
+    console.log("handleStartWork called");
+    setIsDialogOpen(true);
+  };
 
-      // QRコードからアプリケーションIDを取得
-      const scannedApplicationId = decodedText;
-      console.log("スキャンされたアプリケーションID:", scannedApplicationId);
-      console.log("現在のアプリケーションID:", application?.id);
+  useEffect(() => {
+    let currentScanner: Html5QrcodeScanner | null = null;
 
-      // 現在のアプリケーションIDと一致するか確認
-      if (application?.id.toString() === scannedApplicationId) {
-        hasScanned.current = true;
-        setIsQrScanned(true);
-        setScannedData(decodedText);
-        // スキャンを停止
-        stopScanning();
-        // ワークセッションのステータスを更新
-        if (workSession) {
-          try {
-            console.log("チェックイン処理を開始します");
-            await updateWorkSessionToCheckIn(workSession.id);
-            console.log("チェックインが完了しました");
-
-            // ワークセッションのデータを更新
-            const updatedWorkSession = {
-              ...workSession,
-              status: "IN_PROGRESS",
-              check_in_time: new Date().toISOString(),
-            };
-
-            // SWRのキャッシュを更新
-            await mutate(
-              `workSession-${application.id}`,
-              updatedWorkSession,
-              false
-            );
-
-            // ページをリロードして状態を更新
-            router.refresh();
-          } catch (error) {
-            console.error("チェックイン処理に失敗しました:", error);
-            alert("チェックイン処理に失敗しました。もう一度お試しください。");
-            // エラーが発生した場合はスキャン状態をリセット
-            hasScanned.current = false;
-            setIsQrScanned(false);
-          }
+    if (isDialogOpen && !isQrScanned) {
+      // ダイアログが開いてから少し待ってから初期化する
+      const timer = setTimeout(() => {
+        const qrReaderElement = document.getElementById("qr-reader");
+        if (!qrReaderElement) {
+          console.error("QR reader element not found");
+          return;
         }
-      } else {
-        console.log("無効なQRコードです");
-        alert("無効なQRコードです。正しいQRコードをスキャンしてください。");
-        // スキャンを停止
-        stopScanning();
-      }
+
+        currentScanner = new Html5QrcodeScanner(
+          "qr-reader",
+          {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0,
+            showTorchButtonIfSupported: false,
+            showZoomSliderIfSupported: false,
+            defaultZoomValueIfSupported: 1,
+            useBarCodeDetectorIfSupported: false,
+            rememberLastUsedCamera: true,
+            html5qrcode: {
+              formatsToSupport: ["QR_CODE"],
+            },
+          } as any,
+          false
+        );
+
+        // カスタムUIを追加
+        const scannerElement = document.getElementById("qr-reader");
+        if (scannerElement) {
+          // スキャナーのデフォルトUIを非表示
+          const header = scannerElement.querySelector(
+            "div[style*='border-top']"
+          );
+          if (header) {
+            header.remove();
+          }
+
+          // ファイルスキャンのリンクを非表示
+          const links = scannerElement.getElementsByTagName("a");
+          for (const link of links) {
+            if (link.textContent?.includes("Scan an Image File")) {
+              link.style.display = "none";
+            }
+          }
+
+          // Start/Stopボタンのテキストを変更
+          const buttons = scannerElement.getElementsByTagName("button");
+          for (const button of buttons) {
+            if (button.textContent?.includes("Start Scanning")) {
+              button.textContent = "スキャンを開始";
+            } else if (button.textContent?.includes("Stop Scanning")) {
+              button.textContent = "スキャンを停止";
+            }
+          }
+
+          // MutationObserverを設定して動的に追加される要素も監視
+          const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+              if (mutation.type === "childList") {
+                mutation.addedNodes.forEach((node) => {
+                  if (node instanceof HTMLElement) {
+                    // ボタンのテキストを変更
+                    const buttons = node.getElementsByTagName("button");
+                    for (const button of buttons) {
+                      if (button.textContent?.includes("Start Scanning")) {
+                        button.textContent = "スキャンを開始";
+                      } else if (
+                        button.textContent?.includes("Stop Scanning")
+                      ) {
+                        button.textContent = "スキャンを停止";
+                      }
+                    }
+
+                    // リンクを非表示
+                    const links = node.getElementsByTagName("a");
+                    for (const link of links) {
+                      if (link.textContent?.includes("Scan an Image File")) {
+                        link.style.display = "none";
+                      }
+                    }
+                  }
+                });
+              }
+            });
+          });
+
+          observer.observe(scannerElement, {
+            childList: true,
+            subtree: true,
+          });
+        }
+
+        currentScanner.render(
+          (decodedText: string) => {
+            if (application?.id.toString() === decodedText) {
+              setIsQrScanned(true);
+              setScannedData(decodedText);
+              currentScanner?.clear();
+            } else {
+              toast({
+                title: "エラー",
+                description:
+                  "無効なQRコードです。正しいQRコードをスキャンしてください。",
+                variant: "destructive",
+              });
+            }
+          },
+          (errorMessage: string) => {
+            console.log("QRスキャンエラー:", errorMessage);
+          }
+        );
+
+        setScanner(currentScanner);
+      }, 100); // 100ms待機
+
+      return () => {
+        clearTimeout(timer);
+        if (currentScanner) {
+          currentScanner.clear();
+        }
+      };
+    }
+  }, [isDialogOpen, isQrScanned, application?.id]);
+
+  const handleSuccessfulScan = async () => {
+    if (!workSession) return;
+
+    try {
+      console.log("チェックイン処理を開始します");
+      await updateWorkSessionToCheckIn(workSession.id);
+      console.log("チェックインが完了しました");
+
+      const updatedWorkSession = {
+        ...workSession,
+        status: "IN_PROGRESS",
+        check_in_time: new Date().toISOString(),
+      };
+
+      await mutate(`workSession-${application?.id}`, updatedWorkSession, false);
+      router.refresh();
     } catch (error) {
-      console.error("QRコードの検証に失敗しました:", error);
-      alert("QRコードの検証に失敗しました。");
-      // スキャンを停止
-      stopScanning();
+      console.error("チェックイン処理に失敗しました:", error);
+      alert("チェックイン処理に失敗しました。もう一度お試しください。");
+      setIsQrScanned(false);
     }
   };
 
@@ -303,116 +339,6 @@ export default function JobDetail({ params }: PageProps) {
     }
   };
 
-  useEffect(() => {
-    if (
-      isDialogOpen &&
-      !hasScanned.current &&
-      !isScanning &&
-      isMounted.current
-    ) {
-      console.log("カメラの初期化を開始します...");
-      setIsScanning(true);
-
-      navigator.mediaDevices
-        .getUserMedia({
-          video: {
-            facingMode: "environment",
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-          },
-        })
-        .then((stream) => {
-          if (!isMounted.current) {
-            stream.getTracks().forEach((track) => track.stop());
-            return;
-          }
-
-          console.log("カメラのアクセス許可が得られました");
-          streamRef.current = stream;
-
-          if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-            videoRef.current
-              .play()
-              .then(() => {
-                if (!isMounted.current) return;
-
-                console.log("ビデオの再生を開始しました");
-
-                // QRコードリーダーの初期化
-                codeReaderRef.current = new BrowserQRCodeReader();
-                console.log("QRコードリーダーを初期化しました");
-
-                if (videoRef.current) {
-                  const promise = codeReaderRef.current
-                    .decodeFromVideoDevice(
-                      undefined,
-                      videoRef.current,
-                      (result, error) => {
-                        if (!isMounted.current) return;
-                        if (hasScanned.current) return; // すでにスキャン済みの場合は処理をスキップ
-
-                        if (result) {
-                          console.log(
-                            "QRコードを検出しました:",
-                            result.getText()
-                          );
-                          handleQrScan(result.getText());
-                        }
-                        if (error) {
-                          const errorMessage =
-                            error.message || error.toString();
-                          if (
-                            !errorMessage.includes("No QR code found") &&
-                            !errorMessage.includes("NotFoundException")
-                          ) {
-                            console.error(
-                              "QRコードのスキャンに失敗しました:",
-                              error
-                            );
-                            setCameraError("QRコードのスキャンに失敗しました");
-                          }
-                        }
-                      }
-                    )
-                    .catch((error) => {
-                      if (!isMounted.current) return;
-                      console.error(
-                        "QRコードリーダーの初期化に失敗しました:",
-                        error
-                      );
-                      setCameraError("QRコードリーダーの初期化に失敗しました");
-                    });
-                  setScanningPromise(promise);
-                }
-              })
-              .catch((error) => {
-                if (!isMounted.current) return;
-                console.error("ビデオの再生に失敗しました:", error);
-                setCameraError("カメラの初期化に失敗しました");
-                stopScanning();
-              });
-          }
-        })
-        .catch((error) => {
-          if (!isMounted.current) return;
-          console.error("カメラへのアクセスが拒否されました:", error);
-          setCameraError("カメラへのアクセスが拒否されました");
-          stopScanning();
-        });
-    }
-
-    return () => {
-      if (!isDialogOpen || hasScanned.current) {
-        stopScanning();
-      }
-    };
-  }, [isDialogOpen]);
-
-  const handleStartWork = () => {
-    handleOpenDialog();
-  };
-
   const renderWorkStatusButton = () => {
     if (!workSession) return null;
 
@@ -421,7 +347,10 @@ export default function JobDetail({ params }: PageProps) {
         return (
           <Button
             className="w-full"
-            onClick={handleStartWork}
+            onClick={() => {
+              console.log("Button clicked");
+              handleStartWork();
+            }}
             style={{ backgroundColor: "#DB3F1C" }}>
             勤務開始
           </Button>
@@ -468,6 +397,37 @@ export default function JobDetail({ params }: PageProps) {
 
   // 合計金額の計算
   const totalAmount = job.hourly_rate * hours + Number(job.transportation || 0);
+
+  const handleCheckIn = async () => {
+    try {
+      await handleSuccessfulScan();
+      setIsDialogOpen(false);
+      toast({
+        title: "チェックインしました",
+        description: "チェックインが完了しました。",
+      });
+      router.refresh();
+    } catch (error) {
+      console.error("Failed to check in:", error);
+      toast({
+        title: "エラーが発生しました",
+        description:
+          error instanceof Error
+            ? error.message
+            : "チェックインに失敗しました。",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleQrCodeScan = (decodedText: string) => {
+    setScannedData(decodedText);
+    setIsQrScanned(true);
+    setIsDialogOpen(true);
+    if (scanner) {
+      scanner.clear();
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-md">
@@ -576,21 +536,19 @@ export default function JobDetail({ params }: PageProps) {
         </div>
       </div>
 
-      <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>勤務開始確認</DialogTitle>
-            <DialogDescription>
+      <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>勤務開始確認</AlertDialogTitle>
+            <AlertDialogDescription>
               お店のQRコードをスキャンしてください
-            </DialogDescription>
-          </DialogHeader>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
 
           <div className="space-y-4">
             <div className="border p-4 rounded-lg text-center">
               <p className="text-sm text-gray-500 mb-4">
-                {cameraError ? (
-                  <span className="text-red-600">{cameraError}</span>
-                ) : isQrScanned ? (
+                {isQrScanned ? (
                   <span className="text-green-600">
                     QRコードの検証が完了しました
                   </span>
@@ -598,42 +556,48 @@ export default function JobDetail({ params }: PageProps) {
                   "カメラをQRコードに向けてください"
                 )}
               </p>
-              <div className="flex justify-center items-center h-48 bg-gray-100 rounded-lg overflow-hidden">
-                {!isQrScanned && !cameraError && (
-                  <video
-                    ref={videoRef}
-                    className="w-full h-full object-cover"
-                    playsInline
-                    autoPlay
-                    muted
-                  />
-                )}
-                {isQrScanned && (
-                  <div className="flex flex-col items-center justify-center">
+              <div className="flex justify-center items-center bg-gray-100 rounded-lg overflow-hidden">
+                {!isQrScanned ? (
+                  <div id="qr-reader" className="w-full" />
+                ) : (
+                  <div className="flex flex-col items-center justify-center p-8">
                     <QrCode className="h-12 w-12 text-green-500 mb-2" />
                     <span className="text-sm text-gray-600">スキャン完了</span>
-                  </div>
-                )}
-                {cameraError && (
-                  <div className="flex flex-col items-center justify-center">
-                    <QrCode className="h-12 w-12 text-red-500 mb-2" />
-                    <span className="text-sm text-red-600">{cameraError}</span>
                   </div>
                 )}
               </div>
             </div>
           </div>
 
-          <DialogFooter>
+          <div className="flex justify-end gap-4 mt-4">
             <Button variant="outline" onClick={handleCloseDialog}>
               キャンセル
             </Button>
-            <Button onClick={handleCloseDialog} disabled={!isQrScanned}>
-              勤務開始
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            {!isQrScanned ? (
+              <Button
+                onClick={() => {
+                  const qrReaderElement = document.getElementById("qr-reader");
+                  if (qrReaderElement) {
+                    const buttons =
+                      qrReaderElement.getElementsByTagName("button");
+                    for (let i = 0; i < buttons.length; i++) {
+                      if (buttons[i].textContent?.includes("Start")) {
+                        buttons[i].click();
+                        break;
+                      }
+                    }
+                  }
+                }}>
+                スキャンを開始
+              </Button>
+            ) : (
+              <Button onClick={handleCheckIn} disabled={!isQrScanned}>
+                勤務開始
+              </Button>
+            )}
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <ChefReviewModal
         isOpen={isReviewModalOpen}
