@@ -101,6 +101,7 @@ export interface JobDetail {
     transportation: string;
     number_of_spots: number;
     fee: number;
+    expiry_date: number;
   };
   restaurant: {
     id: string;
@@ -342,6 +343,7 @@ export type CreateJobParams = {
   transportation?: string;
   fee: number;
   number_of_spots: number;
+  expiry_date: number;
 };
 
 export type UpdateJobParams = Partial<CreateJobParams>;

@@ -22,6 +22,7 @@ export interface Job {
   point: string;
   transportation: string;
   is_approved: boolean;
+  expiry_date: number;
 }
 
 export interface JobWithRestaurant extends Job {

@@ -328,6 +328,59 @@ export const CreateJobModal = ({
                           </p>
                         )}
                       </div>
+                      <div>
+                        <Label htmlFor="expiry_date">締め切り</Label>
+                        <Input
+                          id="expiry_date"
+                          type="date"
+                          {...register("expiry_date", {
+                            required: "締め切りは必須です",
+                            min: {
+                              value: new Date().toISOString().split("T")[0],
+                              message:
+                                "締め切りは今日以降の日付で設定してください",
+                            },
+                            max: {
+                              value: new Date(
+                                new Date().setDate(new Date().getDate() + 30)
+                              )
+                                .toISOString()
+                                .split("T")[0],
+                              message: "締め切りは30日以内で設定してください",
+                            },
+                            validate: (value) => {
+                              const formValues = watch();
+                              if (
+                                formValues.work_date &&
+                                formValues.start_time &&
+                                formValues.end_time
+                              ) {
+                                const workDate = new Date(formValues.work_date);
+                                const expiryDate = new Date(value);
+                                const startTime = new Date(
+                                  `${formValues.work_date}T${formValues.start_time}:00`
+                                );
+                                const endTime = new Date(
+                                  `${formValues.work_date}T${formValues.end_time}:00`
+                                );
+
+                                if (expiryDate > startTime) {
+                                  return "締め切りは勤務日より前の日付で設定してください";
+                                }
+
+                                return true;
+                              }
+                              return false;
+                            },
+                          })}
+                          className="mt-1"
+                        />
+                        {errors.expiry_date && (
+                          <p className="mt-1 text-sm text-red-600">
+                            {errors.expiry_date.message}
+                          </p>
+                        )}
+                      </div>
                     </div>
 
                     <div>
