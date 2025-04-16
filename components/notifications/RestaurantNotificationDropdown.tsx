@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   Bell,
@@ -23,21 +23,59 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CompanyUserNotification } from "@/lib/api/companyUserNotification";
+import { useToast } from "@/hooks/use-toast";
+import { XanoClient } from "@xano/js-sdk/lib";
 
 interface RestaurantNotificationDropdownProps {
   notifications: CompanyUserNotification[];
   onMarkAsRead: (id: number) => void;
   onMarkAllAsRead: () => void;
+  userId: string;
+  mutateNotifications: () => void;
 }
 
 export function RestaurantNotificationDropdown({
   notifications,
   onMarkAsRead,
   onMarkAllAsRead,
+  userId,
+  mutateNotifications,
 }: RestaurantNotificationDropdownProps) {
   const [open, setOpen] = useState(false);
+  const wsRef = useRef<WebSocket | null>(null);
+  const { toast } = useToast();
+  const xanoClient = new XanoClient({
+    instanceBaseUrl: process.env.NEXT_PUBLIC_XANO_BASE_URL || "",
+    realtimeConnectionHash: process.env.NEXT_PUBLIC_XANO_REALTIME_HASH || "",
+  });
 
   const unreadCount = notifications.filter((n) => !n.read).length;
+
+  useEffect(() => {
+    let channel: any;
+
+    const setupChannel = async () => {
+      try {
+        // チャンネルの設定
+        channel = xanoClient.channel(`notifications/${userId}`);
+        console.log("Channel setup for notifications");
+
+        // メッセージの購読
+        channel.on((message: any) => {
+          console.log("Admin received message:", message);
+          toast({
+            title: "新しい通知",
+            description: message.content || "新しい通知が届きました",
+          });
+          mutateNotifications();
+        });
+      } catch (error) {
+        console.error("Error setting up channel:", error);
+      }
+    };
+
+    setupChannel();
+  }, [userId, toast, mutateNotifications]);
 
   const handleNotificationClick = (notification: CompanyUserNotification) => {
     if (!notification.read) {

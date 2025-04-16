@@ -101,6 +101,7 @@ export interface JobDetail {
     transportation: string;
     number_of_spots: number;
     fee: number;
+    expiry_date: number;
   };
   restaurant: {
     id: string;
