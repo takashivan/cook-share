@@ -220,7 +220,7 @@ export default function Home() {
                       <div className="flex items-center text-xs text-gray-500 mb-1">
                         <Clock className="h-3 w-3 mr-1" />
                         <span>
-                          {new Date(job.start_time * 1000).toLocaleTimeString(
+                          {new Date(job.start_time).toLocaleTimeString(
                             "ja-JP",
                             {
                               hour: "2-digit",
@@ -228,13 +228,10 @@ export default function Home() {
                             }
                           )}
                           {" 〜 "}
-                          {new Date(job.end_time * 1000).toLocaleTimeString(
-                            "ja-JP",
-                            {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            }
-                          )}
+                          {new Date(job.end_time).toLocaleTimeString("ja-JP", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
                         </span>
                       </div>
 
