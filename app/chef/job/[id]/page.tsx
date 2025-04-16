@@ -17,6 +17,8 @@ import {
   CreditCard,
   DollarSign,
   Shield,
+  ChevronDown,
+  Send,
 } from "lucide-react";
 import { jobApi, getJobDetails } from "@/lib/api/job";
 import {
@@ -49,6 +51,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { ChatSheet } from "@/components/chat/ChatSheet";
 
 interface JobDetail {
   job: {
@@ -96,6 +99,7 @@ export default function JobDetail({ params }: PageProps) {
   const [scanner, setScanner] = useState<Html5QrcodeScanner | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   // 応募情報の取得
   const { data: application } = useSWR<Application>(
@@ -380,8 +384,8 @@ export default function JobDetail({ params }: PageProps) {
     );
   }
 
-  const startTime = format(new Date(job.start_time * 1000), "HH:mm");
-  const endTime = format(new Date(job.end_time * 1000), "HH:mm");
+  const startTime = format(new Date(job.start_time), "HH:mm");
+  const endTime = format(new Date(job.end_time), "HH:mm");
   const workDate = format(new Date(job.work_date), "yyyy年MM月dd日 (E)", {
     locale: ja,
   });
@@ -452,17 +456,19 @@ export default function JobDetail({ params }: PageProps) {
               </div>
             </div>
           </div>
-          {workSession?.status === "SCHEDULED" && (
-            <Link href={`/chef/messages/${workSession.id}`}>
-              <div className="relative">
-                <MessageSquare className="h-6 w-6 text-gray-700" />
-                {unreadCount > 0 && (
-                  <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {unreadCount}
-                  </div>
-                )}
-              </div>
-            </Link>
+          {workSession && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsChatOpen(true)}
+              className="relative">
+              <MessageSquare className="h-6 w-6 text-gray-700" />
+              {unreadCount > 0 && (
+                <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {unreadCount}
+                </div>
+              )}
+            </Button>
           )}
         </div>
 
@@ -611,6 +617,34 @@ export default function JobDetail({ params }: PageProps) {
             : ""
         }
       />
+
+      {workSession && (
+        <ChatSheet
+          isOpen={isChatOpen}
+          onClose={() => setIsChatOpen(false)}
+          messages={messages}
+          onSendMessage={async (message) => {
+            try {
+              const messageParams = {
+                content: message,
+                worksession_id: workSession.id,
+                application_id: application?.id.toString() || "",
+                sender_type: "chef" as const,
+              };
+              await messageApi.createMessage(messageParams);
+              mutate(`messages-${workSession.id}`);
+            } catch (error) {
+              console.error("Failed to send message:", error);
+            }
+          }}
+          restaurantName={restaurant?.name || ""}
+          restaurantImage={restaurant?.profile_image}
+          workDate={job?.work_date || ""}
+          startTime={job?.start_time || 0}
+          workSessionId={workSession.id}
+          mutateMessages={() => mutate(`messages-${workSession.id}`)}
+        />
+      )}
     </div>
   );
 }

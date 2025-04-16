@@ -32,6 +32,7 @@ export const CreateJobModal = ({
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
+    watch,
   } = useForm<CreateJobParams>({
     defaultValues: {
       restaurant_id: restaurantId,
@@ -63,13 +64,37 @@ export const CreateJobModal = ({
   const onSubmitHandler = handleSubmit(async (data) => {
     try {
       const formData = new FormData();
+
+      // 日付文字列を作成（YYYY-MM-DDThh:mm:ss）
+      const startDateTimeStr = `${data.work_date}T${data.start_time}:00`;
+      const endDateTimeStr = `${data.work_date}T${data.end_time}:00`;
+
+      // Unix タイムスタンプを計算（ミリ秒単位）
+      const startTimestamp = Date.parse(startDateTimeStr);
+      const endTimestamp = Date.parse(endDateTimeStr);
+
+      console.log("Debug timestamps:", {
+        startDateTimeStr,
+        endDateTimeStr,
+        startTimestamp,
+        endTimestamp,
+        startDate: new Date(startTimestamp).toISOString(),
+        endDate: new Date(endTimestamp).toISOString(),
+      });
+
+      // FormDataにデータを追加
       Object.entries(data).forEach(([key, value]) => {
-        if (Array.isArray(value)) {
+        if (key === "start_time") {
+          formData.append(key, startTimestamp.toString());
+        } else if (key === "end_time") {
+          formData.append(key, endTimestamp.toString());
+        } else if (Array.isArray(value)) {
           value.forEach((item) => formData.append(key + "[]", item.toString()));
         } else {
           formData.append(key, value.toString());
         }
       });
+
       if (selectedFile) {
         formData.append("image", selectedFile);
       }
@@ -166,8 +191,14 @@ export const CreateJobModal = ({
                         <Input
                           id="work_date"
                           type="date"
+                          defaultValue={new Date().toISOString().split("T")[0]}
                           {...register("work_date", {
                             required: "勤務日は必須です",
+                            min: {
+                              value: new Date().toISOString().split("T")[0],
+                              message:
+                                "勤務日は今日以降の日付で設定してください",
+                            },
                           })}
                           className="mt-1"
                         />
@@ -177,61 +208,123 @@ export const CreateJobModal = ({
                           </p>
                         )}
                       </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="start_time">開始時間 *</Label>
+                          <Input
+                            id="start_time"
+                            type="time"
+                            defaultValue="10:00"
+                            {...register("start_time", {
+                              required: "開始時間は必須です",
+                            })}
+                            className="mt-1"
+                          />
+                          {errors.start_time && (
+                            <p className="mt-1 text-sm text-red-600">
+                              {errors.start_time.message}
+                            </p>
+                          )}
+                        </div>
+
+                        <div>
+                          <Label htmlFor="end_time">終了時間 *</Label>
+                          <Input
+                            id="end_time"
+                            type="time"
+                            defaultValue="18:00"
+                            {...register("end_time", {
+                              required: "終了時間は必須です",
+                              validate: (value) => {
+                                const formValues = watch();
+                                const startTime = new Date(
+                                  `${formValues.work_date}T${formValues.start_time}:00`
+                                );
+                                const endTime = new Date(
+                                  `${formValues.work_date}T${value}:00`
+                                );
+                                if (endTime <= startTime) {
+                                  return "終了時間は開始時間より後の時間で設定してください";
+                                }
+                                return true;
+                              },
+                            })}
+                            className="mt-1"
+                          />
+                          {errors.end_time && (
+                            <p className="mt-1 text-sm text-red-600">
+                              {errors.end_time.message}
+                            </p>
+                          )}
+                        </div>
+                      </div>
 
                       <div>
-                        <Label htmlFor="hourly_rate">時給 *</Label>
+                        <Label htmlFor="fee">報酬額 *</Label>
                         <Input
-                          id="hourly_rate"
+                          id="fee"
                           type="number"
-                          {...register("hourly_rate", {
-                            required: "時給は必須です",
+                          {...register("fee", {
+                            required: "報酬額は必須です",
+                            validate: (value) => {
+                              const formValues = watch();
+                              if (
+                                !formValues.start_time ||
+                                !formValues.end_time
+                              )
+                                return true;
+
+                              const startTime = new Date(
+                                `2000-01-01T${formValues.start_time}:00`
+                              );
+                              const endTime = new Date(
+                                `2000-01-01T${formValues.end_time}:00`
+                              );
+
+                              // 終了時間が開始時間より前の場合は翌日の時間として計算
+                              if (endTime < startTime) {
+                                endTime.setDate(endTime.getDate() + 1);
+                              }
+
+                              const hours =
+                                (endTime.getTime() - startTime.getTime()) /
+                                (1000 * 60 * 60);
+                              const hourlyRate = Number(value) / hours;
+
+                              if (hourlyRate < 1500) {
+                                return `時給ベースで1500円を下回らないように設定してください（現在: ${Math.floor(hourlyRate)}円）`;
+                              }
+                              return true;
+                            },
+                          })}
+                          defaultValue={12000}
+                          className="mt-1"
+                          placeholder="例：12000"
+                        />
+                        {errors.fee && (
+                          <p className="mt-1 text-sm text-red-600">
+                            {errors.fee.message}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <Label htmlFor="number_of_spots">募集人数 *</Label>
+                        <Input
+                          id="number_of_spots"
+                          type="number"
+                          {...register("number_of_spots", {
+                            required: "募集人数は必須です",
                             min: {
-                              value: 1800,
-                              message: "時給は1800円以上で設定してください",
+                              value: 1,
+                              message: "募集人数は1人以上で設定してください",
                             },
                           })}
                           className="mt-1"
-                          placeholder="例：1200"
+                          placeholder="例：1"
                         />
-                        {errors.hourly_rate && (
+                        {errors.number_of_spots && (
                           <p className="mt-1 text-sm text-red-600">
-                            {errors.hourly_rate.message}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="start_time">開始時間 *</Label>
-                        <Input
-                          id="start_time"
-                          type="time"
-                          {...register("start_time", {
-                            required: "開始時間は必須です",
-                          })}
-                          className="mt-1"
-                        />
-                        {errors.start_time && (
-                          <p className="mt-1 text-sm text-red-600">
-                            {errors.start_time.message}
-                          </p>
-                        )}
-                      </div>
-
-                      <div>
-                        <Label htmlFor="end_time">終了時間 *</Label>
-                        <Input
-                          id="end_time"
-                          type="time"
-                          {...register("end_time", {
-                            required: "終了時間は必須です",
-                          })}
-                          className="mt-1"
-                        />
-                        {errors.end_time && (
-                          <p className="mt-1 text-sm text-red-600">
-                            {errors.end_time.message}
+                            {errors.number_of_spots.message}
                           </p>
                         )}
                       </div>

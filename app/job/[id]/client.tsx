@@ -193,19 +193,21 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                   </div>
                   <div className="px-4 py-2">
                     <span>
-                      {new Date(
-                        jobDetail.job.start_time * 1000
-                      ).toLocaleTimeString("ja-JP", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}{" "}
+                      {new Date(jobDetail.job.start_time).toLocaleTimeString(
+                        "ja-JP",
+                        {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }
+                      )}{" "}
                       〜{" "}
-                      {new Date(
-                        jobDetail.job.end_time * 1000
-                      ).toLocaleTimeString("ja-JP", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {new Date(jobDetail.job.end_time).toLocaleTimeString(
+                        "ja-JP",
+                        {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }
+                      )}
                     </span>
                   </div>
                 </div>
@@ -308,14 +310,14 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                             {" "}
                             <span>
                               {new Date(
-                                jobDetail.job.start_time * 1000
+                                jobDetail.job.start_time
                               ).toLocaleTimeString("ja-JP", {
                                 hour: "2-digit",
                                 minute: "2-digit",
                               })}{" "}
                               〜{" "}
                               {new Date(
-                                jobDetail.job.end_time * 1000
+                                jobDetail.job.end_time
                               ).toLocaleTimeString("ja-JP", {
                                 hour: "2-digit",
                                 minute: "2-digit",
@@ -335,14 +337,14 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                           <p className="text-sm">
                             <span>
                               {new Date(
-                                jobDetail.job.start_time * 1000
+                                jobDetail.job.start_time
                               ).toLocaleTimeString("ja-JP", {
                                 hour: "2-digit",
                                 minute: "2-digit",
                               })}{" "}
                               〜{" "}
                               {new Date(
-                                jobDetail.job.end_time * 1000
+                                jobDetail.job.end_time
                               ).toLocaleTimeString("ja-JP", {
                                 hour: "2-digit",
                                 minute: "2-digit",
