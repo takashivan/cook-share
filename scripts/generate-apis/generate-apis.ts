@@ -8,28 +8,8 @@ type ApiDefinition = {
 
 const aPIs: ApiDefinition[] = [
   {
-    outputDir: "application",
-    url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:MJ8mZ3fN?type=json&token=",
-  },
-  {
-    outputDir: "authentication",
-    url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:xaJlLYDj?type=json&token=",
-  },
-  {
-    outputDir: "chef-connect",
+    outputDir: "base",
     url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:Mv5jTolf?type=json&token=",
-  },
-  {
-    outputDir: "company",
-    url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:3LZoUG6X?type=json&token=",
-  },
-  {
-    outputDir: "notification",
-    url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:1k5jblUW?type=json&token=",
-  },
-  {
-    outputDir: "operator",
-    url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:grw3Vlqa?type=json&token=",
   },
 ];
 

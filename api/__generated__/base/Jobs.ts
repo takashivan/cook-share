@@ -1,0 +1,134 @@
+/* eslint-disable */
+/* tslint:disable */
+// @ts-nocheck
+/*
+ * ---------------------------------------------------------------
+ * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
+ * ##                                                           ##
+ * ## AUTHOR: acacode                                           ##
+ * ## SOURCE: https://github.com/acacode/swagger-typescript-api ##
+ * ---------------------------------------------------------------
+ */
+
+import {
+  ApplicationsListResult,
+  JobsCreateData,
+  JobsCreatePayload,
+  JobsDeleteData,
+  JobsDetailData,
+  JobsListResult,
+  JobsPartialUpdateData,
+  JobsPartialUpdatePayload,
+  WorksessionsRestaurantTodosListData,
+} from "./data-contracts";
+import { ContentType, HttpClient, RequestParams } from "./http-client";
+
+export class Jobs<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags jobs
+   * @name ApplicationsList
+   * @request GET:/jobs/{job_id}/applications
+   */
+  applicationsList = (jobId: number, params: RequestParams = {}) =>
+    this.request<ApplicationsListResult, void>({
+      path: `/jobs/${jobId}/applications`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags jobs
+   * @name WorksessionsRestaurantTodosList
+   * @request GET:/jobs/{job_id}/worksessions/restaurant_todos
+   */
+  worksessionsRestaurantTodosList = (jobId: number, params: RequestParams = {}) =>
+    this.request<WorksessionsRestaurantTodosListData, void>({
+      path: `/jobs/${jobId}/worksessions/restaurant_todos`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description Delete job record. <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags jobs
+   * @name JobsDelete
+   * @summary Delete job record.
+   * @request DELETE:/jobs/{job_id}
+   */
+  jobsDelete = (jobId: number, params: RequestParams = {}) =>
+    this.request<JobsDeleteData, void>({
+      path: `/jobs/${jobId}`,
+      method: "DELETE",
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description Get job record <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags jobs
+   * @name JobsDetail
+   * @summary Get job record
+   * @request GET:/jobs/{job_id}
+   */
+  jobsDetail = (jobId: number, params: RequestParams = {}) =>
+    this.request<JobsDetailData, void>({
+      path: `/jobs/${jobId}`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description Edit job record <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags jobs
+   * @name JobsPartialUpdate
+   * @summary Edit job record
+   * @request PATCH:/jobs/{job_id}
+   */
+  jobsPartialUpdate = (jobId: number, data: JobsPartialUpdatePayload, params: RequestParams = {}) =>
+    this.request<JobsPartialUpdateData, void>({
+      path: `/jobs/${jobId}`,
+      method: "PATCH",
+      body: data,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description Query all job records <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags jobs
+   * @name JobsList
+   * @summary Query all job records
+   * @request GET:/jobs
+   */
+  jobsList = (params: RequestParams = {}) =>
+    this.request<JobsListResult, void>({
+      path: `/jobs`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description Add job record <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags jobs
+   * @name JobsCreate
+   * @summary Add job record
+   * @request POST:/jobs
+   */
+  jobsCreate = (data: JobsCreatePayload, params: RequestParams = {}) =>
+    this.request<JobsCreateData, void>({
+      path: `/jobs`,
+      method: "POST",
+      body: data,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+}

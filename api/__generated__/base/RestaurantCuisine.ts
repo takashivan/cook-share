@@ -1,0 +1,47 @@
+/* eslint-disable */
+/* tslint:disable */
+// @ts-nocheck
+/*
+ * ---------------------------------------------------------------
+ * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
+ * ##                                                           ##
+ * ## AUTHOR: acacode                                           ##
+ * ## SOURCE: https://github.com/acacode/swagger-typescript-api ##
+ * ---------------------------------------------------------------
+ */
+
+import { RestaurantCuisineList2Data, RestaurantCuisineListData } from "./data-contracts";
+import { HttpClient, RequestParams } from "./http-client";
+
+export class RestaurantCuisine<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags restaurant-cuisine
+   * @name RestaurantCuisineList
+   * @request GET:/restaurant-cuisine
+   */
+  restaurantCuisineList = (params: RequestParams = {}) =>
+    this.request<RestaurantCuisineListData, void>({
+      path: `/restaurant-cuisine`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags restaurant_cuisine
+   * @name RestaurantCuisineList2
+   * @request GET:/restaurant_cuisine
+   * @originalName restaurantCuisineList
+   * @duplicate
+   */
+  restaurantCuisineList2 = (params: RequestParams = {}) =>
+    this.request<RestaurantCuisineList2Data, void>({
+      path: `/restaurant_cuisine`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+}
