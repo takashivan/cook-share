@@ -11,7 +11,7 @@ export const API_CONFIG = {
     company: "https://xcti-onox-8bdw.n7e.xano.io/api:3LZoUG6X/companies",
     workSession: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/worksession",
     job: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/job",
-    application: "https://xcti-onox-8bdw.n7e.xano.io/api:MJ8mZ3fN/application",
+    application: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/application",
     restaurant: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/restaurant",
     restaurantReview:
       "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/restaurant_review",

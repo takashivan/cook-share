@@ -18,6 +18,8 @@ import type { Application, Job, Message, WorkSession } from "@/types";
 import { messageApi, CreateMessageParams } from "@/lib/api/message";
 import { workSessionApi } from "@/lib/api/workSession";
 import useSWR from "swr";
+import { ChatSheet } from "@/components/chat/ChatSheet";
+import { XanoClient } from "@xano/js-sdk";
 
 // APIレスポンスの型
 interface ApplicationResponse extends Omit<Application, "job"> {
@@ -66,7 +68,7 @@ interface ApplicationWithJob extends Application {
 export default function SchedulePage() {
   const { user } = useAuth();
   const [applications, setApplications] = useState<ApplicationWithJob[]>([]);
-  const [activeTab, setActiveTab] = useState("applied");
+  const [activeTab, setActiveTab] = useState("upcoming");
   const [messageInput, setMessageInput] = useState("");
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
   const selectedApplication = selectedJobId
@@ -103,12 +105,33 @@ export default function SchedulePage() {
     }
   );
 
-  const handleSendMessage = async () => {
-    if (!messageInput.trim() || !workSession || !selectedApplication) return;
+  // Xanoのリアルタイム接続を設定
+  useEffect(() => {
+    if (!workSession?.id) return;
+
+    const xanoClient = new XanoClient({
+      instanceBaseUrl: process.env.NEXT_PUBLIC_XANO_BASE_URL || "",
+      realtimeConnectionHash: process.env.NEXT_PUBLIC_XANO_REALTIME_HASH || "",
+    });
+
+    // チャンネルの設定
+    const channel = xanoClient.channel(`worksession/${workSession.id}`);
+
+    // メッセージの購読
+    channel.on((message: any) => {
+      console.log("Chef received message:", message);
+      mutateMessages();
+    });
+
+    return () => {};
+  }, [workSession?.id, mutateMessages]);
+
+  const handleSendMessage = async (message: string) => {
+    if (!message.trim() || !workSession || !selectedApplication) return;
 
     try {
       const messageParams: CreateMessageParams = {
-        content: messageInput,
+        content: message,
         worksession_id: workSession.id,
         application_id: selectedApplication.id.toString(),
         sender_type: "chef",
@@ -200,6 +223,7 @@ export default function SchedulePage() {
 
     return (
       <Card
+        key={application.id}
         className="mb-4 hover:bg-gray-50 transition-colors"
         onClick={() => openChat(application.job!.id)}>
         <CardContent className="p-4">
@@ -259,16 +283,15 @@ export default function SchedulePage() {
       <h1 className="text-2xl font-bold mb-6">お仕事スケジュール</h1>
 
       <Tabs
-        defaultValue="applied"
+        defaultValue="upcoming"
         value={activeTab}
         onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-3 w-full">
-          <TabsTrigger value="applied">応募中</TabsTrigger>
+        <TabsList className="grid grid-cols-2 w-full">
           <TabsTrigger value="upcoming">次のお仕事</TabsTrigger>
           <TabsTrigger value="completed">完了</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="applied" className="mt-6">
+        {/* <TabsContent value="applied" className="mt-6">
           {filteredApplications.applied.length > 0 ? (
             filteredApplications.applied.map(renderJobCard)
           ) : (
@@ -276,7 +299,7 @@ export default function SchedulePage() {
               応募中のお仕事はありません
             </p>
           )}
-        </TabsContent>
+        </TabsContent> */}
 
         <TabsContent value="upcoming" className="mt-6">
           {filteredApplications.upcoming.length > 0 ? (
@@ -299,111 +322,18 @@ export default function SchedulePage() {
         </TabsContent>
       </Tabs>
       {/* チャットシート - 下から表示 */}
-      <Sheet
-        open={selectedJobId !== null}
-        onOpenChange={(open) => !open && closeChat()}>
-        <SheetContent side="bottom" className="p-0 h-[80vh] rounded-t-xl">
-          {selectedApplication?.job && (
-            <div className="flex flex-col h-full">
-              {/* ヘッダー */}
-              <div className="border-b p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage
-                        src={
-                          selectedApplication.job.restaurant.image ||
-                          "/placeholder.svg"
-                        }
-                        alt={selectedApplication.job.restaurant.name}
-                      />
-                      <AvatarFallback>
-                        {selectedApplication.job.restaurant.name.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <h3 className="font-medium">
-                        {selectedApplication.job.restaurant.name}
-                      </h3>
-                      <p className="text-xs text-gray-500">
-                        {format(
-                          new Date(selectedApplication.job.work_date),
-                          "yyyy年MM月dd日"
-                        )}{" "}
-                        {format(
-                          new Date(selectedApplication.job.start_time * 1000),
-                          "HH:mm"
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                  <button onClick={closeChat} className="p-2">
-                    <ChevronDown className="h-6 w-6" />
-                  </button>
-                </div>
-              </div>
-
-              {/* メッセージエリア */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages && messages.length > 0 ? (
-                  messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`flex ${
-                        message.sender_type === "chef"
-                          ? "justify-end"
-                          : "justify-start"
-                      }`}>
-                      <div
-                        className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                          message.sender_type === "chef"
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-gray-100"
-                        }`}>
-                        <p className="text-sm">{message.content}</p>
-                        <p
-                          className={`text-xs mt-1 ${
-                            message.sender_type === "chef"
-                              ? "text-primary-foreground/70"
-                              : "text-gray-500"
-                          }`}>
-                          {format(new Date(message.created_at), "HH:mm")}
-                        </p>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center text-gray-500 py-4">
-                    メッセージはまだありません
-                  </div>
-                )}
-              </div>
-
-              {/* 入力エリア */}
-              <div className="border-t p-4 flex gap-2">
-                <Input
-                  placeholder="メッセージを入力..."
-                  value={messageInput}
-                  onChange={(e) => setMessageInput(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
-                  }}
-                  className="flex-1"
-                />
-                <Button
-                  size="icon"
-                  onClick={handleSendMessage}
-                  disabled={!messageInput.trim()}>
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-        </SheetContent>
-      </Sheet>
+      <ChatSheet
+        isOpen={selectedJobId !== null}
+        onClose={closeChat}
+        messages={messages}
+        mutateMessages={mutateMessages}
+        onSendMessage={handleSendMessage}
+        restaurantName={selectedApplication?.job?.restaurant.name || ""}
+        restaurantImage={selectedApplication?.job?.restaurant.image || ""}
+        workDate={selectedApplication?.job?.work_date || ""}
+        startTime={selectedApplication?.job?.start_time || 0}
+        workSessionId={selectedApplication?.job?.id || 0}
+      />
     </div>
   );
 }

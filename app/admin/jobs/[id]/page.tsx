@@ -10,6 +10,7 @@ import type { Application } from "@/types";
 import { jobApi } from "@/lib/api/job";
 import { applicationApi } from "@/lib/api/application";
 import useSWR from "swr";
+import { GetJobData } from "@/api/__generated__/chef-connect/data-contracts";
 import {
   Calendar,
   Clock,
@@ -57,7 +58,7 @@ export default function JobDetailPage() {
     null
   );
 
-  const { data: job, error: jobError } = useSWR<Job>(
+  const { data: job, error: jobError } = useSWR<GetJobData>(
     params.id ? [`job`, params.id] : null,
     async ([_, id]) => {
       const result = await jobApi.getJob(id as string);
@@ -69,6 +70,8 @@ export default function JobDetailPage() {
       dedupingInterval: 10000,
     }
   );
+
+  const jobData = job?.job;
 
   const { data: applications, error: applicationsError } = useSWR<
     Application[]
@@ -116,7 +119,7 @@ export default function JobDetailPage() {
     );
   }
 
-  if (!job) {
+  if (!jobData) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -139,7 +142,12 @@ export default function JobDetailPage() {
             </Button>
           </Link>
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">{job.title}</h2>
+            <h2 className="text-2xl font-bold tracking-tight">
+              {jobData.title}
+            </h2>
+            <h2 className="text-2xl font-bold tracking-tight">
+              {job?.job?.title}
+            </h2>
             <p className="text-muted-foreground">求人の詳細情報</p>
           </div>
         </div>
@@ -157,42 +165,42 @@ export default function JobDetailPage() {
           <CardContent className="space-y-4">
             <div>
               <h3 className="font-medium mb-2">求人タイトル</h3>
-              <p>{job.title}</p>
+              <p>{job?.job?.title}</p>
             </div>
             <div>
               <h3 className="font-medium mb-2">店舗ID</h3>
-              <p>{job.restaurant_id}</p>
+              <p>{job?.job?.restaurant_id}</p>
             </div>
             <div>
               <h3 className="font-medium mb-2">勤務日</h3>
-              <p>{new Date(job.work_date).toLocaleDateString()}</p>
+              <p>{new Date(job?.job?.work_date || "").toLocaleDateString()}</p>
             </div>
             <div>
               <h3 className="font-medium mb-2">勤務時間</h3>
               <p>
-                {new Date(job.start_time).toLocaleTimeString()} 〜{" "}
-                {new Date(job.end_time).toLocaleTimeString()}
+                {new Date(job?.job?.start_time || 0).toLocaleTimeString()} 〜{" "}
+                {new Date(job?.job?.end_time || 0).toLocaleTimeString()}
               </p>
             </div>
             <div>
               <h3 className="font-medium mb-2">時給</h3>
-              <p>¥{job.hourly_rate?.toLocaleString() ?? "0"}</p>
+              <p>¥{job?.job?.hourly_rate?.toLocaleString() ?? "0"}</p>
             </div>
             <div>
               <h3 className="font-medium mb-2">ステータス</h3>
               <div
                 className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                  job.status === "published"
+                  job?.job?.status === "published"
                     ? "bg-green-100 text-green-800"
-                    : job.status === "draft"
-                    ? "bg-gray-100 text-gray-800"
-                    : "bg-yellow-100 text-yellow-800"
+                    : job?.job?.status === "draft"
+                      ? "bg-gray-100 text-gray-800"
+                      : "bg-yellow-100 text-yellow-800"
                 }`}>
-                {job.status === "published"
+                {job?.job?.status === "published"
                   ? "公開中"
-                  : job.status === "draft"
-                  ? "下書き"
-                  : "終了"}
+                  : job?.job?.status === "draft"
+                    ? "下書き"
+                    : "終了"}
               </div>
             </div>
           </CardContent>
@@ -205,19 +213,19 @@ export default function JobDetailPage() {
           <CardContent className="space-y-4">
             <div>
               <h3 className="font-medium mb-2">業務内容</h3>
-              <p className="whitespace-pre-wrap">{job.task}</p>
+              <p className="whitespace-pre-wrap">{job?.job?.task}</p>
             </div>
             <div>
               <h3 className="font-medium mb-2">必要なスキル</h3>
-              <p className="whitespace-pre-wrap">{job.skill}</p>
+              <p className="whitespace-pre-wrap">{job?.job?.skill}</p>
             </div>
             <div>
               <h3 className="font-medium mb-2">持ち物</h3>
-              <p className="whitespace-pre-wrap">{job.whattotake}</p>
+              <p className="whitespace-pre-wrap">{job?.job?.whattotake}</p>
             </div>
             <div>
               <h3 className="font-medium mb-2">注意事項</h3>
-              <p className="whitespace-pre-wrap">{job.note}</p>
+              <p className="whitespace-pre-wrap">{job?.job?.note}</p>
             </div>
           </CardContent>
         </Card>
@@ -229,11 +237,11 @@ export default function JobDetailPage() {
           <CardContent className="space-y-4">
             <div>
               <h3 className="font-medium mb-2">アピールポイント</h3>
-              <p className="whitespace-pre-wrap">{job.point}</p>
+              <p className="whitespace-pre-wrap">{job?.job?.point}</p>
             </div>
             <div>
               <h3 className="font-medium mb-2">交通費</h3>
-              <p>{job.transportation}</p>
+              <p>{job?.job?.transportation}</p>
             </div>
           </CardContent>
         </Card>
@@ -306,10 +314,10 @@ export default function JobDetailPage() {
                           {applicant.status === "pending"
                             ? "応募済み"
                             : applicant.status === "interview"
-                            ? "面接調整中"
-                            : applicant.status === "accepted"
-                            ? "採用決定"
-                            : "不採用"}
+                              ? "面接調整中"
+                              : applicant.status === "accepted"
+                                ? "採用決定"
+                                : "不採用"}
                         </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground truncate mt-1">
@@ -371,10 +379,10 @@ export default function JobDetailPage() {
                       {selectedApplicantData.status === "pending"
                         ? "応募済み"
                         : selectedApplicantData.status === "interview"
-                        ? "面接調整中"
-                        : selectedApplicantData.status === "accepted"
-                        ? "採用決定"
-                        : "不採用"}
+                          ? "面接調整中"
+                          : selectedApplicantData.status === "accepted"
+                            ? "採用決定"
+                            : "不採用"}
                     </Badge>
                   </div>
                 </div>
