@@ -343,6 +343,7 @@ export type CreateJobParams = {
   transportation?: string;
   fee: number;
   number_of_spots: number;
+  expiry_date: number;
 };
 
 export type UpdateJobParams = Partial<CreateJobParams>;
