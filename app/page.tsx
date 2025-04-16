@@ -62,6 +62,8 @@ export default function Home() {
     }
   }, [dispatch, reduxJobs.length, isLoading]);
 
+  console.log(reduxJobs);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -252,12 +254,22 @@ export default function Home() {
                       <div className="flex items-center text-xs text-gray-500 mb-3">
                         <Badge
                           variant="secondary"
-                          className="bg-black text-white">
-                          残り{job.number_of_spots}名募集中
+                          className={`${
+                            job.number_of_spots > 0 &&
+                            new Date(job.expiry_date) > new Date()
+                              ? "bg-black text-white"
+                              : "bg-gray-500 text-white"
+                          }`}>
+                          {job.number_of_spots > 0 &&
+                          new Date(job.expiry_date) > new Date()
+                            ? `残り${job.number_of_spots}名募集中`
+                            : "締め切りました"}
                         </Badge>
                       </div>
-                      <div className="flex items-center text-xs text-gray-500 mb-3">
-                        <span>報酬額 {job.fee.toLocaleString()}円</span>
+                      <div className="flex items-center text-sm text-gray-500 mb-3">
+                        <span className="font-bold">
+                          報酬額 {job.fee.toLocaleString()}円
+                        </span>
                       </div>
 
                       <div className="flex gap-2"></div>

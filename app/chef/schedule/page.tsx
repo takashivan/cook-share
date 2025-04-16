@@ -2,104 +2,54 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { MoreHorizontal, MessageSquare, Send, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Link from "next/link";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import { applicationApi } from "@/lib/api/application";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import type { Application, Job, Message, WorkSession } from "@/types";
+import type { Message, WorkSessionWithJob } from "@/types";
 import { messageApi, CreateMessageParams } from "@/lib/api/message";
 import { workSessionApi } from "@/lib/api/workSession";
 import useSWR from "swr";
 import { ChatSheet } from "@/components/chat/ChatSheet";
 import { XanoClient } from "@xano/js-sdk";
-
-// APIレスポンスの型
-interface ApplicationResponse extends Omit<Application, "job"> {
-  job: {
-    id: number;
-    created_at: string;
-    title: string;
-    description: string;
-    work_date: string;
-    start_time: number;
-    end_time: number;
-    hourly_rate: number;
-    required_skills: string[];
-    status: string;
-    updated_at: string;
-    restaurant_id: number;
-    image: string | null;
-    creator_id: number;
-    task: string | null;
-    skill: string | null;
-    whattotake: string | null;
-    note: string | null;
-    point: string | null;
-    transportation: string;
-    is_approved: boolean;
-    _restaurant: {
-      id: number;
-      name: string;
-      address: string;
-      image: string | null;
-    };
-  };
-}
-
-interface ApplicationWithJob extends Application {
-  job?: Job & {
-    restaurant: {
-      id: number;
-      name: string;
-      address: string;
-      image: string | null;
-    };
-  };
-}
+import { getWorkSessionsByUserId } from "@/lib/api/workSession";
 
 export default function SchedulePage() {
   const { user } = useAuth();
-  const [applications, setApplications] = useState<ApplicationWithJob[]>([]);
-  const [activeTab, setActiveTab] = useState("upcoming");
-  const [messageInput, setMessageInput] = useState("");
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
-  const selectedApplication = selectedJobId
-    ? applications.find((app) => app.job?.id === selectedJobId)
-    : null;
+  const [activeTab, setActiveTab] = useState("upcoming");
 
-  // ワークセッションの取得
-  const { data: workSession } = useSWR<WorkSession | null>(
-    selectedApplication?.status === "ACCEPTED"
-      ? `workSession-${selectedApplication.id}`
-      : null,
+  // ワークセッション一覧の取得
+  const { data: workSessions } = useSWR<WorkSessionWithJob[]>(
+    user?.id ? `workSessions-${user.id}` : null,
     async () => {
-      if (!selectedApplication) return null;
-      const result = (await workSessionApi.getWorkSessions()) as WorkSession[];
-      // 選択された応募に紐づくワークセッションを探す
-      const matchingWorkSession = result.find(
-        (ws) => ws.application_id === selectedApplication.id.toString()
-      );
-      console.log("Debug - Selected application:", selectedApplication.id);
-      console.log("Debug - Found work session:", matchingWorkSession);
-      return matchingWorkSession || null;
+      const result = await getWorkSessionsByUserId(user?.id || "");
+      return result as WorkSessionWithJob[];
+    },
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
     }
+  );
+  console.log(workSessions);
+
+  // 選択されたワークセッション
+  const selectedWorkSession = workSessions?.find(
+    (ws) => ws?.job?.id === selectedJobId
   );
 
   // メッセージの取得
   const { data: messages, mutate: mutateMessages } = useSWR<Message[]>(
-    workSession ? `messages-${workSession.id}` : null,
+    selectedWorkSession ? `messages-${selectedWorkSession.id}` : null,
     async () => {
-      if (!workSession) return [];
+      if (!selectedWorkSession) return [];
       const result = await messageApi.getMessagesByWorkSessionId(
-        workSession.id
+        selectedWorkSession.id
       );
       return result as Message[];
     }
@@ -107,39 +57,53 @@ export default function SchedulePage() {
 
   // Xanoのリアルタイム接続を設定
   useEffect(() => {
-    if (!workSession?.id) return;
+    if (!selectedWorkSession?.id) return;
 
     const xanoClient = new XanoClient({
       instanceBaseUrl: process.env.NEXT_PUBLIC_XANO_BASE_URL || "",
       realtimeConnectionHash: process.env.NEXT_PUBLIC_XANO_REALTIME_HASH || "",
     });
 
-    // チャンネルの設定
-    const channel = xanoClient.channel(`worksession/${workSession.id}`);
+    let channel: any;
 
-    // メッセージの購読
-    channel.on((message: any) => {
-      console.log("Chef received message:", message);
-      mutateMessages();
-    });
+    const setupChannel = async () => {
+      try {
+        // チャンネルの設定
+        channel = xanoClient.channel(`worksession/${selectedWorkSession.id}`);
+        console.log("Channel setup for workSession:", selectedWorkSession.id);
 
-    return () => {};
-  }, [workSession?.id, mutateMessages]);
+        // メッセージの購読
+        channel.on((message: any) => {
+          console.log("Chef received message:", message);
+          mutateMessages();
+        });
+      } catch (error) {
+        console.error("Error setting up channel:", error);
+      }
+    };
+
+    setupChannel();
+
+    return () => {
+      if (channel) {
+        channel.off();
+      }
+    };
+  }, [selectedWorkSession?.id, mutateMessages]);
 
   const handleSendMessage = async (message: string) => {
-    if (!message.trim() || !workSession || !selectedApplication) return;
+    if (!message.trim() || !selectedWorkSession) return;
 
     try {
       const messageParams: CreateMessageParams = {
         content: message,
-        worksession_id: workSession.id,
-        application_id: selectedApplication.id.toString(),
+        worksession_id: selectedWorkSession.id,
+        application_id: selectedWorkSession.application_id,
         sender_type: "chef",
       };
 
       await messageApi.createMessage(messageParams);
-      setMessageInput(""); // 入力をクリア
-      mutateMessages(); // メッセージ一覧を更新
+      mutateMessages();
     } catch (error) {
       console.error("Failed to send message:", error);
     }
@@ -153,79 +117,36 @@ export default function SchedulePage() {
     setSelectedJobId(null);
   };
 
-  useEffect(() => {
-    const fetchApplications = async () => {
-      if (user?.id) {
-        try {
-          const response = (await applicationApi.getApplicationsByUser(
-            user.id
-          )) as ApplicationResponse[];
-          console.log("API Response:", response);
-          // レスポンスのジョブデータを適切な型に変換
-          const applicationsWithJobs = response.map((app) => {
-            if (!app.job) return { ...app, job: undefined };
-
-            // タイムスタンプを数値に変換し、null値を適切に処理
-            const jobWithNumberTimestamps = {
-              ...app.job,
-              created_at: new Date(app.job.created_at).getTime(),
-              updated_at: new Date(app.job.updated_at).getTime(),
-              image: app.job.image || "",
-              task: app.job.task || "",
-              skill: app.job.skill || "",
-              whattotake: app.job.whattotake || "",
-              note: app.job.note || "",
-              point: app.job.point || "",
-              restaurant: {
-                ...app.job._restaurant,
-                image: app.job._restaurant.image || "",
-              },
-            };
-            console.log("Transformed job:", jobWithNumberTimestamps);
-            return { ...app, job: jobWithNumberTimestamps };
-          });
-          console.log("Final applications:", applicationsWithJobs);
-          setApplications(applicationsWithJobs as ApplicationWithJob[]);
-        } catch (error) {
-          console.error("Failed to fetch applications:", error);
-        }
-      }
-    };
-
-    fetchApplications();
-  }, [user?.id]);
-
-  console.log("Current applications state:", applications);
-
-  const filteredApplications = {
-    applied: applications.filter((app) => app.status === "APPLIED"),
-    upcoming: applications.filter((app) => app.status === "ACCEPTED"),
-    completed: applications.filter((app) => ["DONE"].includes(app.status)),
+  // ワークセッションをステータスでフィルタリング
+  const filteredWorkSessions = {
+    upcoming: workSessions?.filter((ws) => ws.status === "SCHEDULED") || [],
+    completed:
+      workSessions?.filter((ws) =>
+        ["COMPLETED", "VERIFIED"].includes(ws.status)
+      ) || [],
   };
 
-  console.log("Filtered applications:", filteredApplications);
-
-  const renderJobCard = (application: ApplicationWithJob) => {
-    if (!application.job) return null;
+  const renderWorkSessionCard = (workSession: WorkSessionWithJob) => {
+    if (!workSession.job) return null;
 
     const workDate = format(
-      new Date(application.job.work_date),
+      new Date(workSession.job.work_date),
       "yyyy年MM月dd日 (E)",
       {
         locale: ja,
       }
     );
     const startTime = format(
-      new Date(application.job.start_time * 1000),
+      new Date(workSession.job.start_time * 1000),
       "HH:mm"
     );
-    const endTime = format(new Date(application.job.end_time * 1000), "HH:mm");
+    const endTime = format(new Date(workSession.job.end_time * 1000), "HH:mm");
 
     return (
       <Card
-        key={application.id}
+        key={workSession.id}
         className="mb-4 hover:bg-gray-50 transition-colors"
-        onClick={() => openChat(application.job!.id)}>
+        onClick={() => openChat(Number(workSession.job.id))}>
         <CardContent className="p-4">
           <div className="flex justify-between items-start mb-2">
             <div className="flex items-center gap-2">
@@ -235,44 +156,14 @@ export default function SchedulePage() {
                 {startTime} 〜 {endTime}
               </span>
             </div>
-            {/* <button className="p-1" onClick={(e) => e.stopPropagation()}>
-              <MoreHorizontal className="h-5 w-5 text-gray-500" />
-            </button>
-            <Badge
-              variant={
-                application.status === "APPLIED"
-                  ? "secondary"
-                  : application.status === "ACCEPTED"
-                  ? "default"
-                  : application.status === "REJECTED"
-                  ? "destructive"
-                  : application.status === "CANCELED"
-                  ? "outline"
-                  : "outline"
-              }>
-              {application.status === "APPLIED"
-                ? "応募中"
-                : application.status === "ACCEPTED"
-                ? "確定"
-                : application.status === "REJECTED"
-                ? "不採用"
-                : application.status === "CANCELED"
-                ? "キャンセル"
-                : "完了"}
-            </Badge> */}
           </div>
           <div className="text-gray-500 mb-1">
-            {application.job.restaurant.name}
+            {workSession.job.restaurant.name}
           </div>
           <div className="text-xs text-gray-400 mb-2">
-            {application.job.restaurant.address}
+            {workSession.job.restaurant.address}
           </div>
-          <div className="font-medium">{application.job.title}</div>
-          {application.notes && (
-            <div className="text-sm text-gray-500 mt-2">
-              {application.notes}
-            </div>
-          )}
+          <div className="font-medium">{workSession.job.title}</div>
         </CardContent>
       </Card>
     );
@@ -291,29 +182,19 @@ export default function SchedulePage() {
           <TabsTrigger value="completed">完了</TabsTrigger>
         </TabsList>
 
-        {/* <TabsContent value="applied" className="mt-6">
-          {filteredApplications.applied.length > 0 ? (
-            filteredApplications.applied.map(renderJobCard)
-          ) : (
-            <p className="text-center text-gray-500 py-8">
-              応募中のお仕事はありません
-            </p>
-          )}
-        </TabsContent> */}
-
         <TabsContent value="upcoming" className="mt-6">
-          {filteredApplications.upcoming.length > 0 ? (
-            filteredApplications.upcoming.map(renderJobCard)
+          {filteredWorkSessions.upcoming.length > 0 ? (
+            filteredWorkSessions.upcoming.map(renderWorkSessionCard)
           ) : (
             <p className="text-center text-gray-500 py-8">
-              確定しているお仕事はありません
+              予定されているお仕事はありません
             </p>
           )}
         </TabsContent>
 
         <TabsContent value="completed" className="mt-6">
-          {filteredApplications.completed.length > 0 ? (
-            filteredApplications.completed.map(renderJobCard)
+          {filteredWorkSessions.completed.length > 0 ? (
+            filteredWorkSessions.completed.map(renderWorkSessionCard)
           ) : (
             <p className="text-center text-gray-500 py-8">
               完了したお仕事はありません
@@ -321,18 +202,18 @@ export default function SchedulePage() {
           )}
         </TabsContent>
       </Tabs>
-      {/* チャットシート - 下から表示 */}
+
       <ChatSheet
         isOpen={selectedJobId !== null}
         onClose={closeChat}
         messages={messages}
         mutateMessages={mutateMessages}
         onSendMessage={handleSendMessage}
-        restaurantName={selectedApplication?.job?.restaurant.name || ""}
-        restaurantImage={selectedApplication?.job?.restaurant.image || ""}
-        workDate={selectedApplication?.job?.work_date || ""}
-        startTime={selectedApplication?.job?.start_time || 0}
-        workSessionId={selectedApplication?.job?.id || 0}
+        restaurantName={selectedWorkSession?.job?.restaurant.name || ""}
+        restaurantImage={selectedWorkSession?.job?.restaurant.image_url || ""}
+        workDate={selectedWorkSession?.job?.work_date || ""}
+        startTime={selectedWorkSession?.job?.start_time || 0}
+        workSessionId={selectedWorkSession?.id || 0}
       />
     </div>
   );
