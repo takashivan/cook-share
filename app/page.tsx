@@ -6,33 +6,19 @@ import { ChevronLeft, ChevronRight, Clock, MapPin, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { getAllJobs, getJobDetails } from "@/lib/api/job";
-import type { Job, JobWithRestaurant } from "@/types";
 import { Header } from "@/components/layout/header";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState, AppDispatch } from "@/lib/redux/store";
-import { fetchJobs } from "@/lib/redux/slices/jobsSlice";
 import { Card } from "@/components/ui/card";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { Badge } from "@/components/ui/badge";
+import { useGetJobs } from "@/hooks/api/jobs/useGetJobs";
 
 export default function Home() {
-  const [jobs, setJobs] = useState<JobWithRestaurant[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toLocaleDateString("ja-JP", { month: "2-digit", day: "2-digit" })
   );
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const dispatch = useDispatch<AppDispatch>();
-  const {
-    jobs: reduxJobs,
-    loading: isLoading,
-    error,
-  } = useSelector((state: RootState) => state.jobs) as {
-    jobs: JobWithRestaurant[];
-    loading: boolean;
-    error: string | null;
-  };
+  const { data: jobsData, error, isLoading } = useGetJobs();
 
   // 次の7日分の日付を生成
   const dates = Array.from({ length: 7 }, (_, i) => {
@@ -55,14 +41,7 @@ export default function Home() {
       setIsLoggedIn(hasSession);
     };
     checkSession();
-
-    // jobsが空の場合のみデータを取得
-    if (reduxJobs.length === 0 && !isLoading) {
-      dispatch(fetchJobs());
-    }
-  }, [dispatch, reduxJobs.length, isLoading]);
-
-  console.log(reduxJobs);
+  }, [isLoading]);
 
   if (isLoading) {
     return (
@@ -195,13 +174,13 @@ export default function Home() {
           <div className="container mx-auto px-4">
             <h1 className="text-2xl font-bold mb-6">新着求人</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {reduxJobs.map((job: JobWithRestaurant) => (
+              {jobsData?.jobs.map((job) => (
                 <Link key={job.id} href={`/job/${job.id}`} className="">
                   <Card className="h-full hover:shadow-lg transition-shadow">
                     <div className="relative h-48">
                       <Image
                         src={job.image || "/images/default-job.jpg"}
-                        alt={job.title}
+                        alt={job.title ?? ''}
                         fill
                         className="object-cover rounded-t-lg"
                       />
@@ -246,7 +225,7 @@ export default function Home() {
                           {job.restaurant.restaurant_cuisine_id &&
                           job.restaurant.restaurant_cuisine_id.length > 0
                             ? job.restaurant.restaurant_cuisine_id
-                                .map((cat) => cat.category)
+                                .map((cat) => cat)
                                 .join(", ")
                             : "ジャンル未設定"}
                         </span>
@@ -256,11 +235,13 @@ export default function Home() {
                           variant="secondary"
                           className={`${
                             job.number_of_spots > 0 &&
+                            job.expiry_date != null &&
                             new Date(job.expiry_date) > new Date()
                               ? "bg-black text-white"
                               : "bg-gray-500 text-white"
                           }`}>
                           {job.number_of_spots > 0 &&
+                          job.expiry_date != null &&
                           new Date(job.expiry_date) > new Date()
                             ? `残り${job.number_of_spots}名募集中`
                             : "締め切りました"}

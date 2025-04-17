@@ -3472,6 +3472,8 @@ export interface JobsListResult {
     number_of_spots: number;
     /** @format int64 */
     fee: number;
+    /** @format timestamptz */
+    expiry_date: number | null;
     restaurant: {
       /** @format int64 */
       id: number;
