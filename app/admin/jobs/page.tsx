@@ -37,6 +37,15 @@ import {
   Briefcase,
 } from "lucide-react";
 import Link from "next/link";
+import { format } from "date-fns";
+import { ja } from "date-fns/locale";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { workSessionApi } from "@/lib/api/workSession";
+
+interface JobWithWorkSessions extends Job {
+  workSessionCount: number;
+}
 
 export default function JobsPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -51,6 +60,7 @@ export default function JobsPage() {
     error: state.companyJobs.error,
   }));
   const [hasMounted, setHasMounted] = useState(false);
+  const [formattedJobs, setFormattedJobs] = useState<JobWithWorkSessions[]>([]);
 
   useEffect(() => {
     setHasMounted(true);
@@ -61,6 +71,39 @@ export default function JobsPage() {
     console.log("Fetching company jobs...");
     dispatch(fetchCompanyJobs());
   }, [dispatch, hasMounted]);
+
+  useEffect(() => {
+    const fetchWorkSessions = async () => {
+      if (jobs && Array.isArray(jobs)) {
+        const jobsWithSessions = await Promise.all(
+          jobs.map(async (job: Job) => {
+            try {
+              const workSessions =
+                await workSessionApi.getWorkSessionsToDoByJobId(job.id);
+              return {
+                ...job,
+                workSessionCount: workSessions.length,
+              } as JobWithWorkSessions;
+            } catch (error) {
+              console.error(
+                `Error fetching work sessions for job ${job.id}:`,
+                error
+              );
+              return {
+                ...job,
+                workSessionCount: 0,
+              } as JobWithWorkSessions;
+            }
+          })
+        );
+        setFormattedJobs(jobsWithSessions);
+      }
+    };
+
+    if (jobs && Array.isArray(jobs)) {
+      fetchWorkSessions();
+    }
+  }, [jobs]);
 
   useEffect(() => {
     console.log("Current jobs state:", jobs);
@@ -151,95 +194,338 @@ export default function JobsPage() {
       </div>
 
       {/* Desktop View */}
-      <Card className="hidden md:block">
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>求人タイトル</TableHead>
-                <TableHead>店舗</TableHead>
-                <TableHead>勤務日</TableHead>
-                <TableHead>時給</TableHead>
-                <TableHead>ステータス</TableHead>
-                <TableHead className="w-[100px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {jobs.map((job) => (
-                <TableRow key={job.id}>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center">
-                        <Briefcase className="h-4 w-4 text-gray-500" />
+      <Tabs defaultValue="published" className="w-full">
+        <TabsList>
+          <TabsTrigger value="published">公開中</TabsTrigger>
+          <TabsTrigger value="draft">下書き</TabsTrigger>
+          <TabsTrigger value="pending">一時停止中</TabsTrigger>
+          <TabsTrigger value="expired">募集終了</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="published">
+          <div className="grid gap-4">
+            {formattedJobs
+              .filter(
+                (job) =>
+                  job.status === "PUBLISHED" &&
+                  (!job.expiry_date || job.expiry_date > Date.now())
+              )
+              .map((job) => (
+                <div
+                  key={job.id}
+                  className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <h3 className="font-medium">{job.title}</h3>
+                    <p className="text-sm text-gray-500"></p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Badge variant="default">公開中</Badge>
+                      <span className="text-sm text-gray-500">
+                        勤務日:{" "}
+                        {format(new Date(job.work_date), "yyyy年MM月dd日", {
+                          locale: ja,
+                        })}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        勤務時間: {format(new Date(job.start_time), "HH:mm")} 〜{" "}
+                        {format(new Date(job.end_time), "HH:mm")}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        報酬: {job.fee}円
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex flex-col items-end">
+                      <div className="text-sm font-medium text-gray-500">
+                        応募状況
                       </div>
-                      <Link
-                        href={`/admin/job/${job.id}`}
-                        className="hover:underline">
-                        {job.title}
-                      </Link>
+                      <div className="flex items-center gap-1">
+                        <span
+                          className={`text-lg font-bold ${job.workSessionCount >= job.number_of_spots ? "text-primary" : ""}`}>
+                          {job.workSessionCount || 0}
+                        </span>
+                        <span className="text-gray-500">/</span>
+                        <span className="text-lg font-bold">
+                          {job.number_of_spots}
+                        </span>
+                        <span className="text-sm text-gray-500">人</span>
+                      </div>
+                      <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
+                        <div
+                          className={`h-full ${(job.workSessionCount || 0) >= job.number_of_spots ? "bg-primary" : "bg-blue-400"}`}
+                          style={{
+                            width: `${Math.min(
+                              ((job.workSessionCount || 0) /
+                                job.number_of_spots) *
+                                100,
+                              100
+                            )}%`,
+                          }}
+                        />
+                      </div>
                     </div>
-                  </TableCell>
-                  <TableCell>{job.restaurant_id}</TableCell>
-                  <TableCell>
-                    {job.work_date
-                      ? new Date(job.work_date).toLocaleDateString()
-                      : "-"}
-                  </TableCell>
-                  <TableCell>¥{job.hourly_rate.toLocaleString()}</TableCell>
-                  <TableCell>
-                    <div
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        job.status === "published"
-                          ? "bg-green-100 text-green-800"
-                          : job.status === "draft"
-                          ? "bg-gray-100 text-gray-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}>
-                      {job.status === "published"
-                        ? "公開中"
-                        : job.status === "draft"
-                        ? "下書き"
-                        : "終了"}
-                    </div>
-                  </TableCell>
-                  <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon">
                           <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">メニューを開く</span>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem asChild>
-                          <Link
-                            href={`/admin/job/${job.id}`}
-                            className="w-full flex items-center">
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            詳細を表示
-                          </Link>
+                          <Link href={`/admin/job/${job.id}`}>詳細を見る</Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                          <Link
-                            href={`/admin/job/${job.id}/edit`}
-                            className="w-full flex items-center">
-                            <Edit className="h-4 w-4 mr-2" />
-                            編集
-                          </Link>
+                          <Link href={`/admin/job/${job.id}/edit`}>編集</Link>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </TableCell>
-                </TableRow>
+                  </div>
+                </div>
               ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="draft">
+          <div className="grid gap-4">
+            {formattedJobs
+              .filter((job) => job.status === "DRAFT")
+              .map((job) => (
+                <div
+                  key={job.id}
+                  className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <h3 className="font-medium">{job.title}</h3>
+                    <p className="text-sm text-gray-500"></p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Badge variant="secondary">下書き</Badge>
+                      <span className="text-sm text-gray-500">
+                        勤務日:{" "}
+                        {format(new Date(job.work_date), "yyyy年MM月dd日", {
+                          locale: ja,
+                        })}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        勤務時間: {format(new Date(job.start_time), "HH:mm")} 〜{" "}
+                        {format(new Date(job.end_time), "HH:mm")}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        報酬: {job.fee}円
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex flex-col items-end">
+                      <div className="text-sm font-medium text-gray-500">
+                        応募状況
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span
+                          className={`text-lg font-bold ${(job.workSessionCount || 0) >= job.number_of_spots ? "text-primary" : ""}`}>
+                          {job.workSessionCount || 0}
+                        </span>
+                        <span className="text-gray-500">/</span>
+                        <span className="text-lg font-bold">
+                          {job.number_of_spots}
+                        </span>
+                        <span className="text-sm text-gray-500">人</span>
+                      </div>
+                      <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
+                        <div
+                          className={`h-full ${(job.workSessionCount || 0) >= job.number_of_spots ? "bg-primary" : "bg-blue-400"}`}
+                          style={{
+                            width: `${Math.min(
+                              ((job.workSessionCount || 0) /
+                                job.number_of_spots) *
+                                100,
+                              100
+                            )}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                          <Link href={`/admin/job/${job.id}`}>詳細を見る</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/admin/job/${job.id}/edit`}>編集</Link>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="pending">
+          <div className="grid gap-4">
+            {formattedJobs
+              .filter((job) => job.status === "PENDING")
+              .map((job) => (
+                <div
+                  key={job.id}
+                  className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <h3 className="font-medium">{job.title}</h3>
+                    <p className="text-sm text-gray-500"></p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Badge variant="secondary">一時停止中</Badge>
+                      <span className="text-sm text-gray-500">
+                        勤務日:{" "}
+                        {format(new Date(job.work_date), "yyyy年MM月dd日", {
+                          locale: ja,
+                        })}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        勤務時間: {format(new Date(job.start_time), "HH:mm")} 〜{" "}
+                        {format(new Date(job.end_time), "HH:mm")}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        報酬: {job.fee}円
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex flex-col items-end">
+                      <div className="text-sm font-medium text-gray-500">
+                        応募状況
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span
+                          className={`text-lg font-bold ${(job.workSessionCount || 0) >= job.number_of_spots ? "text-primary" : ""}`}>
+                          {job.workSessionCount || 0}
+                        </span>
+                        <span className="text-gray-500">/</span>
+                        <span className="text-lg font-bold">
+                          {job.number_of_spots}
+                        </span>
+                        <span className="text-sm text-gray-500">人</span>
+                      </div>
+                      <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
+                        <div
+                          className={`h-full ${(job.workSessionCount || 0) >= job.number_of_spots ? "bg-primary" : "bg-blue-400"}`}
+                          style={{
+                            width: `${Math.min(
+                              ((job.workSessionCount || 0) /
+                                job.number_of_spots) *
+                                100,
+                              100
+                            )}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                          <Link href={`/admin/job/${job.id}`}>詳細を見る</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/admin/job/${job.id}/edit`}>編集</Link>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="expired">
+          <div className="grid gap-4">
+            {formattedJobs
+              .filter((job) => job.expiry_date && job.expiry_date <= Date.now())
+              .map((job) => (
+                <div
+                  key={job.id}
+                  className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <h3 className="font-medium">{job.title}</h3>
+                    <p className="text-sm text-gray-500"></p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Badge variant="destructive">募集終了</Badge>
+                      <span className="text-sm text-gray-500">
+                        勤務日:{" "}
+                        {format(new Date(job.work_date), "yyyy年MM月dd日", {
+                          locale: ja,
+                        })}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        勤務時間: {format(new Date(job.start_time), "HH:mm")} 〜{" "}
+                        {format(new Date(job.end_time), "HH:mm")}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        報酬: {job.fee}円
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex flex-col items-end">
+                      <div className="text-sm font-medium text-gray-500">
+                        応募状況
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span
+                          className={`text-lg font-bold ${(job.workSessionCount || 0) >= job.number_of_spots ? "text-primary" : ""}`}>
+                          {job.workSessionCount || 0}
+                        </span>
+                        <span className="text-gray-500">/</span>
+                        <span className="text-lg font-bold">
+                          {job.number_of_spots}
+                        </span>
+                        <span className="text-sm text-gray-500">人</span>
+                      </div>
+                      <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
+                        <div
+                          className={`h-full ${(job.workSessionCount || 0) >= job.number_of_spots ? "bg-primary" : "bg-blue-400"}`}
+                          style={{
+                            width: `${Math.min(
+                              ((job.workSessionCount || 0) /
+                                job.number_of_spots) *
+                                100,
+                              100
+                            )}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                          <Link href={`/admin/job/${job.id}`}>詳細を見る</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/admin/job/${job.id}/edit`}>編集</Link>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </TabsContent>
+      </Tabs>
 
       {/* Mobile View */}
       <div className="grid gap-4 md:hidden">
-        {jobs.map((job) => (
+        {formattedJobs.map((job) => (
           <Card key={job.id}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -296,7 +582,7 @@ export default function JobsPage() {
                 </div>
                 <div>
                   <p className="text-muted-foreground">時給</p>
-                  <p>¥{job.hourly_rate.toLocaleString()}</p>
+                  <p>¥{job.fee.toLocaleString()}</p>
                 </div>
                 <div className="col-span-2">
                   <p className="text-muted-foreground">ステータス</p>
@@ -305,14 +591,14 @@ export default function JobsPage() {
                       job.status === "published"
                         ? "bg-green-100 text-green-800"
                         : job.status === "draft"
-                        ? "bg-gray-100 text-gray-800"
-                        : "bg-yellow-100 text-yellow-800"
+                          ? "bg-gray-100 text-gray-800"
+                          : "bg-yellow-100 text-yellow-800"
                     }`}>
                     {job.status === "published"
                       ? "公開中"
                       : job.status === "draft"
-                      ? "下書き"
-                      : "終了"}
+                        ? "下書き"
+                        : "終了"}
                   </div>
                 </div>
               </div>

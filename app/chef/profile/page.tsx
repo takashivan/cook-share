@@ -18,6 +18,8 @@ import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { ChefProfileEditModal } from "@/components/modals/ChefProfileEditModal";
+import { changeEmail } from "@/lib/api/user";
+import { confirmEmail } from "@/lib/api/user";
 
 export default function ChefProfile() {
   const { user } = useAuth();
