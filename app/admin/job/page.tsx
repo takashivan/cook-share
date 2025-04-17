@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import {
   Calendar,
   Clock,
@@ -36,11 +36,10 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { applicationApi } from "@/lib/api/application";
-import { jobApi } from "@/lib/api/job";
+import { jobApi, getJobDetails } from "@/lib/api/job";
 import { useParams } from "next/navigation";
 import type { Application } from "@/types";
 import type { UserProfile } from "@/types/user";
-import type { Job } from "@/types";
 
 interface ApplicationWithUser extends Omit<Application, "user"> {
   user: UserProfile;
@@ -53,32 +52,54 @@ interface Message {
   created_at: string;
 }
 
-export default function JobApplicants() {
-  const params = useParams();
-  const jobId = params.id as string;
+interface JobDetail {
+  job: {
+    id: number;
+    title: string;
+    description: string;
+    work_date: string;
+    start_time: number;
+    end_time: number;
+    hourly_rate: number;
+    status: string;
+    image: string;
+    task: string;
+    skill: string;
+    whattotake: string;
+    note: string;
+    point: string;
+    transportation: string;
+  };
+  restaurant: {
+    id: string;
+    name: string;
+    address: string;
+    business_hours: string;
+    contact_info: string;
+    profile_image: string;
+    station: string;
+    access: string;
+  };
+}
+
+export default function JobApplicants({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = use(params);
   const [selectedApplicant, setSelectedApplicant] = useState<number | null>(
     null
   );
   const [applications, setApplications] = useState<ApplicationWithUser[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
-  const [job, setJob] = useState<Job | null>(null);
+  const [job, setJob] = useState<JobDetail | null>(null);
 
   const fetchJob = async () => {
     try {
-      const response = await jobApi.getJob(jobId);
-      const jobData: Job = {
-        ...response,
-        created_at: new Date(response.created_at).getTime(),
-        updated_at: new Date(response.updated_at).getTime(),
-        image: response.image || "",
-        task: response.task || "",
-        skill: response.skill || "",
-        whattotake: response.whattotake || "",
-        note: response.note || "",
-        point: response.point || "",
-      };
-      setJob(jobData);
+      const response = await getJobDetails(id);
+      setJob(response);
     } catch (error) {
       console.error("Failed to fetch job:", error);
     }
@@ -88,7 +109,7 @@ export default function JobApplicants() {
     try {
       setLoading(true);
       const response = await applicationApi.getApplicationsByJob(
-        parseInt(jobId, 10)
+        parseInt(id, 10)
       );
       setApplications(response as ApplicationWithUser[]);
       // 最初の応募者を選択
@@ -105,16 +126,12 @@ export default function JobApplicants() {
   useEffect(() => {
     fetchJob();
     fetchApplications();
-  }, [jobId]);
+  }, [id]);
 
   const selectedApplicantData =
     applications.find((a) => a.id === selectedApplicant) || null;
 
   const handleAcceptApplication = async (applicationId: string) => {
-    if (!job) {
-      console.error("Job information is not available");
-      return;
-    }
     try {
       // 応募一覧を再取得
       await fetchApplications();
@@ -193,10 +210,10 @@ export default function JobApplicants() {
                           {application.status === "APPLIED"
                             ? "応募済み"
                             : application.status === "ACCEPTED"
-                            ? "採用決定"
-                            : application.status === "REJECTED"
-                            ? "不採用"
-                            : application.status}
+                              ? "採用決定"
+                              : application.status === "REJECTED"
+                                ? "不採用"
+                                : application.status}
                         </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground truncate mt-1">
@@ -253,10 +270,10 @@ export default function JobApplicants() {
                       {selectedApplicantData.status === "APPLIED"
                         ? "応募済み"
                         : selectedApplicantData.status === "ACCEPTED"
-                        ? "採用決定"
-                        : selectedApplicantData.status === "REJECTED"
-                        ? "不採用"
-                        : selectedApplicantData.status}
+                          ? "採用決定"
+                          : selectedApplicantData.status === "REJECTED"
+                            ? "不採用"
+                            : selectedApplicantData.status}
                     </Badge>
                   </div>
                 </div>

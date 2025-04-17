@@ -54,6 +54,7 @@ interface JobDetail {
     transportation: string;
     number_of_spots: number;
     fee: number;
+    expiry_date: number;
   };
   restaurant: Restaurant;
 }
@@ -193,19 +194,21 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                   </div>
                   <div className="px-4 py-2">
                     <span>
-                      {new Date(
-                        jobDetail.job.start_time * 1000
-                      ).toLocaleTimeString("ja-JP", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}{" "}
+                      {new Date(jobDetail.job.start_time).toLocaleTimeString(
+                        "ja-JP",
+                        {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }
+                      )}{" "}
                       〜{" "}
-                      {new Date(
-                        jobDetail.job.end_time * 1000
-                      ).toLocaleTimeString("ja-JP", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {new Date(jobDetail.job.end_time).toLocaleTimeString(
+                        "ja-JP",
+                        {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }
+                      )}
                     </span>
                   </div>
                 </div>
@@ -238,19 +241,38 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                 </p>
                 <Badge
                   variant="secondary"
-                  className="bg-black text-white text-sm mb-0">
-                  残り{jobDetail.job.number_of_spots}名募集中
+                  className={`text-sm mb-0 ${
+                    jobDetail.job.number_of_spots > 0 &&
+                    new Date(jobDetail.job.expiry_date) > new Date()
+                      ? "bg-black text-white"
+                      : "bg-gray-500 text-white"
+                  }`}>
+                  {jobDetail.job.number_of_spots > 0 &&
+                  new Date(jobDetail.job.expiry_date) > new Date()
+                    ? `残り${jobDetail.job.number_of_spots}名募集中`
+                    : "締め切りました"}
                 </Badge>
                 <div className="flex justify-center mt-3">
                   <Button
                     onClick={() => setIsApplyModalOpen(true)}
-                    disabled={!user}
+                    disabled={
+                      !user ||
+                      jobDetail.job.number_of_spots === 0 ||
+                      new Date(jobDetail.job.expiry_date) <= new Date()
+                    }
                     className={`w-full rounded-md py-2 flex items-center justify-center gap-2 ${
-                      user
+                      user &&
+                      jobDetail.job.number_of_spots > 0 &&
+                      new Date(jobDetail.job.expiry_date) > new Date()
                         ? "bg-orange-600 hover:bg-orange-700 text-white"
                         : "bg-gray-300 text-gray-500 cursor-not-allowed"
                     }`}>
-                    {user ? "応募する" : "シェフとしてログインして応募する"}
+                    {!user
+                      ? "シェフとしてログインして応募する"
+                      : jobDetail.job.number_of_spots > 0 &&
+                          new Date(jobDetail.job.expiry_date) > new Date()
+                        ? "応募する"
+                        : "締め切りました"}
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
@@ -308,14 +330,14 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                             {" "}
                             <span>
                               {new Date(
-                                jobDetail.job.start_time * 1000
+                                jobDetail.job.start_time
                               ).toLocaleTimeString("ja-JP", {
                                 hour: "2-digit",
                                 minute: "2-digit",
                               })}{" "}
                               〜{" "}
                               {new Date(
-                                jobDetail.job.end_time * 1000
+                                jobDetail.job.end_time
                               ).toLocaleTimeString("ja-JP", {
                                 hour: "2-digit",
                                 minute: "2-digit",
@@ -335,14 +357,14 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                           <p className="text-sm">
                             <span>
                               {new Date(
-                                jobDetail.job.start_time * 1000
+                                jobDetail.job.start_time
                               ).toLocaleTimeString("ja-JP", {
                                 hour: "2-digit",
                                 minute: "2-digit",
                               })}{" "}
                               〜{" "}
                               {new Date(
-                                jobDetail.job.end_time * 1000
+                                jobDetail.job.end_time
                               ).toLocaleTimeString("ja-JP", {
                                 hour: "2-digit",
                                 minute: "2-digit",
@@ -357,8 +379,10 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                         <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
                         <div>
                           <h3 className="font-medium mb-1">報酬額</h3>
-                          <p className="text-sm">
-                            <span>{jobDetail.job.fee.toLocaleString()}円</span>
+                          <p className="text-lg">
+                            <span className="font-bold">
+                              {jobDetail.job.fee.toLocaleString()}円
+                            </span>
                           </p>
                         </div>
                       </div>
@@ -581,13 +605,24 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
 
                 <Button
                   onClick={() => setIsApplyModalOpen(true)}
-                  disabled={!user}
+                  disabled={
+                    !user ||
+                    jobDetail.job.number_of_spots === 0 ||
+                    new Date(jobDetail.job.expiry_date * 1000) <= new Date()
+                  }
                   className={`w-full rounded-md py-2 flex items-center justify-center gap-2 ${
-                    user
+                    user &&
+                    jobDetail.job.number_of_spots > 0 &&
+                    new Date(jobDetail.job.expiry_date * 1000) > new Date()
                       ? "bg-orange-600 hover:bg-orange-700 text-white"
                       : "bg-gray-300 text-gray-500 cursor-not-allowed"
                   }`}>
-                  {user ? "応募する" : "シェフとしてログインして応募する"}
+                  {!user
+                    ? "シェフとしてログインして応募する"
+                    : jobDetail.job.number_of_spots > 0 &&
+                        new Date(jobDetail.job.expiry_date * 1000) > new Date()
+                      ? "応募する"
+                      : "締め切りました"}
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>

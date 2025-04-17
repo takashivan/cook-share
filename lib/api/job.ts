@@ -3,6 +3,7 @@
 import { API_CONFIG, apiRequest } from "./config";
 import type { Restaurant } from "@/lib/api/restaurant";
 import type { JobWithRestaurant } from "@/types";
+import { GetJobData } from "@/api/__generated__/chef-connect/data-contracts";
 
 const BASE_URL = API_CONFIG.baseURLs.job;
 
@@ -100,6 +101,7 @@ export interface JobDetail {
     transportation: string;
     number_of_spots: number;
     fee: number;
+    expiry_date: number;
   };
   restaurant: {
     id: string;
@@ -339,11 +341,14 @@ export type CreateJobParams = {
   note?: string;
   point?: string;
   transportation?: string;
+  fee: number;
+  number_of_spots: number;
+  expiry_date: number;
 };
 
 export type UpdateJobParams = Partial<CreateJobParams>;
 
-export type GetJobResponse = Job;
+export type GetJobResponse = GetJobData;
 export type CreateJobResponse = Job;
 export type UpdateJobResponse = Job;
 export type DeleteJobResponse = void;

@@ -132,9 +132,9 @@ export default function RestaurantDetailPage(props: {
           locale: ja,
         }),
         formattedTime: `${format(
-          new Date(job.start_time * 1000),
+          new Date(job.start_time),
           "HH:mm"
-        )} 〜 ${format(new Date(job.end_time * 1000), "HH:mm")}`,
+        )} 〜 ${format(new Date(job.end_time), "HH:mm")}`,
       }));
       setFormattedJobs(formatted);
     }
