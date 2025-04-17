@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -33,21 +32,24 @@ import { ContentType, HttpClient, RequestParams } from "./http-client";
 
 export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description <br /><br /> <b>Authentication:</b> required
    *
    * @tags companies
    * @name StaffInviteCreate
    * @request POST:/companies/staff/invite
+   * @secure
    */
   staffInviteCreate = (data: StaffInviteCreatePayload, params: RequestParams = {}) =>
     this.request<StaffInviteCreateData, void>({
       path: `/companies/staff/invite`,
       method: "POST",
       body: data,
+      secure: true,
       type: ContentType.Json,
       format: "json",
       ...params,
     });
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -64,6 +66,7 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       format: "json",
       ...params,
     });
+
   /**
    * @description Delete Companies record. <br /><br /> <b>Authentication:</b> not required
    *
@@ -79,6 +82,7 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       format: "json",
       ...params,
     });
+
   /**
    * @description Get Companies record <br /><br /> <b>Authentication:</b> not required
    *
@@ -94,6 +98,13 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       format: "json",
       ...params,
     });
+
+  companiesDetailQueryArgs = (companiesId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/companies/${companiesId}`] : null;
+    const fetcher = () => this.companiesDetail(companiesId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Edit Companies record <br /><br /> <b>Authentication:</b> not required
    *
@@ -111,6 +122,7 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       format: "json",
       ...params,
     });
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -125,6 +137,13 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       format: "json",
       ...params,
     });
+
+  companyusersListQueryArgs = (companyId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/companies/${companyId}/companyusers`] : null;
+    const fetcher = () => this.companyusersList(companyId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -140,6 +159,17 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       format: "json",
       ...params,
     });
+
+  jobsListQueryArgs = (
+    { companyId, ...query }: JobsListParams,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/companies/${companyId}/jobs`, ...(query ? [query] : [])] : null;
+    const fetcher = () => this.jobsList({ companyId, ...query }, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -154,6 +184,13 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       format: "json",
       ...params,
     });
+
+  restaurantsListQueryArgs = (companyId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/companies/${companyId}/restaurants`] : null;
+    const fetcher = () => this.restaurantsList(companyId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -170,6 +207,7 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       format: "json",
       ...params,
     });
+
   /**
    * @description Query all Companies records <br /><br /> <b>Authentication:</b> not required
    *
@@ -185,6 +223,13 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       format: "json",
       ...params,
     });
+
+  companiesListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/companies`] : null;
+    const fetcher = () => this.companiesList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Add Companies record <br /><br /> <b>Authentication:</b> not required
    *

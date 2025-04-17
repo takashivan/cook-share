@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -37,6 +36,7 @@ export class Messages<SecurityDataType = unknown> extends HttpClient<SecurityDat
       format: "json",
       ...params,
     });
+
   /**
    * @description Get message record <br /><br /> <b>Authentication:</b> not required
    *
@@ -52,6 +52,13 @@ export class Messages<SecurityDataType = unknown> extends HttpClient<SecurityDat
       format: "json",
       ...params,
     });
+
+  messagesDetailQueryArgs = (messageId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/messages/${messageId}`] : null;
+    const fetcher = () => this.messagesDetail(messageId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Edit message record <br /><br /> <b>Authentication:</b> not required
    *
@@ -69,6 +76,7 @@ export class Messages<SecurityDataType = unknown> extends HttpClient<SecurityDat
       format: "json",
       ...params,
     });
+
   /**
    * @description Query all message records <br /><br /> <b>Authentication:</b> not required
    *
@@ -84,6 +92,13 @@ export class Messages<SecurityDataType = unknown> extends HttpClient<SecurityDat
       format: "json",
       ...params,
     });
+
+  messagesListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/messages`] : null;
+    const fetcher = () => this.messagesList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Add message record <br /><br /> <b>Authentication:</b> not required
    *

@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -40,6 +39,7 @@ export class RestaurantCuisines<SecurityDataType = unknown> extends HttpClient<S
       format: "json",
       ...params,
     });
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -54,6 +54,17 @@ export class RestaurantCuisines<SecurityDataType = unknown> extends HttpClient<S
       format: "json",
       ...params,
     });
+
+  restaurantCuisinesDetailQueryArgs = (
+    restaurantCuisineId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/restaurant-cuisines/${restaurantCuisineId}`] : null;
+    const fetcher = () => this.restaurantCuisinesDetail(restaurantCuisineId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -74,6 +85,7 @@ export class RestaurantCuisines<SecurityDataType = unknown> extends HttpClient<S
       format: "json",
       ...params,
     });
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -94,6 +106,7 @@ export class RestaurantCuisines<SecurityDataType = unknown> extends HttpClient<S
       format: "json",
       ...params,
     });
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -108,6 +121,13 @@ export class RestaurantCuisines<SecurityDataType = unknown> extends HttpClient<S
       format: "json",
       ...params,
     });
+
+  restaurantCuisinesListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurant-cuisines`] : null;
+    const fetcher = () => this.restaurantCuisinesList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *

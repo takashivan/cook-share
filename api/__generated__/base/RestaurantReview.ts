@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -39,6 +38,13 @@ export class RestaurantReview<SecurityDataType = unknown> extends HttpClient<Sec
       format: "json",
       ...params,
     });
+
+  byChefDetailQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurant_review/byChef/${userId}`] : null;
+    const fetcher = () => this.byChefDetail(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -53,6 +59,13 @@ export class RestaurantReview<SecurityDataType = unknown> extends HttpClient<Sec
       format: "json",
       ...params,
     });
+
+  byRestaurantDetailQueryArgs = (restaurantId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurant_review/byRestaurant/${restaurantId}`] : null;
+    const fetcher = () => this.byRestaurantDetail(restaurantId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -67,6 +80,13 @@ export class RestaurantReview<SecurityDataType = unknown> extends HttpClient<Sec
       format: "json",
       ...params,
     });
+
+  bySessionDetailQueryArgs = (worksessionId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurant_review/bySession/${worksessionId}`] : null;
+    const fetcher = () => this.bySessionDetail(worksessionId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -81,6 +101,7 @@ export class RestaurantReview<SecurityDataType = unknown> extends HttpClient<Sec
       format: "json",
       ...params,
     });
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -95,6 +116,17 @@ export class RestaurantReview<SecurityDataType = unknown> extends HttpClient<Sec
       format: "json",
       ...params,
     });
+
+  restaurantReviewDetailQueryArgs = (
+    restaurantReviewId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/restaurant_review/${restaurantReviewId}`] : null;
+    const fetcher = () => this.restaurantReviewDetail(restaurantReviewId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -115,6 +147,7 @@ export class RestaurantReview<SecurityDataType = unknown> extends HttpClient<Sec
       format: "json",
       ...params,
     });
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -129,6 +162,13 @@ export class RestaurantReview<SecurityDataType = unknown> extends HttpClient<Sec
       format: "json",
       ...params,
     });
+
+  restaurantReviewListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurant_review`] : null;
+    const fetcher = () => this.restaurantReviewList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *

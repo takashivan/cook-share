@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -38,6 +37,13 @@ export class Job<SecurityDataType = unknown> extends HttpClient<SecurityDataType
       format: "json",
       ...params,
     });
+
+  companyDetailQueryArgs = (companyId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/job/company/${companyId}`] : null;
+    const fetcher = () => this.companyDetail(companyId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -52,6 +58,13 @@ export class Job<SecurityDataType = unknown> extends HttpClient<SecurityDataType
       format: "json",
       ...params,
     });
+
+  restaurantDetailQueryArgs = (restaurantId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/job/restaurant/${restaurantId}`] : null;
+    const fetcher = () => this.restaurantDetail(restaurantId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Delete job record. <br /><br /> <b>Authentication:</b> not required
    *
@@ -67,6 +80,7 @@ export class Job<SecurityDataType = unknown> extends HttpClient<SecurityDataType
       format: "json",
       ...params,
     });
+
   /**
    * @description Get job record <br /><br /> <b>Authentication:</b> not required
    *
@@ -82,6 +96,13 @@ export class Job<SecurityDataType = unknown> extends HttpClient<SecurityDataType
       format: "json",
       ...params,
     });
+
+  getJobQueryArgs = (jobId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/job/${jobId}`] : null;
+    const fetcher = () => this.getJob(jobId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Edit job record <br /><br /> <b>Authentication:</b> not required
    *
@@ -99,6 +120,7 @@ export class Job<SecurityDataType = unknown> extends HttpClient<SecurityDataType
       format: "json",
       ...params,
     });
+
   /**
    * @description Query all job records <br /><br /> <b>Authentication:</b> not required
    *
@@ -116,6 +138,13 @@ export class Job<SecurityDataType = unknown> extends HttpClient<SecurityDataType
       format: "json",
       ...params,
     });
+
+  getJob2QueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/job`] : null;
+    const fetcher = () => this.getJob2(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Add job record <br /><br /> <b>Authentication:</b> not required
    *

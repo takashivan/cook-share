@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -34,6 +33,7 @@ export class RestaurantNotification<SecurityDataType = unknown> extends HttpClie
       format: "json",
       ...params,
     });
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -48,6 +48,17 @@ export class RestaurantNotification<SecurityDataType = unknown> extends HttpClie
       format: "json",
       ...params,
     });
+
+  restaurantNotificationDetailQueryArgs = (
+    restaurantNotificationId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/restaurant_notification/${restaurantNotificationId}`] : null;
+    const fetcher = () => this.restaurantNotificationDetail(restaurantNotificationId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -62,6 +73,13 @@ export class RestaurantNotification<SecurityDataType = unknown> extends HttpClie
       format: "json",
       ...params,
     });
+
+  restaurantNotificationListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurant_notification`] : null;
+    const fetcher = () => this.restaurantNotificationList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *

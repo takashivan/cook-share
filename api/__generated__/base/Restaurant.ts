@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -13,6 +12,7 @@
 import {
   CheckAccessListData,
   CheckAccessListParams,
+  CompanyDetailOutput,
   CompanyusersClone0ListData,
   CompanyusersDetailData,
   RestaurantCreateData,
@@ -45,6 +45,34 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
       format: "json",
       ...params,
     });
+
+  checkAccessListQueryArgs = (query: CheckAccessListParams, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurant/check-access`, ...(query ? [query] : [])] : null;
+    const fetcher = () => this.checkAccessList(query, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags restaurant
+   * @name CompanyDetail
+   * @request GET:/restaurant/company/{company_id}
+   */
+  companyDetail = (companyId: string, params: RequestParams = {}) =>
+    this.request<CompanyDetailOutput, void>({
+      path: `/restaurant/company/${companyId}`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  companyDetailQueryArgs = (companyId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurant/company/${companyId}`] : null;
+    const fetcher = () => this.companyDetail(companyId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -59,6 +87,13 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
       format: "json",
       ...params,
     });
+
+  companyusersClone0ListQueryArgs = (restaurantId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurant/companyusers/${restaurantId}/clone_0`] : null;
+    const fetcher = () => this.companyusersClone0List(restaurantId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -73,6 +108,13 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
       format: "json",
       ...params,
     });
+
+  companyusersDetailQueryArgs = (restaurantId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurant/companyusers/${restaurantId}`] : null;
+    const fetcher = () => this.companyusersDetail(restaurantId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -89,6 +131,7 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
       format: "json",
       ...params,
     });
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -104,6 +147,13 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
       format: "json",
       ...params,
     });
+
+  staffsListQueryArgs = (query: StaffsListParams, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurant/staffs`, ...(query ? [query] : [])] : null;
+    const fetcher = () => this.staffsList(query, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Delete restaurant record. <br /><br /> <b>Authentication:</b> not required
    *
@@ -119,6 +169,7 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
       format: "json",
       ...params,
     });
+
   /**
    * @description Get restaurant record <br /><br /> <b>Authentication:</b> not required
    *
@@ -134,6 +185,13 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
       format: "json",
       ...params,
     });
+
+  restaurantDetailQueryArgs = (restaurantId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurant/${restaurantId}`] : null;
+    const fetcher = () => this.restaurantDetail(restaurantId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Edit restaurant record <br /><br /> <b>Authentication:</b> not required
    *
@@ -147,10 +205,11 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
       path: `/restaurant/${restaurantId}`,
       method: "PATCH",
       body: data,
-      type: ContentType.Json,
+      type: ContentType.FormData,
       format: "json",
       ...params,
     });
+
   /**
    * @description Query all restaurant records <br /><br /> <b>Authentication:</b> not required
    *
@@ -166,6 +225,13 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
       format: "json",
       ...params,
     });
+
+  restaurantListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurant`] : null;
+    const fetcher = () => this.restaurantList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Add restaurant record <br /><br /> <b>Authentication:</b> not required
    *

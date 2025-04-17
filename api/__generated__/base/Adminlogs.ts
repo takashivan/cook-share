@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -37,6 +36,7 @@ export class Adminlogs<SecurityDataType = unknown> extends HttpClient<SecurityDa
       format: "json",
       ...params,
     });
+
   /**
    * @description Get adminlog record <br /><br /> <b>Authentication:</b> not required
    *
@@ -52,6 +52,13 @@ export class Adminlogs<SecurityDataType = unknown> extends HttpClient<SecurityDa
       format: "json",
       ...params,
     });
+
+  adminlogsDetailQueryArgs = (adminlogId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/adminlogs/${adminlogId}`] : null;
+    const fetcher = () => this.adminlogsDetail(adminlogId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Edit adminlog record <br /><br /> <b>Authentication:</b> not required
    *
@@ -69,6 +76,7 @@ export class Adminlogs<SecurityDataType = unknown> extends HttpClient<SecurityDa
       format: "json",
       ...params,
     });
+
   /**
    * @description Query all adminlog records <br /><br /> <b>Authentication:</b> not required
    *
@@ -84,6 +92,13 @@ export class Adminlogs<SecurityDataType = unknown> extends HttpClient<SecurityDa
       format: "json",
       ...params,
     });
+
+  adminlogsListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/adminlogs`] : null;
+    const fetcher = () => this.adminlogsList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Add adminlog record <br /><br /> <b>Authentication:</b> not required
    *

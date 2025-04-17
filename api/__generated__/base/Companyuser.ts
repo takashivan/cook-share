@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -38,6 +37,13 @@ export class Companyuser<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
+  companyDetailQueryArgs = (companyId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/companyuser/company/${companyId}`] : null;
+    const fetcher = () => this.companyDetail(companyId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -53,6 +59,17 @@ export class Companyuser<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
+  meRestaurantsListQueryArgs = (
+    query: MeRestaurantsListParams,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/companyuser/me/restaurants`, ...(query ? [query] : [])] : null;
+    const fetcher = () => this.meRestaurantsList(query, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Get CompanyUser record <br /><br /> <b>Authentication:</b> not required
    *
@@ -68,6 +85,13 @@ export class Companyuser<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
+  companyuserDetailQueryArgs = (companyuserId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/companyuser/${companyuserId}`] : null;
+    const fetcher = () => this.companyuserDetail(companyuserId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Edit CompanyUser record <br /><br /> <b>Authentication:</b> not required
    *
@@ -89,6 +113,7 @@ export class Companyuser<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
   /**
    * @description Query all CompanyUser records <br /><br /> <b>Authentication:</b> not required
    *
@@ -104,6 +129,13 @@ export class Companyuser<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
+  companyuserListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/companyuser`] : null;
+    const fetcher = () => this.companyuserList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Add CompanyUser record <br /><br /> <b>Authentication:</b> not required
    *

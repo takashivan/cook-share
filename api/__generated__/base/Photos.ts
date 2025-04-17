@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -37,6 +36,7 @@ export class Photos<SecurityDataType = unknown> extends HttpClient<SecurityDataT
       format: "json",
       ...params,
     });
+
   /**
    * @description Get Photos record <br /><br /> <b>Authentication:</b> not required
    *
@@ -52,6 +52,13 @@ export class Photos<SecurityDataType = unknown> extends HttpClient<SecurityDataT
       format: "json",
       ...params,
     });
+
+  photosDetailQueryArgs = (photosId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/photos/${photosId}`] : null;
+    const fetcher = () => this.photosDetail(photosId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Edit Photos record <br /><br /> <b>Authentication:</b> not required
    *
@@ -69,6 +76,7 @@ export class Photos<SecurityDataType = unknown> extends HttpClient<SecurityDataT
       format: "json",
       ...params,
     });
+
   /**
    * @description Query all Photos records <br /><br /> <b>Authentication:</b> not required
    *
@@ -84,6 +92,13 @@ export class Photos<SecurityDataType = unknown> extends HttpClient<SecurityDataT
       format: "json",
       ...params,
     });
+
+  photosListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/photos`] : null;
+    const fetcher = () => this.photosList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Add Photos record <br /><br /> <b>Authentication:</b> not required
    *

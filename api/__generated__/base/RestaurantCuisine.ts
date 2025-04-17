@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -28,6 +27,13 @@ export class RestaurantCuisine<SecurityDataType = unknown> extends HttpClient<Se
       format: "json",
       ...params,
     });
+
+  restaurantCuisineListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurant-cuisine`] : null;
+    const fetcher = () => this.restaurantCuisineList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -44,4 +50,10 @@ export class RestaurantCuisine<SecurityDataType = unknown> extends HttpClient<Se
       format: "json",
       ...params,
     });
+
+  restaurantCuisineList2QueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurant_cuisine`] : null;
+    const fetcher = () => this.restaurantCuisineList2(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

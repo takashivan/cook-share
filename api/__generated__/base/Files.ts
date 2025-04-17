@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -35,6 +34,7 @@ export class Files<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       format: "json",
       ...params,
     });
+
   /**
    * @description Get Files record <br /><br /> <b>Authentication:</b> not required
    *
@@ -50,6 +50,13 @@ export class Files<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       format: "json",
       ...params,
     });
+
+  filesDetailQueryArgs = (filesId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/files/${filesId}`] : null;
+    const fetcher = () => this.filesDetail(filesId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Edit Files record <br /><br /> <b>Authentication:</b> not required
    *
@@ -65,6 +72,7 @@ export class Files<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       format: "json",
       ...params,
     });
+
   /**
    * @description Query all Files records <br /><br /> <b>Authentication:</b> not required
    *
@@ -80,6 +88,13 @@ export class Files<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       format: "json",
       ...params,
     });
+
+  filesListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/files`] : null;
+    const fetcher = () => this.filesList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Add Files record <br /><br /> <b>Authentication:</b> not required
    *

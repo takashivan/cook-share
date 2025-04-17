@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -34,6 +33,7 @@ export class ChefNotifications<SecurityDataType = unknown> extends HttpClient<Se
       format: "json",
       ...params,
     });
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -48,6 +48,17 @@ export class ChefNotifications<SecurityDataType = unknown> extends HttpClient<Se
       format: "json",
       ...params,
     });
+
+  chefNotificationsDetailQueryArgs = (
+    chefNotificationId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/chef-notifications/${chefNotificationId}`] : null;
+    const fetcher = () => this.chefNotificationsDetail(chefNotificationId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -62,6 +73,13 @@ export class ChefNotifications<SecurityDataType = unknown> extends HttpClient<Se
       format: "json",
       ...params,
     });
+
+  chefNotificationsListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/chef-notifications`] : null;
+    const fetcher = () => this.chefNotificationsList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *

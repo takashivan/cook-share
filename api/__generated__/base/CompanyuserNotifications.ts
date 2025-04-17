@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -37,6 +36,7 @@ export class CompanyuserNotifications<SecurityDataType = unknown> extends HttpCl
       format: "json",
       ...params,
     });
+
   /**
    * @description Get companyUser_notification record <br /><br /> <b>Authentication:</b> not required
    *
@@ -52,6 +52,18 @@ export class CompanyuserNotifications<SecurityDataType = unknown> extends HttpCl
       format: "json",
       ...params,
     });
+
+  companyuserNotificationsDetailQueryArgs = (
+    companyuserNotificationId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/companyuser-notifications/${companyuserNotificationId}`] : null;
+    const fetcher = () =>
+      this.companyuserNotificationsDetail(companyuserNotificationId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Edit companyUser_notification record <br /><br /> <b>Authentication:</b> not required
    *
@@ -73,6 +85,7 @@ export class CompanyuserNotifications<SecurityDataType = unknown> extends HttpCl
       format: "json",
       ...params,
     });
+
   /**
    * @description Query all companyUser_notification records <br /><br /> <b>Authentication:</b> not required
    *
@@ -88,6 +101,13 @@ export class CompanyuserNotifications<SecurityDataType = unknown> extends HttpCl
       format: "json",
       ...params,
     });
+
+  companyuserNotificationsListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/companyuser-notifications`] : null;
+    const fetcher = () => this.companyuserNotificationsList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Add companyUser_notification record <br /><br /> <b>Authentication:</b> not required
    *

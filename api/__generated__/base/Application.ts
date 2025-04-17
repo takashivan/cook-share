@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -43,6 +42,13 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
+  getApplicationQueryArgs = (jobId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/application/job/${jobId}`] : null;
+    const fetcher = () => this.getApplication(jobId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -57,6 +63,13 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
+  myComingDetailQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/application/my/coming/${userId}`] : null;
+    const fetcher = () => this.myComingDetail(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -73,6 +86,13 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
+  getApplication2QueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/application/my/${userId}`] : null;
+    const fetcher = () => this.getApplication2(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -87,6 +107,7 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -101,6 +122,7 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -115,6 +137,7 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -129,6 +152,13 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
+  applicationDetailQueryArgs = (applicationId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/application/${applicationId}`] : null;
+    const fetcher = () => this.applicationDetail(applicationId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -149,6 +179,7 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -165,6 +196,7 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -179,6 +211,13 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
+  applicationListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/application`] : null;
+    const fetcher = () => this.applicationList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *

@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -36,6 +35,7 @@ export class Restaurantaccesses<SecurityDataType = unknown> extends HttpClient<S
       format: "json",
       ...params,
     });
+
   /**
    * @description Edit RestaurantAccess record <br /><br /> <b>Authentication:</b> not required
    *
@@ -57,6 +57,7 @@ export class Restaurantaccesses<SecurityDataType = unknown> extends HttpClient<S
       format: "json",
       ...params,
     });
+
   /**
    * @description Query all RestaurantAccess records <br /><br /> <b>Authentication:</b> not required
    *
@@ -72,6 +73,13 @@ export class Restaurantaccesses<SecurityDataType = unknown> extends HttpClient<S
       format: "json",
       ...params,
     });
+
+  restaurantaccessesListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurantaccesses`] : null;
+    const fetcher = () => this.restaurantaccessesList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Add RestaurantAccess record <br /><br /> <b>Authentication:</b> not required
    *

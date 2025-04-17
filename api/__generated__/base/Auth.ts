@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -39,6 +38,7 @@ export class Auth<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       format: "json",
       ...params,
     });
+
   /**
    * @description Get the record belonging to the authentication token <br /><br /> <b>Authentication:</b> required
    *
@@ -56,6 +56,13 @@ export class Auth<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       format: "json",
       ...params,
     });
+
+  getAuthQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/auth/me`] : null;
+    const fetcher = () => this.getAuth(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Signup and retrieve an authentication token <br /><br /> <b>Authentication:</b> not required
    *
@@ -73,6 +80,7 @@ export class Auth<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       format: "json",
       ...params,
     });
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *

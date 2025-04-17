@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -37,6 +36,7 @@ export class Payment<SecurityDataType = unknown> extends HttpClient<SecurityData
       format: "json",
       ...params,
     });
+
   /**
    * @description Get payment record <br /><br /> <b>Authentication:</b> not required
    *
@@ -52,6 +52,13 @@ export class Payment<SecurityDataType = unknown> extends HttpClient<SecurityData
       format: "json",
       ...params,
     });
+
+  paymentDetailQueryArgs = (paymentId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/payment/${paymentId}`] : null;
+    const fetcher = () => this.paymentDetail(paymentId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Edit payment record <br /><br /> <b>Authentication:</b> not required
    *
@@ -69,6 +76,7 @@ export class Payment<SecurityDataType = unknown> extends HttpClient<SecurityData
       format: "json",
       ...params,
     });
+
   /**
    * @description Query all payment records <br /><br /> <b>Authentication:</b> not required
    *
@@ -84,6 +92,13 @@ export class Payment<SecurityDataType = unknown> extends HttpClient<SecurityData
       format: "json",
       ...params,
     });
+
+  paymentListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/payment`] : null;
+    const fetcher = () => this.paymentList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Add payment record <br /><br /> <b>Authentication:</b> not required
    *

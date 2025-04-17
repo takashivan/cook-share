@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -41,6 +40,7 @@ export class CompanyuserNotification<SecurityDataType = unknown> extends HttpCli
       format: "json",
       ...params,
     });
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -55,6 +55,13 @@ export class CompanyuserNotification<SecurityDataType = unknown> extends HttpCli
       format: "json",
       ...params,
     });
+
+  byUserDetailQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/companyuser_notification/byUser/${userId}`] : null;
+    const fetcher = () => this.byUserDetail(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Delete companyUser_notification record. <br /><br /> <b>Authentication:</b> not required
    *
@@ -70,6 +77,7 @@ export class CompanyuserNotification<SecurityDataType = unknown> extends HttpCli
       format: "json",
       ...params,
     });
+
   /**
    * @description Get companyUser_notification record <br /><br /> <b>Authentication:</b> not required
    *
@@ -85,6 +93,17 @@ export class CompanyuserNotification<SecurityDataType = unknown> extends HttpCli
       format: "json",
       ...params,
     });
+
+  companyuserNotificationDetailQueryArgs = (
+    companyuserNotificationId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/companyuser_notification/${companyuserNotificationId}`] : null;
+    const fetcher = () => this.companyuserNotificationDetail(companyuserNotificationId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Edit companyUser_notification record <br /><br /> <b>Authentication:</b> not required
    *
@@ -106,6 +125,7 @@ export class CompanyuserNotification<SecurityDataType = unknown> extends HttpCli
       format: "json",
       ...params,
     });
+
   /**
    * @description Query all companyUser_notification records <br /><br /> <b>Authentication:</b> not required
    *
@@ -121,6 +141,13 @@ export class CompanyuserNotification<SecurityDataType = unknown> extends HttpCli
       format: "json",
       ...params,
     });
+
+  companyuserNotificationListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/companyuser_notification`] : null;
+    const fetcher = () => this.companyuserNotificationList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Add companyUser_notification record <br /><br /> <b>Authentication:</b> not required
    *

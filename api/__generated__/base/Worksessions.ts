@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -39,6 +38,13 @@ export class Worksessions<SecurityDataType = unknown> extends HttpClient<Securit
       format: "json",
       ...params,
     });
+
+  chefReviewListQueryArgs = (worksessionId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/worksessions/${worksessionId}/chef-review`] : null;
+    const fetcher = () => this.chefReviewList(worksessionId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -53,6 +59,13 @@ export class Worksessions<SecurityDataType = unknown> extends HttpClient<Securit
       format: "json",
       ...params,
     });
+
+  messagesListQueryArgs = (worksessionId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/worksessions/${worksessionId}/messages`] : null;
+    const fetcher = () => this.messagesList(worksessionId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -67,6 +80,13 @@ export class Worksessions<SecurityDataType = unknown> extends HttpClient<Securit
       format: "json",
       ...params,
     });
+
+  restaurantReviewListQueryArgs = (worksessionId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/worksessions/${worksessionId}/restaurant-review`] : null;
+    const fetcher = () => this.restaurantReviewList(worksessionId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Delete worksession record. <br /><br /> <b>Authentication:</b> not required
    *
@@ -82,6 +102,7 @@ export class Worksessions<SecurityDataType = unknown> extends HttpClient<Securit
       format: "json",
       ...params,
     });
+
   /**
    * @description Get worksession record <br /><br /> <b>Authentication:</b> not required
    *
@@ -97,6 +118,13 @@ export class Worksessions<SecurityDataType = unknown> extends HttpClient<Securit
       format: "json",
       ...params,
     });
+
+  worksessionsDetailQueryArgs = (worksessionId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/worksessions/${worksessionId}`] : null;
+    const fetcher = () => this.worksessionsDetail(worksessionId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Edit worksession record <br /><br /> <b>Authentication:</b> not required
    *
@@ -118,6 +146,7 @@ export class Worksessions<SecurityDataType = unknown> extends HttpClient<Securit
       format: "json",
       ...params,
     });
+
   /**
    * @description Query all worksession records <br /><br /> <b>Authentication:</b> not required
    *
@@ -133,6 +162,13 @@ export class Worksessions<SecurityDataType = unknown> extends HttpClient<Securit
       format: "json",
       ...params,
     });
+
+  worksessionsListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/worksessions`] : null;
+    const fetcher = () => this.worksessionsList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Add worksession record <br /><br /> <b>Authentication:</b> not required
    *

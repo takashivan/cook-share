@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -37,6 +36,7 @@ export class Messageattachments<SecurityDataType = unknown> extends HttpClient<S
       format: "json",
       ...params,
     });
+
   /**
    * @description Get messageAttachment record <br /><br /> <b>Authentication:</b> not required
    *
@@ -52,6 +52,17 @@ export class Messageattachments<SecurityDataType = unknown> extends HttpClient<S
       format: "json",
       ...params,
     });
+
+  messageattachmentsDetailQueryArgs = (
+    messageattachmentId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/messageattachments/${messageattachmentId}`] : null;
+    const fetcher = () => this.messageattachmentsDetail(messageattachmentId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Edit messageAttachment record <br /><br /> <b>Authentication:</b> not required
    *
@@ -73,6 +84,7 @@ export class Messageattachments<SecurityDataType = unknown> extends HttpClient<S
       format: "json",
       ...params,
     });
+
   /**
    * @description Query all messageAttachment records <br /><br /> <b>Authentication:</b> not required
    *
@@ -88,6 +100,13 @@ export class Messageattachments<SecurityDataType = unknown> extends HttpClient<S
       format: "json",
       ...params,
     });
+
+  messageattachmentsListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/messageattachments`] : null;
+    const fetcher = () => this.messageattachmentsList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Add messageAttachment record <br /><br /> <b>Authentication:</b> not required
    *

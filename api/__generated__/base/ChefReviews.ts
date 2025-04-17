@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -36,6 +35,7 @@ export class ChefReviews<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -50,6 +50,13 @@ export class ChefReviews<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
+  chefReviewsDetailQueryArgs = (chefReviewId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/chef-reviews/${chefReviewId}`] : null;
+    const fetcher = () => this.chefReviewsDetail(chefReviewId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -70,6 +77,7 @@ export class ChefReviews<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -84,6 +92,13 @@ export class ChefReviews<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
+  chefReviewsListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/chef-reviews`] : null;
+    const fetcher = () => this.chefReviewsList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *

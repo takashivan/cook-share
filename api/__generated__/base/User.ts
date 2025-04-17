@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -42,6 +41,7 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       format: "json",
       ...params,
     });
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -58,6 +58,7 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       format: "json",
       ...params,
     });
+
   /**
    * @description Delete user record. <br /><br /> <b>Authentication:</b> not required
    *
@@ -73,6 +74,7 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       format: "json",
       ...params,
     });
+
   /**
    * @description Get user record <br /><br /> <b>Authentication:</b> not required
    *
@@ -88,6 +90,13 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       format: "json",
       ...params,
     });
+
+  userDetailQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/user/${userId}`] : null;
+    const fetcher = () => this.userDetail(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Edit user record <br /><br /> <b>Authentication:</b> not required
    *
@@ -105,6 +114,7 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       format: "json",
       ...params,
     });
+
   /**
    * @description Query all user records <br /><br /> <b>Authentication:</b> not required
    *
@@ -120,6 +130,13 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       format: "json",
       ...params,
     });
+
+  userListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/user`] : null;
+    const fetcher = () => this.userList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Add user record <br /><br /> <b>Authentication:</b> not required
    *

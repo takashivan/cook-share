@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -37,6 +36,13 @@ export class Message<SecurityDataType = unknown> extends HttpClient<SecurityData
       format: "json",
       ...params,
     });
+
+  worksessionDetailQueryArgs = (worksessionId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/message/worksession/${worksessionId}`] : null;
+    const fetcher = () => this.worksessionDetail(worksessionId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Delete message record. <br /><br /> <b>Authentication:</b> not required
    *
@@ -52,6 +58,7 @@ export class Message<SecurityDataType = unknown> extends HttpClient<SecurityData
       format: "json",
       ...params,
     });
+
   /**
    * @description Get message record <br /><br /> <b>Authentication:</b> not required
    *
@@ -67,6 +74,13 @@ export class Message<SecurityDataType = unknown> extends HttpClient<SecurityData
       format: "json",
       ...params,
     });
+
+  messageDetailQueryArgs = (messageId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/message/${messageId}`] : null;
+    const fetcher = () => this.messageDetail(messageId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Edit message record <br /><br /> <b>Authentication:</b> not required
    *
@@ -84,6 +98,7 @@ export class Message<SecurityDataType = unknown> extends HttpClient<SecurityData
       format: "json",
       ...params,
     });
+
   /**
    * @description Query all message records <br /><br /> <b>Authentication:</b> not required
    *
@@ -99,6 +114,13 @@ export class Message<SecurityDataType = unknown> extends HttpClient<SecurityData
       format: "json",
       ...params,
     });
+
+  messageListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/message`] : null;
+    const fetcher = () => this.messageList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Add message record <br /><br /> <b>Authentication:</b> not required
    *

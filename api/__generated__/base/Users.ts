@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -44,6 +43,7 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       format: "json",
       ...params,
     });
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -59,6 +59,17 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       format: "json",
       ...params,
     });
+
+  chefNotificationsListQueryArgs = (
+    { userId, ...query }: ChefNotificationsListParams1,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/users/${userId}/chef-notifications`, ...(query ? [query] : [])] : null;
+    const fetcher = () => this.chefNotificationsList({ userId, ...query }, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -73,6 +84,13 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       format: "json",
       ...params,
     });
+
+  applicationsListQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/users/${userId}/applications`] : null;
+    const fetcher = () => this.applicationsList(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -87,6 +105,13 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       format: "json",
       ...params,
     });
+
+  chefReviewsListQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/users/${userId}/chef-reviews`] : null;
+    const fetcher = () => this.chefReviewsList(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -101,6 +126,13 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       format: "json",
       ...params,
     });
+
+  restaurantReviewsListQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/users/${userId}/restaurant-reviews`] : null;
+    const fetcher = () => this.restaurantReviewsList(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -115,6 +147,7 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       format: "json",
       ...params,
     });
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -129,6 +162,13 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       format: "json",
       ...params,
     });
+
+  worksessionsUserTodosListQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/users/${userId}/worksessions/user_todos`] : null;
+    const fetcher = () => this.worksessionsUserTodosList(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Delete user record. <br /><br /> <b>Authentication:</b> not required
    *
@@ -144,6 +184,7 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       format: "json",
       ...params,
     });
+
   /**
    * @description Get user record <br /><br /> <b>Authentication:</b> not required
    *
@@ -159,6 +200,13 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       format: "json",
       ...params,
     });
+
+  usersDetailQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/users/${userId}`] : null;
+    const fetcher = () => this.usersDetail(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Edit user record <br /><br /> <b>Authentication:</b> not required
    *
@@ -176,6 +224,7 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       format: "json",
       ...params,
     });
+
   /**
    * @description Query all user records <br /><br /> <b>Authentication:</b> not required
    *
@@ -191,6 +240,13 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       format: "json",
       ...params,
     });
+
+  usersListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/users`] : null;
+    const fetcher = () => this.usersList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Add user record <br /><br /> <b>Authentication:</b> not required
    *
