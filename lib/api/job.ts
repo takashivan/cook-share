@@ -139,6 +139,7 @@ export interface Job {
   is_approved: boolean;
   number_of_spots: number;
   fee: number;
+  expiry_date: number;
 }
 
 export interface GetJobsResponse {
@@ -438,14 +439,17 @@ export const jobApi = {
 
   updateJob: async (
     id: string,
-    params: UpdateJobParams
+    params: UpdateJobParams | FormData
   ): Promise<UpdateJobResponse> => {
     const response = await fetch(`${BASE_URL}/${id}`, {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(params),
+      headers:
+        params instanceof FormData
+          ? {}
+          : {
+              "Content-Type": "application/json",
+            },
+      body: params instanceof FormData ? params : JSON.stringify(params),
     });
 
     if (!response.ok) {
