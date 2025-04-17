@@ -11,7 +11,7 @@ export interface Job {
   status: string;
   updated_at: number;
   restaurant_id: number;
-  image: string;
+  image?: string;
   creator_id: number;
   number_of_spots: number;
   fee: number;
@@ -157,4 +157,5 @@ export interface Restaurant {
   companies_id: string;
   is_approved: boolean;
   restaurant_cuisine_id: CuisineCategory[];
+  profile_image?: string;
 }

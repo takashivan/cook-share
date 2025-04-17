@@ -166,3 +166,11 @@ export const updateCompanyUser = async (
 export const getCompanyProfile = async (): Promise<Company> => {
   return apiRequest(`${BASE_URL}/profile`, "GET");
 };
+
+export const changeEmail = (newEmail: string): Promise<void> => {
+  return apiRequest(`${BASE_URL}/email/change`, "POST", { newEmail });
+};
+
+export const confirmEmail = (token: string): Promise<void> => {
+  return apiRequest(`${BASE_URL}/email/confirm`, "POST", { token });
+};
