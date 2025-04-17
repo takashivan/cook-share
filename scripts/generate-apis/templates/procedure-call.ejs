@@ -45,6 +45,12 @@ const wrapperArgs = _
     .map(argToTmpl)
     .join(', ')
 
+const wrapperCallArgs = _
+    // Sort by optionality
+    .sortBy(rawWrapperArgs, [o => o.optional])
+    .map(({ name, optional, type, defaultValue }) => name)
+    .join(', ')
+
 // RequestParams["type"]
 const requestContentKind = {
     "JSON": "ContentType.Json",
@@ -98,3 +104,12 @@ const describeReturnType = () => {
         <%~ responseFormatTmpl ? `format: ${responseFormatTmpl},` : '' %>
         ...<%~ _.get(requestConfigParam, "name") %>,
     })
+
+<% if(_.upperCase(method) === "GET") { %>
+  <%~ route.routeName.usage %>QueryArgs = (<%~ wrapperArgs %>, enabled: boolean = true)<%~ config.toJS ? `: ${describeReturnType()}` : "" %> => {
+    const key = enabled ? [`<%~ path  %>`, <%~ (query != null && queryName) ? `...(${queryName} ? [${queryName}] : [])` : '' %>] : null
+    const fetcher = () => this.<%~ route.routeName.usage %>(<%~ wrapperCallArgs %>).then(res => res.data)
+    return [key, fetcher] as const
+  };
+
+<% } %>
