@@ -73,6 +73,9 @@ export const CreateRestaurantModal = ({
       name: "",
       address: "",
       cuisine_type: "",
+      business_hours: "",
+      station: "",
+      access: "",
     },
   });
 
@@ -111,7 +114,7 @@ export const CreateRestaurantModal = ({
       formData.append("is_active", String(data.is_active));
 
       // オプショナルフィールドを追加（値が存在する場合のみ）
-      if (data.phone) formData.append("phone", data.phone);
+      if (data.contact_info) formData.append("contact_info", data.contact_info);
       if (data.description) formData.append("description", data.description);
 
       // 画像を追加
@@ -229,10 +232,10 @@ export const CreateRestaurantModal = ({
                     </div>
 
                     <div>
-                      <Label htmlFor="phone">電話番号</Label>
+                      <Label htmlFor="contact_info">電話番号</Label>
                       <Input
-                        id="phone"
-                        {...register("phone")}
+                        id="contact_info"
+                        {...register("contact_info")}
                         className="mt-1"
                         placeholder="例：03-1234-5678"
                       />
@@ -246,6 +249,36 @@ export const CreateRestaurantModal = ({
                         className="mt-1"
                         placeholder="店舗の説明を入力してください"
                         rows={4}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="business_hours">営業時間</Label>
+                      <Input
+                        id="business_hours"
+                        {...register("business_hours")}
+                        className="mt-1"
+                        placeholder="例：10:00-20:00"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="station">最寄り駅</Label>
+                      <Input
+                        id="station"
+                        {...register("station")}
+                        className="mt-1"
+                        placeholder="例：東京駅"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="access">アクセス</Label>
+                      <Input
+                        id="access"
+                        {...register("access")}
+                        className="mt-1"
+                        placeholder="例：地下鉄千代田線 都庁前駅 徒歩2分"
                       />
                     </div>
 

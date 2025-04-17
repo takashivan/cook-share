@@ -1,5 +1,5 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useState, useRef } from "react";
+import { Fragment, useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Upload, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import Image from "next/image";
-import { Job } from "@/lib/api/job";
+import { Job } from "@/types";
 import { format } from "date-fns";
 
 interface EditJobModalProps {
@@ -25,42 +25,106 @@ export const EditJobModal = ({
   job,
 }: EditJobModalProps) => {
   const [previewImage, setPreviewImage] = useState<string | null>(
-    job.image || null
+    job?.image || null
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   // 日付と時間のフォーマット
-  const formatDate = (dateString: string) => {
-    return format(new Date(dateString), "yyyy-MM-dd");
+  const formatDate = (dateString: string | number) => {
+    if (!dateString) return "";
+    try {
+      const date =
+        typeof dateString === "string"
+          ? new Date(dateString)
+          : new Date(dateString);
+      return format(date, "yyyy-MM-dd");
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "";
+    }
   };
 
   const formatTime = (timestamp: number) => {
-    return format(new Date(timestamp * 1000), "HH:mm");
+    try {
+      const date = new Date(timestamp);
+      return format(date, "HH:mm");
+    } catch (error) {
+      console.error("Error formatting time:", error);
+      return "";
+    }
+  };
+
+  const formatExpiryDateTime = (timestamp: number) => {
+    try {
+      // タイムスタンプをミリ秒に変換
+      const date = new Date(timestamp);
+      // datetime-localの形式に変換 (YYYY-MM-DDThh:mm)
+      return format(date, "yyyy-MM-dd'T'HH:mm");
+    } catch (error) {
+      console.error("Error formatting expiry date:", error);
+      return "";
+    }
   };
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
+    reset,
   } = useForm({
     defaultValues: {
-      title: job.title,
-      description: job.description,
-      work_date: formatDate(job.work_date),
-      hourly_rate: job.hourly_rate,
-      start_time: formatTime(job.start_time),
-      end_time: formatTime(job.end_time),
-      task: job.task || "",
-      skill: job.skill || "",
-      whattotake: job.whattotake || "",
-      transportation: job.transportation || "",
-      note: job.note || "",
-      point: job.point || "",
-      status: job.status,
-      required_skills: job.required_skills || [],
+      title: job?.title || "",
+      description: job?.description || "",
+      work_date: job?.work_date ? formatDate(job.work_date) : "",
+      hourly_rate: job?.hourly_rate || 12000,
+      start_time: job?.start_time ? formatTime(job.start_time) : "",
+      end_time: job?.end_time ? formatTime(job.end_time) : "",
+      task: job?.task || "",
+      skill: job?.skill || "",
+      whattotake: job?.whattotake || "",
+      transportation: job?.transportation || "",
+      note: job?.note || "",
+      point: job?.point || "",
+      status: job?.status || "",
+      required_skills: job?.required_skills || [],
+      fee: job?.fee || 12000,
+      number_of_spots: job?.number_of_spots || 1,
+      expiry_date: job?.expiry_date
+        ? formatExpiryDateTime(job.expiry_date)
+        : "",
     },
   });
+
+  // jobが変更されたときにフォームをリセット
+  useEffect(() => {
+    if (job) {
+      console.log("Resetting form with job data:", job);
+      reset({
+        title: job.title || "",
+        description: job.description || "",
+        work_date: formatDate(job.work_date),
+        hourly_rate: job.hourly_rate || 12000,
+        start_time: formatTime(job.start_time),
+        end_time: formatTime(job.end_time),
+        task: job.task || "",
+        skill: job.skill || "",
+        whattotake: job.whattotake || "",
+        transportation: job.transportation || "",
+        note: job.note || "",
+        point: job.point || "",
+        status: job.status || "",
+        required_skills: job.required_skills || [],
+        fee: job.fee || 12000,
+        number_of_spots: job.number_of_spots || 1,
+        expiry_date: job.expiry_date
+          ? formatExpiryDateTime(job.expiry_date)
+          : "",
+      });
+      setPreviewImage(job.image || null);
+    }
+  }, [job, reset]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -86,32 +150,108 @@ export const EditJobModal = ({
     try {
       const formData = new FormData();
 
-      // 必須フィールドを追加
-      formData.append("id", job.id.toString());
-      formData.append("restaurant_id", job.restaurant_id.toString());
+      // 日付文字列を作成（YYYY-MM-DDThh:mm:ss）
+      const startDateTimeStr = `${data.work_date}T${data.start_time}:00`;
+      const endDateTimeStr = `${data.work_date}T${data.end_time}:00`;
 
+      // Unix タイムスタンプを計算（ミリ秒単位）
+      const startTimestamp = Date.parse(startDateTimeStr);
+      const endTimestamp = Date.parse(endDateTimeStr);
+
+      // FormDataにデータを追加
       Object.entries(data).forEach(([key, value]) => {
-        if (Array.isArray(value)) {
+        if (key === "start_time") {
+          formData.append(key, startTimestamp.toString());
+        } else if (key === "end_time") {
+          formData.append(key, endTimestamp.toString());
+        } else if (Array.isArray(value)) {
           value.forEach((item) => formData.append(key + "[]", item.toString()));
-        } else if (value !== undefined && value !== null) {
+        } else {
           formData.append(key, value.toString());
         }
       });
+
+      // 既存のステータスを維持
+      if (job?.status) {
+        formData.append("status", job.status);
+      }
 
       if (selectedFile) {
         formData.append("image", selectedFile);
       }
 
       await onSubmit(formData);
+      reset();
+      setPreviewImage(null);
+      setSelectedFile(null);
       onClose();
       toast({
         title: "求人を更新しました",
-        description: "求人情報の更新が完了しました。",
+        description: "求人の情報が更新されました。",
       });
     } catch (error) {
       toast({
         title: "エラーが発生しました",
         description: "求人の更新に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handlePublish = handleSubmit(async (data) => {
+    if (!job) {
+      toast({
+        title: "エラーが発生しました",
+        description: "求人情報が見つかりません。",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+
+      // 日付文字列を作成（YYYY-MM-DDThh:mm:ss）
+      const startDateTimeStr = `${data.work_date}T${data.start_time}:00`;
+      const endDateTimeStr = `${data.work_date}T${data.end_time}:00`;
+
+      // Unix タイムスタンプを計算（ミリ秒単位）
+      const startTimestamp = Date.parse(startDateTimeStr);
+      const endTimestamp = Date.parse(endDateTimeStr);
+
+      // FormDataにデータを追加
+      Object.entries(data).forEach(([key, value]) => {
+        if (key === "start_time") {
+          formData.append(key, startTimestamp.toString());
+        } else if (key === "end_time") {
+          formData.append(key, endTimestamp.toString());
+        } else if (Array.isArray(value)) {
+          value.forEach((item) => formData.append(key + "[]", item.toString()));
+        } else {
+          formData.append(key, value.toString());
+        }
+      });
+
+      // ステータスをPUBLISHEDに設定
+      formData.append("status", "PUBLISHED");
+
+      if (selectedFile) {
+        formData.append("image", selectedFile);
+      }
+
+      await onSubmit(formData);
+      reset();
+      setPreviewImage(null);
+      setSelectedFile(null);
+      onClose();
+      toast({
+        title: "求人を公開しました",
+        description: "求人が公開されました。",
+      });
+    } catch (error) {
+      toast({
+        title: "エラーが発生しました",
+        description: "求人の公開に失敗しました。もう一度お試しください。",
         variant: "destructive",
       });
     }
@@ -148,7 +288,7 @@ export const EditJobModal = ({
                   求人を編集
                 </Dialog.Title>
 
-                <form onSubmit={onSubmitHandler} className="space-y-6">
+                <form className="space-y-6">
                   <div className="space-y-4">
                     <div>
                       <Label htmlFor="title">求人タイトル *</Label>
@@ -204,23 +344,71 @@ export const EditJobModal = ({
                       </div>
 
                       <div>
-                        <Label htmlFor="hourly_rate">時給 *</Label>
+                        <Label htmlFor="fee">報酬額 *</Label>
                         <Input
-                          id="hourly_rate"
+                          id="fee"
                           type="number"
-                          {...register("hourly_rate", {
-                            required: "時給は必須です",
+                          {...register("fee", {
+                            required: "報酬額は必須です",
+                            validate: (value) => {
+                              const formValues = watch();
+                              if (
+                                !formValues.start_time ||
+                                !formValues.end_time
+                              )
+                                return true;
+
+                              const startTime = new Date(
+                                `2000-01-01T${formValues.start_time}:00`
+                              );
+                              const endTime = new Date(
+                                `2000-01-01T${formValues.end_time}:00`
+                              );
+
+                              // 終了時間が開始時間より前の場合は翌日の時間として計算
+                              if (endTime < startTime) {
+                                endTime.setDate(endTime.getDate() + 1);
+                              }
+
+                              const hours =
+                                (endTime.getTime() - startTime.getTime()) /
+                                (1000 * 60 * 60);
+                              const hourlyRate = Number(value) / hours;
+
+                              if (hourlyRate < 1500) {
+                                return `時給ベースで1500円を下回らないように設定してください（現在: ${Math.floor(hourlyRate)}円）`;
+                              }
+                              return true;
+                            },
+                          })}
+                          defaultValue={12000}
+                          className="mt-1"
+                          placeholder="例：12000"
+                        />
+                        {errors.fee && (
+                          <p className="mt-1 text-sm text-red-600">
+                            {errors.fee.message}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <Label htmlFor="number_of_spots">募集人数 *</Label>
+                        <Input
+                          id="number_of_spots"
+                          type="number"
+                          {...register("number_of_spots", {
+                            required: "募集人数は必須です",
                             min: {
-                              value: 1000,
-                              message: "時給は1000円以上で設定してください",
+                              value: 1,
+                              message: "募集人数は1人以上で設定してください",
                             },
                           })}
                           className="mt-1"
-                          placeholder="例：1200"
+                          placeholder="例：1"
                         />
-                        {errors.hourly_rate && (
+                        {errors.number_of_spots && (
                           <p className="mt-1 text-sm text-red-600">
-                            {errors.hourly_rate.message}
+                            {errors.number_of_spots.message}
                           </p>
                         )}
                       </div>
@@ -324,51 +512,26 @@ export const EditJobModal = ({
                       />
                     </div>
 
-                    <div className="col-span-full">
-                      <Label htmlFor="photo">求人画像</Label>
-                      <div className="mt-1 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-                        {previewImage ? (
-                          <div className="relative">
-                            <Image
-                              src={previewImage}
-                              alt="プレビュー画像"
-                              width={200}
-                              height={200}
-                              className="rounded-lg object-cover"
-                            />
-                            <button
-                              type="button"
-                              onClick={removeImage}
-                              className="absolute -top-2 -right-2 rounded-full bg-red-500 p-1 text-white hover:bg-red-600">
-                              <X className="h-4 w-4" />
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="text-center">
-                            <Upload className="mx-auto h-12 w-12 text-gray-300" />
-                            <div className="mt-4 flex text-sm leading-6 text-gray-600">
-                              <label
-                                htmlFor="file-upload"
-                                className="relative cursor-pointer rounded-md bg-white font-semibold text-orange-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-orange-600 focus-within:ring-offset-2 hover:text-orange-500">
-                                <span>画像をアップロード</span>
-                                <input
-                                  id="file-upload"
-                                  name="file-upload"
-                                  type="file"
-                                  accept="image/*"
-                                  className="sr-only"
-                                  ref={fileInputRef}
-                                  onChange={handleImageChange}
-                                />
-                              </label>
-                              <p className="pl-1">またはドラッグ＆ドロップ</p>
-                            </div>
-                            <p className="text-xs leading-5 text-gray-600">
-                              PNG, JPG, GIF up to 10MB
-                            </p>
-                          </div>
-                        )}
-                      </div>
+                    <div>
+                      <Label htmlFor="expiry_date">締め切り</Label>
+                      <Input
+                        id="expiry_date"
+                        type="datetime-local"
+                        {...register("expiry_date", {
+                          required: "締め切りは必須です",
+                          min: {
+                            value: new Date().toISOString().split("T")[0],
+                            message:
+                              "締め切りは今日以降の日付で設定してください",
+                          },
+                        })}
+                        className="mt-1"
+                      />
+                      {errors.expiry_date && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.expiry_date.message}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -380,9 +543,21 @@ export const EditJobModal = ({
                       disabled={isSubmitting}>
                       キャンセル
                     </Button>
-                    <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting ? "更新中..." : "変更を保存"}
+                    <Button
+                      type="button"
+                      onClick={onSubmitHandler}
+                      disabled={isSubmitting}>
+                      {isSubmitting ? "更新中..." : "更新する"}
                     </Button>
+                    {job?.status === "DRAFT" && (
+                      <Button
+                        type="button"
+                        variant="default"
+                        onClick={handlePublish}
+                        disabled={isSubmitting}>
+                        {isSubmitting ? "公開中..." : "公開する"}
+                      </Button>
+                    )}
                   </div>
                 </form>
               </Dialog.Panel>

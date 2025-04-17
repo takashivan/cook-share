@@ -23,15 +23,18 @@ export interface Restaurant {
   name: string;
   description?: string;
   address: string;
-  phone?: string;
+  contact_info?: string;
   cuisine_type: string;
+  business_hours?: string;
+  station?: string;
+  access?: string;
   is_active: boolean;
   is_approved: boolean;
   email: string;
   created_at?: string;
   updated_at?: string;
   company?: Company;
-  photo?: string;
+  profile_image?: string;
   restaurant_cuisine_id?: number[] | number;
 }
 
@@ -39,8 +42,11 @@ export type CreateRestaurantData = {
   companies_id: string;
   name: string;
   description?: string;
+  business_hours?: string;
+  station?: string;
+  access?: string;
   address: string;
-  phone?: string;
+  contact_info?: string;
   cuisine_type: string;
   is_active: boolean;
 };
@@ -97,9 +103,9 @@ export const restaurantStaffInvite = (
 // レストラン情報を更新
 export const updateRestaurant = async (
   id: string,
-  restaurantData: UpdateRestaurantData
+  restaurantData: UpdateRestaurantData | FormData
 ): Promise<Restaurant> => {
-  return apiRequest(`${BASE_URL}/${id}`, "PATCH", restaurantData);
+  return apiRequest(`${BASE_URL}/${id}`, "PATCH", restaurantData, "company");
 };
 
 // レストランを削除
