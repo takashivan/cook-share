@@ -11,6 +11,7 @@ const aPIs: ApiDefinition[] = [
     outputDir: "base",
     url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:Mv5jTolf?type=json&token=",
   },
+  // シェフ側のauth、Operator、Stripe、LINE
 ];
 
 const baseConfig = {
@@ -35,6 +36,13 @@ const generateApiTypes = async () => {
           ...baseConfig,
           url,
           output: path.resolve(process.cwd(), "api/__generated__", outputDir),
+          codeGenConstructs: (struct) => ({
+            ...struct,
+            TypeField: (content) => {
+              const { readonly, key, value } = content as any;
+              return `${readonly ? 'readonly ' : ''}${key}: ${value}`;
+            }
+          })
         })
       )
     );
