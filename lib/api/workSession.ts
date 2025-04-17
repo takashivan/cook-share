@@ -16,7 +16,7 @@ export const workSessionApi = {
     return response;
   },
   getWorkSessionsToDoByJobId: async (
-    jobId: string
+    jobId: number
   ): Promise<WorkSessionWithUser[]> => {
     return apiRequest(`${WORK_SESSION_URL}/restaurant_todo/${jobId}`, "GET");
   },

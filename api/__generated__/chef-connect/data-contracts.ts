@@ -527,6 +527,9 @@ export interface CompanyDetailData {
     transportation?: string;
     /** @default "1" */
     is_approved?: boolean;
+    fee?: number;
+    number_of_spots?: number;
+    expiry_date?: number;
   }[];
 }
 
@@ -599,6 +602,9 @@ export interface GetJobData {
     transportation?: string;
     /** @default "1" */
     is_approved?: boolean;
+    fee?: number;
+    number_of_spots?: number;
+    expiry_date?: number;
   };
   restaurant?: {
     /** @format int64 */
@@ -1140,7 +1146,13 @@ export interface NotificationDetailData {
    * @default "now"
    */
   created_at?: number;
-  type?: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type?:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   content?: string;
   is_read?: boolean;
   /** @format timestamptz */
@@ -1152,7 +1164,13 @@ export interface NotificationDetailData {
 }
 
 export interface NotificationPartialUpdatePayload {
-  type?: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type?:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   content?: string;
   is_read?: boolean;
   /** @format timestamptz */
@@ -1171,7 +1189,13 @@ export interface NotificationPartialUpdateData {
    * @default "now"
    */
   created_at?: number;
-  type?: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type?:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   content?: string;
   is_read?: boolean;
   /** @format timestamptz */
@@ -1190,7 +1214,13 @@ export type NotificationListData = {
    * @default "now"
    */
   created_at?: number;
-  type?: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type?:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   content?: string;
   is_read?: boolean;
   /** @format timestamptz */
@@ -1202,7 +1232,13 @@ export type NotificationListData = {
 }[];
 
 export interface NotificationCreatePayload {
-  type?: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type?:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   content?: string;
   is_read?: boolean;
   /** @format timestamptz */
@@ -1221,7 +1257,13 @@ export interface NotificationCreateData {
    * @default "now"
    */
   created_at?: number;
-  type?: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type?:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   content?: string;
   is_read?: boolean;
   /** @format timestamptz */

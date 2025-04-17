@@ -1,5 +1,5 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useState, useRef } from "react";
+import { Fragment, useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ interface CreateJobModalProps {
   onClose: () => void;
   onSubmit: (data: FormData) => Promise<void>;
   restaurantId: number;
+  initialData?: any;
 }
 
 export const CreateJobModal = ({
@@ -22,6 +23,7 @@ export const CreateJobModal = ({
   onClose,
   onSubmit,
   restaurantId,
+  initialData,
 }: CreateJobModalProps) => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -33,6 +35,7 @@ export const CreateJobModal = ({
     formState: { errors, isSubmitting },
     reset,
     watch,
+    setValue,
   } = useForm<CreateJobParams>({
     defaultValues: {
       restaurant_id: restaurantId,
@@ -40,6 +43,15 @@ export const CreateJobModal = ({
       required_skills: [],
     },
   });
+
+  // initialDataが変更されたときにフォームの値を更新
+  useEffect(() => {
+    if (initialData) {
+      Object.entries(initialData).forEach(([key, value]) => {
+        setValue(key as keyof CreateJobParams, value as any);
+      });
+    }
+  }, [initialData, setValue]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -88,6 +100,10 @@ export const CreateJobModal = ({
           formData.append(key, startTimestamp.toString());
         } else if (key === "end_time") {
           formData.append(key, endTimestamp.toString());
+        } else if (key === "expiry_date") {
+          // expiry_dateをUnixタイムスタンプに変換
+          const expiryTimestamp = Date.parse(`${value}T00:00:00`);
+          formData.append(key, expiryTimestamp.toString());
         } else if (Array.isArray(value)) {
           value.forEach((item) => formData.append(key + "[]", item.toString()));
         } else {
@@ -109,9 +125,110 @@ export const CreateJobModal = ({
         description: "新しい求人の登録が完了しました。",
       });
     } catch (error) {
+      console.error("Error creating job:", error);
       toast({
         title: "エラーが発生しました",
         description: "求人の追加に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleDraft = handleSubmit(async (data) => {
+    try {
+      const formData = new FormData();
+
+      // 日付文字列を作成（YYYY-MM-DDThh:mm:ss）
+      const startDateTimeStr = `${data.work_date}T${data.start_time}:00`;
+      const endDateTimeStr = `${data.work_date}T${data.end_time}:00`;
+
+      // Unix タイムスタンプを計算（ミリ秒単位）
+      const startTimestamp = Date.parse(startDateTimeStr);
+      const endTimestamp = Date.parse(endDateTimeStr);
+
+      // FormDataにデータを追加
+      Object.entries(data).forEach(([key, value]) => {
+        if (key === "start_time") {
+          formData.append(key, startTimestamp.toString());
+        } else if (key === "end_time") {
+          formData.append(key, endTimestamp.toString());
+        } else if (Array.isArray(value)) {
+          value.forEach((item) => formData.append(key + "[]", item.toString()));
+        } else {
+          formData.append(key, value.toString());
+        }
+      });
+
+      // ステータスをDRAFTに設定
+      formData.append("status", "DRAFT");
+
+      if (selectedFile) {
+        formData.append("image", selectedFile);
+      }
+
+      await onSubmit(formData);
+      reset();
+      setPreviewImage(null);
+      setSelectedFile(null);
+      onClose();
+      toast({
+        title: "下書きを保存しました",
+        description: "求人の下書きが保存されました。",
+      });
+    } catch (error) {
+      toast({
+        title: "エラーが発生しました",
+        description: "下書きの保存に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handlePublish = handleSubmit(async (data) => {
+    try {
+      const formData = new FormData();
+
+      // 日付文字列を作成（YYYY-MM-DDThh:mm:ss）
+      const startDateTimeStr = `${data.work_date}T${data.start_time}:00`;
+      const endDateTimeStr = `${data.work_date}T${data.end_time}:00`;
+
+      // Unix タイムスタンプを計算（ミリ秒単位）
+      const startTimestamp = Date.parse(startDateTimeStr);
+      const endTimestamp = Date.parse(endDateTimeStr);
+
+      // FormDataにデータを追加
+      Object.entries(data).forEach(([key, value]) => {
+        if (key === "start_time") {
+          formData.append(key, startTimestamp.toString());
+        } else if (key === "end_time") {
+          formData.append(key, endTimestamp.toString());
+        } else if (Array.isArray(value)) {
+          value.forEach((item) => formData.append(key + "[]", item.toString()));
+        } else {
+          formData.append(key, value.toString());
+        }
+      });
+
+      // ステータスをPUBLISHEDに設定
+      formData.append("status", "PUBLISHED");
+
+      if (selectedFile) {
+        formData.append("image", selectedFile);
+      }
+
+      await onSubmit(formData);
+      reset();
+      setPreviewImage(null);
+      setSelectedFile(null);
+      onClose();
+      toast({
+        title: "求人を公開しました",
+        description: "求人が公開されました。",
+      });
+    } catch (error) {
+      toast({
+        title: "エラーが発生しました",
+        description: "求人の公開に失敗しました。もう一度お試しください。",
         variant: "destructive",
       });
     }
@@ -501,8 +618,18 @@ export const CreateJobModal = ({
                       disabled={isSubmitting}>
                       キャンセル
                     </Button>
-                    <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting ? "登録中..." : "求人を登録"}
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={handleDraft}
+                      disabled={isSubmitting}>
+                      {isSubmitting ? "保存中..." : "下書きとして保存"}
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={handlePublish}
+                      disabled={isSubmitting}>
+                      {isSubmitting ? "公開中..." : "公開する"}
                     </Button>
                   </div>
                 </form>

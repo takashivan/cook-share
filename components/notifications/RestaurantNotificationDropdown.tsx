@@ -51,32 +51,6 @@ export function RestaurantNotificationDropdown({
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  useEffect(() => {
-    let channel: any;
-
-    const setupChannel = async () => {
-      try {
-        // チャンネルの設定
-        channel = xanoClient.channel(`notifications/${userId}`);
-        console.log("Channel setup for notifications");
-
-        // メッセージの購読
-        channel.on((message: any) => {
-          console.log("Admin received message:", message);
-          toast({
-            title: "新しい通知",
-            description: message.content || "新しい通知が届きました",
-          });
-          mutateNotifications();
-        });
-      } catch (error) {
-        console.error("Error setting up channel:", error);
-      }
-    };
-
-    setupChannel();
-  }, [userId, toast, mutateNotifications]);
-
   const handleNotificationClick = (notification: CompanyUserNotification) => {
     if (!notification.read) {
       onMarkAsRead(notification.id);

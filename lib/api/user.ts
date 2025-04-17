@@ -374,3 +374,19 @@ export const updateSettings = (
 export const getAllChefs = async (): Promise<UserProfile[]> => {
   return apiRequest<UserProfile[]>(`${USER_URL}`, "GET");
 };
+
+// パスワード変更
+export const changeEmail = (newEmail: string): Promise<void> => {
+  return apiRequest(`${USER_URL}/email/change`, "POST", { newEmail });
+};
+
+export const confirmEmail = (token: string): Promise<void> => {
+  return apiRequest(`${USER_URL}/email/confirm`, "POST", { token });
+};
+
+export const changePassword = (
+  userId: UserId,
+  newPassword: string
+): Promise<void> => {
+  return apiRequest(`${USER_URL}/${userId}/password`, "PUT", { newPassword });
+};

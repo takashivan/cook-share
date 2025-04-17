@@ -112,13 +112,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         // メッセージの購読
         channel.on((message: any) => {
           console.log("Admin received message:", message);
-          toast({
-            title: "新しい通知",
-            description: message.content || "新しい通知が届きました",
-            className: "bg-orange-500 text-white border-0",
-            duration: 5000,
-          });
-          mutateNotifications();
+          if (message.action === "connection_status") {
+            return;
+          } else {
+            toast({
+              title: "新しい通知",
+              description: message.content || "新しい通知が届きました",
+              className: "bg-orange-500 text-white border-0",
+              duration: 5000,
+            });
+            mutateNotifications();
+          }
         });
       } catch (error) {
         console.error("Error setting up channel:", error);

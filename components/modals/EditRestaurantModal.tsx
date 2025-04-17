@@ -15,7 +15,21 @@ interface EditRestaurantModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: FormData) => void;
-  restaurant: Restaurant;
+  restaurant: {
+    id: string;
+    name: string;
+    description?: string;
+    address: string;
+    contact_info?: string;
+    cuisine_type: string;
+    is_active: boolean;
+    is_approved: boolean;
+    profile_image?: string;
+    restaurant_cuisine_id?: number[] | number;
+    business_hours?: string;
+    station?: string;
+    access?: string;
+  };
 }
 
 export const EditRestaurantModal = ({
@@ -25,7 +39,7 @@ export const EditRestaurantModal = ({
   restaurant,
 }: EditRestaurantModalProps) => {
   const [previewImage, setPreviewImage] = useState<string | null>(
-    restaurant.photo || null
+    restaurant.profile_image || null
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -58,6 +72,8 @@ export const EditRestaurantModal = ({
 
     fetchCuisines();
   }, [restaurant.restaurant_cuisine_id]);
+  console.log(" edit modal restaurant", restaurant);
+  console.log(" edit modal restaurant name", restaurant.name);
 
   const handleCuisineChange = (value: string) => {
     const id = parseInt(value);
@@ -73,16 +89,44 @@ export const EditRestaurantModal = ({
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm({
     defaultValues: {
       name: restaurant.name,
-      address: restaurant.address,
-      phone: restaurant.phone || "",
       description: restaurant.description || "",
+      address: restaurant.address,
+      contact_info: restaurant.contact_info || "",
+      cuisine_type: restaurant.cuisine_type,
       is_active: restaurant.is_active,
+      business_hours: restaurant.business_hours || "",
+      station: restaurant.station || "",
+      access: restaurant.access || "",
     },
   });
+
+  useEffect(() => {
+    if (restaurant) {
+      reset({
+        name: restaurant.name,
+        description: restaurant.description || "",
+        address: restaurant.address,
+        contact_info: restaurant.contact_info || "",
+        cuisine_type: restaurant.cuisine_type,
+        is_active: restaurant.is_active,
+        business_hours: restaurant.business_hours || "",
+        station: restaurant.station || "",
+        access: restaurant.access || "",
+      });
+      setPreviewImage(restaurant.profile_image || null);
+      if (restaurant.restaurant_cuisine_id) {
+        const cuisineIds = Array.isArray(restaurant.restaurant_cuisine_id)
+          ? restaurant.restaurant_cuisine_id
+          : [restaurant.restaurant_cuisine_id];
+        setSelectedCuisines(cuisineIds);
+      }
+    }
+  }, [restaurant, reset]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -109,24 +153,32 @@ export const EditRestaurantModal = ({
       const formData = new FormData();
 
       // 必須フィールドを追加
-      formData.append("id", restaurant.id.toString());
-      formData.append("companies_id", restaurant.companies_id.toString());
+      formData.append("id", restaurant.id);
       formData.append("name", data.name);
       formData.append("address", data.address);
-      // 配列として送信
+      formData.append("cuisine_type", data.cuisine_type);
+      formData.append("is_active", String(data.is_active));
+      formData.append("business_hours", data.business_hours);
+      formData.append("station", data.station);
+      formData.append("access", data.access);
+
+      // オプショナルフィールドを追加（値が存在する場合のみ）
+      if (data.contact_info) formData.append("contact_info", data.contact_info);
+      if (data.description) formData.append("description", data.description);
+
+      // 画像を追加（新しい画像が選択された場合はphotoとして送信、そうでない場合は既存のprofile_imageを送信）
+      if (selectedFile) {
+        formData.append("photo", selectedFile);
+      } else if (restaurant.profile_image) {
+        formData.append("profile_image", restaurant.profile_image);
+      } else {
+        throw new Error("店舗画像は必須です");
+      }
+
+      // ジャンルIDを追加
       selectedCuisines.forEach((id) => {
         formData.append("restaurant_cuisine_id[]", id.toString());
       });
-      formData.append("is_active", String(data.is_active));
-
-      // オプショナルフィールドを追加（値が存在する場合のみ）
-      if (data.phone) formData.append("phone", data.phone);
-      if (data.description) formData.append("description", data.description);
-
-      // 画像を追加（新しい画像が選択された場合のみ）
-      if (selectedFile) {
-        formData.append("photo", selectedFile);
-      }
 
       await onSubmit(formData);
       onClose();
@@ -138,7 +190,10 @@ export const EditRestaurantModal = ({
       console.error("Error submitting form:", error);
       toast({
         title: "エラーが発生しました",
-        description: "店舗情報の更新に失敗しました。もう一度お試しください。",
+        description:
+          error instanceof Error
+            ? error.message
+            : "店舗情報の更新に失敗しました。もう一度お試しください。",
         variant: "destructive",
       });
     }
@@ -184,7 +239,7 @@ export const EditRestaurantModal = ({
                         id="name"
                         {...register("name", { required: "店舗名は必須です" })}
                         className="mt-1"
-                        placeholder="例：洋食 黒船亭 上野店"
+                        placeholder="例：洋食 船亭 上野店"
                       />
                       {errors.name && (
                         <p className="mt-1 text-sm text-red-600">
@@ -234,10 +289,10 @@ export const EditRestaurantModal = ({
                     </div>
 
                     <div>
-                      <Label htmlFor="phone">電話番号</Label>
+                      <Label htmlFor="contact_info">電話番号</Label>
                       <Input
-                        id="phone"
-                        {...register("phone")}
+                        id="contact_info"
+                        {...register("contact_info")}
                         className="mt-1"
                         placeholder="例：03-1234-5678"
                       />
@@ -251,6 +306,39 @@ export const EditRestaurantModal = ({
                         className="mt-1"
                         placeholder="店舗の説明を入力してください"
                         rows={4}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="business_hours">営業時間</Label>
+                      <Input
+                        id="business_hours"
+                        {...register("business_hours")}
+                        className="mt-1"
+                        placeholder="例：10:00-20:00"
+                        defaultValue={restaurant.business_hours}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="station">最寄り駅</Label>
+                      <Input
+                        id="station"
+                        {...register("station")}
+                        className="mt-1"
+                        placeholder="例：東京駅"
+                        defaultValue={restaurant.station}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="access">アクセス</Label>
+                      <Input
+                        id="access"
+                        {...register("access")}
+                        className="mt-1"
+                        placeholder="例：地下鉄千代田線 都庁前駅 徒歩2分"
+                        defaultValue={restaurant.access}
                       />
                     </div>
 

@@ -10,6 +10,8 @@ import {
   Send,
   User,
   MessageSquare,
+  Plus,
+  Copy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,9 +39,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { applicationApi } from "@/lib/api/application";
 import { jobApi, getJobDetails } from "@/lib/api/job";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import type { Application } from "@/types";
 import type { UserProfile } from "@/types/user";
+import { CreateJobModal } from "@/components/modals/CreateJobModal";
 
 interface ApplicationWithUser extends Omit<Application, "user"> {
   user: UserProfile;
@@ -95,6 +98,9 @@ export default function JobApplicants({
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [job, setJob] = useState<JobDetail | null>(null);
+  const router = useRouter();
+  const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
+  const [copiedJob, setCopiedJob] = useState<any>(null);
 
   const fetchJob = async () => {
     try {
@@ -138,6 +144,17 @@ export default function JobApplicants({
     } catch (error) {
       console.error("Failed to accept application:", error);
     }
+  };
+
+  const handleCopyJob = (job: any) => {
+    const jobData = {
+      ...job,
+      title: `${job.title} (コピー)`,
+      status: "DRAFT",
+      id: undefined,
+    };
+    setCopiedJob(jobData);
+    setIsCreateJobModalOpen(true);
   };
 
   if (loading) {
@@ -447,6 +464,61 @@ export default function JobApplicants({
           )}
         </Card>
       </div>
+
+      <div className="flex justify-between items-center mt-8">
+        <h2 className="text-2xl font-bold">求人一覧</h2>
+        <Button onClick={() => setIsCreateJobModalOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          新規求人を作成
+        </Button>
+      </div>
+
+      <div className="space-y-4">
+        {/* ここに求人一覧の表示ロジックを追加 */}
+        {/* 例: */}
+        {job && (
+          <div className="flex items-center justify-between p-4 border rounded-lg">
+            <div>
+              <h3 className="font-medium">{job.job.title}</h3>
+              <p className="text-sm text-gray-500">{job.job.description}</p>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => handleCopyJob(job.job)}>
+                <Copy className="h-4 w-4 mr-2" />
+                コピーして新規作成
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {isCreateJobModalOpen && (
+        <CreateJobModal
+          isOpen={isCreateJobModalOpen}
+          onClose={() => {
+            setIsCreateJobModalOpen(false);
+            setCopiedJob(null);
+          }}
+          onSubmit={async (formData) => {
+            try {
+              const response = await fetch("/api/jobs", {
+                method: "POST",
+                body: formData,
+              });
+
+              if (!response.ok) {
+                throw new Error("Failed to create job");
+              }
+
+              router.push("/admin/job");
+            } catch (error) {
+              console.error("Error creating job:", error);
+            }
+          }}
+          restaurantId={0} // TODO: 実際のレストランIDを設定する
+          initialData={copiedJob}
+        />
+      )}
     </div>
   );
 }
