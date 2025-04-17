@@ -1,0 +1,17 @@
+import { Jobs } from "@/api/__generated__/base/Jobs"
+import { getApi } from "@/api/api-factory"
+import useSWR from "swr"
+import { QueryConfigType } from "../config-type";
+import { Companies } from "@/api/__generated__/base/Companies";
+
+export interface Params {
+  companyId: string;
+}
+
+export const useGetCompanyUsersByCompanyId = (params: Params, config?: QueryConfigType) => {
+  const { dedupingInterval } = config || {};
+  const companies = getApi(Companies);
+  return useSWR(...companies.companyusersListQueryArgs(params.companyId), {
+    dedupingInterval
+  });
+}

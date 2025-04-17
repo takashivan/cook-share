@@ -1,15 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
-import {
-  getCompanyUserByCompanyId,
-  type CompanyUser,
-} from "@/lib/api/companyUser";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -28,65 +23,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, ExternalLink, MoreHorizontal, Plus, Users } from "lucide-react";
-import Link from "next/link";
+import { Edit, MoreHorizontal, Plus, Users } from "lucide-react";
 import { AddCompanyStaffModal } from "@/components/modals/AddCompanyStaff";
 import { companyStaffInvite } from "@/lib/api/company";
 import { toast } from "@/hooks/use-toast";
+import { useGetCompanyUsersByCompanyId } from "@/hooks/api/companyUsers/useGetCompanyUsersByCompanyId";
 
 export default function StaffPage() {
   const { user } = useCompanyAuth();
-  const [companyUsers, setCompanyUsers] = useState<CompanyUser[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [hasMounted, setHasMounted] = useState(false);
   const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
 
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!hasMounted || !user?.companies_id) return;
-
-    let isMounted = true;
-    const fetchStaff = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        const response = await getCompanyUserByCompanyId(user.companies_id);
-        if (isMounted) {
-          const validUsers = Array.isArray(response)
-            ? response.filter(
-                (user): user is CompanyUser =>
-                  user !== null && typeof user === "object"
-              )
-            : [];
-          setCompanyUsers(validUsers);
-        }
-      } catch (error) {
-        if (isMounted) {
-          console.error("Failed to fetch staff:", error);
-          setError(
-            error instanceof Error
-              ? error.message
-              : "スタッフ情報の取得に失敗しました"
-          );
-          setCompanyUsers([]);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchStaff();
-    return () => {
-      isMounted = false;
-    };
-  }, [user?.companies_id, hasMounted]);
+  const { data: companyUsers, isLoading, error } = useGetCompanyUsersByCompanyId({ companyId: user?.companies_id.toString() ?? "" });
 
   const handleAddStaff = async (email: string) => {
     try {
@@ -105,17 +52,7 @@ export default function StaffPage() {
     }
   };
 
-  if (!hasMounted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (isLoading) {
+  if (isLoading || !companyUsers) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
