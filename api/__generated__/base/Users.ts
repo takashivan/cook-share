@@ -24,6 +24,7 @@ import {
   UsersListData,
   UsersPartialUpdateData,
   UsersPartialUpdatePayload,
+  WorksessionsListResult,
   WorksessionsUserTodosListData,
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
@@ -166,6 +167,27 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
   worksessionsUserTodosListQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
     const key = enabled ? [`/users/${userId}/worksessions/user_todos`] : null;
     const fetcher = () => this.worksessionsUserTodosList(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags users
+   * @name WorksessionsList
+   * @request GET:/users/{user_id}/worksessions
+   */
+  worksessionsList = (userId: string, params: RequestParams = {}) =>
+    this.request<WorksessionsListResult, void>({
+      path: `/users/${userId}/worksessions`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  worksessionsListQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/users/${userId}/worksessions`] : null;
+    const fetcher = () => this.worksessionsList(userId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 

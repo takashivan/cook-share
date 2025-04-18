@@ -244,6 +244,9 @@ export type GetApplicationData = {
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
     magic_link: {
       token: string;
       /**
@@ -871,6 +874,9 @@ export interface SignupCreateData {
     updated_at: number | null;
     magic_link: object;
     verify_token: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
   };
 }
 
@@ -903,6 +909,9 @@ export interface VerifyEmailCreateData {
     updated_at: number | null;
     magic_link: object;
     verify_token: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
   };
   auth: string;
 }
@@ -1494,6 +1503,9 @@ export type ByRestaurantDetailData = {
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
     magic_link: {
       token: string;
       /**
@@ -1629,6 +1641,9 @@ export interface BySessionDetailData {
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
     magic_link: {
       token: string;
       /**
@@ -1904,6 +1919,9 @@ export interface StaffInviteCreateData {
     updated_at: number | null;
     magic_link: object;
     verify_token: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
   };
 }
 
@@ -1936,6 +1954,9 @@ export interface CompanyusersCreateData {
     updated_at: number | null;
     magic_link: object;
     verify_token: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
   };
 }
 
@@ -2026,11 +2047,10 @@ export type CompanyusersListData = {
   updated_at: number | null;
   magic_link: object;
   verify_token: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
 }[];
-
-export interface JobsListParams {
-  companyId: string;
-}
 
 export interface JobsListData {
   result1: {
@@ -2219,6 +2239,9 @@ export interface CompaniesCreateData {
     updated_at: number | null;
     magic_link: object;
     verify_token: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
   };
 }
 
@@ -2329,6 +2352,9 @@ export type CompanyDetailData = {
   updated_at: number | null;
   magic_link: object;
   verify_token: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
 }[];
 
 export interface MeRestaurantsListParams {
@@ -2359,6 +2385,9 @@ export interface MeRestaurantsListData {
     updated_at: number | null;
     magic_link: object;
     verify_token: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
   };
   rest: string;
 }
@@ -2386,6 +2415,9 @@ export interface CompanyuserDetailData {
   updated_at: number | null;
   magic_link: object;
   verify_token: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
 }
 
 export interface CompanyuserPartialUpdatePayload {
@@ -2402,6 +2434,9 @@ export interface CompanyuserPartialUpdatePayload {
   updated_at: number | null;
   magic_link: object;
   verify_token: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
 }
 
 export interface CompanyuserPartialUpdateData {
@@ -2427,6 +2462,9 @@ export interface CompanyuserPartialUpdateData {
   updated_at: number | null;
   magic_link: object;
   verify_token: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
 }
 
 export interface ByRestaurantCreatePayload {
@@ -2556,6 +2594,9 @@ export interface CompanyusersPartialUpdatePayload {
   updated_at: number | null;
   magic_link: object;
   verify_token: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
 }
 
 export interface CompanyusersPartialUpdateData {
@@ -2581,6 +2622,9 @@ export interface CompanyusersPartialUpdateData {
   updated_at: number | null;
   magic_link: object;
   verify_token: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
 }
 
 export type CompanyuserNotificationsListResult = {
@@ -2622,6 +2666,9 @@ export type CompanyusersListResult = {
   updated_at: number | null;
   magic_link: object;
   verify_token: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
 }[];
 
 export interface CompanyusersCreateBody {
@@ -2638,6 +2685,9 @@ export interface CompanyusersCreateBody {
   updated_at: number | null;
   magic_link: object;
   verify_token: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
 }
 
 export interface CompanyusersCreateResult {
@@ -2663,6 +2713,9 @@ export interface CompanyusersCreateResult {
   updated_at: number | null;
   magic_link: object;
   verify_token: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
 }
 
 export type CompanyuserListData = {
@@ -2688,6 +2741,9 @@ export type CompanyuserListData = {
   updated_at: number | null;
   magic_link: object;
   verify_token: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
 }[];
 
 export interface CompanyuserCreatePayload {
@@ -2704,6 +2760,9 @@ export interface CompanyuserCreatePayload {
   updated_at: number | null;
   magic_link: object;
   verify_token: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
 }
 
 export interface CompanyuserCreateData {
@@ -2729,6 +2788,9 @@ export interface CompanyuserCreateData {
   updated_at: number | null;
   magic_link: object;
   verify_token: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
 }
 
 export type FilesDeleteData = object;
@@ -3152,6 +3214,9 @@ export type ApplicationsListResult = {
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
     magic_link: {
       token: string;
       /**
@@ -3238,6 +3303,9 @@ export type WorksessionsRestaurantTodosListData = {
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
     magic_link: {
       token: string;
       /**
@@ -4794,6 +4862,9 @@ export type StaffsListData = {
     updated_at: number | null;
     magic_link: object;
     verify_token: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
   };
 }[];
 
@@ -5048,6 +5119,9 @@ export type ByRestaurantDetailResult = {
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
     magic_link: {
       token: string;
       /**
@@ -5154,6 +5228,9 @@ export interface BySessionDetailResult {
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
     magic_link: {
       token: string;
       /**
@@ -5601,6 +5678,9 @@ export type ChefReviewsListResult = {
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
     magic_link: {
       token: string;
       /**
@@ -5725,6 +5805,9 @@ export type RestaurantReviewsListResult = {
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
     magic_link: {
       token: string;
       /**
@@ -5946,6 +6029,109 @@ export interface RestaurantCreatePayload {
 
 export type RestaurantCreateData = object;
 
+export interface EmailChangeCreatePayload {
+  /** @format email */
+  email: string;
+}
+
+export interface EmailChangeCreateData {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  name: string;
+  /** @format email */
+  email: string;
+  /** @format password */
+  password: string;
+  user_type: string;
+  status: string;
+  /** @format date */
+  last_login_at: string | null;
+  /** @format date */
+  updated_at: string | null;
+  skills: string[];
+  experience_level: string;
+  bio: string;
+  certifications: string[];
+  /** @format date */
+  dateofbirth: string | null;
+  profile_image: string;
+  is_approved: boolean;
+  line_user_id: string;
+  line_display_name: string;
+  line_notification_enabled: boolean;
+  is_verified: boolean;
+  verify_token: string;
+  stripe_account_id: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
+  magic_link: {
+    token: string;
+    /**
+     * Time the token expires
+     * @format timestamptz
+     */
+    expiration: number;
+    used: boolean;
+  } | null;
+}
+
+export interface EmailConfirmCreatePayload {
+  token: string;
+}
+
+export interface EmailConfirmCreateData {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  name: string;
+  /** @format email */
+  email: string;
+  /** @format password */
+  password: string;
+  user_type: string;
+  status: string;
+  /** @format date */
+  last_login_at: string | null;
+  /** @format date */
+  updated_at: string | null;
+  skills: string[];
+  experience_level: string;
+  bio: string;
+  certifications: string[];
+  /** @format date */
+  dateofbirth: string | null;
+  profile_image: string;
+  is_approved: boolean;
+  line_user_id: string;
+  line_display_name: string;
+  line_notification_enabled: boolean;
+  is_verified: boolean;
+  verify_token: string;
+  stripe_account_id: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
+  magic_link: {
+    token: string;
+    /**
+     * Time the token expires
+     * @format timestamptz
+     */
+    expiration: number;
+    used: boolean;
+  } | null;
+}
+
 export interface StripeCreateAccountLinkCreatePayload {
   user_id: string;
 }
@@ -5993,6 +6179,9 @@ export interface UserDetailData {
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
   magic_link: {
     token: string;
     /**
@@ -6023,6 +6212,9 @@ export interface UserPartialUpdatePayload {
   profile_image: string;
   is_approved: boolean;
   is_verified: boolean;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
   /** @format binary */
   photo: File | null;
   magic_link: {
@@ -6301,6 +6493,119 @@ export type WorksessionsUserTodosListData = {
   };
 }[];
 
+export type WorksessionsListResult = {
+  /** @format int64 */
+  id: number;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format timestamptz */
+  check_in_time: number;
+  /** @format timestamptz */
+  check_out_time: number;
+  total_hours: number;
+  location_data: string;
+  status:
+    | "SCHEDULED"
+    | "IN_PROGRESS"
+    | "CANCELED_BY_CHEF"
+    | "CANCELED_BY_RESTAURANT"
+    | "COMPLETED"
+    | "VERIFIED"
+    | "DISPUTE"
+    | "ESCALATED"
+    | "PAID"
+    | "CANCELED";
+  /** @format timestamptz */
+  updated_at: number;
+  /** @format uuid */
+  application_id: string;
+  /** @format uuid */
+  user_id: string | null;
+  /** @format int64 */
+  restaurant_id: number;
+  /** @format int64 */
+  job_id: number;
+  /** @format int64 */
+  paid_amount: number;
+  chef_feedback: string;
+  restaurant_feedback: string;
+  /** @format int64 */
+  chef_rating: number;
+  /** @format int64 */
+  restaurant_rating: number;
+  job: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    title: string;
+    description: string;
+    /** @format date */
+    work_date: string;
+    /** @format timestamptz */
+    start_time: number;
+    /** @format timestamptz */
+    end_time: number;
+    hourly_rate: number;
+    required_skills: string[];
+    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    /** @format timestamptz */
+    updated_at: number;
+    /** @format int64 */
+    restaurant_id: number;
+    image: string;
+    task: string;
+    skill: string;
+    whattotake: string;
+    note: string;
+    point: string;
+    transportation: string;
+    /** @default "1" */
+    is_approved: boolean;
+    /** @format int64 */
+    number_of_spots: number;
+    /** @format int64 */
+    fee: number;
+    /** @format timestamptz */
+    expiry_date: number | null;
+    restaurant: {
+      /** @format int64 */
+      id: number;
+      /**
+       * @format timestamptz
+       * @default "now"
+       */
+      created_at: number;
+      name: string;
+      address: string;
+      cuisine_type: string;
+      business_hours: string;
+      contact_info: string;
+      profile_image: string;
+      /** @format timestamptz */
+      updated_at: number;
+      /** Whether the restaurant is active. */
+      is_active: boolean;
+      /** @format uuid */
+      companies_id: string | null;
+      station: string;
+      access: string;
+      rating: number;
+      /** @default "1" */
+      is_approved: boolean;
+      restaurant_cuisine_id: number[];
+      description: string;
+      phone: string;
+    };
+  };
+}[];
+
 export type UsersDeleteData = object;
 
 export interface UsersDetailData {
@@ -6336,6 +6641,9 @@ export interface UsersDetailData {
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
   magic_link: {
     token: string;
     /**
@@ -6366,6 +6674,9 @@ export interface UsersPartialUpdatePayload {
   profile_image: string;
   is_approved: boolean;
   is_verified: boolean;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
   /** @format binary */
   photo: File | null;
   magic_link: {
@@ -6414,6 +6725,9 @@ export type UsersListData = {
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
   magic_link: {
     token: string;
     /**
@@ -6449,6 +6763,9 @@ export interface UsersCreatePayload {
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
   magic_link: {
     token: string;
     /**
@@ -6493,6 +6810,9 @@ export interface UsersCreateData {
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
   magic_link: {
     token: string;
     /**
@@ -6537,6 +6857,9 @@ export type UserListData = {
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
   magic_link: {
     token: string;
     /**
@@ -6572,6 +6895,9 @@ export interface UserCreatePayload {
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
   magic_link: {
     token: string;
     /**
@@ -6616,6 +6942,9 @@ export interface UserCreateData {
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
   magic_link: {
     token: string;
     /**
@@ -6775,6 +7104,9 @@ export type RestaurantTodoDetailData = {
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
     magic_link: {
       token: string;
       /**
@@ -7503,6 +7835,9 @@ export interface ChefReviewListResult {
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
     magic_link: {
       token: string;
       /**
@@ -7632,6 +7967,9 @@ export interface RestaurantReviewListResult {
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
     magic_link: {
       token: string;
       /**
@@ -7803,7 +8141,7 @@ export interface WorksessionsPartialUpdateData {
   restaurant_rating: number;
 }
 
-export type WorksessionsListResult = {
+export type WorksessionsListOutput = {
   /** @format int64 */
   id: number;
   /**

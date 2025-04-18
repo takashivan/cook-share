@@ -10,6 +10,10 @@
  */
 
 import {
+  EmailChangeCreateData,
+  EmailChangeCreatePayload,
+  EmailConfirmCreateData,
+  EmailConfirmCreatePayload,
   StripeCreateAccountCreateData,
   StripeCreateAccountCreatePayload,
   StripeCreateAccountLinkCreateData,
@@ -25,6 +29,44 @@ import {
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
 export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+  /**
+   * @description <br /><br /> <b>Authentication:</b> required
+   *
+   * @tags user
+   * @name EmailChangeCreate
+   * @request POST:/user/email/change
+   * @secure
+   */
+  emailChangeCreate = (data: EmailChangeCreatePayload, params: RequestParams = {}) =>
+    this.request<EmailChangeCreateData, void>({
+      path: `/user/email/change`,
+      method: "POST",
+      body: data,
+      secure: true,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> required
+   *
+   * @tags user
+   * @name EmailConfirmCreate
+   * @request POST:/user/email/confirm
+   * @secure
+   */
+  emailConfirmCreate = (data: EmailConfirmCreatePayload, params: RequestParams = {}) =>
+    this.request<EmailConfirmCreateData, void>({
+      path: `/user/email/confirm`,
+      method: "POST",
+      body: data,
+      secure: true,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *

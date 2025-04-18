@@ -17,7 +17,7 @@ import {
   WorksessionsCreatePayload,
   WorksessionsDeleteData,
   WorksessionsDetailData,
-  WorksessionsListResult,
+  WorksessionsListOutput,
   WorksessionsPartialUpdateData,
   WorksessionsPartialUpdatePayload,
 } from "./data-contracts";
@@ -156,7 +156,7 @@ export class Worksessions<SecurityDataType = unknown> extends HttpClient<Securit
    * @request GET:/worksessions
    */
   worksessionsList = (params: RequestParams = {}) =>
-    this.request<WorksessionsListResult, void>({
+    this.request<WorksessionsListOutput, void>({
       path: `/worksessions`,
       method: "GET",
       format: "json",

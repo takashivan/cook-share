@@ -21,7 +21,6 @@ import {
   CompanyusersCreatePayload,
   CompanyusersListData,
   JobsListData,
-  JobsListParams,
   RestaurantsListData,
   StaffInviteCreateData,
   StaffInviteCreatePayload,
@@ -151,22 +150,17 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
    * @name JobsList
    * @request GET:/companies/{company_id}/jobs
    */
-  jobsList = ({ companyId, ...query }: JobsListParams, params: RequestParams = {}) =>
+  jobsList = (companyId: string, params: RequestParams = {}) =>
     this.request<JobsListData, void>({
       path: `/companies/${companyId}/jobs`,
       method: "GET",
-      query: query,
       format: "json",
       ...params,
     });
 
-  jobsListQueryArgs = (
-    { companyId, ...query }: JobsListParams,
-    params: RequestParams = {},
-    enabled: boolean = true,
-  ) => {
-    const key = enabled ? [`/companies/${companyId}/jobs`, ...(query ? [query] : [])] : null;
-    const fetcher = () => this.jobsList({ companyId, ...query }, params).then((res) => res.data);
+  jobsListQueryArgs = (companyId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/companies/${companyId}/jobs`] : null;
+    const fetcher = () => this.jobsList(companyId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
