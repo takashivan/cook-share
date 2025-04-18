@@ -7,10 +7,10 @@ export interface Params {
   companyId?: string;
 }
 
-export const useGetCompanyUsersByCompanyId = (params: Params, config?: QueryConfigType) => {
+export const useGetJobsByCompanyId = (params: Params, config?: QueryConfigType) => {
   const { dedupingInterval } = config || {};
   const companies = getApi(Companies);
-  return useSWR(...companies.companyusersListQueryArgs(params.companyId ?? '', {}, params.companyId != null), {
+  return useSWR(...companies.jobsListQueryArgs(params.companyId ?? '', {}, params.companyId != null), {
     dedupingInterval
   });
 }
