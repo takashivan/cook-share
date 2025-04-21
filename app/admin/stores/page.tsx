@@ -2,16 +2,12 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/lib/store/store";
-import { fetchRestaurantsByCompanyId } from "@/lib/store/restaurantSlice";
 import { CreateRestaurantModal } from "@/components/modals/CreateRestaurantModal";
 import { createRestaurant } from "@/lib/api/restaurant";
 import { toast } from "@/hooks/use-toast";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -36,18 +32,18 @@ import {
   MoreHorizontal,
   Plus,
   Store,
-  Users,
 } from "lucide-react";
 import Link from "next/link";
+import { useGetRestaurantsByCompanyId } from "@/hooks/api/restaurants/useGetRestaurantsByCompanyId";
 
 export default function StoresPage() {
-  const dispatch = useDispatch<AppDispatch>();
   const { user } = useCompanyAuth();
   const {
-    restaurants,
-    loading: isLoading,
+    data: restaurants,
+    isLoading,
     error,
-  } = useSelector((state: RootState) => state.restaurants);
+    mutate,
+  } = useGetRestaurantsByCompanyId({ companyId: user?.companies_id });
   const [isCreateRestaurantModalOpen, setIsCreateRestaurantModalOpen] =
     useState(false);
   const [hasMounted, setHasMounted] = useState(false);
@@ -55,12 +51,6 @@ export default function StoresPage() {
   useEffect(() => {
     setHasMounted(true);
   }, []);
-
-  useEffect(() => {
-    if (!hasMounted || !user?.companies_id) return;
-
-    dispatch(fetchRestaurantsByCompanyId(user.companies_id));
-  }, [dispatch, user?.companies_id, hasMounted]);
 
   const handleCreateRestaurantModal = useCallback(() => {
     if (!hasMounted) return;
@@ -92,12 +82,7 @@ export default function StoresPage() {
         }
 
         // 店舗一覧を再取得
-        const refreshResult = await dispatch(
-          fetchRestaurantsByCompanyId(companyId)
-        );
-        if (refreshResult.type.endsWith("/rejected")) {
-          throw new Error("店舗一覧の更新に失敗しました");
-        }
+        mutate();
 
         handleCloseRestaurantModal();
         toast({
@@ -117,7 +102,7 @@ export default function StoresPage() {
         throw error;
       }
     },
-    [hasMounted, user?.companies_id, dispatch, handleCloseRestaurantModal]
+    [hasMounted, user?.companies_id, mutate, handleCloseRestaurantModal]
   );
 
   if (!hasMounted) {
@@ -172,7 +157,7 @@ export default function StoresPage() {
             <Store className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{restaurants.length}</div>
+            <div className="text-2xl font-bold">{restaurants?.length}</div>
           </CardContent>
         </Card>
 
@@ -183,7 +168,7 @@ export default function StoresPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {restaurants.filter((r) => r.is_active).length}
+              {restaurants?.filter((r) => r.is_active).length}
             </div>
           </CardContent>
         </Card>
@@ -203,7 +188,7 @@ export default function StoresPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {restaurants.map((restaurant) => (
+              {restaurants?.map((restaurant) => (
                 <TableRow key={restaurant.id}>
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-3">
@@ -258,7 +243,7 @@ export default function StoresPage() {
 
       {/* Mobile View */}
       <div className="grid gap-4 md:hidden">
-        {restaurants.map((restaurant) => (
+        {restaurants?.map((restaurant) => (
           <Card key={restaurant.id}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
