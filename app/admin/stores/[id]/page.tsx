@@ -13,6 +13,7 @@ import {
   Plus,
   Store,
   Users,
+  Copy,
 } from "lucide-react";
 import {
   Card,
@@ -44,7 +45,7 @@ import { fetchRestaurantsByCompanyId } from "@/lib/store/restaurantSlice";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { getRestaurant } from "@/lib/api/restaurant";
 import type { Restaurant } from "@/lib/api/restaurant";
-import { EditStoreModal } from "@/components/modals/EditStoreModal";
+import { updateRestaurant } from "@/lib/api/restaurant";
 import { getRestaurantById } from "@/lib/api/restaurant";
 import { getRestaurantStaff } from "@/lib/api/company";
 import { jobApi } from "@/lib/api/job";
@@ -56,9 +57,9 @@ import { CreateJobModal } from "@/components/modals/CreateJobModal";
 import { toast } from "@/hooks/use-toast";
 import { AddRestaurantStaffModal } from "@/components/modals/AddRestaurantStaff";
 import { restaurantStaffInvite } from "@/lib/api/restaurant";
-import { StaffsListData } from "@/api/__generated__/company/data-contracts";
-import { apiRequest } from "@/lib/api/config";
-import { Staff } from "@/types/staff";
+import { EditRestaurantModal } from "@/components/modals/EditRestaurantModal";
+import { workSessionApi } from "@/lib/api/workSession";
+import type { WorkSessionWithJob } from "@/types";
 
 interface StaffData {
   id: string;
@@ -70,28 +71,101 @@ interface StaffData {
   };
 }
 
-const fetcher = async (url: string) => {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error("APIリクエストに失敗しました");
-  return res.json();
-};
+interface JobWithWorkSessions extends Job {
+  formattedWorkDate: string;
+  formattedTime: string;
+  workSessionCount: number;
+}
 
 export default function RestaurantDetailPage(props: {
   params: Promise<{ id: string }>;
 }) {
   const params = use(props.params);
-  const [formattedJobs, setFormattedJobs] = useState<
-    (Job & { formattedWorkDate: string; formattedTime: string })[]
-  >([]);
-  const { data: restaurant, error: restaurantError } = useSWR(
+  const {
+    data: restaurant,
+    error: restaurantError,
+    mutate: mutateRestaurant,
+  } = useSWR(
     [`restaurant`, params.id],
-    ([_, id]) => getRestaurantById(id),
+    ([_, id]: [string, string]) => getRestaurantById(id),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
       dedupingInterval: 10000,
     }
   );
+
+  console.log("restaurant", restaurant);
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [formDataState, setFormDataState] = useState({
+    name: "",
+    email: "",
+    contact_info: "",
+    address: "",
+    business_hours: "",
+    station: "",
+    access: "",
+    is_active: false,
+    description: "",
+    cuisine_type: "",
+    restaurant_cuisine_id: [] as (number | undefined)[],
+    photo: null as File | null,
+  });
+
+  useEffect(() => {
+    const fetchRestaurant = async () => {
+      try {
+        const data = await getRestaurant(params.id);
+        setFormDataState({
+          name: data.name,
+          email: data.email,
+          contact_info: data.contact_info || "",
+          address: data.address,
+          business_hours: data.business_hours || "",
+          station: data.station || "",
+          access: data.access || "",
+          is_active: data.is_active,
+          description: data.description || "",
+          cuisine_type: data.cuisine_type || "",
+          restaurant_cuisine_id: Array.isArray(data.restaurant_cuisine_id)
+            ? data.restaurant_cuisine_id
+            : [data.restaurant_cuisine_id].filter(
+                (id): id is number => id !== undefined
+              ),
+          photo: null,
+        });
+      } catch (error) {
+        console.error("Error fetching restaurant:", error);
+        toast({
+          title: "エラー",
+          description: "レストラン情報の取得に失敗しました",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchRestaurant();
+  }, [params.id, toast]);
+
+  const handleSubmit = async (data: FormData) => {
+    try {
+      await updateRestaurant(params.id, data);
+      setIsEditModalOpen(false);
+      await mutateRestaurant();
+      toast({
+        title: "更新成功",
+        description: "レストラン情報が更新されました",
+      });
+    } catch (error) {
+      console.error("更新エラー:", error);
+      toast({
+        title: "更新エラー",
+        description: "レストラン情報の更新に失敗しました",
+        variant: "destructive",
+      });
+    }
+  };
 
   const { data: jobs, error: jobsError } = useSWR(
     restaurant ? `/api/restaurants/${params.id}/jobs` : null,
@@ -124,20 +198,59 @@ export default function RestaurantDetailPage(props: {
     }
   );
 
+  const [formattedJobs, setFormattedJobs] = useState<JobWithWorkSessions[]>([]);
+
   useEffect(() => {
-    if (jobs && Array.isArray(jobs)) {
-      const formatted = jobs.map((job: Job) => ({
-        ...job,
-        formattedWorkDate: format(new Date(job.work_date), "yyyy年MM月dd日", {
-          locale: ja,
-        }),
-        formattedTime: `${format(
-          new Date(job.start_time * 1000),
-          "HH:mm"
-        )} 〜 ${format(new Date(job.end_time * 1000), "HH:mm")}`,
-      }));
-      setFormattedJobs(formatted);
-    }
+    const fetchWorkSessions = async () => {
+      if (jobs && Array.isArray(jobs)) {
+        const jobsWithSessions = await Promise.all(
+          jobs.map(async (job: Job) => {
+            try {
+              const workSessions =
+                await workSessionApi.getWorkSessionsToDoByJobId(job.id);
+              return {
+                ...job,
+                formattedWorkDate: format(
+                  new Date(job.work_date),
+                  "yyyy年MM月dd日",
+                  {
+                    locale: ja,
+                  }
+                ),
+                formattedTime: `${format(
+                  new Date(job.start_time),
+                  "HH:mm"
+                )} 〜 ${format(new Date(job.end_time), "HH:mm")}`,
+                workSessionCount: workSessions.length,
+              } as JobWithWorkSessions;
+            } catch (error) {
+              console.error(
+                `Error fetching work sessions for job ${job.id}:`,
+                error
+              );
+              return {
+                ...job,
+                formattedWorkDate: format(
+                  new Date(job.work_date),
+                  "yyyy年MM月dd日",
+                  {
+                    locale: ja,
+                  }
+                ),
+                formattedTime: `${format(
+                  new Date(job.start_time),
+                  "HH:mm"
+                )} 〜 ${format(new Date(job.end_time), "HH:mm")}`,
+                workSessionCount: 0,
+              } as JobWithWorkSessions;
+            }
+          })
+        );
+        setFormattedJobs(jobsWithSessions);
+      }
+    };
+
+    fetchWorkSessions();
   }, [jobs]);
 
   console.log("Restaurant data:", restaurant);
@@ -150,6 +263,7 @@ export default function RestaurantDetailPage(props: {
 
   const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
   const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
+  const [copiedJob, setCopiedJob] = useState<Partial<Job> | null>(null);
 
   const handleCreateJob = async (data: FormData) => {
     try {
@@ -157,6 +271,7 @@ export default function RestaurantDetailPage(props: {
       // 求人リストを更新
       // TODO: 求人リストの更新処理を追加
       setIsCreateJobModalOpen(false);
+      setCopiedJob(null);
       toast({
         title: "求人を追加しました",
         description: "新しい求人の登録が完了しました。",
@@ -188,7 +303,6 @@ export default function RestaurantDetailPage(props: {
       console.log("restaurant", restaurant);
       console.log("email", email);
       console.log("restaurant.id", restaurant.id);
-      console.log("restaurant.companies_id", restaurant.companies_id);
       console.log("permissions.canEdit", permissions.canEdit);
       console.log("permissions.canManageJobs", permissions.canManageJobs);
       console.log("restaurant.name", restaurant.name);
@@ -214,6 +328,28 @@ export default function RestaurantDetailPage(props: {
     }
   };
 
+  const handleCopyJob = (job: any) => {
+    const { id, ...jobWithoutId } = job;
+    const jobData = {
+      ...jobWithoutId,
+      title: `${job.title} (コピー)`,
+      status: "DRAFT",
+      start_time: new Date(job.start_time).toLocaleTimeString("ja-JP", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }),
+      end_time: new Date(job.end_time).toLocaleTimeString("ja-JP", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }),
+      expiry_date: new Date(job.expiry_date).toISOString().split("T")[0],
+    };
+    setCopiedJob(jobData);
+    setIsCreateJobModalOpen(true);
+  };
+
   return (
     <div className="container mx-auto py-8">
       {isLoading ? (
@@ -237,7 +373,11 @@ export default function RestaurantDetailPage(props: {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <Button>
+              <Button
+                onClick={() => {
+                  setIsEditModalOpen(true);
+                  console.log("restaurant", restaurant);
+                }}>
                 <Edit className="mr-2 h-4 w-4" />
                 店舗情報を編集
               </Button>
@@ -253,7 +393,7 @@ export default function RestaurantDetailPage(props: {
                 <MessageSquare className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">3</div>
+                <div className="text-2xl font-bold">{formattedJobs.length}</div>
               </CardContent>
             </Card>
             <Card>
@@ -264,7 +404,7 @@ export default function RestaurantDetailPage(props: {
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">4</div>
+                <div className="text-2xl font-bold">{staffs?.length}</div>
               </CardContent>
             </Card>
             <Card>
@@ -273,7 +413,12 @@ export default function RestaurantDetailPage(props: {
                 <BarChart3 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">10</div>
+                <div className="text-2xl font-bold">
+                  {formattedJobs.reduce(
+                    (sum, job) => sum + job.workSessionCount,
+                    0
+                  )}
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -302,7 +447,7 @@ export default function RestaurantDetailPage(props: {
                       <div>
                         <h4 className="font-medium">電話番号</h4>
                         <p className="text-sm text-gray-500">
-                          {restaurant?.phone}
+                          {restaurant?.contact_info}
                         </p>
                       </div>
                       <div>
@@ -323,53 +468,348 @@ export default function RestaurantDetailPage(props: {
 
             <TabsContent value="jobs" className="space-y-4">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-medium">掲載中の求人</h3>
+                <h3 className="text-lg font-medium">求人一覧</h3>
                 <Button size="sm" onClick={() => setIsCreateJobModalOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   求人を追加
                 </Button>
               </div>
 
-              <div className="grid gap-4">
-                {Array.isArray(formattedJobs) &&
-                  formattedJobs.map((job) => (
-                    <Link
-                      href={`/admin/job/${job.id}`}
-                      key={job.id}
-                      className="block">
-                      <Card className="transition-colors hover:bg-gray-50">
-                        <CardHeader>
-                          <div className="flex items-center justify-between">
-                            <CardTitle className="text-lg">
-                              {job.title}
-                            </CardTitle>
-                            <Badge
-                              variant={
-                                job.status === "公開中"
-                                  ? "default"
-                                  : "secondary"
-                              }>
-                              {job.status}
-                            </Badge>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-2">
-                            <div className="flex items-center text-sm text-gray-500">
-                              <span className="mr-4">
+              <Tabs defaultValue="published" className="w-full">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="published">公開中</TabsTrigger>
+                  <TabsTrigger value="draft">下書き</TabsTrigger>
+                  <TabsTrigger value="pending">一時停止中</TabsTrigger>
+                  <TabsTrigger value="expired">募集終了</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="published">
+                  <div className="grid gap-4">
+                    {formattedJobs
+                      .filter(
+                        (job) =>
+                          job.status === "PUBLISHED" &&
+                          (!job.expiry_date || job.expiry_date > Date.now())
+                      )
+                      .map((job) => (
+                        <div
+                          key={job.id}
+                          className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <h3 className="font-medium">{job.title}</h3>
+                            <p className="text-sm text-gray-500"></p>
+                            <div className="flex items-center gap-2 mt-2">
+                              <Badge variant="default">公開中</Badge>
+                              <span className="text-sm text-gray-500">
                                 勤務日: {job.formattedWorkDate}
                               </span>
-                              <span>時給: {job.hourly_rate}円</span>
-                            </div>
-                            <div className="text-sm">
-                              勤務時間: {job.formattedTime}
+                              <span className="text-sm text-gray-500">
+                                勤務時間: {job.formattedTime}
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                報酬: {job.fee}円
+                              </span>
                             </div>
                           </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  ))}
-              </div>
+                          <div className="flex items-center gap-4">
+                            <div className="flex flex-col items-end">
+                              <div className="text-sm font-medium text-gray-500">
+                                応募状況
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <span
+                                  className={`text-lg font-bold ${job.workSessionCount >= job.number_of_spots ? "text-primary" : ""}`}>
+                                  {job.workSessionCount}
+                                </span>
+                                <span className="text-gray-500">/</span>
+                                <span className="text-lg font-bold">
+                                  {job.number_of_spots}
+                                </span>
+                                <span className="text-sm text-gray-500">
+                                  人
+                                </span>
+                              </div>
+                              <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
+                                <div
+                                  className={`h-full ${job.workSessionCount >= job.number_of_spots ? "bg-primary" : "bg-blue-400"}`}
+                                  style={{
+                                    width: `${Math.min(
+                                      (job.workSessionCount /
+                                        job.number_of_spots) *
+                                        100,
+                                      100
+                                    )}%`,
+                                  }}
+                                />
+                              </div>
+                            </div>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem asChild>
+                                  <Link href={`/admin/job/${job.id}`}>
+                                    詳細を見る
+                                  </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => handleCopyJob(job)}>
+                                  コピーして新規作成
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="draft">
+                  <div className="grid gap-4">
+                    {formattedJobs
+                      .filter((job) => job.status === "DRAFT")
+                      .map((job) => (
+                        <div
+                          key={job.id}
+                          className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <h3 className="font-medium">{job.title}</h3>
+                            <p className="text-sm text-gray-500"></p>
+                            <div className="flex items-center gap-2 mt-2">
+                              <Badge variant="secondary">下書き</Badge>
+                              <span className="text-sm text-gray-500">
+                                勤務日: {job.formattedWorkDate}
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                勤務時間: {job.formattedTime}
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                報酬: {job.fee}円
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="flex flex-col items-end">
+                              <div className="text-sm font-medium text-gray-500">
+                                応募状況
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <span
+                                  className={`text-lg font-bold ${job.workSessionCount >= job.number_of_spots ? "text-primary" : ""}`}>
+                                  {job.workSessionCount}
+                                </span>
+                                <span className="text-gray-500">/</span>
+                                <span className="text-lg font-bold">
+                                  {job.number_of_spots}
+                                </span>
+                                <span className="text-sm text-gray-500">
+                                  人
+                                </span>
+                              </div>
+                              <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
+                                <div
+                                  className={`h-full ${job.workSessionCount >= job.number_of_spots ? "bg-primary" : "bg-blue-400"}`}
+                                  style={{
+                                    width: `${Math.min(
+                                      (job.workSessionCount /
+                                        job.number_of_spots) *
+                                        100,
+                                      100
+                                    )}%`,
+                                  }}
+                                />
+                              </div>
+                            </div>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem asChild>
+                                  <Link href={`/admin/job/${job.id}`}>
+                                    詳細を見る
+                                  </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => handleCopyJob(job)}>
+                                  コピーして新規作成
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="pending">
+                  <div className="grid gap-4">
+                    {formattedJobs
+                      .filter((job) => job.status === "PENDING")
+                      .map((job) => (
+                        <div
+                          key={job.id}
+                          className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <h3 className="font-medium">{job.title}</h3>
+                            <p className="text-sm text-gray-500"></p>
+                            <div className="flex items-center gap-2 mt-2">
+                              <Badge variant="secondary">一時停止中</Badge>
+                              <span className="text-sm text-gray-500">
+                                勤務日: {job.formattedWorkDate}
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                勤務時間: {job.formattedTime}
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                報酬: {job.fee}円
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="flex flex-col items-end">
+                              <div className="text-sm font-medium text-gray-500">
+                                応募状況
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <span
+                                  className={`text-lg font-bold ${job.workSessionCount >= job.number_of_spots ? "text-primary" : ""}`}>
+                                  {job.workSessionCount}
+                                </span>
+                                <span className="text-gray-500">/</span>
+                                <span className="text-lg font-bold">
+                                  {job.number_of_spots}
+                                </span>
+                                <span className="text-sm text-gray-500">
+                                  人
+                                </span>
+                              </div>
+                              <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
+                                <div
+                                  className={`h-full ${job.workSessionCount >= job.number_of_spots ? "bg-primary" : "bg-blue-400"}`}
+                                  style={{
+                                    width: `${Math.min(
+                                      (job.workSessionCount /
+                                        job.number_of_spots) *
+                                        100,
+                                      100
+                                    )}%`,
+                                  }}
+                                />
+                              </div>
+                            </div>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem asChild>
+                                  <Link href={`/admin/job/${job.id}`}>
+                                    詳細を見る
+                                  </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => handleCopyJob(job)}>
+                                  コピーして新規作成
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="expired">
+                  <div className="grid gap-4">
+                    {formattedJobs
+                      .filter(
+                        (job) =>
+                          job.expiry_date && job.expiry_date <= Date.now()
+                      )
+                      .map((job) => (
+                        <div
+                          key={job.id}
+                          className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <h3 className="font-medium">{job.title}</h3>
+                            <p className="text-sm text-gray-500"></p>
+                            <div className="flex items-center gap-2 mt-2">
+                              <Badge variant="destructive">募集終了</Badge>
+                              <span className="text-sm text-gray-500">
+                                勤務日: {job.formattedWorkDate}
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                勤務時間: {job.formattedTime}
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                報酬: {job.fee}円
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="flex flex-col items-end">
+                              <div className="text-sm font-medium text-gray-500">
+                                応募状況
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <span
+                                  className={`text-lg font-bold ${job.workSessionCount >= job.number_of_spots ? "text-primary" : ""}`}>
+                                  {job.workSessionCount}
+                                </span>
+                                <span className="text-gray-500">/</span>
+                                <span className="text-lg font-bold">
+                                  {job.number_of_spots}
+                                </span>
+                                <span className="text-sm text-gray-500">
+                                  人
+                                </span>
+                              </div>
+                              <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
+                                <div
+                                  className={`h-full ${job.workSessionCount >= job.number_of_spots ? "bg-primary" : "bg-blue-400"}`}
+                                  style={{
+                                    width: `${Math.min(
+                                      (job.workSessionCount /
+                                        job.number_of_spots) *
+                                        100,
+                                      100
+                                    )}%`,
+                                  }}
+                                />
+                              </div>
+                            </div>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem asChild>
+                                  <Link href={`/admin/job/${job.id}`}>
+                                    詳細を見る
+                                  </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => handleCopyJob(job)}>
+                                  コピーして新規作成
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </TabsContent>
+              </Tabs>
             </TabsContent>
 
             <TabsContent value="staff">
@@ -410,9 +850,35 @@ export default function RestaurantDetailPage(props: {
 
       <CreateJobModal
         isOpen={isCreateJobModalOpen}
-        onClose={() => setIsCreateJobModalOpen(false)}
+        onClose={() => {
+          setIsCreateJobModalOpen(false);
+          setCopiedJob(null);
+        }}
         onSubmit={handleCreateJob}
         restaurantId={parseInt(params.id)}
+        initialData={copiedJob}
+      />
+      <EditRestaurantModal
+        isOpen={isEditModalOpen && !!restaurant}
+        onClose={() => setIsEditModalOpen(false)}
+        onSubmit={handleSubmit}
+        restaurant={
+          restaurant || {
+            id: "",
+            name: "",
+            description: "",
+            address: "",
+            contact_info: "",
+            cuisine_type: "",
+            is_active: true,
+            is_approved: false,
+            profile_image: "",
+            restaurant_cuisine_id: [],
+            business_hours: "",
+            station: "",
+            access: "",
+          }
+        }
       />
 
       <AddRestaurantStaffModal

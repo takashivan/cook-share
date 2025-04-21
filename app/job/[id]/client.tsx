@@ -2,7 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, Clock, MapPin } from "lucide-react";
+import {
+  ChevronRight,
+  Clock,
+  MapPin,
+  Calendar,
+  ArrowRight,
+  PartyPopper,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useMobile } from "@/hooks/use-mobile";
@@ -11,6 +19,10 @@ import { applicationApi } from "@/lib/api/application";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/layout/header";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { format } from "date-fns";
 
 interface Restaurant {
   id: string;
@@ -40,9 +52,24 @@ interface JobDetail {
     note: string;
     point: string;
     transportation: string;
+    number_of_spots: number;
+    fee: number;
+    expiry_date: number;
   };
   restaurant: Restaurant;
 }
+
+interface CreateApplicationParams {
+  job_id: number;
+  status: string;
+  user_id: string;
+  application_date: string;
+}
+
+// 時間のフォーマット関数を追加
+const formatTime = (timestamp: number) => {
+  return format(new Date(timestamp * 1000), "HH:mm");
+};
 
 export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
   const [activeTab, setActiveTab] = useState<"details" | "store" | "access">(
@@ -51,43 +78,84 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isMobile = useMobile();
-  const { user: chefUser } = useAuth();
-  const isChefLoggedIn = !!chefUser;
+  const router = useRouter();
+  const { user } = useAuth();
+  const [applicationId, setApplicationId] = useState<string | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const { toast } = useToast();
 
-  const handleApply = async (data: { notes: string }) => {
-    console.log("user", chefUser);
-    try {
-      if (!chefUser?.id) {
-        console.error("User not logged in");
-        return;
-      }
+  const applyToJob = async () => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        description: "ログインしてください",
+      });
+      return;
+    }
 
-      setIsSubmitting(true);
-      const applicationData = {
-        job_id: jobDetail.job.id,
-        notes: data.notes,
-        status: "APPLIED",
-        user_id: chefUser.id,
-        application_date: new Date().toISOString(),
-      };
-      console.log("Sending application data:", applicationData);
-      await applicationApi.createApplication(applicationData);
+    const applicationData: CreateApplicationParams = {
+      job_id: jobDetail.job.id,
+      status: "ACCEPTED",
+      user_id: user.id.toString(),
+      application_date: new Date().toISOString(),
+    };
+
+    try {
+      const response = await applicationApi.createApplication(applicationData);
+      console.log("response", response);
+      setApplicationId(response.id.toString());
       setIsApplyModalOpen(false);
       toast({
-        title: "応募完了",
-        description: `${jobDetail.restaurant.name}の求人に応募しました。`,
+        description: "応募が完了しました",
       });
+    } catch (error) {
+      console.error("Error applying to job:", error);
+      toast({
+        variant: "destructive",
+        description: "応募に失敗しました",
+      });
+    }
+  };
+
+  const handleApply = async () => {
+    try {
+      await applyToJob();
+
+      // カレンダーイベントのデータを作成
+      const eventData = {
+        text: `${jobDetail.job.title} @ ${jobDetail.restaurant.name}`,
+        dates: jobDetail.job.work_date,
+        details: `勤務時間: ${formatTime(jobDetail.job.start_time)} - ${formatTime(jobDetail.job.end_time)}\n場所: ${jobDetail.restaurant.address}`,
+      };
+
+      setShowSuccessModal(true);
     } catch (error) {
       console.error("Failed to apply:", error);
       toast({
-        title: "エラー",
+        title: "エラーが発生しました",
         description: "応募に失敗しました。もう一度お試しください。",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
     }
+  };
+
+  const generateGoogleCalendarUrl = (event: {
+    text: string;
+    dates: string;
+    details: string;
+  }) => {
+    const startDate = new Date(event.dates);
+    const endDate = new Date(startDate);
+    endDate.setHours(endDate.getHours() + 8); // 仮で8時間の勤務時間を設定
+
+    const params = new URLSearchParams({
+      action: "TEMPLATE",
+      text: event.text,
+      details: event.details,
+      dates: `${startDate.toISOString().replace(/-|:|\.\d+/g, "")}/${endDate.toISOString().replace(/-|:|\.\d+/g, "")}`,
+    });
+
+    return `https://calendar.google.com/calendar/render?${params.toString()}`;
   };
 
   return (
@@ -171,19 +239,40 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                 <p className="text-sm text-gray-700 mb-4 leading-relaxed">
                   {jobDetail.job.description}
                 </p>
-
-                <div className="flex justify-center mt-6">
+                <Badge
+                  variant="secondary"
+                  className={`text-sm mb-0 ${
+                    jobDetail.job.number_of_spots > 0 &&
+                    new Date(jobDetail.job.expiry_date) > new Date()
+                      ? "bg-black text-white"
+                      : "bg-gray-500 text-white"
+                  }`}>
+                  {jobDetail.job.number_of_spots > 0 &&
+                  new Date(jobDetail.job.expiry_date) > new Date()
+                    ? `残り${jobDetail.job.number_of_spots}名募集中`
+                    : "締め切りました"}
+                </Badge>
+                <div className="flex justify-center mt-3">
                   <Button
                     onClick={() => setIsApplyModalOpen(true)}
-                    disabled={!isChefLoggedIn}
+                    disabled={
+                      !user ||
+                      jobDetail.job.number_of_spots === 0 ||
+                      new Date(jobDetail.job.expiry_date) <= new Date()
+                    }
                     className={`w-full rounded-md py-2 flex items-center justify-center gap-2 ${
-                      isChefLoggedIn
+                      user &&
+                      jobDetail.job.number_of_spots > 0 &&
+                      new Date(jobDetail.job.expiry_date) > new Date()
                         ? "bg-orange-600 hover:bg-orange-700 text-white"
                         : "bg-gray-300 text-gray-500 cursor-not-allowed"
                     }`}>
-                    {isChefLoggedIn
-                      ? "応募する"
-                      : "シェフとしてログインして応募する"}
+                    {!user
+                      ? "シェフとしてログインして応募する"
+                      : jobDetail.job.number_of_spots > 0 &&
+                          new Date(jobDetail.job.expiry_date) > new Date()
+                        ? "応募する"
+                        : "締め切りました"}
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
@@ -285,7 +374,19 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                         </div>
                       </div>
 
-                      {/* Hourly Wage */}
+                      {/* Specific Shift */}
+                      <div className="flex">
+                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
+                        <div>
+                          <h3 className="font-medium mb-1">報酬額</h3>
+                          <p className="text-lg">
+                            <span className="font-bold">
+                              {jobDetail.job.fee.toLocaleString()}円
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                      {/* Hourly Wage
                       <div className="border border-red-500 p-4 rounded-md">
                         <div className="flex">
                           <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
@@ -333,7 +434,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                             </Link>
                           </div>
                         </div>
-                      </div>
+                      </div> */}
 
                       {/* Transportation */}
                       <div className="flex">
@@ -404,12 +505,6 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                             {jobDetail.job.note}
                           </div>
                         </div>
-                      </div>
-
-                      {/* Contract Type */}
-                      <div className="flex">
-                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
-                        <div></div>
                       </div>
                     </div>
                   </div>
@@ -510,15 +605,24 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
 
                 <Button
                   onClick={() => setIsApplyModalOpen(true)}
-                  disabled={!isChefLoggedIn}
+                  disabled={
+                    !user ||
+                    jobDetail.job.number_of_spots === 0 ||
+                    new Date(jobDetail.job.expiry_date * 1000) <= new Date()
+                  }
                   className={`w-full rounded-md py-2 flex items-center justify-center gap-2 ${
-                    isChefLoggedIn
+                    user &&
+                    jobDetail.job.number_of_spots > 0 &&
+                    new Date(jobDetail.job.expiry_date * 1000) > new Date()
                       ? "bg-orange-600 hover:bg-orange-700 text-white"
                       : "bg-gray-300 text-gray-500 cursor-not-allowed"
                   }`}>
-                  {isChefLoggedIn
-                    ? "応募する"
-                    : "シェフとしてログインして応募する"}
+                  {!user
+                    ? "シェフとしてログインして応募する"
+                    : jobDetail.job.number_of_spots > 0 &&
+                        new Date(jobDetail.job.expiry_date * 1000) > new Date()
+                      ? "応募する"
+                      : "締め切りました"}
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -576,6 +680,60 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
         onSubmit={handleApply}
         isSubmitting={isSubmitting}
       />
+
+      <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+        <DialogContent className="sm:max-w-md">
+          <div className="flex flex-col items-center justify-center space-y-6 py-8">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 260, damping: 20 }}>
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                <PartyPopper className="w-8 h-8 text-green-600" />
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-center space-y-2">
+              <h3 className="text-2xl font-bold text-gray-900">
+                おめでとうございます！
+              </h3>
+              <p className="text-gray-600">仕事がマッチしました！</p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="flex flex-col gap-4 w-full">
+              <a
+                href={generateGoogleCalendarUrl({
+                  text: `${jobDetail.job.title} @ ${jobDetail.restaurant.name}`,
+                  dates: jobDetail.job.work_date,
+                  details: `勤務時間: ${formatTime(jobDetail.job.start_time)} - ${formatTime(jobDetail.job.end_time)}\n場所: ${jobDetail.restaurant.address}`,
+                })}
+                target="_blank"
+                rel="noopener noreferrer">
+                <Button className="w-full flex items-center justify-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  カレンダーに追加
+                </Button>
+              </a>
+
+              <Button
+                onClick={() => router.push(`/chef/job/${applicationId}`)}
+                className="w-full flex items-center justify-center gap-2"
+                style={{ backgroundColor: "#DB3F1C" }}>
+                <ArrowRight className="w-4 h-4" />
+                仕事の詳細を確認
+              </Button>
+            </motion.div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

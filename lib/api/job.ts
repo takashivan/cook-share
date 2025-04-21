@@ -3,6 +3,7 @@
 import { API_CONFIG, apiRequest } from "./config";
 import type { Restaurant } from "@/lib/api/restaurant";
 import type { JobWithRestaurant } from "@/types";
+import { GetJobData } from "@/api/__generated__/chef-connect/data-contracts";
 
 const BASE_URL = API_CONFIG.baseURLs.job;
 
@@ -98,6 +99,9 @@ export interface JobDetail {
     note: string;
     point: string;
     transportation: string;
+    number_of_spots: number;
+    fee: number;
+    expiry_date: number;
   };
   restaurant: {
     id: string;
@@ -133,6 +137,9 @@ export interface Job {
   point: string | null;
   transportation: string;
   is_approved: boolean;
+  number_of_spots: number;
+  fee: number;
+  expiry_date: number;
 }
 
 export interface GetJobsResponse {
@@ -335,11 +342,14 @@ export type CreateJobParams = {
   note?: string;
   point?: string;
   transportation?: string;
+  fee: number;
+  number_of_spots: number;
+  expiry_date: number;
 };
 
 export type UpdateJobParams = Partial<CreateJobParams>;
 
-export type GetJobResponse = Job;
+export type GetJobResponse = GetJobData;
 export type CreateJobResponse = Job;
 export type UpdateJobResponse = Job;
 export type DeleteJobResponse = void;
@@ -429,14 +439,17 @@ export const jobApi = {
 
   updateJob: async (
     id: string,
-    params: UpdateJobParams
+    params: UpdateJobParams | FormData
   ): Promise<UpdateJobResponse> => {
     const response = await fetch(`${BASE_URL}/${id}`, {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(params),
+      headers:
+        params instanceof FormData
+          ? {}
+          : {
+              "Content-Type": "application/json",
+            },
+      body: params instanceof FormData ? params : JSON.stringify(params),
     });
 
     if (!response.ok) {

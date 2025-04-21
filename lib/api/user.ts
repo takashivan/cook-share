@@ -166,13 +166,6 @@ export const forgotPassword = (email: string) => {
   return apiRequest(`${AUTH_URL}/forgot-password`, "POST", { email });
 };
 
-export const resetPassword = (token: string, newPassword: string) => {
-  return apiRequest(`${AUTH_URL}/reset-password`, "POST", {
-    token,
-    newPassword,
-  });
-};
-
 // ユーザープロフィール関連
 export const getUserProfile = (userId: UserId): Promise<UserProfile> => {
   return apiRequest<UserProfile>(`${USER_URL}/${userId}`, "GET");
@@ -373,4 +366,42 @@ export const updateSettings = (
 // 全シェフユーザー取得
 export const getAllChefs = async (): Promise<UserProfile[]> => {
   return apiRequest<UserProfile[]>(`${USER_URL}`, "GET");
+};
+
+// パスワード変更
+export const changeEmail = (newEmail: string): Promise<void> => {
+  return apiRequest(`${USER_URL}/email/change`, "POST", { newEmail });
+};
+
+export const confirmEmail = (token: string): Promise<void> => {
+  return apiRequest(`${USER_URL}/email/confirm`, "POST", { token });
+};
+
+export const changePassword = (
+  current_password: string,
+  new_password: string
+): Promise<void> => {
+  return apiRequest(`${AUTH_URL}/change-password`, "POST", {
+    current_password,
+    new_password,
+  });
+};
+
+export const requestPasswordReset = (email: string): Promise<void> => {
+  return apiRequest(`${AUTH_URL}/request-password-reset`, "POST", { email });
+};
+
+export const resetPassword = (
+  token: string,
+  newPassword: string
+): Promise<void> => {
+  return apiRequest(
+    `${AUTH_URL}/reset-password`,
+    "POST",
+    {
+      token,
+      new_password: newPassword,
+    },
+    "chef"
+  );
 };

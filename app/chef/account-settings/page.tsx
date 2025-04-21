@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { changeEmail, changePassword, confirmEmail } from "@/lib/api/user";
+import { ChefEmailChangeModal } from "@/components/modals/ChefEmailChangeModal";
 import {
   Card,
   CardContent,
@@ -20,6 +22,7 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 export default function AccountSettings() {
   const [activeTab, setActiveTab] = useState("account");
@@ -30,6 +33,7 @@ export default function AccountSettings() {
     phone: "090-1234-5678",
     language: "ja",
   });
+  const { user } = useAuth();
 
   // パスワード変更のステート
   const [passwordInfo, setPasswordInfo] = useState({
@@ -37,6 +41,11 @@ export default function AccountSettings() {
     newPassword: "",
     confirmPassword: "",
   });
+
+  const handleEmailChange = (newEmail: string) => {
+    changeEmail(newEmail);
+    console.log(newEmail);
+  };
 
   // 通知設定のステート
   const [notificationSettings, setNotificationSettings] = useState({
@@ -275,6 +284,21 @@ export default function AccountSettings() {
                 </Button>
               </CardFooter>
             </form>
+          </Card>
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>メールアドレス変更</CardTitle>
+              <CardDescription>メールアドレスを変更できます</CardDescription>
+            </CardHeader>
+            <CardFooter>
+              <ChefEmailChangeModal
+                currentEmail={user?.email || ""}
+                trigger={
+                  <Button className="ml-auto">メールアドレスを変更する</Button>
+                }
+                onSubmit={handleEmailChange}
+              />
+            </CardFooter>
           </Card>
         </TabsContent>
 

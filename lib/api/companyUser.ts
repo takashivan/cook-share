@@ -109,6 +109,17 @@ export const verifyEmail = async (token: string, user_id: string) => {
   return apiRequest(`${AUTH_URL}/verify-email`, "POST", { token, user_id });
 };
 
+export const changePassword = (new_password: string): Promise<void> => {
+  return apiRequest(
+    `${AUTH_URL}/change-password`,
+    "POST",
+    {
+      new_password,
+    },
+    "company"
+  );
+};
+
 export const getCurrentUser = async (): Promise<CompanyUser> => {
   const response = await apiRequest<{
     id: string;
@@ -138,16 +149,6 @@ export const forgotPassword = (
   return apiRequest(`${BASE_URL}/auth/forgot-password`, "POST", { email });
 };
 
-export const resetPassword = (
-  token: string,
-  newPassword: string
-): Promise<{ success: boolean }> => {
-  return apiRequest(`${BASE_URL}/auth/reset-password`, "POST", {
-    token,
-    newPassword,
-  });
-};
-
 export type CompanyUserResponse = CompanyUser[];
 
 export const getCompanyUserByCompanyId = (
@@ -165,4 +166,33 @@ export const updateCompanyUser = async (
 
 export const getCompanyProfile = async (): Promise<Company> => {
   return apiRequest(`${BASE_URL}/profile`, "GET");
+};
+
+export const changeEmail = (newEmail: string): Promise<void> => {
+  return apiRequest(`${BASE_URL}/email/change`, "POST", { newEmail });
+};
+
+export const confirmEmail = (token: string): Promise<void> => {
+  return apiRequest(`${BASE_URL}/email/confirm`, "POST", { token });
+};
+
+export const requestPasswordReset = (email: string): Promise<void> => {
+  return apiRequest(`${AUTH_URL}/request-password-reset`, "POST", {
+    email,
+  });
+};
+
+export const resetPassword = (
+  token: string,
+  newPassword: string
+): Promise<void> => {
+  return apiRequest(
+    `${AUTH_URL}/reset-password`,
+    "POST",
+    {
+      token,
+      new_password: newPassword,
+    },
+    "company"
+  );
 };

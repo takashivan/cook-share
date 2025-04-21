@@ -14,6 +14,7 @@ import { RootState, AppDispatch } from "@/lib/redux/store";
 import { fetchJobs } from "@/lib/redux/slices/jobsSlice";
 import { Card } from "@/components/ui/card";
 import { LoadingScreen } from "@/components/LoadingScreen";
+import { Badge } from "@/components/ui/badge";
 
 export default function Home() {
   const [jobs, setJobs] = useState<JobWithRestaurant[]>([]);
@@ -60,6 +61,8 @@ export default function Home() {
       dispatch(fetchJobs());
     }
   }, [dispatch, reduxJobs.length, isLoading]);
+
+  console.log(reduxJobs);
 
   if (isLoading) {
     return (
@@ -219,7 +222,7 @@ export default function Home() {
                       <div className="flex items-center text-xs text-gray-500 mb-1">
                         <Clock className="h-3 w-3 mr-1" />
                         <span>
-                          {new Date(job.start_time * 1000).toLocaleTimeString(
+                          {new Date(job.start_time).toLocaleTimeString(
                             "ja-JP",
                             {
                               hour: "2-digit",
@@ -227,13 +230,10 @@ export default function Home() {
                             }
                           )}
                           {" 〜 "}
-                          {new Date(job.end_time * 1000).toLocaleTimeString(
-                            "ja-JP",
-                            {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            }
-                          )}
+                          {new Date(job.end_time).toLocaleTimeString("ja-JP", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
                         </span>
                       </div>
 
@@ -251,9 +251,25 @@ export default function Home() {
                             : "ジャンル未設定"}
                         </span>
                       </div>
-
                       <div className="flex items-center text-xs text-gray-500 mb-3">
-                        <span>時給 {job.hourly_rate.toLocaleString()}円</span>
+                        <Badge
+                          variant="secondary"
+                          className={`${
+                            job.number_of_spots > 0 &&
+                            new Date(job.expiry_date) > new Date()
+                              ? "bg-black text-white"
+                              : "bg-gray-500 text-white"
+                          }`}>
+                          {job.number_of_spots > 0 &&
+                          new Date(job.expiry_date) > new Date()
+                            ? `残り${job.number_of_spots}名募集中`
+                            : "締め切りました"}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center text-sm text-gray-500 mb-3">
+                        <span className="font-bold">
+                          報酬額 {job.fee.toLocaleString()}円
+                        </span>
                       </div>
 
                       <div className="flex gap-2"></div>

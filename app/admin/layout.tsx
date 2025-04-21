@@ -20,6 +20,7 @@ import {
   Home,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { XanoClient } from "@xano/js-sdk/lib";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -37,6 +38,8 @@ import {
   markAllCompanyUserNotificationsAsRead,
   CompanyUserNotification,
 } from "@/lib/api/companyUserNotification";
+import { useToast } from "@/hooks/use-toast";
+import { Toaster } from "@/components/ui/toaster";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -51,6 +54,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [notifications, setNotifications] = useState<CompanyUserNotification[]>(
     []
   );
+  const { toast } = useToast();
 
   useEffect(() => {
     // 認証状態の初期化を待つ
@@ -77,6 +81,55 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
     initAuth();
   }, [isAuthenticated, router]);
+
+  const mutateNotifications = async () => {
+    if (user?.id) {
+      try {
+        const data = await getCompanyUserNotificationsByCompanyUserId(user.id);
+        setNotifications(data);
+      } catch (error) {
+        console.error("Failed to fetch notifications:", error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const xanoClient = new XanoClient({
+      instanceBaseUrl: process.env.NEXT_PUBLIC_XANO_BASE_URL || "",
+      realtimeConnectionHash: process.env.NEXT_PUBLIC_XANO_REALTIME_HASH || "",
+    });
+    // WebSocket接続の確立
+    let channel: any;
+
+    const setupChannel = async () => {
+      try {
+        // チャンネルの設定
+        channel = xanoClient.channel(`notifications/${user?.id}`);
+        console.log("Channel setup for notifications");
+
+        // メッセージの購読
+        channel.on((message: any) => {
+          console.log("Admin received message:", message);
+          if (message.action === "connection_status") {
+            return;
+          } else {
+            toast({
+              title: "新しい通知",
+              description: message.content || "新しい通知が届きました",
+              className: "bg-orange-500 text-white border-0",
+              duration: 5000,
+            });
+            mutateNotifications();
+          }
+        });
+      } catch (error) {
+        console.error("Error setting up channel:", error);
+      }
+    };
+    setupChannel();
+  }, [user?.id, toast, mutateNotifications]);
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -220,6 +273,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
+      <Toaster />
       {/* Mobile Sidebar */}
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetContent side="left" className="p-0 w-72">
@@ -484,6 +538,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             notifications={notifications}
             onMarkAsRead={handleMarkAsRead}
             onMarkAllAsRead={handleMarkAllAsRead}
+            userId={user?.id?.toString() || ""}
+            mutateNotifications={mutateNotifications}
           />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
