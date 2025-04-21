@@ -1,26 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/lib/redux/store";
-import { fetchCompanyJobs } from "@/lib/redux/slices/companyJobsSlice";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
-import type { Job } from "@/lib/api/job";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -33,7 +19,6 @@ import {
   ExternalLink,
   MoreHorizontal,
   Plus,
-  Store,
   Briefcase,
 } from "lucide-react";
 import Link from "next/link";
@@ -41,85 +26,30 @@ import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { workSessionApi } from "@/lib/api/workSession";
+import { useGetJobsByCompanyId } from "@/hooks/api/jobs/useGetJobsByCompanyId";
+import { useGetMultipleWorksessionsByJobId } from "@/hooks/api/worksessions/useGetMultipleWorksessionsByJobId";
+import { JobsListData } from "@/api/__generated__/base/data-contracts";
 
-interface JobWithWorkSessions extends Job {
+interface JobWithWorkSessions extends Omit<JobsListData["jobs"][number], "workSessionCount"> {
   workSessionCount: number;
 }
 
 export default function JobsPage() {
-  const dispatch = useDispatch<AppDispatch>();
   const { user } = useCompanyAuth();
   const {
-    jobs,
-    loading: isLoading,
+    data: jobData,
+    isLoading,
     error,
-  } = useSelector((state: RootState) => ({
-    jobs: state.companyJobs.jobs || [],
-    loading: state.companyJobs.loading,
-    error: state.companyJobs.error,
-  }));
-  const [hasMounted, setHasMounted] = useState(false);
-  const [formattedJobs, setFormattedJobs] = useState<JobWithWorkSessions[]>([]);
+  } = useGetJobsByCompanyId({ companyId: user?.companies_id });
+  const { data: worksessionsbyJob } = useGetMultipleWorksessionsByJobId({ jobIds: jobData?.jobs.map((job) => job.id) || [] })
 
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!hasMounted) return;
-    console.log("Fetching company jobs...");
-    dispatch(fetchCompanyJobs());
-  }, [dispatch, hasMounted]);
-
-  useEffect(() => {
-    const fetchWorkSessions = async () => {
-      if (jobs && Array.isArray(jobs)) {
-        const jobsWithSessions = await Promise.all(
-          jobs.map(async (job: Job) => {
-            try {
-              const workSessions =
-                await workSessionApi.getWorkSessionsToDoByJobId(job.id);
-              return {
-                ...job,
-                workSessionCount: workSessions.length,
-              } as JobWithWorkSessions;
-            } catch (error) {
-              console.error(
-                `Error fetching work sessions for job ${job.id}:`,
-                error
-              );
-              return {
-                ...job,
-                workSessionCount: 0,
-              } as JobWithWorkSessions;
-            }
-          })
-        );
-        setFormattedJobs(jobsWithSessions);
-      }
-    };
-
-    if (jobs && Array.isArray(jobs)) {
-      fetchWorkSessions();
-    }
-  }, [jobs]);
-
-  useEffect(() => {
-    console.log("Current jobs state:", jobs);
-    console.log("Loading state:", isLoading);
-    console.log("Error state:", error);
-  }, [jobs, isLoading, error]);
-
-  if (!hasMounted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
-  }
+  const jobWithWorkSessions = jobData?.jobs.map((job) => {
+    const workSessionCount = worksessionsbyJob?.find((workSessions) => workSessions.some((workSession) => workSession.job_id === job.id))?.length || 0;
+    return {
+      ...job,
+      workSessionCount,
+    } as JobWithWorkSessions;
+  });
 
   if (isLoading) {
     return (
@@ -141,8 +71,8 @@ export default function JobsPage() {
     );
   }
 
-  if (!Array.isArray(jobs)) {
-    console.error("Jobs is not an array:", jobs);
+  if (!Array.isArray(jobWithWorkSessions)) {
+    console.error("Jobs is not an array:", jobWithWorkSessions);
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center text-red-600">
@@ -176,7 +106,7 @@ export default function JobsPage() {
             <Briefcase className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{jobs.length}</div>
+            <div className="text-2xl font-bold">{jobWithWorkSessions.length}</div>
           </CardContent>
         </Card>
 
@@ -187,7 +117,7 @@ export default function JobsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {jobs.filter((job) => job.status === "published").length}
+              {jobWithWorkSessions.filter((job) => job.status === "PUBLISHED").length}
             </div>
           </CardContent>
         </Card>
@@ -204,7 +134,7 @@ export default function JobsPage() {
 
         <TabsContent value="published">
           <div className="grid gap-4">
-            {formattedJobs
+            {jobWithWorkSessions
               .filter(
                 (job) =>
                   job.status === "PUBLISHED" &&
@@ -287,7 +217,7 @@ export default function JobsPage() {
 
         <TabsContent value="draft">
           <div className="grid gap-4">
-            {formattedJobs
+            {jobWithWorkSessions
               .filter((job) => job.status === "DRAFT")
               .map((job) => (
                 <div
@@ -366,7 +296,7 @@ export default function JobsPage() {
 
         <TabsContent value="pending">
           <div className="grid gap-4">
-            {formattedJobs
+            {jobWithWorkSessions
               .filter((job) => job.status === "PENDING")
               .map((job) => (
                 <div
@@ -445,7 +375,7 @@ export default function JobsPage() {
 
         <TabsContent value="expired">
           <div className="grid gap-4">
-            {formattedJobs
+            {jobWithWorkSessions
               .filter((job) => job.expiry_date && job.expiry_date <= Date.now())
               .map((job) => (
                 <div
@@ -525,7 +455,7 @@ export default function JobsPage() {
 
       {/* Mobile View */}
       <div className="grid gap-4 md:hidden">
-        {formattedJobs.map((job) => (
+        {jobWithWorkSessions.map((job) => (
           <Card key={job.id}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -588,15 +518,15 @@ export default function JobsPage() {
                   <p className="text-muted-foreground">ステータス</p>
                   <div
                     className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      job.status === "published"
+                      job.status === "PUBLISHED"
                         ? "bg-green-100 text-green-800"
-                        : job.status === "draft"
+                        : job.status === "DRAFT"
                           ? "bg-gray-100 text-gray-800"
                           : "bg-yellow-100 text-yellow-800"
                     }`}>
-                    {job.status === "published"
+                    {job.status === "PUBLISHED"
                       ? "公開中"
-                      : job.status === "draft"
+                      : job.status === "DRAFT"
                         ? "下書き"
                         : "終了"}
                   </div>
