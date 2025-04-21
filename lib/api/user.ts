@@ -166,13 +166,6 @@ export const forgotPassword = (email: string) => {
   return apiRequest(`${AUTH_URL}/forgot-password`, "POST", { email });
 };
 
-export const resetPassword = (token: string, newPassword: string) => {
-  return apiRequest(`${AUTH_URL}/reset-password`, "POST", {
-    token,
-    newPassword,
-  });
-};
-
 // ユーザープロフィール関連
 export const getUserProfile = (userId: UserId): Promise<UserProfile> => {
   return apiRequest<UserProfile>(`${USER_URL}/${userId}`, "GET");
@@ -385,8 +378,30 @@ export const confirmEmail = (token: string): Promise<void> => {
 };
 
 export const changePassword = (
-  userId: UserId,
+  current_password: string,
+  new_password: string
+): Promise<void> => {
+  return apiRequest(`${AUTH_URL}/change-password`, "POST", {
+    current_password,
+    new_password,
+  });
+};
+
+export const requestPasswordReset = (email: string): Promise<void> => {
+  return apiRequest(`${AUTH_URL}/request-password-reset`, "POST", { email });
+};
+
+export const resetPassword = (
+  token: string,
   newPassword: string
 ): Promise<void> => {
-  return apiRequest(`${USER_URL}/${userId}/password`, "PUT", { newPassword });
+  return apiRequest(
+    `${AUTH_URL}/reset-password`,
+    "POST",
+    {
+      token,
+      new_password: newPassword,
+    },
+    "chef"
+  );
 };

@@ -17,11 +17,14 @@ import { useRouter } from "next/navigation";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { login } from "@/lib/api/companyUser";
 import { toast } from "@/hooks/use-toast";
+import { CompanyForgotPasswordModal } from "@/components/modals/CompanyForgotPasswordModal";
 
 export default function CompanyLoginPage() {
   const router = useRouter();
   const { login: authLogin } = useCompanyAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] =
+    useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -100,11 +103,12 @@ export default function CompanyLoginPage() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">パスワード</Label>
-                  <Link
-                    href="/forgot-password"
+                  <button
+                    type="button"
+                    onClick={() => setIsForgotPasswordModalOpen(true)}
                     className="text-xs text-primary underline underline-offset-4">
                     パスワードをお忘れですか？
-                  </Link>
+                  </button>
                 </div>
                 <Input id="password" name="password" type="password" required />
               </div>
@@ -131,6 +135,11 @@ export default function CompanyLoginPage() {
           </CardContent>
         </Card>
       </main>
+
+      <CompanyForgotPasswordModal
+        isOpen={isForgotPasswordModalOpen}
+        onClose={() => setIsForgotPasswordModalOpen(false)}
+      />
 
       <footer className="border-t py-6">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
