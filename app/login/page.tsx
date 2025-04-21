@@ -17,11 +17,14 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { login } from "@/lib/api/user";
 import { toast } from "@/hooks/use-toast";
+import { ForgotPasswordModal } from "@/components/modals/ForgotPasswordModal";
 
 export default function LoginPage() {
   const router = useRouter();
   const { login: setUser } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] =
+    useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -99,11 +102,12 @@ export default function LoginPage() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">パスワード</Label>
-                  <Link
-                    href="/forgot-password"
+                  <button
+                    type="button"
+                    onClick={() => setIsForgotPasswordModalOpen(true)}
                     className="text-xs text-primary underline underline-offset-4">
                     パスワードをお忘れですか？
-                  </Link>
+                  </button>
                 </div>
                 <Input id="password" name="password" type="password" required />
               </div>
@@ -130,6 +134,11 @@ export default function LoginPage() {
           </CardContent>
         </Card>
       </main>
+
+      <ForgotPasswordModal
+        isOpen={isForgotPasswordModalOpen}
+        onClose={() => setIsForgotPasswordModalOpen(false)}
+      />
 
       <footer className="border-t py-6">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
