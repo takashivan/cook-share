@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { requestPasswordReset } from "@/lib/api/companyUser";
+import { requestPasswordReset } from "@/lib/api/user";
 import { toast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -16,15 +16,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-interface CompanyForgotPasswordModalProps {
+interface ForgotPasswordModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function CompanyForgotPasswordModal({
+export function ForgotPasswordModal({
   isOpen,
   onClose,
-}: CompanyForgotPasswordModalProps) {
+}: ForgotPasswordModalProps) {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -75,7 +75,7 @@ export function CompanyForgotPasswordModal({
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="example@company.jp"
+                placeholder="example@cookchef.jp"
                 required
               />
             </div>
