@@ -10,6 +10,8 @@
  */
 
 import {
+  ChangePasswordCreateData,
+  ChangePasswordCreatePayload,
   GetAuthData,
   LoginCreateData,
   LoginCreatePayload,
@@ -21,6 +23,25 @@ import {
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
 export class Auth<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+  /**
+   * @description <br /><br /> <b>Authentication:</b> required
+   *
+   * @tags auth
+   * @name ChangePasswordCreate
+   * @request POST:/auth/change-password
+   * @secure
+   */
+  changePasswordCreate = (data: ChangePasswordCreatePayload, params: RequestParams = {}) =>
+    this.request<ChangePasswordCreateData, void>({
+      path: `/auth/change-password`,
+      method: "POST",
+      body: data,
+      secure: true,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+
   /**
    * @description Login and retrieve an authentication token <br /><br /> <b>Authentication:</b> not required
    *

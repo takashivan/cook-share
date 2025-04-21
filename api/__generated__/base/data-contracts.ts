@@ -788,6 +788,42 @@ export interface ApplicationCreateData {
   urgent: boolean;
 }
 
+export interface ChangePasswordCreatePayload {
+  current_password: string;
+  new_password: string;
+}
+
+export interface ChangePasswordCreateData {
+  user: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format uuid */
+    companies_id: string | null;
+    name: string;
+    /** @format email */
+    email: string;
+    phone: string | null;
+    /** @format password */
+    password: string;
+    is_admin: boolean;
+    is_active: boolean;
+    is_verified: boolean;
+    /** @format timestamptz */
+    updated_at: number | null;
+    magic_link: object;
+    verify_token: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
+  };
+  status: string;
+}
+
 export interface LoginCreatePayload {
   /** @format email */
   email: string;
@@ -4855,6 +4891,8 @@ export type StaffsListData = {
     /** @format email */
     email: string;
     phone: string | null;
+    /** @format password */
+    password: string;
     is_admin: boolean;
     is_active: boolean;
     is_verified: boolean;
