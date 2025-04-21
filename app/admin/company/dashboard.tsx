@@ -34,7 +34,7 @@ export function CompanyDashboard() {
 
   const { data: company } = useGetCompany({ companyId: user?.companies_id });
   const { data: restaurants, isLoading: restaurantsLoading, error: restaurantsError } = useGetRestaurantsByCompanyId({ companyId: user?.companies_id });
-  const { data: jobs, isLoading: jobsLoading, error: jobsError } = useGetJobsByCompanyId({ companyId: user?.companies_id });
+  const { data: jobData, isLoading: jobsLoading, error: jobsError } = useGetJobsByCompanyId({ companyId: user?.companies_id });
   const { data: companyUsers, isLoading: companyUsersLoading, error: companyUsersError } = useGetCompanyUsersByCompanyId({ companyId: user?.companies_id });
 
   const [isCreateRestaurantModalOpen, setIsCreateRestaurantModalOpen] =
@@ -151,7 +151,7 @@ export function CompanyDashboard() {
               <MessageSquare className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{jobs?.job.length ?? ''}</div>
+              <div className="text-2xl font-bold">{jobData?.jobs.length ?? ''}</div>
             </CardContent>
           </Card>
           <Card>

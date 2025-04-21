@@ -157,7 +157,7 @@ export default function StoresPage() {
             <Store className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{restaurants?.length}</div>
+            <div className="text-2xl font-bold">{restaurants?.length ?? ''}</div>
           </CardContent>
         </Card>
 
@@ -168,7 +168,7 @@ export default function StoresPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {restaurants?.filter((r) => r.is_active).length}
+              {restaurants?.filter((r) => r.is_active).length  ?? ''}
             </div>
           </CardContent>
         </Card>
