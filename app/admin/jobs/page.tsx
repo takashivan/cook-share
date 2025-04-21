@@ -43,12 +43,12 @@ export default function JobsPage() {
   } = useGetJobsByCompanyId({ companyId: user?.companies_id });
   const { data: worksessionsbyJob } = useGetMultipleWorksessionsByJobId({ jobIds: jobData?.jobs.map((job) => job.id) || [] })
 
-  const jobWithWorkSessions = jobData?.jobs.map((job) => {
+  const jobWithWorkSessions: JobWithWorkSessions[] | undefined = jobData?.jobs.map((job) => {
     const workSessionCount = worksessionsbyJob?.find((workSessions) => workSessions.some((workSession) => workSession.job_id === job.id))?.length || 0;
     return {
       ...job,
       workSessionCount,
-    } as JobWithWorkSessions;
+    };
   });
 
   if (isLoading) {

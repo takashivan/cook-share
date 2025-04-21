@@ -1,19 +1,14 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useState, use } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import {
   BarChart3,
-  Calendar,
   Edit,
-  ExternalLink,
   MessageSquare,
   MoreHorizontal,
   Plus,
-  Store,
   Users,
-  Copy,
 } from "lucide-react";
 import {
   Card,
@@ -30,23 +25,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/lib/store/store";
-import { fetchRestaurantsByCompanyId } from "@/lib/store/restaurantSlice";
-import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
-import { getRestaurant } from "@/lib/api/restaurant";
-import type { Restaurant } from "@/lib/api/restaurant";
 import { updateRestaurant } from "@/lib/api/restaurant";
-import { getRestaurantById } from "@/lib/api/restaurant";
 import { getRestaurantStaff } from "@/lib/api/company";
 import { jobApi } from "@/lib/api/job";
 import { format } from "date-fns";
@@ -58,8 +38,10 @@ import { toast } from "@/hooks/use-toast";
 import { AddRestaurantStaffModal } from "@/components/modals/AddRestaurantStaff";
 import { restaurantStaffInvite } from "@/lib/api/restaurant";
 import { EditRestaurantModal } from "@/components/modals/EditRestaurantModal";
-import { workSessionApi } from "@/lib/api/workSession";
-import type { WorkSessionWithJob } from "@/types";
+import { useGetRestaurant } from "@/hooks/api/restaurants/useGetRestaurant";
+import { useGetJobsByRestaurantId } from "@/hooks/api/jobs/useGetJobsByRestaurantId";
+import { useGetMultipleWorksessionsByJobId } from "@/hooks/api/worksessions/useGetMultipleWorksessionsByJobId";
+import { JobsListOutput } from "@/api/__generated__/base/data-contracts";
 
 interface StaffData {
   id: string;
@@ -71,7 +53,7 @@ interface StaffData {
   };
 }
 
-interface JobWithWorkSessions extends Job {
+interface JobWithWorkSessions extends Omit<JobsListOutput[number], "workSessionCount"> {
   formattedWorkDate: string;
   formattedTime: string;
   workSessionCount: number;
@@ -81,72 +63,86 @@ export default function RestaurantDetailPage(props: {
   params: Promise<{ id: string }>;
 }) {
   const params = use(props.params);
+
   const {
     data: restaurant,
     error: restaurantError,
     mutate: mutateRestaurant,
-  } = useSWR(
-    [`restaurant`, params.id],
-    ([_, id]: [string, string]) => getRestaurantById(id),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      dedupingInterval: 10000,
-    }
-  );
+  } = useGetRestaurant({ restaurantId: Number(params.id) });
+  const { data: jobs, error: jobsError } = useGetJobsByRestaurantId({ restaurantId: Number(params.id) });
+  const { data: worksessionsbyJob } = useGetMultipleWorksessionsByJobId({ jobIds: jobs?.map((job) => job.id) || [] })
+
+  const jobWithWorkSessions: JobWithWorkSessions[] | undefined = jobs?.map((job) => {
+    const workSessionCount = worksessionsbyJob?.find((workSessions) => workSessions.some((workSession) => workSession.job_id === job.id))?.length || 0;
+    return {
+      ...job,
+      formattedWorkDate: format(
+        new Date(job.work_date),
+        "yyyy年MM月dd日",
+        {
+          locale: ja,
+        }
+      ),
+      formattedTime: `${format(
+        new Date(job.start_time),
+        "HH:mm"
+      )} 〜 ${format(new Date(job.end_time), "HH:mm")}`,
+      workSessionCount,
+    };
+  }) ?? [];
 
   console.log("restaurant", restaurant);
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [formDataState, setFormDataState] = useState({
-    name: "",
-    email: "",
-    contact_info: "",
-    address: "",
-    business_hours: "",
-    station: "",
-    access: "",
-    is_active: false,
-    description: "",
-    cuisine_type: "",
-    restaurant_cuisine_id: [] as (number | undefined)[],
-    photo: null as File | null,
-  });
+  // const [formDataState, setFormDataState] = useState({
+  //   name: "",
+  //   email: "",
+  //   contact_info: "",
+  //   address: "",
+  //   business_hours: "",
+  //   station: "",
+  //   access: "",
+  //   is_active: false,
+  //   description: "",
+  //   cuisine_type: "",
+  //   restaurant_cuisine_id: [] as (number | undefined)[],
+  //   photo: null as File | null,
+  // });
 
-  useEffect(() => {
-    const fetchRestaurant = async () => {
-      try {
-        const data = await getRestaurant(params.id);
-        setFormDataState({
-          name: data.name,
-          email: data.email,
-          contact_info: data.contact_info || "",
-          address: data.address,
-          business_hours: data.business_hours || "",
-          station: data.station || "",
-          access: data.access || "",
-          is_active: data.is_active,
-          description: data.description || "",
-          cuisine_type: data.cuisine_type || "",
-          restaurant_cuisine_id: Array.isArray(data.restaurant_cuisine_id)
-            ? data.restaurant_cuisine_id
-            : [data.restaurant_cuisine_id].filter(
-                (id): id is number => id !== undefined
-              ),
-          photo: null,
-        });
-      } catch (error) {
-        console.error("Error fetching restaurant:", error);
-        toast({
-          title: "エラー",
-          description: "レストラン情報の取得に失敗しました",
-          variant: "destructive",
-        });
-      }
-    };
+  // useEffect(() => {
+  //   const fetchRestaurant = async () => {
+  //     try {
+  //       const data = await getRestaurant(params.id);
+  //       setFormDataState({
+  //         name: data.name,
+  //         email: data.email,
+  //         contact_info: data.contact_info || "",
+  //         address: data.address,
+  //         business_hours: data.business_hours || "",
+  //         station: data.station || "",
+  //         access: data.access || "",
+  //         is_active: data.is_active,
+  //         description: data.description || "",
+  //         cuisine_type: data.cuisine_type || "",
+  //         restaurant_cuisine_id: Array.isArray(data.restaurant_cuisine_id)
+  //           ? data.restaurant_cuisine_id
+  //           : [data.restaurant_cuisine_id].filter(
+  //               (id): id is number => id !== undefined
+  //             ),
+  //         photo: null,
+  //       });
+  //     } catch (error) {
+  //       console.error("Error fetching restaurant:", error);
+  //       toast({
+  //         title: "エラー",
+  //         description: "レストラン情報の取得に失敗しました",
+  //         variant: "destructive",
+  //       });
+  //     }
+  //   };
 
-    fetchRestaurant();
-  }, [params.id, toast]);
+  //   fetchRestaurant();
+  // }, [params.id, toast]);
 
   const handleSubmit = async (data: FormData) => {
     try {
@@ -166,16 +162,6 @@ export default function RestaurantDetailPage(props: {
       });
     }
   };
-
-  const { data: jobs, error: jobsError } = useSWR(
-    restaurant ? `/api/restaurants/${params.id}/jobs` : null,
-    () => jobApi.getJobsByRestaurant(params.id),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      dedupingInterval: 10000,
-    }
-  );
 
   const { data: staffs, mutate: mutateStaffs } = useSWR<StaffData[]>(
     [`restaurant-staff`, params.id],
@@ -198,64 +184,8 @@ export default function RestaurantDetailPage(props: {
     }
   );
 
-  const [formattedJobs, setFormattedJobs] = useState<JobWithWorkSessions[]>([]);
-
-  useEffect(() => {
-    const fetchWorkSessions = async () => {
-      if (jobs && Array.isArray(jobs)) {
-        const jobsWithSessions = await Promise.all(
-          jobs.map(async (job: Job) => {
-            try {
-              const workSessions =
-                await workSessionApi.getWorkSessionsToDoByJobId(job.id);
-              return {
-                ...job,
-                formattedWorkDate: format(
-                  new Date(job.work_date),
-                  "yyyy年MM月dd日",
-                  {
-                    locale: ja,
-                  }
-                ),
-                formattedTime: `${format(
-                  new Date(job.start_time),
-                  "HH:mm"
-                )} 〜 ${format(new Date(job.end_time), "HH:mm")}`,
-                workSessionCount: workSessions.length,
-              } as JobWithWorkSessions;
-            } catch (error) {
-              console.error(
-                `Error fetching work sessions for job ${job.id}:`,
-                error
-              );
-              return {
-                ...job,
-                formattedWorkDate: format(
-                  new Date(job.work_date),
-                  "yyyy年MM月dd日",
-                  {
-                    locale: ja,
-                  }
-                ),
-                formattedTime: `${format(
-                  new Date(job.start_time),
-                  "HH:mm"
-                )} 〜 ${format(new Date(job.end_time), "HH:mm")}`,
-                workSessionCount: 0,
-              } as JobWithWorkSessions;
-            }
-          })
-        );
-        setFormattedJobs(jobsWithSessions);
-      }
-    };
-
-    fetchWorkSessions();
-  }, [jobs]);
-
   console.log("Restaurant data:", restaurant);
   console.log("Raw jobs response:", jobs);
-  console.log("Formatted jobs:", formattedJobs);
   console.log("Errors:", { restaurantError, jobsError });
 
   const error = restaurantError || jobsError;
@@ -309,7 +239,7 @@ export default function RestaurantDetailPage(props: {
       await restaurantStaffInvite(
         email,
         restaurant.id as unknown as number,
-        restaurant.companies_id,
+        restaurant.companies_id ?? '',
         permissions.canEdit,
         permissions.canManageJobs,
         restaurant.name
@@ -393,7 +323,7 @@ export default function RestaurantDetailPage(props: {
                 <MessageSquare className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{formattedJobs.length}</div>
+                <div className="text-2xl font-bold">{jobWithWorkSessions.length}</div>
               </CardContent>
             </Card>
             <Card>
@@ -414,7 +344,7 @@ export default function RestaurantDetailPage(props: {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {formattedJobs.reduce(
+                  {jobWithWorkSessions.reduce(
                     (sum, job) => sum + job.workSessionCount,
                     0
                   )}
@@ -485,7 +415,7 @@ export default function RestaurantDetailPage(props: {
 
                 <TabsContent value="published">
                   <div className="grid gap-4">
-                    {formattedJobs
+                    {jobWithWorkSessions
                       .filter(
                         (job) =>
                           job.status === "PUBLISHED" &&
@@ -569,7 +499,7 @@ export default function RestaurantDetailPage(props: {
 
                 <TabsContent value="draft">
                   <div className="grid gap-4">
-                    {formattedJobs
+                    {jobWithWorkSessions
                       .filter((job) => job.status === "DRAFT")
                       .map((job) => (
                         <div
@@ -649,7 +579,7 @@ export default function RestaurantDetailPage(props: {
 
                 <TabsContent value="pending">
                   <div className="grid gap-4">
-                    {formattedJobs
+                    {jobWithWorkSessions
                       .filter((job) => job.status === "PENDING")
                       .map((job) => (
                         <div
@@ -729,7 +659,7 @@ export default function RestaurantDetailPage(props: {
 
                 <TabsContent value="expired">
                   <div className="grid gap-4">
-                    {formattedJobs
+                    {jobWithWorkSessions
                       .filter(
                         (job) =>
                           job.expiry_date && job.expiry_date <= Date.now()
@@ -864,7 +794,7 @@ export default function RestaurantDetailPage(props: {
         onSubmit={handleSubmit}
         restaurant={
           restaurant || {
-            id: "",
+            id: 0,
             name: "",
             description: "",
             address: "",
