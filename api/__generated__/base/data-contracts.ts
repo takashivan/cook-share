@@ -2089,7 +2089,7 @@ export type CompanyusersListData = {
 }[];
 
 export interface JobsListData {
-  result1: {
+  company: {
     /** @format uuid */
     id: string;
     /**
@@ -2111,7 +2111,7 @@ export interface JobsListData {
     /** @format email */
     company_email: string;
   };
-  job: {
+  jobs: {
     /** @format int64 */
     id: number;
     /**
@@ -2147,6 +2147,8 @@ export interface JobsListData {
     number_of_spots: number;
     /** @format int64 */
     fee: number;
+    /** @format timestamptz */
+    expiry_date: number | null;
   }[];
 }
 
