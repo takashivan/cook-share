@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -10,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertCircle, CheckCircle2, ArrowLeft } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { resetPassword } from "@/lib/api/companyUser";
 import {
   Card,
   CardContent,
@@ -19,7 +19,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export default function ChefResetPasswordPage() {
+export default function CompanyResetPasswordPage() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
@@ -29,7 +29,7 @@ export default function ChefResetPasswordPage() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -49,13 +49,21 @@ export default function ChefResetPasswordPage() {
       return;
     }
 
+    if (!token) {
+      setError("無効なリセットリンクです");
+      return;
+    }
+
     setIsSubmitting(true);
 
-    // API呼び出しをシミュレート
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      await resetPassword(token, password);
       setIsSuccess(true);
-    }, 1000);
+    } catch (err) {
+      setError("パスワードのリセットに失敗しました");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // トークンが無効な場合
@@ -150,7 +158,7 @@ export default function ChefResetPasswordPage() {
                 <p className="text-muted-foreground text-center text-sm mb-6">
                   新しいパスワードでログインできます
                 </p>
-                <Link href="/" className="w-full">
+                <Link href="/login/company" className="w-full">
                   <Button className="w-full">ログインページへ</Button>
                 </Link>
               </div>

@@ -20,7 +20,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 interface ChefEmailChangeModalProps {
   currentEmail: string;
   trigger?: React.ReactNode;
-  onSubmit?: (newEmail: string) => void;
+  onSubmit?: (email: string) => void;
 }
 
 export function ChefEmailChangeModal({
@@ -28,7 +28,7 @@ export function ChefEmailChangeModal({
   trigger,
   onSubmit,
 }: ChefEmailChangeModalProps) {
-  const [newEmail, setNewEmail] = useState("");
+  const [email, setNewEmail] = useState("");
   const [confirmEmail, setConfirmEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,24 +39,24 @@ export function ChefEmailChangeModal({
     setError(null);
 
     // バリデーション
-    if (!newEmail || !confirmEmail) {
+    if (!email || !confirmEmail) {
       setError("すべての項目を入力してください");
       return;
     }
 
-    if (newEmail !== confirmEmail) {
+    if (email !== confirmEmail) {
       setError("メールアドレスが一致しません");
       return;
     }
 
-    if (newEmail === currentEmail) {
+    if (email === currentEmail) {
       setError("現在のメールアドレスと同じです");
       return;
     }
 
     // メールアドレス形式の簡易チェック
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(newEmail)) {
+    if (!emailRegex.test(email)) {
       setError("有効なメールアドレスを入力してください");
       return;
     }
@@ -69,7 +69,7 @@ export function ChefEmailChangeModal({
       setIsSuccess(true);
 
       if (onSubmit) {
-        onSubmit(newEmail);
+        onSubmit(email);
       }
 
       // 成功メッセージを表示した後、フォームをリセット
@@ -111,7 +111,7 @@ export function ChefEmailChangeModal({
                 <Input
                   id="new-email"
                   type="email"
-                  value={newEmail}
+                  value={email}
                   onChange={(e) => setNewEmail(e.target.value)}
                   placeholder="新しいメールアドレスを入力"
                 />
