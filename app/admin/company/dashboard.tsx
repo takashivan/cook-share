@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import {
   Building,
@@ -17,19 +17,19 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/lib/store/store";
-import { fetchRestaurantsByCompanyId } from "@/lib/store/restaurantSlice";
-import { CreateRestaurantModal } from "@/components/modals/CreateRestaurantModal";
-import { createRestaurant } from "@/lib/api/restaurant";
-import { toast } from "@/hooks/use-toast";
+// import { useDispatch } from "react-redux";
+// import { AppDispatch } from "@/lib/store/store";
+// import { fetchRestaurantsByCompanyId } from "@/lib/store/restaurantSlice";
+// import { CreateRestaurantModal } from "@/components/modals/CreateRestaurantModal";
+// import { createRestaurant } from "@/lib/api/restaurant";
+// import { toast } from "@/hooks/use-toast";
 import { useGetCompany } from "@/hooks/api/companies/useGetCompany";
 import { useGetRestaurantsByCompanyId } from "@/hooks/api/restaurants/useGetRestaurantsByCompanyId";
 import { useGetJobsByCompanyId } from "@/hooks/api/jobs/useGetJobsByCompanyId";
 import { useGetCompanyUsersByCompanyId } from "@/hooks/api/companyUsers/useGetCompanyUsersByCompanyId";
 
 export function CompanyDashboard() {
-  const dispatch = useDispatch<AppDispatch>();
+  // const dispatch = useDispatch<AppDispatch>();
   const { user } = useCompanyAuth();
 
   const { data: company } = useGetCompany({ companyId: user?.companies_id });
@@ -37,8 +37,8 @@ export function CompanyDashboard() {
   const { data: jobData, isLoading: jobsLoading, error: jobsError } = useGetJobsByCompanyId({ companyId: user?.companies_id });
   const { data: companyUsers, isLoading: companyUsersLoading, error: companyUsersError } = useGetCompanyUsersByCompanyId({ companyId: user?.companies_id });
 
-  const [isCreateRestaurantModalOpen, setIsCreateRestaurantModalOpen] =
-    useState(false);
+  // const [isCreateRestaurantModalOpen, setIsCreateRestaurantModalOpen] =
+  //   useState(false);
 
   // データが更新されたときのログ
   useEffect(() => {
@@ -46,61 +46,61 @@ export function CompanyDashboard() {
     console.log("Restaurants updated:", restaurants);
   }, [company, restaurants]);
 
-  const handleCreateRestaurant = async (data: FormData) => {
-    try {
-      if (!user?.companies_id) {
-        throw new Error("会社IDが見つかりません");
-      }
+  // const handleCreateRestaurant = async (data: FormData) => {
+  //   try {
+  //     if (!user?.companies_id) {
+  //       throw new Error("会社IDが見つかりません");
+  //     }
 
-      // UUIDの形式を確認
-      if (
-        !user.companies_id.match(
-          /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-        )
-      ) {
-        throw new Error("会社IDの形式が正しくありません");
-      }
+  //     // UUIDの形式を確認
+  //     if (
+  //       !user.companies_id.match(
+  //         /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+  //       )
+  //     ) {
+  //       throw new Error("会社IDの形式が正しくありません");
+  //     }
 
-      // FormDataの内容を確認（デバッグ用）
-      console.log("Submitting FormData:");
-      for (let [key, value] of data.entries()) {
-        console.log(`${key}: ${value instanceof File ? value.name : value}`);
-      }
+  //     // FormDataの内容を確認（デバッグ用）
+  //     console.log("Submitting FormData:");
+  //     for (let [key, value] of data.entries()) {
+  //       console.log(`${key}: ${value instanceof File ? value.name : value}`);
+  //     }
 
-      // レストラン作成APIを呼び出し
-      const response = await createRestaurant(data);
+  //     // レストラン作成APIを呼び出し
+  //     const response = await createRestaurant(data);
 
-      if (!response) {
-        throw new Error("店舗の作成に失敗しました");
-      }
+  //     if (!response) {
+  //       throw new Error("店舗の作成に失敗しました");
+  //     }
 
-      // 店舗一覧を再取得
-      await dispatch(fetchRestaurantsByCompanyId(user.companies_id));
+  //     // 店舗一覧を再取得
+  //     await dispatch(fetchRestaurantsByCompanyId(user.companies_id));
 
-      // モーダルを閉じる
-      setIsCreateRestaurantModalOpen(false);
+  //     // モーダルを閉じる
+  //     setIsCreateRestaurantModalOpen(false);
 
-      // 成功通知
-      toast({
-        title: "店舗を追加しました",
-        description: "新しい店舗の登録が完了しました。",
-      });
-    } catch (error) {
-      console.error("Failed to create restaurant:", error);
+  //     // 成功通知
+  //     toast({
+  //       title: "店舗を追加しました",
+  //       description: "新しい店舗の登録が完了しました。",
+  //     });
+  //   } catch (error) {
+  //     console.error("Failed to create restaurant:", error);
 
-      // エラー通知
-      toast({
-        title: "エラーが発生しました",
-        description:
-          error instanceof Error
-            ? error.message
-            : "店舗の追加に失敗しました。もう一度お試しください。",
-        variant: "destructive",
-      });
+  //     // エラー通知
+  //     toast({
+  //       title: "エラーが発生しました",
+  //       description:
+  //         error instanceof Error
+  //           ? error.message
+  //           : "店舗の追加に失敗しました。もう一度お試しください。",
+  //       variant: "destructive",
+  //     });
 
-      throw error;
-    }
-  };
+  //     throw error;
+  //   }
+  // };
 
   if (restaurantsLoading || jobsLoading || companyUsersLoading) {
     return <div>Loading...</div>;
@@ -204,12 +204,12 @@ export function CompanyDashboard() {
         </div>
       </div>
 
-      <CreateRestaurantModal
+      {/* <CreateRestaurantModal
         isOpen={isCreateRestaurantModalOpen}
         onClose={() => setIsCreateRestaurantModalOpen(false)}
         onSubmit={handleCreateRestaurant}
         companyId={user?.companies_id || ""}
-      />
+      /> */}
     </>
   );
 }
