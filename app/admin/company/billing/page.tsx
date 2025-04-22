@@ -1,53 +1,79 @@
-import { CreditCard, Download, MoreHorizontal, Search, SlidersHorizontal } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Card, CardContent } from "@/components/ui/card"
+"use client";
+
+import { useEffect, useState } from "react";
+import {
+  CreditCard,
+  Download,
+  MoreHorizontal,
+  Search,
+  SlidersHorizontal,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Card, CardContent } from "@/components/ui/card";
+import { getBillingSummary } from "@/lib/api/company";
+import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
+import { format } from "date-fns";
+import { toast } from "@/hooks/use-toast";
+import type { BillingSummary } from "@/lib/api/company";
 
 export default function BillingList() {
-  const billings = [
-    {
-      id: "INV-2024-001",
-      date: "2024/03/01",
-      amount: "¥45,000",
-      status: "支払済",
-      paymentMethod: "クレジットカード",
-      period: "2024年3月分",
-    },
-    {
-      id: "INV-2024-002",
-      date: "2024/02/01",
-      amount: "¥42,500",
-      status: "支払済",
-      paymentMethod: "クレジットカード",
-      period: "2024年2月分",
-    },
-    {
-      id: "INV-2024-003",
-      date: "2024/01/01",
-      amount: "¥42,500",
-      status: "支払済",
-      paymentMethod: "銀行振込",
-      period: "2024年1月分",
-    },
-    {
-      id: "INV-2023-012",
-      date: "2023/12/01",
-      amount: "¥40,000",
-      status: "支払済",
-      paymentMethod: "クレジットカード",
-      period: "2023年12月分",
-    },
-    {
-      id: "INV-2023-011",
-      date: "2023/11/01",
-      amount: "¥40,000",
-      status: "支払済",
-      paymentMethod: "クレジットカード",
-      period: "2023年11月分",
-    },
-  ]
+  const { user } = useCompanyAuth();
+  const [billings, setBillings] = useState<BillingSummary[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBillingData = async () => {
+      try {
+        if (!user?.companies_id) return;
+        const data = await getBillingSummary(user.companies_id);
+        setBillings(data);
+      } catch (error) {
+        console.error("Failed to fetch billing data:", error);
+        toast({
+          title: "エラーが発生しました",
+          description: "請求データの取得に失敗しました。",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBillingData();
+  }, [user?.companies_id]);
+
+  const formatAmount = (amount: number) => {
+    return new Intl.NumberFormat("ja-JP", {
+      style: "currency",
+      currency: "JPY",
+    }).format(amount);
+  };
+
+  const formatDate = (timestamp: number | undefined) => {
+    if (!timestamp) return "-";
+    const milliseconds =
+      timestamp.toString().length === 13 ? timestamp : timestamp * 1000;
+    return format(new Date(milliseconds), "yyyy/MM/dd");
+  };
+
+  if (isLoading) {
+    return <div>読み込み中...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -67,7 +93,11 @@ export default function BillingList() {
       <div className="flex flex-col md:flex-row items-center gap-4">
         <div className="relative w-full md:w-80">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input type="search" placeholder="請求を検索..." className="w-full pl-8" />
+          <Input
+            type="search"
+            placeholder="請求を検索..."
+            className="w-full pl-8"
+          />
         </div>
         <Button variant="outline" size="sm" className="ml-auto">
           <Download className="mr-2 h-4 w-4" />
@@ -89,7 +119,8 @@ export default function BillingList() {
                 <TableHead>日付</TableHead>
                 <TableHead>期間</TableHead>
                 <TableHead>金額</TableHead>
-                <TableHead>支払い方法</TableHead>
+                <TableHead>手数料率</TableHead>
+                <TableHead>セッション数</TableHead>
                 <TableHead>ステータス</TableHead>
                 <TableHead className="w-[100px]"></TableHead>
               </TableRow>
@@ -97,22 +128,24 @@ export default function BillingList() {
             <TableBody>
               {billings.map((billing) => (
                 <TableRow key={billing.id}>
-                  <TableCell className="font-medium">{billing.id}</TableCell>
-                  <TableCell>{billing.date}</TableCell>
-                  <TableCell>{billing.period}</TableCell>
-                  <TableCell>{billing.amount}</TableCell>
-                  <TableCell>{billing.paymentMethod}</TableCell>
+                  <TableCell className="font-medium">
+                    {billing.invoice_number}
+                  </TableCell>
+                  <TableCell>{formatDate(billing.created_at)}</TableCell>
+                  <TableCell>{billing.month || "-"}</TableCell>
+                  <TableCell>{formatAmount(billing.amount)}</TableCell>
+                  <TableCell>{billing.fee_rate * 100}%</TableCell>
+                  <TableCell>{billing.session_count}回</TableCell>
                   <TableCell>
                     <div
                       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        billing.status === "支払済"
+                        billing.status === "paid"
                           ? "bg-green-100 text-green-800"
-                          : billing.status === "未払い"
+                          : billing.status === "pending"
                             ? "bg-yellow-100 text-yellow-800"
                             : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {billing.status}
+                      }`}>
+                      {billing.status === "paid" ? "支払済" : "未払い"}
                     </div>
                   </TableCell>
                   <TableCell>
@@ -124,8 +157,22 @@ export default function BillingList() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>詳細を表示</DropdownMenuItem>
-                        <DropdownMenuItem>領収書をダウンロード</DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <a
+                            href={billing.hosted_invoice_url}
+                            target="_blank"
+                            rel="noopener noreferrer">
+                            請求書を表示
+                          </a>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <a
+                            href={billing.invoice_pdf}
+                            target="_blank"
+                            rel="noopener noreferrer">
+                            PDFをダウンロード
+                          </a>
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -144,7 +191,9 @@ export default function BillingList() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium">{billing.id}</p>
-                  <p className="text-sm text-muted-foreground">{billing.date}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {formatDate(billing.created_at)}
+                  </p>
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -154,43 +203,65 @@ export default function BillingList() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>詳細を表示</DropdownMenuItem>
-                    <DropdownMenuItem>領収書をダウンロード</DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <a
+                        href={billing.hosted_invoice_url}
+                        target="_blank"
+                        rel="noopener noreferrer">
+                        請求書を表示
+                      </a>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <a
+                        href={billing.invoice_pdf}
+                        target="_blank"
+                        rel="noopener noreferrer">
+                        PDFをダウンロード
+                      </a>
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
               <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
                 <div>
                   <p className="text-muted-foreground">期間</p>
-                  <p>{billing.period}</p>
+                  <p>{billing.month || "-"}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">金額</p>
-                  <p className="font-medium">{billing.amount}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">支払い方法</p>
-                  <p>{billing.paymentMethod}</p>
+                  <p className="font-medium">{formatAmount(billing.amount)}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">ステータス</p>
                   <div
                     className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      billing.status === "支払済"
+                      billing.status === "paid"
                         ? "bg-green-100 text-green-800"
-                        : billing.status === "未払い"
+                        : billing.status === "pending"
                           ? "bg-yellow-100 text-yellow-800"
                           : "bg-red-100 text-red-800"
-                    }`}
-                  >
-                    {billing.status}
+                    }`}>
+                    {billing.status === "paid" ? "支払済" : "未払い"}
                   </div>
                 </div>
               </div>
-              <div className="mt-3">
-                <Button variant="outline" size="sm" className="w-full">
-                  <Download className="h-4 w-4 mr-2" />
-                  領収書をダウンロード
+              <div className="mt-3 space-y-2">
+                <Button variant="outline" size="sm" className="w-full" asChild>
+                  <a
+                    href={billing.hosted_invoice_url}
+                    target="_blank"
+                    rel="noopener noreferrer">
+                    請求書を表示
+                  </a>
+                </Button>
+                <Button variant="outline" size="sm" className="w-full" asChild>
+                  <a
+                    href={billing.invoice_pdf}
+                    target="_blank"
+                    rel="noopener noreferrer">
+                    <Download className="h-4 w-4 mr-2" />
+                    PDFをダウンロード
+                  </a>
                 </Button>
               </div>
             </CardContent>
@@ -198,6 +269,5 @@ export default function BillingList() {
         ))}
       </div>
     </div>
-  )
+  );
 }
-
