@@ -10,7 +10,11 @@ interface Params {
 export const useGetWorksessionsByUserId = (params: Params, config?: QueryConfigType) => {
   const { dedupingInterval } = config || {};
   const users = getApi(Users);
-  return useSWR(...users.worksessionsListQueryArgs(params.userId ?? '', {}, params.userId != null), {
+  return useSWR(...users.worksessionsListQueryArgs(params.userId ?? '', {
+    headers: {
+      "X-User-Type": "company"
+    }
+  }, params.userId != null), {
     dedupingInterval
   });
 }

@@ -10,7 +10,11 @@ export interface Params {
 export const useGetCompanyUserNotificationsByUserId = (params: Params, config?: QueryConfigType) => {
   const { dedupingInterval } = config || {};
   const companyusers = getApi(Companyusers);
-  return useSWR(...companyusers.companyuserNotificationsListQueryArgs(params.userId ?? '', {}, params.userId != null), {
+  return useSWR(...companyusers.companyuserNotificationsListQueryArgs(params.userId ?? '', {
+    headers: {
+      "X-User-Type": "company"
+    }
+  }, params.userId != null), {
     dedupingInterval
   });
 }

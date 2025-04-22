@@ -15,7 +15,11 @@ export const useGetMultipleWorksessionsByJobId = (params: Params, config?: Query
   const keys: string[] = [];
   const fetchers: (() => Promise<WorksessionsRestaurantTodosListData>)[] = [];
   for (const jobId of params.jobIds) {
-    const [key, fetcher] = jobs.worksessionsRestaurantTodosListQueryArgs(jobId, {}, jobId != null);
+    const [key, fetcher] = jobs.worksessionsRestaurantTodosListQueryArgs(jobId, {
+      headers: {
+        "X-User-Type": "company"
+      }
+    }, jobId != null);
     if (key != null) {
       keys.push(key[0]);
       fetchers.push(fetcher);

@@ -10,7 +10,11 @@ export interface Params {
 export const useGetRestaurant = (params: Params, config?: QueryConfigType) => {
   const { dedupingInterval } = config || {};
   const restaurants = getApi(Restaurants);
-  return useSWR(...restaurants.restaurantsDetailQueryArgs(params.restaurantId ?? -1, {}, params.restaurantId != null), {
+  return useSWR(...restaurants.restaurantsDetailQueryArgs(params.restaurantId ?? -1, {
+    headers: {
+      "X-User-Type": "company"
+    }
+  }, params.restaurantId != null), {
     dedupingInterval
   });
 }

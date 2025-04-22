@@ -10,7 +10,11 @@ export interface Params {
 export const useGetApplicationsByJobId = (params: Params, config?: QueryConfigType) => {
   const { dedupingInterval } = config || {};
   const jobs = getApi(Jobs);
-  return useSWR(...jobs.applicationsListQueryArgs(params.jobId ?? -1, {}, params.jobId != null), {
+  return useSWR(...jobs.applicationsListQueryArgs(params.jobId ?? -1, {
+    headers: {
+      "X-User-Type": "company"
+    }
+  }, params.jobId != null), {
     dedupingInterval
   });
 }
