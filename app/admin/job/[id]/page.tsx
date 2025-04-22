@@ -1,23 +1,15 @@
 "use client";
 
 import { useState, use, useEffect, useRef } from "react";
-import Link from "next/link";
 import {
   ArrowLeft,
   Edit,
   Users,
-  Calendar,
-  Clock,
-  MapPin,
-  Phone,
   Send,
   MessageSquare,
-  MoreHorizontal,
   QrCode,
   CheckCircle,
-  Copy,
 } from "lucide-react";
-import { CreateJobParams } from "@/lib/api/job";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -30,9 +22,7 @@ import { jobApi } from "@/lib/api/job";
 import { applicationApi } from "@/lib/api/application";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
-import { ChefReviewModal } from "@/components/modals/ChefReviewModal";
 import { EditJobModal } from "@/components/modals/EditJobModal";
-
 import {
   Dialog,
   DialogContent,
@@ -42,30 +32,24 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
-import { GetApplicationsResponse } from "@/lib/api/application";
 import { Application } from "@/types";
 import { useRouter } from "next/navigation";
 import { workSessionApi } from "@/lib/api/workSession";
 import { messageApi, CreateMessageParams } from "@/lib/api/message";
-import { Message, WorkSession } from "@/types";
+import { Message } from "@/types";
 import { QRCodeSVG } from "qrcode.react";
-import { useParams } from "next/navigation";
 import { Job } from "@/types";
-import { WorkSessionWithJob, WorkSessionWithUser } from "@/types";
 import { RestaurantReviewModal } from "@/components/modals/RestaurantReviewModal";
 import { chefReviewApi } from "@/lib/api/chefReview";
 import { ChefReview } from "@/types";
 import { FaStar } from "react-icons/fa";
-import { GetJobData } from "@/api/__generated__/chef-connect/data-contracts";
 import { XanoClient } from "@xano/js-sdk";
 import { CreateJobModal } from "@/components/modals/CreateJobModal";
+import { useGetJob } from "@/hooks/api/jobs/useGetJob";
+import { JobsDetailData, WorksessionsRestaurantTodosListData } from "@/api/__generated__/base/data-contracts";
+import { useGetApplicationsByJobId } from "@/hooks/api/applications/useGetApplicationsByJobId";
+import { useGetWorksessionsByJobId } from "@/hooks/api/worksessions/useGetWorksessionsByJobId";
 
 interface ApplicantCardProps {
   application: Application;
@@ -128,19 +112,12 @@ interface PageProps {
 
 export default function Page({ params }: PageProps) {
   const { id } = use(params);
-  const { data: jobData, error: jobError } = useSWR<GetJobData>(
-    [`job`, id],
-    async ([_, jobId]: [string, string]) => jobApi.getJob(jobId),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      dedupingInterval: 10000,
-    }
-  );
+
   const [isEditJobModalOpen, setIsEditJobModalOpen] = useState(false);
-  const [editJob, setEditJob] = useState<Job | null>(null);
   const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
   const [copiedJob, setCopiedJob] = useState<any>(null);
+
+  const { data: jobData, error: jobError } = useGetJob({ jobId: Number(id) });
 
   const xanoClient = new XanoClient({
     instanceBaseUrl: process.env.NEXT_PUBLIC_XANO_BASE_URL || "",
@@ -148,10 +125,9 @@ export default function Page({ params }: PageProps) {
   });
 
   const job = jobData?.job;
-  const restaurant = jobData?.restaurant;
 
   // 型チェックとデータ変換
-  const formattedJob: Job | null = job
+  const formattedJob: JobsDetailData['job'] | null = job
     ? {
         id: job.id || 0,
         created_at: job.created_at ? Number(job.created_at) : 0,
@@ -165,8 +141,7 @@ export default function Page({ params }: PageProps) {
         status: job.status || "",
         updated_at: job.updated_at ? Number(job.updated_at) : 0,
         restaurant_id: job.restaurant_id || 0,
-        image: job.image || undefined,
-        creator_id: 0,
+        image: job.image || "",
         task: job.task || "",
         skill: job.skill || "",
         whattotake: job.whattotake || "",
@@ -182,38 +157,8 @@ export default function Page({ params }: PageProps) {
 
   console.log("Formatted job data:", formattedJob);
 
-  const { data: applications, error: applicationsError } =
-    useSWR<GetApplicationsResponse>(
-      id ? [`applications`, id] : null,
-      async ([_, jobId]) => {
-        const result = await applicationApi.getApplicationsByJob(Number(jobId));
-        return result;
-      },
-      {
-        revalidateOnFocus: false,
-        revalidateOnReconnect: false,
-        dedupingInterval: 10000,
-      }
-    );
-
-  const {
-    data: workSessions,
-    error: workSessionsError,
-    mutate,
-  } = useSWR<WorkSessionWithUser[]>(
-    id ? [`workSessions`, id] : null,
-    async ([_, jobId]: [string, string]) => {
-      const result = await workSessionApi.getWorkSessionsToDoByJobId(
-        Number(jobId)
-      );
-      console.log("Fetched workSessions:", result);
-      return result as WorkSessionWithUser[];
-    },
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    }
-  );
+  const { data: applications, error: applicationsError  } = useGetApplicationsByJobId({ jobId: Number(id) });
+  const { data: workSessions, error: workSessionsError, mutate } = useGetWorksessionsByJobId({ jobId: Number(id) });
 
   const isLoading =
     (!job && !jobError) ||
@@ -221,7 +166,7 @@ export default function Page({ params }: PageProps) {
     (!workSessions && !workSessionsError);
   const error = jobError || applicationsError || workSessionsError;
 
-  const [selectedApplicant, setSelectedApplicant] = useState<number | null>(
+  const [selectedApplicant, setSelectedApplicant] = useState<string | null>(
     null
   );
   console.log("selectedApplicant:", selectedApplicant);
@@ -234,7 +179,7 @@ export default function Page({ params }: PageProps) {
   const [isQrDialogOpen, setIsQrDialogOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [selectedWorkSession, setSelectedWorkSession] =
-    useState<WorkSessionWithUser | null>(null);
+    useState<WorksessionsRestaurantTodosListData[number] | null>(null);
   const [isChefReviewModalOpen, setIsChefReviewModalOpen] = useState(false);
   const [chefReview, setChefReview] = useState<ChefReview | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -243,9 +188,9 @@ export default function Page({ params }: PageProps) {
     console.log("Comparing:", {
       wsId: ws.id,
       selectedId: selectedApplicant,
-      isMatch: ws.id === selectedApplicant,
+      isMatch: ws.application_id === selectedApplicant,
     });
-    return ws.id === selectedApplicant;
+    return ws.application_id === selectedApplicant;
   });
 
   console.log("selectedWorkSessionData:", selectedWorkSessionData);
@@ -632,7 +577,7 @@ export default function Page({ params }: PageProps) {
                         </TabsTrigger>
                         <TabsTrigger value="CENCELLED">キャンセル</TabsTrigger>
                       </TabsList>
-                      <TabsContent value="APPLIED" className="mt-4">
+                      {/* <TabsContent value="APPLIED" className="mt-4">
                         <div className="divide-y">
                           {applications
                             ?.filter((app) => app.status === "APPLIED")
@@ -690,18 +635,18 @@ export default function Page({ params }: PageProps) {
                             </p>
                           )}
                         </div>
-                      </TabsContent>
+                      </TabsContent> */}
                       <TabsContent value="ACCEPTED" className="mt-4">
                         <div className="divide-y">
                           {workSessions?.map((session) => (
                             <div
                               key={session.id}
                               className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
-                                selectedApplicant === session.id
+                                selectedApplicant === session.application_id
                                   ? "bg-gray-50"
                                   : ""
                               }`}
-                              onClick={() => setSelectedApplicant(session.id)}>
+                              onClick={() => setSelectedApplicant(session.application_id)}>
                               <div className="flex items-start gap-3">
                                 <Avatar className="h-10 w-10">
                                   <AvatarImage
@@ -947,7 +892,7 @@ export default function Page({ params }: PageProps) {
                               </div>
                             </DialogContent>
                           </Dialog>
-                          {selectedWorkSessionData.status === "ACCEPTED" && (
+                          {selectedWorkSessionData.status === "SCHEDULED" && (
                             <Dialog
                               open={isQrDialogOpen}
                               onOpenChange={setIsQrDialogOpen}>
@@ -980,7 +925,7 @@ export default function Page({ params }: PageProps) {
                               </DialogContent>
                             </Dialog>
                           )}
-                          {selectedWorkSessionData.status === "APPLIED" && (
+                          {/* {selectedWorkSessionData.status === "APPLIED" && (
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="icon">
@@ -1006,38 +951,40 @@ export default function Page({ params }: PageProps) {
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
-                          )}
+                          )} */}
                         </div>
                       </CardHeader>
                       <CardContent className="p-0 h-[calc(100vh-300px)] flex flex-col">
-                        {selectedWorkSessionData.status === "APPLIED" ? (
-                          <div className="flex-1 flex flex-col items-center justify-center gap-4">
-                            <div className="text-center space-y-2">
-                              <p className="text-lg font-medium">
-                                応募者の確認
-                              </p>
-                              <p className="text-muted-foreground">
-                                この応募者のプロフィールを確認し、採用を検討してください。
-                              </p>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button
-                                variant="outline"
-                                onClick={() => setIsAcceptDialogOpen(true)}>
-                                採用する
-                              </Button>
-                              <Button
-                                variant="destructive"
-                                onClick={() =>
-                                  handleRejectApplication(
-                                    selectedWorkSessionData.id.toString()
-                                  )
-                                }>
-                                不採用にする
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
+                        {
+                        // selectedWorkSessionData.status === "APPLIED" ? (
+                        //   <div className="flex-1 flex flex-col items-center justify-center gap-4">
+                        //     <div className="text-center space-y-2">
+                        //       <p className="text-lg font-medium">
+                        //         応募者の確認
+                        //       </p>
+                        //       <p className="text-muted-foreground">
+                        //         この応募者のプロフィールを確認し、採用を検討してください。
+                        //       </p>
+                        //     </div>
+                        //     <div className="flex gap-2">
+                        //       <Button
+                        //         variant="outline"
+                        //         onClick={() => setIsAcceptDialogOpen(true)}>
+                        //         採用する
+                        //       </Button>
+                        //       <Button
+                        //         variant="destructive"
+                        //         onClick={() =>
+                        //           handleRejectApplication(
+                        //             selectedWorkSessionData.id.toString()
+                        //           )
+                        //         }>
+                        //         不採用にする
+                        //       </Button>
+                        //     </div>
+                        //   </div>
+                        // ) : 
+                        (
                           <>
                             <div className="flex-1 overflow-y-auto space-y-4 p-4">
                               {messages && messages.length > 0 ? (
