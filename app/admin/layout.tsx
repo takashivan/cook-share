@@ -216,9 +216,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         },
         {
           title: "スタッフ管理",
-          href: "/admin/company/staff",
+          href: "/admin/company/staffs",
           icon: Users,
-          active: pathname === "/admin/company/staff",
+          active: pathname === "/admin/company/staffs",
           show: true,
         },
         {
@@ -458,7 +458,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   </Link>
 
                   {/* 会社情報の下層ページ */}
-                  {pathname.includes("/company/staff") && (
+                  {pathname.includes("/company/staffs") && (
                     <>
                       <ChevronRight className="h-4 w-4" />
                       <span className="text-foreground">スタッフ管理</span>
