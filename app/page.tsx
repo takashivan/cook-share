@@ -15,6 +15,7 @@ import { fetchJobs } from "@/lib/redux/slices/jobsSlice";
 import { Card } from "@/components/ui/card";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { Badge } from "@/components/ui/badge";
+import { motion } from "framer-motion";
 
 export default function Home() {
   const [jobs, setJobs] = useState<JobWithRestaurant[]>([]);
@@ -195,87 +196,124 @@ export default function Home() {
           <div className="container mx-auto px-4">
             <h1 className="text-2xl font-bold mb-6">新着求人</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {reduxJobs.map((job: JobWithRestaurant) => (
-                <Link key={job.id} href={`/job/${job.id}`} className="">
-                  <Card className="h-full hover:shadow-lg transition-shadow">
-                    <div className="relative h-48">
-                      <Image
-                        src={job.image || "/images/default-job.jpg"}
-                        alt={job.title}
-                        fill
-                        className="object-cover rounded-t-lg"
-                      />
-                      <div className="absolute bottom-4 left-4 bg-white text-black px-3 py-2 rounded-lg text-sm font-bold shadow-md">
-                        {new Date(job.work_date).toLocaleDateString("ja-JP", {
-                          month: "2-digit",
-                          day: "2-digit",
-                          weekday: "short",
-                        })}
-                      </div>
-                    </div>
-                    <div className="p-4">
-                      <div className="text-xs text-gray-500 mb-1">
-                        {job.restaurant.name}
-                      </div>
-                      <h3 className="font-bold text-sm mb-2">{job.title}</h3>
-
-                      <div className="flex items-center text-xs text-gray-500 mb-1">
-                        <Clock className="h-3 w-3 mr-1" />
-                        <span>
-                          {new Date(job.start_time).toLocaleTimeString(
-                            "ja-JP",
-                            {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            }
-                          )}
-                          {" 〜 "}
-                          {new Date(job.end_time).toLocaleTimeString("ja-JP", {
-                            hour: "2-digit",
-                            minute: "2-digit",
+              {reduxJobs.map((job: JobWithRestaurant, index: number) => (
+                <motion.div
+                  key={job.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                  whileHover={{ scale: 1.02 }}
+                  className="h-full">
+                  <Link href={`/job/${job.id}`} className="block h-full">
+                    <Card className="h-full hover:shadow-xl transition-all duration-300 overflow-hidden group">
+                      <div className="relative h-48 overflow-hidden">
+                        <Image
+                          src={job.image || "/images/default-job.jpg"}
+                          alt={job.title}
+                          fill
+                          className="object-cover rounded-t-lg group-hover:scale-[1.01] transition-transform duration-500 ease-out"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                        <div className="absolute bottom-4 left-4 bg-white/90 text-black px-3 py-2 rounded-lg text-sm font-bold shadow-md backdrop-blur-sm">
+                          {new Date(job.work_date).toLocaleDateString("ja-JP", {
+                            month: "2-digit",
+                            day: "2-digit",
+                            weekday: "short",
                           })}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center text-xs text-gray-500 mb-1">
-                        <MapPin className="h-3 w-3 mr-1" />
-                        <span>{job.restaurant.address}</span>
-                      </div>
-                      <div className="flex items-center text-xs text-gray-500 mb-3">
-                        <span>
-                          {job.restaurant.restaurant_cuisine_id &&
-                          job.restaurant.restaurant_cuisine_id.length > 0
-                            ? job.restaurant.restaurant_cuisine_id
-                                .map((cat) => cat.category)
-                                .join(", ")
-                            : "ジャンル未設定"}
-                        </span>
-                      </div>
-                      <div className="flex items-center text-xs text-gray-500 mb-3">
-                        <Badge
-                          variant="secondary"
-                          className={`${
-                            job.number_of_spots > 0 &&
+                        </div>
+                        <div className="absolute top-4 right-4">
+                          <Badge
+                            variant="secondary"
+                            className={`${
+                              job.number_of_spots > 0 &&
+                              new Date(job.expiry_date) > new Date()
+                                ? "bg-black text-white"
+                                : "bg-gray-500 text-white"
+                            }`}>
+                            {job.number_of_spots > 0 &&
                             new Date(job.expiry_date) > new Date()
-                              ? "bg-black text-white"
-                              : "bg-gray-500 text-white"
-                          }`}>
-                          {job.number_of_spots > 0 &&
-                          new Date(job.expiry_date) > new Date()
-                            ? `残り${job.number_of_spots}名募集中`
-                            : "締め切りました"}
-                        </Badge>
+                              ? `残り${job.number_of_spots}名募集中`
+                              : "締め切りました"}
+                          </Badge>
+                        </div>
                       </div>
-                      <div className="flex items-center text-sm text-gray-500 mb-3">
-                        <span className="font-bold">
-                          報酬額 {job.fee.toLocaleString()}円
-                        </span>
-                      </div>
+                      <div className="p-4 flex flex-col h-[calc(100%-12rem)]">
+                        <div>
+                          <div className="text-sm text-gray-500 mb-1">
+                            {job.restaurant.name}
+                          </div>
+                          <h3 className="font-bold text-sm mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                            {job.title}
+                          </h3>
 
-                      <div className="flex gap-2"></div>
-                    </div>
-                  </Card>
-                </Link>
+                          <div className="flex items-center text-sm text-gray-500 mb-1">
+                            <Clock className="h-4 w-4 mr-1 text-primary" />
+                            <span>
+                              {new Date(job.start_time).toLocaleTimeString(
+                                "ja-JP",
+                                {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }
+                              )}
+                              {" 〜 "}
+                              {new Date(job.end_time).toLocaleTimeString(
+                                "ja-JP",
+                                {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }
+                              )}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center text-sm text-gray-500 mb-1">
+                            <MapPin className="h-4 w-4 mr-1 text-primary" />
+                            <span className="line-clamp-1">
+                              {job.restaurant.address}
+                            </span>
+                          </div>
+                          <div className="flex items-center text-xs text-gray-500 mb-3 mt-5">
+                            <div className="flex flex-wrap gap-1">
+                              {job.restaurant.restaurant_cuisine_id &&
+                              job.restaurant.restaurant_cuisine_id.length >
+                                0 ? (
+                                job.restaurant.restaurant_cuisine_id
+                                  .flat()
+                                  .map((cat: { category: string }) => (
+                                    <Badge
+                                      key={cat.category}
+                                      variant="outline"
+                                      className="text-xs bg-white/80 backdrop-blur-sm border-primary/20 text-primary hover:bg-primary/10 transition-colors">
+                                      {cat.category}
+                                    </Badge>
+                                  ))
+                              ) : (
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs bg-white/80 backdrop-blur-sm border-primary/20 text-primary">
+                                  ジャンル未設定
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-100">
+                          <span className="text-sm font-bold text-primary">
+                            報酬額 {job.fee.toLocaleString()}円
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs text-primary hover:text-primary/80">
+                            詳細を見る →
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  </Link>
+                </motion.div>
               ))}
             </div>
 

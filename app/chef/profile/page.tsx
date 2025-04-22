@@ -12,6 +12,7 @@ import {
   Award,
   Edit,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
@@ -24,6 +25,12 @@ import { confirmEmail } from "@/lib/api/user";
 export default function ChefProfile() {
   const { user } = useAuth();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const { logout } = useAuth();
+  const router = useRouter();
+  const handleLogout = () => {
+    logout();
+    router.replace("/login");
+  };
 
   if (!user) {
     return (
@@ -190,13 +197,13 @@ export default function ChefProfile() {
           <span>アカウント設定</span>
           <ChevronRight className="h-5 w-5 text-gray-400" />
         </Link>
-
+        {/* 
         <Link
           href="/chef/notification-settings"
           className="flex items-center justify-between p-4 bg-white rounded-lg shadow-md">
           <span>通知設定</span>
           <ChevronRight className="h-5 w-5 text-gray-400" />
-        </Link>
+        </Link> */}
 
         <Link
           href="/chef/payment-settings"
@@ -205,8 +212,11 @@ export default function ChefProfile() {
           <ChevronRight className="h-5 w-5 text-gray-400" />
         </Link>
 
-        <Button variant="outline" className="w-full mt-6" asChild>
-          <Link href="/logout">ログアウト</Link>
+        <Button
+          variant="outline"
+          className="w-full mt-6"
+          onClick={handleLogout}>
+          ログアウト
         </Button>
       </div>
     </div>

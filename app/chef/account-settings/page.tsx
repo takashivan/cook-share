@@ -42,9 +42,9 @@ export default function AccountSettings() {
     confirmPassword: "",
   });
 
-  const handleEmailChange = (newEmail: string) => {
-    changeEmail(newEmail);
-    console.log(newEmail);
+  const handleEmailChange = (email: string) => {
+    changeEmail(email);
+    console.log(email);
   };
 
   // 通知設定のステート
@@ -140,10 +140,10 @@ export default function AccountSettings() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="account">アカウント情報</TabsTrigger>
           <TabsTrigger value="password">パスワード</TabsTrigger>
-          <TabsTrigger value="notifications">通知設定</TabsTrigger>
+          {/* <TabsTrigger value="notifications">通知設定</TabsTrigger> */}
         </TabsList>
 
         <TabsContent value="account" className="mt-6">
@@ -302,7 +302,7 @@ export default function AccountSettings() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="notifications" className="mt-6">
+        {/* <TabsContent value="notifications" className="mt-6">
           <Card>
             <CardHeader>
               <CardTitle>通知設定</CardTitle>
@@ -564,7 +564,7 @@ export default function AccountSettings() {
               </CardFooter>
             </form>
           </Card>
-        </TabsContent>
+        </TabsContent> */}
       </Tabs>
     </div>
   );
