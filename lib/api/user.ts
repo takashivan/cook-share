@@ -405,3 +405,7 @@ export const resetPassword = (
     "chef"
   );
 };
+
+export const getWorksessionHistories = (user_id: UserId): Promise<any> => {
+  return apiRequest(`${USER_URL}/${user_id}/sessionHistory/current`, "GET");
+};

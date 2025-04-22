@@ -1,8 +1,20 @@
+"use client";
 import Link from "next/link";
-import { ChevronRight, Download } from "lucide-react";
+import { ChevronRight, Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { format } from "date-fns";
+import { ja } from "date-fns/locale";
+import { motion } from "framer-motion";
+import { useAuth } from "@/lib/contexts/AuthContext";
+import { getWorksessionHistories } from "@/lib/api/user";
+import { WorksessionDetailResult } from "@/api/__generated__/chef-connect/data-contracts";
 
 export default function ChefSalary() {
+  const { user } = useAuth();
+  const [monthlyIncome, setMonthlyIncome] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
   const months = [
     { id: 1, month: "2024年3月", amount: "¥120,500", status: "支払い済み" },
     { id: 2, month: "2024年2月", amount: "¥98,000", status: "支払い済み" },
@@ -41,21 +53,82 @@ export default function ChefSalary() {
     },
   ];
 
-  return (
-    <div className="container mx-auto px-4 py-6 max-w-md">
-      <h1 className="text-2xl font-bold mb-8">給料詳細</h1>
+  useEffect(() => {
+    const fetchMonthlyIncome = async () => {
+      try {
+        if (!user?.id) return;
+        const sessions = await getWorksessionHistories(user.id);
 
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        // 合計金額を計算
+        const total = sessions.reduce(
+          (sum: number, session: WorksessionDetailResult) => {
+            return sum + (session.paid_amount || 0);
+          },
+          0
+        );
+
+        setMonthlyIncome(total);
+      } catch (error) {
+        console.error("Failed to fetch monthly income:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMonthlyIncome();
+  }, [user?.id]);
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("ja-JP", {
+      style: "currency",
+      currency: "JPY",
+    }).format(amount);
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-6">収入管理</h1>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="bg-white rounded-lg shadow-lg p-6 mb-6">
         <h2 className="text-lg font-bold mb-4">今月の収入</h2>
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-gray-500">3月の合計</span>
-          <span className="text-2xl font-bold">¥120,500</span>
+        <div className="flex justify-between items-center mb-4">
+          <span className="text-gray-500">
+            {format(new Date(), "M月", { locale: ja })}の合計
+          </span>
+          {isLoading ? (
+            <div className="flex items-center">
+              <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+            </div>
+          ) : (
+            <motion.span
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{
+                type: "spring",
+                stiffness: 260,
+                damping: 20,
+                delay: 0.1,
+              }}
+              className="text-3xl font-bold text-primary">
+              {formatCurrency(monthlyIncome)}
+            </motion.span>
+          )}
         </div>
-        <div className="flex justify-between items-center text-sm text-gray-500">
-          <span>支払い状況</span>
-          <span className="text-green-600">支払い済み</span>
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-gray-500">支払い状況</span>
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-green-600 font-medium">
+            確認済み
+          </motion.span>
         </div>
-      </div>
+      </motion.div>
 
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <div className="flex justify-between items-center mb-4">
