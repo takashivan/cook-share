@@ -88,15 +88,15 @@ export default function JobsPage() {
         <div>
           <h2 className="text-2xl font-bold tracking-tight">求人管理</h2>
           <p className="text-muted-foreground">
-            求人の追加、編集、公開状態の管理を行えます
+            求人の編集、公開状態の管理を行えます
           </p>
         </div>
-        <Button asChild>
+        {/* <Button asChild>
           <Link href="/admin/jobs/new">
             <Plus className="mr-2 h-4 w-4" />
             求人を追加
           </Link>
-        </Button>
+        </Button> */}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
