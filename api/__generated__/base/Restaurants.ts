@@ -15,6 +15,7 @@ import {
   CompanyuserNotificationsCreateResult,
   CompanyusersCreateInput,
   CompanyusersCreateOutput,
+  CompanyusersListOutput,
   JobsListOutput,
   RestaurantReviewsListResult,
   RestaurantsCreateData,
@@ -69,6 +70,27 @@ export class Restaurants<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags restaurants
+   * @name CompanyusersList
+   * @request GET:/restaurants/{restaurant_id}/companyusers
+   */
+  companyusersList = (restaurantId: number, params: RequestParams = {}) =>
+    this.request<CompanyusersListOutput, void>({
+      path: `/restaurants/${restaurantId}/companyusers`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  companyusersListQueryArgs = (restaurantId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurants/${restaurantId}/companyusers`] : null;
+    const fetcher = () => this.companyusersList(restaurantId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 
   /**
    * @description <br /><br /> <b>Authentication:</b> not required

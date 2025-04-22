@@ -247,6 +247,7 @@ export type GetApplicationData = {
     /** @format email */
     pending_email: string;
     email_change_token: string;
+    password_reset_token: string;
     magic_link: {
       token: string;
       /**
@@ -820,6 +821,7 @@ export interface ChangePasswordCreateData {
     /** @format email */
     pending_email: string;
     email_change_token: string;
+    password_reset_token: string;
   };
   status: string;
 }
@@ -913,6 +915,7 @@ export interface SignupCreateData {
     /** @format email */
     pending_email: string;
     email_change_token: string;
+    password_reset_token: string;
   };
 }
 
@@ -948,6 +951,7 @@ export interface VerifyEmailCreateData {
     /** @format email */
     pending_email: string;
     email_change_token: string;
+    password_reset_token: string;
   };
   auth: string;
 }
@@ -1542,6 +1546,7 @@ export type ByRestaurantDetailData = {
     /** @format email */
     pending_email: string;
     email_change_token: string;
+    password_reset_token: string;
     magic_link: {
       token: string;
       /**
@@ -1680,6 +1685,7 @@ export interface BySessionDetailData {
     /** @format email */
     pending_email: string;
     email_change_token: string;
+    password_reset_token: string;
     magic_link: {
       token: string;
       /**
@@ -1958,6 +1964,7 @@ export interface StaffInviteCreateData {
     /** @format email */
     pending_email: string;
     email_change_token: string;
+    password_reset_token: string;
   };
 }
 
@@ -1993,6 +2000,7 @@ export interface CompanyusersCreateData {
     /** @format email */
     pending_email: string;
     email_change_token: string;
+    password_reset_token: string;
   };
 }
 
@@ -2086,6 +2094,7 @@ export type CompanyusersListData = {
   /** @format email */
   pending_email: string;
   email_change_token: string;
+  password_reset_token: string;
 }[];
 
 export interface JobsListData {
@@ -2280,6 +2289,7 @@ export interface CompaniesCreateData {
     /** @format email */
     pending_email: string;
     email_change_token: string;
+    password_reset_token: string;
   };
 }
 
@@ -2393,6 +2403,7 @@ export type CompanyDetailData = {
   /** @format email */
   pending_email: string;
   email_change_token: string;
+  password_reset_token: string;
 }[];
 
 export interface MeRestaurantsListParams {
@@ -2426,6 +2437,7 @@ export interface MeRestaurantsListData {
     /** @format email */
     pending_email: string;
     email_change_token: string;
+    password_reset_token: string;
   };
   rest: string;
 }
@@ -2456,6 +2468,7 @@ export interface CompanyuserDetailData {
   /** @format email */
   pending_email: string;
   email_change_token: string;
+  password_reset_token: string;
 }
 
 export interface CompanyuserPartialUpdatePayload {
@@ -2475,6 +2488,7 @@ export interface CompanyuserPartialUpdatePayload {
   /** @format email */
   pending_email: string;
   email_change_token: string;
+  password_reset_token: string;
 }
 
 export interface CompanyuserPartialUpdateData {
@@ -2503,6 +2517,7 @@ export interface CompanyuserPartialUpdateData {
   /** @format email */
   pending_email: string;
   email_change_token: string;
+  password_reset_token: string;
 }
 
 export interface ByRestaurantCreatePayload {
@@ -2635,6 +2650,7 @@ export interface CompanyusersPartialUpdatePayload {
   /** @format email */
   pending_email: string;
   email_change_token: string;
+  password_reset_token: string;
 }
 
 export interface CompanyusersPartialUpdateData {
@@ -2663,6 +2679,7 @@ export interface CompanyusersPartialUpdateData {
   /** @format email */
   pending_email: string;
   email_change_token: string;
+  password_reset_token: string;
 }
 
 export type CompanyuserNotificationsListResult = {
@@ -2707,6 +2724,7 @@ export type CompanyusersListResult = {
   /** @format email */
   pending_email: string;
   email_change_token: string;
+  password_reset_token: string;
 }[];
 
 export interface CompanyusersCreateBody {
@@ -2726,6 +2744,7 @@ export interface CompanyusersCreateBody {
   /** @format email */
   pending_email: string;
   email_change_token: string;
+  password_reset_token: string;
 }
 
 export interface CompanyusersCreateResult {
@@ -2754,6 +2773,7 @@ export interface CompanyusersCreateResult {
   /** @format email */
   pending_email: string;
   email_change_token: string;
+  password_reset_token: string;
 }
 
 export type CompanyuserListData = {
@@ -2782,6 +2802,7 @@ export type CompanyuserListData = {
   /** @format email */
   pending_email: string;
   email_change_token: string;
+  password_reset_token: string;
 }[];
 
 export interface CompanyuserCreatePayload {
@@ -2801,6 +2822,7 @@ export interface CompanyuserCreatePayload {
   /** @format email */
   pending_email: string;
   email_change_token: string;
+  password_reset_token: string;
 }
 
 export interface CompanyuserCreateData {
@@ -2829,6 +2851,7 @@ export interface CompanyuserCreateData {
   /** @format email */
   pending_email: string;
   email_change_token: string;
+  password_reset_token: string;
 }
 
 export type FilesDeleteData = object;
@@ -3255,6 +3278,7 @@ export type ApplicationsListResult = {
     /** @format email */
     pending_email: string;
     email_change_token: string;
+    password_reset_token: string;
     magic_link: {
       token: string;
       /**
@@ -3344,6 +3368,7 @@ export type WorksessionsRestaurantTodosListData = {
     /** @format email */
     pending_email: string;
     email_change_token: string;
+    password_reset_token: string;
     magic_link: {
       token: string;
       /**
@@ -4905,6 +4930,7 @@ export type StaffsListData = {
     /** @format email */
     pending_email: string;
     email_change_token: string;
+    password_reset_token: string;
   };
 }[];
 
@@ -5162,6 +5188,7 @@ export type ByRestaurantDetailResult = {
     /** @format email */
     pending_email: string;
     email_change_token: string;
+    password_reset_token: string;
     magic_link: {
       token: string;
       /**
@@ -5271,6 +5298,7 @@ export interface BySessionDetailResult {
     /** @format email */
     pending_email: string;
     email_change_token: string;
+    password_reset_token: string;
     magic_link: {
       token: string;
       /**
@@ -5721,6 +5749,7 @@ export type ChefReviewsListResult = {
     /** @format email */
     pending_email: string;
     email_change_token: string;
+    password_reset_token: string;
     magic_link: {
       token: string;
       /**
@@ -5743,6 +5772,32 @@ export interface CompanyuserNotificationsCreateBody {
 }
 
 export type CompanyuserNotificationsCreateResult = object;
+
+export interface CompanyusersListOutput {
+  company: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    name: string;
+    address: string;
+    phone: string;
+    website: string;
+    description: string;
+    status: "pending" | "approved" | "banned" | "rejected";
+    /** @format date */
+    updated_at: string | null;
+    business_registration_number: string;
+    logo_url: string;
+    stripe_customer_id: string;
+    /** @format email */
+    company_email: string;
+  };
+  admin: string;
+}
 
 export interface CompanyusersCreateInput {
   companies_id: string;
@@ -5848,6 +5903,7 @@ export type RestaurantReviewsListResult = {
     /** @format email */
     pending_email: string;
     email_change_token: string;
+    password_reset_token: string;
     magic_link: {
       token: string;
       /**
@@ -6110,6 +6166,7 @@ export interface EmailChangeCreateData {
   /** @format email */
   pending_email: string;
   email_change_token: string;
+  password_reset_token: string;
   magic_link: {
     token: string;
     /**
@@ -6161,6 +6218,7 @@ export interface EmailConfirmCreateData {
   /** @format email */
   pending_email: string;
   email_change_token: string;
+  password_reset_token: string;
   magic_link: {
     token: string;
     /**
@@ -6222,6 +6280,7 @@ export interface UserDetailData {
   /** @format email */
   pending_email: string;
   email_change_token: string;
+  password_reset_token: string;
   magic_link: {
     token: string;
     /**
@@ -6255,6 +6314,7 @@ export interface UserPartialUpdatePayload {
   /** @format email */
   pending_email: string;
   email_change_token: string;
+  password_reset_token: string;
   /** @format binary */
   photo: File | null;
   magic_link: {
@@ -6684,6 +6744,7 @@ export interface UsersDetailData {
   /** @format email */
   pending_email: string;
   email_change_token: string;
+  password_reset_token: string;
   magic_link: {
     token: string;
     /**
@@ -6717,6 +6778,7 @@ export interface UsersPartialUpdatePayload {
   /** @format email */
   pending_email: string;
   email_change_token: string;
+  password_reset_token: string;
   /** @format binary */
   photo: File | null;
   magic_link: {
@@ -6768,6 +6830,7 @@ export type UsersListData = {
   /** @format email */
   pending_email: string;
   email_change_token: string;
+  password_reset_token: string;
   magic_link: {
     token: string;
     /**
@@ -6806,6 +6869,7 @@ export interface UsersCreatePayload {
   /** @format email */
   pending_email: string;
   email_change_token: string;
+  password_reset_token: string;
   magic_link: {
     token: string;
     /**
@@ -6853,6 +6917,7 @@ export interface UsersCreateData {
   /** @format email */
   pending_email: string;
   email_change_token: string;
+  password_reset_token: string;
   magic_link: {
     token: string;
     /**
@@ -6900,6 +6965,7 @@ export type UserListData = {
   /** @format email */
   pending_email: string;
   email_change_token: string;
+  password_reset_token: string;
   magic_link: {
     token: string;
     /**
@@ -6938,6 +7004,7 @@ export interface UserCreatePayload {
   /** @format email */
   pending_email: string;
   email_change_token: string;
+  password_reset_token: string;
   magic_link: {
     token: string;
     /**
@@ -6985,6 +7052,7 @@ export interface UserCreateData {
   /** @format email */
   pending_email: string;
   email_change_token: string;
+  password_reset_token: string;
   magic_link: {
     token: string;
     /**
@@ -7147,6 +7215,7 @@ export type RestaurantTodoDetailData = {
     /** @format email */
     pending_email: string;
     email_change_token: string;
+    password_reset_token: string;
     magic_link: {
       token: string;
       /**
@@ -7878,6 +7947,7 @@ export interface ChefReviewListResult {
     /** @format email */
     pending_email: string;
     email_change_token: string;
+    password_reset_token: string;
     magic_link: {
       token: string;
       /**
@@ -8010,6 +8080,7 @@ export interface RestaurantReviewListResult {
     /** @format email */
     pending_email: string;
     email_change_token: string;
+    password_reset_token: string;
     magic_link: {
       token: string;
       /**
