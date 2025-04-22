@@ -70,6 +70,7 @@ interface JobDetail {
     note: string;
     point: string;
     transportation: string;
+    fee: number;
   };
   restaurant: {
     id: string;
@@ -519,25 +520,10 @@ export default function JobDetail({ params }: PageProps) {
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-lg font-bold mb-4">報酬</h3>
         <div className="space-y-4">
-          <div className="flex justify-between items-center pb-2 border-b">
-            <span>時給</span>
-            <span className="font-bold">
-              ¥{job.hourly_rate.toLocaleString()}
-            </span>
-          </div>
-          <div className="flex justify-between items-center pb-2 border-b">
-            <span>勤務時間</span>
-            <span>{hours}時間</span>
-          </div>
-          <div className="flex justify-between items-center pb-2 border-b">
-            <span>交通費</span>
-            <span>¥{(job.transportation || 0).toLocaleString()}</span>
-          </div>
           <div className="flex justify-between items-center text-lg font-bold">
-            <span>合計</span>
-            <span>¥{totalAmount.toLocaleString()}</span>
+            <span>報酬</span>
+            <span>¥{job.fee.toLocaleString()}</span>
           </div>
         </div>
       </div>
