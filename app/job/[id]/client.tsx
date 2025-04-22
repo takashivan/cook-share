@@ -203,8 +203,8 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center space-x-2">
-                        <Calendar className="h-5 w-5 text-gray-500" />
-                        <span className="font-medium">
+                        <Calendar className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm font-medium">
                           {new Date(jobDetail.job.work_date).toLocaleDateString(
                             "ja-JP",
                             {
@@ -216,24 +216,21 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                         </span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Clock className="h-5 w-5 text-gray-500" />
-                        <span>
+                        <Clock className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm">
                           {formatTime(jobDetail.job.start_time)} 〜{" "}
                           {formatTime(jobDetail.job.end_time)}
                         </span>
                       </div>
                     </div>
-                    <div className="text-xl font-bold text-orange-600">
-                      {jobDetail.job.fee.toLocaleString()}円
-                    </div>
                   </div>
 
                   {/* Restaurant Name and Job Title */}
                   <div className="mb-6">
-                    <h1 className="text-2xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
+                    <h1 className="text-xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
                       {jobDetail.restaurant.name}
                     </h1>
-                    <h2 className="text-xl text-gray-700">
+                    <h2 className="text-lg text-gray-700">
                       {jobDetail.job.title}
                     </h2>
                   </div>
@@ -267,9 +264,19 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
 
                     {/* Job Description */}
                     <div className="pt-2">
-                      <p className="text-base text-gray-700 leading-relaxed">
+                      <p className="text-sm text-gray-700 leading-relaxed">
                         {jobDetail.job.description}
                       </p>
+                    </div>
+
+                    {/* Reward Display for Mobile */}
+                    <div className="flex items-center justify-between py-3 px-4 bg-orange-50 rounded-lg">
+                      <span className="text-sm font-medium text-gray-600">
+                        報酬
+                      </span>
+                      <span className="text-lg font-bold text-orange-600">
+                        {jobDetail.job.fee.toLocaleString()}円
+                      </span>
                     </div>
 
                     <Button
@@ -279,7 +286,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                         jobDetail.job.number_of_spots === 0 ||
                         new Date(jobDetail.job.expiry_date) <= new Date()
                       }
-                      className={`w-full py-3 text-lg font-medium transition-all duration-300 transform hover:scale-[1.02] ${
+                      className={`w-full py-2 text-sm font-medium transition-all duration-300 transform hover:scale-[1.02] ${
                         user &&
                         jobDetail.job.number_of_spots > 0 &&
                         new Date(jobDetail.job.expiry_date) > new Date()
@@ -317,52 +324,52 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
 
                     <TabsContent value="details" className="space-y-8">
                       <div>
-                        <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                          <ScrollText className="h-5 w-5" />
+                        <h3 className="text-base font-bold mb-3 flex items-center gap-2">
+                          <ScrollText className="h-4 w-4" />
                           業務内容
                         </h3>
-                        <div className="text-base space-y-1 whitespace-pre-wrap text-gray-700 leading-relaxed">
+                        <div className="text-sm space-y-1 whitespace-pre-wrap text-gray-700 leading-relaxed">
                           {jobDetail.job.task}
                         </div>
                       </div>
 
                       <div>
-                        <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                          <Star className="h-5 w-5" />
+                        <h3 className="text-base font-bold mb-3 flex items-center gap-2">
+                          <Star className="h-4 w-4" />
                           アピールポイント
                         </h3>
-                        <div className="text-base space-y-1 whitespace-pre-wrap text-gray-700 leading-relaxed">
+                        <div className="text-sm space-y-1 whitespace-pre-wrap text-gray-700 leading-relaxed">
                           {jobDetail.job.point}
                         </div>
                       </div>
 
                       <div>
-                        <h3 className="text-lg font-bold mb-4">
+                        <h3 className="text-base font-bold mb-3">
                           必要なスキル・経験
                         </h3>
-                        <div className="text-base space-y-1 whitespace-pre-wrap text-gray-700 leading-relaxed">
+                        <div className="text-sm space-y-1 whitespace-pre-wrap text-gray-700 leading-relaxed">
                           {jobDetail.job.skill}
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <h3 className="text-lg font-bold mb-4">持ち物</h3>
-                          <div className="text-base text-gray-700">
+                          <h3 className="text-base font-bold mb-3">持ち物</h3>
+                          <div className="text-sm text-gray-700">
                             {jobDetail.job.whattotake}
                           </div>
                         </div>
                         <div>
-                          <h3 className="text-lg font-bold mb-4">服装規定</h3>
-                          <div className="text-base text-gray-700">
+                          <h3 className="text-base font-bold mb-3">服装規定</h3>
+                          <div className="text-sm text-gray-700">
                             {jobDetail.job.note}
                           </div>
                         </div>
                       </div>
 
                       <div>
-                        <h3 className="text-lg font-bold mb-4">交通費</h3>
-                        <div className="text-base text-gray-700">
+                        <h3 className="text-base font-bold mb-3">交通費</h3>
+                        <div className="text-sm text-gray-700">
                           {jobDetail.job.transportation}
                         </div>
                       </div>
@@ -370,21 +377,21 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
 
                     <TabsContent value="store" className="space-y-6">
                       <div>
-                        <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                          <Building2 className="h-5 w-5" />
+                        <h3 className="text-base font-bold mb-3 flex items-center gap-2">
+                          <Building2 className="h-4 w-4" />
                           店舗情報
                         </h3>
-                        <div className="space-y-4 text-base text-gray-700">
+                        <div className="space-y-4 text-sm text-gray-700">
                           <div>
-                            <h4 className="font-medium mb-2">店舗名</h4>
+                            <h4 className="font-medium mb-1">店舗名</h4>
                             <p>{jobDetail.restaurant.name}</p>
                           </div>
                           <div>
-                            <h4 className="font-medium mb-2">住所</h4>
+                            <h4 className="font-medium mb-1">住所</h4>
                             <p>{jobDetail.restaurant.address}</p>
                           </div>
                           <div>
-                            <h4 className="font-medium mb-2">営業時間</h4>
+                            <h4 className="font-medium mb-1">営業時間</h4>
                             <p>{jobDetail.restaurant.business_hours}</p>
                           </div>
                         </div>
@@ -393,17 +400,17 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
 
                     <TabsContent value="access" className="space-y-6">
                       <div>
-                        <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                          <Train className="h-5 w-5" />
+                        <h3 className="text-base font-bold mb-3 flex items-center gap-2">
+                          <Train className="h-4 w-4" />
                           アクセス情報
                         </h3>
-                        <div className="space-y-4 text-base text-gray-700">
+                        <div className="space-y-4 text-sm text-gray-700">
                           <div>
-                            <h4 className="font-medium mb-2">最寄り駅</h4>
+                            <h4 className="font-medium mb-1">最寄り駅</h4>
                             <p>{jobDetail.restaurant.station}</p>
                           </div>
                           <div>
-                            <h4 className="font-medium mb-2">アクセス方法</h4>
+                            <h4 className="font-medium mb-1">アクセス方法</h4>
                             <p>{jobDetail.restaurant.access}</p>
                           </div>
                           <div className="mt-4">
@@ -448,7 +455,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
 
                   <div className="flex items-center justify-between pb-4 border-b">
                     <div className="text-sm text-gray-500">勤務日</div>
-                    <div className="font-medium">
+                    <div className="text-sm font-medium">
                       {new Date(jobDetail.job.work_date).toLocaleDateString(
                         "ja-JP",
                         {
@@ -462,7 +469,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
 
                   <div className="flex items-center justify-between pb-4 border-b">
                     <div className="text-sm text-gray-500">時間</div>
-                    <div className="font-medium">
+                    <div className="text-sm font-medium">
                       {formatTime(jobDetail.job.start_time)} 〜{" "}
                       {formatTime(jobDetail.job.end_time)}
                     </div>
@@ -470,41 +477,11 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
 
                   <div className="flex items-center justify-between pb-4 border-b">
                     <div className="text-sm text-gray-500">報酬</div>
-                    <div className="font-bold text-orange-600">
+                    <div className="text-lg font-bold text-orange-600">
                       {jobDetail.job.fee.toLocaleString()}円
                     </div>
                   </div>
                 </div>
-
-                {/* Navigation Links */}
-                {/* <nav className="space-y-2">
-                  <a
-                    href="#details"
-                    className="flex items-center justify-between p-3 rounded-md hover:bg-gray-50 transition-colors">
-                    <span className="font-medium">募集要項</span>
-                    <ChevronRight className="h-4 w-4 text-gray-400" />
-                  </a>
-                  <a
-                    href="#store"
-                    className="flex items-center justify-between p-3 rounded-md hover:bg-gray-50 transition-colors">
-                    <span className="font-medium">店舗情報</span>
-                    <ChevronRight className="h-4 w-4 text-gray-400" />
-                  </a>
-                  <a
-                    href="#access"
-                    className="flex items-center justify-between p-3 rounded-md hover:bg-gray-50 transition-colors">
-                    <span className="font-medium">アクセス</span>
-                    <ChevronRight className="h-4 w-4 text-gray-400" />
-                  </a>
-                </nav> */}
-
-                {/* Job Description */}
-                {/* <div className="pt-2">
-                  <h3 className="text-sm text-gray-500 mb-2">仕事内容</h3>
-                  <p className="text-sm text-gray-700 leading-relaxed">
-                    {jobDetail.job.description}
-                  </p>
-                </div> */}
 
                 {/* Apply Button */}
                 <Button
@@ -514,7 +491,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                     jobDetail.job.number_of_spots === 0 ||
                     new Date(jobDetail.job.expiry_date * 1000) <= new Date()
                   }
-                  className={`w-full py-3 text-lg font-medium transition-all duration-300 transform hover:scale-[1.02] ${
+                  className={`w-full py-2 text-sm font-medium transition-all duration-300 transform hover:scale-[1.02] ${
                     user &&
                     jobDetail.job.number_of_spots > 0 &&
                     new Date(jobDetail.job.expiry_date * 1000) > new Date()
