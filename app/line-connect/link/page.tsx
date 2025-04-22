@@ -53,7 +53,7 @@ export default function LinkPage() {
 
       // ② LINE IDを紐づける（トークン付きで）
       await LinkLineId(lineUserId, name, picture, loginRes.authToken);
-      router.push("/chef/mypage");
+      router.push("/line-connect/liff");
     } catch (error) {
       console.error("連携失敗:", error);
     } finally {
