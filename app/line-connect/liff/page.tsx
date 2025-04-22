@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+
 import { CheckLineUser } from "@/lib/api/line";
+
 import {
   Calendar,
   Clock,
@@ -43,6 +45,7 @@ const AnimatedSection: React.FC<AnimatedSectionProps> = ({
     </motion.section>
   );
 };
+
 
 // 連携選択画面
 function LinkAccountScreen({
@@ -97,6 +100,34 @@ function LinkAccountScreen({
 // ダッシュボード
 function Dashboard({ profile }: { profile: any }) {
   const router = useRouter();
+=======
+export default function LiffDashboard() {
+  const router = useRouter();
+  const [profile, setProfile] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const initializeLiff = async () => {
+      try {
+        const liff = (await import("@line/liff")).default;
+        await liff.init({ liffId: process.env.NEXT_PUBLIC_LIFF_ID! });
+
+        if (!liff.isLoggedIn()) {
+          liff.login();
+          return;
+        }
+
+        const profile = await liff.getProfile();
+        setProfile(profile);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("LIFF initialization failed:", error);
+      }
+    };
+
+    initializeLiff();
+  }, []);
+
 
   const handleLogout = async () => {
     try {
@@ -107,6 +138,19 @@ function Dashboard({ profile }: { profile: any }) {
       console.error("Logout failed:", error);
     }
   };
+
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-gray-300 border-t-gray-900"></div>
+          <p className="mt-4 text-gray-600">読み込み中...</p>
+        </div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -139,7 +183,7 @@ function Dashboard({ profile }: { profile: any }) {
         </div>
       </header>
 
-      {/* ダッシュボードの内容 */}
+
       <main className="container mx-auto px-4 py-8">
         {/* ステータスカード */}
         <AnimatedSection className="mb-8">
@@ -317,6 +361,7 @@ function Dashboard({ profile }: { profile: any }) {
   );
 }
 
+
 export default function LiffPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
@@ -399,3 +444,4 @@ export default function LiffPage() {
 
   return null;
 }
+

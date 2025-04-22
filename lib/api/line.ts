@@ -24,6 +24,7 @@ export const LinkLineId = async (
   return res.json();
 };
 
+
 export const LinkLineUser = async (data: {
   line_user_id: string;
   email: string;
@@ -55,3 +56,4 @@ export const RegisterWithLine = async (data: {
   });
   return res.json();
 };
+

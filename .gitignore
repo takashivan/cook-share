@@ -42,6 +42,8 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 
+
 # Large image files
 public/chef_illust/hero_image.png
 public/chef_illust/chef_logo.png
+
