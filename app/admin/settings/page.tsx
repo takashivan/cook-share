@@ -357,7 +357,7 @@ export default function AdminSettingsPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="notifications" className="space-y-6">
+        {/* <TabsContent value="notifications" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>通知設定</CardTitle>
@@ -456,7 +456,7 @@ export default function AdminSettingsPage() {
               <Button>設定を保存</Button>
             </CardFooter>
           </Card>
-        </TabsContent>
+        </TabsContent> */}
       </Tabs>
     </div>
   );
