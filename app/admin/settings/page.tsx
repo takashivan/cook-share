@@ -18,6 +18,7 @@ import { Switch } from "@/components/ui/switch";
 import { CompanyEmailChangeModal } from "@/components/modals/CompanyEmailChangeModal";
 import { AlertCircle, Camera, CheckCircle2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { changePassword } from "@/lib/api/companyUser";
 import {
   Select,
   SelectContent,
@@ -47,10 +48,42 @@ export default function AdminSettingsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleEmailChange = (newEmail: string) => {
+  const handleEmailChange = (email: string) => {
     // 実際のアプリでは、ここでAPIを呼び出してメールアドレスを更新します
-    setUser((prev) => ({ ...prev, email: newEmail }));
+    setUser((prev) => ({ ...prev, email: email }));
+  };
+
+  const handlePasswordChange = async () => {
+    setError(null);
+    setIsSubmitting(true);
+
+    if (newPassword !== confirmPassword) {
+      setError("新しいパスワードと確認用パスワードが一致しません。");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setError("新しいパスワードは8文字以上で入力してください。");
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      await changePassword(newPassword);
+      setIsSuccess(true);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err) {
+      setError("パスワードの変更に失敗しました。");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleProfileSubmit = () => {
@@ -254,19 +287,13 @@ export default function AdminSettingsPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="current-password">現在のパスワード</Label>
-                <Input
-                  id="current-password"
-                  type="password"
-                  placeholder="••••••••"
-                />
-              </div>
-              <div className="space-y-2">
                 <Label htmlFor="new-password">新しいパスワード</Label>
                 <Input
                   id="new-password"
                   type="password"
                   placeholder="••••••••"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
                 />
               </div>
               <div className="space-y-2">
@@ -277,10 +304,12 @@ export default function AdminSettingsPage() {
                   id="confirm-password"
                   type="password"
                   placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                 />
               </div>
               <div className="flex items-center justify-between">
-                <Button>パスワードを変更</Button>
+                <Button onClick={handlePasswordChange}>パスワードを変更</Button>
               </div>
             </CardContent>
           </Card>
