@@ -170,10 +170,10 @@ export default function Page({ params }: PageProps) {
     null
   );
   console.log("selectedApplicant:", selectedApplicant);
-  const [isAcceptDialogOpen, setIsAcceptDialogOpen] = useState(false);
-  const [acceptMessage, setAcceptMessage] = useState(
-    "この度は、ご応募いただき、ありがとうございます！\n\n当日、何卒よろしくお願いいたします。"
-  );
+  // const [isAcceptDialogOpen, setIsAcceptDialogOpen] = useState(false);
+  // const [acceptMessage, setAcceptMessage] = useState(
+  //   "この度は、ご応募いただき、ありがとうございます！\n\n当日、何卒よろしくお願いいたします。"
+  // );
   const router = useRouter();
   const [messageInput, setMessageInput] = useState("");
   const [isQrDialogOpen, setIsQrDialogOpen] = useState(false);
@@ -248,32 +248,32 @@ export default function Page({ params }: PageProps) {
     messages,
   });
 
-  const handleAcceptApplication = async (applicationId: string) => {
-    try {
-      await applicationApi.acceptApplication(applicationId, {
-        message: acceptMessage,
-      });
-      setIsAcceptDialogOpen(false);
-      // ページをリフレッシュして最新の状態を取得
-      router.refresh();
-    } catch (error) {
-      console.error("Failed to accept application:", error);
-    }
-  };
+  // const handleAcceptApplication = async (applicationId: string) => {
+  //   try {
+  //     await applicationApi.acceptApplication(applicationId, {
+  //       message: acceptMessage,
+  //     });
+  //     setIsAcceptDialogOpen(false);
+  //     // ページをリフレッシュして最新の状態を取得
+  //     router.refresh();
+  //   } catch (error) {
+  //     console.error("Failed to accept application:", error);
+  //   }
+  // };
 
-  const handleRejectApplication = async (applicationId: string) => {
-    try {
-      await applicationApi.rejectApplication(applicationId);
-      // ページをリフレッシュして最新の状態を取得
-      router.refresh();
-      toast({
-        title: "不採用にしました",
-        description: "応募者を不採用にしました",
-      });
-    } catch (error) {
-      console.error("Failed to reject application:", error);
-    }
-  };
+  // const handleRejectApplication = async (applicationId: string) => {
+  //   try {
+  //     await applicationApi.rejectApplication(applicationId);
+  //     // ページをリフレッシュして最新の状態を取得
+  //     router.refresh();
+  //     toast({
+  //       title: "不採用にしました",
+  //       description: "応募者を不採用にしました",
+  //     });
+  //   } catch (error) {
+  //     console.error("Failed to reject application:", error);
+  //   }
+  // };
 
   const handleEditJobSubmit = async (data: FormData) => {
     try {
@@ -1124,7 +1124,7 @@ export default function Page({ params }: PageProps) {
           </Tabs>
         )}
       </div>
-      <Dialog open={isAcceptDialogOpen} onOpenChange={setIsAcceptDialogOpen}>
+      {/* <Dialog open={isAcceptDialogOpen} onOpenChange={setIsAcceptDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>採用の確認</DialogTitle>
@@ -1158,7 +1158,7 @@ export default function Page({ params }: PageProps) {
             </Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
       <Dialog
         open={isChefReviewModalOpen}
         onOpenChange={setIsChefReviewModalOpen}>
