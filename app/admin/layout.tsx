@@ -223,9 +223,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         },
         {
           title: "請求管理",
-          href: "/admin/company/billing",
+          href: "/admin/company/billings",
           icon: CreditCard,
-          active: pathname === "/admin/company/billing",
+          active: pathname === "/admin/company/billings",
           show: true,
         },
       ],
@@ -464,7 +464,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                       <span className="text-foreground">スタッフ管理</span>
                     </>
                   )}
-                  {pathname.includes("/company/billing") && (
+                  {pathname.includes("/company/billings") && (
                     <>
                       <ChevronRight className="h-4 w-4" />
                       <span className="text-foreground">請求管理</span>

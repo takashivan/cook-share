@@ -192,7 +192,7 @@ export function CompanyDashboard() {
                   </div>
                 ))}
                 <div className="mt-4">
-                  <Link href="/admin/company/billing">
+                  <Link href="/admin/company/billings">
                     <Button variant="outline" className="w-full">
                       すべての請求を表示
                     </Button>
