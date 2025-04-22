@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { CheckLineUser } from "@/lib/api/line";
 import {
   Calendar,
   Clock,
@@ -43,32 +44,59 @@ const AnimatedSection: React.FC<AnimatedSectionProps> = ({
   );
 };
 
-export default function LiffDashboard() {
+// 連携選択画面
+function LinkAccountScreen({
+  lineUserId,
+  name,
+  picture,
+}: {
+  lineUserId: string;
+  name: string;
+  picture: string;
+}) {
   const router = useRouter();
-  const [profile, setProfile] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const initializeLiff = async () => {
-      try {
-        const liff = (await import("@line/liff")).default;
-        await liff.init({ liffId: process.env.NEXT_PUBLIC_LIFF_ID! });
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md p-6">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            LINEアカウントの連携
+          </h2>
+          <p className="text-gray-600">
+            既存のアカウントと連携するか、新しいアカウントを作成しますか？
+          </p>
+        </div>
 
-        if (!liff.isLoggedIn()) {
-          liff.login();
-          return;
-        }
+        <div className="space-y-4">
+          <Button
+            className="w-full"
+            onClick={() => {
+              router.push(
+                `/line-connect/link?line_user_id=${encodeURIComponent(lineUserId)}&name=${encodeURIComponent(name)}&picture=${encodeURIComponent(picture)}`
+              );
+            }}>
+            既存のアカウントと連携
+          </Button>
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => {
+              router.push(
+                `/line-connect/register?line_user_id=${encodeURIComponent(lineUserId)}&name=${encodeURIComponent(name)}&picture=${encodeURIComponent(picture)}`
+              );
+            }}>
+            新規アカウントを作成
+          </Button>
+        </div>
+      </Card>
+    </div>
+  );
+}
 
-        const profile = await liff.getProfile();
-        setProfile(profile);
-        setIsLoading(false);
-      } catch (error) {
-        console.error("LIFF initialization failed:", error);
-      }
-    };
-
-    initializeLiff();
-  }, []);
+// ダッシュボード
+function Dashboard({ profile }: { profile: any }) {
+  const router = useRouter();
 
   const handleLogout = async () => {
     try {
@@ -79,17 +107,6 @@ export default function LiffDashboard() {
       console.error("Logout failed:", error);
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-gray-300 border-t-gray-900"></div>
-          <p className="mt-4 text-gray-600">読み込み中...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -122,6 +139,7 @@ export default function LiffDashboard() {
         </div>
       </header>
 
+      {/* ダッシュボードの内容 */}
       <main className="container mx-auto px-4 py-8">
         {/* ステータスカード */}
         <AnimatedSection className="mb-8">
@@ -297,4 +315,87 @@ export default function LiffDashboard() {
       </main>
     </div>
   );
+}
+
+export default function LiffPage() {
+  const router = useRouter();
+  const [profile, setProfile] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isLinked, setIsLinked] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const initializeLiff = async () => {
+      try {
+        const liff = (await import("@line/liff")).default;
+
+        // LIFFの初期化
+        await liff.init({
+          liffId: "2007239287-yqkpjQBl",
+          withLoginOnExternalBrowser: true,
+        });
+
+        // ログイン状態の確認
+        if (!liff.isLoggedIn()) {
+          liff.login();
+          return;
+        }
+
+        // プロフィール情報の取得
+        const profile = await liff.getProfile();
+        setProfile(profile);
+
+        // アカウント連携の確認
+        const response = await CheckLineUser(profile.userId);
+        setIsLinked(response && response.count > 0);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("LIFF initialization failed:", error);
+        setError("初期化に失敗しました。ページをリロードしてください。");
+        setIsLoading(false);
+      }
+    };
+
+    initializeLiff();
+  }, []);
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>
+            ページをリロード
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-gray-300 border-t-gray-900"></div>
+          <p className="mt-4 text-gray-600">読み込み中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isLinked && profile) {
+    return (
+      <LinkAccountScreen
+        lineUserId={profile.userId}
+        name={profile.displayName}
+        picture={profile.pictureUrl || ""}
+      />
+    );
+  }
+
+  if (isLinked && profile) {
+    return <Dashboard profile={profile} />;
+  }
+
+  return null;
 }
