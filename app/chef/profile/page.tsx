@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -11,7 +11,9 @@ import {
   MapPin,
   Award,
   Edit,
+  CreditCard,
 } from "lucide-react";
+import { updateUserProfile } from "@/lib/api/user";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,14 +21,35 @@ import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { ChefProfileEditModal } from "@/components/modals/ChefProfileEditModal";
-import { changeEmail } from "@/lib/api/user";
-import { confirmEmail } from "@/lib/api/user";
+import {
+  changeEmail,
+  confirmEmail,
+  getUserProfile,
+  UserProfile,
+} from "@/lib/api/user";
+import { createStripeAccountLink } from "@/lib/api/user";
 
 export default function ChefProfile() {
-  const { user } = useAuth();
+  const { user: authUser, logout } = useAuth();
+  const [user, setUser] = useState(authUser);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const { logout } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (authUser?.id) {
+        try {
+          const fullProfile = await getUserProfile(authUser.id);
+          setUser(fullProfile);
+        } catch (error) {
+          console.error("Error fetching user profile:", error);
+        }
+      }
+    };
+
+    fetchUserProfile();
+  }, [authUser?.id]);
+
   const handleLogout = () => {
     logout();
     router.replace("/login");
@@ -44,181 +67,157 @@ export default function ChefProfile() {
     setIsEditModalOpen(false);
   };
 
-  const handleSave = (data: any) => {
-    console.log(data);
+  const handleSave = async (updatedProfile: UserProfile) => {
+    setUser(updatedProfile);
   };
 
-  const demoProfileData = {
-    name: user.name,
-    email: user.email,
-    gender: user.gender || "未設定",
-    phone: user.phone || "未設定",
-    address: user.address || "未設定",
-    skills: ["和食", "洋食", "中華"],
-    experience: user.experience_level || "未設定",
-    certifications: ["調理師免許", "食品衛生責任者"],
-    bio: user.bio || "自己紹介が未設定です",
-    profileImage: user.profile_image || "",
+  const handleStripeAccountLink = async () => {
+    if (user.id) {
+      const res = await createStripeAccountLink(user.id);
+      if (res.response.result.url) {
+        const stripeWindow = window.open(res.response.result.url, "_blank");
+        if (!stripeWindow) {
+          throw new Error(
+            "ポップアップがブロックされました。ブラウザの設定を確認してください。"
+          );
+        }
+      }
+    }
   };
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-md">
-      <h1 className="text-2xl font-bold mb-8">プロフィール</h1>
-
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="relative">
-            <Image
-              src={
-                user.profile_image ||
-                `/placeholder.svg?height=80&width=80&text=${user.name.charAt(
-                  0
-                )}`
-              }
-              alt="Profile"
-              width={80}
-              height={80}
-              className="rounded-full"
-            />
-            <button className="absolute bottom-0 right-0 bg-gray-100 rounded-full p-1">
-              <Edit className="h-4 w-4" />
-            </button>
-          </div>
-          <div>
-            <h2 className="text-xl font-bold">{user.name}</h2>
-            <p className="text-gray-500">
-              {user.age}歳・{user.gender}
-            </p>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex items-start gap-3">
-            <Phone className="h-5 w-5 text-gray-400 mt-0.5" />
-            <div>
-              <h3 className="text-sm text-gray-500">電話番号</h3>
-              <p>{user.phone}</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <Mail className="h-5 w-5 text-gray-400 mt-0.5" />
-            <div>
-              <h3 className="text-sm text-gray-500">メールアドレス</h3>
-              <p>{user.email}</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <MapPin className="h-5 w-5 text-gray-400 mt-0.5" />
-            <div>
-              <h3 className="text-sm text-gray-500">住所</h3>
-              <p>{user.address}</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <Calendar className="h-5 w-5 text-gray-400 mt-0.5" />
-            <div>
-              <h3 className="text-sm text-gray-500">登録日</h3>
-              <p>
-                {user.created_at
-                  ? format(user.created_at, "yyyy年MM月dd日", {
-                      locale: ja,
-                    })
-                  : "未設定"}
-              </p>
-            </div>
-          </div>
-        </div>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">プロフィール</h1>
+        <Button variant="outline" onClick={() => setIsEditModalOpen(true)}>
+          <Edit className="w-4 h-4 mr-2" />
+          編集
+        </Button>
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold">スキル・経験</h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              setIsEditModalOpen(true);
-            }}>
-            <Edit className="h-4 w-4 mr-2" />
-            編集
-          </Button>
-        </div>
-
-        <ChefProfileEditModal
-          isOpen={isEditModalOpen}
-          onClose={handleEditModalClose}
-          onSave={handleSave}
-          profileData={demoProfileData}
-        />
-
-        <div className="space-y-4">
-          <div>
-            <h3 className="text-sm text-gray-500 mb-2">スキル</h3>
-            <div className="flex flex-wrap gap-2">
-              {user.skills?.map((skill: string, index: number) => (
-                <Badge
-                  key={index}
-                  className="bg-gray-100 text-gray-800 hover:bg-gray-100">
-                  {skill}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-sm text-gray-500 mb-2">経験年数</h3>
-            <p>{user.experience_level}</p>
-          </div>
-
-          <div>
-            <h3 className="text-sm text-gray-500 mb-2">保有資格</h3>
-            {user.certifications?.map((cert: string, index: number) => (
-              <div key={index} className="flex items-center gap-2">
-                <Award className="h-4 w-4 text-yellow-500" />
-                <span>{cert}</span>
+        <div className="flex items-center mb-6">
+          <div className="relative w-20 h-20 rounded-full overflow-hidden mr-4">
+            {user.profile_image ? (
+              <Image
+                src={user.profile_image}
+                alt={user.name}
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-400 text-xl">
+                  {user.name.charAt(0)}
+                </span>
               </div>
-            ))}
+            )}
           </div>
-
           <div>
-            <h3 className="text-sm text-gray-500 mb-2">自己紹介</h3>
-            <p className="text-sm">{user.bio}</p>
+            <h2 className="text-xl font-semibold">{user.name}</h2>
+            <p className="text-gray-500">{user.email}</p>
           </div>
+        </div>
+
+        <div className="space-y-4">
+          {user.bio && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">
+                自己紹介
+              </h3>
+              <p className="text-gray-800">{user.bio}</p>
+            </div>
+          )}
+
+          {user.skills && user.skills.length > 0 && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">スキル</h3>
+              <div className="flex flex-wrap gap-2">
+                {user.skills.map((skill, index) => (
+                  <Badge key={index} variant="secondary">
+                    {skill}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {user.experience && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">経験</h3>
+              <p className="text-gray-800">{user.experience}</p>
+            </div>
+          )}
+
+          {user.certifications && user.certifications.length > 0 && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">資格</h3>
+              <div className="flex flex-wrap gap-2">
+                {user.certifications.map((cert, index) => (
+                  <Badge key={index} variant="outline">
+                    {cert}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="space-y-4">
-        <Link
-          href="/chef/account-settings"
-          className="flex items-center justify-between p-4 bg-white rounded-lg shadow-md">
-          <span>アカウント設定</span>
-          <ChevronRight className="h-5 w-5 text-gray-400" />
-        </Link>
-        {/* 
-        <Link
-          href="/chef/notification-settings"
-          className="flex items-center justify-between p-4 bg-white rounded-lg shadow-md">
-          <span>通知設定</span>
-          <ChevronRight className="h-5 w-5 text-gray-400" />
-        </Link> */}
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h3 className="text-lg font-semibold mb-4">連絡先情報</h3>
+        <div className="space-y-4">
+          {user.phone && (
+            <div className="flex items-center">
+              <Phone className="w-5 h-5 text-gray-500 mr-3" />
+              <span className="text-gray-800">{user.phone}</span>
+            </div>
+          )}
+          {user.email && (
+            <div className="flex items-center">
+              <Mail className="w-5 h-5 text-gray-500 mr-3" />
+              <span className="text-gray-800">{user.email}</span>
+            </div>
+          )}
+          {user.address && (
+            <div className="flex items-center">
+              <MapPin className="w-5 h-5 text-gray-500 mr-3" />
+              <span className="text-gray-800">{user.address}</span>
+            </div>
+          )}
+        </div>
+      </div>
 
-        <Link
-          href="/chef/payment-settings"
-          className="flex items-center justify-between p-4 bg-white rounded-lg shadow-md">
-          <span>支払い設定</span>
-          <ChevronRight className="h-5 w-5 text-gray-400" />
-        </Link>
+      {/* 支払い情報 */}
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h3 className="text-lg font-semibold mb-4">支払い情報</h3>
+        <Button variant="outline" onClick={() => handleStripeAccountLink()}>
+          Stripeアカウントを設定
+        </Button>
 
-        <Button
-          variant="outline"
-          className="w-full mt-6"
-          onClick={handleLogout}>
+        <div className="space-y-4">
+          {user.stripe_verified && (
+            <div className="flex items-center">
+              <CreditCard className="w-5 h-5 text-gray-500 mr-3" />
+              <span className="text-gray-800">
+                Stripeアカウントが登録されています。
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="mt-6">
+        <Button variant="outline" className="w-full" onClick={handleLogout}>
           ログアウト
         </Button>
       </div>
+
+      <ChefProfileEditModal
+        isOpen={isEditModalOpen}
+        onClose={handleEditModalClose}
+        onSave={handleSave}
+        user={user}
+      />
     </div>
   );
 }

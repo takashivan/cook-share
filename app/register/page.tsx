@@ -38,7 +38,7 @@ export default function RegisterPage() {
       };
 
       const response = await register(data);
-      await login(response.authToken, response.user);
+      await login(response.authToken, response.user.id);
 
       toast({
         title: "登録が完了しました",

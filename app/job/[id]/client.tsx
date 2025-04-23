@@ -15,9 +15,10 @@ import {
   ScrollText,
   Star,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { getUserProfile } from "@/lib/api/user";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import { useMobile } from "@/hooks/use-mobile";
 import { ApplyJobModal } from "@/components/modals/ApplyJobModal";
 import { applicationApi } from "@/lib/api/application";
@@ -89,11 +90,29 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
   const [activeTab, setActiveTab] = useState<"details" | "store" | "access">(
     "details"
   );
+
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isMobile = useMobile();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user: authUser } = useAuth();
+  const [user, setUser] = useState(authUser);
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (authUser?.id) {
+        try {
+          const fullProfile = await getUserProfile(authUser.id);
+          setUser(fullProfile);
+        } catch (error) {
+          console.error("Error fetching user profile:", error);
+        }
+      }
+    };
+
+    fetchUserProfile();
+  }, [authUser?.id]);
+
+  console.log("user", user);
   const [applicationId, setApplicationId] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const { toast } = useToast();
@@ -103,6 +122,15 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
       toast({
         variant: "destructive",
         description: "ログインしてください",
+      });
+      return;
+    }
+
+    if (!user.is_approved) {
+      toast({
+        variant: "destructive",
+        description:
+          "シェフとしての審査が完了していません。審査完了までお待ちください。",
       });
       return;
     }
@@ -283,6 +311,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                       onClick={() => setIsApplyModalOpen(true)}
                       disabled={
                         !user ||
+                        !user.is_approved ||
                         jobDetail.job.number_of_spots === 0 ||
                         new Date(jobDetail.job.expiry_date) <= new Date()
                       }
@@ -295,10 +324,13 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                       }`}>
                       {!user
                         ? "シェフとしてログインして応募する"
-                        : jobDetail.job.number_of_spots > 0 &&
-                            new Date(jobDetail.job.expiry_date) > new Date()
-                          ? "応募する"
-                          : "締め切りました"}
+                        : !user.is_approved
+                          ? "シェフとしての審査が完了していません"
+                          : jobDetail.job.number_of_spots === 0
+                            ? "募集人数が上限に達しました"
+                            : new Date(jobDetail.job.expiry_date) <= new Date()
+                              ? "募集期間が終了しました"
+                              : "応募する"}
                     </Button>
                   </div>
                 </motion.div>
@@ -488,8 +520,9 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                   onClick={() => setIsApplyModalOpen(true)}
                   disabled={
                     !user ||
+                    !user.is_approved ||
                     jobDetail.job.number_of_spots === 0 ||
-                    new Date(jobDetail.job.expiry_date * 1000) <= new Date()
+                    new Date(jobDetail.job.expiry_date) <= new Date()
                   }
                   className={`w-full py-2 text-sm font-medium transition-all duration-300 transform hover:scale-[1.02] ${
                     user &&
@@ -500,10 +533,13 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                   }`}>
                   {!user
                     ? "シェフとしてログインして応募する"
-                    : jobDetail.job.number_of_spots > 0 &&
-                        new Date(jobDetail.job.expiry_date * 1000) > new Date()
-                      ? "応募する"
-                      : "締め切りました"}
+                    : !user.is_approved
+                      ? "シェフとしての審査が完了していません"
+                      : jobDetail.job.number_of_spots === 0
+                        ? "募集人数が上限に達しました"
+                        : new Date(jobDetail.job.expiry_date) <= new Date()
+                          ? "募集期間が終了しました"
+                          : "応募する"}
                 </Button>
               </div>
             </motion.div>
