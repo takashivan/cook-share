@@ -188,6 +188,20 @@ export default function ChefProfile() {
         </div>
       </div>
 
+      {/* アカウント情報 */}
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h3 className="text-lg font-semibold mb-4">アカウント情報</h3>
+        <div className="space-y-4">
+          <div className="flex items-center">
+            <Button
+              variant="outline"
+              onClick={() => router.push("/chef/account-settings")}>
+              アカウント設定
+            </Button>
+          </div>
+        </div>
+      </div>
+
       {/* 支払い情報 */}
       <div className="bg-white rounded-lg shadow-md p-6">
         <h3 className="text-lg font-semibold mb-4">支払い情報</h3>
