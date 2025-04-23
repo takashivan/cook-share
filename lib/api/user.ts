@@ -87,9 +87,10 @@ interface SettingsData {
 // 認証関連
 export const login = async (
   credentials: Credentials
-): Promise<{ authToken: string; user: UserProfile }> => {
+): Promise<{ sessionToken: string; authToken: string; user: UserProfile }> => {
   try {
     const response = await apiRequest<{
+      sessionToken: string;
       authToken: string;
       user: {
         id: string;
@@ -105,12 +106,13 @@ export const login = async (
       };
     }>(`${AUTH_URL}/login`, "POST", credentials);
 
-    if (response.authToken) {
-      setAuthToken(response.authToken, "chef");
+    if (response.sessionToken) {
+      setAuthToken(response.sessionToken, "chef");
       setCurrentUser(response.user, "chef");
     }
 
     return {
+      sessionToken: response.sessionToken,
       authToken: response.authToken,
       user: {
         ...response.user,
