@@ -9,10 +9,16 @@ import {
   Calendar,
   ArrowRight,
   PartyPopper,
+  ChevronDown,
+  Building2,
+  Train,
+  ScrollText,
+  Star,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { getUserProfile } from "@/lib/api/user";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import { useMobile } from "@/hooks/use-mobile";
 import { ApplyJobModal } from "@/components/modals/ApplyJobModal";
 import { applicationApi } from "@/lib/api/application";
@@ -23,6 +29,15 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
+import { GoogleMap } from "@/components/maps/GoogleMap";
+import { cn } from "@/lib/utils";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Restaurant {
   id: string;
@@ -75,11 +90,29 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
   const [activeTab, setActiveTab] = useState<"details" | "store" | "access">(
     "details"
   );
+
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isMobile = useMobile();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user: authUser } = useAuth();
+  const [user, setUser] = useState(authUser);
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (authUser?.id) {
+        try {
+          const fullProfile = await getUserProfile(authUser.id);
+          setUser(fullProfile);
+        } catch (error) {
+          console.error("Error fetching user profile:", error);
+        }
+      }
+    };
+
+    fetchUserProfile();
+  }, [authUser?.id]);
+
+  console.log("user", user);
   const [applicationId, setApplicationId] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const { toast } = useToast();
@@ -89,6 +122,15 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
       toast({
         variant: "destructive",
         description: "ログインしてください",
+      });
+      return;
+    }
+
+    if (!user.is_approved) {
+      toast({
+        variant: "destructive",
+        description:
+          "シェフとしての審査が完了していません。審査完了までお待ちください。",
       });
       return;
     }
@@ -177,11 +219,275 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
-              {/* Date and Time */}
-              <div className="inline-block border rounded-md mb-4">
-                <div className="flex items-center">
-                  <div className="px-4 py-2 border-r">
-                    <span className="font-medium">
+              {/* Main Content Area */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Key Information Card */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="bg-white rounded-lg shadow-md p-6">
+                  {/* Date and Fee Banner */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-2">
+                        <Calendar className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm font-medium">
+                          {new Date(jobDetail.job.work_date).toLocaleDateString(
+                            "ja-JP",
+                            {
+                              month: "2-digit",
+                              day: "2-digit",
+                              weekday: "short",
+                            }
+                          )}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Clock className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm">
+                          {formatTime(jobDetail.job.start_time)} 〜{" "}
+                          {formatTime(jobDetail.job.end_time)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Restaurant Name and Job Title */}
+                  <div className="mb-6">
+                    <h1 className="text-xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
+                      {jobDetail.restaurant.name}
+                    </h1>
+                    <h2 className="text-lg text-gray-700">
+                      {jobDetail.job.title}
+                    </h2>
+                  </div>
+
+                  {/* Main Image */}
+                  <div className="relative aspect-[16/9] mb-6">
+                    <Image
+                      src={jobDetail.job.image || "/placeholder.svg"}
+                      alt={jobDetail.job.title}
+                      fill
+                      className="object-cover rounded-lg shadow-lg"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent rounded-lg" />
+                  </div>
+
+                  {/* Status Badge and Apply Button */}
+                  <div className="space-y-4">
+                    <Badge
+                      variant="secondary"
+                      className={`text-sm ${
+                        jobDetail.job.number_of_spots > 0 &&
+                        new Date(jobDetail.job.expiry_date) > new Date()
+                          ? "bg-black text-white"
+                          : "bg-gray-500 text-white"
+                      }`}>
+                      {jobDetail.job.number_of_spots > 0 &&
+                      new Date(jobDetail.job.expiry_date) > new Date()
+                        ? `残り${jobDetail.job.number_of_spots}名募集中`
+                        : "締め切りました"}
+                    </Badge>
+
+                    {/* Job Description */}
+                    <div className="pt-2">
+                      <p className="text-sm text-gray-700 leading-relaxed">
+                        {jobDetail.job.description}
+                      </p>
+                    </div>
+
+                    {/* Reward Display for Mobile */}
+                    <div className="flex items-center justify-between py-3 px-4 bg-orange-50 rounded-lg">
+                      <span className="text-sm font-medium text-gray-600">
+                        報酬
+                      </span>
+                      <span className="text-lg font-bold text-orange-600">
+                        {jobDetail.job.fee.toLocaleString()}円
+                      </span>
+                    </div>
+
+                    <Button
+                      onClick={() => setIsApplyModalOpen(true)}
+                      disabled={
+                        !user ||
+                        !user.is_approved ||
+                        jobDetail.job.number_of_spots === 0 ||
+                        new Date(jobDetail.job.expiry_date) <= new Date()
+                      }
+                      className={`w-full py-2 text-sm font-medium transition-all duration-300 transform hover:scale-[1.02] ${
+                        user &&
+                        jobDetail.job.number_of_spots > 0 &&
+                        new Date(jobDetail.job.expiry_date) > new Date()
+                          ? "bg-orange-600 hover:bg-orange-700 text-white"
+                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      }`}>
+                      {!user
+                        ? "シェフとしてログインして応募する"
+                        : !user.is_approved
+                          ? "シェフとしての審査が完了していません"
+                          : jobDetail.job.number_of_spots === 0
+                            ? "募集人数が上限に達しました"
+                            : new Date(jobDetail.job.expiry_date) <= new Date()
+                              ? "募集期間が終了しました"
+                              : "応募する"}
+                    </Button>
+                  </div>
+                </motion.div>
+
+                {/* Tabbed Content */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="bg-white rounded-lg shadow-md p-6">
+                  <Tabs defaultValue="details" className="w-full">
+                    <TabsList className="w-full mb-6">
+                      <TabsTrigger value="details" className="flex-1">
+                        募集要項
+                      </TabsTrigger>
+                      <TabsTrigger value="store" className="flex-1">
+                        店舗情報
+                      </TabsTrigger>
+                      <TabsTrigger value="access" className="flex-1">
+                        アクセス
+                      </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="details" className="space-y-8">
+                      <div>
+                        <h3 className="text-base font-bold mb-3 flex items-center gap-2">
+                          <ScrollText className="h-4 w-4" />
+                          業務内容
+                        </h3>
+                        <div className="text-sm space-y-1 whitespace-pre-wrap text-gray-700 leading-relaxed">
+                          {jobDetail.job.task}
+                        </div>
+                      </div>
+
+                      <div>
+                        <h3 className="text-base font-bold mb-3 flex items-center gap-2">
+                          <Star className="h-4 w-4" />
+                          アピールポイント
+                        </h3>
+                        <div className="text-sm space-y-1 whitespace-pre-wrap text-gray-700 leading-relaxed">
+                          {jobDetail.job.point}
+                        </div>
+                      </div>
+
+                      <div>
+                        <h3 className="text-base font-bold mb-3">
+                          必要なスキル・経験
+                        </h3>
+                        <div className="text-sm space-y-1 whitespace-pre-wrap text-gray-700 leading-relaxed">
+                          {jobDetail.job.skill}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <h3 className="text-base font-bold mb-3">持ち物</h3>
+                          <div className="text-sm text-gray-700">
+                            {jobDetail.job.whattotake}
+                          </div>
+                        </div>
+                        <div>
+                          <h3 className="text-base font-bold mb-3">服装規定</h3>
+                          <div className="text-sm text-gray-700">
+                            {jobDetail.job.note}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h3 className="text-base font-bold mb-3">交通費</h3>
+                        <div className="text-sm text-gray-700">
+                          {jobDetail.job.transportation}
+                        </div>
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="store" className="space-y-6">
+                      <div>
+                        <h3 className="text-base font-bold mb-3 flex items-center gap-2">
+                          <Building2 className="h-4 w-4" />
+                          店舗情報
+                        </h3>
+                        <div className="space-y-4 text-sm text-gray-700">
+                          <div>
+                            <h4 className="font-medium mb-1">店舗名</h4>
+                            <p>{jobDetail.restaurant.name}</p>
+                          </div>
+                          <div>
+                            <h4 className="font-medium mb-1">住所</h4>
+                            <p>{jobDetail.restaurant.address}</p>
+                          </div>
+                          <div>
+                            <h4 className="font-medium mb-1">営業時間</h4>
+                            <p>{jobDetail.restaurant.business_hours}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="access" className="space-y-6">
+                      <div>
+                        <h3 className="text-base font-bold mb-3 flex items-center gap-2">
+                          <Train className="h-4 w-4" />
+                          アクセス情報
+                        </h3>
+                        <div className="space-y-4 text-sm text-gray-700">
+                          <div>
+                            <h4 className="font-medium mb-1">最寄り駅</h4>
+                            <p>{jobDetail.restaurant.station}</p>
+                          </div>
+                          <div>
+                            <h4 className="font-medium mb-1">アクセス方法</h4>
+                            <p>{jobDetail.restaurant.access}</p>
+                          </div>
+                          <div className="mt-4">
+                            <GoogleMap
+                              address={jobDetail.restaurant.address}
+                              className="h-64 w-full rounded-lg shadow-md"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                </motion.div>
+              </div>
+            </div>
+
+            {/* Sidebar - Desktop only */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+              className="hidden lg:block lg:col-span-1">
+              <div className="border rounded-lg p-6 bg-white sticky top-4 space-y-6 shadow-md">
+                {/* Quick Info */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between pb-4 border-b">
+                    <div className="text-sm text-gray-500">募集状況</div>
+                    <Badge
+                      variant="secondary"
+                      className={`${
+                        jobDetail.job.number_of_spots > 0 &&
+                        new Date(jobDetail.job.expiry_date) > new Date()
+                          ? "bg-black text-white"
+                          : "bg-gray-500 text-white"
+                      }`}>
+                      {jobDetail.job.number_of_spots > 0 &&
+                      new Date(jobDetail.job.expiry_date) > new Date()
+                        ? `残り${jobDetail.job.number_of_spots}名`
+                        : "締め切り"}
+                    </Badge>
+                  </div>
+
+                  <div className="flex items-center justify-between pb-4 border-b">
+                    <div className="text-sm text-gray-500">勤務日</div>
+                    <div className="text-sm font-medium">
                       {new Date(jobDetail.job.work_date).toLocaleDateString(
                         "ja-JP",
                         {
@@ -190,427 +496,35 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                           weekday: "short",
                         }
                       )}
-                    </span>
-                  </div>
-                  <div className="px-4 py-2">
-                    <span>
-                      {new Date(jobDetail.job.start_time).toLocaleTimeString(
-                        "ja-JP",
-                        {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        }
-                      )}{" "}
-                      〜{" "}
-                      {new Date(jobDetail.job.end_time).toLocaleTimeString(
-                        "ja-JP",
-                        {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        }
-                      )}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Job Title */}
-              <h1 className="text-xl font-bold mb-4">
-                {jobDetail.restaurant.name}
-              </h1>
-
-              {/* Job Image */}
-              <div className="mb-6">
-                <div className="relative aspect-[16/9]">
-                  <Image
-                    src={jobDetail.job.image || "/placeholder.svg"}
-                    alt={jobDetail.job.title}
-                    fill
-                    className="object-cover rounded-md"
-                  />
-                </div>
-              </div>
-
-              {/* Job Description */}
-              <div className="mb-6">
-                <h2 className="text-lg font-bold mb-2">
-                  {jobDetail.job.title}
-                </h2>
-                <p className="text-sm text-gray-700 mb-4 leading-relaxed">
-                  {jobDetail.job.description}
-                </p>
-                <Badge
-                  variant="secondary"
-                  className={`text-sm mb-0 ${
-                    jobDetail.job.number_of_spots > 0 &&
-                    new Date(jobDetail.job.expiry_date) > new Date()
-                      ? "bg-black text-white"
-                      : "bg-gray-500 text-white"
-                  }`}>
-                  {jobDetail.job.number_of_spots > 0 &&
-                  new Date(jobDetail.job.expiry_date) > new Date()
-                    ? `残り${jobDetail.job.number_of_spots}名募集中`
-                    : "締め切りました"}
-                </Badge>
-                <div className="flex justify-center mt-3">
-                  <Button
-                    onClick={() => setIsApplyModalOpen(true)}
-                    disabled={
-                      !user ||
-                      jobDetail.job.number_of_spots === 0 ||
-                      new Date(jobDetail.job.expiry_date) <= new Date()
-                    }
-                    className={`w-full rounded-md py-2 flex items-center justify-center gap-2 ${
-                      user &&
-                      jobDetail.job.number_of_spots > 0 &&
-                      new Date(jobDetail.job.expiry_date) > new Date()
-                        ? "bg-orange-600 hover:bg-orange-700 text-white"
-                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    }`}>
-                    {!user
-                      ? "シェフとしてログインして応募する"
-                      : jobDetail.job.number_of_spots > 0 &&
-                          new Date(jobDetail.job.expiry_date) > new Date()
-                        ? "応募する"
-                        : "締め切りました"}
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-
-              {/* Mobile Tabs */}
-              {isMobile && (
-                <div className="mb-4 border-t pt-4">
-                  <div className="flex border rounded-md overflow-hidden">
-                    <button
-                      className={`flex-1 py-2 text-center text-sm ${
-                        activeTab === "details"
-                          ? "bg-gray-100 font-medium"
-                          : "bg-white"
-                      }`}
-                      onClick={() => setActiveTab("details")}>
-                      募集要項
-                    </button>
-                    <button
-                      className={`flex-1 py-2 text-center text-sm ${
-                        activeTab === "store"
-                          ? "bg-gray-100 font-medium"
-                          : "bg-white"
-                      }`}
-                      onClick={() => setActiveTab("store")}>
-                      店舗情報
-                    </button>
-                    <button
-                      className={`flex-1 py-2 text-center text-sm ${
-                        activeTab === "access"
-                          ? "bg-gray-100 font-medium"
-                          : "bg-white"
-                      }`}
-                      onClick={() => setActiveTab("access")}>
-                      アクセス
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Job Details - Desktop or Mobile with active tab */}
-              {(!isMobile || (isMobile && activeTab === "details")) && (
-                <>
-                  <hr className="my-8" />
-                  <div className="mb-8">
-                    <h2 className="text-lg font-bold mb-4">募集要項</h2>
-
-                    <div className="space-y-6">
-                      {/* Working Hours */}
-                      <div className="flex">
-                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
-                        <div>
-                          <h3 className="font-medium mb-1">勤務時間</h3>
-                          <p className="text-sm">
-                            {" "}
-                            <span>
-                              {new Date(
-                                jobDetail.job.start_time
-                              ).toLocaleTimeString("ja-JP", {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}{" "}
-                              〜{" "}
-                              {new Date(
-                                jobDetail.job.end_time
-                              ).toLocaleTimeString("ja-JP", {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </span>
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Specific Shift */}
-                      <div className="flex">
-                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
-                        <div>
-                          <h3 className="font-medium mb-1">
-                            想定の勤務時間・終了時間
-                          </h3>
-                          <p className="text-sm">
-                            <span>
-                              {new Date(
-                                jobDetail.job.start_time
-                              ).toLocaleTimeString("ja-JP", {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}{" "}
-                              〜{" "}
-                              {new Date(
-                                jobDetail.job.end_time
-                              ).toLocaleTimeString("ja-JP", {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </span>
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Specific Shift */}
-                      <div className="flex">
-                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
-                        <div>
-                          <h3 className="font-medium mb-1">報酬額</h3>
-                          <p className="text-lg">
-                            <span className="font-bold">
-                              {jobDetail.job.fee.toLocaleString()}円
-                            </span>
-                          </p>
-                        </div>
-                      </div>
-                      {/* Hourly Wage
-                      <div className="border border-red-500 p-4 rounded-md">
-                        <div className="flex">
-                          <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
-                          <div>
-                            <h3 className="font-medium mb-1">
-                              時間あたりの報酬額
-                            </h3>
-                            <p className="text-sm">****円</p>
-                          </div>
-                        </div>
-
-                        <div className="flex mt-4">
-                          <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
-                          <div>
-                            <h3 className="font-medium mb-1">
-                              時間あたりの店舗報酬額
-                            </h3>
-                            <p className="text-sm">****円</p>
-                          </div>
-                        </div>
-
-                        <div className="flex mt-4">
-                          <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
-                          <div>
-                            <h3 className="font-medium mb-1">想定報酬総額</h3>
-                            <p className="text-sm">****円</p>
-                          </div>
-                        </div>
-
-                        <div className="flex justify-center mt-4">
-                          <div className="text-center">
-                            <p className="text-sm mb-2">
-                              アカウント登録後に確認できます。
-                            </p>
-                            <div className="flex justify-center mb-2">
-                              <Button className="bg-white border border-red-500 text-red-500 hover:bg-red-50 rounded-md px-4 py-2 flex items-center gap-2">
-                                シェフの皆様にご登録
-                                <ChevronRight className="h-4 w-4" />
-                              </Button>
-                            </div>
-                            <Link
-                              href="#"
-                              className="text-sm text-gray-500 flex items-center justify-center gap-1">
-                              ログインはこちら
-                            </Link>
-                          </div>
-                        </div>
-                      </div> */}
-
-                      {/* Transportation */}
-                      <div className="flex">
-                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
-                        <div>
-                          <h3 className="font-medium mb-1">交通費</h3>
-                          <p className="text-sm">
-                            {" "}
-                            {jobDetail.job.transportation}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Job Details */}
-                      <div className="flex">
-                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
-                        <div>
-                          <h3 className="font-medium mb-1">
-                            想定の業務委託内容
-                          </h3>
-                          <div className="text-sm space-y-1 whitespace-pre-wrap">
-                            {jobDetail.job.task}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Appeal Points */}
-                      <div className="flex">
-                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
-                        <div>
-                          <h3 className="font-medium mb-1">アピールポイント</h3>
-                          <div className="text-sm space-y-1 whitespace-pre-wrap">
-                            {jobDetail.job.point}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Required Skills */}
-                      <div className="flex">
-                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
-                        <div>
-                          <h3 className="font-medium mb-1">
-                            必要なスキル・経験
-                          </h3>
-                          <div className="text-sm space-y-1 whitespace-pre-wrap">
-                            {jobDetail.job.skill}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Dress Code */}
-                      <div className="flex">
-                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
-                        <div>
-                          <h3 className="font-medium mb-1">持ち物</h3>
-                          <div className="text-sm space-y-1">
-                            {jobDetail.job.whattotake}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Dress Regulations */}
-                      <div className="flex">
-                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
-                        <div>
-                          <h3 className="font-medium mb-1">服装規定</h3>
-                          <div className="text-sm space-y-1">
-                            {jobDetail.job.note}
-                          </div>
-                        </div>
-                      </div>
                     </div>
                   </div>
-                </>
-              )}
 
-              {/* Store Information - Desktop or Mobile with active tab */}
-              {(!isMobile || (isMobile && activeTab === "store")) && (
-                <>
-                  {!isMobile && <hr className="my-8" />}
-                  <div className="mb-8">
-                    <h2 className="text-lg font-bold mb-4">店舗情報</h2>
-
-                    <div className="space-y-6">
-                      <div className="flex">
-                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
-                        <div>
-                          <h3 className="font-medium mb-1">店舗名</h3>
-                          <p className="text-sm">{jobDetail.restaurant.name}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex">
-                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
-                        <div>
-                          <h3 className="font-medium mb-1">住所</h3>
-                          <p className="text-sm">
-                            {jobDetail.restaurant.address}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex">
-                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
-                        <div>
-                          <h3 className="font-medium mb-1">営業時間</h3>
-                          <p className="text-sm">
-                            {jobDetail.restaurant.business_hours}
-                          </p>
-                        </div>
-                      </div>
+                  <div className="flex items-center justify-between pb-4 border-b">
+                    <div className="text-sm text-gray-500">時間</div>
+                    <div className="text-sm font-medium">
+                      {formatTime(jobDetail.job.start_time)} 〜{" "}
+                      {formatTime(jobDetail.job.end_time)}
                     </div>
                   </div>
-                </>
-              )}
 
-              {/* Access Information - Desktop or Mobile with active tab */}
-              {(!isMobile || (isMobile && activeTab === "access")) && (
-                <>
-                  {!isMobile && <hr className="my-8" />}
-                  <div className="mb-8">
-                    <h2 className="text-lg font-bold mb-4">アクセス</h2>
-
-                    <div className="space-y-6">
-                      <div className="flex">
-                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
-                        <div>
-                          <h3 className="font-medium mb-1">最寄り駅</h3>
-                          <p className="text-sm">
-                            {jobDetail.restaurant.station}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex">
-                        <div className="flex-shrink-0 w-3 h-3 rounded-sm bg-red-500 mr-2 mt-1.5"></div>
-                        <div>
-                          <h3 className="font-medium mb-1">アクセス方法</h3>
-                          <p className="text-sm">
-                            {jobDetail.restaurant.access}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="mt-4">
-                        <div className="bg-gray-200 h-64 w-full rounded-md flex items-center justify-center">
-                          <p className="text-gray-500">地図が表示されます</p>
-                        </div>
-                      </div>
+                  <div className="flex items-center justify-between pb-4 border-b">
+                    <div className="text-sm text-gray-500">報酬</div>
+                    <div className="text-lg font-bold text-orange-600">
+                      {jobDetail.job.fee.toLocaleString()}円
                     </div>
                   </div>
-                </>
-              )}
-            </div>
-
-            {/* Sidebar - Desktop only */}
-            <div className="hidden lg:block lg:col-span-1">
-              <div className="border rounded-md p-4 bg-white sticky top-4">
-                <div className="text-center py-2 border-b mb-2">
-                  <h3 className="font-medium">募集要項</h3>
-                </div>
-                <div className="text-center py-2 border-b mb-2">
-                  <h3 className="font-medium">店舗情報</h3>
-                </div>
-                <div className="text-center py-2 border-b mb-4">
-                  <h3 className="font-medium">アクセス</h3>
                 </div>
 
+                {/* Apply Button */}
                 <Button
                   onClick={() => setIsApplyModalOpen(true)}
                   disabled={
                     !user ||
+                    !user.is_approved ||
                     jobDetail.job.number_of_spots === 0 ||
-                    new Date(jobDetail.job.expiry_date * 1000) <= new Date()
+                    new Date(jobDetail.job.expiry_date) <= new Date()
                   }
-                  className={`w-full rounded-md py-2 flex items-center justify-center gap-2 ${
+                  className={`w-full py-2 text-sm font-medium transition-all duration-300 transform hover:scale-[1.02] ${
                     user &&
                     jobDetail.job.number_of_spots > 0 &&
                     new Date(jobDetail.job.expiry_date * 1000) > new Date()
@@ -619,14 +533,16 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                   }`}>
                   {!user
                     ? "シェフとしてログインして応募する"
-                    : jobDetail.job.number_of_spots > 0 &&
-                        new Date(jobDetail.job.expiry_date * 1000) > new Date()
-                      ? "応募する"
-                      : "締め切りました"}
-                  <ChevronRight className="h-4 w-4" />
+                    : !user.is_approved
+                      ? "シェフとしての審査が完了していません"
+                      : jobDetail.job.number_of_spots === 0
+                        ? "募集人数が上限に達しました"
+                        : new Date(jobDetail.job.expiry_date) <= new Date()
+                          ? "募集期間が終了しました"
+                          : "応募する"}
                 </Button>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </main>

@@ -20,6 +20,13 @@ export default function ChefLayout({
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    setIsMenuOpen(false);
+    router.replace("/login");
+  };
 
   useEffect(() => {
     // 初期ロード時は何もしない
@@ -100,12 +107,12 @@ export default function ChefLayout({
                 </div>
 
                 <div className="mt-auto p-6 space-y-4">
-                  <Link
+                  {/* <Link
                     href="/chef/applications"
                     className="flex items-center justify-center py-4 px-6 rounded-full border border-gray-300 w-full"
                     onClick={() => setIsMenuOpen(false)}>
                     <span className="text-gray-500">応募履歴</span>
-                  </Link>
+                  </Link> */}
                   <Link
                     href="/chef/guide"
                     className="flex items-center justify-center py-4 px-6 rounded-full border border-gray-300 w-full"
@@ -123,6 +130,15 @@ export default function ChefLayout({
                     className="flex items-center justify-center py-4 px-6 rounded-full border border-gray-300 w-full"
                     onClick={() => setIsMenuOpen(false)}>
                     <span className="text-gray-500">お問い合わせ</span>
+                  </Link>
+                  <Link
+                    href="/logout"
+                    className="flex items-center justify-center py-4 px-6 rounded-full border border-gray-300 w-full"
+                    onClick={() => {
+                      logout();
+                      setIsMenuOpen(false);
+                    }}>
+                    <span className="text-gray-500">ログアウト</span>
                   </Link>
                 </div>
               </div>

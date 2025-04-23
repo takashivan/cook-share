@@ -38,7 +38,7 @@ export default function LoginPage() {
       };
 
       const response = await login(data);
-      await setUser(response.authToken, response.user);
+      await setUser(data.email, data.password);
 
       toast({
         title: "ログインしました",

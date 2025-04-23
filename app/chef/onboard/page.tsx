@@ -29,7 +29,6 @@ export default function OnboardPage() {
   const handleOnboard = async () => {
     setLoading(true);
     try {
-      // 実際の実装では、認証済みユーザーからchef_idを取得します
       const user_id = user?.id;
       console.log(user_id);
       if (!user_id) {
@@ -38,13 +37,33 @@ export default function OnboardPage() {
       const res = await createStripeAccountLink(user_id);
 
       if (res.response.result.url) {
-        window.location.href = res.response.result.url;
+        // 新しいウィンドウでStripeの連携ページを開く
+        const stripeWindow = window.open(res.response.result.url, "_blank");
+
+        if (!stripeWindow) {
+          throw new Error(
+            "ポップアップがブロックされました。ブラウザの設定を確認してください。"
+          );
+        }
+
+        // ウィンドウが閉じられたかどうかを監視
+        const checkWindow = setInterval(() => {
+          if (stripeWindow.closed) {
+            clearInterval(checkWindow);
+            // ウィンドウが閉じられたら、完了ページにリダイレクト
+            window.location.href = "/chef/onboarding-complete";
+          }
+        }, 1000);
       } else {
         throw new Error("リンク取得に失敗しました");
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("エラーが発生しました。もう一度お試しください。");
+      alert(
+        error instanceof Error
+          ? error.message
+          : "エラーが発生しました。もう一度お試しください。"
+      );
       setLoading(false);
     }
   };
