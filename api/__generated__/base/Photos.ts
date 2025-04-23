@@ -77,6 +77,15 @@ export class Photos<SecurityDataType = unknown> extends HttpClient<SecurityDataT
       ...params,
     });
 
+  photosPartialUpdateQueryArgs = (photosId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/photos/${photosId}`] : null;
+    const fetcher: (url: string[], { arg }: { arg: PhotosPartialUpdatePayload }) => Promise<PhotosPartialUpdateData> = (
+      _,
+      { arg },
+    ) => this.photosPartialUpdate(photosId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Query all Photos records <br /><br /> <b>Authentication:</b> not required
    *
@@ -116,4 +125,11 @@ export class Photos<SecurityDataType = unknown> extends HttpClient<SecurityDataT
       format: "json",
       ...params,
     });
+
+  photosCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/photos`] : null;
+    const fetcher: (url: string[], { arg }: { arg: PhotosCreatePayload }) => Promise<PhotosCreateData> = (_, { arg }) =>
+      this.photosCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

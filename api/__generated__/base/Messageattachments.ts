@@ -85,6 +85,20 @@ export class Messageattachments<SecurityDataType = unknown> extends HttpClient<S
       ...params,
     });
 
+  messageattachmentsPartialUpdateQueryArgs = (
+    messageattachmentId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/messageattachments/${messageattachmentId}`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: MessageattachmentsPartialUpdatePayload },
+    ) => Promise<MessageattachmentsPartialUpdateData> = (_, { arg }) =>
+      this.messageattachmentsPartialUpdate(messageattachmentId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Query all messageAttachment records <br /><br /> <b>Authentication:</b> not required
    *
@@ -124,4 +138,14 @@ export class Messageattachments<SecurityDataType = unknown> extends HttpClient<S
       format: "json",
       ...params,
     });
+
+  messageattachmentsCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/messageattachments`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: MessageattachmentsCreatePayload },
+    ) => Promise<MessageattachmentsCreateData> = (_, { arg }) =>
+      this.messageattachmentsCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

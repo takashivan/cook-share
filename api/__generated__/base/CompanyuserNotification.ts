@@ -41,6 +41,15 @@ export class CompanyuserNotification<SecurityDataType = unknown> extends HttpCli
       ...params,
     });
 
+  byRestaurantCreateQueryArgs = (restaurantId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/companyuser_notification/byRestaurant/${restaurantId}`] : null;
+    const fetcher: (url: string[], { arg }: { arg: ByRestaurantCreatePayload }) => Promise<ByRestaurantCreateData> = (
+      _,
+      { arg },
+    ) => this.byRestaurantCreate(restaurantId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -126,6 +135,20 @@ export class CompanyuserNotification<SecurityDataType = unknown> extends HttpCli
       ...params,
     });
 
+  companyuserNotificationPartialUpdateQueryArgs = (
+    companyuserNotificationId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/companyuser_notification/${companyuserNotificationId}`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: CompanyuserNotificationPartialUpdatePayload },
+    ) => Promise<CompanyuserNotificationPartialUpdateData> = (_, { arg }) =>
+      this.companyuserNotificationPartialUpdate(companyuserNotificationId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Query all companyUser_notification records <br /><br /> <b>Authentication:</b> not required
    *
@@ -165,4 +188,14 @@ export class CompanyuserNotification<SecurityDataType = unknown> extends HttpCli
       format: "json",
       ...params,
     });
+
+  companyuserNotificationCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/companyuser_notification`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: CompanyuserNotificationCreatePayload },
+    ) => Promise<CompanyuserNotificationCreateData> = (_, { arg }) =>
+      this.companyuserNotificationCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

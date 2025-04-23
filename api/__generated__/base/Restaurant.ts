@@ -132,6 +132,15 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
       ...params,
     });
 
+  staffInviteCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurant/staff/invite`] : null;
+    const fetcher: (url: string[], { arg }: { arg: StaffInviteCreateBody }) => Promise<StaffInviteCreateResult> = (
+      _,
+      { arg },
+    ) => this.staffInviteCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -210,6 +219,16 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
       ...params,
     });
 
+  restaurantPartialUpdateQueryArgs = (restaurantId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurant/${restaurantId}`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: RestaurantPartialUpdatePayload },
+    ) => Promise<RestaurantPartialUpdateData> = (_, { arg }) =>
+      this.restaurantPartialUpdate(restaurantId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Query all restaurant records <br /><br /> <b>Authentication:</b> not required
    *
@@ -249,4 +268,13 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
       format: "json",
       ...params,
     });
+
+  restaurantCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurant`] : null;
+    const fetcher: (url: string[], { arg }: { arg: RestaurantCreatePayload }) => Promise<RestaurantCreateData> = (
+      _,
+      { arg },
+    ) => this.restaurantCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

@@ -35,6 +35,16 @@ export class Billing<SecurityDataType = unknown> extends HttpClient<SecurityData
       ...params,
     });
 
+  addInvoiceItemsCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/billing/add-invoice-items`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: AddInvoiceItemsCreatePayload },
+    ) => Promise<AddInvoiceItemsCreateData> = (_, { arg }) =>
+      this.addInvoiceItemsCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -51,4 +61,14 @@ export class Billing<SecurityDataType = unknown> extends HttpClient<SecurityData
       format: "json",
       ...params,
     });
+
+  generateCompanySummaryCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/billing/generate-company-summary`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: GenerateCompanySummaryCreatePayload },
+    ) => Promise<GenerateCompanySummaryCreateData> = (_, { arg }) =>
+      this.generateCompanySummaryCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

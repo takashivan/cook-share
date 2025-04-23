@@ -86,6 +86,20 @@ export class CompanyuserNotifications<SecurityDataType = unknown> extends HttpCl
       ...params,
     });
 
+  companyuserNotificationsPartialUpdateQueryArgs = (
+    companyuserNotificationId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/companyuser-notifications/${companyuserNotificationId}`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: CompanyuserNotificationsPartialUpdatePayload },
+    ) => Promise<CompanyuserNotificationsPartialUpdateData> = (_, { arg }) =>
+      this.companyuserNotificationsPartialUpdate(companyuserNotificationId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Query all companyUser_notification records <br /><br /> <b>Authentication:</b> not required
    *
@@ -125,4 +139,14 @@ export class CompanyuserNotifications<SecurityDataType = unknown> extends HttpCl
       format: "json",
       ...params,
     });
+
+  companyuserNotificationsCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/companyuser-notifications`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: CompanyuserNotificationsCreatePayload },
+    ) => Promise<CompanyuserNotificationsCreateData> = (_, { arg }) =>
+      this.companyuserNotificationsCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

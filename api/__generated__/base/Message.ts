@@ -99,6 +99,16 @@ export class Message<SecurityDataType = unknown> extends HttpClient<SecurityData
       ...params,
     });
 
+  messagePartialUpdateQueryArgs = (messageId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/message/${messageId}`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: MessagePartialUpdatePayload },
+    ) => Promise<MessagePartialUpdateData> = (_, { arg }) =>
+      this.messagePartialUpdate(messageId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Query all message records <br /><br /> <b>Authentication:</b> not required
    *
@@ -138,4 +148,13 @@ export class Message<SecurityDataType = unknown> extends HttpClient<SecurityData
       format: "json",
       ...params,
     });
+
+  messageCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/message`] : null;
+    const fetcher: (url: string[], { arg }: { arg: MessageCreatePayload }) => Promise<MessageCreateData> = (
+      _,
+      { arg },
+    ) => this.messageCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

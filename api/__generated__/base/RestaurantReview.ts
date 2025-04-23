@@ -148,6 +148,20 @@ export class RestaurantReview<SecurityDataType = unknown> extends HttpClient<Sec
       ...params,
     });
 
+  restaurantReviewPartialUpdateQueryArgs = (
+    restaurantReviewId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/restaurant_review/${restaurantReviewId}`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: RestaurantReviewPartialUpdatePayload },
+    ) => Promise<RestaurantReviewPartialUpdateData> = (_, { arg }) =>
+      this.restaurantReviewPartialUpdate(restaurantReviewId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -185,4 +199,14 @@ export class RestaurantReview<SecurityDataType = unknown> extends HttpClient<Sec
       format: "json",
       ...params,
     });
+
+  restaurantReviewCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurant_review`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: RestaurantReviewCreatePayload },
+    ) => Promise<RestaurantReviewCreateData> = (_, { arg }) =>
+      this.restaurantReviewCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

@@ -71,6 +71,20 @@ export class Restaurants<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
+  companyuserNotificationsCreateQueryArgs = (
+    restaurantId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/restaurants/${restaurantId}/companyuser-notifications`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: CompanyuserNotificationsCreateBody },
+    ) => Promise<CompanyuserNotificationsCreateResult> = (_, { arg }) =>
+      this.companyuserNotificationsCreate(restaurantId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -108,6 +122,15 @@ export class Restaurants<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
+  companyusersCreateQueryArgs = (restaurantId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurants/${restaurantId}/companyusers`] : null;
+    const fetcher: (url: string[], { arg }: { arg: CompanyusersCreateInput }) => Promise<CompanyusersCreateOutput> = (
+      _,
+      { arg },
+    ) => this.companyusersCreate(restaurantId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
@@ -211,6 +234,16 @@ export class Restaurants<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
+  restaurantsPartialUpdateQueryArgs = (restaurantId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurants/${restaurantId}`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: RestaurantsPartialUpdatePayload },
+    ) => Promise<RestaurantsPartialUpdateData> = (_, { arg }) =>
+      this.restaurantsPartialUpdate(restaurantId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Query all restaurant records <br /><br /> <b>Authentication:</b> not required
    *
@@ -250,4 +283,13 @@ export class Restaurants<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
+  restaurantsCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurants`] : null;
+    const fetcher: (url: string[], { arg }: { arg: RestaurantsCreatePayload }) => Promise<RestaurantsCreateData> = (
+      _,
+      { arg },
+    ) => this.restaurantsCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

@@ -77,6 +77,16 @@ export class Payment<SecurityDataType = unknown> extends HttpClient<SecurityData
       ...params,
     });
 
+  paymentPartialUpdateQueryArgs = (paymentId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/payment/${paymentId}`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: PaymentPartialUpdatePayload },
+    ) => Promise<PaymentPartialUpdateData> = (_, { arg }) =>
+      this.paymentPartialUpdate(paymentId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Query all payment records <br /><br /> <b>Authentication:</b> not required
    *
@@ -116,4 +126,13 @@ export class Payment<SecurityDataType = unknown> extends HttpClient<SecurityData
       format: "json",
       ...params,
     });
+
+  paymentCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/payment`] : null;
+    const fetcher: (url: string[], { arg }: { arg: PaymentCreatePayload }) => Promise<PaymentCreateData> = (
+      _,
+      { arg },
+    ) => this.paymentCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

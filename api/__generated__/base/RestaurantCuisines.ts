@@ -86,6 +86,20 @@ export class RestaurantCuisines<SecurityDataType = unknown> extends HttpClient<S
       ...params,
     });
 
+  restaurantCuisinesPartialUpdateQueryArgs = (
+    restaurantCuisineId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/restaurant-cuisines/${restaurantCuisineId}`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: RestaurantCuisinesPartialUpdatePayload },
+    ) => Promise<RestaurantCuisinesPartialUpdateData> = (_, { arg }) =>
+      this.restaurantCuisinesPartialUpdate(restaurantCuisineId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -144,4 +158,14 @@ export class RestaurantCuisines<SecurityDataType = unknown> extends HttpClient<S
       format: "json",
       ...params,
     });
+
+  restaurantCuisinesCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurant-cuisines`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: RestaurantCuisinesCreatePayload },
+    ) => Promise<RestaurantCuisinesCreateData> = (_, { arg }) =>
+      this.restaurantCuisinesCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

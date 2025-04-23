@@ -118,4 +118,14 @@ export class ChefNotification<SecurityDataType = unknown> extends HttpClient<Sec
       format: "json",
       ...params,
     });
+
+  chefNotificationCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/chef_notification`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: ChefNotificationCreatePayload },
+    ) => Promise<ChefNotificationCreateData> = (_, { arg }) =>
+      this.chefNotificationCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

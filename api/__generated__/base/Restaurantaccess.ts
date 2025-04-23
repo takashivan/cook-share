@@ -85,6 +85,20 @@ export class Restaurantaccess<SecurityDataType = unknown> extends HttpClient<Sec
       ...params,
     });
 
+  restaurantaccessPartialUpdateQueryArgs = (
+    restaurantaccessId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/restaurantaccess/${restaurantaccessId}`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: RestaurantaccessPartialUpdatePayload },
+    ) => Promise<RestaurantaccessPartialUpdateData> = (_, { arg }) =>
+      this.restaurantaccessPartialUpdate(restaurantaccessId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Query all RestaurantAccess records <br /><br /> <b>Authentication:</b> not required
    *
@@ -124,4 +138,14 @@ export class Restaurantaccess<SecurityDataType = unknown> extends HttpClient<Sec
       format: "json",
       ...params,
     });
+
+  restaurantaccessCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurantaccess`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: RestaurantaccessCreatePayload },
+    ) => Promise<RestaurantaccessCreateData> = (_, { arg }) =>
+      this.restaurantaccessCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

@@ -30,4 +30,13 @@ export class JobWithCheck<SecurityDataType = unknown> extends HttpClient<Securit
       format: "json",
       ...params,
     });
+
+  jobWithCheckCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/job_with_check`] : null;
+    const fetcher: (url: string[], { arg }: { arg: JobWithCheckCreatePayload }) => Promise<JobWithCheckCreateData> = (
+      _,
+      { arg },
+    ) => this.jobWithCheckCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

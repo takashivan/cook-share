@@ -73,6 +73,13 @@ export class Files<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       ...params,
     });
 
+  filesPartialUpdateQueryArgs = (filesId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/files/${filesId}`] : null;
+    const fetcher: (url: string[]) => Promise<FilesPartialUpdateData> = (_) =>
+      this.filesPartialUpdate(filesId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Query all Files records <br /><br /> <b>Authentication:</b> not required
    *
@@ -110,4 +117,11 @@ export class Files<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       format: "json",
       ...params,
     });
+
+  filesCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/files`] : null;
+    const fetcher: (url: string[]) => Promise<FilesCreateData> = (_) =>
+      this.filesCreate(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

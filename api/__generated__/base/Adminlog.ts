@@ -77,6 +77,16 @@ export class Adminlog<SecurityDataType = unknown> extends HttpClient<SecurityDat
       ...params,
     });
 
+  adminlogPartialUpdateQueryArgs = (adminlogId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/adminlog/${adminlogId}`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: AdminlogPartialUpdatePayload },
+    ) => Promise<AdminlogPartialUpdateData> = (_, { arg }) =>
+      this.adminlogPartialUpdate(adminlogId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Query all adminlog records <br /><br /> <b>Authentication:</b> not required
    *
@@ -116,4 +126,13 @@ export class Adminlog<SecurityDataType = unknown> extends HttpClient<SecurityDat
       format: "json",
       ...params,
     });
+
+  adminlogCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/adminlog`] : null;
+    const fetcher: (url: string[], { arg }: { arg: AdminlogCreatePayload }) => Promise<AdminlogCreateData> = (
+      _,
+      { arg },
+    ) => this.adminlogCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

@@ -76,6 +76,16 @@ export class ChefSkills<SecurityDataType = unknown> extends HttpClient<SecurityD
       ...params,
     });
 
+  chefSkillsPartialUpdateQueryArgs = (chefSkillId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/chef-skills/${chefSkillId}`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: ChefSkillsPartialUpdatePayload },
+    ) => Promise<ChefSkillsPartialUpdateData> = (_, { arg }) =>
+      this.chefSkillsPartialUpdate(chefSkillId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -132,4 +142,13 @@ export class ChefSkills<SecurityDataType = unknown> extends HttpClient<SecurityD
       format: "json",
       ...params,
     });
+
+  chefSkillsCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/chef-skills`] : null;
+    const fetcher: (url: string[], { arg }: { arg: ChefSkillsCreatePayload }) => Promise<ChefSkillsCreateData> = (
+      _,
+      { arg },
+    ) => this.chefSkillsCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

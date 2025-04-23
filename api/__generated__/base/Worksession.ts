@@ -138,6 +138,15 @@ export class Worksession<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
+  finishPartialUpdateQueryArgs = (worksessionId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/worksession/${worksessionId}/finish`] : null;
+    const fetcher: (url: string[], { arg }: { arg: FinishPartialUpdatePayload }) => Promise<FinishPartialUpdateData> = (
+      _,
+      { arg },
+    ) => this.finishPartialUpdate(worksessionId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -155,6 +164,15 @@ export class Worksession<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
+  startPartialUpdateQueryArgs = (worksessionId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/worksession/${worksessionId}/start`] : null;
+    const fetcher: (url: string[], { arg }: { arg: StartPartialUpdatePayload }) => Promise<StartPartialUpdateData> = (
+      _,
+      { arg },
+    ) => this.startPartialUpdate(worksessionId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -171,6 +189,15 @@ export class Worksession<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
+  verifyPartialUpdateQueryArgs = (worksessionId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/worksession/${worksessionId}/verify`] : null;
+    const fetcher: (url: string[], { arg }: { arg: VerifyPartialUpdatePayload }) => Promise<VerifyPartialUpdateData> = (
+      _,
+      { arg },
+    ) => this.verifyPartialUpdate(worksessionId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 
   /**
    * @description Delete worksession record. <br /><br /> <b>Authentication:</b> not required
@@ -232,6 +259,16 @@ export class Worksession<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
+  worksessionPartialUpdateQueryArgs = (worksessionId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/worksession/${worksessionId}`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: WorksessionPartialUpdatePayload },
+    ) => Promise<WorksessionPartialUpdateData> = (_, { arg }) =>
+      this.worksessionPartialUpdate(worksessionId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Query all worksession records <br /><br /> <b>Authentication:</b> not required
    *
@@ -271,4 +308,13 @@ export class Worksession<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
+  worksessionCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/worksession`] : null;
+    const fetcher: (url: string[], { arg }: { arg: WorksessionCreatePayload }) => Promise<WorksessionCreateData> = (
+      _,
+      { arg },
+    ) => this.worksessionCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

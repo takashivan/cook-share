@@ -113,3 +113,12 @@ const describeReturnType = () => {
   };
 
 <% } %>
+
+<% if(_.upperCase(method) === "POST" || _.upperCase(method) === "PATCH") { %>
+    <%~ route.routeName.usage %>QueryArgs = (<%~ _.filter(rawWrapperArgs, (item) => item.name !== 'data').map(argToTmpl) %>, enabled: boolean = true)<%~ config.toJS ? `: ${describeReturnType()}` : "" %> => {
+        const key = enabled ? [`<%~ path  %>`, <%~ (query != null && queryName) ? `...(${queryName} ? [${queryName}] : [])` : '' %>] : null
+        const fetcher: (url: string[]<%~ payload ? `, { arg }: { arg: ${_.compact([payload]).map(({ name, optional, type, defaultValue }) => type)}  }` : '' %>) => Promise<<%~ type %>> = (_<%~ payload ? ', { arg }' : '' %>) => this.<%~ route.routeName.usage %>(<%~ pathParamsNames.length > 0 ? _.map(pathParamsNames, (name) => `${name}, `) : '' %><%~ payload ? 'arg, ' : '' %>params).then(res => res.data)
+        return [key, fetcher] as const
+    };
+
+<% } %>

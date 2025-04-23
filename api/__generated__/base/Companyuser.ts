@@ -114,6 +114,16 @@ export class Companyuser<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
+  companyuserPartialUpdateQueryArgs = (companyuserId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/companyuser/${companyuserId}`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: CompanyuserPartialUpdatePayload },
+    ) => Promise<CompanyuserPartialUpdateData> = (_, { arg }) =>
+      this.companyuserPartialUpdate(companyuserId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Query all CompanyUser records <br /><br /> <b>Authentication:</b> not required
    *
@@ -153,4 +163,13 @@ export class Companyuser<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
+  companyuserCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/companyuser`] : null;
+    const fetcher: (url: string[], { arg }: { arg: CompanyuserCreatePayload }) => Promise<CompanyuserCreateData> = (
+      _,
+      { arg },
+    ) => this.companyuserCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

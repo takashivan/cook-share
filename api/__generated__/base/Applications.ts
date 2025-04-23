@@ -63,6 +63,13 @@ export class Applications<SecurityDataType = unknown> extends HttpClient<Securit
       ...params,
     });
 
+  acceptPartialUpdateQueryArgs = (applicationId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/applications/${applicationId}/accept`] : null;
+    const fetcher: (url: string[]) => Promise<AcceptPartialUpdateResult> = (_) =>
+      this.acceptPartialUpdate(applicationId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -146,6 +153,16 @@ export class Applications<SecurityDataType = unknown> extends HttpClient<Securit
       ...params,
     });
 
+  applicationsPartialUpdateQueryArgs = (applicationId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/applications/${applicationId}`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: ApplicationsPartialUpdatePayload },
+    ) => Promise<ApplicationsPartialUpdateData> = (_, { arg }) =>
+      this.applicationsPartialUpdate(applicationId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -183,4 +200,13 @@ export class Applications<SecurityDataType = unknown> extends HttpClient<Securit
       format: "json",
       ...params,
     });
+
+  applicationsCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/applications`] : null;
+    const fetcher: (url: string[], { arg }: { arg: ApplicationsCreatePayload }) => Promise<ApplicationsCreateData> = (
+      _,
+      { arg },
+    ) => this.applicationsCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

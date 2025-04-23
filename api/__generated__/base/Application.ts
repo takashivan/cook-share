@@ -108,6 +108,13 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
+  acceptPartialUpdateQueryArgs = (applicationId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/application/${applicationId}/accept`] : null;
+    const fetcher: (url: string[]) => Promise<AcceptPartialUpdateData> = (_) =>
+      this.acceptPartialUpdate(applicationId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -122,6 +129,13 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
+  rejectPartialUpdateQueryArgs = (applicationId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/application/${applicationId}/reject`] : null;
+    const fetcher: (url: string[]) => Promise<RejectPartialUpdateData> = (_) =>
+      this.rejectPartialUpdate(applicationId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
@@ -180,6 +194,16 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
+  applicationPartialUpdateQueryArgs = (applicationId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/application/${applicationId}`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: ApplicationPartialUpdatePayload },
+    ) => Promise<ApplicationPartialUpdateData> = (_, { arg }) =>
+      this.applicationPartialUpdate(applicationId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -234,4 +258,13 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
       format: "json",
       ...params,
     });
+
+  applicationCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/application`] : null;
+    const fetcher: (url: string[], { arg }: { arg: ApplicationCreatePayload }) => Promise<ApplicationCreateData> = (
+      _,
+      { arg },
+    ) => this.applicationCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

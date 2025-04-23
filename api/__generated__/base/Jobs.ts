@@ -121,6 +121,15 @@ export class Jobs<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       ...params,
     });
 
+  jobsPartialUpdateQueryArgs = (jobId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/jobs/${jobId}`] : null;
+    const fetcher: (url: string[], { arg }: { arg: JobsPartialUpdatePayload }) => Promise<JobsPartialUpdateData> = (
+      _,
+      { arg },
+    ) => this.jobsPartialUpdate(jobId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Query all job records <br /><br /> <b>Authentication:</b> not required
    *
@@ -160,4 +169,11 @@ export class Jobs<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       format: "json",
       ...params,
     });
+
+  jobsCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/jobs`] : null;
+    const fetcher: (url: string[], { arg }: { arg: JobsCreatePayload }) => Promise<JobsCreateData> = (_, { arg }) =>
+      this.jobsCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

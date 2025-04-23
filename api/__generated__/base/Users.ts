@@ -45,6 +45,13 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       ...params,
     });
 
+  stripeAccountLinksCreateQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/users/${userId}/stripe/account-links`] : null;
+    const fetcher: (url: string[]) => Promise<StripeAccountLinksCreateData> = (_) =>
+      this.stripeAccountLinksCreate(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -149,6 +156,13 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       ...params,
     });
 
+  stripeAccountCreateQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/users/${userId}/stripe/account`] : null;
+    const fetcher: (url: string[]) => Promise<StripeAccountCreateData> = (_) =>
+      this.stripeAccountCreate(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -247,6 +261,15 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       ...params,
     });
 
+  usersPartialUpdateQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/users/${userId}`] : null;
+    const fetcher: (url: string[], { arg }: { arg: UsersPartialUpdatePayload }) => Promise<UsersPartialUpdateData> = (
+      _,
+      { arg },
+    ) => this.usersPartialUpdate(userId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Query all user records <br /><br /> <b>Authentication:</b> not required
    *
@@ -286,4 +309,11 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       format: "json",
       ...params,
     });
+
+  usersCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/users`] : null;
+    const fetcher: (url: string[], { arg }: { arg: UsersCreatePayload }) => Promise<UsersCreateData> = (_, { arg }) =>
+      this.usersCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

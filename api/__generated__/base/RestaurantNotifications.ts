@@ -96,4 +96,14 @@ export class RestaurantNotifications<SecurityDataType = unknown> extends HttpCli
       format: "json",
       ...params,
     });
+
+  restaurantNotificationsCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurant-notifications`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: RestaurantNotificationsCreatePayload },
+    ) => Promise<RestaurantNotificationsCreateData> = (_, { arg }) =>
+      this.restaurantNotificationsCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

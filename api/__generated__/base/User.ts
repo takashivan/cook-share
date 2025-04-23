@@ -14,6 +14,7 @@ import {
   EmailChangeCreatePayload,
   EmailConfirmCreateData,
   EmailConfirmCreatePayload,
+  SessionHistoryCurrentListData,
   StripeCreateAccountCreateData,
   StripeCreateAccountCreatePayload,
   StripeCreateAccountLinkCreateData,
@@ -48,6 +49,15 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       ...params,
     });
 
+  emailChangeCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/user/email/change`] : null;
+    const fetcher: (url: string[], { arg }: { arg: EmailChangeCreatePayload }) => Promise<EmailChangeCreateData> = (
+      _,
+      { arg },
+    ) => this.emailChangeCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> required
    *
@@ -67,6 +77,15 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       ...params,
     });
 
+  emailConfirmCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/user/email/confirm`] : null;
+    const fetcher: (url: string[], { arg }: { arg: EmailConfirmCreatePayload }) => Promise<EmailConfirmCreateData> = (
+      _,
+      { arg },
+    ) => this.emailConfirmCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -84,6 +103,16 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       ...params,
     });
 
+  stripeCreateAccountLinkCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/user/stripe/create-account-link`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: StripeCreateAccountLinkCreatePayload },
+    ) => Promise<StripeCreateAccountLinkCreateData> = (_, { arg }) =>
+      this.stripeCreateAccountLinkCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -100,6 +129,37 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       format: "json",
       ...params,
     });
+
+  stripeCreateAccountCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/user/stripe/create-account`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: StripeCreateAccountCreatePayload },
+    ) => Promise<StripeCreateAccountCreateData> = (_, { arg }) =>
+      this.stripeCreateAccountCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags user
+   * @name SessionHistoryCurrentList
+   * @request GET:/user/{user_id}/sessionHistory/current
+   */
+  sessionHistoryCurrentList = (userId: string, params: RequestParams = {}) =>
+    this.request<SessionHistoryCurrentListData, void>({
+      path: `/user/${userId}/sessionHistory/current`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  sessionHistoryCurrentListQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/user/${userId}/sessionHistory/current`] : null;
+    const fetcher = () => this.sessionHistoryCurrentList(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 
   /**
    * @description Delete user record. <br /><br /> <b>Authentication:</b> not required
@@ -157,6 +217,15 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       ...params,
     });
 
+  userPartialUpdateQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/user/${userId}`] : null;
+    const fetcher: (url: string[], { arg }: { arg: UserPartialUpdatePayload }) => Promise<UserPartialUpdateData> = (
+      _,
+      { arg },
+    ) => this.userPartialUpdate(userId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Query all user records <br /><br /> <b>Authentication:</b> not required
    *
@@ -196,4 +265,11 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       format: "json",
       ...params,
     });
+
+  userCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/user`] : null;
+    const fetcher: (url: string[], { arg }: { arg: UserCreatePayload }) => Promise<UserCreateData> = (_, { arg }) =>
+      this.userCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

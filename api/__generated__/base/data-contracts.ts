@@ -994,12 +994,14 @@ export interface BillingSummaryDetailData {
   /** stripe invoice id */
   invoice_id: string;
   status: "PENDING" | "PAID" | "FAILED";
-  /** @format int64 */
   fee_rate: number;
   /** @format int64 */
   session_count: number;
   start_date: string;
   end_date: string;
+  hosted_invoice_url: string;
+  invoice_pdf: string;
+  invoice_number: string;
 }
 
 export interface BillingSummaryPartialUpdatePayload {
@@ -1011,12 +1013,14 @@ export interface BillingSummaryPartialUpdatePayload {
   /** stripe invoice id */
   invoice_id: string;
   status: "PENDING" | "PAID" | "FAILED";
-  /** @format int64 */
   fee_rate: number;
   /** @format int64 */
   session_count: number;
   start_date: string;
   end_date: string;
+  hosted_invoice_url: string;
+  invoice_pdf: string;
+  invoice_number: string;
 }
 
 export interface BillingSummaryPartialUpdateData {
@@ -1035,12 +1039,14 @@ export interface BillingSummaryPartialUpdateData {
   /** stripe invoice id */
   invoice_id: string;
   status: "PENDING" | "PAID" | "FAILED";
-  /** @format int64 */
   fee_rate: number;
   /** @format int64 */
   session_count: number;
   start_date: string;
   end_date: string;
+  hosted_invoice_url: string;
+  invoice_pdf: string;
+  invoice_number: string;
 }
 
 export interface BillingSummaryUpdatePayload {
@@ -1052,12 +1058,14 @@ export interface BillingSummaryUpdatePayload {
   /** stripe invoice id */
   invoice_id: string;
   status: "PENDING" | "PAID" | "FAILED";
-  /** @format int64 */
   fee_rate: number;
   /** @format int64 */
   session_count: number;
   start_date: string;
   end_date: string;
+  hosted_invoice_url: string;
+  invoice_pdf: string;
+  invoice_number: string;
 }
 
 export interface BillingSummaryUpdateData {
@@ -1076,12 +1084,14 @@ export interface BillingSummaryUpdateData {
   /** stripe invoice id */
   invoice_id: string;
   status: "PENDING" | "PAID" | "FAILED";
-  /** @format int64 */
   fee_rate: number;
   /** @format int64 */
   session_count: number;
   start_date: string;
   end_date: string;
+  hosted_invoice_url: string;
+  invoice_pdf: string;
+  invoice_number: string;
 }
 
 export type BillingSummaryListData = {
@@ -1100,12 +1110,14 @@ export type BillingSummaryListData = {
   /** stripe invoice id */
   invoice_id: string;
   status: "PENDING" | "PAID" | "FAILED";
-  /** @format int64 */
   fee_rate: number;
   /** @format int64 */
   session_count: number;
   start_date: string;
   end_date: string;
+  hosted_invoice_url: string;
+  invoice_pdf: string;
+  invoice_number: string;
 }[];
 
 export interface BillingSummaryCreatePayload {
@@ -1117,12 +1129,14 @@ export interface BillingSummaryCreatePayload {
   /** stripe invoice id */
   invoice_id: string;
   status: "PENDING" | "PAID" | "FAILED";
-  /** @format int64 */
   fee_rate: number;
   /** @format int64 */
   session_count: number;
   start_date: string;
   end_date: string;
+  hosted_invoice_url: string;
+  invoice_pdf: string;
+  invoice_number: string;
 }
 
 export interface BillingSummaryCreateData {
@@ -1141,12 +1155,14 @@ export interface BillingSummaryCreateData {
   /** stripe invoice id */
   invoice_id: string;
   status: "PENDING" | "PAID" | "FAILED";
-  /** @format int64 */
   fee_rate: number;
   /** @format int64 */
   session_count: number;
   start_date: string;
   end_date: string;
+  hosted_invoice_url: string;
+  invoice_pdf: string;
+  invoice_number: string;
 }
 
 export type Clone0DeleteData = object;
@@ -1491,6 +1507,108 @@ export interface ChefNotificationCreateData {
   user_id: string;
   /** url */
   related_link: string;
+}
+
+export type ChefPayoutLogDeleteData = object;
+
+export interface ChefPayoutLogDetailData {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format uuid */
+  user_id: string | null;
+  month: string;
+  /** @format int64 */
+  total_amount: number;
+  transfer_id: string;
+  status: "PAID" | "PENDING";
+  /** @format timestamptz */
+  paid_at: number | null;
+}
+
+export interface ChefPayoutLogPartialUpdatePayload {
+  /** @format uuid */
+  user_id: string | null;
+  month: string;
+  /** @format int64 */
+  total_amount: number;
+  transfer_id: string;
+  status: "PAID" | "PENDING";
+  /** @format timestamptz */
+  paid_at: number | null;
+}
+
+export interface ChefPayoutLogPartialUpdateData {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format uuid */
+  user_id: string | null;
+  month: string;
+  /** @format int64 */
+  total_amount: number;
+  transfer_id: string;
+  status: "PAID" | "PENDING";
+  /** @format timestamptz */
+  paid_at: number | null;
+}
+
+export type ChefPayoutLogListData = {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format uuid */
+  user_id: string | null;
+  month: string;
+  /** @format int64 */
+  total_amount: number;
+  transfer_id: string;
+  status: "PAID" | "PENDING";
+  /** @format timestamptz */
+  paid_at: number | null;
+}[];
+
+export interface ChefPayoutLogCreatePayload {
+  /** @format uuid */
+  user_id: string | null;
+  month: string;
+  /** @format int64 */
+  total_amount: number;
+  transfer_id: string;
+  status: "PAID" | "PENDING";
+  /** @format timestamptz */
+  paid_at: number | null;
+}
+
+export interface ChefPayoutLogCreateData {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format uuid */
+  user_id: string | null;
+  month: string;
+  /** @format int64 */
+  total_amount: number;
+  transfer_id: string;
+  status: "PAID" | "PENDING";
+  /** @format timestamptz */
+  paid_at: number | null;
 }
 
 export type ByRestaurantDetailData = {
@@ -2960,6 +3078,172 @@ export interface CompanyDetailResult {
   }[];
 }
 
+export interface QueryUpcomingjobsListData {
+  jobs: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    title: string;
+    description: string;
+    /** @format date */
+    work_date: string;
+    /** @format timestamptz */
+    start_time: number;
+    /** @format timestamptz */
+    end_time: number;
+    hourly_rate: number;
+    required_skills: string[];
+    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    /** @format timestamptz */
+    updated_at: number;
+    /** @format int64 */
+    restaurant_id: number;
+    image: string;
+    task: string;
+    skill: string;
+    whattotake: string;
+    note: string;
+    point: string;
+    transportation: string;
+    /** @default "1" */
+    is_approved: boolean;
+    /** @format int64 */
+    number_of_spots: number;
+    /** @format int64 */
+    fee: number;
+    /** @format timestamptz */
+    expiry_date: number | null;
+    restaurant: {
+      /** @format int64 */
+      id: number;
+      /**
+       * @format timestamptz
+       * @default "now"
+       */
+      created_at: number;
+      name: string;
+      address: string;
+      cuisine_type: string;
+      business_hours: string;
+      contact_info: string;
+      profile_image: string;
+      /** @format timestamptz */
+      updated_at: number;
+      /** Whether the restaurant is active. */
+      is_active: boolean;
+      /** @format uuid */
+      companies_id: string | null;
+      station: string;
+      access: string;
+      rating: number;
+      /** @default "1" */
+      is_approved: boolean;
+      restaurant_cuisine_id: {
+        "0": {
+          /** @format int64 */
+          id: number;
+          /**
+           * @format timestamptz
+           * @default "now"
+           */
+          created_at: number;
+          /** Whether this cuisine is the primary cuisine for the restaurant. */
+          is_primary: boolean;
+          category: string;
+        };
+      }[];
+      description: string;
+      phone: string;
+    };
+  }[];
+}
+
+export type QueryUpcomingListData = {
+  /** @format int64 */
+  id: number;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  title: string;
+  description: string;
+  /** @format date */
+  work_date: string;
+  /** @format timestamptz */
+  start_time: number;
+  /** @format timestamptz */
+  end_time: number;
+  hourly_rate: number;
+  required_skills: string[];
+  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+  /** @format timestamptz */
+  updated_at: number;
+  /** @format int64 */
+  restaurant_id: number;
+  image: string;
+  task: string;
+  skill: string;
+  whattotake: string;
+  note: string;
+  point: string;
+  transportation: string;
+  /** @default "1" */
+  is_approved: boolean;
+  /** @format int64 */
+  number_of_spots: number;
+  /** @format int64 */
+  fee: number;
+  /** @format timestamptz */
+  expiry_date: number | null;
+  restaurant: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    name: string;
+    address: string;
+    cuisine_type: string;
+    business_hours: string;
+    contact_info: string;
+    profile_image: string;
+    /** @format timestamptz */
+    updated_at: number;
+    /** Whether the restaurant is active. */
+    is_active: boolean;
+    /** @format uuid */
+    companies_id: string | null;
+    station: string;
+    access: string;
+    rating: number;
+    /** @default "1" */
+    is_approved: boolean;
+    restaurant_cuisine_id: {
+      cuisines: {
+        /** @format int64 */
+        id: number;
+        /**
+         * @format timestamptz
+         * @default "now"
+         */
+        created_at: number;
+        /** Whether this cuisine is the primary cuisine for the restaurant. */
+        is_primary: boolean;
+        category: string;
+      }[];
+    }[];
+    description: string;
+    phone: string;
+  };
+}[];
+
 export type RestaurantDetailData = {
   /** @format int64 */
   id: number;
@@ -3505,19 +3789,12 @@ export interface JobsPartialUpdatePayload {
   hourly_rate: number;
   required_skills: string[];
   status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format int64 */
-  restaurant_id: number;
-  image: string;
   task: string;
   skill: string;
   whattotake: string;
   note: string;
   point: string;
   transportation: string;
-  /** @default "1" */
-  is_approved: boolean;
   /** @format int64 */
   number_of_spots: number;
   /** @format int64 */
@@ -3663,19 +3940,14 @@ export interface JobsCreatePayload {
   hourly_rate: number;
   required_skills: string[];
   status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
-  /** @format timestamptz */
-  updated_at: number;
   /** @format int64 */
   restaurant_id: number;
-  image: string;
   task: string;
   skill: string;
   whattotake: string;
   note: string;
   point: string;
   transportation: string;
-  /** @default "1" */
-  is_approved: boolean;
   /** @format int64 */
   number_of_spots: number;
   /** @format int64 */
@@ -6241,6 +6513,119 @@ export interface StripeCreateAccountCreatePayload {
 }
 
 export type StripeCreateAccountCreateData = object;
+
+export type SessionHistoryCurrentListData = {
+  /** @format int64 */
+  id: number;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format timestamptz */
+  check_in_time: number;
+  /** @format timestamptz */
+  check_out_time: number;
+  total_hours: number;
+  location_data: string;
+  status:
+    | "SCHEDULED"
+    | "IN_PROGRESS"
+    | "CANCELED_BY_CHEF"
+    | "CANCELED_BY_RESTAURANT"
+    | "COMPLETED"
+    | "VERIFIED"
+    | "DISPUTE"
+    | "ESCALATED"
+    | "PAID"
+    | "CANCELED";
+  /** @format timestamptz */
+  updated_at: number;
+  /** @format uuid */
+  application_id: string;
+  /** @format uuid */
+  user_id: string | null;
+  /** @format int64 */
+  restaurant_id: number;
+  /** @format int64 */
+  job_id: number;
+  /** @format int64 */
+  paid_amount: number;
+  chef_feedback: string;
+  restaurant_feedback: string;
+  /** @format int64 */
+  chef_rating: number;
+  /** @format int64 */
+  restaurant_rating: number;
+  restaurant: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    name: string;
+    address: string;
+    cuisine_type: string;
+    business_hours: string;
+    contact_info: string;
+    profile_image: string;
+    /** @format timestamptz */
+    updated_at: number;
+    /** Whether the restaurant is active. */
+    is_active: boolean;
+    /** @format uuid */
+    companies_id: string | null;
+    station: string;
+    access: string;
+    rating: number;
+    /** @default "1" */
+    is_approved: boolean;
+    restaurant_cuisine_id: number[];
+    description: string;
+    phone: string;
+  };
+  job: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    title: string;
+    description: string;
+    /** @format date */
+    work_date: string;
+    /** @format timestamptz */
+    start_time: number;
+    /** @format timestamptz */
+    end_time: number;
+    hourly_rate: number;
+    required_skills: string[];
+    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    /** @format timestamptz */
+    updated_at: number;
+    /** @format int64 */
+    restaurant_id: number;
+    image: string;
+    task: string;
+    skill: string;
+    whattotake: string;
+    note: string;
+    point: string;
+    transportation: string;
+    /** @default "1" */
+    is_approved: boolean;
+    /** @format int64 */
+    number_of_spots: number;
+    /** @format int64 */
+    fee: number;
+    /** @format timestamptz */
+    expiry_date: number | null;
+  };
+}[];
 
 export type UserDeleteData = object;
 

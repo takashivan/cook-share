@@ -42,6 +42,16 @@ export class Auth<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       ...params,
     });
 
+  changePasswordCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/auth/change-password`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: ChangePasswordCreatePayload },
+    ) => Promise<ChangePasswordCreateData> = (_, { arg }) =>
+      this.changePasswordCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Login and retrieve an authentication token <br /><br /> <b>Authentication:</b> not required
    *
@@ -59,6 +69,13 @@ export class Auth<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       format: "json",
       ...params,
     });
+
+  loginCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/auth/login`] : null;
+    const fetcher: (url: string[], { arg }: { arg: LoginCreatePayload }) => Promise<LoginCreateData> = (_, { arg }) =>
+      this.loginCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 
   /**
    * @description Get the record belonging to the authentication token <br /><br /> <b>Authentication:</b> required
@@ -102,6 +119,13 @@ export class Auth<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       ...params,
     });
 
+  signupCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/auth/signup`] : null;
+    const fetcher: (url: string[], { arg }: { arg: SignupCreatePayload }) => Promise<SignupCreateData> = (_, { arg }) =>
+      this.signupCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -118,4 +142,13 @@ export class Auth<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       format: "json",
       ...params,
     });
+
+  verifyEmailCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/auth/verify-email`] : null;
+    const fetcher: (url: string[], { arg }: { arg: VerifyEmailCreatePayload }) => Promise<VerifyEmailCreateData> = (
+      _,
+      { arg },
+    ) => this.verifyEmailCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

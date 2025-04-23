@@ -49,6 +49,15 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       ...params,
     });
 
+  staffInviteCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/companies/staff/invite`] : null;
+    const fetcher: (url: string[], { arg }: { arg: StaffInviteCreatePayload }) => Promise<StaffInviteCreateData> = (
+      _,
+      { arg },
+    ) => this.staffInviteCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -65,6 +74,15 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       format: "json",
       ...params,
     });
+
+  companyusersCreateQueryArgs = (companiesId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/companies/${companiesId}/companyusers`] : null;
+    const fetcher: (url: string[], { arg }: { arg: CompanyusersCreatePayload }) => Promise<CompanyusersCreateData> = (
+      _,
+      { arg },
+    ) => this.companyusersCreate(companiesId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 
   /**
    * @description Delete Companies record. <br /><br /> <b>Authentication:</b> not required
@@ -121,6 +139,16 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       format: "json",
       ...params,
     });
+
+  companiesPartialUpdateQueryArgs = (companiesId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/companies/${companiesId}`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: CompaniesPartialUpdatePayload },
+    ) => Promise<CompaniesPartialUpdateData> = (_, { arg }) =>
+      this.companiesPartialUpdate(companiesId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
@@ -202,6 +230,16 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       ...params,
     });
 
+  stripeCustomersCreateQueryArgs = (companyId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/companies/${companyId}/stripe/customers`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: StripeCustomersCreatePayload },
+    ) => Promise<StripeCustomersCreateData> = (_, { arg }) =>
+      this.stripeCustomersCreate(companyId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Query all Companies records <br /><br /> <b>Authentication:</b> not required
    *
@@ -241,4 +279,13 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       format: "json",
       ...params,
     });
+
+  companiesCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/companies`] : null;
+    const fetcher: (url: string[], { arg }: { arg: CompaniesCreatePayload }) => Promise<CompaniesCreateData> = (
+      _,
+      { arg },
+    ) => this.companiesCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

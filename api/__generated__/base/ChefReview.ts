@@ -140,6 +140,16 @@ export class ChefReview<SecurityDataType = unknown> extends HttpClient<SecurityD
       ...params,
     });
 
+  chefReviewPartialUpdateQueryArgs = (chefReviewId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/chef_review/${chefReviewId}`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: ChefReviewPartialUpdatePayload },
+    ) => Promise<ChefReviewPartialUpdateData> = (_, { arg }) =>
+      this.chefReviewPartialUpdate(chefReviewId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -177,4 +187,13 @@ export class ChefReview<SecurityDataType = unknown> extends HttpClient<SecurityD
       format: "json",
       ...params,
     });
+
+  chefReviewCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/chef_review`] : null;
+    const fetcher: (url: string[], { arg }: { arg: ChefReviewCreatePayload }) => Promise<ChefReviewCreateData> = (
+      _,
+      { arg },
+    ) => this.chefReviewCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }
