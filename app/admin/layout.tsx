@@ -11,13 +11,16 @@ import {
   LogOut,
   Menu,
   MessageSquare,
+  Utensils,
   Settings,
+  Tag,
   Store,
   User,
   Users,
   Building,
   ChevronRight,
   Home,
+  ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { XanoClient } from "@xano/js-sdk/lib";
@@ -40,21 +43,49 @@ import {
 } from "@/lib/api/companyUserNotification";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/lib/store/store";
+import { fetchRestaurantsByCompanyId } from "@/lib/store/restaurantSlice";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
+interface NavigationItem {
+  title: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  active: boolean;
+  show: boolean;
+  onClick?: () => void;
+  isOpen?: boolean;
+  className?: string;
+}
+
+interface NavigationGroup {
+  title: string;
+  items: NavigationItem[];
+}
+
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
   const { user, isAuthenticated, logout } = useCompanyAuth();
+  const { restaurants } = useSelector((state: RootState) => state.restaurants);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [notifications, setNotifications] = useState<CompanyUserNotification[]>(
     []
   );
+  const [isStoreListOpen, setIsStoreListOpen] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (user?.companies_id) {
+      dispatch(fetchRestaurantsByCompanyId(user.companies_id));
+    }
+  }, [dispatch, user?.companies_id]);
 
   useEffect(() => {
     // 認証状態の初期化を待つ
@@ -191,7 +222,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const isJobDetail = pathSegments.includes("jobs") && pathSegments.length > 3;
 
   // ナビゲーション項目
-  const navigation = [
+  const navigation: NavigationGroup[] = [
     {
       title: "ダッシュボード",
       items: [
@@ -236,12 +267,29 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         {
           title: "店舗一覧",
           href: "/admin/stores",
-          icon: Store,
-          active:
-            pathname === "/admin/stores" ||
-            pathname.startsWith("/admin/stores/"),
+          icon: Utensils,
+          active: pathname === "/admin/stores",
           show: true,
         },
+        {
+          title: "店舗",
+          href: "/admin/stores",
+          icon: Store,
+          active: pathname.startsWith("/admin/stores/"),
+          show: true,
+          onClick: () => setIsStoreListOpen(!isStoreListOpen),
+          isOpen: isStoreListOpen,
+        },
+        ...(isStoreListOpen
+          ? restaurants.map((restaurant) => ({
+              title: restaurant.name,
+              href: `/admin/stores/${restaurant.id}`,
+              icon: Tag,
+              active: pathname === `/admin/stores/${restaurant.id}`,
+              show: true,
+              className: "ml-4",
+            }))
+          : []),
       ],
     },
     {
@@ -305,15 +353,29 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                         <Link
                           key={item.href}
                           href={item.href}
-                          onClick={() => setIsSidebarOpen(false)}
+                          onClick={(e) => {
+                            if (item.onClick) {
+                              e.preventDefault();
+                              item.onClick();
+                            }
+                          }}
                           className={cn(
                             "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
                             item.active
                               ? "bg-gray-100 text-gray-900 font-medium"
-                              : "text-gray-700 hover:bg-gray-100"
+                              : "text-gray-700 hover:bg-gray-100",
+                            item.className
                           )}>
                           <item.icon className="h-4 w-4" />
                           {item.title}
+                          {item.isOpen !== undefined && (
+                            <ChevronDown
+                              className={cn(
+                                "h-4 w-4 ml-auto transition-transform",
+                                item.isOpen ? "rotate-180" : ""
+                              )}
+                            />
+                          )}
                         </Link>
                       ))}
                   </div>
@@ -382,14 +444,29 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                       <Link
                         key={item.href}
                         href={item.href}
+                        onClick={(e) => {
+                          if (item.onClick) {
+                            e.preventDefault();
+                            item.onClick();
+                          }
+                        }}
                         className={cn(
                           "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
                           item.active
                             ? "bg-gray-100 text-gray-900 font-medium"
-                            : "text-gray-700 hover:bg-gray-100"
+                            : "text-gray-700 hover:bg-gray-100",
+                          item.className
                         )}>
                         <item.icon className="h-4 w-4" />
                         {item.title}
+                        {item.isOpen !== undefined && (
+                          <ChevronDown
+                            className={cn(
+                              "h-4 w-4 ml-auto transition-transform",
+                              item.isOpen ? "rotate-180" : ""
+                            )}
+                          />
+                        )}
                       </Link>
                     ))}
                 </div>
