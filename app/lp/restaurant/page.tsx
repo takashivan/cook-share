@@ -229,7 +229,7 @@ export default function RestaurantLandingPage() {
                     transition={{ duration: 0.8, delay: 0.2 }}
                     className="overflow-hidden rounded-xl shadow-xl">
                     <Image
-                      src="/chef_illust/hero_image.png"
+                      src="/chef_illust/top_chef.png"
                       alt="Restaurant kitchen"
                       width={800}
                       height={600}
