@@ -16,62 +16,102 @@ import {
   getAuthToken,
 } from "@/lib/api/config";
 import type { UserProfile } from "@/lib/api/user";
+import { useRouter } from "next/navigation";
+import { login, logout, getUserProfile } from "@/lib/api/user";
 
 interface AuthContextType {
-  isAuthenticated: boolean;
   user: UserProfile | null;
-  login: (token: string, userData: UserProfile) => Promise<void>;
+  isAuthenticated: boolean;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  isAuthenticated: false,
+  loading: true,
+  login: async () => {},
+  logout: () => {},
+});
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  const initAuth = async () => {
+    try {
+      const token = getAuthToken();
+      if (token) {
+        const userData = await getCurrentUser();
+        if (userData) {
+          const fullProfile = await getUserProfile(userData.id);
+          setUser(fullProfile);
+          setCurrentUser(fullProfile, "chef");
+          setIsAuthenticated(true);
+        } else {
+          clearAuthToken();
+          setIsAuthenticated(false);
+        }
+      } else {
+        setIsAuthenticated(false);
+      }
+    } catch (error) {
+      console.error("Auth initialization error:", error);
+      clearAuthToken();
+      setIsAuthenticated(false);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // ページロード時に localStorage から認証状態を復元
-    const token = getAuthToken();
-    const currentUser = getCurrentUser();
-
-    if (token && currentUser) {
-      setUser(currentUser as UserProfile);
-      setIsAuthenticated(true);
-    }
+    initAuth();
   }, []);
 
-  const login = async (token: string, userData: UserProfile) => {
-    setUser(userData);
-    setCurrentUser(userData, "chef");
-    setAuthToken(token, "chef");
-    setIsAuthenticated(true);
+  const handleLogin = async (email: string, password: string) => {
+    try {
+      const { authToken, user } = await login({ email, password });
+      setAuthToken(authToken);
+      const fullProfile = await getUserProfile(user.id);
+      setUser(fullProfile);
+      setCurrentUser(fullProfile, "chef");
+      localStorage.setItem("user", JSON.stringify(fullProfile));
+      setIsAuthenticated(true);
+      router.push("/chef/dashboard");
+    } catch (error) {
+      console.error("Login error:", error);
+      throw error;
+    }
   };
 
-  const logout = () => {
+  const handleLogout = () => {
+    logout();
     setUser(null);
     setIsAuthenticated(false);
-    clearAuthToken("chef");
-    localStorage.removeItem("current_user");
+    clearAuthToken();
+    localStorage.removeItem("user");
+    router.push("/login");
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <AuthContext.Provider
       value={{
-        isAuthenticated,
         user,
-        login,
-        logout,
+        isAuthenticated,
+        loading,
+        login: handleLogin,
+        logout: handleLogout,
       }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-}
+export const useAuth = () => useContext(AuthContext);

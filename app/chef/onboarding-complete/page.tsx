@@ -13,8 +13,11 @@ import { LoadingScreen } from "@/components/LoadingScreen";
 import { CheckCircle, ChevronRight, Clock } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/contexts/AuthContext";
+import { checkStripeAccount } from "@/lib/api/user";
 
 export default function OnboardingCompletePage() {
+  const { user } = useAuth();
   const [status, setStatus] = useState<
     "loading" | "verified" | "pending" | "error"
   >("loading");
@@ -22,29 +25,23 @@ export default function OnboardingCompletePage() {
 
   useEffect(() => {
     const verifyStatus = async () => {
+      if (!user?.id) {
+        setStatus("error");
+        setMessage("ユーザー情報が見つかりません。");
+        return;
+      }
+
       try {
-        // 実際の実装では、認証済みユーザーからchef_idを取得します
-        const chef_id = "取得済みのchef_id";
+        const res = await checkStripeAccount(user.id);
 
-        const res = await fetch("/api/chef/verify-onboarding-status", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ chef_id }),
-        });
-
-        const data = await res.json();
-
-        if (data.verified) {
+        if (res.user.stripe_verified) {
           setStatus("verified");
           setMessage(
             "おめでとうございます！Stripeアカウントの設定が完了しました。"
           );
         } else {
           setStatus("pending");
-          setMessage(
-            data.message ||
-              "まだ登録が完了していません。すべての必要情報を入力してください。"
-          );
+          setMessage("Stripeアカウントの設定が完了していません。");
         }
       } catch (error) {
         console.error("Error:", error);
@@ -54,7 +51,7 @@ export default function OnboardingCompletePage() {
     };
 
     verifyStatus();
-  }, []);
+  }, [user?.id]);
 
   if (status === "loading") {
     return <LoadingScreen message="アカウント状態を確認しています..." />;

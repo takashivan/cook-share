@@ -159,9 +159,10 @@ export default function ChefLandingPage() {
                 transition={{ duration: 0.8 }}
                 className="max-w-xl">
                 <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-                  <span className="text-orange-600">料理の腕</span>を活かす
+                  <span className="text-orange-600">料理人</span>
+                  のキャリアに
                   <br />
-                  新しい働き方
+                  もうひとつの選択肢を。{" "}
                 </h1>
                 <p className="mt-6 text-lg text-gray-600">
                   CHEFDOMは、シェフと飲食店をつなぐ新しいプラットフォーム。

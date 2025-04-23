@@ -66,6 +66,9 @@ export function Header() {
                     {userType === "company"
                       ? "企業アカウント"
                       : "シェフアカウント"}
+                    {userType === "chef" &&
+                      (user as any).is_approved === false &&
+                      " 審査中"}
                   </div>
                 </div>
               </DropdownMenuTrigger>

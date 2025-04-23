@@ -22,21 +22,38 @@ export default function ChefRegisterPage() {
   const router = useRouter();
   const { login } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError(null);
     setIsSubmitting(true);
 
-    try {
-      const formData = new FormData(e.currentTarget);
-      const data = {
-        email: formData.get("email") as string,
-        password: formData.get("password") as string,
-        name: formData.get("name") as string,
-      };
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const name = formData.get("name") as string;
 
-      const response = await register(data);
-      await login(response.authToken, response.user);
+    console.log("Submitting form with:", { email, name });
+
+    if (!validateEmail(email)) {
+      setError("有効なメールアドレスを入力してください");
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      // まず登録を試みる
+      const response = await register({ email, password, name });
+      console.log("Registration response:", response);
+
+      // 登録成功後、自動的にログイン
+      await login(email, password);
 
       toast({
         title: "登録が完了しました",
@@ -44,13 +61,14 @@ export default function ChefRegisterPage() {
       });
 
       router.push("/register/chef-profile");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Registration failed:", error);
-      toast({
-        title: "エラーが発生しました",
-        description: "登録に失敗しました。もう一度お試しください。",
-        variant: "destructive",
-      });
+      // APIからのエラーメッセージを表示
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "登録に失敗しました。入力内容を確認してください。";
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -83,6 +101,11 @@ export default function ChefRegisterPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {error && (
+              <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+                {error}
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name">お名前</Label>

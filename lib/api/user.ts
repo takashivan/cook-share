@@ -6,6 +6,7 @@ import {
   setAuthToken,
   clearAuthToken,
   clearCurrentUser,
+  setCurrentUser,
 } from "./config";
 
 const AUTH_URL = API_CONFIG.baseURLs.auth;
@@ -51,6 +52,12 @@ export interface UserProfile {
   is_verified?: boolean;
   experience?: string;
   profileImage?: string;
+  stripe_account_id?: string;
+  stripe_verified?: boolean;
+  stripe_requirements?: {
+    currentlyDue?: string[];
+    eventuallyDue?: string[];
+  };
 }
 
 // 共通の型定義
@@ -100,6 +107,7 @@ export const login = async (
 
     if (response.authToken) {
       setAuthToken(response.authToken, "chef");
+      setCurrentUser(response.user, "chef");
     }
 
     return {
@@ -183,6 +191,16 @@ export const createStripeAccountLink = async (
     response: { result: { url: string } };
   }>(`${USER_URL}/stripe/create-account-link`, "POST", { user_id });
   return response;
+};
+
+export const checkStripeAccount = async (
+  user_id: string
+): Promise<{
+  user: UserProfile;
+}> => {
+  return apiRequest<{
+    user: UserProfile;
+  }>(`${USER_URL}/stripe/account-check`, "POST", { user_id });
 };
 
 export const updateUserProfile = (
