@@ -67,9 +67,6 @@ import { EditRestaurantModal } from "@/components/modals/EditRestaurantModal";
 import { workSessionApi } from "@/lib/api/workSession";
 import type { WorkSessionWithJob } from "@/types";
 import Image from "next/image";
-import ReactCalendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
-import type { CalendarProps } from "react-calendar";
 
 interface StaffData {
   id: string;
