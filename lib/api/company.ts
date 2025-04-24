@@ -21,6 +21,23 @@ export interface Company {
   business_registration_number: string;
 }
 
+export interface BillingSummary {
+  id: string;
+  created_at: number;
+  companies_id: string;
+  month: string;
+  amount: number;
+  invoice_id: string;
+  status: string;
+  fee_rate: number;
+  session_count: number;
+  start_date: string;
+  end_date: string;
+  hosted_invoice_url: string;
+  invoice_pdf: string;
+  invoice_number: string;
+}
+
 export interface initializeCompanyResponse {
   company: Company;
   companyUser: CompanyUser;
@@ -334,4 +351,15 @@ export const updateSettings = (
   settingsData: Partial<CompanySettings>
 ): Promise<CompanySettings> => {
   return apiRequest(`${BASE_URL}/settings`, "PUT", settingsData);
+};
+
+export const getBillingSummary = (
+  company_id: string
+): Promise<BillingSummary[]> => {
+  return apiRequest(
+    `${BASE_URL}/${company_id}/billing-summary/current`,
+    "GET",
+    undefined,
+    "company"
+  );
 };

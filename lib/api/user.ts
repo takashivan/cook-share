@@ -6,6 +6,7 @@ import {
   setAuthToken,
   clearAuthToken,
   clearCurrentUser,
+  setCurrentUser,
 } from "./config";
 
 const AUTH_URL = API_CONFIG.baseURLs.auth;
@@ -51,6 +52,12 @@ export interface UserProfile {
   is_verified?: boolean;
   experience?: string;
   profileImage?: string;
+  stripe_account_id?: string;
+  stripe_verified?: boolean;
+  stripe_requirements?: {
+    currentlyDue?: string[];
+    eventuallyDue?: string[];
+  };
 }
 
 // 共通の型定義
@@ -80,9 +87,10 @@ interface SettingsData {
 // 認証関連
 export const login = async (
   credentials: Credentials
-): Promise<{ authToken: string; user: UserProfile }> => {
+): Promise<{ sessionToken: string; authToken: string; user: UserProfile }> => {
   try {
     const response = await apiRequest<{
+      sessionToken: string;
       authToken: string;
       user: {
         id: string;
@@ -98,11 +106,13 @@ export const login = async (
       };
     }>(`${AUTH_URL}/login`, "POST", credentials);
 
-    if (response.authToken) {
-      setAuthToken(response.authToken, "chef");
+    if (response.sessionToken) {
+      setAuthToken(response.sessionToken, "chef");
+      setCurrentUser(response.user, "chef");
     }
 
     return {
+      sessionToken: response.sessionToken,
       authToken: response.authToken,
       user: {
         ...response.user,
@@ -183,6 +193,16 @@ export const createStripeAccountLink = async (
     response: { result: { url: string } };
   }>(`${USER_URL}/stripe/create-account-link`, "POST", { user_id });
   return response;
+};
+
+export const checkStripeAccount = async (
+  user_id: string
+): Promise<{
+  user: UserProfile;
+}> => {
+  return apiRequest<{
+    user: UserProfile;
+  }>(`${USER_URL}/stripe/account-check`, "POST", { user_id });
 };
 
 export const updateUserProfile = (
@@ -404,4 +424,8 @@ export const resetPassword = (
     },
     "chef"
   );
+};
+
+export const getWorksessionHistories = (user_id: UserId): Promise<any> => {
+  return apiRequest(`${USER_URL}/${user_id}/sessionHistory/current`, "GET");
 };
