@@ -18,13 +18,16 @@ export const useCreateJob = (params: Params) => {
     onSuccess: (data) => {
       console.log('Job created successfully:', data);
 
+      // Jobsリストのキャッシュを更新
       const jobsKey = jobs.jobsListQueryArgs()[0];
       mutate(jobsKey);
 
+      // 追加した求人の会社が持つJobsリストのキャッシュを更新
       const companies = getApi(Companies);
       const jobsByCompanyIdKey = companies.jobsListQueryArgs(params.companyId ?? '')[0];
       mutate(jobsByCompanyIdKey);
 
+      // 追加した求人のレストランが持つJobsリストのキャッシュを更新
       const restaurant = getApi(Restaurants);
       const jobsByRestaurantIdKey = restaurant.jobsListQueryArgs(params.restaurantId ?? -1)[0];
       mutate(jobsByRestaurantIdKey);

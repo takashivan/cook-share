@@ -59,12 +59,13 @@ import { EditRestaurantModal } from "@/components/modals/EditRestaurantModal";
 import { useGetRestaurant } from "@/hooks/api/restaurants/useGetRestaurant";
 import { useGetJobsByRestaurantId } from "@/hooks/api/jobs/useGetJobsByRestaurantId";
 import { useGetMultipleWorksessionsByJobId } from "@/hooks/api/worksessions/useGetMultipleWorksessionsByJobId";
-import { JobsCreatePayload, JobsListOutput } from "@/api/__generated__/base/data-contracts";
+import { CompanyusersCreateInput, JobsCreatePayload, JobsListOutput } from "@/api/__generated__/base/data-contracts";
 // import { useGetCompanyUsersByRestaurantId } from "@/hooks/api/companyUsers/useGetCompanyUsersByRestaurantId";
 import { useCreateJob } from "@/hooks/api/jobs/useCreateJob";
 import { workSessionApi } from "@/lib/api/workSession";
 import type { WorkSessionWithJob } from "@/types";
 import Image from "next/image";
+import { useCreateCompanyUserByRestaurantId } from "@/hooks/api/companyUsers/useCreateCompanyUserByRestaurantId";
 
 interface StaffData {
   id: string;
@@ -118,10 +119,15 @@ export default function RestaurantDetailPage(props: {
     };
   }) ?? [];
 
-  const { trigger } = useCreateJob({
+  const { trigger: createJobTrigger } = useCreateJob({
     companyId: restaurant?.companies_id ?? undefined,
     restaurantId: restaurant?.id,
   });
+
+  const { trigger: createCompanyUserTrigger } = useCreateCompanyUserByRestaurantId({
+    restaurantId: restaurant?.id,
+    companyId: restaurant?.companies_id ?? undefined,
+  })
 
   console.log("restaurant", restaurant);
 
@@ -232,7 +238,7 @@ export default function RestaurantDetailPage(props: {
 
   const handleCreateJob = async (data: JobsCreatePayload) => {
     try {
-      await trigger(data);
+      await createJobTrigger(data);
       // 求人リストを更新
       // TODO: 求人リストの更新処理を追加
       setIsCreateJobModalOpen(false);
@@ -271,14 +277,14 @@ export default function RestaurantDetailPage(props: {
       console.log("permissions.canEdit", permissions.canEdit);
       console.log("permissions.canManageJobs", permissions.canManageJobs);
       console.log("restaurant.name", restaurant.name);
-      await restaurantStaffInvite(
+      const data: CompanyusersCreateInput = {
+        companies_id: restaurant.companies_id ?? '',
         email,
-        restaurant.id as unknown as number,
-        restaurant.companies_id ?? '',
-        permissions.canEdit,
-        permissions.canManageJobs,
-        restaurant.name
-      );
+        can_edit: permissions.canEdit,
+        can_manage_jobs: permissions.canManageJobs,
+        restaurant_name: restaurant.name
+      }
+      await createCompanyUserTrigger(data);
       toast({
         title: "招待を送信しました",
         description: `${email}に招待メールを送信しました。`,
