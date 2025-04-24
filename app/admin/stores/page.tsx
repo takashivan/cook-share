@@ -35,6 +35,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useGetRestaurantsByCompanyId } from "@/hooks/api/restaurants/useGetRestaurantsByCompanyId";
+import { useCreateRestaurant } from "@/hooks/api/restaurants/useCreateRestaurant";
+import { RestaurantsCreatePayload } from "@/api/__generated__/base/data-contracts";
 
 export default function StoresPage() {
   const { user } = useCompanyAuth();
@@ -47,6 +49,10 @@ export default function StoresPage() {
   const [isCreateRestaurantModalOpen, setIsCreateRestaurantModalOpen] =
     useState(false);
   const [hasMounted, setHasMounted] = useState(false);
+
+  const { trigger: createRestaurantTrigger } = useCreateRestaurant({
+    companyId: user?.companies_id ?? undefined,
+  });
 
   useEffect(() => {
     setHasMounted(true);
@@ -63,7 +69,7 @@ export default function StoresPage() {
   }, [hasMounted]);
 
   const handleCreateRestaurant = useCallback(
-    async (data: FormData) => {
+    async (data: RestaurantsCreatePayload) => {
       if (!hasMounted || !user?.companies_id) return;
 
       try {
@@ -76,13 +82,10 @@ export default function StoresPage() {
           throw new Error("会社IDの形式が正しくありません");
         }
 
-        const result = await createRestaurant(data);
+        const result = await createRestaurantTrigger(data);
         if (!result) {
           throw new Error("店舗の作成に失敗しました");
         }
-
-        // 店舗一覧を再取得
-        mutate();
 
         handleCloseRestaurantModal();
         toast({

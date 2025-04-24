@@ -23,14 +23,18 @@ export const useCreateJob = (params: Params) => {
       mutate(jobsKey);
 
       // 追加した求人の会社が持つJobsリストのキャッシュを更新
-      const companies = getApi(Companies);
-      const jobsByCompanyIdKey = companies.jobsListQueryArgs(params.companyId ?? '')[0];
-      mutate(jobsByCompanyIdKey);
+      if (params.companyId) {
+        const companies = getApi(Companies);
+        const jobsByCompanyIdKey = companies.jobsListQueryArgs(params.companyId)[0];
+        mutate(jobsByCompanyIdKey);
+      }
 
       // 追加した求人のレストランが持つJobsリストのキャッシュを更新
-      const restaurant = getApi(Restaurants);
-      const jobsByRestaurantIdKey = restaurant.jobsListQueryArgs(params.restaurantId ?? -1)[0];
-      mutate(jobsByRestaurantIdKey);
+      if (params.restaurantId) {
+        const restaurant = getApi(Restaurants);
+        const jobsByRestaurantIdKey = restaurant.jobsListQueryArgs(params.restaurantId)[0];
+        mutate(jobsByRestaurantIdKey);
+      }
     }
   })
 }

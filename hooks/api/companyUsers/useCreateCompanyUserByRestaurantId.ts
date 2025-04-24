@@ -18,13 +18,17 @@ export const useCreateCompanyUserByRestaurantId = (params: Params) => {
       console.log('Company user created successfully:', data);
 
       // 追加したユーザーが所属するレストランに関連するCompanyUsersリストのキャッシュを更新
-      const companyUsersKey = restaurants.companyusersListQueryArgs(params.restaurantId ?? -1)[0];
-      mutate(companyUsersKey);
+      if (params.restaurantId) {
+        const companyUsersKey = restaurants.companyusersListQueryArgs(params.restaurantId)[0];
+        mutate(companyUsersKey);
+      }
 
       // 追加したユーザーが所属する会社のCompanyUsersリストのキャッシュを更新
-      const companies = getApi(Companies);
-      const companyUsersListByCompanyIdKey = companies.companyusersListQueryArgs(params.companyId ?? '')[0];
-      mutate(companyUsersListByCompanyIdKey);
+      if (params.companyId) {
+        const companies = getApi(Companies);
+        const companyUsersListByCompanyIdKey = companies.companyusersListQueryArgs(params.companyId)[0];
+        mutate(companyUsersListByCompanyIdKey);
+      }
     }
   })
 }
