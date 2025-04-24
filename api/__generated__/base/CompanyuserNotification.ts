@@ -22,7 +22,6 @@ import {
   MarkReadAllPartialUpdateData,
   MarkReadAllPartialUpdatePayload,
   MarkReadPartialUpdateData,
-  MarkReadPartialUpdatePayload,
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
@@ -182,23 +181,18 @@ export class CompanyuserNotification<SecurityDataType = unknown> extends HttpCli
    * @name MarkReadPartialUpdate
    * @request PATCH:/companyuser_notification/{id}/mark-read
    */
-  markReadPartialUpdate = (id: string, data: MarkReadPartialUpdatePayload, params: RequestParams = {}) =>
+  markReadPartialUpdate = (id: string, params: RequestParams = {}) =>
     this.request<MarkReadPartialUpdateData, void>({
       path: `/companyuser_notification/${id}/mark-read`,
       method: "PATCH",
-      body: data,
-      type: ContentType.Json,
       format: "json",
       ...params,
     });
 
   markReadPartialUpdateQueryArgs = (id: string, params: RequestParams = {}, enabled: boolean = true) => {
     const key = enabled ? [`/companyuser_notification/${id}/mark-read`] : null;
-    const fetcher: (
-      url: string[],
-      { arg }: { arg: MarkReadPartialUpdatePayload },
-    ) => Promise<MarkReadPartialUpdateData> = (_, { arg }) =>
-      this.markReadPartialUpdate(id, arg, params).then((res) => res.data);
+    const fetcher: (url: string[]) => Promise<MarkReadPartialUpdateData> = (_) =>
+      this.markReadPartialUpdate(id, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 

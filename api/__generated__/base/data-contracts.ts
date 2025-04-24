@@ -2691,7 +2691,7 @@ export type ByUserDetailOutput = {
 }[];
 
 export interface MarkReadAllPartialUpdatePayload {
-  id: string[];
+  ids: string[];
 }
 
 export type MarkReadAllPartialUpdateData = object;
@@ -2749,10 +2749,6 @@ export interface CompanyuserNotificationPartialUpdateData {
   job_id: number | null;
   /** @format int64 */
   restaurant_id: number | null;
-}
-
-export interface MarkReadPartialUpdatePayload {
-  ids: string;
 }
 
 export interface MarkReadPartialUpdateData {
@@ -6111,7 +6107,34 @@ export interface CompanyusersListOutput {
     /** @format email */
     company_email: string;
   };
-  admin: string;
+  admin: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format uuid */
+    companies_id: string | null;
+    name: string;
+    /** @format email */
+    email: string;
+    phone: string | null;
+    /** @format password */
+    password: string;
+    is_admin: boolean;
+    is_active: boolean;
+    is_verified: boolean;
+    /** @format timestamptz */
+    updated_at: number | null;
+    magic_link: object;
+    verify_token: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
+    password_reset_token: string;
+  }[];
 }
 
 export interface CompanyusersCreateInput {

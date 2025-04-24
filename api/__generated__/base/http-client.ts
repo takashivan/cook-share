@@ -53,7 +53,7 @@ export class HttpClient<SecurityDataType = unknown> {
   private secure?: boolean;
   private format?: ResponseType;
 
-  constructor({ axiosInstance, securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
+  constructor({ axiosInstance, securityWorker, secure, format }: ApiConfig<SecurityDataType>) {
     this.instance = axiosInstance;
     this.instance.defaults.baseURL = "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf";
     this.secure = secure;
@@ -95,10 +95,11 @@ export class HttpClient<SecurityDataType = unknown> {
     return Object.keys(input || {}).reduce((formData, key) => {
       const property = input[key];
       const propertyContent: any[] = property instanceof Array ? property : [property];
+      const keyForFormData = property instanceof Array ? `${key}[]` : key;
 
       for (const formItem of propertyContent) {
         const isFileType = formItem instanceof Blob || formItem instanceof File;
-        formData.append(key, isFileType ? formItem : this.stringifyFormItem(formItem));
+        formData.append(keyForFormData, isFileType ? formItem : this.stringifyFormItem(formItem));
       }
 
       return formData;
