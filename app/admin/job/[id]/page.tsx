@@ -114,7 +114,7 @@ export default function Page({ params }: PageProps) {
   const { id } = use(params);
 
   const [isEditJobModalOpen, setIsEditJobModalOpen] = useState(false);
-  const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
+  // const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
   const [copiedJob, setCopiedJob] = useState<any>(null);
 
   const { data: jobData, error: jobError } = useGetJob({ jobId: Number(id) });
@@ -1225,7 +1225,7 @@ export default function Page({ params }: PageProps) {
         ).toLocaleDateString()}
         jobTime={`${selectedWorkSession?.job.start_time}:00 - ${selectedWorkSession?.job.end_time}:00`}
       />
-      {isCreateJobModalOpen && (
+      {/* {isCreateJobModalOpen && (
         <CreateJobModal
           isOpen={isCreateJobModalOpen}
           onClose={() => {
@@ -1251,7 +1251,7 @@ export default function Page({ params }: PageProps) {
           restaurantId={job?.restaurant_id || 0}
           initialData={copiedJob}
         />
-      )}
+      )} */}
     </div>
   );
 }

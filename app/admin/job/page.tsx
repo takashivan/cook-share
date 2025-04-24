@@ -99,7 +99,7 @@ export default function JobApplicants({
   const [loading, setLoading] = useState(true);
   const [job, setJob] = useState<JobDetail | null>(null);
   const router = useRouter();
-  const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
+  // const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
   const [copiedJob, setCopiedJob] = useState<any>(null);
 
   const fetchJob = async () => {
@@ -154,7 +154,7 @@ export default function JobApplicants({
       id: undefined,
     };
     setCopiedJob(jobData);
-    setIsCreateJobModalOpen(true);
+    // setIsCreateJobModalOpen(true);
   };
 
   if (loading) {
@@ -467,10 +467,10 @@ export default function JobApplicants({
 
       <div className="flex justify-between items-center mt-8">
         <h2 className="text-2xl font-bold">求人一覧</h2>
-        <Button onClick={() => setIsCreateJobModalOpen(true)}>
+        {/* <Button onClick={() => setIsCreateJobModalOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           新規求人を作成
-        </Button>
+        </Button> */}
       </div>
 
       <div className="space-y-4">
@@ -492,7 +492,7 @@ export default function JobApplicants({
         )}
       </div>
 
-      {isCreateJobModalOpen && (
+      {/* {isCreateJobModalOpen && (
         <CreateJobModal
           isOpen={isCreateJobModalOpen}
           onClose={() => {
@@ -518,7 +518,7 @@ export default function JobApplicants({
           restaurantId={0} // TODO: 実際のレストランIDを設定する
           initialData={copiedJob}
         />
-      )}
+      )} */}
     </div>
   );
 }
