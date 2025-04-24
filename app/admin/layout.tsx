@@ -60,6 +60,8 @@ interface NavigationItem {
   onClick?: () => void;
   isOpen?: boolean;
   className?: string;
+  notification?: React.ReactNode;
+  key?: string;
 }
 
 interface NavigationGroup {
@@ -81,6 +83,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [isStoreListOpen, setIsStoreListOpen] = useState(false);
   const { toast } = useToast();
 
+  const mutateNotifications = async () => {
+    if (user?.id) {
+      try {
+        const data = await getCompanyUserNotificationsByCompanyUserId(user.id);
+        setNotifications(data);
+      } catch (error) {
+        console.error("Failed to fetch notifications:", error);
+      }
+    }
+  };
+
   useEffect(() => {
     if (user?.companies_id) {
       dispatch(fetchRestaurantsByCompanyId(user.companies_id));
@@ -88,17 +101,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }, [dispatch, user?.companies_id]);
 
   useEffect(() => {
-    // 認証状態の初期化を待つ
     const initAuth = async () => {
       try {
-        // ローカルストレージからトークンを確認
         const token = localStorage.getItem("company_auth_token");
         if (!token) {
           router.push("/login/company");
           return;
         }
 
-        // 認証状態が確定するまで待機
         if (isAuthenticated === undefined) {
           return;
         }
@@ -113,17 +123,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     initAuth();
   }, [isAuthenticated, router]);
 
-  const mutateNotifications = async () => {
-    if (user?.id) {
-      try {
-        const data = await getCompanyUserNotificationsByCompanyUserId(user.id);
-        setNotifications(data);
-      } catch (error) {
-        console.error("Failed to fetch notifications:", error);
-      }
-    }
-  };
-
   useEffect(() => {
     if (!user?.id) return;
 
@@ -131,16 +130,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       instanceBaseUrl: process.env.NEXT_PUBLIC_XANO_BASE_URL || "",
       realtimeConnectionHash: process.env.NEXT_PUBLIC_XANO_REALTIME_HASH || "",
     });
-    // WebSocket接続の確立
+
     let channel: any;
 
     const setupChannel = async () => {
       try {
-        // チャンネルの設定
         channel = xanoClient.channel(`notifications/${user?.id}`);
         console.log("Channel setup for notifications");
 
-        // メッセージの購読
         channel.on((message: any) => {
           console.log("Admin received message:", message);
           if (message.action === "connection_status") {
@@ -181,9 +178,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   const handleMarkAsRead = async (notificationId: number) => {
     try {
-      await markCompanyUserNotificationAsRead(notificationId);
+      await markCompanyUserNotificationAsRead(notificationId.toString());
       setNotifications((prev) =>
-        prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
+        prev.map((n) => (n.id === notificationId ? { ...n, is_read: true } : n))
       );
     } catch (error) {
       console.error("Failed to mark notification as read:", error);
@@ -192,14 +189,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   const handleMarkAllAsRead = async () => {
     try {
-      await markAllCompanyUserNotificationsAsRead();
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      if (user?.id) {
+        await markAllCompanyUserNotificationsAsRead(user.id);
+        setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+      }
     } catch (error) {
       console.error("Failed to mark all notifications as read:", error);
     }
   };
 
-  // ローディング中は早期リターン
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -210,18 +208,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     );
   }
 
-  // 認証されていない場合は何も表示しない
   if (!isAuthenticated) {
     return null;
   }
 
-  // 現在のパスに基づいて、階層構造を判断
   const pathSegments = pathname.split("/").filter(Boolean);
   const isStoreDetail =
     pathSegments.includes("stores") && pathSegments.length > 3;
   const isJobDetail = pathSegments.includes("jobs") && pathSegments.length > 3;
 
-  // ナビゲーション項目
   const navigation: NavigationGroup[] = [
     {
       title: "ダッシュボード",
@@ -270,15 +265,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           icon: Utensils,
           active: pathname === "/admin/stores",
           show: true,
+          key: "stores-list",
         },
         {
           title: "店舗",
-          href: "/admin/stores",
+          href: "#", // Changed from /admin/stores to # to avoid duplicate href
           icon: Store,
           active: pathname.startsWith("/admin/stores/"),
           show: true,
           onClick: () => setIsStoreListOpen(!isStoreListOpen),
           isOpen: isStoreListOpen,
+          key: "stores-toggle",
         },
         ...(isStoreListOpen
           ? restaurants.map((restaurant) => ({
@@ -288,6 +285,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               active: pathname === `/admin/stores/${restaurant.id}`,
               show: true,
               className: "ml-4",
+              key: `store-${restaurant.id}`,
             }))
           : []),
       ],
@@ -322,7 +320,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Toaster />
-      {/* Mobile Sidebar */}
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetContent side="left" className="p-0 w-72">
           <div className="flex flex-col h-full">
@@ -334,8 +331,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   width={120}
                   height={30}
                 />
-
-                <span className="text-xs bg-gray-200 px-2 py-0.5 rounded-full ">
+                <span className="text-xs bg-gray-200 px-2 py-0.5 rounded-full">
                   管理画面
                 </span>
               </div>
@@ -351,7 +347,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                       .filter((item) => item.show)
                       .map((item) => (
                         <Link
-                          key={item.href}
+                          key={item.key || item.href}
                           href={item.href}
                           onClick={(e) => {
                             if (item.onClick) {
@@ -368,6 +364,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                           )}>
                           <item.icon className="h-4 w-4" />
                           {item.title}
+                          {item.notification}
                           {item.isOpen !== undefined && (
                             <ChevronDown
                               className={cn(
@@ -415,7 +412,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </SheetContent>
       </Sheet>
 
-      {/* Desktop Sidebar */}
       <div className="hidden lg:flex lg:w-72 lg:flex-col lg:fixed lg:inset-y-0 border-r bg-white">
         <div className="flex flex-col h-full">
           <div className="border-b p-4">
@@ -442,7 +438,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     .filter((item) => item.show)
                     .map((item) => (
                       <Link
-                        key={item.href}
+                        key={item.key || item.href}
                         href={item.href}
                         onClick={(e) => {
                           if (item.onClick) {
@@ -459,6 +455,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                         )}>
                         <item.icon className="h-4 w-4" />
                         {item.title}
+                        {item.notification}
                         {item.isOpen !== undefined && (
                           <ChevronDown
                             className={cn(
@@ -503,7 +500,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 lg:pl-72">
         <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-white px-4 md:px-6">
           <Button
@@ -520,7 +516,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 ホーム
               </Link>
 
-              {/* 会社情報 */}
               {pathname.includes("/company") && (
                 <>
                   <ChevronRight className="h-4 w-4" />
@@ -534,7 +529,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     会社情報
                   </Link>
 
-                  {/* 会社情報の下層ページ */}
                   {pathname.includes("/company/staff") && (
                     <>
                       <ChevronRight className="h-4 w-4" />
@@ -550,7 +544,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 </>
               )}
 
-              {/* 店舗一覧 */}
               {pathname.includes("/stores") && (
                 <>
                   <ChevronRight className="h-4 w-4" />
@@ -564,7 +557,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     店舗一覧
                   </Link>
 
-                  {/* 店舗詳細 */}
                   {isStoreDetail && (
                     <>
                       <ChevronRight className="h-4 w-4" />
@@ -576,7 +568,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 </>
               )}
 
-              {/* 求人一覧 */}
               {pathname.includes("/jobs") && (
                 <>
                   <ChevronRight className="h-4 w-4" />
@@ -590,7 +581,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     求人一覧
                   </Link>
 
-                  {/* 求人詳細 */}
                   {isJobDetail && (
                     <>
                       <ChevronRight className="h-4 w-4" />
@@ -602,7 +592,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 </>
               )}
 
-              {/* 設定 */}
               {pathname.includes("/settings") && (
                 <>
                   <ChevronRight className="h-4 w-4" />
@@ -611,41 +600,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               )}
             </div>
           </div>
-          <RestaurantNotificationDropdown
-            notifications={notifications}
-            onMarkAsRead={handleMarkAsRead}
-            onMarkAllAsRead={handleMarkAllAsRead}
-            userId={user?.id?.toString() || ""}
-            mutateNotifications={mutateNotifications}
-          />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage
-                    src="/placeholder.svg?height=32&width=32"
-                    alt="User"
-                  />
-                  <AvatarFallback>SC</AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>
-                <User className="mr-2 h-4 w-4" />
-                <span>プロフィール</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
-                <span>設定</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>ログアウト</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center gap-4">
+            <RestaurantNotificationDropdown
+              notifications={notifications}
+              onMarkAsRead={handleMarkAsRead}
+              onMarkAllAsRead={handleMarkAllAsRead}
+              userId={user?.id?.toString() || ""}
+              mutateNotifications={mutateNotifications}
+              restaurantId={0}
+            />
+          </div>
         </header>
         <main className="p-4 md:p-6">{children}</main>
       </div>

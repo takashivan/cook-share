@@ -65,7 +65,7 @@ export default function RestaurantNotificationsPage() {
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {
-      await markCompanyUserNotificationAsRead(Number(notificationId));
+      await markCompanyUserNotificationAsRead(notificationId);
       setNotifications((prev) =>
         prev.map((n) =>
           n.id === Number(notificationId) ? { ...n, read: true } : n
@@ -76,18 +76,9 @@ export default function RestaurantNotificationsPage() {
     }
   };
 
-  const handleMarkAllAsRead = async () => {
-    try {
-      await markAllCompanyUserNotificationsAsRead();
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    } catch (error) {
-      console.error("Failed to mark all notifications as read:", error);
-    }
-  };
-
   // 通知をフィルタリングする
   const filteredNotifications = notifications.filter((notification) => {
-    if (activeTab === "unread" && notification.read) return false;
+    if (activeTab === "unread" && notification.is_read) return false;
     if (filter !== "all" && notification.type !== filter) return false;
     return true;
   });
@@ -159,7 +150,8 @@ export default function RestaurantNotificationsPage() {
             {filteredNotifications.length > 0 ? (
               filteredNotifications.map((notification) => (
                 <Link key={notification.id} href="#">
-                  <Card className={`${!notification.read ? "bg-gray-50" : ""}`}>
+                  <Card
+                    className={`${!notification.is_read ? "bg-gray-50" : ""}`}>
                     <CardContent className="p-4">
                       <div className="flex gap-3">
                         <div
@@ -211,7 +203,7 @@ export default function RestaurantNotificationsPage() {
           </TabsContent>
           <TabsContent value="unread" className="mt-0">
             {filteredNotifications
-              .filter((n) => !n.read)
+              .filter((n) => !n.is_read)
               .map((notification) => (
                 <Link key={notification.id} href="#">
                   <Card className="bg-gray-50">
