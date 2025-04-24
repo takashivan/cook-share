@@ -152,9 +152,9 @@ export const forgotPassword = (
 export type CompanyUserResponse = CompanyUser[];
 
 export const getCompanyUserByCompanyId = (
-  id: string
+  companies_id: string
 ): Promise<CompanyUserResponse> => {
-  return apiRequest(`${BASE_URL}/company/${id}`, "GET");
+  return apiRequest(`${BASE_URL}/company/${companies_id}`, "GET");
 };
 
 export const updateCompanyUser = async (

@@ -37,13 +37,9 @@ export const fetchCuisines = createAsyncThunk(
 
 export const fetchOperatorJobs = createAsyncThunk(
   "operator/fetchJobs",
-  async (_, { rejectWithValue }) => {
-    try {
-      const jobs = await getAllJobs();
-      return jobs;
-    } catch (error) {
-      return rejectWithValue((error as Error).message);
-    }
+  async () => {
+    const response = await getAllJobs();
+    return response;
   }
 );
 
@@ -140,33 +136,37 @@ export const approveRestaurant = createAsyncThunk(
 
 export const banJob = createAsyncThunk(
   "operator/banJob",
-  async (
-    { id, reason }: { id: number; reason: string },
-    { rejectWithValue }
-  ) => {
-    try {
-      const response = await operatorApi.banJob(id, reason);
-      return response;
-    } catch (error) {
-      return rejectWithValue((error as Error).message);
-    }
+  async ({ id, reason }: { id: number; reason: string }) => {
+    const response = await operatorApi.banJob(id, reason);
+    return response;
   }
 );
 
 export const approveJob = createAsyncThunk(
   "operator/approveJob",
-  async (
-    { id, reason }: { id: number; reason: string },
-    { rejectWithValue }
-  ) => {
-    try {
-      const response = await operatorApi.approveJob(id, reason);
-      return response;
-    } catch (error) {
-      return rejectWithValue((error as Error).message);
-    }
+  async ({ id, reason }: { id: number; reason: string }) => {
+    const response = await operatorApi.approveJob(id, reason);
+    return response;
   }
 );
+
+export const fetchOperatorAlerts = createAsyncThunk(
+  "operator/fetchAlerts",
+  async () => {
+    const response = await operatorApi.getAlert();
+    return response;
+  }
+);
+
+interface Alert {
+  id: number;
+  created_at: number;
+  message: string;
+  job_id: number;
+  messages: string;
+  json: string;
+  status: string;
+}
 
 interface OperatorState {
   companies: any[];
@@ -207,6 +207,11 @@ interface OperatorState {
     loading: boolean;
     error: string | null;
   };
+  alerts: {
+    data: Alert[];
+    loading: boolean;
+    error: string | null;
+  };
 }
 
 const initialState: OperatorState = {
@@ -244,6 +249,11 @@ const initialState: OperatorState = {
     skills: null,
   },
   restaurants: {
+    data: [],
+    loading: false,
+    error: null,
+  },
+  alerts: {
     data: [],
     loading: false,
     error: null,
@@ -290,19 +300,14 @@ const operatorSlice = createSlice({
       .addCase(fetchOperatorJobs.pending, (state) => {
         state.jobs.loading = true;
         state.jobs.error = null;
-        state.loading.jobs = true;
-        state.error.jobs = null;
       })
       .addCase(fetchOperatorJobs.fulfilled, (state, action) => {
         state.jobs.data = action.payload;
         state.jobs.loading = false;
-        state.loading.jobs = false;
       })
       .addCase(fetchOperatorJobs.rejected, (state, action) => {
         state.jobs.loading = false;
-        state.jobs.error = action.error.message || "エラーが発生しました";
-        state.loading.jobs = false;
-        state.error.jobs = action.error.message || "エラーが発生しました";
+        state.jobs.error = action.error.message || "Failed to fetch jobs";
       });
 
     // Cuisines
@@ -461,6 +466,21 @@ const operatorSlice = createSlice({
       .addCase(approveJob.rejected, (state, action) => {
         state.jobs.loading = false;
         state.jobs.error = action.payload as string;
+      });
+
+    // Fetch Alerts
+    builder
+      .addCase(fetchOperatorAlerts.pending, (state) => {
+        state.alerts.loading = true;
+        state.alerts.error = null;
+      })
+      .addCase(fetchOperatorAlerts.fulfilled, (state, action) => {
+        state.alerts.loading = false;
+        state.alerts.data = action.payload;
+      })
+      .addCase(fetchOperatorAlerts.rejected, (state, action) => {
+        state.alerts.loading = false;
+        state.alerts.error = action.error.message || "Failed to fetch alerts";
       });
   },
 });

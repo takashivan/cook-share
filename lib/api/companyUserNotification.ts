@@ -7,9 +7,11 @@ export type CompanyUserNotification = {
   company_user_id: number;
   type: string;
   content: string;
-  read: boolean;
+  is_read: boolean;
   created_at: number;
   updated_at: number;
+  job_id: number;
+  restaurant_id: number;
 };
 
 export type CompanyUserNotificationType =
@@ -36,7 +38,7 @@ export type UpdateCompanyUserNotificationResponse = CompanyUserNotification;
 export type DeleteCompanyUserNotificationResponse = void;
 export type MarkCompanyUserNotificationAsReadResponse = void;
 export type MarkAllCompanyUserNotificationsAsReadResponse = void;
-
+export type MarkCompanyUserNotificationsAsReadResponse = void;
 export const createCompanyUserNotification = async (
   params: CreateCompanyUserNotificationParams
 ) => {
@@ -84,19 +86,29 @@ export const deleteCompanyUserNotification = async (id: number) => {
   return response;
 };
 
-export const markCompanyUserNotificationAsRead = async (id: number) => {
+export const markCompanyUserNotificationAsRead = async (id: string) => {
   const response = await apiRequest<MarkCompanyUserNotificationAsReadResponse>(
-    `${API_URL}/${id}/read`,
-    "POST"
+    `${API_URL}/${id}/mark-read`,
+    "PATCH"
   );
   return response;
 };
 
-export const markAllCompanyUserNotificationsAsRead = async () => {
+export const markCompanyUserNotificationsAsRead = async (ids: string[]) => {
+  const response = await apiRequest<MarkCompanyUserNotificationsAsReadResponse>(
+    `${API_URL}/mark-read/all`,
+    "PATCH",
+    ids
+  );
+  return response;
+};
+
+export const markAllCompanyUserNotificationsAsRead = async (user_id: string) => {
   const response =
     await apiRequest<MarkAllCompanyUserNotificationsAsReadResponse>(
-      `${API_URL}/read_all`,
-      "POST"
+      `${API_URL}/mark-read/all`,
+      "PATCH",
+      { user_id }
     );
   return response;
 };

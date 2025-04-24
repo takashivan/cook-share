@@ -23,10 +23,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CompanyUserNotification } from "@/lib/api/companyUserNotification";
+import { markCompanyUserNotificationAsRead } from "@/lib/api/companyUserNotification";
 import { useToast } from "@/hooks/use-toast";
 import { XanoClient } from "@xano/js-sdk/lib";
 
 interface RestaurantNotificationDropdownProps {
+  restaurantId: number;
   notifications: CompanyUserNotification[];
   onMarkAsRead: (id: number) => void;
   onMarkAllAsRead: () => void;
@@ -35,6 +37,7 @@ interface RestaurantNotificationDropdownProps {
 }
 
 export function RestaurantNotificationDropdown({
+  restaurantId,
   notifications,
   onMarkAsRead,
   onMarkAllAsRead,
@@ -49,11 +52,35 @@ export function RestaurantNotificationDropdown({
     realtimeConnectionHash: process.env.NEXT_PUBLIC_XANO_REALTIME_HASH || "",
   });
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const filteredNotifications = notifications.filter(
+    (notification) =>
+      restaurantId === 0 || notification.restaurant_id === restaurantId
+  );
 
-  const handleNotificationClick = (notification: CompanyUserNotification) => {
-    if (!notification.read) {
-      onMarkAsRead(notification.id);
+  const unreadCount = filteredNotifications.filter(
+    (notification) => !notification.is_read
+  ).length;
+
+  console.log("Notifications:", notifications);
+  console.log("Filtered Notifications:", filteredNotifications);
+  console.log("Restaurant ID:", restaurantId);
+  console.log("Unread Count:", unreadCount);
+
+  const handleNotificationClick = async (
+    notification: CompanyUserNotification
+  ) => {
+    if (!notification.is_read) {
+      try {
+        await markCompanyUserNotificationAsRead(notification.id.toString());
+        mutateNotifications();
+      } catch (error) {
+        console.error("Failed to mark notification as read:", error);
+        toast({
+          title: "エラー",
+          description: "通知の既読化に失敗しました",
+          variant: "destructive",
+        });
+      }
     }
     setOpen(false);
   };
@@ -123,12 +150,12 @@ export function RestaurantNotificationDropdown({
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup className="max-h-[400px] overflow-y-auto">
-          {notifications.length > 0 ? (
-            notifications.map((notification) => (
+          {filteredNotifications.length > 0 ? (
+            filteredNotifications.map((notification) => (
               <DropdownMenuItem
                 key={notification.id}
                 className={`p-3 cursor-pointer ${
-                  !notification.read ? "bg-muted/50" : ""
+                  !notification.is_read ? "bg-muted/50" : ""
                 }`}
                 onClick={() => handleNotificationClick(notification)}
                 asChild>
@@ -158,7 +185,7 @@ export function RestaurantNotificationDropdown({
                         )}
                       </p>
                     </div>
-                    {!notification.read && (
+                    {!notification.is_read && (
                       <div className="w-2 h-2 rounded-full bg-blue-600 self-start mt-2"></div>
                     )}
                   </div>
