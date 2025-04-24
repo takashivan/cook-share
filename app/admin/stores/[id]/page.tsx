@@ -60,7 +60,7 @@ import { useGetRestaurant } from "@/hooks/api/restaurants/useGetRestaurant";
 import { useGetJobsByRestaurantId } from "@/hooks/api/jobs/useGetJobsByRestaurantId";
 import { useGetMultipleWorksessionsByJobId } from "@/hooks/api/worksessions/useGetMultipleWorksessionsByJobId";
 import { CompanyusersCreateInput, JobsCreatePayload, JobsListOutput } from "@/api/__generated__/base/data-contracts";
-// import { useGetCompanyUsersByRestaurantId } from "@/hooks/api/companyUsers/useGetCompanyUsersByRestaurantId";
+import { useGetCompanyUsersByRestaurantId } from "@/hooks/api/companyUsers/useGetCompanyUsersByRestaurantId";
 import { useCreateJob } from "@/hooks/api/jobs/useCreateJob";
 import { workSessionApi } from "@/lib/api/workSession";
 import type { WorkSessionWithJob } from "@/types";
@@ -98,7 +98,7 @@ export default function RestaurantDetailPage(props: {
   } = useGetRestaurant({ restaurantId: Number(params.id) });
   const { data: jobs, error: jobsError } = useGetJobsByRestaurantId({ restaurantId: Number(params.id) });
   const { data: worksessionsbyJob } = useGetMultipleWorksessionsByJobId({ jobIds: jobs?.map((job) => job.id) || [] })
-  // const { data: staffs } = useGetCompanyUsersByRestaurantId({ restaurantId: Number(params.id) });
+  const { data: staffData } = useGetCompanyUsersByRestaurantId({ restaurantId: Number(params.id) });
 
   const jobWithWorkSessions: JobWithWorkSessions[] | undefined = jobs?.map((job) => {
     const workSessionCount = worksessionsbyJob?.find((workSessions) => workSessions.some((workSession) => workSession.job_id === job.id))?.length || 0;
@@ -204,26 +204,26 @@ export default function RestaurantDetailPage(props: {
     }
   };
 
-  const { data: staffs, mutate: mutateStaffs } = useSWR<StaffData[]>(
-    [`restaurant-staff`, params.id],
-    async ([_, id]: [string, string]) => {
-      const response = await getRestaurantStaff(parseInt(id));
-      return response.admin.map((staff) => ({
-        id: staff.id,
-        companyuser_id: staff.companies_id,
-        companyuser: {
-          name: staff.name,
-          email: staff.email,
-          is_active: true, // APIレスポンスにis_activeが含まれていないため、デフォルトでtrueとする
-        },
-      }));
-    },
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      dedupingInterval: 10000,
-    }
-  );
+  // const { data: staffs, mutate: mutateStaffs } = useSWR<StaffData[]>(
+  //   [`restaurant-staff`, params.id],
+  //   async ([_, id]: [string, string]) => {
+  //     const response = await getRestaurantStaff(parseInt(id));
+  //     return response.admin.map((staff) => ({
+  //       id: staff.id,
+  //       companyuser_id: staff.companies_id,
+  //       companyuser: {
+  //         name: staff.name,
+  //         email: staff.email,
+  //         is_active: true, // APIレスポンスにis_activeが含まれていないため、デフォルトでtrueとする
+  //       },
+  //     }));
+  //   },
+  //   {
+  //     revalidateOnFocus: false,
+  //     revalidateOnReconnect: false,
+  //     dedupingInterval: 10000,
+  //   }
+  // );
 
   console.log("Restaurant data:", restaurant);
   console.log("Raw jobs response:", jobs);
@@ -1116,20 +1116,20 @@ export default function RestaurantDetailPage(props: {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {staffs?.map((staff: StaffData) => (
-                      <TableRow key={staff.companyuser_id || staff.id}>
+                    {staffData?.admin?.map((staff) => (
+                      <TableRow key={staff.id}>
                         <TableCell className="font-medium">
-                          {staff.companyuser.name}
+                          {staff.name}
                         </TableCell>
-                        <TableCell>{staff.companyuser.email}</TableCell>
+                        <TableCell>{staff.email}</TableCell>
                         <TableCell>
                           <Badge
                             variant={
-                              staff.companyuser.is_active
+                              staff.is_active
                                 ? "default"
                                 : "secondary"
                             }>
-                            {staff.companyuser.is_active
+                            {staff.is_active
                               ? "アクティブ"
                               : "非アクティブ"}
                           </Badge>
