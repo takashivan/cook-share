@@ -61,6 +61,7 @@ interface NavigationItem {
   isOpen?: boolean;
   className?: string;
   notification?: React.ReactNode;
+  key?: string;
 }
 
 interface NavigationGroup {
@@ -264,15 +265,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           icon: Utensils,
           active: pathname === "/admin/stores",
           show: true,
+          key: "stores-list",
         },
         {
           title: "店舗",
-          href: "/admin/stores",
+          href: "#", // Changed from /admin/stores to # to avoid duplicate href
           icon: Store,
           active: pathname.startsWith("/admin/stores/"),
           show: true,
           onClick: () => setIsStoreListOpen(!isStoreListOpen),
           isOpen: isStoreListOpen,
+          key: "stores-toggle",
         },
         ...(isStoreListOpen
           ? restaurants.map((restaurant) => ({
@@ -282,6 +285,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               active: pathname === `/admin/stores/${restaurant.id}`,
               show: true,
               className: "ml-4",
+              key: `store-${restaurant.id}`,
             }))
           : []),
       ],
@@ -343,7 +347,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                       .filter((item) => item.show)
                       .map((item) => (
                         <Link
-                          key={item.href}
+                          key={item.key || item.href}
                           href={item.href}
                           onClick={(e) => {
                             if (item.onClick) {
@@ -434,7 +438,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     .filter((item) => item.show)
                     .map((item) => (
                       <Link
-                        key={item.href}
+                        key={item.key || item.href}
                         href={item.href}
                         onClick={(e) => {
                           if (item.onClick) {
