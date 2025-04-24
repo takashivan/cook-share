@@ -5,15 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import Image from "next/image";
-import { CreateJobParams } from "@/lib/api/job";
+import { JobsCreatePayload } from "@/api/__generated__/base/data-contracts";
 
 interface CreateJobModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: FormData) => Promise<void>;
+  onSubmit: (data: JobsCreatePayload) => Promise<void>;
   restaurantId: number;
   initialData?: any;
 }
@@ -36,10 +34,10 @@ export const CreateJobModal = ({
     reset,
     watch,
     setValue,
-  } = useForm<CreateJobParams>({
+  } = useForm<JobsCreatePayload>({
     defaultValues: {
       restaurant_id: restaurantId,
-      status: "draft",
+      status: "DRAFT",
       required_skills: [],
     },
   });
@@ -48,7 +46,7 @@ export const CreateJobModal = ({
   useEffect(() => {
     if (initialData) {
       Object.entries(initialData).forEach(([key, value]) => {
-        setValue(key as keyof CreateJobParams, value as any);
+        setValue(key as keyof JobsCreatePayload, value as any);
       });
     }
   }, [initialData, setValue]);
@@ -115,7 +113,14 @@ export const CreateJobModal = ({
         formData.append("image", selectedFile);
       }
 
-      await onSubmit(formData);
+      const newData: JobsCreatePayload = {
+        ...data,
+        restaurant_id: restaurantId,
+        start_time: startTimestamp,
+        end_time: endTimestamp,
+      }
+
+      await onSubmit(newData);
       reset();
       setPreviewImage(null);
       setSelectedFile(null);
@@ -166,7 +171,15 @@ export const CreateJobModal = ({
         formData.append("image", selectedFile);
       }
 
-      await onSubmit(formData);
+      const newData: JobsCreatePayload = {
+        ...data,
+        restaurant_id: restaurantId,
+        start_time: startTimestamp,
+        end_time: endTimestamp,
+        status: "DRAFT",
+      }
+
+      await onSubmit(newData);
       reset();
       setPreviewImage(null);
       setSelectedFile(null);
@@ -216,7 +229,15 @@ export const CreateJobModal = ({
         formData.append("image", selectedFile);
       }
 
-      await onSubmit(formData);
+      const newData: JobsCreatePayload = {
+        ...data,
+        restaurant_id: restaurantId,
+        start_time: startTimestamp,
+        end_time: endTimestamp,
+        status: "PUBLISHED",
+      }
+
+      await onSubmit(newData);
       reset();
       setPreviewImage(null);
       setSelectedFile(null);
@@ -470,7 +491,8 @@ export const CreateJobModal = ({
                               if (
                                 formValues.work_date &&
                                 formValues.start_time &&
-                                formValues.end_time
+                                formValues.end_time &&
+                                value != null
                               ) {
                                 const workDate = new Date(formValues.work_date);
                                 const expiryDate = new Date(value);

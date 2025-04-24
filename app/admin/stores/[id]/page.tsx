@@ -41,7 +41,9 @@ import { EditRestaurantModal } from "@/components/modals/EditRestaurantModal";
 import { useGetRestaurant } from "@/hooks/api/restaurants/useGetRestaurant";
 import { useGetJobsByRestaurantId } from "@/hooks/api/jobs/useGetJobsByRestaurantId";
 import { useGetMultipleWorksessionsByJobId } from "@/hooks/api/worksessions/useGetMultipleWorksessionsByJobId";
-import { JobsListOutput } from "@/api/__generated__/base/data-contracts";
+import { JobsCreatePayload, JobsListOutput } from "@/api/__generated__/base/data-contracts";
+// import { useGetCompanyUsersByRestaurantId } from "@/hooks/api/companyUsers/useGetCompanyUsersByRestaurantId";
+import { useCreateJob } from "@/hooks/api/jobs/useCreateJob";
 
 interface StaffData {
   id: string;
@@ -71,6 +73,7 @@ export default function RestaurantDetailPage(props: {
   } = useGetRestaurant({ restaurantId: Number(params.id) });
   const { data: jobs, error: jobsError } = useGetJobsByRestaurantId({ restaurantId: Number(params.id) });
   const { data: worksessionsbyJob } = useGetMultipleWorksessionsByJobId({ jobIds: jobs?.map((job) => job.id) || [] })
+  // const { data: staffs } = useGetCompanyUsersByRestaurantId({ restaurantId: Number(params.id) });
 
   const jobWithWorkSessions: JobWithWorkSessions[] | undefined = jobs?.map((job) => {
     const workSessionCount = worksessionsbyJob?.find((workSessions) => workSessions.some((workSession) => workSession.job_id === job.id))?.length || 0;
@@ -90,6 +93,11 @@ export default function RestaurantDetailPage(props: {
       workSessionCount,
     };
   }) ?? [];
+
+  const { trigger } = useCreateJob({
+    companyId: restaurant?.companies_id ?? undefined,
+    restaurantId: restaurant?.id,
+  });
 
   console.log("restaurant", restaurant);
 
@@ -195,9 +203,9 @@ export default function RestaurantDetailPage(props: {
   const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
   const [copiedJob, setCopiedJob] = useState<Partial<Job> | null>(null);
 
-  const handleCreateJob = async (data: FormData) => {
+  const handleCreateJob = async (data: JobsCreatePayload) => {
     try {
-      await jobApi.createJob(data);
+      await trigger(data);
       // 求人リストを更新
       // TODO: 求人リストの更新処理を追加
       setIsCreateJobModalOpen(false);
