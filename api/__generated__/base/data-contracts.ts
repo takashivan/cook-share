@@ -248,6 +248,8 @@ export type GetApplicationData = {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    stripe_verified: boolean;
+    stripe_requirements: object;
     magic_link: {
       token: string;
       /**
@@ -1665,6 +1667,8 @@ export type ByRestaurantDetailData = {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    stripe_verified: boolean;
+    stripe_requirements: object;
     magic_link: {
       token: string;
       /**
@@ -1804,6 +1808,8 @@ export interface BySessionDetailData {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    stripe_verified: boolean;
+    stripe_requirements: object;
     magic_link: {
       token: string;
       /**
@@ -2427,6 +2433,10 @@ export interface CompanyuserNotificationsDetailData {
   related_link: string;
   is_read: boolean;
   content: string;
+  /** @format int64 */
+  job_id: number | null;
+  /** @format int64 */
+  restaurant_id: number | null;
 }
 
 export interface CompanyuserNotificationsPartialUpdatePayload {
@@ -2436,6 +2446,10 @@ export interface CompanyuserNotificationsPartialUpdatePayload {
   related_link: string;
   is_read: boolean;
   content: string;
+  /** @format int64 */
+  job_id: number | null;
+  /** @format int64 */
+  restaurant_id: number | null;
 }
 
 export interface CompanyuserNotificationsPartialUpdateData {
@@ -2452,6 +2466,10 @@ export interface CompanyuserNotificationsPartialUpdateData {
   related_link: string;
   is_read: boolean;
   content: string;
+  /** @format int64 */
+  job_id: number | null;
+  /** @format int64 */
+  restaurant_id: number | null;
 }
 
 export type CompanyuserNotificationsListData = {
@@ -2468,6 +2486,10 @@ export type CompanyuserNotificationsListData = {
   related_link: string;
   is_read: boolean;
   content: string;
+  /** @format int64 */
+  job_id: number | null;
+  /** @format int64 */
+  restaurant_id: number | null;
 }[];
 
 export interface CompanyuserNotificationsCreatePayload {
@@ -2477,6 +2499,10 @@ export interface CompanyuserNotificationsCreatePayload {
   related_link: string;
   is_read: boolean;
   content: string;
+  /** @format int64 */
+  job_id: number | null;
+  /** @format int64 */
+  restaurant_id: number | null;
 }
 
 export interface CompanyuserNotificationsCreateData {
@@ -2493,6 +2519,10 @@ export interface CompanyuserNotificationsCreateData {
   related_link: string;
   is_read: boolean;
   content: string;
+  /** @format int64 */
+  job_id: number | null;
+  /** @format int64 */
+  restaurant_id: number | null;
 }
 
 export type CompanyDetailData = {
@@ -2638,15 +2668,6 @@ export interface CompanyuserPartialUpdateData {
   password_reset_token: string;
 }
 
-export interface ByRestaurantCreatePayload {
-  /** @format uuid */
-  companyuser_id: string | null;
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
-  related_link: string;
-  is_read: boolean;
-  content: string;
-}
-
 export type ByRestaurantCreateData = object;
 
 export type ByUserDetailOutput = {
@@ -2663,7 +2684,17 @@ export type ByUserDetailOutput = {
   related_link: string;
   is_read: boolean;
   content: string;
+  /** @format int64 */
+  job_id: number | null;
+  /** @format int64 */
+  restaurant_id: number | null;
 }[];
+
+export interface MarkReadAllPartialUpdatePayload {
+  id: string[];
+}
+
+export type MarkReadAllPartialUpdateData = object;
 
 export type CompanyuserNotificationDeleteData = object;
 
@@ -2681,6 +2712,10 @@ export interface CompanyuserNotificationDetailData {
   related_link: string;
   is_read: boolean;
   content: string;
+  /** @format int64 */
+  job_id: number | null;
+  /** @format int64 */
+  restaurant_id: number | null;
 }
 
 export interface CompanyuserNotificationPartialUpdatePayload {
@@ -2690,6 +2725,10 @@ export interface CompanyuserNotificationPartialUpdatePayload {
   related_link: string;
   is_read: boolean;
   content: string;
+  /** @format int64 */
+  job_id: number | null;
+  /** @format int64 */
+  restaurant_id: number | null;
 }
 
 export interface CompanyuserNotificationPartialUpdateData {
@@ -2706,6 +2745,34 @@ export interface CompanyuserNotificationPartialUpdateData {
   related_link: string;
   is_read: boolean;
   content: string;
+  /** @format int64 */
+  job_id: number | null;
+  /** @format int64 */
+  restaurant_id: number | null;
+}
+
+export interface MarkReadPartialUpdatePayload {
+  ids: string;
+}
+
+export interface MarkReadPartialUpdateData {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format uuid */
+  companyuser_id: string | null;
+  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  related_link: string;
+  is_read: boolean;
+  content: string;
+  /** @format int64 */
+  job_id: number | null;
+  /** @format int64 */
+  restaurant_id: number | null;
 }
 
 export type CompanyuserNotificationListData = {
@@ -2722,6 +2789,10 @@ export type CompanyuserNotificationListData = {
   related_link: string;
   is_read: boolean;
   content: string;
+  /** @format int64 */
+  job_id: number | null;
+  /** @format int64 */
+  restaurant_id: number | null;
 }[];
 
 export interface CompanyuserNotificationCreatePayload {
@@ -2731,6 +2802,10 @@ export interface CompanyuserNotificationCreatePayload {
   related_link: string;
   is_read: boolean;
   content: string;
+  /** @format int64 */
+  job_id: number | null;
+  /** @format int64 */
+  restaurant_id: number | null;
 }
 
 export interface CompanyuserNotificationCreateData {
@@ -2747,6 +2822,10 @@ export interface CompanyuserNotificationCreateData {
   related_link: string;
   is_read: boolean;
   content: string;
+  /** @format int64 */
+  job_id: number | null;
+  /** @format int64 */
+  restaurant_id: number | null;
 }
 
 export type CompanyusersDeleteData = object;
@@ -2814,6 +2893,10 @@ export type CompanyuserNotificationsListResult = {
   related_link: string;
   is_read: boolean;
   content: string;
+  /** @format int64 */
+  job_id: number | null;
+  /** @format int64 */
+  restaurant_id: number | null;
 }[];
 
 export type CompanyusersListResult = {
@@ -3463,48 +3546,7 @@ export interface JobWithCheckCreatePayload {
   expiry_date: number | null;
 }
 
-export interface JobWithCheckCreateData {
-  result1: {
-    /** @format int64 */
-    id: number;
-    /**
-     * @format timestamptz
-     * @default "now"
-     */
-    created_at: number;
-    title: string;
-    description: string;
-    /** @format date */
-    work_date: string;
-    /** @format timestamptz */
-    start_time: number;
-    /** @format timestamptz */
-    end_time: number;
-    hourly_rate: number;
-    required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
-    /** @format timestamptz */
-    updated_at: number;
-    /** @format int64 */
-    restaurant_id: number;
-    image: string;
-    task: string;
-    skill: string;
-    whattotake: string;
-    note: string;
-    point: string;
-    transportation: string;
-    /** @default "1" */
-    is_approved: boolean;
-    /** @format int64 */
-    number_of_spots: number;
-    /** @format int64 */
-    fee: number;
-    /** @format timestamptz */
-    expiry_date: number | null;
-  };
-  al: string;
-}
+export type JobWithCheckCreateData = object;
 
 export type ApplicationsListResult = {
   /** @format uuid */
@@ -3563,6 +3605,8 @@ export type ApplicationsListResult = {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    stripe_verified: boolean;
+    stripe_requirements: object;
     magic_link: {
       token: string;
       /**
@@ -3653,6 +3697,8 @@ export type WorksessionsRestaurantTodosListData = {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    stripe_verified: boolean;
+    stripe_requirements: object;
     magic_link: {
       token: string;
       /**
@@ -5461,6 +5507,8 @@ export type ByRestaurantDetailResult = {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    stripe_verified: boolean;
+    stripe_requirements: object;
     magic_link: {
       token: string;
       /**
@@ -5571,6 +5619,8 @@ export interface BySessionDetailResult {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    stripe_verified: boolean;
+    stripe_requirements: object;
     magic_link: {
       token: string;
       /**
@@ -6022,6 +6072,8 @@ export type ChefReviewsListResult = {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    stripe_verified: boolean;
+    stripe_requirements: object;
     magic_link: {
       token: string;
       /**
@@ -6033,15 +6085,6 @@ export type ChefReviewsListResult = {
     } | null;
   };
 }[];
-
-export interface CompanyuserNotificationsCreateBody {
-  /** @format uuid */
-  companyuser_id: string | null;
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
-  related_link: string;
-  is_read: boolean;
-  content: string;
-}
 
 export type CompanyuserNotificationsCreateResult = object;
 
@@ -6176,6 +6219,8 @@ export type RestaurantReviewsListResult = {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    stripe_verified: boolean;
+    stripe_requirements: object;
     magic_link: {
       token: string;
       /**
@@ -6439,6 +6484,8 @@ export interface EmailChangeCreateData {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  stripe_verified: boolean;
+  stripe_requirements: object;
   magic_link: {
     token: string;
     /**
@@ -6491,6 +6538,8 @@ export interface EmailConfirmCreateData {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  stripe_verified: boolean;
+  stripe_requirements: object;
   magic_link: {
     token: string;
     /**
@@ -6501,6 +6550,12 @@ export interface EmailConfirmCreateData {
     used: boolean;
   } | null;
 }
+
+export interface StripeAccountCheckCreatePayload {
+  user_id: string;
+}
+
+export type StripeAccountCheckCreateData = object;
 
 export interface StripeCreateAccountLinkCreatePayload {
   user_id: string;
@@ -6666,6 +6721,8 @@ export interface UserDetailData {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  stripe_verified: boolean;
+  stripe_requirements: object;
   magic_link: {
     token: string;
     /**
@@ -6700,6 +6757,8 @@ export interface UserPartialUpdatePayload {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  stripe_verified: boolean;
+  stripe_requirements: object;
   /** @format binary */
   photo: File | null;
   magic_link: {
@@ -7130,6 +7189,8 @@ export interface UsersDetailData {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  stripe_verified: boolean;
+  stripe_requirements: object;
   magic_link: {
     token: string;
     /**
@@ -7164,6 +7225,8 @@ export interface UsersPartialUpdatePayload {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  stripe_verified: boolean;
+  stripe_requirements: object;
   /** @format binary */
   photo: File | null;
   magic_link: {
@@ -7216,6 +7279,8 @@ export type UsersListData = {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  stripe_verified: boolean;
+  stripe_requirements: object;
   magic_link: {
     token: string;
     /**
@@ -7255,6 +7320,8 @@ export interface UsersCreatePayload {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  stripe_verified: boolean;
+  stripe_requirements: object;
   magic_link: {
     token: string;
     /**
@@ -7303,6 +7370,8 @@ export interface UsersCreateData {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  stripe_verified: boolean;
+  stripe_requirements: object;
   magic_link: {
     token: string;
     /**
@@ -7351,6 +7420,8 @@ export type UserListData = {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  stripe_verified: boolean;
+  stripe_requirements: object;
   magic_link: {
     token: string;
     /**
@@ -7390,6 +7461,8 @@ export interface UserCreatePayload {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  stripe_verified: boolean;
+  stripe_requirements: object;
   magic_link: {
     token: string;
     /**
@@ -7438,6 +7511,8 @@ export interface UserCreateData {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  stripe_verified: boolean;
+  stripe_requirements: object;
   magic_link: {
     token: string;
     /**
@@ -7601,6 +7676,8 @@ export type RestaurantTodoDetailData = {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    stripe_verified: boolean;
+    stripe_requirements: object;
     magic_link: {
       token: string;
       /**
@@ -8333,6 +8410,8 @@ export interface ChefReviewListResult {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    stripe_verified: boolean;
+    stripe_requirements: object;
     magic_link: {
       token: string;
       /**
@@ -8466,6 +8545,8 @@ export interface RestaurantReviewListResult {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    stripe_verified: boolean;
+    stripe_requirements: object;
     magic_link: {
       token: string;
       /**

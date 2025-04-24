@@ -15,6 +15,8 @@ import {
   EmailConfirmCreateData,
   EmailConfirmCreatePayload,
   SessionHistoryCurrentListData,
+  StripeAccountCheckCreateData,
+  StripeAccountCheckCreatePayload,
   StripeCreateAccountCreateData,
   StripeCreateAccountCreatePayload,
   StripeCreateAccountLinkCreateData,
@@ -83,6 +85,33 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       _,
       { arg },
     ) => this.emailConfirmCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags user
+   * @name StripeAccountCheckCreate
+   * @request POST:/user/stripe/account-check
+   */
+  stripeAccountCheckCreate = (data: StripeAccountCheckCreatePayload, params: RequestParams = {}) =>
+    this.request<StripeAccountCheckCreateData, void>({
+      path: `/user/stripe/account-check`,
+      method: "POST",
+      body: data,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+
+  stripeAccountCheckCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/user/stripe/account-check`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: StripeAccountCheckCreatePayload },
+    ) => Promise<StripeAccountCheckCreateData> = (_, { arg }) =>
+      this.stripeAccountCheckCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 

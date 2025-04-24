@@ -11,7 +11,6 @@
 
 import {
   ByRestaurantCreateData,
-  ByRestaurantCreatePayload,
   ByUserDetailOutput,
   CompanyuserNotificationCreateData,
   CompanyuserNotificationCreatePayload,
@@ -20,6 +19,10 @@ import {
   CompanyuserNotificationListData,
   CompanyuserNotificationPartialUpdateData,
   CompanyuserNotificationPartialUpdatePayload,
+  MarkReadAllPartialUpdateData,
+  MarkReadAllPartialUpdatePayload,
+  MarkReadPartialUpdateData,
+  MarkReadPartialUpdatePayload,
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
@@ -31,22 +34,18 @@ export class CompanyuserNotification<SecurityDataType = unknown> extends HttpCli
    * @name ByRestaurantCreate
    * @request POST:/companyuser_notification/byRestaurant/{restaurant_id}
    */
-  byRestaurantCreate = (restaurantId: number, data: ByRestaurantCreatePayload, params: RequestParams = {}) =>
+  byRestaurantCreate = (restaurantId: number, params: RequestParams = {}) =>
     this.request<ByRestaurantCreateData, void>({
       path: `/companyuser_notification/byRestaurant/${restaurantId}`,
       method: "POST",
-      body: data,
-      type: ContentType.Json,
       format: "json",
       ...params,
     });
 
   byRestaurantCreateQueryArgs = (restaurantId: number, params: RequestParams = {}, enabled: boolean = true) => {
     const key = enabled ? [`/companyuser_notification/byRestaurant/${restaurantId}`] : null;
-    const fetcher: (url: string[], { arg }: { arg: ByRestaurantCreatePayload }) => Promise<ByRestaurantCreateData> = (
-      _,
-      { arg },
-    ) => this.byRestaurantCreate(restaurantId, arg, params).then((res) => res.data);
+    const fetcher: (url: string[]) => Promise<ByRestaurantCreateData> = (_) =>
+      this.byRestaurantCreate(restaurantId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -68,6 +67,33 @@ export class CompanyuserNotification<SecurityDataType = unknown> extends HttpCli
   byUserDetailQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
     const key = enabled ? [`/companyuser_notification/byUser/${userId}`] : null;
     const fetcher = () => this.byUserDetail(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags companyuser_notification
+   * @name MarkReadAllPartialUpdate
+   * @request PATCH:/companyuser_notification/mark-read/all
+   */
+  markReadAllPartialUpdate = (data: MarkReadAllPartialUpdatePayload, params: RequestParams = {}) =>
+    this.request<MarkReadAllPartialUpdateData, void>({
+      path: `/companyuser_notification/mark-read/all`,
+      method: "PATCH",
+      body: data,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+
+  markReadAllPartialUpdateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/companyuser_notification/mark-read/all`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: MarkReadAllPartialUpdatePayload },
+    ) => Promise<MarkReadAllPartialUpdateData> = (_, { arg }) =>
+      this.markReadAllPartialUpdate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -146,6 +172,33 @@ export class CompanyuserNotification<SecurityDataType = unknown> extends HttpCli
       { arg }: { arg: CompanyuserNotificationPartialUpdatePayload },
     ) => Promise<CompanyuserNotificationPartialUpdateData> = (_, { arg }) =>
       this.companyuserNotificationPartialUpdate(companyuserNotificationId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags companyuser_notification
+   * @name MarkReadPartialUpdate
+   * @request PATCH:/companyuser_notification/{id}/mark-read
+   */
+  markReadPartialUpdate = (id: string, data: MarkReadPartialUpdatePayload, params: RequestParams = {}) =>
+    this.request<MarkReadPartialUpdateData, void>({
+      path: `/companyuser_notification/${id}/mark-read`,
+      method: "PATCH",
+      body: data,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+
+  markReadPartialUpdateQueryArgs = (id: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/companyuser_notification/${id}/mark-read`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: MarkReadPartialUpdatePayload },
+    ) => Promise<MarkReadPartialUpdateData> = (_, { arg }) =>
+      this.markReadPartialUpdate(id, arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 

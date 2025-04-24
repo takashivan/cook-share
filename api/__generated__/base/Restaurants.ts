@@ -11,7 +11,6 @@
 
 import {
   ChefReviewsListResult,
-  CompanyuserNotificationsCreateBody,
   CompanyuserNotificationsCreateResult,
   CompanyusersCreateInput,
   CompanyusersCreateOutput,
@@ -57,16 +56,10 @@ export class Restaurants<SecurityDataType = unknown> extends HttpClient<Security
    * @name CompanyuserNotificationsCreate
    * @request POST:/restaurants/{restaurant_id}/companyuser-notifications
    */
-  companyuserNotificationsCreate = (
-    restaurantId: number,
-    data: CompanyuserNotificationsCreateBody,
-    params: RequestParams = {},
-  ) =>
+  companyuserNotificationsCreate = (restaurantId: number, params: RequestParams = {}) =>
     this.request<CompanyuserNotificationsCreateResult, void>({
       path: `/restaurants/${restaurantId}/companyuser-notifications`,
       method: "POST",
-      body: data,
-      type: ContentType.Json,
       format: "json",
       ...params,
     });
@@ -77,11 +70,8 @@ export class Restaurants<SecurityDataType = unknown> extends HttpClient<Security
     enabled: boolean = true,
   ) => {
     const key = enabled ? [`/restaurants/${restaurantId}/companyuser-notifications`] : null;
-    const fetcher: (
-      url: string[],
-      { arg }: { arg: CompanyuserNotificationsCreateBody },
-    ) => Promise<CompanyuserNotificationsCreateResult> = (_, { arg }) =>
-      this.companyuserNotificationsCreate(restaurantId, arg, params).then((res) => res.data);
+    const fetcher: (url: string[]) => Promise<CompanyuserNotificationsCreateResult> = (_) =>
+      this.companyuserNotificationsCreate(restaurantId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
