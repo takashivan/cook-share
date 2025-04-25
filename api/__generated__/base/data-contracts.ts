@@ -814,6 +814,7 @@ export interface ChangePasswordCreateData {
     /** @format password */
     password: string;
     is_admin: boolean;
+    /** @default "1" */
     is_active: boolean;
     is_verified: boolean;
     /** @format timestamptz */
@@ -853,6 +854,7 @@ export interface LoginCreateData {
     /** @format password */
     password: string;
     is_admin: boolean;
+    /** @default "1" */
     is_active: boolean;
     is_verified: boolean;
     /** @format timestamptz */
@@ -875,6 +877,7 @@ export interface GetAuthData {
   email: string;
   phone: string | null;
   is_admin: boolean;
+  /** @default "1" */
   is_active: boolean;
   is_verified: boolean;
   /** @format timestamptz */
@@ -908,6 +911,7 @@ export interface SignupCreateData {
     /** @format password */
     password: string;
     is_admin: boolean;
+    /** @default "1" */
     is_active: boolean;
     is_verified: boolean;
     /** @format timestamptz */
@@ -944,6 +948,7 @@ export interface VerifyEmailCreateData {
     /** @format password */
     password: string;
     is_admin: boolean;
+    /** @default "1" */
     is_active: boolean;
     is_verified: boolean;
     /** @format timestamptz */
@@ -2079,6 +2084,7 @@ export interface StaffInviteCreateData {
     /** @format password */
     password: string;
     is_admin: boolean;
+    /** @default "1" */
     is_active: boolean;
     is_verified: boolean;
     /** @format timestamptz */
@@ -2115,6 +2121,7 @@ export interface CompanyusersCreateData {
     /** @format password */
     password: string;
     is_admin: boolean;
+    /** @default "1" */
     is_active: boolean;
     is_verified: boolean;
     /** @format timestamptz */
@@ -2209,6 +2216,7 @@ export type CompanyusersListData = {
   /** @format password */
   password: string;
   is_admin: boolean;
+  /** @default "1" */
   is_active: boolean;
   is_verified: boolean;
   /** @format timestamptz */
@@ -2404,6 +2412,7 @@ export interface CompaniesCreateData {
     /** @format password */
     password: string;
     is_admin: boolean;
+    /** @default "1" */
     is_active: boolean;
     is_verified: boolean;
     /** @format timestamptz */
@@ -2542,6 +2551,7 @@ export type CompanyDetailData = {
   /** @format password */
   password: string;
   is_admin: boolean;
+  /** @default "1" */
   is_active: boolean;
   is_verified: boolean;
   /** @format timestamptz */
@@ -2576,6 +2586,7 @@ export interface MeRestaurantsListData {
     /** @format password */
     password: string;
     is_admin: boolean;
+    /** @default "1" */
     is_active: boolean;
     is_verified: boolean;
     /** @format timestamptz */
@@ -2607,6 +2618,7 @@ export interface CompanyuserDetailData {
   /** @format password */
   password: string;
   is_admin: boolean;
+  /** @default "1" */
   is_active: boolean;
   is_verified: boolean;
   /** @format timestamptz */
@@ -2627,6 +2639,7 @@ export interface CompanyuserPartialUpdatePayload {
   email: string;
   phone: string | null;
   is_admin: boolean;
+  /** @default "1" */
   is_active: boolean;
   is_verified: boolean;
   /** @format timestamptz */
@@ -2656,6 +2669,7 @@ export interface CompanyuserPartialUpdateData {
   /** @format password */
   password: string;
   is_admin: boolean;
+  /** @default "1" */
   is_active: boolean;
   is_verified: boolean;
   /** @format timestamptz */
@@ -2834,6 +2848,7 @@ export interface CompanyusersPartialUpdatePayload {
   email: string;
   phone: string | null;
   is_admin: boolean;
+  /** @default "1" */
   is_active: boolean;
   is_verified: boolean;
   /** @format timestamptz */
@@ -2863,6 +2878,7 @@ export interface CompanyusersPartialUpdateData {
   /** @format password */
   password: string;
   is_admin: boolean;
+  /** @default "1" */
   is_active: boolean;
   is_verified: boolean;
   /** @format timestamptz */
@@ -2912,6 +2928,7 @@ export type CompanyusersListResult = {
   /** @format password */
   password: string;
   is_admin: boolean;
+  /** @default "1" */
   is_active: boolean;
   is_verified: boolean;
   /** @format timestamptz */
@@ -2932,6 +2949,7 @@ export interface CompanyusersCreateBody {
   email: string;
   phone: string | null;
   is_admin: boolean;
+  /** @default "1" */
   is_active: boolean;
   is_verified: boolean;
   /** @format timestamptz */
@@ -2961,6 +2979,7 @@ export interface CompanyusersCreateResult {
   /** @format password */
   password: string;
   is_admin: boolean;
+  /** @default "1" */
   is_active: boolean;
   is_verified: boolean;
   /** @format timestamptz */
@@ -2990,6 +3009,7 @@ export type CompanyuserListData = {
   /** @format password */
   password: string;
   is_admin: boolean;
+  /** @default "1" */
   is_active: boolean;
   is_verified: boolean;
   /** @format timestamptz */
@@ -3010,6 +3030,7 @@ export interface CompanyuserCreatePayload {
   email: string;
   phone: string | null;
   is_admin: boolean;
+  /** @default "1" */
   is_active: boolean;
   is_verified: boolean;
   /** @format timestamptz */
@@ -3039,6 +3060,7 @@ export interface CompanyuserCreateData {
   /** @format password */
   password: string;
   is_admin: boolean;
+  /** @default "1" */
   is_active: boolean;
   is_verified: boolean;
   /** @format timestamptz */
@@ -5237,6 +5259,7 @@ export type StaffsListData = {
     /** @format password */
     password: string;
     is_admin: boolean;
+    /** @default "1" */
     is_active: boolean;
     is_verified: boolean;
     /** @format timestamptz */
@@ -6126,6 +6149,7 @@ export interface CompanyusersListOutput {
     /** @format password */
     password: string;
     is_admin: boolean;
+    /** @default "1" */
     is_active: boolean;
     is_verified: boolean;
     /** @format timestamptz */
