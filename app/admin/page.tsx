@@ -143,7 +143,7 @@ export default function AdminDashboard() {
                 </p>
               </div>
             </div>
-            <Link href="/admin/company/billing">
+            <Link href="/admin/company/billings">
               <Button variant="outline" className="w-full mt-2">
                 請求一覧を表示
               </Button>

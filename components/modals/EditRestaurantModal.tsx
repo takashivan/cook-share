@@ -16,7 +16,7 @@ interface EditRestaurantModalProps {
   onClose: () => void;
   onSubmit: (data: FormData) => void;
   restaurant: {
-    id: string;
+    id: number;
     name: string;
     description?: string;
     address: string;
@@ -153,7 +153,7 @@ export const EditRestaurantModal = ({
       const formData = new FormData();
 
       // 必須フィールドを追加
-      formData.append("id", restaurant.id);
+      formData.append("id", restaurant.id.toString());
       formData.append("name", data.name);
       formData.append("address", data.address);
       formData.append("cuisine_type", data.cuisine_type);

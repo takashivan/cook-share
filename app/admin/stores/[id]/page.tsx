@@ -1,17 +1,14 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useState, use } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import {
   BarChart3,
-  Calendar,
   Edit,
-  ExternalLink,
   MessageSquare,
   MoreHorizontal,
   Plus,
-  Store,
   Users,
   MapPin,
   Phone,
@@ -20,6 +17,8 @@ import {
   ChevronLeft,
   ChevronRight,
   List,
+  Store,
+  Calendar,
 } from "lucide-react";
 import {
   Card,
@@ -28,14 +27,6 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -44,6 +35,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/lib/store/store";
@@ -65,9 +64,16 @@ import { toast } from "@/hooks/use-toast";
 import { AddRestaurantStaffModal } from "@/components/modals/AddRestaurantStaff";
 import { restaurantStaffInvite } from "@/lib/api/restaurant";
 import { EditRestaurantModal } from "@/components/modals/EditRestaurantModal";
+import { useGetRestaurant } from "@/hooks/api/restaurants/useGetRestaurant";
+import { useGetJobsByRestaurantId } from "@/hooks/api/jobs/useGetJobsByRestaurantId";
+import { useGetMultipleWorksessionsByJobId } from "@/hooks/api/worksessions/useGetMultipleWorksessionsByJobId";
+import { CompanyusersCreateInput, CompanyusersListData, CompanyusersListOutput, JobsCreatePayload, JobsListOutput } from "@/api/__generated__/base/data-contracts";
+import { useGetCompanyUsersByRestaurantId } from "@/hooks/api/companyUsers/useGetCompanyUsersByRestaurantId";
+import { useCreateJob } from "@/hooks/api/jobs/useCreateJob";
 import { workSessionApi } from "@/lib/api/workSession";
 import type { WorkSessionWithJob } from "@/types";
 import Image from "next/image";
+import { useCreateCompanyUserByRestaurantId } from "@/hooks/api/companyUsers/useCreateCompanyUserByRestaurantId";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -101,7 +107,7 @@ interface StaffData {
   };
 }
 
-interface JobWithWorkSessions extends Job {
+interface JobWithWorkSessions extends Omit<JobsListOutput[number], "workSessionCount"> {
   formattedWorkDate: string;
   formattedTime: string;
   workSessionCount: number;
@@ -124,41 +130,65 @@ export default function RestaurantDetailPage(props: {
     data: restaurant,
     error: restaurantError,
     mutate: mutateRestaurant,
-  } = useSWR(
-    [`restaurant`, params.id],
-    ([_, id]: [string, string]) => getRestaurantById(id),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      dedupingInterval: 10000,
-    }
-  );
+  } = useGetRestaurant({ restaurantId: Number(params.id) });
+  const { data: jobs, error: jobsError } = useGetJobsByRestaurantId({ restaurantId: Number(params.id) });
+  const { data: worksessionsbyJob } = useGetMultipleWorksessionsByJobId({ jobIds: jobs?.map((job) => job.id) || [] })
+  const { data: staffData } = useGetCompanyUsersByRestaurantId({ restaurantId: Number(params.id) });
+
+  const jobWithWorkSessions: JobWithWorkSessions[] | undefined = jobs?.map((job) => {
+    const workSessionCount = worksessionsbyJob?.find((workSessions) => workSessions.some((workSession) => workSession.job_id === job.id))?.length || 0;
+    return {
+      ...job,
+      formattedWorkDate: format(
+        new Date(job.work_date),
+        "yyyy年MM月dd日",
+        {
+          locale: ja,
+        }
+      ),
+      formattedTime: `${format(
+        new Date(job.start_time),
+        "HH:mm"
+      )} 〜 ${format(new Date(job.end_time), "HH:mm")}`,
+      workSessionCount,
+    };
+  }) ?? [];
+
+  const { trigger: createJobTrigger } = useCreateJob({
+    companyId: restaurant?.companies_id ?? undefined,
+    restaurantId: restaurant?.id,
+  });
+
+  const { trigger: createCompanyUserTrigger } = useCreateCompanyUserByRestaurantId({
+    restaurantId: restaurant?.id,
+    companyId: restaurant?.companies_id ?? undefined,
+  })
 
   console.log("restaurant", restaurant);
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [formDataState, setFormDataState] = useState({
-    name: "",
-    email: "",
-    contact_info: "",
-    address: "",
-    business_hours: "",
-    station: "",
-    access: "",
-    is_active: false,
-    description: "",
-    cuisine_type: "",
-    restaurant_cuisine_id: [] as (number | undefined)[],
-    photo: null as File | null,
-  });
-
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
+  
+  // const [formDataState, setFormDataState] = useState({
+  //   name: "",
+  //   email: "",
+  //   contact_info: "",
+  //   address: "",
+  //   business_hours: "",
+  //   station: "",
+  //   access: "",
+  //   is_active: false,
+  //   description: "",
+  //   cuisine_type: "",
+  //   restaurant_cuisine_id: [] as (number | undefined)[],
+  //   photo: null as File | null,
+  // });
 
   const [deleteTargetStaff, setDeleteTargetStaff] = useState<StaffData | null>(
     null
   );
-  const [editTargetStaff, setEditTargetStaff] = useState<StaffData | null>(
+  const [editTargetStaff, setEditTargetStaff] = useState<CompanyusersListOutput['admin'][number] | null>(
     null
   );
   const [editPermissions, setEditPermissions] = useState<EditStaffPermissions>({
@@ -166,40 +196,40 @@ export default function RestaurantDetailPage(props: {
     canManageJobs: false,
   });
 
-  useEffect(() => {
-    const fetchRestaurant = async () => {
-      try {
-        const data = await getRestaurant(params.id);
-        setFormDataState({
-          name: data.name,
-          email: data.email,
-          contact_info: data.contact_info || "",
-          address: data.address,
-          business_hours: data.business_hours || "",
-          station: data.station || "",
-          access: data.access || "",
-          is_active: data.is_active,
-          description: data.description || "",
-          cuisine_type: data.cuisine_type || "",
-          restaurant_cuisine_id: Array.isArray(data.restaurant_cuisine_id)
-            ? data.restaurant_cuisine_id
-            : [data.restaurant_cuisine_id].filter(
-                (id): id is number => id !== undefined
-              ),
-          photo: null,
-        });
-      } catch (error) {
-        console.error("Error fetching restaurant:", error);
-        toast({
-          title: "エラー",
-          description: "レストラン情報の取得に失敗しました",
-          variant: "destructive",
-        });
-      }
-    };
+  // useEffect(() => {
+  //   const fetchRestaurant = async () => {
+  //     try {
+  //       const data = await getRestaurant(params.id);
+  //       setFormDataState({
+  //         name: data.name,
+  //         email: data.email,
+  //         contact_info: data.contact_info || "",
+  //         address: data.address,
+  //         business_hours: data.business_hours || "",
+  //         station: data.station || "",
+  //         access: data.access || "",
+  //         is_active: data.is_active,
+  //         description: data.description || "",
+  //         cuisine_type: data.cuisine_type || "",
+  //         restaurant_cuisine_id: Array.isArray(data.restaurant_cuisine_id)
+  //           ? data.restaurant_cuisine_id
+  //           : [data.restaurant_cuisine_id].filter(
+  //               (id): id is number => id !== undefined
+  //             ),
+  //         photo: null,
+  //       });
+  //     } catch (error) {
+  //       console.error("Error fetching restaurant:", error);
+  //       toast({
+  //         title: "エラー",
+  //         description: "レストラン情報の取得に失敗しました",
+  //         variant: "destructive",
+  //       });
+  //     }
+  //   };
 
-    fetchRestaurant();
-  }, [params.id, toast]);
+  //   fetchRestaurant();
+  // }, [params.id, toast]);
 
   const handleSubmit = async (data: FormData) => {
     try {
@@ -220,92 +250,29 @@ export default function RestaurantDetailPage(props: {
     }
   };
 
-  const { data: jobs, error: jobsError } = useSWR(
-    restaurant ? `/api/restaurants/${params.id}/jobs` : null,
-    () => jobApi.getJobsByRestaurant(params.id),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      dedupingInterval: 10000,
-    }
-  );
-
-  const { data: staffs, mutate: mutateStaffs } = useSWR<StaffData[]>(
-    [`restaurant-staff`, params.id],
-    async ([_, id]: [string, string]) => {
-      const response = await getRestaurantStaff(parseInt(id));
-      return response.admin.map((staff) => ({
-        id: staff.id,
-        companyuser_id: staff.companies_id,
-        companyuser: {
-          name: staff.name,
-          email: staff.email,
-          is_active: true,
-          is_admin: staff.is_admin || false,
-        },
-      }));
-    },
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      dedupingInterval: 10000,
-    }
-  );
-
-  const [formattedJobs, setFormattedJobs] = useState<JobWithWorkSessions[]>([]);
-
-  useEffect(() => {
-    const fetchWorkSessions = async () => {
-      if (jobs && Array.isArray(jobs)) {
-        const jobsWithSessions = await Promise.all(
-          jobs.map(async (job: Job) => {
-            try {
-              const workSessions =
-                await workSessionApi.getWorkSessionsToDoByJobId(job.id);
-              return {
-                ...job,
-                formattedWorkDate: format(new Date(job.work_date), "MM月dd日", {
-                  locale: ja,
-                }),
-                formattedTime: `${format(
-                  new Date(job.start_time),
-                  "HH:mm"
-                )} 〜 ${format(new Date(job.end_time), "HH:mm")}`,
-                workSessionCount: workSessions.length,
-              } as JobWithWorkSessions;
-            } catch (error) {
-              console.error(
-                `Error fetching work sessions for job ${job.id}:`,
-                error
-              );
-              return {
-                ...job,
-                formattedWorkDate: format(
-                  new Date(job.work_date),
-                  "yyyy年MM月dd日",
-                  {
-                    locale: ja,
-                  }
-                ),
-                formattedTime: `${format(
-                  new Date(job.start_time),
-                  "HH:mm"
-                )} 〜 ${format(new Date(job.end_time), "HH:mm")}`,
-                workSessionCount: 0,
-              } as JobWithWorkSessions;
-            }
-          })
-        );
-        setFormattedJobs(jobsWithSessions);
-      }
-    };
-
-    fetchWorkSessions();
-  }, [jobs]);
+  // const { data: staffs, mutate: mutateStaffs } = useSWR<StaffData[]>(
+  //   [`restaurant-staff`, params.id],
+  //   async ([_, id]: [string, string]) => {
+  //     const response = await getRestaurantStaff(parseInt(id));
+  //     return response.admin.map((staff) => ({
+  //       id: staff.id,
+  //       companyuser_id: staff.companies_id,
+  //       companyuser: {
+  //         name: staff.name,
+  //         email: staff.email,
+  //         is_active: true, // APIレスポンスにis_activeが含まれていないため、デフォルトでtrueとする
+  //       },
+  //     }));
+  //   },
+  //   {
+  //     revalidateOnFocus: false,
+  //     revalidateOnReconnect: false,
+  //     dedupingInterval: 10000,
+  //   }
+  // );
 
   console.log("Restaurant data:", restaurant);
   console.log("Raw jobs response:", jobs);
-  console.log("Formatted jobs:", formattedJobs);
   console.log("Errors:", { restaurantError, jobsError });
 
   const error = restaurantError || jobsError;
@@ -315,9 +282,9 @@ export default function RestaurantDetailPage(props: {
   const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
   const [copiedJob, setCopiedJob] = useState<Partial<Job> | null>(null);
 
-  const handleCreateJob = async (data: FormData) => {
+  const handleCreateJob = async (data: JobsCreatePayload) => {
     try {
-      await jobApi.createJob(data);
+      await createJobTrigger(data);
       // 求人リストを更新
       // TODO: 求人リストの更新処理を追加
       setIsCreateJobModalOpen(false);
@@ -356,14 +323,14 @@ export default function RestaurantDetailPage(props: {
       console.log("permissions.canEdit", permissions.canEdit);
       console.log("permissions.canManageJobs", permissions.canManageJobs);
       console.log("restaurant.name", restaurant.name);
-      await restaurantStaffInvite(
+      const data: CompanyusersCreateInput = {
+        companies_id: restaurant.companies_id ?? '',
         email,
-        restaurant.id as unknown as number,
-        restaurant.companies_id,
-        permissions.canEdit,
-        permissions.canManageJobs,
-        restaurant.name
-      );
+        can_edit: permissions.canEdit,
+        can_manage_jobs: permissions.canManageJobs,
+        restaurant_name: restaurant.name
+      }
+      await createCompanyUserTrigger(data);
       toast({
         title: "招待を送信しました",
         description: `${email}に招待メールを送信しました。`,
@@ -413,7 +380,7 @@ export default function RestaurantDetailPage(props: {
   };
 
   const getJobsForDate = (date: Date) => {
-    return formattedJobs.filter((job) => {
+    return jobWithWorkSessions.filter((job) => {
       const jobDate = new Date(job.work_date);
       return (
         jobDate.getFullYear() === date.getFullYear() &&
@@ -460,10 +427,10 @@ export default function RestaurantDetailPage(props: {
       // await deleteRestaurantStaff(restaurant?.id, deleteTargetStaff.id);
 
       // Optimistically update the UI
-      const updatedStaffs = staffs?.filter(
+      const updatedStaffs = staffData?.admin?.filter(
         (staff) => staff.id !== deleteTargetStaff.id
       );
-      mutateStaffs(updatedStaffs);
+      // mutateStaffs(updatedStaffs);
 
       toast({
         title: "スタッフを削除しました",
@@ -490,7 +457,7 @@ export default function RestaurantDetailPage(props: {
 
       toast({
         title: "権限を更新しました",
-        description: `${editTargetStaff.companyuser.name || editTargetStaff.companyuser.email}の権限を更新しました。`,
+        description: `${editTargetStaff.name || editTargetStaff.email}の権限を更新しました。`,
       });
     } catch (error) {
       console.error("Failed to update staff permissions:", error);
@@ -593,7 +560,7 @@ export default function RestaurantDetailPage(props: {
                 <MessageSquare className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{formattedJobs.length}</div>
+                <div className="text-2xl font-bold">{jobWithWorkSessions.length}</div>
               </CardContent>
             </Card>
             <Card>
@@ -614,7 +581,7 @@ export default function RestaurantDetailPage(props: {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {formattedJobs.reduce(
+                  {jobWithWorkSessions.reduce(
                     (sum, job) => sum + job.workSessionCount,
                     0
                   )}
@@ -901,7 +868,7 @@ export default function RestaurantDetailPage(props: {
 
                   <TabsContent value="published">
                     <div className="grid gap-4">
-                      {formattedJobs
+                      {jobWithWorkSessions
                         .filter(
                           (job) =>
                             job.status === "PUBLISHED" &&
@@ -988,7 +955,7 @@ export default function RestaurantDetailPage(props: {
 
                   <TabsContent value="draft">
                     <div className="grid gap-4">
-                      {formattedJobs
+                      {jobWithWorkSessions
                         .filter((job) => job.status === "DRAFT")
                         .map((job) => (
                           <div
@@ -1071,7 +1038,7 @@ export default function RestaurantDetailPage(props: {
 
                   <TabsContent value="pending">
                     <div className="grid gap-4">
-                      {formattedJobs
+                      {jobWithWorkSessions
                         .filter((job) => job.status === "PENDING")
                         .map((job) => (
                           <div
@@ -1154,7 +1121,7 @@ export default function RestaurantDetailPage(props: {
 
                   <TabsContent value="expired">
                     <div className="grid gap-4">
-                      {formattedJobs
+                      {jobWithWorkSessions
                         .filter(
                           (job) =>
                             job.expiry_date && job.expiry_date <= Date.now()
@@ -1264,14 +1231,14 @@ export default function RestaurantDetailPage(props: {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {staffs
-                        ?.filter((staff) => !staff.companyuser.is_admin)
-                        .map((staff: StaffData) => (
+                      {staffData?.admin
+                        ?.filter((staff) => !staff.is_admin)
+                        .map((staff) => (
                           <TableRow key={`staff-${staff.id}`}>
                             <TableCell className="font-medium">
-                              {staff.companyuser.name}
+                              {staff.name}
                             </TableCell>
-                            <TableCell>{staff.companyuser.email}</TableCell>
+                            <TableCell>{staff.email}</TableCell>
                             <TableCell>
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -1292,7 +1259,8 @@ export default function RestaurantDetailPage(props: {
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
                                     className="text-red-600"
-                                    onClick={() => setDeleteTargetStaff(staff)}>
+                                    // onClick={() => setDeleteTargetStaff(staff)}
+                                  >
                                     削除
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
@@ -1317,14 +1285,14 @@ export default function RestaurantDetailPage(props: {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {staffs
-                        ?.filter((staff) => staff.companyuser.is_admin)
-                        .map((staff: StaffData) => (
+                      {staffData?.admin
+                        ?.filter((staff) => staff.is_admin)
+                        .map((staff) => (
                           <TableRow key={`staff-${staff.id}`}>
                             <TableCell className="font-medium">
-                              {staff.companyuser.name}
+                              {staff.name}
                             </TableCell>
-                            <TableCell>{staff.companyuser.email}</TableCell>
+                            <TableCell>{staff.email}</TableCell>
                             <TableCell></TableCell>
                           </TableRow>
                         ))}
@@ -1359,7 +1327,7 @@ export default function RestaurantDetailPage(props: {
         onSubmit={handleSubmit}
         restaurant={
           restaurant || {
-            id: "",
+            id: 0,
             name: "",
             description: "",
             address: "",
@@ -1417,8 +1385,8 @@ export default function RestaurantDetailPage(props: {
           <DialogHeader>
             <DialogTitle>スタッフ権限の編集</DialogTitle>
             <DialogDescription>
-              {editTargetStaff?.companyuser.name ||
-                editTargetStaff?.companyuser.email}
+              {editTargetStaff?.name ||
+                editTargetStaff?.email}
               の権限を編集します。
             </DialogDescription>
           </DialogHeader>

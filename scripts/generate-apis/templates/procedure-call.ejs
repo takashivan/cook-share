@@ -45,6 +45,12 @@ const wrapperArgs = _
     .map(argToTmpl)
     .join(', ')
 
+const wrapperCallArgs = _
+    // Sort by optionality
+    .sortBy(rawWrapperArgs, [o => o.optional])
+    .map(({ name, optional, type, defaultValue }) => name)
+    .join(', ')
+
 // RequestParams["type"]
 const requestContentKind = {
     "JSON": "ContentType.Json",
@@ -98,3 +104,21 @@ const describeReturnType = () => {
         <%~ responseFormatTmpl ? `format: ${responseFormatTmpl},` : '' %>
         ...<%~ _.get(requestConfigParam, "name") %>,
     })
+
+<% if(_.upperCase(method) === "GET" || _.upperCase(method) === "DELETE") { %>
+  <%~ route.routeName.usage %>QueryArgs = (<%~ wrapperArgs %>, enabled: boolean = true)<%~ config.toJS ? `: ${describeReturnType()}` : "" %> => {
+    const key = enabled ? [`<%~ path  %>`, <%~ (query != null && queryName) ? `...(${queryName} ? [${queryName}] : [])` : '' %>] : null
+    const fetcher = () => this.<%~ route.routeName.usage %>(<%~ wrapperCallArgs %>).then(res => res.data)
+    return [key, fetcher] as const
+  };
+
+<% } %>
+
+<% if(_.upperCase(method) === "POST" || _.upperCase(method) === "PATCH") { %>
+    <%~ route.routeName.usage %>QueryArgs = (<%~ _.filter(rawWrapperArgs, (item) => item.name !== 'data').map(argToTmpl) %>, enabled: boolean = true)<%~ config.toJS ? `: ${describeReturnType()}` : "" %> => {
+        const key = enabled ? [`<%~ path  %>`, <%~ (query != null && queryName) ? `...(${queryName} ? [${queryName}] : [])` : '' %>] : null
+        const fetcher: (url: string[]<%~ payload ? `, { arg }: { arg: ${_.compact([payload]).map(({ name, optional, type, defaultValue }) => type)}  }` : '' %>) => Promise<<%~ type %>> = (_<%~ payload ? ', { arg }' : '' %>) => this.<%~ route.routeName.usage %>(<%~ pathParamsNames.length > 0 ? _.map(pathParamsNames, (name) => `${name}, `) : '' %><%~ payload ? 'arg, ' : '' %>params).then(res => res.data)
+        return [key, fetcher] as const
+    };
+
+<% } %>
