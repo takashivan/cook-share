@@ -10,7 +10,7 @@ import { Header } from "@/components/layout/header";
 import { Card } from "@/components/ui/card";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { Badge } from "@/components/ui/badge";
-import { useGetJobs } from "@/hooks/api/jobs/useGetJobs";
+import { useGetJobsByUpcoming } from "@/hooks/api/jobs/useGetJobsByUpcoming";
 import { motion } from "framer-motion";
 
 export default function Home() {
@@ -19,7 +19,7 @@ export default function Home() {
   );
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const { data: jobsData, error, isLoading } = useGetJobs();
+  const { data: jobsData, error, isLoading } = useGetJobsByUpcoming();
 
   // 次の7日分の日付を生成
   const dates = Array.from({ length: 7 }, (_, i) => {
@@ -258,13 +258,13 @@ export default function Home() {
                               job.restaurant.restaurant_cuisine_id.length >
                                 0 ? (
                                 job.restaurant.restaurant_cuisine_id
-                                  .flat()
+                                  .map((item) => item[0])
                                   .map((cat) => (
                                     <Badge
-                                      key={cat}
+                                      key={cat.category}
                                       variant="outline"
                                       className="text-xs bg-white/80 backdrop-blur-sm border-primary/20 text-primary hover:bg-primary/10 transition-colors">
-                                      {cat}
+                                      {cat.category}
                                     </Badge>
                                   ))
                               ) : (
