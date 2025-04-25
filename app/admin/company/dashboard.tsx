@@ -92,11 +92,11 @@ export function CompanyDashboard() {
   }, [user]);
 
   useEffect(() => {
-    if (user?.id) {
-      // dispatch(fetchMyRestaurants(user.companies_id));
+    if (user?.companies_id) {
+      dispatch(fetchMyRestaurants(user.id));
       dispatch(fetchJobsByCompanyId(user.companies_id));
     }
-  }, [dispatch, user?.companies_id]);
+  }, [dispatch, user?.companies_id, user?.id]);
 
   useEffect(() => {
     const fetchCompanyUsers = async () => {
