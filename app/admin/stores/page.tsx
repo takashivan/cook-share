@@ -40,6 +40,7 @@ import Link from "next/link";
 import { useGetRestaurantsByCompanyId } from "@/hooks/api/restaurants/useGetRestaurantsByCompanyId";
 import { useCreateRestaurant } from "@/hooks/api/restaurants/useCreateRestaurant";
 import { RestaurantsCreatePayload } from "@/api/__generated__/base/data-contracts";
+import { useGetRestaurantsByCompanyUserId } from "@/hooks/api/restaurants/useGetRestaurantsByCompanyUserId";
 
 export default function StoresPage() {
   const { user } = useCompanyAuth();
@@ -48,7 +49,7 @@ export default function StoresPage() {
     isLoading,
     error,
     mutate,
-  } = useGetRestaurantsByCompanyId({ companyId: user?.companies_id });
+  } = useGetRestaurantsByCompanyUserId({ companyuserId: user?.id });
   const [isCreateRestaurantModalOpen, setIsCreateRestaurantModalOpen] =
     useState(false);
   const [hasMounted, setHasMounted] = useState(false);
