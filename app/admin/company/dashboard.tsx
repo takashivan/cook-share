@@ -27,13 +27,14 @@ import { useGetCompany } from "@/hooks/api/companies/useGetCompany";
 import { useGetRestaurantsByCompanyId } from "@/hooks/api/restaurants/useGetRestaurantsByCompanyId";
 import { useGetJobsByCompanyId } from "@/hooks/api/jobs/useGetJobsByCompanyId";
 import { useGetCompanyUsersByCompanyId } from "@/hooks/api/companyUsers/useGetCompanyUsersByCompanyId";
+import { useGetRestaurantsByCompanyUserId } from "@/hooks/api/restaurants/useGetRestaurantsByCompanyUserId";
 
 export function CompanyDashboard() {
   // const dispatch = useDispatch<AppDispatch>();
   const { user } = useCompanyAuth();
 
   const { data: company } = useGetCompany({ companyId: user?.companies_id });
-  const { data: restaurants, isLoading: restaurantsLoading, error: restaurantsError } = useGetRestaurantsByCompanyId({ companyId: user?.companies_id });
+  const { data: restaurants, isLoading: restaurantsLoading, error: restaurantsError } = useGetRestaurantsByCompanyUserId({ companyuserId: user?.id });
   const { data: jobData, isLoading: jobsLoading, error: jobsError } = useGetJobsByCompanyId({ companyId: user?.companies_id });
   const { data: companyUsers, isLoading: companyUsersLoading, error: companyUsersError } = useGetCompanyUsersByCompanyId({ companyId: user?.companies_id });
 
