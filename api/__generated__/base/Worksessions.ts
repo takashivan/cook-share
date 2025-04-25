@@ -11,8 +11,14 @@
 
 import {
   ChefReviewListResult,
+  FinishPartialUpdateBody,
+  FinishPartialUpdateResult,
   MessagesListResult,
   RestaurantReviewListResult,
+  StartPartialUpdateBody,
+  StartPartialUpdateResult,
+  VerifyPartialUpdateBody,
+  VerifyPartialUpdateResult,
   WorksessionsCreateData,
   WorksessionsCreatePayload,
   WorksessionsDeleteData,
@@ -42,6 +48,32 @@ export class Worksessions<SecurityDataType = unknown> extends HttpClient<Securit
   chefReviewListQueryArgs = (worksessionId: number, params: RequestParams = {}, enabled: boolean = true) => {
     const key = enabled ? [`/worksessions/${worksessionId}/chef-review`] : null;
     const fetcher = () => this.chefReviewList(worksessionId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags worksessions
+   * @name FinishPartialUpdate
+   * @request PATCH:/worksessions/{worksession_id}/finish
+   */
+  finishPartialUpdate = (worksessionId: number, data: FinishPartialUpdateBody, params: RequestParams = {}) =>
+    this.request<FinishPartialUpdateResult, void>({
+      path: `/worksessions/${worksessionId}/finish`,
+      method: "PATCH",
+      body: data,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+
+  finishPartialUpdateQueryArgs = (worksessionId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/worksessions/${worksessionId}/finish`] : null;
+    const fetcher: (url: string[], { arg }: { arg: FinishPartialUpdateBody }) => Promise<FinishPartialUpdateResult> = (
+      _,
+      { arg },
+    ) => this.finishPartialUpdate(worksessionId, arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -84,6 +116,58 @@ export class Worksessions<SecurityDataType = unknown> extends HttpClient<Securit
   restaurantReviewListQueryArgs = (worksessionId: number, params: RequestParams = {}, enabled: boolean = true) => {
     const key = enabled ? [`/worksessions/${worksessionId}/restaurant-review`] : null;
     const fetcher = () => this.restaurantReviewList(worksessionId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags worksessions
+   * @name StartPartialUpdate
+   * @request PATCH:/worksessions/{worksession_id}/start
+   */
+  startPartialUpdate = (worksessionId: number, data: StartPartialUpdateBody, params: RequestParams = {}) =>
+    this.request<StartPartialUpdateResult, void>({
+      path: `/worksessions/${worksessionId}/start`,
+      method: "PATCH",
+      body: data,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+
+  startPartialUpdateQueryArgs = (worksessionId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/worksessions/${worksessionId}/start`] : null;
+    const fetcher: (url: string[], { arg }: { arg: StartPartialUpdateBody }) => Promise<StartPartialUpdateResult> = (
+      _,
+      { arg },
+    ) => this.startPartialUpdate(worksessionId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags worksessions
+   * @name VerifyPartialUpdate
+   * @request PATCH:/worksessions/{worksession_id}/verify
+   */
+  verifyPartialUpdate = (worksessionId: number, data: VerifyPartialUpdateBody, params: RequestParams = {}) =>
+    this.request<VerifyPartialUpdateResult, void>({
+      path: `/worksessions/${worksessionId}/verify`,
+      method: "PATCH",
+      body: data,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+
+  verifyPartialUpdateQueryArgs = (worksessionId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/worksessions/${worksessionId}/verify`] : null;
+    const fetcher: (url: string[], { arg }: { arg: VerifyPartialUpdateBody }) => Promise<VerifyPartialUpdateResult> = (
+      _,
+      { arg },
+    ) => this.verifyPartialUpdate(worksessionId, arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 

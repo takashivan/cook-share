@@ -3157,7 +3157,7 @@ export interface CompanyDetailResult {
   }[];
 }
 
-export interface QueryUpcomingjobsListData {
+export interface QueryUpcomingListData {
   jobs: {
     /** @format int64 */
     id: number;
@@ -3240,88 +3240,6 @@ export interface QueryUpcomingjobsListData {
     };
   }[];
 }
-
-export type QueryUpcomingListData = {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  title: string;
-  description: string;
-  /** @format date */
-  work_date: string;
-  /** @format timestamptz */
-  start_time: number;
-  /** @format timestamptz */
-  end_time: number;
-  hourly_rate: number;
-  required_skills: string[];
-  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format int64 */
-  restaurant_id: number;
-  image: string;
-  task: string;
-  skill: string;
-  whattotake: string;
-  note: string;
-  point: string;
-  transportation: string;
-  /** @default "1" */
-  is_approved: boolean;
-  /** @format int64 */
-  number_of_spots: number;
-  /** @format int64 */
-  fee: number;
-  /** @format timestamptz */
-  expiry_date: number | null;
-  restaurant: {
-    /** @format int64 */
-    id: number;
-    /**
-     * @format timestamptz
-     * @default "now"
-     */
-    created_at: number;
-    name: string;
-    address: string;
-    cuisine_type: string;
-    business_hours: string;
-    contact_info: string;
-    profile_image: string;
-    /** @format timestamptz */
-    updated_at: number;
-    /** Whether the restaurant is active. */
-    is_active: boolean;
-    /** @format uuid */
-    companies_id: string | null;
-    station: string;
-    access: string;
-    rating: number;
-    /** @default "1" */
-    is_approved: boolean;
-    restaurant_cuisine_id: {
-      cuisines: {
-        /** @format int64 */
-        id: number;
-        /**
-         * @format timestamptz
-         * @default "now"
-         */
-        created_at: number;
-        /** Whether this cuisine is the primary cuisine for the restaurant. */
-        is_primary: boolean;
-        category: string;
-      }[];
-    }[];
-    description: string;
-    phone: string;
-  };
-}[];
 
 export type RestaurantDetailData = {
   /** @format int64 */
@@ -3543,6 +3461,90 @@ export interface JobWithCheckCreatePayload {
 }
 
 export type JobWithCheckCreateData = object;
+
+export interface QueryUpcomingListResult {
+  jobs: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    title: string;
+    description: string;
+    /** @format date */
+    work_date: string;
+    /** @format timestamptz */
+    start_time: number;
+    /** @format timestamptz */
+    end_time: number;
+    hourly_rate: number;
+    required_skills: string[];
+    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    /** @format timestamptz */
+    updated_at: number;
+    /** @format int64 */
+    restaurant_id: number;
+    image: string;
+    task: string;
+    skill: string;
+    whattotake: string;
+    note: string;
+    point: string;
+    transportation: string;
+    /** @default "1" */
+    is_approved: boolean;
+    /** @format int64 */
+    number_of_spots: number;
+    /** @format int64 */
+    fee: number;
+    /** @format timestamptz */
+    expiry_date: number | null;
+    restaurant: {
+      /** @format int64 */
+      id: number;
+      /**
+       * @format timestamptz
+       * @default "now"
+       */
+      created_at: number;
+      name: string;
+      address: string;
+      cuisine_type: string;
+      business_hours: string;
+      contact_info: string;
+      profile_image: string;
+      /** @format timestamptz */
+      updated_at: number;
+      /** Whether the restaurant is active. */
+      is_active: boolean;
+      /** @format uuid */
+      companies_id: string | null;
+      station: string;
+      access: string;
+      rating: number;
+      /** @default "1" */
+      is_approved: boolean;
+      restaurant_cuisine_id: {
+        "0": {
+          /** @format int64 */
+          id: number;
+          /**
+           * @format timestamptz
+           * @default "now"
+           */
+          created_at: number;
+          /** Whether this cuisine is the primary cuisine for the restaurant. */
+          is_primary: boolean;
+          category: string;
+        };
+      }[];
+      description: string;
+      phone: string;
+    };
+  }[];
+}
 
 export type ApplicationsListResult = {
   /** @format uuid */
@@ -8447,6 +8449,81 @@ export interface ChefReviewListResult {
   };
 }
 
+export interface FinishPartialUpdateBody {
+  /** @format int64 */
+  rating: number;
+  feedback: string;
+  /** @format timestamptz */
+  check_out_time: number | null;
+}
+
+export interface FinishPartialUpdateResult {
+  result1: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format timestamptz */
+    check_in_time: number;
+    /** @format timestamptz */
+    check_out_time: number;
+    total_hours: number;
+    location_data: string;
+    status:
+      | "SCHEDULED"
+      | "IN_PROGRESS"
+      | "CANCELED_BY_CHEF"
+      | "CANCELED_BY_RESTAURANT"
+      | "COMPLETED"
+      | "VERIFIED"
+      | "DISPUTE"
+      | "ESCALATED"
+      | "PAID"
+      | "CANCELED";
+    /** @format timestamptz */
+    updated_at: number;
+    /** @format uuid */
+    application_id: string;
+    /** @format uuid */
+    user_id: string | null;
+    /** @format int64 */
+    restaurant_id: number;
+    /** @format int64 */
+    job_id: number;
+    /** @format int64 */
+    paid_amount: number;
+    chef_feedback: string;
+    restaurant_feedback: string;
+    /** @format int64 */
+    chef_rating: number;
+    /** @format int64 */
+    restaurant_rating: number;
+  };
+  review: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format int64 */
+    rating: number;
+    comment: string;
+    /** @format timestamptz */
+    updated_at: number;
+    /** @format int64 */
+    session_id: number;
+    /** @format uuid */
+    reviewer_id: string;
+    /** @format int64 */
+    reviewee_id: number;
+  };
+}
+
 export type MessagesListResult = {
   /** @format int64 */
   id: number;
@@ -8608,6 +8685,129 @@ export interface RestaurantReviewListResult {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
+  };
+}
+
+export interface StartPartialUpdateBody {
+  /** @format timestamptz */
+  check_in_time: number | null;
+}
+
+export interface StartPartialUpdateResult {
+  /** @format int64 */
+  id: number;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format timestamptz */
+  check_in_time: number;
+  /** @format timestamptz */
+  check_out_time: number;
+  total_hours: number;
+  location_data: string;
+  status:
+    | "SCHEDULED"
+    | "IN_PROGRESS"
+    | "CANCELED_BY_CHEF"
+    | "CANCELED_BY_RESTAURANT"
+    | "COMPLETED"
+    | "VERIFIED"
+    | "DISPUTE"
+    | "ESCALATED"
+    | "PAID"
+    | "CANCELED";
+  /** @format timestamptz */
+  updated_at: number;
+  /** @format uuid */
+  application_id: string;
+  /** @format uuid */
+  user_id: string | null;
+  /** @format int64 */
+  restaurant_id: number;
+  /** @format int64 */
+  job_id: number;
+  /** @format int64 */
+  paid_amount: number;
+  chef_feedback: string;
+  restaurant_feedback: string;
+  /** @format int64 */
+  chef_rating: number;
+  /** @format int64 */
+  restaurant_rating: number;
+}
+
+export interface VerifyPartialUpdateBody {
+  /** @format int64 */
+  rating: number;
+  feedback: string;
+}
+
+export interface VerifyPartialUpdateResult {
+  result1: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format timestamptz */
+    check_in_time: number;
+    /** @format timestamptz */
+    check_out_time: number;
+    total_hours: number;
+    location_data: string;
+    status:
+      | "SCHEDULED"
+      | "IN_PROGRESS"
+      | "CANCELED_BY_CHEF"
+      | "CANCELED_BY_RESTAURANT"
+      | "COMPLETED"
+      | "VERIFIED"
+      | "DISPUTE"
+      | "ESCALATED"
+      | "PAID"
+      | "CANCELED";
+    /** @format timestamptz */
+    updated_at: number;
+    /** @format uuid */
+    application_id: string;
+    /** @format uuid */
+    user_id: string | null;
+    /** @format int64 */
+    restaurant_id: number;
+    /** @format int64 */
+    job_id: number;
+    /** @format int64 */
+    paid_amount: number;
+    chef_feedback: string;
+    restaurant_feedback: string;
+    /** @format int64 */
+    chef_rating: number;
+    /** @format int64 */
+    restaurant_rating: number;
+  };
+  review: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format int64 */
+    rating: number;
+    comment: string;
+    /** @format timestamptz */
+    updated_at: number;
+    /** @format int64 */
+    session_id: number;
+    /** @format int64 */
+    reviewer_id: number;
+    /** @format uuid */
+    reviewee_id: string;
   };
 }
 

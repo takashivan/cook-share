@@ -18,11 +18,34 @@ import {
   JobsListResult,
   JobsPartialUpdateData,
   JobsPartialUpdatePayload,
+  QueryUpcomingListResult,
   WorksessionsRestaurantTodosListData,
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
 export class Jobs<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+  /**
+   * @description Query all job records <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags jobs
+   * @name QueryUpcomingList
+   * @summary Query all job records
+   * @request GET:/jobs/query/upcoming
+   */
+  queryUpcomingList = (params: RequestParams = {}) =>
+    this.request<QueryUpcomingListResult, void>({
+      path: `/jobs/query/upcoming`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  queryUpcomingListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/jobs/query/upcoming`] : null;
+    const fetcher = () => this.queryUpcomingList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
