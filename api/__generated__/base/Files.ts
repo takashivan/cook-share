@@ -35,6 +35,12 @@ export class Files<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       ...params,
     });
 
+  filesDeleteQueryArgs = (filesId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/files/${filesId}`] : null;
+    const fetcher = () => this.filesDelete(filesId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Get Files record <br /><br /> <b>Authentication:</b> not required
    *

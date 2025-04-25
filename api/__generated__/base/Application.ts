@@ -152,6 +152,12 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
+  applicationDeleteQueryArgs = (applicationId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/application/${applicationId}`] : null;
+    const fetcher = () => this.applicationDelete(applicationId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *

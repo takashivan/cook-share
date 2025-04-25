@@ -37,6 +37,12 @@ export class Payment<SecurityDataType = unknown> extends HttpClient<SecurityData
       ...params,
     });
 
+  paymentDeleteQueryArgs = (paymentId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/payment/${paymentId}`] : null;
+    const fetcher = () => this.paymentDelete(paymentId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Get payment record <br /><br /> <b>Authentication:</b> not required
    *

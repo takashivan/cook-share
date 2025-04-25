@@ -56,6 +56,16 @@ export class ChefNotification<SecurityDataType = unknown> extends HttpClient<Sec
       ...params,
     });
 
+  chefNotificationDeleteQueryArgs = (
+    chefNotificationId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/chef_notification/${chefNotificationId}`] : null;
+    const fetcher = () => this.chefNotificationDelete(chefNotificationId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *

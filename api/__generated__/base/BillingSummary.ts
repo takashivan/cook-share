@@ -38,6 +38,12 @@ export class BillingSummary<SecurityDataType = unknown> extends HttpClient<Secur
       ...params,
     });
 
+  billingSummaryDeleteQueryArgs = (billingSummaryId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/billing_summary/${billingSummaryId}`] : null;
+    const fetcher = () => this.billingSummaryDelete(billingSummaryId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *

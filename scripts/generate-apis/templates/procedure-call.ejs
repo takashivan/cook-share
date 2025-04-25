@@ -105,7 +105,7 @@ const describeReturnType = () => {
         ...<%~ _.get(requestConfigParam, "name") %>,
     })
 
-<% if(_.upperCase(method) === "GET") { %>
+<% if(_.upperCase(method) === "GET" || _.upperCase(method) === "DELETE") { %>
   <%~ route.routeName.usage %>QueryArgs = (<%~ wrapperArgs %>, enabled: boolean = true)<%~ config.toJS ? `: ${describeReturnType()}` : "" %> => {
     const key = enabled ? [`<%~ path  %>`, <%~ (query != null && queryName) ? `...(${queryName} ? [${queryName}] : [])` : '' %>] : null
     const fetcher = () => this.<%~ route.routeName.usage %>(<%~ wrapperCallArgs %>).then(res => res.data)

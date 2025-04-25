@@ -180,6 +180,12 @@ export class Restaurants<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
+  restaurantsDeleteQueryArgs = (restaurantId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/restaurants/${restaurantId}`] : null;
+    const fetcher = () => this.restaurantsDelete(restaurantId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Get restaurant record <br /><br /> <b>Authentication:</b> not required
    *

@@ -34,6 +34,16 @@ export class RestaurantNotifications<SecurityDataType = unknown> extends HttpCli
       ...params,
     });
 
+  restaurantNotificationsDeleteQueryArgs = (
+    restaurantNotificationId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/restaurant-notifications/${restaurantNotificationId}`] : null;
+    const fetcher = () => this.restaurantNotificationsDelete(restaurantNotificationId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *

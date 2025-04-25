@@ -37,6 +37,12 @@ export class Messages<SecurityDataType = unknown> extends HttpClient<SecurityDat
       ...params,
     });
 
+  messagesDeleteQueryArgs = (messageId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/messages/${messageId}`] : null;
+    const fetcher = () => this.messagesDelete(messageId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Get message record <br /><br /> <b>Authentication:</b> not required
    *

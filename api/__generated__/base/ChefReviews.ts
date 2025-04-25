@@ -36,6 +36,12 @@ export class ChefReviews<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
+  chefReviewsDeleteQueryArgs = (chefReviewId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/chef-reviews/${chefReviewId}`] : null;
+    const fetcher = () => this.chefReviewsDelete(chefReviewId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *

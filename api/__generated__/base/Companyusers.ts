@@ -59,6 +59,12 @@ export class Companyusers<SecurityDataType = unknown> extends HttpClient<Securit
       ...params,
     });
 
+  companyusersDeleteQueryArgs = (companyuserId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/companyusers/${companyuserId}`] : null;
+    const fetcher = () => this.companyusersDelete(companyuserId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Edit CompanyUser record <br /><br /> <b>Authentication:</b> not required
    *

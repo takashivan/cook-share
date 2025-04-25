@@ -37,6 +37,12 @@ export class ChefPayoutLog<SecurityDataType = unknown> extends HttpClient<Securi
       ...params,
     });
 
+  chefPayoutLogDeleteQueryArgs = (chefPayoutLogId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/chef_payout_log/${chefPayoutLogId}`] : null;
+    const fetcher = () => this.chefPayoutLogDelete(chefPayoutLogId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Get chef_payout_log record <br /><br /> <b>Authentication:</b> not required
    *

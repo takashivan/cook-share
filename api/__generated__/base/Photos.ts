@@ -37,6 +37,12 @@ export class Photos<SecurityDataType = unknown> extends HttpClient<SecurityDataT
       ...params,
     });
 
+  photosDeleteQueryArgs = (photosId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/photos/${photosId}`] : null;
+    const fetcher = () => this.photosDelete(photosId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Get Photos record <br /><br /> <b>Authentication:</b> not required
    *

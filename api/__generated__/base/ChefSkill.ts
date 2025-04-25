@@ -38,6 +38,12 @@ export class ChefSkill<SecurityDataType = unknown> extends HttpClient<SecurityDa
       ...params,
     });
 
+  chefSkillDeleteQueryArgs = (chefSkillId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/chef_skill/${chefSkillId}`] : null;
+    const fetcher = () => this.chefSkillDelete(chefSkillId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *

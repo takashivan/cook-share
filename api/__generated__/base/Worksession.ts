@@ -215,6 +215,12 @@ export class Worksession<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
+  worksessionDeleteQueryArgs = (worksessionId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/worksession/${worksessionId}`] : null;
+    const fetcher = () => this.worksessionDelete(worksessionId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Get worksession record <br /><br /> <b>Authentication:</b> not required
    *

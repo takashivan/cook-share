@@ -37,6 +37,12 @@ export class Adminlogs<SecurityDataType = unknown> extends HttpClient<SecurityDa
       ...params,
     });
 
+  adminlogsDeleteQueryArgs = (adminlogId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/adminlogs/${adminlogId}`] : null;
+    const fetcher = () => this.adminlogsDelete(adminlogId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Get adminlog record <br /><br /> <b>Authentication:</b> not required
    *

@@ -221,6 +221,12 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       ...params,
     });
 
+  usersDeleteQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/users/${userId}`] : null;
+    const fetcher = () => this.usersDelete(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Get user record <br /><br /> <b>Authentication:</b> not required
    *

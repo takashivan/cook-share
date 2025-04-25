@@ -37,6 +37,16 @@ export class Messageattachments<SecurityDataType = unknown> extends HttpClient<S
       ...params,
     });
 
+  messageattachmentsDeleteQueryArgs = (
+    messageattachmentId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/messageattachments/${messageattachmentId}`] : null;
+    const fetcher = () => this.messageattachmentsDelete(messageattachmentId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Get messageAttachment record <br /><br /> <b>Authentication:</b> not required
    *

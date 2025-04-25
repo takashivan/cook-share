@@ -127,6 +127,12 @@ export class Job<SecurityDataType = unknown> extends HttpClient<SecurityDataType
       ...params,
     });
 
+  deleteJobQueryArgs = (jobId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/job/${jobId}`] : null;
+    const fetcher = () => this.deleteJob(jobId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Get job record <br /><br /> <b>Authentication:</b> not required
    *

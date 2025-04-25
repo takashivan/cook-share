@@ -102,6 +102,12 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       ...params,
     });
 
+  companiesDeleteQueryArgs = (companiesId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/companies/${companiesId}`] : null;
+    const fetcher = () => this.companiesDelete(companiesId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Get Companies record <br /><br /> <b>Authentication:</b> not required
    *
@@ -173,6 +179,18 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       format: "json",
       ...params,
     });
+
+  companyusersDeleteQueryArgs = (
+    companyId: string,
+    companyuserId: string,
+    data: CompanyusersDeletePayload,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/companies/${companyId}/companyusers/${companyuserId}`] : null;
+    const fetcher = () => this.companyusersDelete(companyId, companyuserId, data, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 
   /**
    * @description <br /><br /> <b>Authentication:</b> not required

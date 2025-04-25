@@ -36,6 +36,16 @@ export class Restaurantaccesses<SecurityDataType = unknown> extends HttpClient<S
       ...params,
     });
 
+  restaurantaccessesDeleteQueryArgs = (
+    restaurantaccessId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/restaurantaccesses/${restaurantaccessId}`] : null;
+    const fetcher = () => this.restaurantaccessesDelete(restaurantaccessId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Edit RestaurantAccess record <br /><br /> <b>Authentication:</b> not required
    *

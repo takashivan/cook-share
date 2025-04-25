@@ -37,6 +37,17 @@ export class CompanyuserNotifications<SecurityDataType = unknown> extends HttpCl
       ...params,
     });
 
+  companyuserNotificationsDeleteQueryArgs = (
+    companyuserNotificationId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/companyuser-notifications/${companyuserNotificationId}`] : null;
+    const fetcher = () =>
+      this.companyuserNotificationsDelete(companyuserNotificationId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Get companyUser_notification record <br /><br /> <b>Authentication:</b> not required
    *
