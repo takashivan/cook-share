@@ -13,7 +13,7 @@ import {
   CompanyuserNotificationsListResult,
   CompanyusersCreateBody,
   CompanyusersCreateResult,
-  CompanyusersDeleteData,
+  CompanyusersDeleteResult,
   CompanyusersListResult,
   CompanyusersPartialUpdateData,
   CompanyusersPartialUpdatePayload,
@@ -52,7 +52,7 @@ export class Companyusers<SecurityDataType = unknown> extends HttpClient<Securit
    * @request DELETE:/companyusers/{companyuser_id}
    */
   companyusersDelete = (companyuserId: string, params: RequestParams = {}) =>
-    this.request<CompanyusersDeleteData, void>({
+    this.request<CompanyusersDeleteResult, void>({
       path: `/companyusers/${companyuserId}`,
       method: "DELETE",
       format: "json",

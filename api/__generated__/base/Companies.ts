@@ -19,6 +19,8 @@ import {
   CompaniesPartialUpdatePayload,
   CompanyusersCreateData,
   CompanyusersCreatePayload,
+  CompanyusersDeleteData,
+  CompanyusersDeletePayload,
   CompanyusersListData,
   JobsListData,
   RestaurantsListData,
@@ -149,6 +151,28 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       this.companiesPartialUpdate(companiesId, arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags companies
+   * @name CompanyusersDelete
+   * @request DELETE:/companies/{company_id}/companyusers/{companyuser_id}
+   */
+  companyusersDelete = (
+    companyId: string,
+    companyuserId: string,
+    data: CompanyusersDeletePayload,
+    params: RequestParams = {},
+  ) =>
+    this.request<CompanyusersDeleteData, void>({
+      path: `/companies/${companyId}/companyusers/${companyuserId}`,
+      method: "DELETE",
+      body: data,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
 
   /**
    * @description <br /><br /> <b>Authentication:</b> not required

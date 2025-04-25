@@ -2199,6 +2199,43 @@ export interface CompaniesPartialUpdateData {
   company_email: string;
 }
 
+export interface CompanyusersDeletePayload {
+  companies_id: string;
+  companyUser_id: string;
+}
+
+export interface CompanyusersDeleteData {
+  companyUser: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format uuid */
+    companies_id: string | null;
+    name: string;
+    /** @format email */
+    email: string;
+    phone: string | null;
+    /** @format password */
+    password: string;
+    is_admin: boolean;
+    /** @default "1" */
+    is_active: boolean;
+    is_verified: boolean;
+    /** @format timestamptz */
+    updated_at: number | null;
+    magic_link: object;
+    verify_token: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
+    password_reset_token: string;
+  };
+}
+
 export type CompanyusersListData = {
   /** @format uuid */
   id: string;
@@ -2838,9 +2875,37 @@ export interface CompanyuserNotificationCreateData {
   restaurant_id: number | null;
 }
 
-export type RestaurantsListResult = object;
+export type RestaurantsListResult = {
+  /** @format int64 */
+  id: number;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  name: string;
+  address: string;
+  cuisine_type: string;
+  business_hours: string;
+  contact_info: string;
+  profile_image: string;
+  /** @format timestamptz */
+  updated_at: number;
+  /** Whether the restaurant is active. */
+  is_active: boolean;
+  /** @format uuid */
+  companies_id: string | null;
+  station: string;
+  access: string;
+  rating: number;
+  /** @default "1" */
+  is_approved: boolean;
+  restaurant_cuisine_id: number[];
+  description: string;
+  phone: string;
+}[];
 
-export type CompanyusersDeleteData = object;
+export type CompanyusersDeleteResult = object;
 
 export interface CompanyusersPartialUpdatePayload {
   /** @format uuid */
