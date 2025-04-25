@@ -67,7 +67,7 @@ import { EditRestaurantModal } from "@/components/modals/EditRestaurantModal";
 import { useGetRestaurant } from "@/hooks/api/restaurants/useGetRestaurant";
 import { useGetJobsByRestaurantId } from "@/hooks/api/jobs/useGetJobsByRestaurantId";
 import { useGetMultipleWorksessionsByJobId } from "@/hooks/api/worksessions/useGetMultipleWorksessionsByJobId";
-import { CompanyusersCreateInput, JobsCreatePayload, JobsListOutput } from "@/api/__generated__/base/data-contracts";
+import { CompanyusersCreateInput, CompanyusersListData, CompanyusersListOutput, JobsCreatePayload, JobsListOutput } from "@/api/__generated__/base/data-contracts";
 import { useGetCompanyUsersByRestaurantId } from "@/hooks/api/companyUsers/useGetCompanyUsersByRestaurantId";
 import { useCreateJob } from "@/hooks/api/jobs/useCreateJob";
 import { workSessionApi } from "@/lib/api/workSession";
@@ -188,7 +188,7 @@ export default function RestaurantDetailPage(props: {
   const [deleteTargetStaff, setDeleteTargetStaff] = useState<StaffData | null>(
     null
   );
-  const [editTargetStaff, setEditTargetStaff] = useState<StaffData | null>(
+  const [editTargetStaff, setEditTargetStaff] = useState<CompanyusersListOutput['admin'][number] | null>(
     null
   );
   const [editPermissions, setEditPermissions] = useState<EditStaffPermissions>({
@@ -457,7 +457,7 @@ export default function RestaurantDetailPage(props: {
 
       toast({
         title: "権限を更新しました",
-        description: `${editTargetStaff.companyuser.name || editTargetStaff.companyuser.email}の権限を更新しました。`,
+        description: `${editTargetStaff.name || editTargetStaff.email}の権限を更新しました。`,
       });
     } catch (error) {
       console.error("Failed to update staff permissions:", error);
@@ -1249,7 +1249,7 @@ export default function RestaurantDetailPage(props: {
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuItem
                                     onClick={() => {
-                                      // setEditTargetStaff(staff);
+                                      setEditTargetStaff(staff);
                                       setEditPermissions({
                                         canEdit: true,
                                         canManageJobs: true,
@@ -1385,8 +1385,8 @@ export default function RestaurantDetailPage(props: {
           <DialogHeader>
             <DialogTitle>スタッフ権限の編集</DialogTitle>
             <DialogDescription>
-              {editTargetStaff?.companyuser.name ||
-                editTargetStaff?.companyuser.email}
+              {editTargetStaff?.name ||
+                editTargetStaff?.email}
               の権限を編集します。
             </DialogDescription>
           </DialogHeader>
