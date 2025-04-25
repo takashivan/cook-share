@@ -21,7 +21,7 @@ import {
   RestaurantsCreatePayload,
   RestaurantsDeleteData,
   RestaurantsDetailData,
-  RestaurantsListResult,
+  RestaurantsListOutput,
   RestaurantsPartialUpdateData,
   RestaurantsPartialUpdatePayload,
 } from "./data-contracts";
@@ -243,7 +243,7 @@ export class Restaurants<SecurityDataType = unknown> extends HttpClient<Security
    * @request GET:/restaurants
    */
   restaurantsList = (params: RequestParams = {}) =>
-    this.request<RestaurantsListResult, void>({
+    this.request<RestaurantsListOutput, void>({
       path: `/restaurants`,
       method: "GET",
       format: "json",

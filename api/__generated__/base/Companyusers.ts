@@ -17,10 +17,32 @@ import {
   CompanyusersListResult,
   CompanyusersPartialUpdateData,
   CompanyusersPartialUpdatePayload,
+  RestaurantsListResult,
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
 export class Companyusers<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags companyusers
+   * @name RestaurantsList
+   * @request GET:/companyusers/{companyuser_id}/restaurants
+   */
+  restaurantsList = (companyuserId: string, params: RequestParams = {}) =>
+    this.request<RestaurantsListResult, void>({
+      path: `/companyusers/${companyuserId}/restaurants`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  restaurantsListQueryArgs = (companyuserId: string, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/companyusers/${companyuserId}/restaurants`] : null;
+    const fetcher = () => this.restaurantsList(companyuserId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Delete CompanyUser record. <br /><br /> <b>Authentication:</b> not required
    *

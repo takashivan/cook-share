@@ -2838,6 +2838,8 @@ export interface CompanyuserNotificationCreateData {
   restaurant_id: number | null;
 }
 
+export type RestaurantsListResult = object;
+
 export type CompanyusersDeleteData = object;
 
 export interface CompanyusersPartialUpdatePayload {
@@ -3176,6 +3178,90 @@ export interface CompanyDetailResult {
     fee: number;
     /** @format timestamptz */
     expiry_date: number | null;
+  }[];
+}
+
+export interface QueryUpcomingjobsListData {
+  jobs: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    title: string;
+    description: string;
+    /** @format date */
+    work_date: string;
+    /** @format timestamptz */
+    start_time: number;
+    /** @format timestamptz */
+    end_time: number;
+    hourly_rate: number;
+    required_skills: string[];
+    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    /** @format timestamptz */
+    updated_at: number;
+    /** @format int64 */
+    restaurant_id: number;
+    image: string;
+    task: string;
+    skill: string;
+    whattotake: string;
+    note: string;
+    point: string;
+    transportation: string;
+    /** @default "1" */
+    is_approved: boolean;
+    /** @format int64 */
+    number_of_spots: number;
+    /** @format int64 */
+    fee: number;
+    /** @format timestamptz */
+    expiry_date: number | null;
+    restaurant: {
+      /** @format int64 */
+      id: number;
+      /**
+       * @format timestamptz
+       * @default "now"
+       */
+      created_at: number;
+      name: string;
+      address: string;
+      cuisine_type: string;
+      business_hours: string;
+      contact_info: string;
+      profile_image: string;
+      /** @format timestamptz */
+      updated_at: number;
+      /** Whether the restaurant is active. */
+      is_active: boolean;
+      /** @format uuid */
+      companies_id: string | null;
+      station: string;
+      access: string;
+      rating: number;
+      /** @default "1" */
+      is_approved: boolean;
+      restaurant_cuisine_id: {
+        "0": {
+          /** @format int64 */
+          id: number;
+          /**
+           * @format timestamptz
+           * @default "now"
+           */
+          created_at: number;
+          /** Whether this cuisine is the primary cuisine for the restaurant. */
+          is_primary: boolean;
+          category: string;
+        };
+      }[];
+      description: string;
+      phone: string;
+    };
   }[];
 }
 
@@ -4576,14 +4662,9 @@ export type MessagesListData = {
 
 export interface MessagesCreatePayload {
   content: string;
-  is_read: boolean;
-  /** @format timestamptz */
-  updated_at: number;
   /** @format uuid */
   application_id: string;
   sender_type: "chef" | "restaurant";
-  /** @format int64 */
-  restaurant_id: number | null;
   /** @format int64 */
   worksession_id: number;
 }
@@ -6367,7 +6448,7 @@ export interface RestaurantsPartialUpdateData {
   phone: string;
 }
 
-export type RestaurantsListResult = {
+export type RestaurantsListOutput = {
   "0": {
     name: string;
     address: string;

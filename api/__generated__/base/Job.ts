@@ -19,6 +19,7 @@ import {
   PostJobData,
   PostJobPayload,
   QueryUpcomingListData,
+  QueryUpcomingjobsListData,
   RestaurantDetailData,
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
@@ -42,6 +43,28 @@ export class Job<SecurityDataType = unknown> extends HttpClient<SecurityDataType
   companyDetailQueryArgs = (companyId: string, params: RequestParams = {}, enabled: boolean = true) => {
     const key = enabled ? [`/job/company/${companyId}`] : null;
     const fetcher = () => this.companyDetail(companyId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description Query all job records <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags job
+   * @name QueryUpcomingjobsList
+   * @summary Query all job records
+   * @request GET:/job/query/upcomingjobs
+   */
+  queryUpcomingjobsList = (params: RequestParams = {}) =>
+    this.request<QueryUpcomingjobsListData, void>({
+      path: `/job/query/upcomingjobs`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  queryUpcomingjobsListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/job/query/upcomingjobs`] : null;
+    const fetcher = () => this.queryUpcomingjobsList(params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
