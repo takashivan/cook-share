@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { formatToJapanDateTime } from "@/lib/functions";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,10 +31,10 @@ export function ChefNotificationDropdown({
 }: ChefNotificationDropdownProps) {
   const [open, setOpen] = useState(false);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   const handleNotificationClick = (notification: ChefNotification) => {
-    if (!notification.read) {
+    if (!notification.is_read) {
       onMarkAsRead(notification.id);
     }
     setOpen(false);
@@ -87,37 +88,40 @@ export function ChefNotificationDropdown({
         <DropdownMenuSeparator />
         <DropdownMenuGroup className="max-h-[400px] overflow-y-auto">
           {notifications.length > 0 ? (
-            notifications.map((notification) => (
-              <DropdownMenuItem
-                key={notification.id}
-                className={`p-3 cursor-pointer ${
-                  !notification.read ? "bg-muted/50" : ""
-                }`}
-                onClick={() => handleNotificationClick(notification)}
-                asChild>
-                <Link href="#">
-                  <div className="flex gap-3 w-full">
-                    <div
-                      className={`w-9 h-9 rounded-full flex items-center justify-center ${getNotificationColor(
-                        notification.notification_type
-                      )}`}>
-                      <Bell className="h-4 w-4" />
+            notifications
+              .sort((a, b) => b.created_at - a.created_at)
+              .map((notification) => (
+                <DropdownMenuItem
+                  key={notification.id}
+                  className={`p-3 cursor-pointer ${
+                    !notification.is_read ? "bg-muted/50" : ""
+                  }`}
+                  onClick={() => handleNotificationClick(notification)}
+                  asChild>
+                  <Link href={notification.related_link}>
+                    <div className="flex gap-3 w-full">
+                      <div
+                        className={`w-9 h-9 rounded-full flex items-center justify-center ${getNotificationColor(
+                          notification.notification_type
+                        )}`}>
+                        <Bell className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1 space-y-1">
+                        <p className="text-sm font-medium leading-none">
+                          {notification.content}
+                        </p>
+
+                        <p className="text-xs text-muted-foreground">
+                          {formatToJapanDateTime(notification.created_at)}
+                        </p>
+                      </div>
+                      {!notification.is_read && (
+                        <div className="w-2 h-2 rounded-full bg-blue-600 self-start mt-2"></div>
+                      )}
                     </div>
-                    <div className="flex-1 space-y-1">
-                      <p className="text-sm font-medium leading-none">
-                        {notification.message}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {notification.created_at}
-                      </p>
-                    </div>
-                    {!notification.read && (
-                      <div className="w-2 h-2 rounded-full bg-blue-600 self-start mt-2"></div>
-                    )}
-                  </div>
-                </Link>
-              </DropdownMenuItem>
-            ))
+                  </Link>
+                </DropdownMenuItem>
+              ))
           ) : (
             <div className="py-6 text-center text-muted-foreground">
               <p>通知はありません</p>
