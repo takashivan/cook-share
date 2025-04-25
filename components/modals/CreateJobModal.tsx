@@ -78,10 +78,12 @@ export const CreateJobModal = ({
       // 日付文字列を作成（YYYY-MM-DDThh:mm:ss）
       const startDateTimeStr = `${data.work_date}T${data.start_time}:00`;
       const endDateTimeStr = `${data.work_date}T${data.end_time}:00`;
+      const expiryTimestamp =`${data.expiry_date}T00:00:00`;
 
       // Unix タイムスタンプを計算（ミリ秒単位）
       const startTimestamp = Date.parse(startDateTimeStr);
       const endTimestamp = Date.parse(endDateTimeStr);
+      const expiryDateTimestamp = Date.parse(expiryTimestamp);
 
       console.log("Debug timestamps:", {
         startDateTimeStr,
@@ -118,6 +120,7 @@ export const CreateJobModal = ({
         restaurant_id: restaurantId,
         start_time: startTimestamp,
         end_time: endTimestamp,
+        expiry_date: expiryDateTimestamp,
       }
 
       await onSubmit(newData);
@@ -146,10 +149,12 @@ export const CreateJobModal = ({
       // 日付文字列を作成（YYYY-MM-DDThh:mm:ss）
       const startDateTimeStr = `${data.work_date}T${data.start_time}:00`;
       const endDateTimeStr = `${data.work_date}T${data.end_time}:00`;
+      const expiryTimestamp =`${data.expiry_date}T00:00:00`;
 
       // Unix タイムスタンプを計算（ミリ秒単位）
       const startTimestamp = Date.parse(startDateTimeStr);
       const endTimestamp = Date.parse(endDateTimeStr);
+      const expiryDateTimestamp = Date.parse(expiryTimestamp);
 
       // FormDataにデータを追加
       // Object.entries(data).forEach(([key, value]) => {
@@ -176,8 +181,12 @@ export const CreateJobModal = ({
         restaurant_id: restaurantId,
         start_time: startTimestamp,
         end_time: endTimestamp,
+        expiry_date: expiryDateTimestamp,
+        // ステータスをDRAFTに設定
         status: "DRAFT",
       }
+
+      console.log('Create Job', data, newData);
 
       await onSubmit(newData);
       reset();
@@ -204,10 +213,12 @@ export const CreateJobModal = ({
       // 日付文字列を作成（YYYY-MM-DDThh:mm:ss）
       const startDateTimeStr = `${data.work_date}T${data.start_time}:00`;
       const endDateTimeStr = `${data.work_date}T${data.end_time}:00`;
+      const expiryTimestamp =`${data.expiry_date}T00:00:00`;
 
       // Unix タイムスタンプを計算（ミリ秒単位）
       const startTimestamp = Date.parse(startDateTimeStr);
       const endTimestamp = Date.parse(endDateTimeStr);
+      const expiryDateTimestamp = Date.parse(expiryTimestamp);
 
       // FormDataにデータを追加
       // Object.entries(data).forEach(([key, value]) => {
@@ -234,6 +245,8 @@ export const CreateJobModal = ({
         restaurant_id: restaurantId,
         start_time: startTimestamp,
         end_time: endTimestamp,
+        expiry_date: expiryDateTimestamp,
+        // ステータスをPUBLISHEDに設定
         status: "PUBLISHED",
       }
 

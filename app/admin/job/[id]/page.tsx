@@ -72,7 +72,9 @@ import {
 } from "@/components/ui/tooltip";
 import { useGetJob } from "@/hooks/api/jobs/useGetJob";
 import { useGetWorksessionsByJobId } from "@/hooks/api/worksessions/useGetWorksessionsByJobId";
-import { JobsDetailData } from "@/api/__generated__/base/data-contracts";
+import { JobsDetailData, JobsPartialUpdatePayload } from "@/api/__generated__/base/data-contracts";
+import { useVerifyWorksession } from "@/hooks/api/worksessions/useVerifyWorksession";
+import { useUpdateJob } from "@/hooks/api/jobs/useUpdateJob";
 
 interface Message {
   id: number;
@@ -105,7 +107,13 @@ export default function JobDetail({ params }: PageParams) {
   });
 
   const { data: jobData, error: jobError } = useGetJob({ jobId: Number(jobId) });
-  const { data: workSessions, error: workSessionsError, mutate } = useGetWorksessionsByJobId({ jobId: Number(jobId) });
+  const { data: workSessions, error: workSessionsError } = useGetWorksessionsByJobId({ jobId: Number(jobId) });
+
+  const job = jobData?.job;
+  const restaurant = jobData?.restaurant;
+
+  const { trigger: updateJobTrigger } = useUpdateJob({ jobId: Number(jobId), companyId: restaurant?.companies_id ?? undefined, restaurantId: restaurant?.id ?? undefined});
+  const { trigger: verifyWorksessionTrigger } = useVerifyWorksession({ worksessionId: selectedWorkSession?.id || 0, jobId: Number(jobId) });
 
   const { data: messages, mutate: mutateMessages } = useSWR<Message[]>(
     selectedWorkSession?.id
@@ -172,19 +180,16 @@ export default function JobDetail({ params }: PageParams) {
     if (!selectedWorkSession) return;
 
     try {
-      await workSessionApi.updateWorkSessionToVerify(
-        selectedWorkSession.id,
+      await verifyWorksessionTrigger({
         rating,
-        comment
-      );
+        feedback: comment
+      })
 
       const review = await chefReviewApi.getChefReviewsBySessionId(
         selectedWorkSession.id
       );
       setChefReview(review);
       setIsChefReviewModalOpen(true);
-
-      mutate();
     } catch (err) {
       console.error("Failed to submit review:", err);
     }
@@ -197,9 +202,6 @@ export default function JobDetail({ params }: PageParams) {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-
-  const job = jobData?.job;
-  const restaurant = jobData?.restaurant;
 
   // 型チェックとデータ変換
   const formattedJob: JobsDetailData['job'] | null = job
@@ -230,10 +232,9 @@ export default function JobDetail({ params }: PageParams) {
       }
     : null;
 
-  const handleEditJobSubmit = async (formData: FormData) => {
+  const handleEditJobSubmit = async (data: JobsPartialUpdatePayload) => {
     try {
-      await jobApi.updateJob(jobId, formData);
-      mutate();
+      await updateJobTrigger(data);
       setIsEditJobModalOpen(false);
       toast({
         title: "求人を更新しました",
@@ -825,12 +826,14 @@ export default function JobDetail({ params }: PageParams) {
         </DialogContent>
       </Dialog>
 
-      <EditJobModal
-        isOpen={isEditJobModalOpen}
-        onClose={() => setIsEditJobModalOpen(false)}
-        onSubmit={handleEditJobSubmit}
-        job={formattedJob as Job}
-      />
+      {formattedJob && 
+        <EditJobModal
+          isOpen={isEditJobModalOpen}
+          onClose={() => setIsEditJobModalOpen(false)}
+          onSubmit={handleEditJobSubmit}
+          job={formattedJob}
+        />
+      }
     </div>
   );
 }
