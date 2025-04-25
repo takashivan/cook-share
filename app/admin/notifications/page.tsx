@@ -24,17 +24,9 @@ export default function RestaurantNotificationsPage() {
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {
-      await markCompanyUserNotificationAsRead(Number(notificationId));
+      await markCompanyUserNotificationAsRead(notificationId);
     } catch (error) {
       console.error("Failed to mark notification as read:", error);
-    }
-  };
-
-  const handleMarkAllAsRead = async () => {
-    try {
-      await markAllCompanyUserNotificationsAsRead();
-    } catch (error) {
-      console.error("Failed to mark all notifications as read:", error);
     }
   };
 
@@ -112,7 +104,8 @@ export default function RestaurantNotificationsPage() {
             {filteredNotifications.length > 0 ? (
               filteredNotifications.map((notification) => (
                 <Link key={notification.id} href="#">
-                  <Card className={`${!notification.is_read ? "bg-gray-50" : ""}`}>
+                  <Card
+                    className={`${!notification.is_read ? "bg-gray-50" : ""}`}>
                     <CardContent className="p-4">
                       <div className="flex gap-3">
                         <div

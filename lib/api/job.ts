@@ -154,6 +154,14 @@ export const getAllJobs = async (): Promise<JobWithRestaurant[]> => {
   );
   return response.jobs || [];
 };
+// ジョブ一覧取得
+export const getAllJobsNonSelected = async (): Promise<JobWithRestaurant[]> => {
+  const response = await apiRequest<{ jobs: JobWithRestaurant[] }>(
+    `${API_CONFIG.baseURLs.job}`,
+    "GET"
+  );
+  return response.jobs || [];
+};
 
 // ジョブ検索・フィルタリング
 export const searchJobs = (params: JobSearchParams = {}): Promise<Job[]> => {

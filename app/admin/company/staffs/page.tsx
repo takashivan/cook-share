@@ -37,7 +37,10 @@ export default function StaffPage() {
 
   const handleAddStaff = async (email: string) => {
     try {
-      await companyStaffInvite(email, user?.companies_id.toString() ?? "");
+      if (!user?.companies_id) {
+        throw new Error("会社IDが取得できません");
+      }
+      await companyStaffInvite(email, user.companies_id);
       toast({
         title: "招待を送信しました",
         description: `${email}に招待メールを送信しました。`,
