@@ -75,6 +75,8 @@ import { useGetWorksessionsByJobId } from "@/hooks/api/worksessions/useGetWorkse
 import { JobsDetailData, JobsPartialUpdatePayload } from "@/api/__generated__/base/data-contracts";
 import { useVerifyWorksession } from "@/hooks/api/worksessions/useVerifyWorksession";
 import { useUpdateJob } from "@/hooks/api/jobs/useUpdateJob";
+import { getApi } from "@/api/api-factory";
+import { Worksessions } from "@/api/__generated__/base/Worksessions";
 
 interface Message {
   id: number;
@@ -185,7 +187,8 @@ export default function JobDetail({ params }: PageParams) {
         feedback: comment
       })
 
-      const review = await chefReviewApi.getChefReviewsBySessionId(
+      const worksessionsClient = getApi(Worksessions);
+      const review = await worksessionsClient.chefReviewList(
         selectedWorkSession.id
       );
       setChefReview(review);
