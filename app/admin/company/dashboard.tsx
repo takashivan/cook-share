@@ -38,8 +38,43 @@ export function CompanyDashboard() {
   const { data: jobData, isLoading: jobsLoading, error: jobsError } = useGetJobsByCompanyId({ companyId: user?.companies_id });
   const { data: companyUsers, isLoading: companyUsersLoading, error: companyUsersError } = useGetCompanyUsersByCompanyId({ companyId: user?.companies_id });
 
-  // const [isCreateRestaurantModalOpen, setIsCreateRestaurantModalOpen] =
-  //   useState(false);
+  useEffect(() => {
+    if (user?.companies_id) {
+      dispatch(fetchMyRestaurants(user.id));
+      dispatch(fetchJobsByCompanyId(user.companies_id));
+    }
+  }, [dispatch, user?.companies_id, user?.id]);
+
+  useEffect(() => {
+    const fetchCompanyUsers = async () => {
+      if (user?.companies_id) {
+        try {
+          setIsLoadingUsers(true);
+          const response = await getCompanyUserByCompanyId(user.companies_id);
+          const validUsers = Array.isArray(response)
+            ? response.filter(
+                (user): user is CompanyUser =>
+                  user !== null && typeof user === "object"
+              )
+            : [];
+          setCompanyUsers(validUsers);
+        } catch (error) {
+          console.error("Failed to fetch company users:", error);
+          setError(
+            error instanceof Error
+              ? error.message
+              : "スタッフ情報の取得に失敗しました"
+          );
+        } finally {
+          setIsLoadingUsers(false);
+        }
+      }
+    };
+
+    fetchCompanyUsers();
+  }, [user?.companies_id]);
+
+  
 
   // データが更新されたときのログ
   useEffect(() => {
