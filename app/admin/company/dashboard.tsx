@@ -2,12 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import {
-  Building,
-  CreditCard,
-  MessageSquare,
-  Store,
-} from "lucide-react";
+import { Building, CreditCard, MessageSquare, Store } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -17,12 +12,15 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
-// import { useDispatch } from "react-redux";
-// import { AppDispatch } from "@/lib/store/store";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/lib/store/store";
 // import { fetchRestaurantsByCompanyId } from "@/lib/store/restaurantSlice";
 // import { CreateRestaurantModal } from "@/components/modals/CreateRestaurantModal";
 // import { createRestaurant } from "@/lib/api/restaurant";
 // import { toast } from "@/hooks/use-toast";
+import { getCompanyUserByCompanyId } from "@/lib/api/companyUser";
+import { fetchJobsByCompanyId } from "@/lib/store/jobSlice";
+import { fetchMyRestaurants } from "@/lib/store/restaurantSlice";
 import { useGetCompany } from "@/hooks/api/companies/useGetCompany";
 import { useGetRestaurantsByCompanyId } from "@/hooks/api/restaurants/useGetRestaurantsByCompanyId";
 import { useGetJobsByCompanyId } from "@/hooks/api/jobs/useGetJobsByCompanyId";
@@ -32,11 +30,24 @@ import { useGetRestaurantsByCompanyUserId } from "@/hooks/api/restaurants/useGet
 export function CompanyDashboard() {
   // const dispatch = useDispatch<AppDispatch>();
   const { user } = useCompanyAuth();
+  const dispatch = useDispatch<AppDispatch>();
 
   const { data: company } = useGetCompany({ companyId: user?.companies_id });
-  const { data: restaurants, isLoading: restaurantsLoading, error: restaurantsError } = useGetRestaurantsByCompanyUserId({ companyuserId: user?.id });
-  const { data: jobData, isLoading: jobsLoading, error: jobsError } = useGetJobsByCompanyId({ companyId: user?.companies_id });
-  const { data: companyUsers, isLoading: companyUsersLoading, error: companyUsersError } = useGetCompanyUsersByCompanyId({ companyId: user?.companies_id });
+  const {
+    data: restaurants,
+    isLoading: restaurantsLoading,
+    error: restaurantsError,
+  } = useGetRestaurantsByCompanyUserId({ companyuserId: user?.id });
+  const {
+    data: jobData,
+    isLoading: jobsLoading,
+    error: jobsError,
+  } = useGetJobsByCompanyId({ companyId: user?.companies_id });
+  const {
+    data: companyUsers,
+    isLoading: companyUsersLoading,
+    error: companyUsersError,
+  } = useGetCompanyUsersByCompanyId({ companyId: user?.companies_id });
 
   useEffect(() => {
     if (user?.companies_id) {
@@ -45,36 +56,34 @@ export function CompanyDashboard() {
     }
   }, [dispatch, user?.companies_id, user?.id]);
 
-  useEffect(() => {
-    const fetchCompanyUsers = async () => {
-      if (user?.companies_id) {
-        try {
-          setIsLoadingUsers(true);
-          const response = await getCompanyUserByCompanyId(user.companies_id);
-          const validUsers = Array.isArray(response)
-            ? response.filter(
-                (user): user is CompanyUser =>
-                  user !== null && typeof user === "object"
-              )
-            : [];
-          setCompanyUsers(validUsers);
-        } catch (error) {
-          console.error("Failed to fetch company users:", error);
-          setError(
-            error instanceof Error
-              ? error.message
-              : "スタッフ情報の取得に失敗しました"
-          );
-        } finally {
-          setIsLoadingUsers(false);
-        }
-      }
-    };
+  // useEffect(() => {
+  //   const fetchCompanyUsers = async () => {
+  //     if (user?.companies_id) {
+  //       try {
+  //         setIsLoadingUsers(true);
+  //         const response = await getCompanyUserByCompanyId(user.companies_id);
+  //         const validUsers = Array.isArray(response)
+  //           ? response.filter(
+  //               (user): user is CompanyUser =>
+  //                 user !== null && typeof user === "object"
+  //             )
+  //           : [];
+  //         setCompanyUsers(validUsers);
+  //       } catch (error) {
+  //         console.error("Failed to fetch company users:", error);
+  //         setError(
+  //           error instanceof Error
+  //             ? error.message
+  //             : "スタッフ情報の取得に失敗しました"
+  //         );
+  //       } finally {
+  //         setIsLoadingUsers(false);
+  //       }
+  //     }
+  //   };
 
-    fetchCompanyUsers();
-  }, [user?.companies_id]);
-
-  
+  //   fetchCompanyUsers();
+  // }, [user?.companies_id]);
 
   // データが更新されたときのログ
   useEffect(() => {
@@ -149,7 +158,9 @@ export function CompanyDashboard() {
   return (
     <>
       {companyUsersError && (
-        <div className="bg-red-50 text-red-600 p-4 mb-4 rounded">{companyUsersError}</div>
+        <div className="bg-red-50 text-red-600 p-4 mb-4 rounded">
+          {companyUsersError}
+        </div>
       )}
 
       <div className="space-y-6">
@@ -177,7 +188,9 @@ export function CompanyDashboard() {
               <Store className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{restaurants?.length ?? ''}</div>
+              <div className="text-2xl font-bold">
+                {restaurants?.length ?? ""}
+              </div>
             </CardContent>
           </Card>
 
@@ -187,7 +200,9 @@ export function CompanyDashboard() {
               <MessageSquare className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{jobData?.jobs.length ?? ''}</div>
+              <div className="text-2xl font-bold">
+                {jobData?.jobs.length ?? ""}
+              </div>
             </CardContent>
           </Card>
           <Card>
@@ -196,7 +211,9 @@ export function CompanyDashboard() {
               <MessageSquare className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{companyUsers?.length ?? ''}</div>
+              <div className="text-2xl font-bold">
+                {companyUsers?.length ?? ""}
+              </div>
             </CardContent>
           </Card>
         </div>

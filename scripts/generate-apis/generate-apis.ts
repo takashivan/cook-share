@@ -23,7 +23,7 @@ const baseConfig = {
   extractResponseError: true,
   httpClientType: "axios" as const,
   modular: true,
-  nameCase: 'camel',
+  nameCase: "camel",
   templates: path.resolve(process.cwd(), "scripts/generate-apis/templates"),
   unionEnums: true,
 };
@@ -36,13 +36,13 @@ const generateApiTypes = async () => {
           ...baseConfig,
           url,
           output: path.resolve(process.cwd(), "api/__generated__", outputDir),
-          codeGenConstructs: (struct) => ({
+          codeGenConstructs: (struct: any) => ({
             ...struct,
-            TypeField: (content) => {
-              const { readonly, key, value } = content as any;
-              return `${readonly ? 'readonly ' : ''}${key}: ${value}`;
-            }
-          })
+            TypeField: (content: any) => {
+              const { readonly, key, value } = content;
+              return `${readonly ? "readonly " : ""}${key}: ${value}`;
+            },
+          }),
         })
       )
     );
