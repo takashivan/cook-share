@@ -40,7 +40,7 @@ export default function ChefNotificationsPage() {
     const fetchNotifications = async () => {
       if (!user?.id) return;
       try {
-        const data = await getChefNotificationsByChefId(Number(user.id));
+        const data = await getChefNotificationsByChefId(user.id);
         setNotifications(data);
       } catch (error) {
         console.error("Failed to fetch notifications:", error);
@@ -68,8 +68,9 @@ export default function ChefNotificationsPage() {
   };
 
   const handleMarkAllAsRead = async () => {
+    if (!user?.id) return;
     try {
-      await markAllChefNotificationsAsRead();
+      await markAllChefNotificationsAsRead(user.id.toString());
       setNotifications((prev) =>
         prev.map((notification) => ({ ...notification, read: true }))
       );
@@ -143,7 +144,7 @@ export default function ChefNotificationsPage() {
   };
 
   const filteredNotifications = notifications.filter((notification) => {
-    const matchesTab = activeTab === "all" || !notification.read;
+    const matchesTab = activeTab === "all" || !notification.is_read;
     const matchesFilter =
       filter === "all" || notification.notification_type === filter;
     return matchesTab && matchesFilter;
@@ -199,7 +200,7 @@ export default function ChefNotificationsPage() {
               <div
                 key={notification.id}
                 className={`p-4 rounded-lg border ${
-                  !notification.read ? "bg-blue-50" : ""
+                  !notification.is_read ? "bg-blue-50" : ""
                 }`}>
                 <div className="flex items-start gap-4">
                   <div
@@ -210,8 +211,8 @@ export default function ChefNotificationsPage() {
                   </div>
                   <div className="flex-1">
                     <div className="flex justify-between items-start">
-                      <h3 className="font-medium">{notification.message}</h3>
-                      {!notification.read && (
+                      <h3 className="font-medium">{notification.content}</h3>
+                      {!notification.is_read && (
                         <Button
                           variant="ghost"
                           size="sm"

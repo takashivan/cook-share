@@ -44,7 +44,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/lib/store/store";
+import { fetchMyRestaurants } from "@/lib/store/restaurantSlice";
+import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
+import { getRestaurant } from "@/lib/api/restaurant";
+import type { Restaurant } from "@/lib/api/restaurant";
 import { updateRestaurant } from "@/lib/api/restaurant";
+import { formatToJapanDateTime, formatToJapanTime } from "@/lib/functions";
+import { getRestaurantById } from "@/lib/api/restaurant";
 import { getRestaurantStaff } from "@/lib/api/company";
 import { jobApi } from "@/lib/api/job";
 import { format } from "date-fns";
@@ -66,6 +74,27 @@ import { workSessionApi } from "@/lib/api/workSession";
 import type { WorkSessionWithJob } from "@/types";
 import Image from "next/image";
 import { useCreateCompanyUserByRestaurantId } from "@/hooks/api/companyUsers/useCreateCompanyUserByRestaurantId";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Staff } from "@/types/staff";
 
 interface StaffData {
   id: string;
@@ -74,6 +103,7 @@ interface StaffData {
     name: string;
     email: string;
     is_active: boolean;
+    is_admin: boolean;
   };
 }
 
@@ -81,6 +111,11 @@ interface JobWithWorkSessions extends Omit<JobsListOutput[number], "workSessionC
   formattedWorkDate: string;
   formattedTime: string;
   workSessionCount: number;
+}
+
+interface EditStaffPermissions {
+  canEdit: boolean;
+  canManageJobs: boolean;
 }
 
 const weekDays = ["日", "月", "火", "水", "木", "金", "土"];
@@ -149,6 +184,17 @@ export default function RestaurantDetailPage(props: {
   //   restaurant_cuisine_id: [] as (number | undefined)[],
   //   photo: null as File | null,
   // });
+
+  const [deleteTargetStaff, setDeleteTargetStaff] = useState<StaffData | null>(
+    null
+  );
+  const [editTargetStaff, setEditTargetStaff] = useState<StaffData | null>(
+    null
+  );
+  const [editPermissions, setEditPermissions] = useState<EditStaffPermissions>({
+    canEdit: false,
+    canManageJobs: false,
+  });
 
   // useEffect(() => {
   //   const fetchRestaurant = async () => {
@@ -373,8 +419,60 @@ export default function RestaurantDetailPage(props: {
     setIsCreateJobModalOpen(true);
   };
 
+  const handleDeleteStaff = async () => {
+    if (!deleteTargetStaff) return;
+
+    try {
+      // TODO: Add API call to delete staff
+      // await deleteRestaurantStaff(restaurant?.id, deleteTargetStaff.id);
+
+      // Optimistically update the UI
+      const updatedStaffs = staffData?.admin?.filter(
+        (staff) => staff.id !== deleteTargetStaff.id
+      );
+      // mutateStaffs(updatedStaffs);
+
+      toast({
+        title: "スタッフを削除しました",
+        description: `${deleteTargetStaff.companyuser.name || deleteTargetStaff.companyuser.email}を削除しました。`,
+      });
+    } catch (error) {
+      console.error("Failed to delete staff:", error);
+      toast({
+        title: "エラーが発生しました",
+        description: "スタッフの削除に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteTargetStaff(null);
+    }
+  };
+
+  const handleEditStaff = async () => {
+    if (!editTargetStaff) return;
+
+    try {
+      // TODO: Add API call to update staff permissions
+      // await updateRestaurantStaffPermissions(restaurant?.id, editTargetStaff.id, editPermissions);
+
+      toast({
+        title: "権限を更新しました",
+        description: `${editTargetStaff.companyuser.name || editTargetStaff.companyuser.email}の権限を更新しました。`,
+      });
+    } catch (error) {
+      console.error("Failed to update staff permissions:", error);
+      toast({
+        title: "エラーが発生しました",
+        description: "権限の更新に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
+    } finally {
+      setEditTargetStaff(null);
+    }
+  };
+
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto py-1">
       {isLoading ? (
         <div className="flex justify-center items-center min-h-[200px]">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
@@ -385,7 +483,7 @@ export default function RestaurantDetailPage(props: {
         </div>
       ) : (
         <div className="space-y-6">
-          <div className="flex items-center gap-4 mb-6">
+          <div className="flex items-center gap-1 mb-6">
             <Link
               href="/admin/stores"
               className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900">
@@ -429,7 +527,7 @@ export default function RestaurantDetailPage(props: {
                       {restaurant?.cuisine_type}
                     </Badge>
                   </div>
-                  <h1 className="text-3xl font-bold">{restaurant?.name}</h1>
+                  <h1 className="text-2xl font-bold">{restaurant?.name}</h1>
                   <div className="flex flex-col items-start gap-4 mt-2 text-white/90">
                     <div className="flex items-center gap-1">
                       <MapPin className="h-4 w-4" />
@@ -449,14 +547,6 @@ export default function RestaurantDetailPage(props: {
                     </div>
                   </div>
                 </div>
-                <Button
-                  onClick={() => {
-                    setIsEditModalOpen(true);
-                    console.log("restaurant", restaurant);
-                  }}>
-                  <Edit className="mr-2 h-4 w-4" />
-                  店舗情報を編集
-                </Button>
               </div>
             </div>
           </div>
@@ -558,6 +648,16 @@ export default function RestaurantDetailPage(props: {
                           {restaurant?.station}
                         </p>
                       </div>
+                      <div className="flex justify-end">
+                        <Button
+                          onClick={() => {
+                            setIsEditModalOpen(true);
+                            console.log("restaurant", restaurant);
+                          }}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          店舗情報を編集
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -596,7 +696,7 @@ export default function RestaurantDetailPage(props: {
                         {format(currentDate, "yyyy年M月", { locale: ja })}
                       </h3>
                       <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2 text-sm">
+                        {/* <div className="flex items-center gap-2 text-sm">
                           <div className="flex items-center gap-1">
                             <div className="w-3 h-3 rounded-full bg-green-500"></div>
                             <span>公開中</span>
@@ -613,7 +713,7 @@ export default function RestaurantDetailPage(props: {
                             <div className="w-3 h-3 rounded-full bg-red-400"></div>
                             <span>応募あり</span>
                           </div>
-                        </div>
+                        </div> */}
                         <div className="flex items-center gap-2">
                           <Button
                             variant="outline"
@@ -777,73 +877,76 @@ export default function RestaurantDetailPage(props: {
                         .map((job) => (
                           <div
                             key={job.id}
-                            className="flex items-center justify-between p-4 border rounded-lg">
+                            className=" items-center justify-between p-4 border rounded-lg">
                             <div>
-                              <h3 className="font-medium">{job.title}</h3>
-                              <p className="text-sm text-gray-500"></p>
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-medium">{job.title}</h3>
+                              </div>
+
                               <div className="flex items-center gap-2 mt-2">
-                                <Badge variant="default">公開中</Badge>
+                                <Badge variant="outline" className="text-sm">
+                                  {job.formattedWorkDate}
+                                </Badge>
                                 <span className="text-sm text-gray-500">
-                                  勤務日: {job.formattedWorkDate}
+                                  {job.formattedTime}
                                 </span>
                                 <span className="text-sm text-gray-500">
-                                  勤務時間: {job.formattedTime}
-                                </span>
-                                <span className="text-sm text-gray-500">
-                                  報酬: {job.fee}円
+                                  {job.fee}円
                                 </span>
                               </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                              <div className="flex flex-col items-end">
-                                <div className="text-sm font-medium text-gray-500">
-                                  応募状況
+                              <div className="flex items-center justify-between gap-4 mt-2">
+                                <Badge variant="outline" className="text-sm">
+                                  公開中
+                                </Badge>
+                                <div className="flex-1">
+                                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                                    <div
+                                      className={`h-full ${job.workSessionCount >= job.number_of_spots ? "bg-primary" : "bg-blue-400"}`}
+                                      style={{
+                                        width: `${Math.min(
+                                          (job.workSessionCount /
+                                            job.number_of_spots) *
+                                            100,
+                                          100
+                                        )}%`,
+                                      }}
+                                    />
+                                  </div>
                                 </div>
-                                <div className="flex items-center gap-1">
-                                  <span
-                                    className={`text-lg font-bold ${job.workSessionCount >= job.number_of_spots ? "text-primary" : ""}`}>
-                                    {job.workSessionCount}
-                                  </span>
-                                  <span className="text-gray-500">/</span>
-                                  <span className="text-lg font-bold">
-                                    {job.number_of_spots}
-                                  </span>
-                                  <span className="text-sm text-gray-500">
-                                    人
-                                  </span>
-                                </div>
-                                <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
-                                  <div
-                                    className={`h-full ${job.workSessionCount >= job.number_of_spots ? "bg-primary" : "bg-blue-400"}`}
-                                    style={{
-                                      width: `${Math.min(
-                                        (job.workSessionCount /
-                                          job.number_of_spots) *
-                                          100,
-                                        100
-                                      )}%`,
-                                    }}
-                                  />
+                                <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-1">
+                                    <span
+                                      className={`text-lg font-bold ${job.workSessionCount >= job.number_of_spots ? "text-primary" : ""}`}>
+                                      {job.workSessionCount}
+                                    </span>
+                                    <span className="text-gray-500">/</span>
+                                    <span className="text-lg font-bold">
+                                      {job.number_of_spots}
+                                    </span>
+                                    <span className="text-sm text-gray-500">
+                                      人
+                                    </span>
+                                  </div>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="icon">
+                                        <MoreHorizontal className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuItem asChild>
+                                        <Link href={`/admin/job/${job.id}`}>
+                                          詳細を見る
+                                        </Link>
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem
+                                        onClick={() => handleCopyJob(job)}>
+                                        コピーして新規作成
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
                                 </div>
                               </div>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon">
-                                    <MoreHorizontal className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem asChild>
-                                    <Link href={`/admin/job/${job.id}`}>
-                                      詳細を見る
-                                    </Link>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => handleCopyJob(job)}>
-                                    コピーして新規作成
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
                             </div>
                           </div>
                         ))}
@@ -857,73 +960,76 @@ export default function RestaurantDetailPage(props: {
                         .map((job) => (
                           <div
                             key={job.id}
-                            className="flex items-center justify-between p-4 border rounded-lg">
+                            className="items-center justify-between p-4 border rounded-lg">
                             <div>
-                              <h3 className="font-medium">{job.title}</h3>
-                              <p className="text-sm text-gray-500"></p>
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-medium">{job.title}</h3>
+                              </div>
+
                               <div className="flex items-center gap-2 mt-2">
-                                <Badge variant="secondary">下書き</Badge>
+                                <Badge variant="outline" className="text-sm">
+                                  {job.formattedWorkDate}
+                                </Badge>
                                 <span className="text-sm text-gray-500">
-                                  勤務日: {job.formattedWorkDate}
+                                  {job.formattedTime}
                                 </span>
                                 <span className="text-sm text-gray-500">
-                                  勤務時間: {job.formattedTime}
-                                </span>
-                                <span className="text-sm text-gray-500">
-                                  報酬: {job.fee}円
+                                  {job.fee}円
                                 </span>
                               </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                              <div className="flex flex-col items-end">
-                                <div className="text-sm font-medium text-gray-500">
-                                  応募状況
+                              <div className="flex items-center justify-between gap-4 mt-2">
+                                <Badge variant="outline" className="text-sm">
+                                  下書き
+                                </Badge>
+                                <div className="flex-1">
+                                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                                    <div
+                                      className={`h-full ${job.workSessionCount >= job.number_of_spots ? "bg-primary" : "bg-blue-400"}`}
+                                      style={{
+                                        width: `${Math.min(
+                                          (job.workSessionCount /
+                                            job.number_of_spots) *
+                                            100,
+                                          100
+                                        )}%`,
+                                      }}
+                                    />
+                                  </div>
                                 </div>
-                                <div className="flex items-center gap-1">
-                                  <span
-                                    className={`text-lg font-bold ${job.workSessionCount >= job.number_of_spots ? "text-primary" : ""}`}>
-                                    {job.workSessionCount}
-                                  </span>
-                                  <span className="text-gray-500">/</span>
-                                  <span className="text-lg font-bold">
-                                    {job.number_of_spots}
-                                  </span>
-                                  <span className="text-sm text-gray-500">
-                                    人
-                                  </span>
-                                </div>
-                                <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
-                                  <div
-                                    className={`h-full ${job.workSessionCount >= job.number_of_spots ? "bg-primary" : "bg-blue-400"}`}
-                                    style={{
-                                      width: `${Math.min(
-                                        (job.workSessionCount /
-                                          job.number_of_spots) *
-                                          100,
-                                        100
-                                      )}%`,
-                                    }}
-                                  />
+                                <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-1">
+                                    <span
+                                      className={`text-lg font-bold ${job.workSessionCount >= job.number_of_spots ? "text-primary" : ""}`}>
+                                      {job.workSessionCount}
+                                    </span>
+                                    <span className="text-gray-500">/</span>
+                                    <span className="text-lg font-bold">
+                                      {job.number_of_spots}
+                                    </span>
+                                    <span className="text-sm text-gray-500">
+                                      人
+                                    </span>
+                                  </div>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="icon">
+                                        <MoreHorizontal className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuItem asChild>
+                                        <Link href={`/admin/job/${job.id}`}>
+                                          詳細を見る
+                                        </Link>
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem
+                                        onClick={() => handleCopyJob(job)}>
+                                        コピーして新規作成
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
                                 </div>
                               </div>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon">
-                                    <MoreHorizontal className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem asChild>
-                                    <Link href={`/admin/job/${job.id}`}>
-                                      詳細を見る
-                                    </Link>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => handleCopyJob(job)}>
-                                    コピーして新規作成
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
                             </div>
                           </div>
                         ))}
@@ -937,73 +1043,76 @@ export default function RestaurantDetailPage(props: {
                         .map((job) => (
                           <div
                             key={job.id}
-                            className="flex items-center justify-between p-4 border rounded-lg">
+                            className="items-center justify-between p-4 border rounded-lg">
                             <div>
-                              <h3 className="font-medium">{job.title}</h3>
-                              <p className="text-sm text-gray-500"></p>
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-medium">{job.title}</h3>
+                              </div>
+
                               <div className="flex items-center gap-2 mt-2">
-                                <Badge variant="secondary">一時停止中</Badge>
+                                <Badge variant="outline" className="text-sm">
+                                  {job.formattedWorkDate}
+                                </Badge>
                                 <span className="text-sm text-gray-500">
-                                  勤務日: {job.formattedWorkDate}
+                                  {job.formattedTime}
                                 </span>
                                 <span className="text-sm text-gray-500">
-                                  勤務時間: {job.formattedTime}
-                                </span>
-                                <span className="text-sm text-gray-500">
-                                  報酬: {job.fee}円
+                                  {job.fee}円
                                 </span>
                               </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                              <div className="flex flex-col items-end">
-                                <div className="text-sm font-medium text-gray-500">
-                                  応募状況
+                              <div className="flex items-center justify-between gap-4 mt-2">
+                                <Badge variant="outline" className="text-sm">
+                                  一時停止中
+                                </Badge>
+                                <div className="flex-1">
+                                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                                    <div
+                                      className={`h-full ${job.workSessionCount >= job.number_of_spots ? "bg-primary" : "bg-blue-400"}`}
+                                      style={{
+                                        width: `${Math.min(
+                                          (job.workSessionCount /
+                                            job.number_of_spots) *
+                                            100,
+                                          100
+                                        )}%`,
+                                      }}
+                                    />
+                                  </div>
                                 </div>
-                                <div className="flex items-center gap-1">
-                                  <span
-                                    className={`text-lg font-bold ${job.workSessionCount >= job.number_of_spots ? "text-primary" : ""}`}>
-                                    {job.workSessionCount}
-                                  </span>
-                                  <span className="text-gray-500">/</span>
-                                  <span className="text-lg font-bold">
-                                    {job.number_of_spots}
-                                  </span>
-                                  <span className="text-sm text-gray-500">
-                                    人
-                                  </span>
-                                </div>
-                                <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
-                                  <div
-                                    className={`h-full ${job.workSessionCount >= job.number_of_spots ? "bg-primary" : "bg-blue-400"}`}
-                                    style={{
-                                      width: `${Math.min(
-                                        (job.workSessionCount /
-                                          job.number_of_spots) *
-                                          100,
-                                        100
-                                      )}%`,
-                                    }}
-                                  />
+                                <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-1">
+                                    <span
+                                      className={`text-lg font-bold ${job.workSessionCount >= job.number_of_spots ? "text-primary" : ""}`}>
+                                      {job.workSessionCount}
+                                    </span>
+                                    <span className="text-gray-500">/</span>
+                                    <span className="text-lg font-bold">
+                                      {job.number_of_spots}
+                                    </span>
+                                    <span className="text-sm text-gray-500">
+                                      人
+                                    </span>
+                                  </div>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="icon">
+                                        <MoreHorizontal className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuItem asChild>
+                                        <Link href={`/admin/job/${job.id}`}>
+                                          詳細を見る
+                                        </Link>
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem
+                                        onClick={() => handleCopyJob(job)}>
+                                        コピーして新規作成
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
                                 </div>
                               </div>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon">
-                                    <MoreHorizontal className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem asChild>
-                                    <Link href={`/admin/job/${job.id}`}>
-                                      詳細を見る
-                                    </Link>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => handleCopyJob(job)}>
-                                    コピーして新規作成
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
                             </div>
                           </div>
                         ))}
@@ -1020,73 +1129,76 @@ export default function RestaurantDetailPage(props: {
                         .map((job) => (
                           <div
                             key={job.id}
-                            className="flex items-center justify-between p-4 border rounded-lg">
+                            className="items-center justify-between p-4 border rounded-lg">
                             <div>
-                              <h3 className="font-medium">{job.title}</h3>
-                              <p className="text-sm text-gray-500"></p>
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-medium">{job.title}</h3>
+                              </div>
+
                               <div className="flex items-center gap-2 mt-2">
-                                <Badge variant="destructive">募集終了</Badge>
+                                <Badge variant="outline" className="text-sm">
+                                  {job.formattedWorkDate}
+                                </Badge>
                                 <span className="text-sm text-gray-500">
-                                  勤務日: {job.formattedWorkDate}
+                                  {job.formattedTime}
                                 </span>
                                 <span className="text-sm text-gray-500">
-                                  勤務時間: {job.formattedTime}
-                                </span>
-                                <span className="text-sm text-gray-500">
-                                  報酬: {job.fee}円
+                                  {job.fee}円
                                 </span>
                               </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                              <div className="flex flex-col items-end">
-                                <div className="text-sm font-medium text-gray-500">
-                                  応募状況
+                              <div className="flex items-center justify-between gap-4 mt-2">
+                                <Badge variant="outline" className="text-sm">
+                                  募集終了
+                                </Badge>
+                                <div className="flex-1">
+                                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                                    <div
+                                      className={`h-full ${job.workSessionCount >= job.number_of_spots ? "bg-primary" : "bg-blue-400"}`}
+                                      style={{
+                                        width: `${Math.min(
+                                          (job.workSessionCount /
+                                            job.number_of_spots) *
+                                            100,
+                                          100
+                                        )}%`,
+                                      }}
+                                    />
+                                  </div>
                                 </div>
-                                <div className="flex items-center gap-1">
-                                  <span
-                                    className={`text-lg font-bold ${job.workSessionCount >= job.number_of_spots ? "text-primary" : ""}`}>
-                                    {job.workSessionCount}
-                                  </span>
-                                  <span className="text-gray-500">/</span>
-                                  <span className="text-lg font-bold">
-                                    {job.number_of_spots}
-                                  </span>
-                                  <span className="text-sm text-gray-500">
-                                    人
-                                  </span>
-                                </div>
-                                <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
-                                  <div
-                                    className={`h-full ${job.workSessionCount >= job.number_of_spots ? "bg-primary" : "bg-blue-400"}`}
-                                    style={{
-                                      width: `${Math.min(
-                                        (job.workSessionCount /
-                                          job.number_of_spots) *
-                                          100,
-                                        100
-                                      )}%`,
-                                    }}
-                                  />
+                                <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-1">
+                                    <span
+                                      className={`text-lg font-bold ${job.workSessionCount >= job.number_of_spots ? "text-primary" : ""}`}>
+                                      {job.workSessionCount}
+                                    </span>
+                                    <span className="text-gray-500">/</span>
+                                    <span className="text-lg font-bold">
+                                      {job.number_of_spots}
+                                    </span>
+                                    <span className="text-sm text-gray-500">
+                                      人
+                                    </span>
+                                  </div>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="icon">
+                                        <MoreHorizontal className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuItem asChild>
+                                        <Link href={`/admin/job/${job.id}`}>
+                                          詳細を見る
+                                        </Link>
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem
+                                        onClick={() => handleCopyJob(job)}>
+                                        コピーして新規作成
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
                                 </div>
                               </div>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon">
-                                    <MoreHorizontal className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem asChild>
-                                    <Link href={`/admin/job/${job.id}`}>
-                                      詳細を見る
-                                    </Link>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => handleCopyJob(job)}>
-                                    コピーして新規作成
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
                             </div>
                           </div>
                         ))}
@@ -1105,54 +1217,88 @@ export default function RestaurantDetailPage(props: {
                 </Button>
               </div>
 
-              <div className="border rounded-lg">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>名前</TableHead>
-                      <TableHead>メールアドレス</TableHead>
-                      <TableHead>ステータス</TableHead>
-                      <TableHead className="w-[50px]"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {staffData?.admin?.map((staff) => (
-                      <TableRow key={staff.id}>
-                        <TableCell className="font-medium">
-                          {staff.name}
-                        </TableCell>
-                        <TableCell>{staff.email}</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              staff.is_active
-                                ? "default"
-                                : "secondary"
-                            }>
-                            {staff.is_active
-                              ? "アクティブ"
-                              : "非アクティブ"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem>権限を編集</DropdownMenuItem>
-                              <DropdownMenuItem className="text-red-600">
-                                削除
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
+              <div className="space-y-6">
+                <div className="border rounded-lg">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead colSpan={3}>一般スタッフ</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                      <TableRow>
+                        <TableHead>名前</TableHead>
+                        <TableHead>メールアドレス</TableHead>
+                        <TableHead className="w-[50px]"></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {staffData?.admin
+                        ?.filter((staff) => !staff.is_admin)
+                        .map((staff) => (
+                          <TableRow key={`staff-${staff.id}`}>
+                            <TableCell className="font-medium">
+                              {staff.name}
+                            </TableCell>
+                            <TableCell>{staff.email}</TableCell>
+                            <TableCell>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      // setEditTargetStaff(staff);
+                                      setEditPermissions({
+                                        canEdit: true,
+                                        canManageJobs: true,
+                                      });
+                                    }}>
+                                    権限を編集
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="text-red-600"
+                                    // onClick={() => setDeleteTargetStaff(staff)}
+                                  >
+                                    削除
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                <div className="border rounded-lg">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead colSpan={3}>管理者</TableHead>
+                      </TableRow>
+                      <TableRow>
+                        <TableHead>名前</TableHead>
+                        <TableHead>メールアドレス</TableHead>
+                        <TableHead className="w-[50px]"></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {staffData?.admin
+                        ?.filter((staff) => staff.is_admin)
+                        .map((staff) => (
+                          <TableRow key={`staff-${staff.id}`}>
+                            <TableCell className="font-medium">
+                              {staff.name}
+                            </TableCell>
+                            <TableCell>{staff.email}</TableCell>
+                            <TableCell></TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
             </TabsContent>
           </Tabs>
@@ -1204,6 +1350,82 @@ export default function RestaurantDetailPage(props: {
         onSubmit={handleAddStaff}
         restaurantName={restaurant?.name ?? ""}
       />
+
+      {/* Delete Staff Confirmation Modal */}
+      <AlertDialog
+        open={!!deleteTargetStaff}
+        onOpenChange={() => setDeleteTargetStaff(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>スタッフを削除</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTargetStaff?.companyuser.name ||
+                deleteTargetStaff?.companyuser.email}
+              をスタッフから削除してもよろしいですか？
+              <br />
+              この操作は取り消せません。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>キャンセル</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteStaff}
+              className="bg-red-600 hover:bg-red-700">
+              削除する
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Edit Staff Permissions Modal */}
+      <Dialog
+        open={!!editTargetStaff}
+        onOpenChange={() => setEditTargetStaff(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>スタッフ権限の編集</DialogTitle>
+            <DialogDescription>
+              {editTargetStaff?.companyuser.name ||
+                editTargetStaff?.companyuser.email}
+              の権限を編集します。
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="canEdit"
+                checked={editPermissions.canEdit}
+                onCheckedChange={(checked) =>
+                  setEditPermissions((prev) => ({
+                    ...prev,
+                    canEdit: checked as boolean,
+                  }))
+                }
+              />
+              <Label htmlFor="canEdit">店舗情報の編集</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="canManageJobs"
+                checked={editPermissions.canManageJobs}
+                onCheckedChange={(checked) =>
+                  setEditPermissions((prev) => ({
+                    ...prev,
+                    canManageJobs: checked as boolean,
+                  }))
+                }
+              />
+              <Label htmlFor="canManageJobs">求人の管理</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditTargetStaff(null)}>
+              キャンセル
+            </Button>
+            <Button onClick={handleEditStaff}>保存する</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

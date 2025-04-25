@@ -9,6 +9,13 @@ import { useRouter, usePathname } from "next/navigation";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ChevronRight, Menu } from "lucide-react";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { ChefNotificationDropdown } from "@/components/notifications/ChefNotificationDropdown";
+import useSWR from "swr";
+import {
+  getChefNotificationsByChefId,
+  markChefNotificationAsRead,
+  markAllChefNotificationsAsRead,
+} from "@/lib/api/chefNotification";
 
 export default function ChefLayout({
   children,
@@ -26,6 +33,29 @@ export default function ChefLayout({
     logout();
     setIsMenuOpen(false);
     router.replace("/login");
+  };
+
+  const { data: notifications = [], mutate: mutateNotifications } = useSWR(
+    user?.id ? `chef-notifications-${user.id}` : null,
+    () => (user?.id ? getChefNotificationsByChefId(user.id.toString()) : [])
+  );
+
+  const handleMarkAsRead = async (notificationId: number) => {
+    try {
+      await markChefNotificationAsRead(notificationId);
+      mutateNotifications();
+    } catch (error) {
+      console.error("Failed to mark notification as read:", error);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await markAllChefNotificationsAsRead(user?.id.toString() ?? "");
+      mutateNotifications();
+    } catch (error) {
+      console.error("Failed to mark all notifications as read:", error);
+    }
   };
 
   useEffect(() => {
@@ -65,85 +95,92 @@ export default function ChefLayout({
               className="text-white"
             />
           </Link>
-          <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-            <SheetTrigger asChild>
-              <button className="p-2" aria-label="メニュー">
-                <Menu className="h-6 w-6" />
-              </button>
-            </SheetTrigger>
-            <SheetContent side="right" className="p-0 w-full max-w-xs">
-              <div className="flex flex-col h-full">
-                <div className="p-6 space-y-6 mt-10">
-                  <Link
-                    href="/chef/dashboard"
-                    className="flex items-center justify-between py-4 border-b"
-                    onClick={() => setIsMenuOpen(false)}>
-                    <span className="text-xl font-bold">ダッシュボード</span>
-                    <ChevronRight className="h-6 w-6" />
-                  </Link>
-                  <Link
-                    href="/chef/schedule"
-                    className="flex items-center justify-between py-4 border-b"
-                    onClick={() => setIsMenuOpen(false)}>
-                    <span className="text-xl font-bold">
-                      お仕事スケジュール
-                    </span>
-                    <ChevronRight className="h-6 w-6" />
-                  </Link>
-                  <Link
-                    href="/chef/salary"
-                    className="flex items-center justify-between py-4 border-b"
-                    onClick={() => setIsMenuOpen(false)}>
-                    <span className="text-xl font-bold">給料詳細</span>
-                    <ChevronRight className="h-6 w-6" />
-                  </Link>
-                  <Link
-                    href="/chef/profile"
-                    className="flex items-center justify-between py-4 border-b"
-                    onClick={() => setIsMenuOpen(false)}>
-                    <span className="text-xl font-bold">プロフィール</span>
-                    <ChevronRight className="h-6 w-6" />
-                  </Link>
-                </div>
+          <div className="flex items-center gap-2">
+            <ChefNotificationDropdown
+              notifications={notifications}
+              onMarkAsRead={handleMarkAsRead}
+              onMarkAllAsRead={handleMarkAllAsRead}
+            />
+            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+              <SheetTrigger asChild>
+                <button className="p-2" aria-label="メニュー">
+                  <Menu className="h-6 w-6" />
+                </button>
+              </SheetTrigger>
+              <SheetContent side="right" className="p-0 w-full max-w-xs">
+                <div className="flex flex-col h-full">
+                  <div className="p-6 space-y-6 mt-10">
+                    <Link
+                      href="/chef/dashboard"
+                      className="flex items-center justify-between py-4 border-b"
+                      onClick={() => setIsMenuOpen(false)}>
+                      <span className="text-xl font-bold">ダッシュボード</span>
+                      <ChevronRight className="h-6 w-6" />
+                    </Link>
+                    <Link
+                      href="/chef/schedule"
+                      className="flex items-center justify-between py-4 border-b"
+                      onClick={() => setIsMenuOpen(false)}>
+                      <span className="text-xl font-bold">
+                        お仕事スケジュール
+                      </span>
+                      <ChevronRight className="h-6 w-6" />
+                    </Link>
+                    <Link
+                      href="/chef/salary"
+                      className="flex items-center justify-between py-4 border-b"
+                      onClick={() => setIsMenuOpen(false)}>
+                      <span className="text-xl font-bold">給料詳細</span>
+                      <ChevronRight className="h-6 w-6" />
+                    </Link>
+                    <Link
+                      href="/chef/profile"
+                      className="flex items-center justify-between py-4 border-b"
+                      onClick={() => setIsMenuOpen(false)}>
+                      <span className="text-xl font-bold">プロフィール</span>
+                      <ChevronRight className="h-6 w-6" />
+                    </Link>
+                  </div>
 
-                <div className="mt-auto p-6 space-y-4">
-                  {/* <Link
+                  <div className="mt-auto p-6 space-y-4">
+                    {/* <Link
                     href="/chef/applications"
                     className="flex items-center justify-center py-4 px-6 rounded-full border border-gray-300 w-full"
                     onClick={() => setIsMenuOpen(false)}>
                     <span className="text-gray-500">応募履歴</span>
                   </Link> */}
-                  <Link
-                    href="/chef/guide"
-                    className="flex items-center justify-center py-4 px-6 rounded-full border border-gray-300 w-full"
-                    onClick={() => setIsMenuOpen(false)}>
-                    <span className="text-gray-500">ご利用の流れ</span>
-                  </Link>
-                  <Link
-                    href="/chef/faq"
-                    className="flex items-center justify-center py-4 px-6 rounded-full border border-gray-300 w-full"
-                    onClick={() => setIsMenuOpen(false)}>
-                    <span className="text-gray-500">よくある質問</span>
-                  </Link>
-                  <Link
-                    href="/chef/contact"
-                    className="flex items-center justify-center py-4 px-6 rounded-full border border-gray-300 w-full"
-                    onClick={() => setIsMenuOpen(false)}>
-                    <span className="text-gray-500">お問い合わせ</span>
-                  </Link>
-                  <Link
-                    href="/logout"
-                    className="flex items-center justify-center py-4 px-6 rounded-full border border-gray-300 w-full"
-                    onClick={() => {
-                      logout();
-                      setIsMenuOpen(false);
-                    }}>
-                    <span className="text-gray-500">ログアウト</span>
-                  </Link>
+                    <Link
+                      href="/chef/guide"
+                      className="flex items-center justify-center py-4 px-6 rounded-full border border-gray-300 w-full"
+                      onClick={() => setIsMenuOpen(false)}>
+                      <span className="text-gray-500">ご利用の流れ</span>
+                    </Link>
+                    <Link
+                      href="/chef/faq"
+                      className="flex items-center justify-center py-4 px-6 rounded-full border border-gray-300 w-full"
+                      onClick={() => setIsMenuOpen(false)}>
+                      <span className="text-gray-500">よくある質問</span>
+                    </Link>
+                    <Link
+                      href="/chef/contact"
+                      className="flex items-center justify-center py-4 px-6 rounded-full border border-gray-300 w-full"
+                      onClick={() => setIsMenuOpen(false)}>
+                      <span className="text-gray-500">お問い合わせ</span>
+                    </Link>
+                    <Link
+                      href="/logout"
+                      className="flex items-center justify-center py-4 px-6 rounded-full border border-gray-300 w-full"
+                      onClick={() => {
+                        logout();
+                        setIsMenuOpen(false);
+                      }}>
+                      <span className="text-gray-500">ログアウト</span>
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            </SheetContent>
-          </Sheet>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </header>
 

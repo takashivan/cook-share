@@ -2,6 +2,9 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/lib/store/store";
+import { fetchMyRestaurants } from "@/lib/store/restaurantSlice";
 import { CreateRestaurantModal } from "@/components/modals/CreateRestaurantModal";
 import { createRestaurant } from "@/lib/api/restaurant";
 import { toast } from "@/hooks/use-toast";
@@ -86,6 +89,12 @@ export default function StoresPage() {
         if (!result) {
           throw new Error("店舗の作成に失敗しました");
         }
+
+        // 店舗一覧を再取得
+        // const refreshResult = await dispatch(fetchMyRestaurants(user.id));
+        // if (refreshResult.type.endsWith("/rejected")) {
+        //   throw new Error("店舗一覧の更新に失敗しました");
+        // }
 
         handleCloseRestaurantModal();
         toast({

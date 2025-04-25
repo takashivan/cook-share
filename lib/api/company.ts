@@ -297,6 +297,16 @@ export const companyStaffInvite = (email: string, companies_id: string) => {
   });
 };
 
+export const deleteCompanyStaff = (
+  companies_id: string,
+  companyUser_id: string
+) => {
+  return apiRequest(`${BASE_URL}/staff/delete`, "POST", {
+    companies_id,
+    companyUser_id,
+  });
+};
+
 interface RestaurantStaffResponse {
   company: {
     id: string;
@@ -311,6 +321,7 @@ interface RestaurantStaffResponse {
     companies_id: string;
     name: string;
     email: string;
+    is_admin: boolean;
   }>;
 }
 

@@ -75,7 +75,7 @@ export function CompanyDashboard() {
   //     }
 
   //     // 店舗一覧を再取得
-  //     await dispatch(fetchRestaurantsByCompanyId(user.companies_id));
+  //     await dispatch(fetchMyRestaurants(user.id));
 
   //     // モーダルを閉じる
   //     setIsCreateRestaurantModalOpen(false);
