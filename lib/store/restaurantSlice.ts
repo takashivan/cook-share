@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { Restaurant } from "@/lib/api/restaurant";
-import { getRestaurantsByCompanyId } from "@/lib/api/restaurant";
+import { getMyRestaurants } from "@/lib/api/companyUser";
 
 interface RestaurantState {
   restaurants: Restaurant[];
@@ -14,10 +14,10 @@ const initialState: RestaurantState = {
   error: null,
 };
 
-export const fetchRestaurantsByCompanyId = createAsyncThunk(
+export const fetchMyRestaurants = createAsyncThunk(
   "restaurants/fetchByCompanyId",
-  async (companyId: string) => {
-    const response = await getRestaurantsByCompanyId(companyId);
+  async (companyuser_id: string) => {
+    const response = await getMyRestaurants(companyuser_id);
     return response;
   }
 );
@@ -28,15 +28,15 @@ const restaurantSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchRestaurantsByCompanyId.pending, (state) => {
+      .addCase(fetchMyRestaurants.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchRestaurantsByCompanyId.fulfilled, (state, action) => {
+      .addCase(fetchMyRestaurants.fulfilled, (state, action) => {
         state.loading = false;
         state.restaurants = action.payload;
       })
-      .addCase(fetchRestaurantsByCompanyId.rejected, (state, action) => {
+      .addCase(fetchMyRestaurants.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "レストランの取得に失敗しました";
       });

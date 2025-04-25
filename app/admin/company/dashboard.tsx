@@ -44,7 +44,7 @@ import { getCompany, type Company } from "@/lib/api/company";
 import type { Job } from "@/types";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/lib/store/store";
-import { fetchRestaurantsByCompanyId } from "@/lib/store/restaurantSlice";
+import { fetchMyRestaurants } from "@/lib/store/restaurantSlice";
 import { fetchJobsByCompanyId } from "@/lib/store/jobSlice";
 import { CreateRestaurantModal } from "@/components/modals/CreateRestaurantModal";
 import { createRestaurant } from "@/lib/api/restaurant";
@@ -92,8 +92,8 @@ export function CompanyDashboard() {
   }, [user]);
 
   useEffect(() => {
-    if (user?.companies_id) {
-      dispatch(fetchRestaurantsByCompanyId(user.companies_id));
+    if (user?.id) {
+      // dispatch(fetchMyRestaurants(user.companies_id));
       dispatch(fetchJobsByCompanyId(user.companies_id));
     }
   }, [dispatch, user?.companies_id]);
@@ -162,7 +162,7 @@ export function CompanyDashboard() {
       }
 
       // 店舗一覧を再取得
-      await dispatch(fetchRestaurantsByCompanyId(user.companies_id));
+      await dispatch(fetchMyRestaurants(user.id));
 
       // モーダルを閉じる
       setIsCreateRestaurantModalOpen(false);

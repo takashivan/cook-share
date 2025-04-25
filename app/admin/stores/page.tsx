@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/lib/store/store";
-import { fetchRestaurantsByCompanyId } from "@/lib/store/restaurantSlice";
+import { fetchMyRestaurants } from "@/lib/store/restaurantSlice";
 import { CreateRestaurantModal } from "@/components/modals/CreateRestaurantModal";
 import { createRestaurant } from "@/lib/api/restaurant";
 import { toast } from "@/hooks/use-toast";
@@ -59,8 +59,8 @@ export default function StoresPage() {
   useEffect(() => {
     if (!hasMounted || !user?.companies_id) return;
 
-    dispatch(fetchRestaurantsByCompanyId(user.companies_id));
-  }, [dispatch, user?.companies_id, hasMounted]);
+    dispatch(fetchMyRestaurants(user.id));
+  }, [dispatch, user?.id, hasMounted]);
 
   const handleCreateRestaurantModal = useCallback(() => {
     if (!hasMounted) return;
@@ -92,9 +92,7 @@ export default function StoresPage() {
         }
 
         // 店舗一覧を再取得
-        const refreshResult = await dispatch(
-          fetchRestaurantsByCompanyId(companyId)
-        );
+        const refreshResult = await dispatch(fetchMyRestaurants(user.id));
         if (refreshResult.type.endsWith("/rejected")) {
           throw new Error("店舗一覧の更新に失敗しました");
         }

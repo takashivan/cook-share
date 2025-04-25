@@ -20,6 +20,7 @@ import {
   Building,
   ChevronRight,
   Home,
+  Bell,
   ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -45,7 +46,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/lib/store/store";
-import { fetchRestaurantsByCompanyId } from "@/lib/store/restaurantSlice";
+import { fetchMyRestaurants } from "@/lib/store/restaurantSlice";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -61,7 +62,6 @@ interface NavigationItem {
   isOpen?: boolean;
   className?: string;
   notification?: React.ReactNode;
-  key?: string;
 }
 
 interface NavigationGroup {
@@ -96,7 +96,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   useEffect(() => {
     if (user?.companies_id) {
-      dispatch(fetchRestaurantsByCompanyId(user.companies_id));
+      dispatch(fetchMyRestaurants(user.companies_id));
     }
   }, [dispatch, user?.companies_id]);
 
@@ -113,6 +113,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           return;
         }
 
+        if (!user?.is_admin && pathname.startsWith("/admin/company")) {
+          router.push("/admin");
+          return;
+        }
+
         setIsLoading(false);
       } catch (error) {
         console.error("Auth initialization error:", error);
@@ -121,7 +126,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     };
 
     initAuth();
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, user?.is_admin, pathname]);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -189,10 +194,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   const handleMarkAllAsRead = async () => {
     try {
-      if (user?.id) {
-        await markAllCompanyUserNotificationsAsRead(user.id);
-        setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
-      }
+      await markAllCompanyUserNotificationsAsRead(user?.id?.toString() || "");
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
     } catch (error) {
       console.error("Failed to mark all notifications as read:", error);
     }
@@ -230,32 +233,36 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         },
       ],
     },
-    {
-      title: "会社管理",
-      items: [
-        {
-          title: "会社情報",
-          href: "/admin/company",
-          icon: Building,
-          active: pathname === "/admin/company",
-          show: true,
-        },
-        {
-          title: "スタッフ管理",
-          href: "/admin/company/staff",
-          icon: Users,
-          active: pathname === "/admin/company/staff",
-          show: true,
-        },
-        {
-          title: "請求管理",
-          href: "/admin/company/billing",
-          icon: CreditCard,
-          active: pathname === "/admin/company/billing",
-          show: true,
-        },
-      ],
-    },
+    ...(user?.is_admin
+      ? [
+          {
+            title: "会社管理",
+            items: [
+              {
+                title: "会社情報",
+                href: "/admin/company",
+                icon: Building,
+                active: pathname === "/admin/company",
+                show: true,
+              },
+              {
+                title: "スタッフ管理",
+                href: "/admin/company/staff",
+                icon: Users,
+                active: pathname === "/admin/company/staff",
+                show: true,
+              },
+              {
+                title: "請求管理",
+                href: "/admin/company/billing",
+                icon: CreditCard,
+                active: pathname === "/admin/company/billing",
+                show: true,
+              },
+            ],
+          },
+        ]
+      : []),
     {
       title: "店舗管理",
       items: [
@@ -265,17 +272,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           icon: Utensils,
           active: pathname === "/admin/stores",
           show: true,
-          key: "stores-list",
         },
         {
           title: "店舗",
-          href: "#", // Changed from /admin/stores to # to avoid duplicate href
+          href: "/admin/stores",
           icon: Store,
           active: pathname.startsWith("/admin/stores/"),
           show: true,
           onClick: () => setIsStoreListOpen(!isStoreListOpen),
           isOpen: isStoreListOpen,
-          key: "stores-toggle",
         },
         ...(isStoreListOpen
           ? restaurants.map((restaurant) => ({
@@ -285,32 +290,39 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               active: pathname === `/admin/stores/${restaurant.id}`,
               show: true,
               className: "ml-4",
-              key: `store-${restaurant.id}`,
             }))
           : []),
       ],
     },
+    // {
+    //   title: "求人管理",
+    //   items: [
+    //     {
+    //       title: "求人一覧",
+    //       href: "/admin/jobs",
+    //       icon: MessageSquare,
+    //       active:
+    //         pathname === "/admin/jobs" || pathname.startsWith("/admin/jobs/"),
+    //       show: true,
+    //     },
+    //   ],
+    // },
+
     {
-      title: "求人管理",
-      items: [
-        {
-          title: "求人一覧",
-          href: "/admin/jobs",
-          icon: MessageSquare,
-          active:
-            pathname === "/admin/jobs" || pathname.startsWith("/admin/jobs/"),
-          show: true,
-        },
-      ],
-    },
-    {
-      title: "設定",
+      title: "その他",
       items: [
         {
           title: "アカウント設定",
           href: "/admin/settings",
           icon: Settings,
           active: pathname === "/admin/settings",
+          show: true,
+        },
+        {
+          title: "すべての通知",
+          href: "/admin/notifications",
+          icon: Bell,
+          active: pathname === "/admin/notifications",
           show: true,
         },
       ],
@@ -347,7 +359,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                       .filter((item) => item.show)
                       .map((item) => (
                         <Link
-                          key={item.key || item.href}
+                          key={item.href}
                           href={item.href}
                           onClick={(e) => {
                             if (item.onClick) {
@@ -438,7 +450,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     .filter((item) => item.show)
                     .map((item) => (
                       <Link
-                        key={item.key || item.href}
+                        key={item.href}
                         href={item.href}
                         onClick={(e) => {
                           if (item.onClick) {
@@ -516,7 +528,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 ホーム
               </Link>
 
-              {pathname.includes("/company") && (
+              {user?.is_admin && pathname.includes("/company") && (
                 <>
                   <ChevronRight className="h-4 w-4" />
                   <Link
