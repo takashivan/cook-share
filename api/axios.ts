@@ -16,6 +16,7 @@ const instance = axios.create({
 instance.interceptors.request.use((config) => {
   const userType = config.headers['X-User-Type'] || 'chef'; // デフォルトは 'chef'
   const token = getAuthToken(userType);
+  config.headers['X-User-Type'] = undefined; // ヘッダーから削除
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;

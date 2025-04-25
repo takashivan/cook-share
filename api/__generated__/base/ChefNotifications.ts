@@ -1,0 +1,115 @@
+/* eslint-disable */
+/* tslint:disable */
+/*
+ * ---------------------------------------------------------------
+ * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
+ * ##                                                           ##
+ * ## AUTHOR: acacode                                           ##
+ * ## SOURCE: https://github.com/acacode/swagger-typescript-api ##
+ * ---------------------------------------------------------------
+ */
+
+import {
+  ChefNotificationsCreateData,
+  ChefNotificationsCreatePayload,
+  ChefNotificationsDetailData,
+  ChefNotificationsListData,
+  Clone0DeleteData,
+} from "./data-contracts";
+import { ContentType, HttpClient, RequestParams } from "./http-client";
+
+export class ChefNotifications<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags chef-notifications
+   * @name Clone0Delete
+   * @request DELETE:/chef-notifications/{chef_notification_id}/clone_0
+   */
+  clone0Delete = (chefNotificationId: number, params: RequestParams = {}) =>
+    this.request<Clone0DeleteData, void>({
+      path: `/chef-notifications/${chefNotificationId}/clone_0`,
+      method: "DELETE",
+      format: "json",
+      ...params,
+    });
+
+  clone0DeleteQueryArgs = (chefNotificationId: number, params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/chef-notifications/${chefNotificationId}/clone_0`] : null;
+    const fetcher = () => this.clone0Delete(chefNotificationId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags chef-notifications
+   * @name ChefNotificationsDetail
+   * @request GET:/chef-notifications/{chef_notification_id}
+   */
+  chefNotificationsDetail = (chefNotificationId: number, params: RequestParams = {}) =>
+    this.request<ChefNotificationsDetailData, void>({
+      path: `/chef-notifications/${chefNotificationId}`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  chefNotificationsDetailQueryArgs = (
+    chefNotificationId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/chef-notifications/${chefNotificationId}`] : null;
+    const fetcher = () => this.chefNotificationsDetail(chefNotificationId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags chef-notifications
+   * @name ChefNotificationsList
+   * @request GET:/chef-notifications
+   */
+  chefNotificationsList = (params: RequestParams = {}) =>
+    this.request<ChefNotificationsListData, void>({
+      path: `/chef-notifications`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  chefNotificationsListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/chef-notifications`] : null;
+    const fetcher = () => this.chefNotificationsList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags chef-notifications
+   * @name ChefNotificationsCreate
+   * @request POST:/chef-notifications
+   */
+  chefNotificationsCreate = (data: ChefNotificationsCreatePayload, params: RequestParams = {}) =>
+    this.request<ChefNotificationsCreateData, void>({
+      path: `/chef-notifications`,
+      method: "POST",
+      body: data,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+
+  chefNotificationsCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/chef-notifications`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: ChefNotificationsCreatePayload },
+    ) => Promise<ChefNotificationsCreateData> = (_, { arg }) =>
+      this.chefNotificationsCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+}

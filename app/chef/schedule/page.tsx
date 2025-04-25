@@ -2,22 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { ChevronDown } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { Card, CardContent } from "@/components/ui/card";
-import type { Message, WorkSessionWithJob } from "@/types";
+import type { Message } from "@/types";
 import { messageApi, CreateMessageParams } from "@/lib/api/message";
-import { workSessionApi } from "@/lib/api/workSession";
 import useSWR from "swr";
 import { ChatSheet } from "@/components/chat/ChatSheet";
 import { XanoClient } from "@xano/js-sdk";
-import { getWorkSessionsByUserId } from "@/lib/api/workSession";
+import { useGetWorksessionsByUserId } from "@/hooks/api/worksessions/useGetWorksessionsByUserId";
+import { WorksessionsListResult } from "@/api/__generated__/base/data-contracts";
 
 export default function SchedulePage() {
   const { user } = useAuth();
@@ -25,17 +20,7 @@ export default function SchedulePage() {
   const [activeTab, setActiveTab] = useState("upcoming");
 
   // ワークセッション一覧の取得
-  const { data: workSessions } = useSWR<WorkSessionWithJob[]>(
-    user?.id ? `workSessions-${user.id}` : null,
-    async () => {
-      const result = await getWorkSessionsByUserId(user?.id || "");
-      return result as WorkSessionWithJob[];
-    },
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    }
-  );
+  const { data: workSessions } = useGetWorksessionsByUserId({ userId: user?.id })
   console.log(workSessions);
 
   // 選択されたワークセッション
@@ -126,7 +111,7 @@ export default function SchedulePage() {
       ) || [],
   };
 
-  const renderWorkSessionCard = (workSession: WorkSessionWithJob) => {
+  const renderWorkSessionCard = (workSession: WorksessionsListResult[number]) => {
     if (!workSession.job) return null;
 
     const workDate = format(
@@ -146,7 +131,7 @@ export default function SchedulePage() {
       <Card
         key={workSession.id}
         className="mb-4 hover:bg-gray-50 transition-colors"
-        onClick={() => openChat(Number(workSession.job.id))}>
+        onClick={() => openChat(workSession.job.id)}>
         <CardContent className="p-4">
           <div className="flex justify-between items-start mb-2">
             <div className="flex items-center gap-2">
@@ -210,7 +195,7 @@ export default function SchedulePage() {
         mutateMessages={mutateMessages}
         onSendMessage={handleSendMessage}
         restaurantName={selectedWorkSession?.job?.restaurant.name || ""}
-        restaurantImage={selectedWorkSession?.job?.restaurant.image_url || ""}
+        restaurantImage={selectedWorkSession?.job?.restaurant.profile_image || ""}
         workDate={selectedWorkSession?.job?.work_date || ""}
         startTime={selectedWorkSession?.job?.start_time || 0}
         workSessionId={selectedWorkSession?.id || 0}

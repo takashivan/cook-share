@@ -1,11 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
-import {
-  getCompanyUserByCompanyId,
-  type CompanyUser,
-} from "@/lib/api/companyUser";
 import {
   Card,
   CardContent,
@@ -40,6 +36,7 @@ import Link from "next/link";
 import { AddCompanyStaffModal } from "@/components/modals/AddCompanyStaff";
 import { companyStaffInvite, deleteCompanyStaff } from "@/lib/api/company";
 import { toast } from "@/hooks/use-toast";
+import { useGetCompanyUsersByCompanyId } from "@/hooks/api/companyUsers/useGetCompanyUsersByCompanyId";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -50,62 +47,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { CompanyUser } from "@/lib/api/companyUser";
+import { useDeleteCompanyUserByCompanyId } from "@/hooks/api/companyUsers/useDeleteCompanyUserByCompanyId";
+import { CompanyusersListData } from "@/api/__generated__/base/data-contracts";
 
 export default function StaffPage() {
   const { user } = useCompanyAuth();
-  const [companyUsers, setCompanyUsers] = useState<CompanyUser[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [hasMounted, setHasMounted] = useState(false);
   const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
   const [deleteTargetStaff, setDeleteTargetStaff] =
-    useState<CompanyUser | null>(null);
+    useState<CompanyusersListData[number] | null>(null);
 
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!hasMounted || !user?.companies_id) return;
-
-    let isMounted = true;
-    const fetchStaff = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        const response = await getCompanyUserByCompanyId(user.companies_id);
-        if (isMounted) {
-          const validUsers = Array.isArray(response)
-            ? response.filter(
-                (user): user is CompanyUser =>
-                  user !== null && typeof user === "object"
-              )
-            : [];
-          setCompanyUsers(validUsers);
-        }
-      } catch (error) {
-        if (isMounted) {
-          console.error("Failed to fetch staff:", error);
-          setError(
-            error instanceof Error
-              ? error.message
-              : "スタッフ情報の取得に失敗しました"
-          );
-          setCompanyUsers([]);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchStaff();
-    return () => {
-      isMounted = false;
-    };
-  }, [user?.companies_id, hasMounted]);
+  const { data: companyUsers, isLoading, error } = useGetCompanyUsersByCompanyId({ companyId: user?.companies_id.toString() ?? "" });
+  
+  const { trigger: deleteCompanyUserByCompanyIdTrigger } = useDeleteCompanyUserByCompanyId({
+    companyId: user?.companies_id ,
+    companyUserId: deleteTargetStaff?.id,
+  });
 
   const handleAddStaff = async (email: string) => {
     try {
@@ -134,12 +91,13 @@ export default function StaffPage() {
       if (!user?.companies_id) {
         throw new Error("会社IDが取得できません");
       }
-      await deleteCompanyStaff(user.companies_id, deleteTargetStaff.id);
+      await deleteCompanyUserByCompanyIdTrigger();
+      // await deleteCompanyStaff(user.companies_id, deleteTargetStaff.id);
 
       // Optimistically update the UI
-      setCompanyUsers((prev) =>
-        prev.filter((staff) => staff.id !== deleteTargetStaff.id)
-      );
+      // setCompanyUsers((prev) =>
+      //   prev.filter((staff) => staff.id !== deleteTargetStaff.id)
+      // );
 
       toast({
         title: "スタッフを削除しました",
@@ -157,31 +115,21 @@ export default function StaffPage() {
     }
   };
 
-  if (!hasMounted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center text-red-600">
           <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading || !companyUsers) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p>Loading...</p>
         </div>
       </div>
     );
@@ -285,7 +233,8 @@ export default function StaffPage() {
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem
                                 className="text-red-600"
-                                onClick={() => setDeleteTargetStaff(staff)}>
+                                onClick={() => setDeleteTargetStaff(staff)}
+                              >
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 削除
                               </DropdownMenuItem>
@@ -381,7 +330,8 @@ export default function StaffPage() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
                             className="text-red-600"
-                            onClick={() => setDeleteTargetStaff(staff)}>
+                            onClick={() => setDeleteTargetStaff(staff)}
+                          >
                             <Trash2 className="h-4 w-4 mr-2" />
                             削除
                           </DropdownMenuItem>

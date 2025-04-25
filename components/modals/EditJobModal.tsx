@@ -10,12 +10,19 @@ import { toast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { Job } from "@/types";
 import { format } from "date-fns";
+import { JobsDetailData, JobsPartialUpdatePayload } from "@/api/__generated__/base/data-contracts";
+
+interface UpdateJob extends Omit<JobsPartialUpdatePayload, 'start_time' | 'end_time' | 'expiry_date'> {
+  start_time: string;
+  end_time: string;
+  expiry_date: string;
+}
 
 interface EditJobModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: FormData) => Promise<void>;
-  job: Job;
+  onSubmit: (data: JobsPartialUpdatePayload) => Promise<void>;
+  job: JobsDetailData['job'];
 }
 
 export const EditJobModal = ({
@@ -73,7 +80,7 @@ export const EditJobModal = ({
     watch,
     formState: { errors, isSubmitting },
     reset,
-  } = useForm({
+  } = useForm<UpdateJob>({
     defaultValues: {
       title: job?.title || "",
       description: job?.description || "",
@@ -148,39 +155,52 @@ export const EditJobModal = ({
 
   const onSubmitHandler = handleSubmit(async (data) => {
     try {
-      const formData = new FormData();
+      // const formData = new FormData();
 
       // 日付文字列を作成（YYYY-MM-DDThh:mm:ss）
       const startDateTimeStr = `${data.work_date}T${data.start_time}:00`;
       const endDateTimeStr = `${data.work_date}T${data.end_time}:00`;
+      const expiryTimestamp =`${data.expiry_date}:00`;
 
       // Unix タイムスタンプを計算（ミリ秒単位）
       const startTimestamp = Date.parse(startDateTimeStr);
       const endTimestamp = Date.parse(endDateTimeStr);
+      const expiryDateTimestamp = Date.parse(expiryTimestamp);
 
       // FormDataにデータを追加
-      Object.entries(data).forEach(([key, value]) => {
-        if (key === "start_time") {
-          formData.append(key, startTimestamp.toString());
-        } else if (key === "end_time") {
-          formData.append(key, endTimestamp.toString());
-        } else if (Array.isArray(value)) {
-          value.forEach((item) => formData.append(key + "[]", item.toString()));
-        } else {
-          formData.append(key, value.toString());
-        }
-      });
+      // Object.entries(data).forEach(([key, value]) => {
+      //   if (key === "start_time") {
+      //     formData.append(key, startTimestamp.toString());
+      //   } else if (key === "end_time") {
+      //     formData.append(key, endTimestamp.toString());
+      //   } else if (Array.isArray(value)) {
+      //     value.forEach((item) => formData.append(key + "[]", item.toString()));
+      //   } else {
+      //     formData.append(key, value.toString());
+      //   }
+      // });
 
       // 既存のステータスを維持
-      if (job?.status) {
-        formData.append("status", job.status);
+      // if (job?.status) {
+      //   formData.append("status", job.status);
+      // }
+
+      // if (selectedFile) {
+      //   formData.append("image", selectedFile);
+      // }
+
+      const newData: JobsPartialUpdatePayload = {
+        ...data,
+        start_time: startTimestamp,
+        end_time: endTimestamp,
+        expiry_date: expiryDateTimestamp,
+        // 既存のステータスを維持
+        status: job.status,
       }
 
-      if (selectedFile) {
-        formData.append("image", selectedFile);
-      }
+      console.log('確認', data, newData)
 
-      await onSubmit(formData);
+      await onSubmit(newData);
       reset();
       setPreviewImage(null);
       setSelectedFile(null);
@@ -209,37 +229,48 @@ export const EditJobModal = ({
     }
 
     try {
-      const formData = new FormData();
+      // const formData = new FormData();
 
       // 日付文字列を作成（YYYY-MM-DDThh:mm:ss）
       const startDateTimeStr = `${data.work_date}T${data.start_time}:00`;
       const endDateTimeStr = `${data.work_date}T${data.end_time}:00`;
+      const expiryTimestamp =`${data.expiry_date}T00:00:00`;
 
       // Unix タイムスタンプを計算（ミリ秒単位）
       const startTimestamp = Date.parse(startDateTimeStr);
       const endTimestamp = Date.parse(endDateTimeStr);
+      const expiryDateTimestamp = Date.parse(expiryTimestamp);
 
       // FormDataにデータを追加
-      Object.entries(data).forEach(([key, value]) => {
-        if (key === "start_time") {
-          formData.append(key, startTimestamp.toString());
-        } else if (key === "end_time") {
-          formData.append(key, endTimestamp.toString());
-        } else if (Array.isArray(value)) {
-          value.forEach((item) => formData.append(key + "[]", item.toString()));
-        } else {
-          formData.append(key, value.toString());
-        }
-      });
+      // Object.entries(data).forEach(([key, value]) => {
+      //   if (key === "start_time") {
+      //     formData.append(key, startTimestamp.toString());
+      //   } else if (key === "end_time") {
+      //     formData.append(key, endTimestamp.toString());
+      //   } else if (Array.isArray(value)) {
+      //     value.forEach((item) => formData.append(key + "[]", item.toString()));
+      //   } else {
+      //     formData.append(key, value.toString());
+      //   }
+      // });
 
       // ステータスをPUBLISHEDに設定
-      formData.append("status", "PUBLISHED");
+      // formData.append("status", "PUBLISHED");
 
-      if (selectedFile) {
-        formData.append("image", selectedFile);
+      // if (selectedFile) {
+      //   formData.append("image", selectedFile);
+      // }
+
+      const newData: JobsPartialUpdatePayload = {
+        ...data,
+        start_time: startTimestamp,
+        end_time: endTimestamp,
+        expiry_date: expiryDateTimestamp,
+        // ステータスをPUBLISHEDに設定
+        status: "PUBLISHED",
       }
 
-      await onSubmit(formData);
+      await onSubmit(newData);
       reset();
       setPreviewImage(null);
       setSelectedFile(null);

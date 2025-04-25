@@ -49,12 +49,6 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
@@ -76,6 +70,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useGetJob } from "@/hooks/api/jobs/useGetJob";
+import { useGetWorksessionsByJobId } from "@/hooks/api/worksessions/useGetWorksessionsByJobId";
+import { JobsDetailData, JobsPartialUpdatePayload } from "@/api/__generated__/base/data-contracts";
+import { useVerifyWorksession } from "@/hooks/api/worksessions/useVerifyWorksession";
+import { useUpdateJob } from "@/hooks/api/jobs/useUpdateJob";
+import { getApi } from "@/api/api-factory";
+import { Worksessions } from "@/api/__generated__/base/Worksessions";
 
 interface Message {
   id: number;
@@ -107,33 +108,14 @@ export default function JobDetail({ params }: PageParams) {
     realtimeConnectionHash: process.env.NEXT_PUBLIC_XANO_REALTIME_HASH || "",
   });
 
-  const { data: jobData, error: jobError } = useSWR(
-    [`job-${jobId}`, jobId],
-    async ([_, jobId]: [string, string]) => jobApi.getJob(jobId),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      dedupingInterval: 10000,
-    }
-  );
+  const { data: jobData, error: jobError } = useGetJob({ jobId: Number(jobId) });
+  const { data: workSessions, error: workSessionsError } = useGetWorksessionsByJobId({ jobId: Number(jobId) });
 
-  const {
-    data: workSessions,
-    error: workSessionsError,
-    mutate,
-  } = useSWR(
-    jobId ? [`workSessions-${jobId}`, jobId] : null,
-    async ([_, jobId]: [string, string]) => {
-      const result = await workSessionApi.getWorkSessionsToDoByJobId(
-        Number(jobId)
-      );
-      return result;
-    },
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    }
-  );
+  const job = jobData?.job;
+  const restaurant = jobData?.restaurant;
+
+  const { trigger: updateJobTrigger } = useUpdateJob({ jobId: Number(jobId), companyId: restaurant?.companies_id ?? undefined, restaurantId: restaurant?.id ?? undefined});
+  const { trigger: verifyWorksessionTrigger } = useVerifyWorksession({ worksessionId: selectedWorkSession?.id || 0, jobId: Number(jobId) });
 
   const { data: messages, mutate: mutateMessages } = useSWR<Message[]>(
     selectedWorkSession?.id
@@ -200,19 +182,17 @@ export default function JobDetail({ params }: PageParams) {
     if (!selectedWorkSession) return;
 
     try {
-      await workSessionApi.updateWorkSessionToVerify(
-        selectedWorkSession.id,
+      await verifyWorksessionTrigger({
         rating,
-        comment
-      );
+        feedback: comment
+      })
 
-      const review = await chefReviewApi.getChefReviewsBySessionId(
+      const worksessionsClient = getApi(Worksessions);
+      const review = await worksessionsClient.chefReviewList(
         selectedWorkSession.id
       );
       setChefReview(review);
       setIsChefReviewModalOpen(true);
-
-      mutate();
     } catch (err) {
       console.error("Failed to submit review:", err);
     }
@@ -226,11 +206,8 @@ export default function JobDetail({ params }: PageParams) {
     scrollToBottom();
   }, [messages]);
 
-  const job = jobData?.job;
-  const restaurant = jobData?.restaurant;
-
   // 型チェックとデータ変換
-  const formattedJob: Job | null = job
+  const formattedJob: JobsDetailData['job'] | null = job
     ? {
         id: job.id || 0,
         created_at: job.created_at ? Number(job.created_at) : 0,
@@ -244,8 +221,7 @@ export default function JobDetail({ params }: PageParams) {
         status: job.status || "",
         updated_at: job.updated_at ? Number(job.updated_at) : 0,
         restaurant_id: job.restaurant_id || 0,
-        image: job.image || undefined,
-        creator_id: 0,
+        image: job.image || "",
         task: job.task || "",
         skill: job.skill || "",
         whattotake: job.whattotake || "",
@@ -259,10 +235,9 @@ export default function JobDetail({ params }: PageParams) {
       }
     : null;
 
-  const handleEditJobSubmit = async (formData: FormData) => {
+  const handleEditJobSubmit = async (data: JobsPartialUpdatePayload) => {
     try {
-      await jobApi.updateJob(jobId, formData);
-      mutate();
+      await updateJobTrigger(data);
       setIsEditJobModalOpen(false);
       toast({
         title: "求人を更新しました",
@@ -854,12 +829,14 @@ export default function JobDetail({ params }: PageParams) {
         </DialogContent>
       </Dialog>
 
-      <EditJobModal
-        isOpen={isEditJobModalOpen}
-        onClose={() => setIsEditJobModalOpen(false)}
-        onSubmit={handleEditJobSubmit}
-        job={formattedJob as Job}
-      />
+      {formattedJob && 
+        <EditJobModal
+          isOpen={isEditJobModalOpen}
+          onClose={() => setIsEditJobModalOpen(false)}
+          onSubmit={handleEditJobSubmit}
+          job={formattedJob}
+        />
+      }
     </div>
   );
 }

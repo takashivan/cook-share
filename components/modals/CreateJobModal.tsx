@@ -5,15 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import Image from "next/image";
-import { CreateJobParams } from "@/lib/api/job";
+import { JobsCreatePayload } from "@/api/__generated__/base/data-contracts";
 
 interface CreateJobModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: FormData) => Promise<void>;
+  onSubmit: (data: JobsCreatePayload) => Promise<void>;
   restaurantId: number;
   initialData?: any;
 }
@@ -36,10 +34,10 @@ export const CreateJobModal = ({
     reset,
     watch,
     setValue,
-  } = useForm<CreateJobParams>({
+  } = useForm<JobsCreatePayload>({
     defaultValues: {
       restaurant_id: restaurantId,
-      status: "draft",
+      status: "DRAFT",
       required_skills: [],
     },
   });
@@ -48,7 +46,7 @@ export const CreateJobModal = ({
   useEffect(() => {
     if (initialData) {
       Object.entries(initialData).forEach(([key, value]) => {
-        setValue(key as keyof CreateJobParams, value as any);
+        setValue(key as keyof JobsCreatePayload, value as any);
       });
     }
   }, [initialData, setValue]);
@@ -75,15 +73,17 @@ export const CreateJobModal = ({
 
   const onSubmitHandler = handleSubmit(async (data) => {
     try {
-      const formData = new FormData();
+      // const formData = new FormData();
 
       // 日付文字列を作成（YYYY-MM-DDThh:mm:ss）
       const startDateTimeStr = `${data.work_date}T${data.start_time}:00`;
       const endDateTimeStr = `${data.work_date}T${data.end_time}:00`;
+      const expiryTimestamp =`${data.expiry_date}T00:00:00`;
 
       // Unix タイムスタンプを計算（ミリ秒単位）
       const startTimestamp = Date.parse(startDateTimeStr);
       const endTimestamp = Date.parse(endDateTimeStr);
+      const expiryDateTimestamp = Date.parse(expiryTimestamp);
 
       console.log("Debug timestamps:", {
         startDateTimeStr,
@@ -95,27 +95,35 @@ export const CreateJobModal = ({
       });
 
       // FormDataにデータを追加
-      Object.entries(data).forEach(([key, value]) => {
-        if (key === "start_time") {
-          formData.append(key, startTimestamp.toString());
-        } else if (key === "end_time") {
-          formData.append(key, endTimestamp.toString());
-        } else if (key === "expiry_date") {
-          // expiry_dateをUnixタイムスタンプに変換
-          const expiryTimestamp = Date.parse(`${value}T00:00:00`);
-          formData.append(key, expiryTimestamp.toString());
-        } else if (Array.isArray(value)) {
-          value.forEach((item) => formData.append(key + "[]", item.toString()));
-        } else {
-          formData.append(key, value.toString());
-        }
-      });
+      // Object.entries(data).forEach(([key, value]) => {
+      //   if (key === "start_time") {
+      //     formData.append(key, startTimestamp.toString());
+      //   } else if (key === "end_time") {
+      //     formData.append(key, endTimestamp.toString());
+      //   } else if (key === "expiry_date") {
+      //     // expiry_dateをUnixタイムスタンプに変換
+      //     const expiryTimestamp = Date.parse(`${value}T00:00:00`);
+      //     formData.append(key, expiryTimestamp.toString());
+      //   } else if (Array.isArray(value)) {
+      //     value.forEach((item) => formData.append(key + "[]", item.toString()));
+      //   } else {
+      //     formData.append(key, value.toString());
+      //   }
+      // });
 
-      if (selectedFile) {
-        formData.append("image", selectedFile);
+      // if (selectedFile) {
+      //   formData.append("image", selectedFile);
+      // }
+
+      const newData: JobsCreatePayload = {
+        ...data,
+        restaurant_id: restaurantId,
+        start_time: startTimestamp,
+        end_time: endTimestamp,
+        expiry_date: expiryDateTimestamp,
       }
 
-      await onSubmit(formData);
+      await onSubmit(newData);
       reset();
       setPreviewImage(null);
       setSelectedFile(null);
@@ -136,37 +144,51 @@ export const CreateJobModal = ({
 
   const handleDraft = handleSubmit(async (data) => {
     try {
-      const formData = new FormData();
+      // const formData = new FormData();
 
       // 日付文字列を作成（YYYY-MM-DDThh:mm:ss）
       const startDateTimeStr = `${data.work_date}T${data.start_time}:00`;
       const endDateTimeStr = `${data.work_date}T${data.end_time}:00`;
+      const expiryTimestamp =`${data.expiry_date}T00:00:00`;
 
       // Unix タイムスタンプを計算（ミリ秒単位）
       const startTimestamp = Date.parse(startDateTimeStr);
       const endTimestamp = Date.parse(endDateTimeStr);
+      const expiryDateTimestamp = Date.parse(expiryTimestamp);
 
       // FormDataにデータを追加
-      Object.entries(data).forEach(([key, value]) => {
-        if (key === "start_time") {
-          formData.append(key, startTimestamp.toString());
-        } else if (key === "end_time") {
-          formData.append(key, endTimestamp.toString());
-        } else if (Array.isArray(value)) {
-          value.forEach((item) => formData.append(key + "[]", item.toString()));
-        } else {
-          formData.append(key, value.toString());
-        }
-      });
+      // Object.entries(data).forEach(([key, value]) => {
+      //   if (key === "start_time") {
+      //     formData.append(key, startTimestamp.toString());
+      //   } else if (key === "end_time") {
+      //     formData.append(key, endTimestamp.toString());
+      //   } else if (Array.isArray(value)) {
+      //     value.forEach((item) => formData.append(key + "[]", item.toString()));
+      //   } else {
+      //     formData.append(key, value.toString());
+      //   }
+      // });
 
-      // ステータスをDRAFTに設定
-      formData.append("status", "DRAFT");
+      // // ステータスをDRAFTに設定
+      // formData.append("status", "DRAFT");
 
-      if (selectedFile) {
-        formData.append("image", selectedFile);
+      // if (selectedFile) {
+      //   formData.append("image", selectedFile);
+      // }
+
+      const newData: JobsCreatePayload = {
+        ...data,
+        restaurant_id: restaurantId,
+        start_time: startTimestamp,
+        end_time: endTimestamp,
+        expiry_date: expiryDateTimestamp,
+        // ステータスをDRAFTに設定
+        status: "DRAFT",
       }
 
-      await onSubmit(formData);
+      console.log('Create Job', data, newData);
+
+      await onSubmit(newData);
       reset();
       setPreviewImage(null);
       setSelectedFile(null);
@@ -186,37 +208,49 @@ export const CreateJobModal = ({
 
   const handlePublish = handleSubmit(async (data) => {
     try {
-      const formData = new FormData();
+      // const formData = new FormData();
 
       // 日付文字列を作成（YYYY-MM-DDThh:mm:ss）
       const startDateTimeStr = `${data.work_date}T${data.start_time}:00`;
       const endDateTimeStr = `${data.work_date}T${data.end_time}:00`;
+      const expiryTimestamp =`${data.expiry_date}T00:00:00`;
 
       // Unix タイムスタンプを計算（ミリ秒単位）
       const startTimestamp = Date.parse(startDateTimeStr);
       const endTimestamp = Date.parse(endDateTimeStr);
+      const expiryDateTimestamp = Date.parse(expiryTimestamp);
 
       // FormDataにデータを追加
-      Object.entries(data).forEach(([key, value]) => {
-        if (key === "start_time") {
-          formData.append(key, startTimestamp.toString());
-        } else if (key === "end_time") {
-          formData.append(key, endTimestamp.toString());
-        } else if (Array.isArray(value)) {
-          value.forEach((item) => formData.append(key + "[]", item.toString()));
-        } else {
-          formData.append(key, value.toString());
-        }
-      });
+      // Object.entries(data).forEach(([key, value]) => {
+      //   if (key === "start_time") {
+      //     formData.append(key, startTimestamp.toString());
+      //   } else if (key === "end_time") {
+      //     formData.append(key, endTimestamp.toString());
+      //   } else if (Array.isArray(value)) {
+      //     value.forEach((item) => formData.append(key + "[]", item.toString()));
+      //   } else {
+      //     formData.append(key, value.toString());
+      //   }
+      // });
 
-      // ステータスをPUBLISHEDに設定
-      formData.append("status", "PUBLISHED");
+      // // ステータスをPUBLISHEDに設定
+      // formData.append("status", "PUBLISHED");
 
-      if (selectedFile) {
-        formData.append("image", selectedFile);
+      // if (selectedFile) {
+      //   formData.append("image", selectedFile);
+      // }
+
+      const newData: JobsCreatePayload = {
+        ...data,
+        restaurant_id: restaurantId,
+        start_time: startTimestamp,
+        end_time: endTimestamp,
+        expiry_date: expiryDateTimestamp,
+        // ステータスをPUBLISHEDに設定
+        status: "PUBLISHED",
       }
 
-      await onSubmit(formData);
+      await onSubmit(newData);
       reset();
       setPreviewImage(null);
       setSelectedFile(null);
@@ -470,7 +504,8 @@ export const CreateJobModal = ({
                               if (
                                 formValues.work_date &&
                                 formValues.start_time &&
-                                formValues.end_time
+                                formValues.end_time &&
+                                value != null
                               ) {
                                 const workDate = new Date(formValues.work_date);
                                 const expiryDate = new Date(value);

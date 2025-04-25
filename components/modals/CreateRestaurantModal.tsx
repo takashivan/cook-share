@@ -10,11 +10,12 @@ import { CreateRestaurantData } from "@/lib/api/restaurant";
 import { toast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { getCuisines } from "@/lib/api/cuisines";
+import { RestaurantsCreatePayload } from "@/api/__generated__/base/data-contracts";
 
 interface CreateRestaurantModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: FormData) => void;
+  onSubmit: (data: RestaurantsCreatePayload) => Promise<void>;
   companyId: string;
 }
 
@@ -66,7 +67,7 @@ export const CreateRestaurantModal = ({
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-  } = useForm<CreateRestaurantData>({
+  } = useForm<RestaurantsCreatePayload>({
     defaultValues: {
       companies_id: companyId.toString(),
       is_active: false,
@@ -101,28 +102,35 @@ export const CreateRestaurantModal = ({
 
   const onSubmitHandler = handleSubmit(async (data) => {
     try {
-      const formData = new FormData();
+      // const formData = new FormData();
 
-      // 必須フィールドを追加
-      formData.append("companies_id", companyId);
-      formData.append("name", data.name);
-      formData.append("address", data.address);
-      // 配列として送信
-      selectedCuisines.forEach((id) => {
-        formData.append("restaurant_cuisine_id[]", id.toString());
-      });
-      formData.append("is_active", String(data.is_active));
+      // // 必須フィールドを追加
+      // formData.append("companies_id", companyId);
+      // formData.append("name", data.name);
+      // formData.append("address", data.address);
+      // // 配列として送信
+      // selectedCuisines.forEach((id) => {
+      //   formData.append("restaurant_cuisine_id[]", id.toString());
+      // });
+      // formData.append("is_active", String(data.is_active));
 
-      // オプショナルフィールドを追加（値が存在する場合のみ）
-      if (data.contact_info) formData.append("contact_info", data.contact_info);
-      if (data.description) formData.append("description", data.description);
+      // // オプショナルフィールドを追加（値が存在する場合のみ）
+      // if (data.contact_info) formData.append("contact_info", data.contact_info);
+      // if (data.description) formData.append("description", data.description);
 
-      // 画像を追加
-      if (selectedFile) {
-        formData.append("photo", selectedFile);
+      // // 画像を追加
+      // if (selectedFile) {
+      //   formData.append("photo", selectedFile);
+      // }
+
+      const newData: RestaurantsCreatePayload = {
+        ...data,
+        restaurant_cuisine_id: selectedCuisines,
+        photo: selectedFile,
       }
 
-      await onSubmit(formData);
+      await onSubmit(newData);
+
       reset();
       setPreviewImage(null);
       setSelectedFile(null);

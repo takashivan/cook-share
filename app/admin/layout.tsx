@@ -247,16 +247,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               },
               {
                 title: "スタッフ管理",
-                href: "/admin/company/staff",
+                href: "/admin/company/staffs",
                 icon: Users,
-                active: pathname === "/admin/company/staff",
+                active: pathname === "/admin/company/staffs",
                 show: true,
               },
               {
                 title: "請求管理",
-                href: "/admin/company/billing",
+                href: "/admin/company/billings",
                 icon: CreditCard,
-                active: pathname === "/admin/company/billing",
+                active: pathname === "/admin/company/billings",
                 show: true,
               },
             ],
@@ -541,13 +541,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     会社情報
                   </Link>
 
-                  {pathname.includes("/company/staff") && (
+                  {pathname.includes("/company/staffs") && (
                     <>
                       <ChevronRight className="h-4 w-4" />
                       <span className="text-foreground">スタッフ管理</span>
                     </>
                   )}
-                  {pathname.includes("/company/billing") && (
+                  {pathname.includes("/company/billings") && (
                     <>
                       <ChevronRight className="h-4 w-4" />
                       <span className="text-foreground">請求管理</span>
