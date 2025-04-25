@@ -21,7 +21,7 @@ export const useDeleteCompanyUserByCompanyId = (params: Params) => {
     params.companyId ?? "",
     params.companyUserId ?? "",
     {
-      companies_id: params.companyUserId ?? "",
+      companies_id: params.companyId ?? "",
       companyUser_id: params.companyUserId ?? "",
     },
     {},
