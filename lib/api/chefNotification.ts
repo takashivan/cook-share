@@ -6,10 +6,11 @@ export type ChefNotification = {
   id: number;
   chef_id: number;
   notification_type: string;
-  message: string;
-  read: boolean;
-  created_at: string;
-  updated_at: string;
+  content: string;
+  related_link: string;
+  is_read: boolean;
+  created_at: number;
+  updated_at: number;
 };
 
 export type ChefNotificationType =
@@ -84,25 +85,28 @@ export const deleteChefNotification = async (id: number) => {
   return response;
 };
 
-export const markChefNotificationAsRead = async (id: number) => {
+export const markChefNotificationAsRead = async (
+  chef_notification_id: number
+) => {
   const response = await apiRequest<MarkChefNotificationAsReadResponse>(
-    `${API_URL}/${id}/read`,
-    "POST"
+    `${API_URL}/${chef_notification_id}/read`,
+    "PATCH"
   );
   return response;
 };
 
-export const markAllChefNotificationsAsRead = async () => {
+export const markAllChefNotificationsAsRead = async (user_id: string) => {
   const response = await apiRequest<MarkAllChefNotificationsAsReadResponse>(
-    `${API_URL}/read_all`,
-    "POST"
+    `${API_URL}/mark-read/all`,
+    "PATCH",
+    { user_id }
   );
   return response;
 };
 
-export const getChefNotificationsByChefId = async (chefId: number) => {
+export const getChefNotificationsByChefId = async (user_id: string) => {
   const response = await apiRequest<GetChefNotificationsResponse>(
-    `${API_URL}/list/${chefId}`,
+    `${API_URL}/byUser/${user_id}`,
     "GET"
   );
   return response;
