@@ -47,7 +47,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/lib/store/store";
-import { fetchRestaurantsByCompanyId } from "@/lib/store/restaurantSlice";
+import { fetchMyRestaurants } from "@/lib/store/restaurantSlice";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { getRestaurant } from "@/lib/api/restaurant";
 import type { Restaurant } from "@/lib/api/restaurant";

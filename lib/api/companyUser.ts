@@ -16,7 +16,7 @@ import {
   CompanyNotification,
   CompanySettings,
 } from "./company";
-
+import { Restaurant } from "./restaurant";
 const BASE_URL = API_CONFIG.baseURLs.companyUser;
 const AUTH_URL = API_CONFIG.baseURLs.companyAuth;
 
@@ -66,6 +66,12 @@ export const login = async (
   } catch (error) {
     throw error;
   }
+};
+
+export const getMyRestaurants = async (
+  companyuser_id: string
+): Promise<Restaurant[]> => {
+  return apiRequest(`${BASE_URL}/restaurants/${companyuser_id}`, "GET");
 };
 
 export const register = async (
