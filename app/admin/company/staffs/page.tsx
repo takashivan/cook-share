@@ -48,14 +48,21 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { CompanyUser } from "@/lib/api/companyUser";
+import { useDeleteCompanyUserByCompanyId } from "@/hooks/api/companyUsers/useDeleteCompanyUserByCompanyId";
+import { CompanyusersListData } from "@/api/__generated__/base/data-contracts";
 
 export default function StaffPage() {
   const { user } = useCompanyAuth();
   const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
   const [deleteTargetStaff, setDeleteTargetStaff] =
-    useState<CompanyUser | null>(null);
+    useState<CompanyusersListData[number] | null>(null);
 
   const { data: companyUsers, isLoading, error } = useGetCompanyUsersByCompanyId({ companyId: user?.companies_id.toString() ?? "" });
+  
+  const { trigger: deleteCompanyUserByCompanyIdTrigger } = useDeleteCompanyUserByCompanyId({
+    companyId: user?.companies_id ,
+    companyUserId: deleteTargetStaff?.id,
+  });
 
   const handleAddStaff = async (email: string) => {
     try {
@@ -84,7 +91,8 @@ export default function StaffPage() {
       if (!user?.companies_id) {
         throw new Error("会社IDが取得できません");
       }
-      await deleteCompanyStaff(user.companies_id, deleteTargetStaff.id);
+      await deleteCompanyUserByCompanyIdTrigger();
+      // await deleteCompanyStaff(user.companies_id, deleteTargetStaff.id);
 
       // Optimistically update the UI
       // setCompanyUsers((prev) =>
@@ -225,7 +233,7 @@ export default function StaffPage() {
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem
                                 className="text-red-600"
-                                // onClick={() => setDeleteTargetStaff(staff)}
+                                onClick={() => setDeleteTargetStaff(staff)}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 削除
@@ -322,7 +330,7 @@ export default function StaffPage() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
                             className="text-red-600"
-                            // onClick={() => setDeleteTargetStaff(staff)}
+                            onClick={() => setDeleteTargetStaff(staff)}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
                             削除
