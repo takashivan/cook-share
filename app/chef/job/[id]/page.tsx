@@ -91,6 +91,8 @@ type PageProps = {
   }>;
 };
 
+
+
 export default function JobDetail({ params }: PageProps) {
   const { id } = use(params);
   const searchParams = useSearchParams();
@@ -605,7 +607,7 @@ export default function JobDetail({ params }: PageProps) {
         <ChatSheet
           isOpen={isChatOpen}
           onClose={() => setIsChatOpen(false)}
-          messages={messages}
+          messages={messages || []}
           onSendMessage={sendMessage}
           restaurantName={restaurant?.name || ""}
           restaurantImage={restaurant?.profile_image}

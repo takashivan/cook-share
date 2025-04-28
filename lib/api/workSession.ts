@@ -16,10 +16,8 @@ export const workSessionApi = {
     const response = await apiRequest(
       `${WORK_SESSION_URL}/user_todo/${userId}`,
       "GET",
-      {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      }
+      undefined,
+      "chef"
     );
     return response;
   },
