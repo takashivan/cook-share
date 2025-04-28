@@ -12,8 +12,8 @@
 
 import {
   ApplicationsListOutput,
-  ChefNotificationsListParams1,
-  ChefNotificationsListResult,
+  ChefNotificationsListData,
+  ChefNotificationsListParams,
   ChefReviewsListOutput,
   RestaurantReviewsListOutput,
   StripeAccountCreateData,
@@ -41,10 +41,10 @@ export class Users<
    * @request GET:/users/{userId}/chef-notifications
    */
   chefNotificationsList = (
-    { userId, ...query }: ChefNotificationsListParams1,
+    { userId, ...query }: ChefNotificationsListParams,
     params: RequestParams = {},
   ) =>
-    this.request<ChefNotificationsListResult, void>({
+    this.request<ChefNotificationsListData, void>({
       path: `/users/${userId}/chef-notifications`,
       method: "GET",
       query: query,
@@ -53,7 +53,7 @@ export class Users<
     });
 
   chefNotificationsListQueryArgs = (
-    { userId, ...query }: ChefNotificationsListParams1,
+    { userId, ...query }: ChefNotificationsListParams,
     params: RequestParams = {},
     enabled: boolean = true,
   ) => {

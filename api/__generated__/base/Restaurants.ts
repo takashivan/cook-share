@@ -12,7 +12,7 @@
 
 import {
   ChefReviewsListResult,
-  CompanyuserNotificationsCreateResult,
+  CompanyuserNotificationsCreateData,
   CompanyusersCreateInput,
   CompanyusersCreateOutput,
   CompanyusersListOutput,
@@ -25,12 +25,47 @@ import {
   RestaurantsListOutput,
   RestaurantsPartialUpdateData,
   RestaurantsPartialUpdatePayload,
+  StaffInviteCreateInput,
+  StaffInviteCreateOutput,
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
 export class Restaurants<
   SecurityDataType = unknown,
 > extends HttpClient<SecurityDataType> {
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags restaurants
+   * @name StaffInviteCreate
+   * @request POST:/restaurants/staff/invite
+   */
+  staffInviteCreate = (
+    data: StaffInviteCreateInput,
+    params: RequestParams = {},
+  ) =>
+    this.request<StaffInviteCreateOutput, void>({
+      path: `/restaurants/staff/invite`,
+      method: "POST",
+      body: data,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+
+  staffInviteCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/restaurants/staff/invite`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: StaffInviteCreateInput },
+    ) => Promise<StaffInviteCreateOutput> = (_, { arg }) =>
+      this.staffInviteCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -68,7 +103,7 @@ export class Restaurants<
     restaurantId: number,
     params: RequestParams = {},
   ) =>
-    this.request<CompanyuserNotificationsCreateResult, void>({
+    this.request<CompanyuserNotificationsCreateData, void>({
       path: `/restaurants/${restaurantId}/companyuser-notifications`,
       method: "POST",
       format: "json",
@@ -85,7 +120,7 @@ export class Restaurants<
       : null;
     const fetcher: (
       url: string[],
-    ) => Promise<CompanyuserNotificationsCreateResult> = (_) =>
+    ) => Promise<CompanyuserNotificationsCreateData> = (_) =>
       this.companyuserNotificationsCreate(restaurantId, params).then(
         (res) => res.data,
       );

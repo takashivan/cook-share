@@ -13,7 +13,11 @@ export const useCreateCompanyUserByRestaurantId = (params: Params) => {
   const { mutate } = useSWRConfig();
 
   const restaurants = getApi(Restaurants);
-  return useSWRMutation(...restaurants.companyusersCreateQueryArgs(params.restaurantId ?? -1, {}, params.restaurantId != null), {
+  return useSWRMutation(...restaurants.companyusersCreateQueryArgs(params.restaurantId ?? -1, {
+    headers: {
+      "X-User-Type": "company"
+    }
+  }, params.restaurantId != null), {
     onSuccess: (data) => {
       console.log('Company user created successfully:', data);
 

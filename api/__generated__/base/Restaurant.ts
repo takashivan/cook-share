@@ -23,6 +23,8 @@ import {
   RestaurantListData,
   RestaurantPartialUpdateData,
   RestaurantPartialUpdatePayload,
+  StaffDeleteDeleteData,
+  StaffDeleteDeletePayload,
   StaffInviteCreateBody,
   StaffInviteCreateResult,
   StaffsListData,
@@ -142,6 +144,37 @@ export class Restaurant<
     const key = enabled ? [`/restaurant/companyusers/${restaurantId}`] : null;
     const fetcher = () =>
       this.companyusersDetail(restaurantId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags restaurant
+   * @name StaffDeleteDelete
+   * @request DELETE:/restaurant/staff/delete
+   */
+  staffDeleteDelete = (
+    data: StaffDeleteDeletePayload,
+    params: RequestParams = {},
+  ) =>
+    this.request<StaffDeleteDeleteData, void>({
+      path: `/restaurant/staff/delete`,
+      method: "DELETE",
+      body: data,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+
+  staffDeleteDeleteQueryArgs = (
+    data: StaffDeleteDeletePayload,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/restaurant/staff/delete`] : null;
+    const fetcher = () =>
+      this.staffDeleteDelete(data, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 

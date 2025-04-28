@@ -1304,12 +1304,4 @@ export type StaffrestaurantaccessListData = object;
 
 export type StaffrestaurantaccessCreateData = object;
 
-export interface SessionHistoryCurrentListResult {
-  result1: {
-    /** @format uuid */
-    worksession_user_id: string;
-    worksession_paid_amount: number;
-  }[];
-  star: string;
-  end: string;
-}
+export type SessionHistoryCurrentListResult = object;

@@ -10,23 +10,6 @@
  * ---------------------------------------------------------------
  */
 
-export interface AdminlogDetailData {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format int64 */
-  target_id: number;
-  target_type: string;
-  action: string;
-  reason: string;
-  /** @format uuid */
-  operator_id: string | null;
-}
-
 export interface AdminlogsDetailData {
   /** @format int64 */
   id: number;
@@ -72,50 +55,6 @@ export interface AdminlogsCreatePayload {
 }
 
 export interface AdminlogsCreateData {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format int64 */
-  target_id: number;
-  target_type: string;
-  action: string;
-  reason: string;
-  /** @format uuid */
-  operator_id: string | null;
-}
-
-export type AdminlogListData = {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format int64 */
-  target_id: number;
-  target_type: string;
-  action: string;
-  reason: string;
-  /** @format uuid */
-  operator_id: string | null;
-}[];
-
-export interface AdminlogCreatePayload {
-  /** @format int64 */
-  target_id: number;
-  target_type: string;
-  action: string;
-  reason: string;
-  /** @format uuid */
-  operator_id: string | null;
-}
-
-export interface AdminlogCreateData {
   /** @format int64 */
   id: number;
   /**
@@ -732,26 +671,6 @@ export interface ApplicationCreateData {
   urgent: boolean;
 }
 
-export interface AddInvoiceItemsCreatePayload {
-  company_id: string;
-  /** @format int64 */
-  fee_rate: number;
-  /** @format timestamptz */
-  start: number | null;
-  /** @format timestamptz */
-  end: number | null;
-}
-
-export type AddInvoiceItemsCreateData = object;
-
-export interface GenerateCompanySummaryCreatePayload {
-  month: string;
-  /** @format int64 */
-  fee_rate: number;
-}
-
-export type GenerateCompanySummaryCreateData = object;
-
 export type BillingSummaryDeleteData = object;
 
 export interface BillingSummaryDetailData {
@@ -941,101 +860,6 @@ export interface BillingSummaryCreateData {
   invoice_number: string;
 }
 
-export type Clone0DeleteData = object;
-
-export interface ChefNotificationsDetailData {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  type:
-    | "new_job"
-    | "application_status"
-    | "new_message"
-    | "review"
-    | "operator"
-    | "payment";
-  content: string;
-  is_read: boolean;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format uuid */
-  user_id: string;
-  /** url */
-  related_link: string;
-}
-
-export type ChefNotificationsListData = {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  type:
-    | "new_job"
-    | "application_status"
-    | "new_message"
-    | "review"
-    | "operator"
-    | "payment";
-  content: string;
-  is_read: boolean;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format uuid */
-  user_id: string;
-  /** url */
-  related_link: string;
-}[];
-
-export interface ChefNotificationsCreatePayload {
-  type:
-    | "new_job"
-    | "application_status"
-    | "new_message"
-    | "review"
-    | "operator"
-    | "payment";
-  content: string;
-  is_read: boolean;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format uuid */
-  user_id: string;
-  /** url */
-  related_link: string;
-}
-
-export interface ChefNotificationsCreateData {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  type:
-    | "new_job"
-    | "application_status"
-    | "new_message"
-    | "review"
-    | "operator"
-    | "payment";
-  content: string;
-  is_read: boolean;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format uuid */
-  user_id: string;
-  /** url */
-  related_link: string;
-}
-
 export type ChefReviewsDeleteData = object;
 
 export interface ChefReviewsDetailData {
@@ -1217,126 +1041,6 @@ export interface ChefSkillsCreateData {
    */
   created_at: number;
   skill: string;
-}
-
-export type ByUserDetailData = {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  type:
-    | "new_job"
-    | "application_status"
-    | "new_message"
-    | "review"
-    | "operator"
-    | "payment";
-  content: string;
-  is_read: boolean;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format uuid */
-  user_id: string;
-  /** url */
-  related_link: string;
-}[];
-
-export type ChefNotificationDeleteData = object;
-
-export interface ChefNotificationDetailData {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  type:
-    | "new_job"
-    | "application_status"
-    | "new_message"
-    | "review"
-    | "operator"
-    | "payment";
-  content: string;
-  is_read: boolean;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format uuid */
-  user_id: string;
-  /** url */
-  related_link: string;
-}
-
-export type ChefNotificationListData = {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  type:
-    | "new_job"
-    | "application_status"
-    | "new_message"
-    | "review"
-    | "operator"
-    | "payment";
-  content: string;
-  is_read: boolean;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format uuid */
-  user_id: string;
-  /** url */
-  related_link: string;
-}[];
-
-export interface ChefNotificationCreatePayload {
-  type:
-    | "new_job"
-    | "application_status"
-    | "new_message"
-    | "review"
-    | "operator"
-    | "payment";
-  content: string;
-  is_read: boolean;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format uuid */
-  user_id: string;
-  /** url */
-  related_link: string;
-}
-
-export interface ChefNotificationCreateData {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  type:
-    | "new_job"
-    | "application_status"
-    | "new_message"
-    | "review"
-    | "operator"
-    | "payment";
-  content: string;
-  is_read: boolean;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format uuid */
-  user_id: string;
-  /** url */
-  related_link: string;
 }
 
 export type ChefPayoutLogDeleteData = object;
@@ -1650,7 +1354,7 @@ export interface BySessionDetailData {
   };
 }
 
-export type ByUserDetailResult = {
+export type ByUserDetailData = {
   /** @format int64 */
   id: number;
   /**
@@ -2286,150 +1990,6 @@ export interface CompaniesCreateData {
   };
 }
 
-export type CompanyuserNotificationsDeleteData = object;
-
-export interface CompanyuserNotificationsDetailData {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format uuid */
-  companyuser_id: string | null;
-  type:
-    | "new_job"
-    | "application_status"
-    | "new_message"
-    | "review"
-    | "operator"
-    | "payment";
-  related_link: string;
-  is_read: boolean;
-  content: string;
-  /** @format int64 */
-  job_id: number | null;
-  /** @format int64 */
-  restaurant_id: number | null;
-}
-
-export interface CompanyuserNotificationsPartialUpdatePayload {
-  /** @format uuid */
-  companyuser_id: string | null;
-  type:
-    | "new_job"
-    | "application_status"
-    | "new_message"
-    | "review"
-    | "operator"
-    | "payment";
-  related_link: string;
-  is_read: boolean;
-  content: string;
-  /** @format int64 */
-  job_id: number | null;
-  /** @format int64 */
-  restaurant_id: number | null;
-}
-
-export interface CompanyuserNotificationsPartialUpdateData {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format uuid */
-  companyuser_id: string | null;
-  type:
-    | "new_job"
-    | "application_status"
-    | "new_message"
-    | "review"
-    | "operator"
-    | "payment";
-  related_link: string;
-  is_read: boolean;
-  content: string;
-  /** @format int64 */
-  job_id: number | null;
-  /** @format int64 */
-  restaurant_id: number | null;
-}
-
-export type CompanyuserNotificationsListData = {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format uuid */
-  companyuser_id: string | null;
-  type:
-    | "new_job"
-    | "application_status"
-    | "new_message"
-    | "review"
-    | "operator"
-    | "payment";
-  related_link: string;
-  is_read: boolean;
-  content: string;
-  /** @format int64 */
-  job_id: number | null;
-  /** @format int64 */
-  restaurant_id: number | null;
-}[];
-
-export interface CompanyuserNotificationsCreatePayload {
-  /** @format uuid */
-  companyuser_id: string | null;
-  type:
-    | "new_job"
-    | "application_status"
-    | "new_message"
-    | "review"
-    | "operator"
-    | "payment";
-  related_link: string;
-  is_read: boolean;
-  content: string;
-  /** @format int64 */
-  job_id: number | null;
-  /** @format int64 */
-  restaurant_id: number | null;
-}
-
-export interface CompanyuserNotificationsCreateData {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format uuid */
-  companyuser_id: string | null;
-  type:
-    | "new_job"
-    | "application_status"
-    | "new_message"
-    | "review"
-    | "operator"
-    | "payment";
-  related_link: string;
-  is_read: boolean;
-  content: string;
-  /** @format int64 */
-  job_id: number | null;
-  /** @format int64 */
-  restaurant_id: number | null;
-}
-
 export type CompanyDetailData = {
   /** @format uuid */
   id: string;
@@ -2578,210 +2138,6 @@ export interface CompanyuserPartialUpdateData {
   password_reset_token: string;
 }
 
-export type ByRestaurantCreateData = object;
-
-export type ByUserDetailOutput = {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format uuid */
-  companyuser_id: string | null;
-  type:
-    | "new_job"
-    | "application_status"
-    | "new_message"
-    | "review"
-    | "operator"
-    | "payment";
-  related_link: string;
-  is_read: boolean;
-  content: string;
-  /** @format int64 */
-  job_id: number | null;
-  /** @format int64 */
-  restaurant_id: number | null;
-}[];
-
-export interface MarkReadAllPartialUpdatePayload {
-  ids: string[];
-}
-
-export type MarkReadAllPartialUpdateData = object;
-
-export type CompanyuserNotificationDeleteData = object;
-
-export interface CompanyuserNotificationDetailData {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format uuid */
-  companyuser_id: string | null;
-  type:
-    | "new_job"
-    | "application_status"
-    | "new_message"
-    | "review"
-    | "operator"
-    | "payment";
-  related_link: string;
-  is_read: boolean;
-  content: string;
-  /** @format int64 */
-  job_id: number | null;
-  /** @format int64 */
-  restaurant_id: number | null;
-}
-
-export interface CompanyuserNotificationPartialUpdatePayload {
-  /** @format uuid */
-  companyuser_id: string | null;
-  type:
-    | "new_job"
-    | "application_status"
-    | "new_message"
-    | "review"
-    | "operator"
-    | "payment";
-  related_link: string;
-  is_read: boolean;
-  content: string;
-  /** @format int64 */
-  job_id: number | null;
-  /** @format int64 */
-  restaurant_id: number | null;
-}
-
-export interface CompanyuserNotificationPartialUpdateData {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format uuid */
-  companyuser_id: string | null;
-  type:
-    | "new_job"
-    | "application_status"
-    | "new_message"
-    | "review"
-    | "operator"
-    | "payment";
-  related_link: string;
-  is_read: boolean;
-  content: string;
-  /** @format int64 */
-  job_id: number | null;
-  /** @format int64 */
-  restaurant_id: number | null;
-}
-
-export interface MarkReadPartialUpdateData {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format uuid */
-  companyuser_id: string | null;
-  type:
-    | "new_job"
-    | "application_status"
-    | "new_message"
-    | "review"
-    | "operator"
-    | "payment";
-  related_link: string;
-  is_read: boolean;
-  content: string;
-  /** @format int64 */
-  job_id: number | null;
-  /** @format int64 */
-  restaurant_id: number | null;
-}
-
-export type CompanyuserNotificationListData = {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format uuid */
-  companyuser_id: string | null;
-  type:
-    | "new_job"
-    | "application_status"
-    | "new_message"
-    | "review"
-    | "operator"
-    | "payment";
-  related_link: string;
-  is_read: boolean;
-  content: string;
-  /** @format int64 */
-  job_id: number | null;
-  /** @format int64 */
-  restaurant_id: number | null;
-}[];
-
-export interface CompanyuserNotificationCreatePayload {
-  /** @format uuid */
-  companyuser_id: string | null;
-  type:
-    | "new_job"
-    | "application_status"
-    | "new_message"
-    | "review"
-    | "operator"
-    | "payment";
-  related_link: string;
-  is_read: boolean;
-  content: string;
-  /** @format int64 */
-  job_id: number | null;
-  /** @format int64 */
-  restaurant_id: number | null;
-}
-
-export interface CompanyuserNotificationCreateData {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format uuid */
-  companyuser_id: string | null;
-  type:
-    | "new_job"
-    | "application_status"
-    | "new_message"
-    | "review"
-    | "operator"
-    | "payment";
-  related_link: string;
-  is_read: boolean;
-  content: string;
-  /** @format int64 */
-  job_id: number | null;
-  /** @format int64 */
-  restaurant_id: number | null;
-}
-
 export type RestaurantsListResult = {
   /** @format int64 */
   id: number;
@@ -2865,7 +2221,7 @@ export interface CompanyusersPartialUpdateData {
   password_reset_token: string;
 }
 
-export type CompanyuserNotificationsListResult = {
+export type CompanyuserNotificationsListData = {
   /** @format uuid */
   id: string;
   /**
@@ -3051,48 +2407,6 @@ export interface CompanyuserCreateData {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
-}
-
-export type FilesDeleteData = object;
-
-export interface FilesDetailData {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-}
-
-export interface FilesPartialUpdateData {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-}
-
-export type FilesListData = {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-}[];
-
-export interface FilesCreateData {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
 }
 
 export interface CompanyDetailResult {
@@ -3512,41 +2826,6 @@ export interface PatchJobData {
   /** @format timestamptz */
   expiry_date: number | null;
 }
-
-export interface JobWithCheckCreatePayload {
-  title: string;
-  description: string;
-  /** @format date */
-  work_date: string;
-  /** @format timestamptz */
-  start_time: number;
-  /** @format timestamptz */
-  end_time: number;
-  hourly_rate: number;
-  required_skills: string[];
-  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format int64 */
-  restaurant_id: number;
-  image: string;
-  task: string;
-  skill: string;
-  whattotake: string;
-  note: string;
-  point: string;
-  transportation: string;
-  /** @default "1" */
-  is_approved: boolean;
-  /** @format int64 */
-  number_of_spots: number;
-  /** @format int64 */
-  fee: number;
-  /** @format timestamptz */
-  expiry_date: number | null;
-}
-
-export type JobWithCheckCreateData = object;
 
 export interface QueryUpcomingListResult {
   jobs: {
@@ -4126,13 +3405,6 @@ export interface JobsCreateData {
   expiry_date: number | null;
 }
 
-export interface PostCreatePayload {
-  /** @format int64 */
-  id: number;
-}
-
-export type PostCreateData = object;
-
 export interface GetJob2Data {
   jobs: {
     /** @format int64 */
@@ -4378,52 +3650,6 @@ export interface MessagePartialUpdateData {
   worksession_id: number;
 }
 
-export type MessageattachmentDeleteData = object;
-
-export interface MessageattachmentDetailData {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format int64 */
-  message_id: number;
-  file_name: string;
-  file_path: string;
-  file_type: string;
-  /** @format int64 */
-  file_size: number;
-}
-
-export interface MessageattachmentPartialUpdatePayload {
-  /** @format int64 */
-  message_id: number;
-  file_name: string;
-  file_path: string;
-  file_type: string;
-  /** @format int64 */
-  file_size: number;
-}
-
-export interface MessageattachmentPartialUpdateData {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format int64 */
-  message_id: number;
-  file_name: string;
-  file_path: string;
-  file_type: string;
-  /** @format int64 */
-  file_size: number;
-}
-
 export type MessageattachmentsDeleteData = object;
 
 export interface MessageattachmentsDetailData {
@@ -4498,50 +3724,6 @@ export interface MessageattachmentsCreatePayload {
 }
 
 export interface MessageattachmentsCreateData {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format int64 */
-  message_id: number;
-  file_name: string;
-  file_path: string;
-  file_type: string;
-  /** @format int64 */
-  file_size: number;
-}
-
-export type MessageattachmentListData = {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format int64 */
-  message_id: number;
-  file_name: string;
-  file_path: string;
-  file_type: string;
-  /** @format int64 */
-  file_size: number;
-}[];
-
-export interface MessageattachmentCreatePayload {
-  /** @format int64 */
-  message_id: number;
-  file_name: string;
-  file_path: string;
-  file_type: string;
-  /** @format int64 */
-  file_size: number;
-}
-
-export interface MessageattachmentCreateData {
   /** @format uuid */
   id: string;
   /**
@@ -4737,58 +3919,6 @@ export interface MessageCreateData {
   worksession_id: number;
 }
 
-export type PaymentDeleteData = object;
-
-export interface PaymentDetailData {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  amount: number;
-  status: string;
-  /** @format date */
-  transaction_date: string;
-  invoice_number: string;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format int64 */
-  session_id: number;
-}
-
-export interface PaymentPartialUpdatePayload {
-  amount: number;
-  status: string;
-  /** @format date */
-  transaction_date: string;
-  invoice_number: string;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format int64 */
-  session_id: number;
-}
-
-export interface PaymentPartialUpdateData {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  amount: number;
-  status: string;
-  /** @format date */
-  transaction_date: string;
-  invoice_number: string;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format int64 */
-  session_id: number;
-}
-
 export type PaymentsDeleteData = object;
 
 export interface PaymentsDetailData {
@@ -4891,159 +4021,7 @@ export interface PaymentsCreateData {
   session_id: number;
 }
 
-export type PaymentListData = {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  amount: number;
-  status: string;
-  /** @format date */
-  transaction_date: string;
-  invoice_number: string;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format int64 */
-  session_id: number;
-}[];
-
-export interface PaymentCreatePayload {
-  amount: number;
-  status: string;
-  /** @format date */
-  transaction_date: string;
-  invoice_number: string;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format int64 */
-  session_id: number;
-}
-
-export interface PaymentCreateData {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  amount: number;
-  status: string;
-  /** @format date */
-  transaction_date: string;
-  invoice_number: string;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format int64 */
-  session_id: number;
-}
-
-export type PhotosDeleteData = object;
-
-export interface PhotosDetailData {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  photo: {
-    /** @default "public" */
-    access: "public" | "private";
-    path: string;
-    name: string;
-    type: string;
-    /** @format int64 */
-    size: number;
-    mime: string;
-    meta: object;
-    url: string | null;
-  };
-}
-
-export interface PhotosPartialUpdatePayload {
-  photo: {
-    /** @default "public" */
-    access: "public" | "private";
-    path: string;
-    name: string;
-    type: string;
-    /** @format int64 */
-    size: number;
-    mime: string;
-    meta: object;
-  } | null;
-}
-
-export interface PhotosPartialUpdateData {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  photo: {
-    /** @default "public" */
-    access: "public" | "private";
-    path: string;
-    name: string;
-    type: string;
-    /** @format int64 */
-    size: number;
-    mime: string;
-    meta: object;
-    url: string | null;
-  };
-}
-
-export type PhotosListData = {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  photo: {
-    /** @default "public" */
-    access: "public" | "private";
-    path: string;
-    name: string;
-    type: string;
-    /** @format int64 */
-    size: number;
-    mime: string;
-    meta: object;
-    url: string | null;
-  };
-}[];
-
-export interface PhotosCreatePayload {
-  /** @format binary */
-  image: File | null;
-}
-
-export type PhotosCreateData = object;
-
 export type RestaurantCuisinesDeleteData = object;
-
-export interface RestaurantCuisinesDetailData {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** Whether this cuisine is the primary cuisine for the restaurant. */
-  is_primary: boolean;
-  category: string;
-}
 
 export interface RestaurantCuisinesPartialUpdatePayload {
   /** Whether this cuisine is the primary cuisine for the restaurant. */
@@ -5052,25 +4030,6 @@ export interface RestaurantCuisinesPartialUpdatePayload {
 }
 
 export interface RestaurantCuisinesPartialUpdateData {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** Whether this cuisine is the primary cuisine for the restaurant. */
-  is_primary: boolean;
-  category: string;
-}
-
-export interface RestaurantCuisinesUpdatePayload {
-  /** Whether this cuisine is the primary cuisine for the restaurant. */
-  is_primary: boolean;
-  category: string;
-}
-
-export interface RestaurantCuisinesUpdateData {
   /** @format int64 */
   id: number;
   /**
@@ -5113,98 +4072,6 @@ export interface RestaurantCuisinesCreateData {
   /** Whether this cuisine is the primary cuisine for the restaurant. */
   is_primary: boolean;
   category: string;
-}
-
-export type RestaurantCuisineListData = {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** Whether this cuisine is the primary cuisine for the restaurant. */
-  is_primary: boolean;
-  category: string;
-}[];
-
-export type RestaurantNotificationsDeleteData = object;
-
-export interface RestaurantNotificationsDetailData {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  type: "OPERATOR" | "APPLICATION" | "SESSION";
-  content: string;
-  /** @format int64 */
-  related_id: number;
-  is_read: boolean;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format int64 */
-  user_id: number;
-  /** url */
-  related_link: string;
-}
-
-export type RestaurantNotificationsListData = {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  type: "OPERATOR" | "APPLICATION" | "SESSION";
-  content: string;
-  /** @format int64 */
-  related_id: number;
-  is_read: boolean;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format int64 */
-  user_id: number;
-  /** url */
-  related_link: string;
-}[];
-
-export interface RestaurantNotificationsCreatePayload {
-  type: "OPERATOR" | "APPLICATION" | "SESSION";
-  content: string;
-  /** @format int64 */
-  related_id: number;
-  is_read: boolean;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format int64 */
-  user_id: number;
-  /** url */
-  related_link: string;
-}
-
-export interface RestaurantNotificationsCreateData {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  type: "OPERATOR" | "APPLICATION" | "SESSION";
-  content: string;
-  /** @format int64 */
-  related_id: number;
-  is_read: boolean;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format int64 */
-  user_id: number;
-  /** url */
-  related_link: string;
 }
 
 export interface CheckAccessListParams {
@@ -5274,6 +4141,30 @@ export interface CompanyusersDetailData {
     company_email: string;
   };
   admin: string;
+}
+
+export interface StaffDeleteDeletePayload {
+  /** @format int64 */
+  restaurant_id: number;
+  user_id: string;
+}
+
+export interface StaffDeleteDeleteData {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format uuid */
+  companyuser_id: string | null;
+  /** @format int64 */
+  restaurant_id: number;
+  /** @default "1" */
+  can_edit: boolean;
+  /** @default "1" */
+  can_manage_jobs: boolean;
 }
 
 export interface StaffInviteCreateBody {
@@ -5399,98 +4290,6 @@ export interface RestaurantPartialUpdatePayload {
 }
 
 export type RestaurantPartialUpdateData = object;
-
-export type RestaurantCuisineList2Data = {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** Whether this cuisine is the primary cuisine for the restaurant. */
-  is_primary: boolean;
-  category: string;
-}[];
-
-export type RestaurantNotificationDeleteData = object;
-
-export interface RestaurantNotificationDetailData {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  type: "OPERATOR" | "APPLICATION" | "SESSION";
-  content: string;
-  /** @format int64 */
-  related_id: number;
-  is_read: boolean;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format int64 */
-  user_id: number;
-  /** url */
-  related_link: string;
-}
-
-export type RestaurantNotificationListData = {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  type: "OPERATOR" | "APPLICATION" | "SESSION";
-  content: string;
-  /** @format int64 */
-  related_id: number;
-  is_read: boolean;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format int64 */
-  user_id: number;
-  /** url */
-  related_link: string;
-}[];
-
-export interface RestaurantNotificationCreatePayload {
-  type: "OPERATOR" | "APPLICATION" | "SESSION";
-  content: string;
-  /** @format int64 */
-  related_id: number;
-  is_read: boolean;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format int64 */
-  user_id: number;
-  /** url */
-  related_link: string;
-}
-
-export interface RestaurantNotificationCreateData {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  type: "OPERATOR" | "APPLICATION" | "SESSION";
-  content: string;
-  /** @format int64 */
-  related_id: number;
-  is_read: boolean;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format int64 */
-  user_id: number;
-  /** url */
-  related_link: string;
-}
 
 export type ByChefDetailData = {
   /** @format int64 */
@@ -6125,6 +4924,19 @@ export interface RestaurantaccessCreatePayload {
 
 export type RestaurantaccessCreateData = object;
 
+export interface StaffInviteCreateInput {
+  companies_id: string;
+  /** @format email */
+  email: string;
+  /** @format int64 */
+  restaurant_id: number;
+  can_edit: boolean;
+  can_manage_jobs: boolean;
+  restaurant_name: string;
+}
+
+export type StaffInviteCreateOutput = object;
+
 export type ChefReviewsListResult = {
   /** @format int64 */
   id: number;
@@ -6193,7 +5005,7 @@ export type ChefReviewsListResult = {
   };
 }[];
 
-export type CompanyuserNotificationsCreateResult = object;
+export type CompanyuserNotificationsCreateData = object;
 
 export interface CompanyusersListOutput {
   company: {
@@ -6909,12 +5721,12 @@ export interface UserPartialUpdatePayload {
 
 export type UserPartialUpdateData = object;
 
-export interface ChefNotificationsListParams1 {
+export interface ChefNotificationsListParams {
   user_id: string;
   userId: string;
 }
 
-export type ChefNotificationsListResult = {
+export type ChefNotificationsListData = {
   /** @format int64 */
   id: number;
   /**
@@ -9103,89 +7915,6 @@ export type WorksessionsListOutput = {
   /** @format int64 */
   restaurant_rating: number;
 }[];
-
-export interface WorksessionsCreatePayload {
-  /** @format timestamptz */
-  check_in_time: number;
-  /** @format timestamptz */
-  check_out_time: number;
-  total_hours: number;
-  location_data: string;
-  status:
-    | "SCHEDULED"
-    | "IN_PROGRESS"
-    | "CANCELED_BY_CHEF"
-    | "CANCELED_BY_RESTAURANT"
-    | "COMPLETED"
-    | "VERIFIED"
-    | "DISPUTE"
-    | "ESCALATED"
-    | "PAID"
-    | "CANCELED";
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format uuid */
-  application_id: string;
-  /** @format uuid */
-  user_id: string | null;
-  /** @format int64 */
-  restaurant_id: number;
-  /** @format int64 */
-  job_id: number;
-  /** @format int64 */
-  paid_amount: number;
-  chef_feedback: string;
-  restaurant_feedback: string;
-  /** @format int64 */
-  chef_rating: number;
-  /** @format int64 */
-  restaurant_rating: number;
-}
-
-export interface WorksessionsCreateData {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format timestamptz */
-  check_in_time: number;
-  /** @format timestamptz */
-  check_out_time: number;
-  total_hours: number;
-  location_data: string;
-  status:
-    | "SCHEDULED"
-    | "IN_PROGRESS"
-    | "CANCELED_BY_CHEF"
-    | "CANCELED_BY_RESTAURANT"
-    | "COMPLETED"
-    | "VERIFIED"
-    | "DISPUTE"
-    | "ESCALATED"
-    | "PAID"
-    | "CANCELED";
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format uuid */
-  application_id: string;
-  /** @format uuid */
-  user_id: string | null;
-  /** @format int64 */
-  restaurant_id: number;
-  /** @format int64 */
-  job_id: number;
-  /** @format int64 */
-  paid_amount: number;
-  chef_feedback: string;
-  restaurant_feedback: string;
-  /** @format int64 */
-  chef_rating: number;
-  /** @format int64 */
-  restaurant_rating: number;
-}
 
 export type WorksessionListData = {
   /** @format int64 */

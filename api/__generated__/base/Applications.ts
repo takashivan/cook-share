@@ -237,10 +237,11 @@ export class Applications<
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH-CHEF]自分だけが仕事にapplyできます。 <br /><br /> <b>Authentication:</b> not required
    *
    * @tags applications
    * @name ApplicationsCreate
+   * @summary [AUTH-CHEF]自分だけが仕事にapplyできます。
    * @request POST:/applications
    */
   applicationsCreate = (

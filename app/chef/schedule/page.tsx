@@ -10,9 +10,9 @@ import type { Message } from "@/types";
 import { messageApi, CreateMessageParams } from "@/lib/api/message";
 import useSWR from "swr";
 import { ChatSheet } from "@/components/chat/ChatSheet";
-import { XanoClient } from "@xano/js-sdk";
 import { useGetWorksessionsByUserId } from "@/hooks/api/worksessions/useGetWorksessionsByUserId";
 import { WorksessionsListResult } from "@/api/__generated__/base/data-contracts";
+import { useSubscriptionMessagesByWorksessionId } from "@/hooks/api/messages/useSubscriptionMessagesByWorksessionId";
 
 export default function SchedulePage() {
   const { user } = useAuth();
@@ -29,66 +29,17 @@ export default function SchedulePage() {
   );
 
   // メッセージの取得
-  const { data: messages, mutate: mutateMessages } = useSWR<Message[]>(
-    selectedWorkSession ? `messages-${selectedWorkSession.id}` : null,
-    async () => {
-      if (!selectedWorkSession) return [];
-      const result = await messageApi.getMessagesByWorkSessionId(
-        selectedWorkSession.id
-      );
-      return result as Message[];
-    }
-  );
-
-  // Xanoのリアルタイム接続を設定
-  useEffect(() => {
-    if (!selectedWorkSession?.id) return;
-
-    const xanoClient = new XanoClient({
-      instanceBaseUrl: process.env.NEXT_PUBLIC_XANO_BASE_URL || "",
-      realtimeConnectionHash: process.env.NEXT_PUBLIC_XANO_REALTIME_HASH || "",
-    });
-
-    let channel: any;
-
-    const setupChannel = async () => {
-      try {
-        // チャンネルの設定
-        channel = xanoClient.channel(`worksession/${selectedWorkSession.id}`);
-        console.log("Channel setup for workSession:", selectedWorkSession.id);
-
-        // メッセージの購読
-        channel.on((message: any) => {
-          console.log("Chef received message:", message);
-          mutateMessages();
-        });
-      } catch (error) {
-        console.error("Error setting up channel:", error);
-      }
-    };
-
-    setupChannel();
-
-    return () => {
-      if (channel) {
-        channel.off();
-      }
-    };
-  }, [selectedWorkSession?.id, mutateMessages]);
+  const { messages, sendMessage } = useSubscriptionMessagesByWorksessionId({
+    workSessionId: selectedWorkSession?.id,
+    applicationId: selectedWorkSession?.application_id,
+    userType: 'chef',
+  })
 
   const handleSendMessage = async (message: string) => {
     if (!message.trim() || !selectedWorkSession) return;
 
     try {
-      const messageParams: CreateMessageParams = {
-        content: message,
-        worksession_id: selectedWorkSession.id,
-        application_id: selectedWorkSession.application_id,
-        sender_type: "chef",
-      };
-
-      await messageApi.createMessage(messageParams);
-      mutateMessages();
+      sendMessage(message)
     } catch (error) {
       console.error("Failed to send message:", error);
     }
@@ -192,13 +143,11 @@ export default function SchedulePage() {
         isOpen={selectedJobId !== null}
         onClose={closeChat}
         messages={messages}
-        mutateMessages={mutateMessages}
         onSendMessage={handleSendMessage}
         restaurantName={selectedWorkSession?.job?.restaurant.name || ""}
         restaurantImage={selectedWorkSession?.job?.restaurant.profile_image || ""}
         workDate={selectedWorkSession?.job?.work_date || ""}
         startTime={selectedWorkSession?.job?.start_time || 0}
-        workSessionId={selectedWorkSession?.id || 0}
       />
     </div>
   );
