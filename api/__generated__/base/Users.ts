@@ -37,33 +37,6 @@ export class Users<
    * @description <br /><br /> <b>Authentication:</b> not required
    *
    * @tags users
-   * @name StripeAccountLinksCreate
-   * @request POST:/users/{user_id}/stripe/account-links
-   */
-  stripeAccountLinksCreate = (userId: string, params: RequestParams = {}) =>
-    this.request<StripeAccountLinksCreateData, void>({
-      path: `/users/${userId}/stripe/account-links`,
-      method: "POST",
-      format: "json",
-      ...params,
-    });
-
-  stripeAccountLinksCreateQueryArgs = (
-    userId: string,
-    params: RequestParams = {},
-    enabled: boolean = true,
-  ) => {
-    const key = enabled ? [`/users/${userId}/stripe/account-links`] : null;
-    const fetcher: (url: string[]) => Promise<StripeAccountLinksCreateData> = (
-      _,
-    ) => this.stripeAccountLinksCreate(userId, params).then((res) => res.data);
-    return [key, fetcher] as const;
-  };
-
-  /**
-   * @description <br /><br /> <b>Authentication:</b> not required
-   *
-   * @tags users
    * @name ChefNotificationsList
    * @request GET:/users/{userId}/chef-notifications
    */
@@ -169,6 +142,33 @@ export class Users<
     const key = enabled ? [`/users/${userId}/restaurant-reviews`] : null;
     const fetcher = () =>
       this.restaurantReviewsList(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags users
+   * @name StripeAccountLinksCreate
+   * @request POST:/users/{user_id}/stripe/account-links
+   */
+  stripeAccountLinksCreate = (userId: string, params: RequestParams = {}) =>
+    this.request<StripeAccountLinksCreateData, void>({
+      path: `/users/${userId}/stripe/account-links`,
+      method: "POST",
+      format: "json",
+      ...params,
+    });
+
+  stripeAccountLinksCreateQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/users/${userId}/stripe/account-links`] : null;
+    const fetcher: (url: string[]) => Promise<StripeAccountLinksCreateData> = (
+      _,
+    ) => this.stripeAccountLinksCreate(userId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 

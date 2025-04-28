@@ -78,6 +78,7 @@ export interface LoginCreateData {
     /** @format timestamptz */
     updated_at: number | null;
   };
+  sessionToken: string;
 }
 
 export interface GetAuthData {

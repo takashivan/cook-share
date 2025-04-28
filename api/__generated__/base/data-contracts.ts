@@ -10,10 +10,6 @@
  * ---------------------------------------------------------------
  */
 
-export type StripeAccountLinksCreateData = object;
-
-export type AdminlogDeleteData = object;
-
 export interface AdminlogDetailData {
   /** @format int64 */
   id: number;
@@ -31,63 +27,7 @@ export interface AdminlogDetailData {
   operator_id: string | null;
 }
 
-export interface AdminlogPartialUpdatePayload {
-  /** @format int64 */
-  target_id: number;
-  target_type: string;
-  action: string;
-  reason: string;
-  /** @format uuid */
-  operator_id: string | null;
-}
-
-export interface AdminlogPartialUpdateData {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format int64 */
-  target_id: number;
-  target_type: string;
-  action: string;
-  reason: string;
-  /** @format uuid */
-  operator_id: string | null;
-}
-
-export type AdminlogsDeleteData = object;
-
 export interface AdminlogsDetailData {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format int64 */
-  target_id: number;
-  target_type: string;
-  action: string;
-  reason: string;
-  /** @format uuid */
-  operator_id: string | null;
-}
-
-export interface AdminlogsPartialUpdatePayload {
-  /** @format int64 */
-  target_id: number;
-  target_type: string;
-  action: string;
-  reason: string;
-  /** @format uuid */
-  operator_id: string | null;
-}
-
-export interface AdminlogsPartialUpdateData {
   /** @format int64 */
   id: number;
   /**
@@ -790,178 +730,6 @@ export interface ApplicationCreateData {
   /** @format timestamptz */
   expiry_date: number | null;
   urgent: boolean;
-}
-
-export interface ChangePasswordCreatePayload {
-  current_password: string;
-  new_password: string;
-}
-
-export interface ChangePasswordCreateData {
-  user: {
-    /** @format uuid */
-    id: string;
-    /**
-     * @format timestamptz
-     * @default "now"
-     */
-    created_at: number;
-    /** @format uuid */
-    companies_id: string | null;
-    name: string;
-    /** @format email */
-    email: string;
-    phone: string | null;
-    /** @format password */
-    password: string;
-    is_admin: boolean;
-    /** @default "1" */
-    is_active: boolean;
-    is_verified: boolean;
-    /** @format timestamptz */
-    updated_at: number | null;
-    magic_link: object;
-    verify_token: string;
-    /** @format email */
-    pending_email: string;
-    email_change_token: string;
-    password_reset_token: string;
-  };
-  status: string;
-}
-
-export interface LoginCreatePayload {
-  /** @format email */
-  email: string;
-  password: string;
-}
-
-export interface LoginCreateData {
-  authToken: string;
-  user: {
-    /** @format uuid */
-    id: string;
-    /**
-     * @format timestamptz
-     * @default "now"
-     */
-    created_at: number;
-    /** @format uuid */
-    companies_id: string | null;
-    name: string;
-    /** @format email */
-    email: string;
-    phone: string | null;
-    /** @format password */
-    password: string;
-    is_admin: boolean;
-    /** @default "1" */
-    is_active: boolean;
-    is_verified: boolean;
-    /** @format timestamptz */
-    updated_at: number | null;
-  };
-}
-
-export interface GetAuthData {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format uuid */
-  companies_id: string | null;
-  name: string;
-  /** @format email */
-  email: string;
-  phone: string | null;
-  is_admin: boolean;
-  /** @default "1" */
-  is_active: boolean;
-  is_verified: boolean;
-  /** @format timestamptz */
-  updated_at: number | null;
-}
-
-export interface SignupCreatePayload {
-  name: string;
-  /** @format email */
-  email: string;
-  /** @format password */
-  password: string;
-}
-
-export interface SignupCreateData {
-  authToken: string;
-  user: {
-    /** @format uuid */
-    id: string;
-    /**
-     * @format timestamptz
-     * @default "now"
-     */
-    created_at: number;
-    /** @format uuid */
-    companies_id: string | null;
-    name: string;
-    /** @format email */
-    email: string;
-    phone: string | null;
-    /** @format password */
-    password: string;
-    is_admin: boolean;
-    /** @default "1" */
-    is_active: boolean;
-    is_verified: boolean;
-    /** @format timestamptz */
-    updated_at: number | null;
-    magic_link: object;
-    verify_token: string;
-    /** @format email */
-    pending_email: string;
-    email_change_token: string;
-    password_reset_token: string;
-  };
-}
-
-export interface VerifyEmailCreatePayload {
-  user_id: string;
-  token: string;
-}
-
-export interface VerifyEmailCreateData {
-  result1: {
-    /** @format uuid */
-    id: string;
-    /**
-     * @format timestamptz
-     * @default "now"
-     */
-    created_at: number;
-    /** @format uuid */
-    companies_id: string | null;
-    name: string;
-    /** @format email */
-    email: string;
-    phone: string | null;
-    /** @format password */
-    password: string;
-    is_admin: boolean;
-    /** @default "1" */
-    is_active: boolean;
-    is_verified: boolean;
-    /** @format timestamptz */
-    updated_at: number | null;
-    magic_link: object;
-    verify_token: string;
-    /** @format email */
-    pending_email: string;
-    email_change_token: string;
-    password_reset_token: string;
-  };
-  auth: string;
 }
 
 export interface AddInvoiceItemsCreatePayload {
@@ -7294,6 +7062,8 @@ export type RestaurantReviewsListOutput = {
     phone: string;
   };
 }[];
+
+export type StripeAccountLinksCreateData = object;
 
 export type StripeAccountCreateData = object;
 
