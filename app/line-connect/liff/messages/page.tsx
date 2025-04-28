@@ -16,9 +16,9 @@ import { ja } from "date-fns/locale";
 import type { Message, WorkSessionWithJob } from "@/types";
 import { getWorkSessionsByUserId } from "@/lib/api/workSession";
 import { messageApi, CreateMessageParams } from "@/lib/api/message";
-import { XanoClient } from "@xano/js-sdk";
 import useSWR from "swr";
 import { LinkAccountScreen } from "../components/LinkAccountScreen";
+import { useSubscriptionMessagesByWorksessionId } from "@/hooks/api/messages/useSubscriptionMessagesByWorksessionId";
 
 interface AnimatedSectionProps {
   children: React.ReactNode;
@@ -71,67 +71,16 @@ function MessagesPage({ profile }: { profile: any }) {
   );
 
   // メッセージの取得
-  const { data: messages, mutate: mutateMessages } = useSWR<Message[]>(
-    selectedWorkSession ? `messages-${selectedWorkSession.id}` : null,
-    async () => {
-      if (!selectedWorkSession) return [];
-      const result = await messageApi.getMessagesByWorkSessionId(
-        selectedWorkSession.id
-      );
-      return result as Message[];
-    }
-  );
-
-  // Xanoのリアルタイム接続を設定
-  useEffect(() => {
-    if (!selectedWorkSession?.id) return;
-
-    const xanoClient = new XanoClient({
-      instanceBaseUrl: process.env.NEXT_PUBLIC_XANO_BASE_URL || "",
-      realtimeConnectionHash: process.env.NEXT_PUBLIC_XANO_REALTIME_HASH || "",
-    });
-
-    let messageHandler: ((message: any) => void) | undefined;
-    let channel: any;
-
-    const setupChannel = async () => {
-      try {
-        // チャンネルの設定
-        channel = xanoClient.channel(`worksession/${selectedWorkSession.id}`);
-        console.log("Channel setup for workSession:", selectedWorkSession.id);
-
-        // メッセージの購読
-        messageHandler = (message: any) => {
-          console.log("Chef received message:", message);
-          mutateMessages();
-        };
-      } catch (error) {
-        console.error("Error setting up channel:", error);
-      }
-    };
-
-    setupChannel();
-
-    return () => {
-      if (channel && messageHandler) {
-      }
-    };
-  }, [selectedWorkSession?.id, mutateMessages]);
+  const { messages, sendMessage } = useSubscriptionMessagesByWorksessionId({
+    workSessionId: selectedWorkSession?.id,
+    applicationId: selectedWorkSession?.application_id,
+    userType: 'chef',
+  })
 
   const handleSendMessage = async () => {
-    if (!messageInput.trim() || !selectedWorkSession) return;
-
     try {
-      const messageParams: CreateMessageParams = {
-        content: messageInput,
-        worksession_id: selectedWorkSession.id,
-        application_id: selectedWorkSession.application_id,
-        sender_type: "chef",
-      };
-
-      await messageApi.createMessage(messageParams);
+      sendMessage(messageInput);
       setMessageInput("");
-      mutateMessages();
     } catch (error) {
       console.error("Failed to send message:", error);
     }

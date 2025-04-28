@@ -11,28 +11,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Message } from "@/types";
-import { XanoClient } from "@xano/js-sdk";
+import { MessagesListResult } from "@/api/__generated__/base/data-contracts";
 
 interface ChatSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  messages: Message[] | undefined;
+  messages: MessagesListResult | undefined;
   onSendMessage: (message: string) => void;
   restaurantName: string;
   restaurantImage?: string;
   workDate: string | Date;
   startTime: number;
-  workSessionId: number;
-  mutateMessages: () => void;
-}
-
-interface XanoMessage {
-  action: string;
-  payload: {
-    content: string;
-    worksession_id: number;
-    sender_type: string;
-  };
 }
 
 export function ChatSheet({
@@ -44,11 +33,8 @@ export function ChatSheet({
   restaurantImage,
   workDate,
   startTime,
-  workSessionId,
-  mutateMessages,
 }: ChatSheetProps) {
   const [messageInput, setMessageInput] = useState("");
-  const xanoClientRef = useRef<XanoClient | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -60,49 +46,9 @@ export function ChatSheet({
     scrollToBottom();
   }, [messages]);
 
-  useEffect(() => {
-    if (!isOpen || !workSessionId) return;
-
-    // XanoClientの初期化
-    const xanoClient = new XanoClient({
-      instanceBaseUrl: process.env.NEXT_PUBLIC_XANO_BASE_URL || "",
-      realtimeConnectionHash: process.env.NEXT_PUBLIC_XANO_REALTIME_HASH || "",
-    });
-
-    let channel: any;
-
-    const setupChannel = () => {
-      try {
-        // チャンネルの設定
-        channel = xanoClient.channel(`worksession/${workSessionId}`);
-        console.log("Channel setup for workSessionId:", workSessionId);
-
-        // メッセージの購読
-        channel.on((message: any) => {
-          console.log("Received message:", message);
-          mutateMessages();
-        });
-
-        xanoClientRef.current = xanoClient;
-      } catch (error) {
-        console.error("Error setting up channel:", error);
-      }
-    };
-
-    setupChannel();
-  }, [isOpen, workSessionId, mutateMessages]);
-
   const handleSendMessage = () => {
-    if (!messageInput.trim() || !xanoClientRef.current || !workSessionId)
-      return;
-
     try {
-      const channel = xanoClientRef.current.channel(
-        `worksession/${workSessionId}`
-      );
-      console.log("Sending message to workSessionId:", workSessionId);
       onSendMessage(messageInput);
-      channel.message(messageInput);
       setMessageInput("");
     } catch (error) {
       console.error("Error sending message:", error);

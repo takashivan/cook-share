@@ -58,7 +58,6 @@ import { applicationApi } from "@/lib/api/application";
 import { workSessionApi } from "@/lib/api/workSession";
 import { messageApi, CreateMessageParams } from "@/lib/api/message";
 import { QRCodeSVG } from "qrcode.react";
-import { XanoClient } from "@xano/js-sdk";
 import { RestaurantReviewModal } from "@/components/modals/RestaurantReviewModal";
 import { chefReviewApi } from "@/lib/api/chefReview";
 import { FaStar } from "react-icons/fa";
@@ -72,11 +71,12 @@ import {
 } from "@/components/ui/tooltip";
 import { useGetJob } from "@/hooks/api/jobs/useGetJob";
 import { useGetWorksessionsByJobId } from "@/hooks/api/worksessions/useGetWorksessionsByJobId";
-import { JobsDetailData, JobsPartialUpdatePayload } from "@/api/__generated__/base/data-contracts";
+import { JobsDetailData, JobsPartialUpdatePayload, WorksessionsRestaurantTodosListData } from "@/api/__generated__/base/data-contracts";
 import { useVerifyWorksession } from "@/hooks/api/worksessions/useVerifyWorksession";
 import { useUpdateJob } from "@/hooks/api/jobs/useUpdateJob";
 import { getApi } from "@/api/api-factory";
 import { Worksessions } from "@/api/__generated__/base/Worksessions";
+import { useSubscriptionMessagesByWorksessionId } from "@/hooks/api/messages/useSubscriptionMessagesByWorksessionId";
 
 interface Message {
   id: number;
@@ -97,16 +97,11 @@ export default function JobDetail({ params }: PageParams) {
   const [messageInput, setMessageInput] = useState("");
   const [isQrDialogOpen, setIsQrDialogOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [selectedWorkSession, setSelectedWorkSession] = useState<any>(null);
+  const [selectedWorkSession, setSelectedWorkSession] = useState<WorksessionsRestaurantTodosListData[number] | null>(null);
   const [isChefReviewModalOpen, setIsChefReviewModalOpen] = useState(false);
   const [chefReview, setChefReview] = useState<any>(null);
   const [isEditJobModalOpen, setIsEditJobModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const xanoClient = new XanoClient({
-    instanceBaseUrl: process.env.NEXT_PUBLIC_XANO_BASE_URL || "",
-    realtimeConnectionHash: process.env.NEXT_PUBLIC_XANO_REALTIME_HASH || "",
-  });
 
   const { data: jobData, error: jobError } = useGetJob({ jobId: Number(jobId) });
   const { data: workSessions, error: workSessionsError } = useGetWorksessionsByJobId({ jobId: Number(jobId) });
@@ -117,58 +112,16 @@ export default function JobDetail({ params }: PageParams) {
   const { trigger: updateJobTrigger } = useUpdateJob({ jobId: Number(jobId), companyId: restaurant?.companies_id ?? undefined, restaurantId: restaurant?.id ?? undefined});
   const { trigger: verifyWorksessionTrigger } = useVerifyWorksession({ worksessionId: selectedWorkSession?.id || 0, jobId: Number(jobId) });
 
-  const { data: messages, mutate: mutateMessages } = useSWR<Message[]>(
-    selectedWorkSession?.id
-      ? [`messages-worksession-${selectedWorkSession.id}`]
-      : null,
-    async ([_]: [string]): Promise<Message[]> => {
-      if (!selectedWorkSession?.id) return [];
-      const result = await messageApi.getMessagesByWorkSessionId(
-        selectedWorkSession.id
-      );
-      return result as Message[];
-    }
-  );
-
-  useEffect(() => {
-    if (!selectedWorkSession?.id) return;
-
-    let channel: any;
-
-    const setupChannel = async () => {
-      try {
-        channel = xanoClient.channel(`worksession-${selectedWorkSession.id}`);
-        channel.on((message: any) => {
-          mutateMessages();
-        });
-      } catch (error) {
-        console.error("Error setting up channel:", error);
-      }
-    };
-
-    setupChannel();
-  }, [selectedWorkSession?.id, mutateMessages]);
+  const { messages, sendMessage } = useSubscriptionMessagesByWorksessionId({
+    workSessionId: selectedWorkSession?.id,
+    applicationId: selectedWorkSession?.application_id,
+    userType: 'company',
+  })
 
   const handleSendMessage = async () => {
-    if (!messageInput.trim() || !selectedWorkSession) return;
-
     try {
-      const channel = xanoClient.channel(
-        `worksession-${selectedWorkSession.id}`
-      );
-
-      const messageParams: CreateMessageParams = {
-        content: messageInput,
-        worksession_id: selectedWorkSession.id,
-        application_id: selectedWorkSession.application_id,
-        sender_type: "restaurant",
-      };
-
-      await messageApi.createMessage(messageParams);
-      channel.message(messageParams);
-
+      sendMessage(messageInput)
       setMessageInput("");
-      mutateMessages();
     } catch (error) {
       console.error("Failed to send message:", error);
     }
@@ -337,7 +290,7 @@ export default function JobDetail({ params }: PageParams) {
             </CardHeader> */}
             <CardContent className="p-0">
               <div className="divide-y">
-                {workSessions?.map((session: any) => (
+                {workSessions?.map((session) => (
                   <div
                     key={session.id}
                     className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
