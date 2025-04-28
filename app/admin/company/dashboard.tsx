@@ -1,19 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
-import {
-  Building,
-  CreditCard,
-  DollarSign,
-  Edit,
-  ExternalLink,
-  MessageSquare,
-  MoreHorizontal,
-  Plus,
-  Store,
-  Users,
-} from "lucide-react";
+import { Building, CreditCard, MessageSquare, Store } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -22,236 +11,156 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { getRestaurants, CreateRestaurantData } from "@/lib/api/restaurant";
-import type { Restaurant } from "@/lib/api/restaurant";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
-import { getCompany, type Company } from "@/lib/api/company";
-import type { Job } from "@/types";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/lib/store/store";
-import { fetchRestaurantsByCompanyId } from "@/lib/store/restaurantSlice";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/lib/store/store";
+// import { fetchRestaurantsByCompanyId } from "@/lib/store/restaurantSlice";
+// import { CreateRestaurantModal } from "@/components/modals/CreateRestaurantModal";
+// import { createRestaurant } from "@/lib/api/restaurant";
+// import { toast } from "@/hooks/use-toast";
+import { getCompanyUserByCompanyId } from "@/lib/api/companyUser";
 import { fetchJobsByCompanyId } from "@/lib/store/jobSlice";
-import { CreateRestaurantModal } from "@/components/modals/CreateRestaurantModal";
-import { createRestaurant } from "@/lib/api/restaurant";
-import {
-  getCompanyUserByCompanyId,
-  type CompanyUser,
-} from "@/lib/api/companyUser";
-import { toast } from "@/hooks/use-toast";
+import { fetchMyRestaurants } from "@/lib/store/restaurantSlice";
+import { useGetCompany } from "@/hooks/api/companies/useGetCompany";
+import { useGetRestaurantsByCompanyId } from "@/hooks/api/restaurants/useGetRestaurantsByCompanyId";
+import { useGetJobsByCompanyId } from "@/hooks/api/jobs/useGetJobsByCompanyId";
+import { useGetCompanyUsersByCompanyId } from "@/hooks/api/companyUsers/useGetCompanyUsersByCompanyId";
+import { useGetRestaurantsByCompanyUserId } from "@/hooks/api/restaurants/useGetRestaurantsByCompanyUserId";
 
 export function CompanyDashboard() {
-  const dispatch = useDispatch<AppDispatch>();
+  // const dispatch = useDispatch<AppDispatch>();
   const { user } = useCompanyAuth();
+  const dispatch = useDispatch<AppDispatch>();
+
+  const { data: company } = useGetCompany({ companyId: user?.companies_id ?? undefined });
   const {
-    restaurants,
-    loading: restaurantsLoading,
+    data: restaurants,
+    isLoading: restaurantsLoading,
     error: restaurantsError,
-  } = useSelector((state: RootState) => state.restaurants);
+  } = useGetRestaurantsByCompanyUserId({ companyuserId: user?.id });
   const {
-    jobs,
-    loading: jobsLoading,
+    data: jobData,
+    isLoading: jobsLoading,
     error: jobsError,
-  } = useSelector((state: RootState) => state.jobs);
-  const [companyInfo, setCompanyInfo] = useState<Company | null>(null);
-  const [isCreateRestaurantModalOpen, setIsCreateRestaurantModalOpen] =
-    useState(false);
-  const [companyUsers, setCompanyUsers] = useState<CompanyUser[]>([]);
-  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (user?.companies_id) {
-        console.log("Fetching data for company ID:", user.companies_id);
-
-        // まず会社情報を取得
-        const companyData = await getCompany(user.companies_id);
-        console.log("Fetched company data:", companyData);
-        setCompanyInfo(companyData);
-      }
-    };
-
-    if (user) {
-      fetchData();
-    }
-  }, [user]);
+  } = useGetJobsByCompanyId({ companyId: user?.companies_id ?? undefined });
+  const {
+    data: companyUsers,
+    isLoading: companyUsersLoading,
+    error: companyUsersError,
+  } = useGetCompanyUsersByCompanyId({ companyId: user?.companies_id ?? undefined });
 
   useEffect(() => {
     if (user?.companies_id) {
-      dispatch(fetchRestaurantsByCompanyId(user.companies_id));
+      dispatch(fetchMyRestaurants(user.id));
       dispatch(fetchJobsByCompanyId(user.companies_id));
     }
-  }, [dispatch, user?.companies_id]);
+  }, [dispatch, user?.companies_id, user?.id]);
 
-  useEffect(() => {
-    const fetchCompanyUsers = async () => {
-      if (user?.companies_id) {
-        try {
-          setIsLoadingUsers(true);
-          const response = await getCompanyUserByCompanyId(user.companies_id);
-          const validUsers = Array.isArray(response)
-            ? response.filter(
-                (user): user is CompanyUser =>
-                  user !== null && typeof user === "object"
-              )
-            : [];
-          setCompanyUsers(validUsers);
-        } catch (error) {
-          console.error("Failed to fetch company users:", error);
-          setError(
-            error instanceof Error
-              ? error.message
-              : "スタッフ情報の取得に失敗しました"
-          );
-        } finally {
-          setIsLoadingUsers(false);
-        }
-      }
-    };
+  // useEffect(() => {
+  //   const fetchCompanyUsers = async () => {
+  //     if (user?.companies_id) {
+  //       try {
+  //         setIsLoadingUsers(true);
+  //         const response = await getCompanyUserByCompanyId(user.companies_id);
+  //         const validUsers = Array.isArray(response)
+  //           ? response.filter(
+  //               (user): user is CompanyUser =>
+  //                 user !== null && typeof user === "object"
+  //             )
+  //           : [];
+  //         setCompanyUsers(validUsers);
+  //       } catch (error) {
+  //         console.error("Failed to fetch company users:", error);
+  //         setError(
+  //           error instanceof Error
+  //             ? error.message
+  //             : "スタッフ情報の取得に失敗しました"
+  //         );
+  //       } finally {
+  //         setIsLoadingUsers(false);
+  //       }
+  //     }
+  //   };
 
-    fetchCompanyUsers();
-  }, [user?.companies_id]);
+  //   fetchCompanyUsers();
+  // }, [user?.companies_id]);
 
   // データが更新されたときのログ
   useEffect(() => {
-    console.log("Company info updated:", companyInfo);
+    console.log("Company info updated:", company);
     console.log("Restaurants updated:", restaurants);
-  }, [companyInfo, restaurants]);
+  }, [company, restaurants]);
 
-  const handleCreateRestaurant = async (data: FormData) => {
-    try {
-      if (!user?.companies_id) {
-        throw new Error("会社IDが見つかりません");
-      }
+  // const handleCreateRestaurant = async (data: FormData) => {
+  //   try {
+  //     if (!user?.companies_id) {
+  //       throw new Error("会社IDが見つかりません");
+  //     }
 
-      // UUIDの形式を確認
-      if (
-        !user.companies_id.match(
-          /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-        )
-      ) {
-        throw new Error("会社IDの形式が正しくありません");
-      }
+  //     // UUIDの形式を確認
+  //     if (
+  //       !user.companies_id.match(
+  //         /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+  //       )
+  //     ) {
+  //       throw new Error("会社IDの形式が正しくありません");
+  //     }
 
-      // FormDataの内容を確認（デバッグ用）
-      console.log("Submitting FormData:");
-      for (let [key, value] of data.entries()) {
-        console.log(`${key}: ${value instanceof File ? value.name : value}`);
-      }
+  //     // FormDataの内容を確認（デバッグ用）
+  //     console.log("Submitting FormData:");
+  //     for (let [key, value] of data.entries()) {
+  //       console.log(`${key}: ${value instanceof File ? value.name : value}`);
+  //     }
 
-      // レストラン作成APIを呼び出し
-      const response = await createRestaurant(data);
+  //     // レストラン作成APIを呼び出し
+  //     const response = await createRestaurant(data);
 
-      if (!response) {
-        throw new Error("店舗の作成に失敗しました");
-      }
+  //     if (!response) {
+  //       throw new Error("店舗の作成に失敗しました");
+  //     }
 
-      // 店舗一覧を再取得
-      await dispatch(fetchRestaurantsByCompanyId(user.companies_id));
+  //     // 店舗一覧を再取得
+  //     await dispatch(fetchMyRestaurants(user.id));
 
-      // モーダルを閉じる
-      setIsCreateRestaurantModalOpen(false);
+  //     // モーダルを閉じる
+  //     setIsCreateRestaurantModalOpen(false);
 
-      // 成功通知
-      toast({
-        title: "店舗を追加しました",
-        description: "新しい店舗の登録が完了しました。",
-      });
-    } catch (error) {
-      console.error("Failed to create restaurant:", error);
+  //     // 成功通知
+  //     toast({
+  //       title: "店舗を追加しました",
+  //       description: "新しい店舗の登録が完了しました。",
+  //     });
+  //   } catch (error) {
+  //     console.error("Failed to create restaurant:", error);
 
-      // エラー通知
-      toast({
-        title: "エラーが発生しました",
-        description:
-          error instanceof Error
-            ? error.message
-            : "店舗の追加に失敗しました。もう一度お試しください。",
-        variant: "destructive",
-      });
+  //     // エラー通知
+  //     toast({
+  //       title: "エラーが発生しました",
+  //       description:
+  //         error instanceof Error
+  //           ? error.message
+  //           : "店舗の追加に失敗しました。もう一度お試しください。",
+  //       variant: "destructive",
+  //     });
 
-      throw error;
-    }
-  };
+  //     throw error;
+  //   }
+  // };
 
-  if (restaurantsLoading) {
+  if (restaurantsLoading || jobsLoading || companyUsersLoading) {
     return <div>Loading...</div>;
   }
 
-  if (restaurantsError) {
+  if (restaurantsError || jobsError) {
     return <div>Error: {restaurantsError}</div>;
   }
 
-  const recentJobs = [
-    {
-      id: 1,
-      title: "【明治創業】上野駅徒歩5分、老舗洋食店での勤務",
-      store: "洋食 黒船亭 上野店",
-      date: "2024/04/01",
-      applicants: 5,
-      status: "公開中",
-    },
-    {
-      id: 2,
-      title: "【週末限定】ランチタイムのホールスタッフ募集",
-      store: "和食 さくら 新宿店",
-      date: "2024/04/02",
-      applicants: 3,
-      status: "公開中",
-    },
-    {
-      id: 3,
-      title: "【経験者優遇】ディナータイムの調理補助スタッフ",
-      store: "イタリアン ベラ 渋谷店",
-      date: "2024/04/03",
-      applicants: 2,
-      status: "公開中",
-    },
-  ];
-
-  const recentStaff = [
-    {
-      id: 1,
-      name: "山田 太郎",
-      email: "yamada@example.com",
-      role: "管理者",
-      department: "経営企画部",
-    },
-    {
-      id: 2,
-      name: "佐藤 花子",
-      email: "sato@example.com",
-      role: "一般ユーザー",
-      department: "人事部",
-    },
-    {
-      id: 3,
-      name: "鈴木 一郎",
-      email: "suzuki@example.com",
-      role: "一般ユーザー",
-      department: "マーケティング部",
-    },
-  ];
-
   return (
     <>
-      {error && (
-        <div className="bg-red-50 text-red-600 p-4 mb-4 rounded">{error}</div>
+      {companyUsersError && (
+        <div className="bg-red-50 text-red-600 p-4 mb-4 rounded">
+          {companyUsersError}
+        </div>
       )}
 
       <div className="space-y-6">
@@ -261,7 +170,7 @@ export function CompanyDashboard() {
               会社ダッシュボード
             </h2>
             <p className="text-muted-foreground">
-              {companyInfo?.name || "読み込み中..."}の管理画面へようこそ
+              {company?.name || "読み込み中..."}の管理画面へようこそ
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -279,7 +188,9 @@ export function CompanyDashboard() {
               <Store className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{restaurants.length}</div>
+              <div className="text-2xl font-bold">
+                {restaurants?.length ?? ""}
+              </div>
             </CardContent>
           </Card>
 
@@ -289,7 +200,9 @@ export function CompanyDashboard() {
               <MessageSquare className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{jobs.length}</div>
+              <div className="text-2xl font-bold">
+                {jobData?.jobs.length ?? ""}
+              </div>
             </CardContent>
           </Card>
           <Card>
@@ -298,7 +211,9 @@ export function CompanyDashboard() {
               <MessageSquare className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{companyUsers.length}</div>
+              <div className="text-2xl font-bold">
+                {companyUsers?.length ?? ""}
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -330,7 +245,7 @@ export function CompanyDashboard() {
                   </div>
                 ))}
                 <div className="mt-4">
-                  <Link href="/admin/company/billing">
+                  <Link href="/admin/company/billings">
                     <Button variant="outline" className="w-full">
                       すべての請求を表示
                     </Button>
@@ -342,12 +257,12 @@ export function CompanyDashboard() {
         </div>
       </div>
 
-      <CreateRestaurantModal
+      {/* <CreateRestaurantModal
         isOpen={isCreateRestaurantModalOpen}
         onClose={() => setIsCreateRestaurantModalOpen(false)}
         onSubmit={handleCreateRestaurant}
         companyId={user?.companies_id || ""}
-      />
+      /> */}
     </>
   );
 }

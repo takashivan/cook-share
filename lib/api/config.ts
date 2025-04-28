@@ -24,9 +24,11 @@ export const API_CONFIG = {
     operator: "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/operator",
     cuisines:
       "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/restaurant_cuisine",
+
     skill: "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/chef_skill",
     operatorAuth: "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/auth",
     line: "https://xcti-onox-8bdw.n7e.xano.io/api:iG6oGWEP/",
+    alert: "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/alert",
   },
   // 共通ヘッダー
   headers: {
@@ -133,8 +135,8 @@ export async function apiRequest<T>(
       data instanceof FormData
         ? "FormData"
         : data
-          ? JSON.stringify(data)
-          : "No data",
+        ? JSON.stringify(data)
+        : "No data",
   });
 
   try {

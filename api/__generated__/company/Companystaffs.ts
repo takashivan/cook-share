@@ -19,7 +19,9 @@ import {
 } from "./data-contracts";
 import { HttpClient, RequestParams } from "./http-client";
 
-export class Companystaffs<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class Companystaffs<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description Delete CompanyStaffs record. <br /><br /> <b>Authentication:</b> not required
    *
@@ -35,6 +37,18 @@ export class Companystaffs<SecurityDataType = unknown> extends HttpClient<Securi
       format: "json",
       ...params,
     });
+
+  companystaffsDeleteQueryArgs = (
+    companystaffsId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/companystaffs/${companystaffsId}`] : null;
+    const fetcher = () =>
+      this.companystaffsDelete(companystaffsId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Get CompanyStaffs record <br /><br /> <b>Authentication:</b> not required
    *
@@ -50,6 +64,18 @@ export class Companystaffs<SecurityDataType = unknown> extends HttpClient<Securi
       format: "json",
       ...params,
     });
+
+  companystaffsDetailQueryArgs = (
+    companystaffsId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/companystaffs/${companystaffsId}`] : null;
+    const fetcher = () =>
+      this.companystaffsDetail(companystaffsId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Edit CompanyStaffs record <br /><br /> <b>Authentication:</b> not required
    *
@@ -58,13 +84,31 @@ export class Companystaffs<SecurityDataType = unknown> extends HttpClient<Securi
    * @summary Edit CompanyStaffs record
    * @request PATCH:/companystaffs/{companystaffs_id}
    */
-  companystaffsPartialUpdate = (companystaffsId: string, params: RequestParams = {}) =>
+  companystaffsPartialUpdate = (
+    companystaffsId: string,
+    params: RequestParams = {},
+  ) =>
     this.request<CompanystaffsPartialUpdateData, void>({
       path: `/companystaffs/${companystaffsId}`,
       method: "PATCH",
       format: "json",
       ...params,
     });
+
+  companystaffsPartialUpdateQueryArgs = (
+    companystaffsId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/companystaffs/${companystaffsId}`] : null;
+    const fetcher: (url: string[]) => Promise<CompanystaffsPartialUpdateData> =
+      (_) =>
+        this.companystaffsPartialUpdate(companystaffsId, params).then(
+          (res) => res.data,
+        );
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Query all CompanyStaffs records <br /><br /> <b>Authentication:</b> not required
    *
@@ -80,6 +124,17 @@ export class Companystaffs<SecurityDataType = unknown> extends HttpClient<Securi
       format: "json",
       ...params,
     });
+
+  companystaffsListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/companystaffs`] : null;
+    const fetcher = () =>
+      this.companystaffsList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Add CompanyStaffs record <br /><br /> <b>Authentication:</b> not required
    *
@@ -95,4 +150,14 @@ export class Companystaffs<SecurityDataType = unknown> extends HttpClient<Securi
       format: "json",
       ...params,
     });
+
+  companystaffsCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/companystaffs`] : null;
+    const fetcher: (url: string[]) => Promise<CompanystaffsCreateData> = (_) =>
+      this.companystaffsCreate(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

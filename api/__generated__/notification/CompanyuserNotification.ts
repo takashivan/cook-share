@@ -11,131 +11,102 @@
  */
 
 import {
-  ByRestaurantCreateData,
-  ByRestaurantCreatePayload,
-  ByUserDetailResult,
-  CompanyuserNotificationCreateData,
-  CompanyuserNotificationCreatePayload,
-  CompanyuserNotificationDeleteData,
-  CompanyuserNotificationDetailData,
-  CompanyuserNotificationListData,
-  CompanyuserNotificationPartialUpdateData,
-  CompanyuserNotificationPartialUpdatePayload,
+  ByUserDetailOutput1,
+  MarkReadAllPartialUpdateOutput1,
+  MarkReadAllPartialUpdatePayload1,
+  MarkReadPartialUpdateResult,
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class CompanyuserNotification<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class CompanyuserNotification<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
-   *
-   * @tags companyuser_notification
-   * @name ByRestaurantCreate
-   * @request POST:/companyuser_notification/byRestaurant/{restaurant_id}
-   */
-  byRestaurantCreate = (restaurantId: number, data: ByRestaurantCreatePayload, params: RequestParams = {}) =>
-    this.request<ByRestaurantCreateData, void>({
-      path: `/companyuser_notification/byRestaurant/${restaurantId}`,
-      method: "POST",
-      body: data,
-      type: ContentType.Json,
-      format: "json",
-      ...params,
-    });
-  /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH-CompanyUser] 自分の通知だけ見られます。 <br /><br /> <b>Authentication:</b> not required
    *
    * @tags companyuser_notification
    * @name ByUserDetail
+   * @summary [AUTH-CompanyUser] 自分の通知だけ見られます。
    * @request GET:/companyuser_notification/byUser/{user_id}
    */
   byUserDetail = (userId: string, params: RequestParams = {}) =>
-    this.request<ByUserDetailResult, void>({
+    this.request<ByUserDetailOutput1, void>({
       path: `/companyuser_notification/byUser/${userId}`,
       method: "GET",
       format: "json",
       ...params,
     });
+
+  byUserDetailQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/companyuser_notification/byUser/${userId}`] : null;
+    const fetcher = () =>
+      this.byUserDetail(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
-   * @description Delete companyUser_notification record. <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH-CompanyUser]自分の通知だけを全て既読にできます。 <br /><br /> <b>Authentication:</b> not required
    *
    * @tags companyuser_notification
-   * @name CompanyuserNotificationDelete
-   * @summary Delete companyUser_notification record.
-   * @request DELETE:/companyuser_notification/{companyuser_notification_id}
+   * @name MarkReadAllPartialUpdate
+   * @summary [AUTH-CompanyUser]自分の通知だけを全て既読にできます。
+   * @request PATCH:/companyuser_notification/mark-read/all
    */
-  companyuserNotificationDelete = (companyuserNotificationId: string, params: RequestParams = {}) =>
-    this.request<CompanyuserNotificationDeleteData, void>({
-      path: `/companyuser_notification/${companyuserNotificationId}`,
-      method: "DELETE",
-      format: "json",
-      ...params,
-    });
-  /**
-   * @description Get companyUser_notification record <br /><br /> <b>Authentication:</b> not required
-   *
-   * @tags companyuser_notification
-   * @name CompanyuserNotificationDetail
-   * @summary Get companyUser_notification record
-   * @request GET:/companyuser_notification/{companyuser_notification_id}
-   */
-  companyuserNotificationDetail = (companyuserNotificationId: string, params: RequestParams = {}) =>
-    this.request<CompanyuserNotificationDetailData, void>({
-      path: `/companyuser_notification/${companyuserNotificationId}`,
-      method: "GET",
-      format: "json",
-      ...params,
-    });
-  /**
-   * @description Edit companyUser_notification record <br /><br /> <b>Authentication:</b> not required
-   *
-   * @tags companyuser_notification
-   * @name CompanyuserNotificationPartialUpdate
-   * @summary Edit companyUser_notification record
-   * @request PATCH:/companyuser_notification/{companyuser_notification_id}
-   */
-  companyuserNotificationPartialUpdate = (
-    companyuserNotificationId: string,
-    data: CompanyuserNotificationPartialUpdatePayload,
+  markReadAllPartialUpdate = (
+    data: MarkReadAllPartialUpdatePayload1,
     params: RequestParams = {},
   ) =>
-    this.request<CompanyuserNotificationPartialUpdateData, void>({
-      path: `/companyuser_notification/${companyuserNotificationId}`,
+    this.request<MarkReadAllPartialUpdateOutput1, void>({
+      path: `/companyuser_notification/mark-read/all`,
       method: "PATCH",
       body: data,
       type: ContentType.Json,
       format: "json",
       ...params,
     });
+
+  markReadAllPartialUpdateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/companyuser_notification/mark-read/all`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: MarkReadAllPartialUpdatePayload1 },
+    ) => Promise<MarkReadAllPartialUpdateOutput1> = (_, { arg }) =>
+      this.markReadAllPartialUpdate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
-   * @description Query all companyUser_notification records <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH-CompanyUser]自分の通知だけを既読にできます。 <br /><br /> <b>Authentication:</b> not required
    *
    * @tags companyuser_notification
-   * @name CompanyuserNotificationList
-   * @summary Query all companyUser_notification records
-   * @request GET:/companyuser_notification
+   * @name MarkReadPartialUpdate
+   * @summary [AUTH-CompanyUser]自分の通知だけを既読にできます。
+   * @request PATCH:/companyuser_notification/{id}/mark-read
    */
-  companyuserNotificationList = (params: RequestParams = {}) =>
-    this.request<CompanyuserNotificationListData, void>({
-      path: `/companyuser_notification`,
-      method: "GET",
+  markReadPartialUpdate = (id: string, params: RequestParams = {}) =>
+    this.request<MarkReadPartialUpdateResult, void>({
+      path: `/companyuser_notification/${id}/mark-read`,
+      method: "PATCH",
       format: "json",
       ...params,
     });
-  /**
-   * @description Add companyUser_notification record <br /><br /> <b>Authentication:</b> not required
-   *
-   * @tags companyuser_notification
-   * @name CompanyuserNotificationCreate
-   * @summary Add companyUser_notification record
-   * @request POST:/companyuser_notification
-   */
-  companyuserNotificationCreate = (data: CompanyuserNotificationCreatePayload, params: RequestParams = {}) =>
-    this.request<CompanyuserNotificationCreateData, void>({
-      path: `/companyuser_notification`,
-      method: "POST",
-      body: data,
-      type: ContentType.Json,
-      format: "json",
-      ...params,
-    });
+
+  markReadPartialUpdateQueryArgs = (
+    id: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/companyuser_notification/${id}/mark-read`] : null;
+    const fetcher: (url: string[]) => Promise<MarkReadPartialUpdateResult> = (
+      _,
+    ) => this.markReadPartialUpdate(id, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

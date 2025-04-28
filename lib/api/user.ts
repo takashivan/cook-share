@@ -25,6 +25,7 @@ interface UserData {
 }
 
 interface RegisterResponse {
+  sessionToken: string;
   authToken: string;
   user: UserProfile;
 }
@@ -87,9 +88,10 @@ interface SettingsData {
 // 認証関連
 export const login = async (
   credentials: Credentials
-): Promise<{ authToken: string; user: UserProfile }> => {
+): Promise<{ sessionToken: string; authToken: string; user: UserProfile }> => {
   try {
     const response = await apiRequest<{
+      sessionToken: string;
       authToken: string;
       user: {
         id: string;
@@ -105,12 +107,13 @@ export const login = async (
       };
     }>(`${AUTH_URL}/login`, "POST", credentials);
 
-    if (response.authToken) {
-      setAuthToken(response.authToken, "chef");
+    if (response.sessionToken) {
+      setAuthToken(response.sessionToken, "chef");
       setCurrentUser(response.user, "chef");
     }
 
     return {
+      sessionToken: response.sessionToken,
       authToken: response.authToken,
       user: {
         ...response.user,
@@ -127,6 +130,7 @@ export const register = async (
   userData: UserData
 ): Promise<RegisterResponse> => {
   const response = await apiRequest<{
+    sessionToken: string;
     authToken: string;
     user: {
       id: string;
@@ -142,12 +146,13 @@ export const register = async (
     };
   }>(`${AUTH_URL}/signup`, "POST", userData);
 
-  if (response.authToken) {
-    setAuthToken(response.authToken, "chef");
+  if (response.sessionToken) {
+    setAuthToken(response.sessionToken, "chef");
   }
 
   return {
     authToken: response.authToken,
+    sessionToken: response.sessionToken,
     user: {
       ...response.user,
       created_at: undefined,

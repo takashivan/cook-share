@@ -16,7 +16,7 @@ import {
   CompanyNotification,
   CompanySettings,
 } from "./company";
-
+import { Restaurant } from "./restaurant";
 const BASE_URL = API_CONFIG.baseURLs.companyUser;
 const AUTH_URL = API_CONFIG.baseURLs.companyAuth;
 
@@ -52,15 +52,15 @@ type QueryParams = Record<string, string>;
 // 認証関連
 export const login = async (
   credentials: Credentials
-): Promise<{ authToken: string; user: CompanyUser }> => {
+): Promise<{ sessionToken: string; authToken: string; user: CompanyUser }> => {
   try {
-    const response = await apiRequest<{ authToken: string; user: CompanyUser }>(
+    const response = await apiRequest<{ sessionToken: string; authToken: string; user: CompanyUser }>(
       `${AUTH_URL}/login`,
       "POST",
       credentials
     );
-    if (response.authToken) {
-      setAuthToken(response.authToken, "company");
+    if (response.sessionToken) {
+      setAuthToken(response.sessionToken, "company");
     }
     return response;
   } catch (error) {
@@ -68,10 +68,17 @@ export const login = async (
   }
 };
 
+export const getMyRestaurants = async (
+  companyuser_id: string
+): Promise<Restaurant[]> => {
+  return apiRequest(`${BASE_URL}/restaurants/${companyuser_id}`, "GET");
+};
+
 export const register = async (
   userData: CompanyUserData
-): Promise<{ authToken: string; user: CompanyUser }> => {
+): Promise<{ sessionToken: string; authToken: string; user: CompanyUser }> => {
   const response = await apiRequest<{
+    sessionToken: string;
     authToken: string;
     user: {
       id: string;
@@ -82,8 +89,8 @@ export const register = async (
     };
   }>(`${AUTH_URL}/signup`, "POST", userData);
 
-  if (response.authToken) {
-    setAuthToken(response.authToken, "company");
+  if (response.sessionToken) {
+    setAuthToken(response.sessionToken, "company");
   }
 
   // Transform the response to match CompanyUser interface
@@ -100,6 +107,7 @@ export const register = async (
   setCurrentUser(transformedUser, "company");
 
   return {
+    sessionToken: response.sessionToken,
     authToken: response.authToken,
     user: transformedUser,
   };
@@ -152,9 +160,9 @@ export const forgotPassword = (
 export type CompanyUserResponse = CompanyUser[];
 
 export const getCompanyUserByCompanyId = (
-  id: string
+  companies_id: string
 ): Promise<CompanyUserResponse> => {
-  return apiRequest(`${BASE_URL}/company/${id}`, "GET");
+  return apiRequest(`${BASE_URL}/company/${companies_id}`, "GET");
 };
 
 export const updateCompanyUser = async (

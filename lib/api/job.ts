@@ -149,7 +149,15 @@ export interface GetJobsResponse {
 // ジョブ一覧取得
 export const getAllJobs = async (): Promise<JobWithRestaurant[]> => {
   const response = await apiRequest<{ jobs: JobWithRestaurant[] }>(
-    `${API_CONFIG.baseURLs.job}/query/upcomingjobs`,
+    `${API_CONFIG.baseURLs.job}/query/upcoming`,
+    "GET"
+  );
+  return response.jobs || [];
+};
+// ジョブ一覧取得
+export const getAllJobsNonSelected = async (): Promise<JobWithRestaurant[]> => {
+  const response = await apiRequest<{ jobs: JobWithRestaurant[] }>(
+    `${API_CONFIG.baseURLs.job}`,
     "GET"
   );
   return response.jobs || [];

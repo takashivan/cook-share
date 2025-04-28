@@ -50,7 +50,7 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {/* <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle>会社管理</CardTitle>
@@ -143,14 +143,14 @@ export default function AdminDashboard() {
                 </p>
               </div>
             </div>
-            <Link href="/admin/company/billing">
+            <Link href="/admin/company/billings">
               <Button variant="outline" className="w-full mt-2">
                 請求一覧を表示
               </Button>
             </Link>
           </CardContent>
         </Card>
-      </div>
+      </div> */}
     </div>
   );
 }

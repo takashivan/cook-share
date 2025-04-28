@@ -52,6 +52,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ChatSheet } from "@/components/chat/ChatSheet";
+import { useSubscriptionMessagesByWorksessionId } from "@/hooks/api/messages/useSubscriptionMessagesByWorksessionId";
 
 interface JobDetail {
   job: {
@@ -89,6 +90,8 @@ type PageProps = {
     id: string;
   }>;
 };
+
+
 
 export default function JobDetail({ params }: PageProps) {
   const { id } = use(params);
@@ -130,15 +133,11 @@ export default function JobDetail({ params }: PageProps) {
   );
 
   // メッセージの取得
-  const { data: messages } = useSWR<Message[]>(
-    workSession?.id ? `messages-${workSession.id}` : null,
-    async () => {
-      const result = await messageApi.getMessagesByWorkSessionId(
-        workSession!.id
-      );
-      return result as Message[];
-    }
-  );
+  const { messages, sendMessage } = useSubscriptionMessagesByWorksessionId({
+    workSessionId: workSession?.id,
+    applicationId: application?.id.toString() || "",
+    userType: 'chef',
+  })
 
   // 未読メッセージのカウント
   const unreadCount =
@@ -608,27 +607,12 @@ export default function JobDetail({ params }: PageProps) {
         <ChatSheet
           isOpen={isChatOpen}
           onClose={() => setIsChatOpen(false)}
-          messages={messages}
-          onSendMessage={async (message) => {
-            try {
-              const messageParams = {
-                content: message,
-                worksession_id: workSession.id,
-                application_id: application?.id.toString() || "",
-                sender_type: "chef" as const,
-              };
-              await messageApi.createMessage(messageParams);
-              mutate(`messages-${workSession.id}`);
-            } catch (error) {
-              console.error("Failed to send message:", error);
-            }
-          }}
+          messages={messages || []}
+          onSendMessage={sendMessage}
           restaurantName={restaurant?.name || ""}
           restaurantImage={restaurant?.profile_image}
           workDate={job?.work_date || ""}
           startTime={job?.start_time || 0}
-          workSessionId={workSession.id}
-          mutateMessages={() => mutate(`messages-${workSession.id}`)}
         />
       )}
     </div>

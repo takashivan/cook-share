@@ -73,8 +73,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const handleLogin = async (email: string, password: string) => {
     try {
-      const { authToken, user } = await login({ email, password });
-      setAuthToken(authToken);
+      const { sessionToken, user } = await login({
+        email,
+        password,
+      });
+      setAuthToken(sessionToken, "chef");
       const fullProfile = await getUserProfile(user.id);
       setUser(fullProfile);
       setCurrentUser(fullProfile, "chef");
@@ -114,4 +117,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export const useAuth = () => useContext(AuthContext);
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+}

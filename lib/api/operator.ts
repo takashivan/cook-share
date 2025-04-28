@@ -193,6 +193,14 @@ export const operatorApi = {
     );
   },
 
+  getAlert: async (): Promise<any[]> => {
+    return apiRequest(
+      `${API_CONFIG.baseURLs.alert}`,
+      "GET",
+      undefined,
+      "operator"
+    );
+  },
   getStaffMember: async (id: string): Promise<any> => {
     return apiRequest(
       `${API_CONFIG.baseURLs.operator}/staff/${id}`,

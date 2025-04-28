@@ -4,14 +4,13 @@ import { useEffect, useState, useCallback } from "react";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/lib/store/store";
-import { fetchRestaurantsByCompanyId } from "@/lib/store/restaurantSlice";
+import { fetchMyRestaurants } from "@/lib/store/restaurantSlice";
 import { CreateRestaurantModal } from "@/components/modals/CreateRestaurantModal";
 import { createRestaurant } from "@/lib/api/restaurant";
 import { toast } from "@/hooks/use-toast";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -36,31 +35,32 @@ import {
   MoreHorizontal,
   Plus,
   Store,
-  Users,
 } from "lucide-react";
 import Link from "next/link";
+import { useGetRestaurantsByCompanyId } from "@/hooks/api/restaurants/useGetRestaurantsByCompanyId";
+import { useCreateRestaurant } from "@/hooks/api/restaurants/useCreateRestaurant";
+import { RestaurantsCreatePayload } from "@/api/__generated__/base/data-contracts";
+import { useGetRestaurantsByCompanyUserId } from "@/hooks/api/restaurants/useGetRestaurantsByCompanyUserId";
 
 export default function StoresPage() {
-  const dispatch = useDispatch<AppDispatch>();
   const { user } = useCompanyAuth();
   const {
-    restaurants,
-    loading: isLoading,
+    data: restaurants,
+    isLoading,
     error,
-  } = useSelector((state: RootState) => state.restaurants);
+    mutate,
+  } = useGetRestaurantsByCompanyUserId({ companyuserId: user?.id });
   const [isCreateRestaurantModalOpen, setIsCreateRestaurantModalOpen] =
     useState(false);
   const [hasMounted, setHasMounted] = useState(false);
 
+  const { trigger: createRestaurantTrigger } = useCreateRestaurant({
+    companyId: user?.companies_id ?? undefined,
+  });
+
   useEffect(() => {
     setHasMounted(true);
   }, []);
-
-  useEffect(() => {
-    if (!hasMounted || !user?.companies_id) return;
-
-    dispatch(fetchRestaurantsByCompanyId(user.companies_id));
-  }, [dispatch, user?.companies_id, hasMounted]);
 
   const handleCreateRestaurantModal = useCallback(() => {
     if (!hasMounted) return;
@@ -73,7 +73,7 @@ export default function StoresPage() {
   }, [hasMounted]);
 
   const handleCreateRestaurant = useCallback(
-    async (data: FormData) => {
+    async (data: RestaurantsCreatePayload) => {
       if (!hasMounted || !user?.companies_id) return;
 
       try {
@@ -86,18 +86,16 @@ export default function StoresPage() {
           throw new Error("会社IDの形式が正しくありません");
         }
 
-        const result = await createRestaurant(data);
+        const result = await createRestaurantTrigger(data);
         if (!result) {
           throw new Error("店舗の作成に失敗しました");
         }
 
         // 店舗一覧を再取得
-        const refreshResult = await dispatch(
-          fetchRestaurantsByCompanyId(companyId)
-        );
-        if (refreshResult.type.endsWith("/rejected")) {
-          throw new Error("店舗一覧の更新に失敗しました");
-        }
+        // const refreshResult = await dispatch(fetchMyRestaurants(user.id));
+        // if (refreshResult.type.endsWith("/rejected")) {
+        //   throw new Error("店舗一覧の更新に失敗しました");
+        // }
 
         handleCloseRestaurantModal();
         toast({
@@ -117,7 +115,7 @@ export default function StoresPage() {
         throw error;
       }
     },
-    [hasMounted, user?.companies_id, dispatch, handleCloseRestaurantModal]
+    [hasMounted, user?.companies_id, mutate, handleCloseRestaurantModal]
   );
 
   if (!hasMounted) {
@@ -172,7 +170,7 @@ export default function StoresPage() {
             <Store className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{restaurants.length}</div>
+            <div className="text-2xl font-bold">{restaurants?.length ?? ''}</div>
           </CardContent>
         </Card>
 
@@ -183,7 +181,7 @@ export default function StoresPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {restaurants.filter((r) => r.is_active).length}
+              {restaurants?.filter((r) => r.is_active).length  ?? ''}
             </div>
           </CardContent>
         </Card>
@@ -198,13 +196,16 @@ export default function StoresPage() {
                 <TableHead>店舗名</TableHead>
                 <TableHead>住所</TableHead>
                 <TableHead>ジャンル</TableHead>
-                <TableHead>ステータス</TableHead>
-                <TableHead className="w-[100px]"></TableHead>
+                {/* <TableHead>ステータス</TableHead> */}
               </TableRow>
             </TableHeader>
             <TableBody>
-              {restaurants.map((restaurant) => (
-                <TableRow key={restaurant.id}>
+              {restaurants?.map((restaurant) => (
+                <TableRow 
+                  key={restaurant.id} 
+                  className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => window.location.href = `/admin/stores/${restaurant.id}`}
+                >
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center">
@@ -215,40 +216,6 @@ export default function StoresPage() {
                   </TableCell>
                   <TableCell>{restaurant.address}</TableCell>
                   <TableCell>{restaurant.cuisine_type}</TableCell>
-                  <TableCell>
-                    <div
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        restaurant.is_active
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}>
-                      {restaurant.is_active ? "営業中" : "準備中"}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">メニューを開く</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <Link
-                            href={`/admin/stores/${restaurant.id}`}
-                            className="w-full flex items-center">
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            詳細を表示
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Edit className="h-4 w-4 mr-2" />
-                          編集
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -258,7 +225,7 @@ export default function StoresPage() {
 
       {/* Mobile View */}
       <div className="grid gap-4 md:hidden">
-        {restaurants.map((restaurant) => (
+        {restaurants?.map((restaurant) => (
           <Card key={restaurant.id}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">

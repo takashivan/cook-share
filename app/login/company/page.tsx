@@ -39,7 +39,7 @@ export default function CompanyLoginPage() {
 
       const response = await login(data);
       console.log("Login response:", response);
-      await authLogin(response.authToken, response.user);
+      await authLogin(response.sessionToken, response.user);
 
       toast({
         title: "ログインしました",

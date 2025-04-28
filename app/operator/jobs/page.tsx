@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/lib/redux/store";
 import {
   fetchOperatorJobs,
+  fetchOperatorAlerts,
   banJob,
   approveJob,
 } from "@/lib/redux/slices/operatorSlice";
@@ -13,31 +14,29 @@ import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { AlertCircle } from "lucide-react";
 
 export default function JobsPage() {
   const dispatch = useDispatch<AppDispatch>();
-  const { jobs, loading, error } = useSelector((state: RootState) => ({
+  const { jobs, alerts, loading, error } = useSelector((state: RootState) => ({
     jobs: state.operator.jobs.data,
-    loading: state.operator.jobs.loading,
-    error: state.operator.jobs.error,
+    alerts: state.operator.alerts.data,
+    loading: state.operator.jobs.loading || state.operator.alerts.loading,
+    error: state.operator.jobs.error || state.operator.alerts.error,
   }));
-  console.log(
-    "Jobs data:",
-    jobs?.map((job) => ({
-      id: job.id,
-      title: job.title,
-      is_approved: job.is_approved,
-    }))
-  );
+
   const [searchTerm, setSearchTerm] = useState("");
   const [showSuspendedOnly, setShowSuspendedOnly] = useState(false);
   const [selectedJob, setSelectedJob] = useState<JobWithRestaurant | null>(
     null
   );
+  const [selectedAlert, setSelectedAlert] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
 
   useEffect(() => {
     dispatch(fetchOperatorJobs());
+    dispatch(fetchOperatorAlerts());
   }, [dispatch]);
 
   const filteredJobs = jobs?.filter((job) => {
@@ -47,6 +46,10 @@ export default function JobsPage() {
     const matchesStatus = showSuspendedOnly ? !job.is_approved : true;
     return matchesSearch && matchesStatus;
   });
+
+  const getJobAlert = (jobId: number) => {
+    return alerts?.find((alert) => alert.job_id === jobId);
+  };
 
   const handleBan = async (id: number) => {
     if (window.confirm("この求人を停止しますか？")) {
@@ -123,47 +126,62 @@ export default function JobsPage() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredJobs?.map((job: JobWithRestaurant) => (
-              <tr key={job.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <button
-                    onClick={() => {
-                      setSelectedJob(job);
-                      setIsModalOpen(true);
-                    }}
-                    className="text-blue-600 hover:text-blue-800">
-                    {job.title}
-                  </button>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {new Date(job.work_date).toLocaleDateString("ja-JP")}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  ¥{job.hourly_rate?.toLocaleString() || "未設定"}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {job.is_approved ? (
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                      公開中
-                    </span>
-                  ) : (
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                      停止中
-                    </span>
-                  )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button
-                    onClick={() => {
-                      setSelectedJob(job);
-                      setIsModalOpen(true);
-                    }}
-                    className="text-blue-600 hover:text-blue-900">
-                    詳細
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {filteredJobs?.map((job: JobWithRestaurant) => {
+              const alert = getJobAlert(job.id);
+              return (
+                <tr key={job.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          setSelectedJob(job);
+                          setIsModalOpen(true);
+                        }}
+                        className="text-blue-600 hover:text-blue-800">
+                        {job.title}
+                      </button>
+                      {alert && (
+                        <button
+                          onClick={() => {
+                            setSelectedAlert(alert);
+                            setIsAlertModalOpen(true);
+                          }}
+                          className="text-red-500 hover:text-red-700">
+                          <AlertCircle className="h-5 w-5" />
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {new Date(job.work_date).toLocaleDateString("ja-JP")}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    ¥{job.hourly_rate?.toLocaleString() || "未設定"}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {job.is_approved ? (
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                        公開中
+                      </span>
+                    ) : (
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                        停止中
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button
+                      onClick={() => {
+                        setSelectedJob(job);
+                        setIsModalOpen(true);
+                      }}
+                      className="text-blue-600 hover:text-blue-900">
+                      詳細
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -211,6 +229,41 @@ export default function JobsPage() {
                 )}
                 <button
                   onClick={() => setIsModalOpen(false)}
+                  className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                  閉じる
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isAlertModalOpen && selectedAlert && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full">
+            <h2 className="text-xl font-bold mb-4 text-red-600">
+              アラート情報
+            </h2>
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-semibold">ステータス</h3>
+                <p className="text-gray-600">{selectedAlert.status}</p>
+              </div>
+              <div>
+                <h3 className="font-semibold">メッセージ</h3>
+                <p className="text-gray-600 whitespace-pre-line">
+                  {selectedAlert.messages}
+                </p>
+              </div>
+              <div>
+                <h3 className="font-semibold">作成日時</h3>
+                <p className="text-gray-600">
+                  {new Date(selectedAlert.created_at).toLocaleString("ja-JP")}
+                </p>
+              </div>
+              <div className="flex justify-end mt-6">
+                <button
+                  onClick={() => setIsAlertModalOpen(false)}
                   className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
                   閉じる
                 </button>

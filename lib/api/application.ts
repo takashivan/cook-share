@@ -1,4 +1,5 @@
 import { API_CONFIG, apiRequest } from "./config";
+import { getAuthToken } from "./config";
 import { Application } from "../../types";
 
 const API_URL = API_CONFIG.baseURLs.application;
@@ -92,10 +93,16 @@ export const applicationApi = {
   createApplication: async (
     params: CreateApplicationParams
   ): Promise<CreateApplicationResponse> => {
+    const token = getAuthToken();
+    if (!token) {
+      throw new Error("認証トークンが見つかりません");
+    }
+
     const response = await fetch(`${API_URL}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(params),
     });

@@ -2,6 +2,7 @@ import { apiRequest } from "./config";
 import { API_CONFIG } from "./config";
 import { getCompany } from "./company";
 import { Restaurant as RestaurantType } from "@/types/restaurant";
+import { CompanyUserNotification } from "./companyUserNotification";
 
 const BASE_URL = API_CONFIG.baseURLs.restaurant;
 
@@ -99,6 +100,19 @@ export const restaurantStaffInvite = (
     restaurant_name,
   });
 };
+export const deleteRestaurantStaff = async (
+  restaurant_id: number,
+  user_id: string
+): Promise<void> => {
+  return apiRequest(
+    `${BASE_URL}/staff/delete`,
+    "DELETE",
+    {
+      restaurant_id,
+      user_id,
+    }
+  );
+};
 
 // レストラン情報を更新
 export const updateRestaurant = async (
@@ -136,3 +150,17 @@ export const getRestaurantStaff = async (restaurantId: string) => {
   );
   return response;
 };
+
+export const getRestaurantNotifications = async (
+  restaurantId: number
+): Promise<CompanyUserNotification[]> => {
+  const response = await fetch(
+    `/api/restaurants/${restaurantId}/notifications`
+  );
+  if (!response.ok) {
+    throw new Error("Failed to fetch restaurant notifications");
+  }
+  return response.json();
+};
+
+

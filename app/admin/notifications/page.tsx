@@ -1,37 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import {
-  Bell,
-  Search,
-  User,
-  MessageSquare,
-  Calendar,
-  CreditCard,
-  AlertTriangle,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import {
-  CompanyUserNotification,
   CompanyUserNotificationType,
-  getCompanyUserNotificationsByCompanyUserId,
   markCompanyUserNotificationAsRead,
   markAllCompanyUserNotificationsAsRead,
 } from "@/lib/api/companyUserNotification";
+import { useGetCompanyUserNotificationsByUserId } from "@/hooks/api/companyUserNotifications/useGetCompanyUserNotificationsByUserId";
 
 export default function RestaurantNotificationsPage() {
   const { user } = useCompanyAuth();
@@ -39,58 +19,23 @@ export default function RestaurantNotificationsPage() {
   const [filter, setFilter] = useState<CompanyUserNotificationType | "all">(
     "all"
   );
-  const [notifications, setNotifications] = useState<CompanyUserNotification[]>(
-    []
-  );
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      if (user?.id) {
-        try {
-          const data = await getCompanyUserNotificationsByCompanyUserId(
-            user.id
-          );
-          setNotifications(data);
-        } catch (error) {
-          console.error("Failed to fetch notifications:", error);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchNotifications();
-  }, [user?.id]);
+  const { data: notifications, isLoading } = useGetCompanyUserNotificationsByUserId({ userId: user?.id });
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {
-      await markCompanyUserNotificationAsRead(Number(notificationId));
-      setNotifications((prev) =>
-        prev.map((n) =>
-          n.id === Number(notificationId) ? { ...n, read: true } : n
-        )
-      );
+      await markCompanyUserNotificationAsRead(notificationId);
     } catch (error) {
       console.error("Failed to mark notification as read:", error);
     }
   };
 
-  const handleMarkAllAsRead = async () => {
-    try {
-      await markAllCompanyUserNotificationsAsRead();
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    } catch (error) {
-      console.error("Failed to mark all notifications as read:", error);
-    }
-  };
-
   // 通知をフィルタリングする
-  const filteredNotifications = notifications.filter((notification) => {
-    if (activeTab === "unread" && notification.read) return false;
+  const filteredNotifications = notifications?.filter((notification) => {
+    if (activeTab === "unread" && notification.is_read) return false;
     if (filter !== "all" && notification.type !== filter) return false;
     return true;
-  });
+  }) ?? [];
 
   // 通知タイプに応じたアイコンを返す関数
   const getNotificationIcon = (type: CompanyUserNotificationType) => {
@@ -159,7 +104,8 @@ export default function RestaurantNotificationsPage() {
             {filteredNotifications.length > 0 ? (
               filteredNotifications.map((notification) => (
                 <Link key={notification.id} href="#">
-                  <Card className={`${!notification.read ? "bg-gray-50" : ""}`}>
+                  <Card
+                    className={`${!notification.is_read ? "bg-gray-50" : ""}`}>
                     <CardContent className="p-4">
                       <div className="flex gap-3">
                         <div
@@ -211,7 +157,7 @@ export default function RestaurantNotificationsPage() {
           </TabsContent>
           <TabsContent value="unread" className="mt-0">
             {filteredNotifications
-              .filter((n) => !n.read)
+              .filter((n) => !n.is_read)
               .map((notification) => (
                 <Link key={notification.id} href="#">
                   <Card className="bg-gray-50">

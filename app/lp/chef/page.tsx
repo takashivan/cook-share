@@ -1,637 +1,1111 @@
-"use client";
+"use client"
 
-import Image from "next/image";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  CheckCircle,
-  ChevronRight,
-  Clock,
-  MessageSquare,
-  Shield,
-  Star,
-  Users,
-  ArrowRight,
-  ChefHat,
-  DollarSign,
-  MapPin,
-  LucideIcon,
-} from "lucide-react";
-import { motion, Variants } from "framer-motion";
-import { useInView } from "react-intersection-observer";
-
-interface AnimatedSectionProps {
-  children: React.ReactNode;
-  id?: string;
-  className?: string;
-}
-
-interface FeatureCardProps {
-  icon: LucideIcon;
-  title: string;
-  description: string;
-}
-
-const fadeInUp: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-};
-
-const staggerContainer: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-
-const AnimatedSection: React.FC<AnimatedSectionProps> = ({
-  children,
-  id,
-  className,
-}) => {
-  const [ref, inView] = useInView({
-    triggerOnce: true,
-    threshold: 0.1,
-  });
-
-  return (
-    <motion.section
-      ref={ref}
-      initial="hidden"
-      animate={inView ? "visible" : "hidden"}
-      variants={staggerContainer}
-      id={id}
-      className={className}>
-      {children}
-    </motion.section>
-  );
-};
-
-const FeatureCard: React.FC<FeatureCardProps> = ({
-  icon: Icon,
-  title,
-  description,
-}) => {
-  return (
-    <motion.div
-      variants={fadeInUp}
-      className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-      <div className="flex items-center gap-4 mb-4">
-        <div className="p-2 bg-primary/10 rounded-full">
-          <Icon className="h-5 w-5 text-primary" />
-        </div>
-        <h3 className="text-lg font-semibold">{title}</h3>
-      </div>
-      <p className="text-gray-600">{description}</p>
-    </motion.div>
-  );
-};
+import { useEffect, useRef, useState } from "react"
+import Image from "next/image"
+import Link from "next/link"
+import { motion, useScroll, useTransform, useInView, useAnimation } from "framer-motion"
+import { Phone, User, ChevronDown, ArrowRight, Star } from "lucide-react"
 
 export default function ChefLandingPage() {
+  const [activeSection, setActiveSection] = useState("hero")
+  const { scrollY } = useScroll()
+  const heroRef = useRef<HTMLDivElement>(null)
+  const featuresRef = useRef<HTMLDivElement>(null)
+  const aboutRef = useRef<HTMLDivElement>(null)
+  const benefitsRef = useRef<HTMLDivElement>(null)
+  const stepsRef = useRef<HTMLDivElement>(null)
+  const testimonialsRef = useRef<HTMLDivElement>(null)
+
+  // Enhanced scroll-based animations
+  const heroOpacity = useTransform(scrollY, [0, 400], [1, 0])
+  const heroScale = useTransform(scrollY, [0, 400], [1, 0.9])
+  const heroY = useTransform(scrollY, [0, 400], [0, 100])
+
+  // Parallax effects
+  const parallax1 = useTransform(scrollY, [0, 1000], [0, -150])
+  const parallax2 = useTransform(scrollY, [0, 1000], [0, -100])
+  const parallax3 = useTransform(scrollY, [0, 1000], [0, -50])
+
+  // Rotation effects
+  const rotate1 = useTransform(scrollY, [0, 1000], [0, 10])
+  const rotate2 = useTransform(scrollY, [0, 1000], [0, -5])
+
+  // InView detection for sections
+  const isHeroInView = useInView(heroRef, { once: false, amount: 0.5 })
+  const isFeaturesInView = useInView(featuresRef, { once: false, amount: 0.3 })
+  const isAboutInView = useInView(aboutRef, { once: false, amount: 0.3 })
+  const isBenefitsInView = useInView(benefitsRef, { once: false, amount: 0.3 })
+  const isStepsInView = useInView(stepsRef, { once: false, amount: 0.3 })
+  const isTestimonialsInView = useInView(testimonialsRef, { once: false, amount: 0.3 })
+
+  // Animation controls
+  const featureControls = useAnimation()
+  const aboutControls = useAnimation()
+  const benefitsControls = useAnimation()
+  const stepsControls = useAnimation()
+  const testimonialsControls = useAnimation()
+
+  // Update active section based on scroll position
+  useEffect(() => {
+    const sections = [
+      { ref: heroRef, id: "hero" },
+      { ref: featuresRef, id: "features" },
+      { ref: aboutRef, id: "about" },
+      { ref: benefitsRef, id: "benefits" },
+      { ref: stepsRef, id: "steps" },
+      { ref: testimonialsRef, id: "testimonials" },
+    ]
+
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + window.innerHeight / 2
+
+      for (const section of sections) {
+        if (!section.ref.current) continue
+
+        const offsetTop = section.ref.current.offsetTop
+        const offsetHeight = section.ref.current.offsetHeight
+
+        if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+          setActiveSection(section.id)
+          break
+        }
+      }
+    }
+
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  // Trigger animations when sections come into view
+  useEffect(() => {
+    if (isFeaturesInView) featureControls.start("visible")
+    if (isAboutInView) aboutControls.start("visible")
+    if (isBenefitsInView) benefitsControls.start("visible")
+    if (isStepsInView) stepsControls.start("visible")
+    if (isTestimonialsInView) testimonialsControls.start("visible")
+  }, [
+    isFeaturesInView,
+    isAboutInView,
+    isBenefitsInView,
+    isStepsInView,
+    isTestimonialsInView,
+    featureControls,
+    aboutControls,
+    benefitsControls,
+    stepsControls,
+    testimonialsControls,
+  ])
+
+  // Animation variants
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 60 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.8,
+        ease: [0.22, 1, 0.36, 1],
+      },
+    },
+  }
+
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  }
+
+  const staggerItem = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut",
+      },
+    },
+  }
+
+  const scaleIn = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.6,
+        ease: [0.22, 1, 0.36, 1],
+      },
+    },
+  }
+
+  // Testimonials data
+  const testimonials = [
+    {
+      name: "田中 健太",
+      role: "フレンチシェフ",
+      text: "CHEFDOMのおかげで、様々なレストランで経験を積むことができました。自分のスキルを高めながら、柔軟な働き方ができるのが最高です。",
+      rating: 5,
+    },
+    {
+      name: "佐藤 美咲",
+      role: "パティシエ",
+      text: "自分のペースで働けるのが魅力です。様々な店舗のデザートメニュー開発に携わる機会が増え、クリエイティビティを発揮できています。",
+      rating: 5,
+    },
+    {
+      name: "鈴木 大輔",
+      role: "和食料理人",
+      text: "伝統的な和食の技術を様々な場所で活かせるようになりました。収入も安定し、キャリアの幅も広がっています。",
+      rating: 4,
+    },
+  ]
+
+  const staggerVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: (custom: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: { delay: custom * 0.2, duration: 0.5, ease: "easeOut" },
+    }),
+  }
+
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-b from-white to-orange-50">
-      {/* ヘッダー */}
-      <header className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-sm">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-            className="flex items-center gap-2">
-            <Image
-              src="/chef_illust/chef_logo.png"
-              alt="CHEFDOM Logo"
-              width={32}
-              height={32}
-              className="rounded-full"
+    <div className="min-h-screen bg-white overflow-hidden">
+      {/* ナビゲーションドット */}
+      <div className="fixed right-8 top-1/2 transform -translate-y-1/2 z-50 hidden lg:block">
+        <div className="flex flex-col items-center space-y-4">
+          {["hero", "features", "about", "benefits", "steps", "testimonials"].map((section) => (
+            <motion.div
+              key={section}
+              className={`w-3 h-3 rounded-full cursor-pointer ${
+                activeSection === section ? "bg-red-500" : "bg-gray-300"
+              }`}
+              whileHover={{ scale: 1.5 }}
+              onClick={() => {
+                const element = document.getElementById(section)
+                if (element) {
+                  element.scrollIntoView({ behavior: "smooth" })
+                }
+              }}
             />
-            <span className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-orange-400">
-              CHEFDOM
-            </span>
-            <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-800">
-              ベータ版
-            </span>
-          </motion.div>
-          <nav className="hidden md:flex items-center gap-6">
-            <Link
-              href="#features"
-              className="text-sm font-medium hover:text-orange-600 transition-colors">
-              特徴
-            </Link>
-            <Link
-              href="#how-it-works"
-              className="text-sm font-medium hover:text-orange-600 transition-colors">
-              利用の流れ
-            </Link>
-            <Link
-              href="#faq"
-              className="text-sm font-medium hover:text-orange-600 transition-colors">
-              よくある質問
-            </Link>
-          </nav>
-          <div className="flex items-center gap-4">
-            <Link href="/lp/restaurant">
-              <Button variant="outline" className="hidden sm:flex">
-                飲食店の方はこちら
-              </Button>
-            </Link>
-            <Link href="#register">
-              <Button className="bg-orange-600 hover:bg-orange-700 transition-colors">
-                登録する
-              </Button>
-            </Link>
-          </div>
+          ))}
         </div>
-      </header>
+      </div>
 
-      <main className="flex-1">
-        {/* ヒーローセクション */}
-        <section className="relative overflow-hidden py-20 sm:py-32">
-          <div className="container mx-auto px-4 sm:px-6">
-            <div className="grid gap-12 lg:grid-cols-2 lg:gap-8 items-center">
-              <motion.div
-                initial={{ opacity: 0, x: -50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8 }}
-                className="max-w-xl">
-                <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-                  <span className="text-orange-600">料理人</span>
-                  のキャリアに
-                  <br />
-                  もうひとつの選択肢を。{" "}
-                </h1>
-                <p className="mt-6 text-lg text-gray-600">
-                  CHEFDOMは、シェフと飲食店をつなぐ新しいプラットフォーム。
-                  <br />
-                  あなたのスキルを活かせる場所がきっと見つかります。
-                </p>
-                <div className="mt-8 flex flex-col sm:flex-row gap-4">
-                  <Link href="#register">
-                    <Button
-                      size="lg"
-                      className="bg-orange-600 hover:bg-orange-700 transition-all duration-300 transform hover:scale-105">
-                      今すぐ登録する
-                      <ChevronRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </Link>
-                  <Link href="#how-it-works">
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="transition-all duration-300 transform hover:scale-105">
-                      詳しく見る
-                    </Button>
-                  </Link>
-                </div>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                  className="mt-8 flex items-center gap-4">
-                  <div className="flex -space-x-2">
-                    {[1, 2, 3, 4].map((i) => (
-                      <motion.div
-                        key={i}
-                        initial={{ opacity: 0, scale: 0.5 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: i * 0.1 }}
-                        className="inline-block h-10 w-10 rounded-full border-2 border-white bg-gray-200 overflow-hidden">
-                        <Image
-                          src={`/chef_illust/chef${i}.png`}
-                          alt={`User ${i}`}
-                          width={40}
-                          height={40}
-                        />
-                      </motion.div>
-                    ))}
-                  </div>
-                  <p className="text-sm text-gray-600">
-                    <span className="font-bold text-orange-600">500+</span>{" "}
-                    のシェフが既に登録しています
-                  </p>
-                </motion.div>
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8 }}
-                className="relative lg:pl-8">
-                <div className="relative mx-auto max-w-md lg:max-w-none">
-                  <motion.div
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.8, delay: 0.2 }}
-                    className="overflow-hidden rounded-xl shadow-xl">
-                    <Image
-                      src="/chef_illust/top_chef.png"
-                      alt="Chef working in kitchen"
-                      width={800}
-                      height={600}
-                      className="w-full h-auto"
-                    />
-                  </motion.div>
-                  <motion.div
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.5 }}
-                    className="absolute -bottom-6 -left-6 rounded-lg bg-white p-4 shadow-lg">
-                    <div className="flex items-center gap-4">
-                      <div className="rounded-full bg-orange-100 p-2">
-                        <Clock className="h-6 w-6 text-orange-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium">すぐに仕事が見つかる</p>
-                        <p className="text-sm text-gray-600">
-                          平均3日以内に初めての仕事が決まります
-                        </p>
-                      </div>
-                    </div>
-                  </motion.div>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-
-        {/* 特徴セクション */}
-        <AnimatedSection id="features" className="py-20 sm:py-32">
-          <div className="container mx-auto px-4 sm:px-6">
-            <motion.div
-              variants={fadeInUp}
-              className="mx-auto max-w-2xl text-center">
-              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                CHEFDOMで<span className="text-orange-600">料理の腕</span>
-                を活かそう
-              </h2>
-              <p className="mt-4 text-lg text-gray-600">
-                CHEFDOMは、シェフの皆様に最適な仕事を提供するプラットフォームです。
-                あなたのスキルと経験を活かせる場所がきっと見つかります。
-              </p>
-            </motion.div>
-
-            <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              <FeatureCard
-                icon={Shield}
-                title="完全審査制で安心"
-                description="登録飲食店は全て審査済み。安心して働ける環境を提供します。悪質な店舗は徹底的に排除しています。"
-              />
-              <FeatureCard
-                icon={Clock}
-                title="すぐに仕事が決まる"
-                description="登録後、平均3日以内に初めての仕事が決まります。あなたのスキルを必要としている店舗がすぐに見つかります。"
-              />
-              <FeatureCard
-                icon={Users}
-                title="柔軟な働き方"
-                description="単発の仕事から長期契約まで、あなたのライフスタイルに合わせた働き方が可能です。自分のペースで仕事を選べます。"
-              />
-              <FeatureCard
-                icon={Star}
-                title="スキルアップの機会"
-                description="様々な店舗で働くことで、新しい料理技術や知識を習得できます。キャリアアップにつながる貴重な経験が得られます。"
-              />
-              <FeatureCard
-                icon={MessageSquare}
-                title="充実したサポート"
-                description="専任のサポートスタッフが、仕事の紹介から契約まで全面的にサポート。困ったことがあればいつでも相談できます。"
-              />
-              <FeatureCard
-                icon={CheckCircle}
-                title="安定した収入"
-                description="高単価の仕事が多数。あなたのスキルに見合った報酬を得られます。支払いも安心の仲介システムで確実です。"
-              />
-            </div>
-          </div>
-        </AnimatedSection>
-
-        {/* 利用の流れ */}
-        <AnimatedSection id="how-it-works" className="bg-white py-20 sm:py-32">
-          <div className="container mx-auto px-4 sm:px-6">
-            <motion.div
-              variants={fadeInUp}
-              className="mx-auto max-w-2xl text-center">
-              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                利用の流れ
-              </h2>
-              <p className="mt-4 text-lg text-gray-600">
-                CHEFDOMの利用は簡単です。LINEで登録して、審査が完了したら仕事を探すことができます。
-              </p>
-            </motion.div>
-
-            <div className="mt-16 grid gap-8 md:grid-cols-4">
-              {[
-                {
-                  icon: ChefHat,
-                  title: "LINE登録",
-                  description:
-                    "公式LINEアカウントを友達追加して、必要情報を入力します。",
-                },
-                {
-                  icon: Clock,
-                  title: "審査",
-                  description:
-                    "経験やスキルの確認する審査を行います。審査完了後に通知が届きます。",
-                },
-                {
-                  icon: DollarSign,
-                  title: "仕事探し",
-                  description:
-                    "審査通過後、アプリで条件に合った仕事を探して応募します。",
-                },
-                {
-                  icon: MapPin,
-                  title: "働く",
-                  description:
-                    "店舗とマッチングが成立したら、指定の日時に働きます。報酬は安全に受け取れます。",
-                },
-              ].map((step, index) => (
-                <motion.div
-                  key={index}
-                  variants={fadeInUp}
-                  transition={{ delay: index * 0.2 }}
-                  className="relative">
-                  <div className="relative flex flex-col items-center">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-orange-100 text-orange-600 mb-4">
-                      <step.icon className="h-8 w-8" />
-                    </div>
-                    <h3 className="text-xl font-bold">{step.title}</h3>
-                    <p className="mt-2 text-center text-gray-600">
-                      {step.description}
-                    </p>
-                  </div>
-                  {index < 3 && (
-                    <div className="absolute top-8 right-0 h-px w-[calc(100%-4rem)] bg-orange-200 hidden md:block" />
-                  )}
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </AnimatedSection>
-
-        {/* 登録セクション */}
-        <AnimatedSection id="register" className="py-20 sm:py-32">
-          <div className="container mx-auto px-4 sm:px-6">
-            <motion.div
-              variants={fadeInUp}
-              className="mx-auto max-w-3xl rounded-2xl bg-gradient-to-r from-orange-600 to-orange-400 p-8 sm:p-12 text-white">
-              <div className="text-center">
-                <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                  今すぐ登録して始めよう
-                </h2>
-                <p className="mt-4 text-lg opacity-90">
-                  LINEで簡単登録。審査完了後、すぐに仕事を探すことができます。
-                </p>
-              </div>
-
-              <div className="mt-8 flex flex-col items-center">
-                <motion.div
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                  className="relative w-64 h-64 overflow-hidden rounded-xl border-8 border-white shadow-lg">
+      {/* ヘッダー */}
+      <motion.header
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100"
+      >
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center">
+              <Link href="/" className="flex items-center group">
+                <motion.div whileHover={{ rotate: [0, -10, 10, -10, 0] }} transition={{ duration: 0.5 }}>
                   <Image
-                    src="/chef_illust/line_qr.png"
-                    alt="LINE QR Code"
-                    width={400}
-                    height={400}
-                    className="w-full h-auto"
+                    src="/placeholder.svg?height=32&width=32&text=CHEF"
+                    alt="CHEFDOM"
+                    width={32}
+                    height={32}
+                    className="mr-2"
                   />
                 </motion.div>
-                <p className="mt-4 text-center text-white opacity-90">
-                  QRコードをスキャンして友達追加
-                  <br />
-                  または
-                </p>
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.5 }}>
-                  <Button
-                    size="lg"
-                    className="mt-4 bg-[#06C755] hover:bg-[#05a748] transition-all duration-300 transform hover:scale-105">
-                    <Image
-                      src="/chef_illust/line_logo.png"
-                      alt="LINE Logo"
-                      width={24}
-                      height={24}
-                      className="mr-2"
-                    />
-                    LINEで友達追加
-                  </Button>
-                </motion.div>
-                <p className="mt-6 text-sm text-white opacity-80">
-                  ※審査には1〜3営業日ほどお時間をいただきます。
-                  <br />
-                  審査完了後、LINEにて通知いたします。
-                </p>
-              </div>
-            </motion.div>
-          </div>
-        </AnimatedSection>
-
-        {/* FAQ */}
-        <AnimatedSection id="faq" className="bg-white py-20 sm:py-32">
-          <div className="container mx-auto px-4 sm:px-6">
-            <motion.div
-              variants={fadeInUp}
-              className="mx-auto max-w-2xl text-center">
-              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                よくある質問
-              </h2>
-              <p className="mt-4 text-lg text-gray-600">
-                CHEFDOMについてよくある質問と回答をまとめました。
-              </p>
-            </motion.div>
-
-            <div className="mt-16 mx-auto max-w-3xl">
-              <div className="divide-y">
-                {[
-                  {
-                    q: "登録は無料ですか？",
-                    a: "はい、CHEFDOMへの登録は完全無料です。仕事が決まった際に発生する手数料のみをいただいております。",
-                  },
-                  {
-                    q: "どのような審査がありますか？",
-                    a: "経歴やスキルの確認、身分証明書の提出、必要に応じてオンライン面談を行います。安心・安全なサービス提供のための審査となります。",
-                  },
-                  {
-                    q: "どのような仕事がありますか？",
-                    a: "和食、洋食、中華など様々なジャンルの飲食店での調理業務があります。単発のスポット勤務から長期契約まで、多様な働き方に対応しています。",
-                  },
-                  {
-                    q: "報酬はいつ受け取れますか？",
-                    a: "勤務完了後、翌月15日に指定の口座へ振り込まれます。安全な決済システムで確実にお支払いいたします。",
-                  },
-                  {
-                    q: "キャンセルはできますか？",
-                    a: "やむを得ない事情でのキャンセルは可能ですが、直前のキャンセルは評価に影響する場合があります。できるだけ早めにご連絡ください。",
-                  },
-                ].map((item, i) => (
-                  <motion.div
-                    key={i}
-                    variants={fadeInUp}
-                    transition={{ delay: i * 0.1 }}
-                    className="py-6">
-                    <h3 className="text-lg font-bold">{item.q}</h3>
-                    <p className="mt-2 text-gray-600">{item.a}</p>
-                  </motion.div>
-                ))}
+                <span className="font-bold text-lg">CHEFDOM</span>
+              </Link>
+              <div className="hidden md:block ml-10">
+                <span className="text-xs text-gray-600">料理人と飲食店の出会いを創る、最適なマッチングサービス</span>
               </div>
             </div>
+            <div className="flex items-center space-x-4">
+              <Link
+                href="#contact"
+                className="hidden md:flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                <Phone className="h-4 w-4 mr-1" />
+                <span>お問い合わせ</span>
+              </Link>
+              <Link
+                href="#login"
+                className="hidden md:flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                <User className="h-4 w-4 mr-1" />
+                <span>ログイン</span>
+              </Link>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link
+                  href="#register"
+                  className="bg-black text-white text-sm px-4 py-2 rounded-md hover:bg-gray-800 transition-colors"
+                >
+                  新規登録
+                </Link>
+              </motion.div>
+            </div>
           </div>
-        </AnimatedSection>
+        </div>
+      </motion.header>
 
-        {/* CTA */}
-        <AnimatedSection className="py-20 sm:py-32">
-          <div className="container mx-auto px-4 sm:px-6">
+      {/* ヒーローセクション */}
+      <motion.section
+        id="hero"
+        ref={heroRef}
+        style={{
+          opacity: heroOpacity,
+          scale: heroScale,
+          y: heroY,
+        }}
+        className="relative pt-32 pb-20 md:pt-40 md:pb-32 overflow-hidden"
+      >
+        {/* 背景の装飾要素 */}
+        <motion.div
+          className="absolute top-20 right-10 w-64 h-64 bg-red-50 rounded-full blur-3xl opacity-60 z-0"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.4, 0.6, 0.4],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Number.POSITIVE_INFINITY,
+            repeatType: "reverse",
+          }}
+        />
+        <motion.div
+          className="absolute bottom-20 left-10 w-96 h-96 bg-blue-50 rounded-full blur-3xl opacity-60 z-0"
+          animate={{
+            scale: [1, 1.1, 1],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Number.POSITIVE_INFINITY,
+            repeatType: "reverse",
+            delay: 1,
+          }}
+        />
+
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <motion.div
-              variants={fadeInUp}
-              className="mx-auto max-w-3xl rounded-2xl bg-gradient-to-r from-orange-600 to-orange-400 p-8 sm:p-12 text-white text-center">
-              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                あなたの料理スキルを活かす場所がここに
-              </h2>
-              <p className="mt-4 text-lg opacity-90">
-                CHEFDOMで新しい働き方を始めましょう。
+              initial={{ opacity: 0, x: -100 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              className="max-w-xl"
+            >
+              <motion.h1
+                className="text-5xl md:text-6xl font-bold leading-tight bg-gradient-to-r from-black to-gray-700 bg-clip-text text-transparent"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.8 }}
+              >
+                働く場所も時間も、
                 <br />
-                今すぐLINEで登録して、あなたに合った仕事を見つけましょう。
-              </p>
+                <span className="text-red-500">もっと自由に。</span>
+              </motion.h1>
+              <motion.p
+                className="mt-6 text-xl text-gray-600"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4, duration: 0.8 }}
+              >
+                料理で、あなたらしいキャリアを
+                <br />
+                デザインしよう。
+              </motion.p>
               <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}>
-                <Button
-                  size="lg"
-                  className="mt-8 bg-white text-orange-600 hover:bg-gray-100 transition-all duration-300 transform hover:scale-105">
-                  LINEで登録する
-                </Button>
+                className="mt-10"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6, duration: 0.8 }}
+              >
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="relative overflow-hidden inline-block"
+                >
+                  <Link
+                    href="#register"
+                    className="inline-flex items-center bg-black text-white px-8 py-4 rounded-full hover:bg-gray-800 transition-colors"
+                  >
+                    <span className="mr-2">シェフ新規登録はこちら</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                    initial={{ x: "-100%" }}
+                    whileHover={{ x: "100%" }}
+                    transition={{ duration: 0.8 }}
+                  />
+                </motion.div>
+                <p className="mt-4 text-sm text-gray-500 flex items-center">
+                  <motion.span
+                    animate={{
+                      scale: [1, 1.2, 1],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Number.POSITIVE_INFINITY,
+                      repeatType: "reverse",
+                    }}
+                    className="inline-block mr-2"
+                  >
+                    ✨
+                  </motion.span>
+                  登録後は最短即日で働けます
+                </p>
               </motion.div>
             </motion.div>
-          </div>
-        </AnimatedSection>
-      </main>
 
-      {/* フッター */}
-      <footer className="border-t bg-white py-12">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+            <div className="relative h-80 md:h-[500px] lg:h-[600px]">
+              {/* 3D効果のあるイメージグリッド */}
+              <motion.div
+                className="grid grid-cols-3 gap-2 h-full perspective-1000"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1, delay: 0.3 }}
+              >
+                <motion.div
+                  className="relative overflow-hidden rounded-lg shadow-lg"
+                  style={{ y: parallax1, rotateY: rotate1 }}
+                  whileHover={{ scale: 1.05, rotateY: 5 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                >
+                  <Image
+                    src="/placeholder.svg?height=600&width=300&text=Chef1"
+                    alt="Chef cooking"
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                </motion.div>
+
+                <motion.div
+                  className="relative overflow-hidden rounded-lg shadow-lg translate-y-6"
+                  style={{ y: parallax2, rotateY: rotate2 }}
+                  whileHover={{ scale: 1.05, rotateY: -5 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                >
+                  <Image
+                    src="/placeholder.svg?height=600&width=300&text=Chef2"
+                    alt="Chef plating"
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                </motion.div>
+
+                <motion.div
+                  className="relative overflow-hidden rounded-lg shadow-lg"
+                  style={{ y: parallax3, rotateY: rotate1 }}
+                  whileHover={{ scale: 1.05, rotateY: 5 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                >
+                  <Image
+                    src="/placeholder.svg?height=600&width=300&text=Chef3"
+                    alt="Chef working"
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                </motion.div>
+              </motion.div>
+
+              {/* 装飾要素 */}
+              <motion.div
+                className="absolute -bottom-5 -right-5 w-20 h-20 bg-red-500 rounded-full z-10 flex items-center justify-center text-white font-bold"
+                initial={{ scale: 0, rotate: -20 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ delay: 1, duration: 0.6, type: "spring" }}
+              >
+                即日勤務
+              </motion.div>
+            </div>
+          </div>
+
+          {/* スクロールダウン指示 */}
+          <motion.div
+            className="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.2, duration: 0.8 }}
+          >
+            <span className="text-sm text-gray-500 mb-2">詳しく見る</span>
+            <motion.div animate={{ y: [0, 10, 0] }} transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}>
+              <ChevronDown className="h-6 w-6 text-gray-400" />
+            </motion.div>
+          </motion.div>
+        </div>
+      </motion.section>
+
+      {/* 特徴セクション */}
+      <section id="features" ref={featuresRef} className="py-20 md:py-32 bg-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={featureControls}
+            variants={{
+              visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+            }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold relative inline-block">
+              CHEFDOMなら！
+              <motion.div
+                className="absolute -bottom-2 left-0 right-0 h-1 bg-red-500"
+                initial={{ width: 0 }}
+                animate={featureControls}
+                variants={{
+                  hidden: { width: 0 },
+                  visible: { width: "100%", transition: { duration: 0.8, delay: 0.3 } },
+                }}
+              />
+            </h2>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}>
-              <div className="flex items-center gap-2">
+              custom={0}
+              initial="hidden"
+              animate={featureControls}
+              variants={staggerVariants}
+              className="text-center p-8 border rounded-lg hover:shadow-lg transition-shadow relative overflow-hidden group"
+            >
+              <motion.div
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                className="inline-block mb-6"
+              >
                 <Image
-                  src="/chef_illust/chef_logo.png"
-                  alt="CHEFDOM Logo"
-                  width={32}
-                  height={32}
-                  className="rounded-full"
+                  src="/placeholder.svg?height=80&width=80&text=シェフ帽子"
+                  alt="無料アイコン"
+                  width={80}
+                  height={80}
                 />
-                <span className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-orange-400">
-                  CHEFDOM
-                </span>
-              </div>
-              <p className="mt-4 text-sm text-gray-600">
-                シェフと飲食店をつなぐ、
+              </motion.div>
+              <h3 className="text-xl font-bold mb-2">
+                登録費用
                 <br />
-                新しい働き方のプラットフォーム
+                <span className="text-red-500 text-3xl">無料</span>
+              </h3>
+              <p className="text-gray-600">完全無料でご利用いただけます</p>
+              <motion.div
+                className="absolute bottom-0 left-0 right-0 h-1 bg-red-500 origin-left"
+                initial={{ scaleX: 0 }}
+                whileHover={{ scaleX: 1 }}
+                transition={{ duration: 0.3 }}
+              />
+            </motion.div>
+
+            <motion.div
+              custom={1}
+              initial="hidden"
+              animate={featureControls}
+              variants={staggerVariants}
+              className="text-center p-8 border rounded-lg hover:shadow-lg transition-shadow relative overflow-hidden group"
+            >
+              <motion.div
+                whileHover={{ scale: 1.1, rotate: -5 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                className="inline-block mb-6"
+              >
+                <Image
+                  src="/placeholder.svg?height=80&width=80&text=キャリア"
+                  alt="キャリアアイコン"
+                  width={80}
+                  height={80}
+                />
+              </motion.div>
+              <h3 className="text-xl font-bold mb-2">
+                新しい
+                <br />
+                <span className="text-red-500 text-3xl">キャリア</span>
+                <span className="text-xl">形成</span>
+              </h3>
+              <p className="text-gray-600">あなたのスキルを活かせる場所</p>
+              <motion.div
+                className="absolute bottom-0 left-0 right-0 h-1 bg-red-500 origin-left"
+                initial={{ scaleX: 0 }}
+                whileHover={{ scaleX: 1 }}
+                transition={{ duration: 0.3 }}
+              />
+            </motion.div>
+
+            <motion.div
+              custom={2}
+              initial="hidden"
+              animate={featureControls}
+              variants={staggerVariants}
+              className="text-center p-8 border rounded-lg hover:shadow-lg transition-shadow relative overflow-hidden group"
+            >
+              <motion.div
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                className="inline-block mb-6"
+              >
+                <Image
+                  src="/placeholder.svg?height=80&width=80&text=エプロン"
+                  alt="即日アイコン"
+                  width={80}
+                  height={80}
+                />
+              </motion.div>
+              <h3 className="text-xl font-bold mb-2">
+                <span className="text-red-500 text-3xl">最短即日</span>
+                <br />
+                <span>から働ける</span>
+              </h3>
+              <p className="text-gray-600">すぐに仕事が見つかります</p>
+              <motion.div
+                className="absolute bottom-0 left-0 right-0 h-1 bg-red-500 origin-left"
+                initial={{ scaleX: 0 }}
+                whileHover={{ scaleX: 1 }}
+                transition={{ duration: 0.3 }}
+              />
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* サービス説明セクション */}
+      <section id="about" ref={aboutRef} className="py-20 md:py-32 bg-gray-50 overflow-hidden">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
+          {/* 装飾要素 */}
+          <motion.div
+            className="absolute top-0 right-0 w-64 h-64 bg-red-100 rounded-full blur-3xl opacity-30 z-0"
+            animate={{
+              x: [0, 30, 0],
+              y: [0, -30, 0],
+            }}
+            transition={{
+              duration: 15,
+              repeat: Number.POSITIVE_INFINITY,
+              repeatType: "reverse",
+            }}
+          />
+
+          <motion.div
+            initial="hidden"
+            animate={aboutControls}
+            variants={fadeInUp}
+            className="max-w-3xl mx-auto text-center relative z-10"
+          >
+            <motion.h2 className="text-3xl md:text-4xl font-bold mb-8 leading-tight" variants={fadeInUp}>
+              CHEFDOMは
+              <br />
+              <span className="text-black">必要な時に、必要なだけ</span>働ける
+              <br />
+              シェフと飲食店のマッチングサービスです。
+            </motion.h2>
+
+            <motion.p className="text-gray-600 mb-12 text-lg" variants={fadeInUp}>
+              飲食業界に特化したマッチングで、シェフのスキルと飲食店のニーズを最適につなげます。
+              <br />
+              一つひとつの出会いが、あなたのキャリアにしっかりとつながっていきます。
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={aboutControls}
+              variants={{
+                hidden: { opacity: 0, y: 30 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.8, delay: 0.3 } },
+              }}
+              className="relative h-60 md:h-80"
+            >
+              <div className="relative z-10 h-full">
+                <Image
+                  src="/placeholder.svg?height=320&width=800&text=シェフのイラスト"
+                  alt="シェフのイラスト"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+
+              {/* 装飾的な背景要素 */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-red-50 to-orange-50 rounded-2xl -z-10"
+                animate={{
+                  scale: [1, 1.03, 1],
+                  rotate: [0, 1, 0],
+                }}
+                transition={{
+                  duration: 8,
+                  repeat: Number.POSITIVE_INFINITY,
+                  repeatType: "reverse",
+                }}
+              />
+            </motion.div>
+
+            <motion.div className="mt-12" variants={scaleIn}>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="relative overflow-hidden inline-block"
+              >
+                <Link
+                  href="#register"
+                  className="inline-flex items-center bg-black text-white px-8 py-4 rounded-full hover:bg-gray-800 transition-colors"
+                >
+                  <span className="mr-2">シェフ新規登録はこちら</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: "100%" }}
+                  transition={{ duration: 0.8 }}
+                />
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* 特徴詳細セクション */}
+      <section id="benefits" ref={benefitsRef} className="py-20 md:py-32 bg-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div initial="hidden" animate={benefitsControls} variants={fadeInUp} className="text-center mb-20">
+            <motion.div
+              whileHover={{ scale: 1.1, rotate: 5 }}
+              transition={{ type: "spring", stiffness: 300, damping: 10 }}
+              className="inline-block mb-4 bg-red-50 p-3 rounded-full"
+            >
+              <Image src="/placeholder.svg?height=60&width=60&text=CHEF" alt="CHEFDOM" width={60} height={60} />
+            </motion.div>
+            <h2 className="text-3xl md:text-4xl font-bold relative inline-block">
+              CHEFDOMの特徴
+              <motion.div
+                className="absolute -bottom-2 left-0 right-0 h-1 bg-red-500"
+                initial={{ width: 0 }}
+                animate={benefitsControls}
+                variants={{
+                  hidden: { width: 0 },
+                  visible: { width: "100%", transition: { duration: 0.8, delay: 0.3 } },
+                }}
+              />
+            </h2>
+          </motion.div>
+
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-3 gap-12"
+            initial="hidden"
+            animate={benefitsControls}
+            variants={staggerContainer}
+          >
+            <motion.div variants={staggerItem} className="text-center">
+              <motion.div
+                className="relative h-48 mb-8 overflow-hidden rounded-xl shadow-lg"
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              >
+                <Image
+                  src="/placeholder.svg?height=200&width=300&text=自由な働き方"
+                  alt="自由な働き方"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+              </motion.div>
+              <h3 className="text-2xl font-bold mb-4 text-red-500">自由な働き方</h3>
+              <p className="text-gray-600">
+                働きたいときに、働きたい場所で。フレックスな働き方で、あなたのライフスタイルに合わせた働き方ができます。
+                プライベートとの両立も可能です。
               </p>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}>
-              <h3 className="font-bold">サービス</h3>
-              <ul className="mt-4 space-y-2">
-                <li>
-                  <Link
-                    href="#features"
-                    className="text-sm text-gray-600 hover:text-orange-600 transition-colors">
-                    特徴
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#how-it-works"
-                    className="text-sm text-gray-600 hover:text-orange-600 transition-colors">
-                    利用の流れ
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#faq"
-                    className="text-sm text-gray-600 hover:text-orange-600 transition-colors">
-                    よくある質問
-                  </Link>
-                </li>
-              </ul>
+            <motion.div variants={staggerItem} className="text-center">
+              <motion.div
+                className="relative h-48 mb-8 overflow-hidden rounded-xl shadow-lg"
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              >
+                <Image
+                  src="/placeholder.svg?height=200&width=300&text=キャリア形成"
+                  alt="キャリア形成"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+              </motion.div>
+              <h3 className="text-2xl font-bold mb-4 text-red-500">キャリア形成</h3>
+              <p className="text-gray-600">
+                様々な店舗でのプロフェッショナルな経験を積むことで、あなたのスキルと経験値を高めることができます。
+                多様な料理スタイルに触れる機会も増えます。
+              </p>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}>
-              <h3 className="font-bold">会社情報</h3>
-              <ul className="mt-4 space-y-2">
-                <li>
-                  <Link
-                    href="#"
-                    className="text-sm text-gray-600 hover:text-orange-600 transition-colors">
-                    会社概要
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#"
-                    className="text-sm text-gray-600 hover:text-orange-600 transition-colors">
-                    プライバシーポリシー
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#"
-                    className="text-sm text-gray-600 hover:text-orange-600 transition-colors">
-                    利用規約
-                  </Link>
-                </li>
-              </ul>
+            <motion.div variants={staggerItem} className="text-center">
+              <motion.div
+                className="relative h-48 mb-8 overflow-hidden rounded-xl shadow-lg"
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              >
+                <Image
+                  src="/placeholder.svg?height=200&width=300&text=収入最適化"
+                  alt="収入最適化"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+              </motion.div>
+              <h3 className="text-2xl font-bold mb-4 text-red-500">収入最適化</h3>
+              <p className="text-gray-600">
+                あなたのスキルに見合った報酬を得られます。時給制で明確な収入計画が立てられ、収入を最大化できます。
+                繁忙期には集中して働くことも可能です。
+              </p>
             </motion.div>
+          </motion.div>
+        </div>
+      </section>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}>
-              <h3 className="font-bold">お問い合わせ</h3>
-              <ul className="mt-4 space-y-2">
-                <li>
-                  <Link
-                    href="#"
-                    className="text-sm text-gray-600 hover:text-orange-600 transition-colors">
-                    お問い合わせフォーム
-                  </Link>
-                </li>
-                <li>
-                  <p className="text-sm text-gray-600">support@chefdom.jp</p>
-                </li>
-              </ul>
+      {/* 4ステップセクション */}
+      <section id="steps" ref={stepsRef} className="py-20 md:py-32 bg-gray-50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div initial="hidden" animate={stepsControls} variants={fadeInUp} className="text-center mb-20">
+            <h2 className="text-3xl md:text-4xl font-bold relative inline-block">
+              働くまでの<span className="text-red-500">4</span>ステップ
+              <motion.div
+                className="absolute -bottom-2 left-0 right-0 h-1 bg-red-500"
+                initial={{ width: 0 }}
+                animate={stepsControls}
+                variants={{
+                  hidden: { width: 0 },
+                  visible: { width: "100%", transition: { duration: 0.8, delay: 0.3 } },
+                }}
+              />
+            </h2>
+          </motion.div>
+
+          <div className="max-w-5xl mx-auto">
+            <motion.div initial="hidden" animate={stepsControls} variants={staggerContainer} className="relative">
+              {/* 接続線 */}
+              <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-gray-200 hidden md:block" />
+
+              {/* ステップ1 */}
+              <motion.div variants={staggerItem} className="flex flex-col md:flex-row items-center mb-20 relative">
+                <div className="md:w-1/2 mb-6 md:mb-0 md:pr-12 text-right">
+                  <div className="text-red-500 text-5xl font-bold mb-4">01.</div>
+                  <h3 className="text-2xl font-bold mb-4">プロフィール作成</h3>
+                  <p className="text-gray-600">これまでの経験やスキルなどを登録。簡単な入力で完了します！</p>
+                </div>
+                <motion.div
+                  className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-red-500 rounded-full z-10 hidden md:flex items-center justify-center text-white font-bold"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.5, duration: 0.5 }}
+                >
+                  1
+                </motion.div>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 10 }}
+                  className="md:w-1/2 relative h-60 md:h-80 overflow-hidden rounded-xl shadow-xl"
+                >
+                  <Image
+                    src="/chef_illust/chef_profile_image.png"
+                    alt="プロフィール作成"
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                </motion.div>
+              </motion.div>
+
+              {/* ステップ2 */}
+              <motion.div
+                variants={staggerItem}
+                className="flex flex-col md:flex-row-reverse items-center mb-20 relative"
+              >
+                <div className="md:w-1/2 mb-6 md:mb-0 md:pl-12">
+                  <div className="text-red-500 text-5xl font-bold mb-4">02.</div>
+                  <h3 className="text-2xl font-bold mb-4">お仕事を探す</h3>
+                  <p className="text-gray-600">あなたのスキルや条件に合った求人を探してみましょう！</p>
+                </div>
+                <motion.div
+                  className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-red-500 rounded-full z-10 hidden md:flex items-center justify-center text-white font-bold"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.7, duration: 0.5 }}
+                >
+                  2
+                </motion.div>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 10 }}
+                  className="md:w-1/2 relative h-60 md:h-80 overflow-hidden rounded-xl shadow-xl"
+                >
+                  <Image
+                    src="/chef_illust/chef_search_image.png"
+                    alt="お仕事を探す"
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                </motion.div>
+              </motion.div>
+
+              {/* ステップ3 */}
+              <motion.div variants={staggerItem} className="flex flex-col md:flex-row items-center mb-20 relative">
+                <div className="md:w-1/2 mb-6 md:mb-0 md:pr-12 text-right">
+                  <div className="text-red-500 text-5xl font-bold mb-4">03.</div>
+                  <h3 className="text-2xl font-bold mb-4">チャットで確認</h3>
+                  <p className="text-gray-600">店舗とのチャットで詳細を確認。お互いの条件について確認できます。</p>
+                </div>
+                <motion.div
+                  className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-red-500 rounded-full z-10 hidden md:flex items-center justify-center text-white font-bold"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.9, duration: 0.5 }}
+                >
+                  3
+                </motion.div>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 10 }}
+                  className="md:w-1/2 relative h-60 md:h-80 overflow-hidden rounded-xl shadow-xl"
+                >
+                  <Image
+                    src="/placeholder.svg?height=320&width=400&text=チャットで確認"
+                    alt="チャットで確認"
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                </motion.div>
+              </motion.div>
+
+              {/* ステップ4 */}
+              <motion.div variants={staggerItem} className="flex flex-col md:flex-row-reverse items-center relative">
+                <div className="md:w-1/2 mb-6 md:mb-0 md:pl-12">
+                  <div className="text-red-500 text-5xl font-bold mb-4">04.</div>
+                  <h3 className="text-2xl font-bold mb-4">出勤して働く</h3>
+                  <p className="text-gray-600">お店に出勤してお仕事スタート！あなたのスキルを活かしましょう。</p>
+                </div>
+                <motion.div
+                  className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-red-500 rounded-full z-10 hidden md:flex items-center justify-center text-white font-bold"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 1.1, duration: 0.5 }}
+                >
+                  4
+                </motion.div>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 10 }}
+                  className="md:w-1/2 relative h-60 md:h-80 overflow-hidden rounded-xl shadow-xl"
+                >
+                  <Image
+                    src="/placeholder.svg?height=320&width=400&text=出勤して働く"
+                    alt="出勤して働く"
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                </motion.div>
+              </motion.div>
             </motion.div>
           </div>
 
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="mt-12 border-t pt-8 text-center">
-            <p className="text-sm text-gray-600">
-              © 2024 CHEFDOM. All rights reserved.
-            </p>
+            initial={{ opacity: 0, y: 20 }}
+            animate={stepsControls}
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0, transition: { duration: 0.6, delay: 1.2 } },
+            }}
+            className="text-center mt-20"
+          >
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="relative overflow-hidden inline-block"
+            >
+              <Link
+                href="#register"
+                className="inline-flex items-center bg-black text-white px-8 py-4 rounded-full hover:bg-gray-800 transition-colors"
+              >
+                <span className="mr-2">シェフ新規登録はこちら</span>
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                initial={{ x: "-100%" }}
+                whileHover={{ x: "100%" }}
+                transition={{ duration: 0.8 }}
+              />
+            </motion.div>
           </motion.div>
+        </div>
+      </section>
+
+      {/* 口コミセクション */}
+      <section id="testimonials" ref={testimonialsRef} className="py-20 md:py-32 bg-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div initial="hidden" animate={testimonialsControls} variants={fadeInUp} className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold relative inline-block">
+              シェフの声
+              <motion.div
+                className="absolute -bottom-2 left-0 right-0 h-1 bg-red-500"
+                initial={{ width: 0 }}
+                animate={testimonialsControls}
+                variants={{
+                  hidden: { width: 0 },
+                  visible: { width: "100%", transition: { duration: 0.8, delay: 0.3 } },
+                }}
+              />
+            </h2>
+          </motion.div>
+
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+            initial="hidden"
+            animate={testimonialsControls}
+            variants={staggerContainer}
+          >
+            {testimonials.map((testimonial, index) => (
+              <motion.div
+                key={index}
+                variants={staggerItem}
+                className="bg-gray-50 p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+              >
+                <div className="flex items-center mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`h-5 w-5 ${i < testimonial.rating ? "text-yellow-400" : "text-gray-300"}`}
+                      fill={i < testimonial.rating ? "currentColor" : "none"}
+                    />
+                  ))}
+                </div>
+                <p className="text-gray-600 mb-6 italic">{testimonial.text}</p>
+                <div className="flex items-center">
+                  <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
+                  <div>
+                    <h4 className="font-bold">{testimonial.name}</h4>
+                    <p className="text-sm text-gray-500">{testimonial.role}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* フッター */}
+      <footer className="bg-black text-white py-16">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+            <div>
+              <div className="flex items-center mb-6">
+                <Image
+                  src="/placeholder.svg?height=40&width=40&text=CHEF"
+                  alt="CHEFDOM"
+                  width={40}
+                  height={40}
+                  className="mr-3 invert"
+                />
+                <span className="font-bold text-2xl">CHEFDOM</span>
+              </div>
+              <p className="text-gray-400 mb-6">料理人と飲食店の出会いを創る、最適なマッチングサービス</p>
+              <div className="flex space-x-4">
+                <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"></path>
+                  </svg>
+                </a>
+                <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"></path>
+                  </svg>
+                </a>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold mb-4">サービス</h3>
+              <ul className="space-y-2">
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    シェフ向けサービス
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    飲食店向けサービス
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    料金プラン
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    よくある質問
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold mb-4">会社情報</h3>
+              <ul className="space-y-2">
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    会社概要
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    ニュース
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    採用情報
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    お問い合わせ
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold mb-4">法的情報</h3>
+              <ul className="space-y-2">
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    利用規約
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    プライバシーポリシー
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    特定商取引法に基づく表記
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-800 mt-12 pt-8 text-center">
+            <p className="text-gray-400">© cookchef Co.,Ltd. All rights reserved.</p>
+          </div>
         </div>
       </footer>
     </div>
-  );
+  )
 }

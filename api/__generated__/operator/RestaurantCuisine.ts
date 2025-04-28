@@ -23,7 +23,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class RestaurantCuisine<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class RestaurantCuisine<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description <br /><br /> <b>Authentication:</b> required
    *
@@ -32,7 +34,10 @@ export class RestaurantCuisine<SecurityDataType = unknown> extends HttpClient<Se
    * @request DELETE:/restaurant_cuisine/{restaurant_cuisine_id}
    * @secure
    */
-  restaurantCuisineDelete = (restaurantCuisineId: number, params: RequestParams = {}) =>
+  restaurantCuisineDelete = (
+    restaurantCuisineId: number,
+    params: RequestParams = {},
+  ) =>
     this.request<RestaurantCuisineDeleteData, void>({
       path: `/restaurant_cuisine/${restaurantCuisineId}`,
       method: "DELETE",
@@ -40,6 +45,20 @@ export class RestaurantCuisine<SecurityDataType = unknown> extends HttpClient<Se
       format: "json",
       ...params,
     });
+
+  restaurantCuisineDeleteQueryArgs = (
+    restaurantCuisineId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/restaurant_cuisine/${restaurantCuisineId}`] : null;
+    const fetcher = () =>
+      this.restaurantCuisineDelete(restaurantCuisineId, params).then(
+        (res) => res.data,
+      );
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -47,13 +66,30 @@ export class RestaurantCuisine<SecurityDataType = unknown> extends HttpClient<Se
    * @name RestaurantCuisineDetail
    * @request GET:/restaurant_cuisine/{restaurant_cuisine_id}
    */
-  restaurantCuisineDetail = (restaurantCuisineId: number, params: RequestParams = {}) =>
+  restaurantCuisineDetail = (
+    restaurantCuisineId: number,
+    params: RequestParams = {},
+  ) =>
     this.request<RestaurantCuisineDetailData, void>({
       path: `/restaurant_cuisine/${restaurantCuisineId}`,
       method: "GET",
       format: "json",
       ...params,
     });
+
+  restaurantCuisineDetailQueryArgs = (
+    restaurantCuisineId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/restaurant_cuisine/${restaurantCuisineId}`] : null;
+    const fetcher = () =>
+      this.restaurantCuisineDetail(restaurantCuisineId, params).then(
+        (res) => res.data,
+      );
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -74,6 +110,25 @@ export class RestaurantCuisine<SecurityDataType = unknown> extends HttpClient<Se
       format: "json",
       ...params,
     });
+
+  restaurantCuisinePartialUpdateQueryArgs = (
+    restaurantCuisineId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/restaurant_cuisine/${restaurantCuisineId}`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: RestaurantCuisinePartialUpdatePayload },
+    ) => Promise<RestaurantCuisinePartialUpdateData> = (_, { arg }) =>
+      this.restaurantCuisinePartialUpdate(
+        restaurantCuisineId,
+        arg,
+        params,
+      ).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -94,6 +149,7 @@ export class RestaurantCuisine<SecurityDataType = unknown> extends HttpClient<Se
       format: "json",
       ...params,
     });
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -108,6 +164,17 @@ export class RestaurantCuisine<SecurityDataType = unknown> extends HttpClient<Se
       format: "json",
       ...params,
     });
+
+  restaurantCuisineListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/restaurant_cuisine`] : null;
+    const fetcher = () =>
+      this.restaurantCuisineList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -115,7 +182,10 @@ export class RestaurantCuisine<SecurityDataType = unknown> extends HttpClient<Se
    * @name RestaurantCuisineCreate
    * @request POST:/restaurant_cuisine
    */
-  restaurantCuisineCreate = (data: RestaurantCuisineCreatePayload, params: RequestParams = {}) =>
+  restaurantCuisineCreate = (
+    data: RestaurantCuisineCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<RestaurantCuisineCreateData, void>({
       path: `/restaurant_cuisine`,
       method: "POST",
@@ -124,4 +194,17 @@ export class RestaurantCuisine<SecurityDataType = unknown> extends HttpClient<Se
       format: "json",
       ...params,
     });
+
+  restaurantCuisineCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/restaurant_cuisine`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: RestaurantCuisineCreatePayload },
+    ) => Promise<RestaurantCuisineCreateData> = (_, { arg }) =>
+      this.restaurantCuisineCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }
