@@ -24,6 +24,10 @@ const aPIs: ApiDefinition[] = [
     url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:iG6oGWEP?type=json&token=",
   },
   {
+    outputDir: "notification",
+    url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:1k5jblUW?type=json&token=",
+  },
+  {
     outputDir: "operator",
     url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:grw3Vlqa?type=json&token=",
   },
@@ -56,6 +60,13 @@ const generateApiTypes = async () => {
           ...baseConfig,
           url,
           output: path.resolve(process.cwd(), "api/__generated__", outputDir),
+          codeGenConstructs: (struct: any) => ({
+            ...struct,
+            TypeField: (content: any) => {
+              const { readonly, key, value } = content;
+              return `${readonly ? "readonly " : ""}${key}: ${value}`;
+            },
+          }),
         })
       )
     );
@@ -64,3 +75,5 @@ const generateApiTypes = async () => {
     console.error("型生成エラー:", error);
   }
 };
+
+generateApiTypes();

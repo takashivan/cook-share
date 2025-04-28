@@ -12,280 +12,322 @@
 
 export type ByUserDetailData = {
   /** @format int64 */
-  id?: number;
+  id: number;
   /**
    * @format timestamptz
    * @default "now"
    */
-  created_at?: number;
-  type?: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
-  content?: string;
-  is_read?: boolean;
+  created_at: number;
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
+  content: string;
+  is_read: boolean;
   /** @format timestamptz */
-  updated_at?: number;
+  updated_at: number;
   /** @format uuid */
-  user_id?: string;
+  user_id: string;
   /** url */
-  related_link?: string;
+  related_link: string;
 }[];
 
-export type ChefNotificationDeleteData = object;
-
-export interface ChefNotificationDetailData {
-  /** @format int64 */
-  id?: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at?: number;
-  type?: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
-  content?: string;
-  is_read?: boolean;
-  /** @format timestamptz */
-  updated_at?: number;
-  /** @format uuid */
-  user_id?: string;
-  /** url */
-  related_link?: string;
+export interface MarkReadAllPartialUpdatePayload {
+  user_id: string;
 }
 
-export type ChefNotificationListData = {
+export type MarkReadAllPartialUpdateData = {
   /** @format int64 */
-  id?: number;
+  id: number;
   /**
    * @format timestamptz
    * @default "now"
    */
-  created_at?: number;
-  type?: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
-  content?: string;
-  is_read?: boolean;
+  created_at: number;
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
+  content: string;
+  is_read: boolean;
   /** @format timestamptz */
-  updated_at?: number;
+  updated_at: number;
   /** @format uuid */
-  user_id?: string;
+  user_id: string;
   /** url */
-  related_link?: string;
+  related_link: string;
 }[];
 
-export interface ChefNotificationCreatePayload {
-  type?: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
-  content?: string;
-  is_read?: boolean;
-  /** @format timestamptz */
-  updated_at?: number;
-  /** @format uuid */
-  user_id?: string;
-  /** url */
-  related_link?: string;
-}
-
-export interface ChefNotificationCreateData {
+export interface ReadPartialUpdateData {
   /** @format int64 */
-  id?: number;
+  id: number;
   /**
    * @format timestamptz
    * @default "now"
    */
-  created_at?: number;
-  type?: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
-  content?: string;
-  is_read?: boolean;
+  created_at: number;
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
+  content: string;
+  is_read: boolean;
   /** @format timestamptz */
-  updated_at?: number;
+  updated_at: number;
   /** @format uuid */
-  user_id?: string;
+  user_id: string;
   /** url */
-  related_link?: string;
+  related_link: string;
 }
-
-export interface ByRestaurantCreatePayload {
-  /** @format uuid */
-  companyuser_id?: string | null;
-  type?: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
-  related_link?: string;
-  is_read?: boolean;
-  content?: string;
-}
-
-export type ByRestaurantCreateData = object;
 
 export type ByUserDetailResult = {
-  /** @format uuid */
-  id?: string;
+  /** @format int64 */
+  id: number;
   /**
    * @format timestamptz
    * @default "now"
    */
-  created_at?: number;
+  created_at: number;
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
+  content: string;
+  is_read: boolean;
+  /** @format timestamptz */
+  updated_at: number;
   /** @format uuid */
-  companyuser_id?: string | null;
-  type?: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
-  related_link?: string;
-  is_read?: boolean;
-  content?: string;
+  user_id: string;
+  /** url */
+  related_link: string;
 }[];
 
-export type CompanyuserNotificationDeleteData = object;
+export interface MarkReadAllPartialUpdateBody {
+  user_id: string;
+}
 
-export interface CompanyuserNotificationDetailData {
-  /** @format uuid */
-  id?: string;
+export type MarkReadAllPartialUpdateResult = {
+  /** @format int64 */
+  id: number;
   /**
    * @format timestamptz
    * @default "now"
    */
-  created_at?: number;
+  created_at: number;
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
+  content: string;
+  is_read: boolean;
+  /** @format timestamptz */
+  updated_at: number;
   /** @format uuid */
-  companyuser_id?: string | null;
-  type?: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
-  related_link?: string;
-  is_read?: boolean;
-  content?: string;
-}
-
-export interface CompanyuserNotificationPartialUpdatePayload {
-  /** @format uuid */
-  companyuser_id?: string | null;
-  type?: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
-  related_link?: string;
-  is_read?: boolean;
-  content?: string;
-}
-
-export interface CompanyuserNotificationPartialUpdateData {
-  /** @format uuid */
-  id?: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at?: number;
-  /** @format uuid */
-  companyuser_id?: string | null;
-  type?: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
-  related_link?: string;
-  is_read?: boolean;
-  content?: string;
-}
-
-export type CompanyuserNotificationListData = {
-  /** @format uuid */
-  id?: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at?: number;
-  /** @format uuid */
-  companyuser_id?: string | null;
-  type?: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
-  related_link?: string;
-  is_read?: boolean;
-  content?: string;
+  user_id: string;
+  /** url */
+  related_link: string;
 }[];
 
-export interface CompanyuserNotificationCreatePayload {
-  /** @format uuid */
-  companyuser_id?: string | null;
-  type?: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
-  related_link?: string;
-  is_read?: boolean;
-  content?: string;
-}
-
-export interface CompanyuserNotificationCreateData {
-  /** @format uuid */
-  id?: string;
+export interface ReadPartialUpdateResult {
+  /** @format int64 */
+  id: number;
   /**
    * @format timestamptz
    * @default "now"
    */
-  created_at?: number;
-  /** @format uuid */
-  companyuser_id?: string | null;
-  type?: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
-  related_link?: string;
-  is_read?: boolean;
-  content?: string;
-}
-
-export type RestaurantNotificationDeleteData = object;
-
-export interface RestaurantNotificationDetailData {
-  /** @format int64 */
-  id?: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at?: number;
-  type?: "OPERATOR" | "APPLICATION" | "SESSION";
-  content?: string;
-  /** @format int64 */
-  related_id?: number;
-  is_read?: boolean;
+  created_at: number;
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
+  content: string;
+  is_read: boolean;
   /** @format timestamptz */
-  updated_at?: number;
-  /** @format int64 */
-  user_id?: number;
+  updated_at: number;
+  /** @format uuid */
+  user_id: string;
   /** url */
-  related_link?: string;
+  related_link: string;
 }
 
-export type RestaurantNotificationListData = {
-  /** @format int64 */
-  id?: number;
+export type ByUserDetailOutput = {
+  /** @format uuid */
+  id: string;
   /**
    * @format timestamptz
    * @default "now"
    */
-  created_at?: number;
-  type?: "OPERATOR" | "APPLICATION" | "SESSION";
-  content?: string;
+  created_at: number;
+  /** @format uuid */
+  companyuser_id: string | null;
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
+  related_link: string;
+  is_read: boolean;
+  content: string;
   /** @format int64 */
-  related_id?: number;
-  is_read?: boolean;
-  /** @format timestamptz */
-  updated_at?: number;
+  job_id: number | null;
   /** @format int64 */
-  user_id?: number;
-  /** url */
-  related_link?: string;
+  restaurant_id: number | null;
 }[];
 
-export interface RestaurantNotificationCreatePayload {
-  type?: "OPERATOR" | "APPLICATION" | "SESSION";
-  content?: string;
-  /** @format int64 */
-  related_id?: number;
-  is_read?: boolean;
-  /** @format timestamptz */
-  updated_at?: number;
-  /** @format int64 */
-  user_id?: number;
-  /** url */
-  related_link?: string;
+export interface MarkReadAllPartialUpdateInput {
+  user_id: string;
 }
 
-export interface RestaurantNotificationCreateData {
-  /** @format int64 */
-  id?: number;
+export type MarkReadAllPartialUpdateOutput = {
+  /** @format uuid */
+  id: string;
   /**
    * @format timestamptz
    * @default "now"
    */
-  created_at?: number;
-  type?: "OPERATOR" | "APPLICATION" | "SESSION";
-  content?: string;
+  created_at: number;
+  /** @format uuid */
+  companyuser_id: string | null;
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
+  related_link: string;
+  is_read: boolean;
+  content: string;
   /** @format int64 */
-  related_id?: number;
-  is_read?: boolean;
-  /** @format timestamptz */
-  updated_at?: number;
+  job_id: number | null;
   /** @format int64 */
-  user_id?: number;
-  /** url */
-  related_link?: string;
+  restaurant_id: number | null;
+}[];
+
+export interface MarkReadPartialUpdateData {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format uuid */
+  companyuser_id: string | null;
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
+  related_link: string;
+  is_read: boolean;
+  content: string;
+  /** @format int64 */
+  job_id: number | null;
+  /** @format int64 */
+  restaurant_id: number | null;
+}
+
+export type ByUserDetailData1 = {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format uuid */
+  companyuser_id: string | null;
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
+  related_link: string;
+  is_read: boolean;
+  content: string;
+  /** @format int64 */
+  job_id: number | null;
+  /** @format int64 */
+  restaurant_id: number | null;
+}[];
+
+export interface MarkReadAllPartialUpdatePayload1 {
+  user_id: string;
+}
+
+export type MarkReadAllPartialUpdateResult1 = {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format uuid */
+  companyuser_id: string | null;
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
+  related_link: string;
+  is_read: boolean;
+  content: string;
+  /** @format int64 */
+  job_id: number | null;
+  /** @format int64 */
+  restaurant_id: number | null;
+}[];
+
+export interface MarkReadPartialUpdateResult {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format uuid */
+  companyuser_id: string | null;
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
+  related_link: string;
+  is_read: boolean;
+  content: string;
+  /** @format int64 */
+  job_id: number | null;
+  /** @format int64 */
+  restaurant_id: number | null;
 }

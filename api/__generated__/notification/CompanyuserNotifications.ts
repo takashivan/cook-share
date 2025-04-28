@@ -11,27 +11,27 @@
  */
 
 import {
-  ByUserDetailData1,
-  MarkReadAllPartialUpdatePayload1,
-  MarkReadAllPartialUpdateResult1,
-  MarkReadPartialUpdateResult,
+  ByUserDetailOutput,
+  MarkReadAllPartialUpdateInput,
+  MarkReadAllPartialUpdateOutput,
+  MarkReadPartialUpdateData,
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class CompanyuserNotification<
+export class CompanyuserNotifications<
   SecurityDataType = unknown,
 > extends HttpClient<SecurityDataType> {
   /**
    * @description [AUTH-CompanyUser] 自分の通知だけ見られます。 <br /><br /> <b>Authentication:</b> not required
    *
-   * @tags companyuser_notification
+   * @tags companyuser-notifications
    * @name ByUserDetail
    * @summary [AUTH-CompanyUser] 自分の通知だけ見られます。
-   * @request GET:/companyuser_notification/byUser/{user_id}
+   * @request GET:/companyuser-notifications/byUser/{user_id}
    */
   byUserDetail = (userId: string, params: RequestParams = {}) =>
-    this.request<ByUserDetailData1, void>({
-      path: `/companyuser_notification/byUser/${userId}`,
+    this.request<ByUserDetailOutput, void>({
+      path: `/companyuser-notifications/byUser/${userId}`,
       method: "GET",
       format: "json",
       ...params,
@@ -42,7 +42,9 @@ export class CompanyuserNotification<
     params: RequestParams = {},
     enabled: boolean = true,
   ) => {
-    const key = enabled ? [`/companyuser_notification/byUser/${userId}`] : null;
+    const key = enabled
+      ? [`/companyuser-notifications/byUser/${userId}`]
+      : null;
     const fetcher = () =>
       this.byUserDetail(userId, params).then((res) => res.data);
     return [key, fetcher] as const;
@@ -51,17 +53,17 @@ export class CompanyuserNotification<
   /**
    * @description [AUTH-CompanyUser]自分の通知だけを全て既読にできます。 <br /><br /> <b>Authentication:</b> not required
    *
-   * @tags companyuser_notification
+   * @tags companyuser-notifications
    * @name MarkReadAllPartialUpdate
    * @summary [AUTH-CompanyUser]自分の通知だけを全て既読にできます。
-   * @request PATCH:/companyuser_notification/mark-read/all
+   * @request PATCH:/companyuser-notifications/mark-read/all
    */
   markReadAllPartialUpdate = (
-    data: MarkReadAllPartialUpdatePayload1,
+    data: MarkReadAllPartialUpdateInput,
     params: RequestParams = {},
   ) =>
-    this.request<MarkReadAllPartialUpdateResult1, void>({
-      path: `/companyuser_notification/mark-read/all`,
+    this.request<MarkReadAllPartialUpdateOutput, void>({
+      path: `/companyuser-notifications/mark-read/all`,
       method: "PATCH",
       body: data,
       type: ContentType.Json,
@@ -73,11 +75,11 @@ export class CompanyuserNotification<
     params: RequestParams = {},
     enabled: boolean = true,
   ) => {
-    const key = enabled ? [`/companyuser_notification/mark-read/all`] : null;
+    const key = enabled ? [`/companyuser-notifications/mark-read/all`] : null;
     const fetcher: (
       url: string[],
-      { arg }: { arg: MarkReadAllPartialUpdatePayload1 },
-    ) => Promise<MarkReadAllPartialUpdateResult1> = (_, { arg }) =>
+      { arg }: { arg: MarkReadAllPartialUpdateInput },
+    ) => Promise<MarkReadAllPartialUpdateOutput> = (_, { arg }) =>
       this.markReadAllPartialUpdate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
@@ -85,14 +87,14 @@ export class CompanyuserNotification<
   /**
    * @description [AUTH-CompanyUser]自分の通知だけを既読にできます。 <br /><br /> <b>Authentication:</b> not required
    *
-   * @tags companyuser_notification
+   * @tags companyuser-notifications
    * @name MarkReadPartialUpdate
    * @summary [AUTH-CompanyUser]自分の通知だけを既読にできます。
-   * @request PATCH:/companyuser_notification/{id}/mark-read
+   * @request PATCH:/companyuser-notifications/{id}/mark-read
    */
   markReadPartialUpdate = (id: string, params: RequestParams = {}) =>
-    this.request<MarkReadPartialUpdateResult, void>({
-      path: `/companyuser_notification/${id}/mark-read`,
+    this.request<MarkReadPartialUpdateData, void>({
+      path: `/companyuser-notifications/${id}/mark-read`,
       method: "PATCH",
       format: "json",
       ...params,
@@ -103,8 +105,8 @@ export class CompanyuserNotification<
     params: RequestParams = {},
     enabled: boolean = true,
   ) => {
-    const key = enabled ? [`/companyuser_notification/${id}/mark-read`] : null;
-    const fetcher: (url: string[]) => Promise<MarkReadPartialUpdateResult> = (
+    const key = enabled ? [`/companyuser-notifications/${id}/mark-read`] : null;
+    const fetcher: (url: string[]) => Promise<MarkReadPartialUpdateData> = (
       _,
     ) => this.markReadPartialUpdate(id, params).then((res) => res.data);
     return [key, fetcher] as const;

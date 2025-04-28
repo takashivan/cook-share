@@ -71,8 +71,6 @@ export interface ConnectLineAccountCreateData {
   } | null;
 }
 
-export type LineNotify1CreateData = object;
-
 export type LineNotifyCreateData = object;
 
 export interface LineWebhookCreateData {

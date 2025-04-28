@@ -20,8 +20,6 @@ import {
   StartPartialUpdateResult,
   VerifyPartialUpdateBody,
   VerifyPartialUpdateResult,
-  WorksessionsCreateData,
-  WorksessionsCreatePayload,
   WorksessionsDeleteData,
   WorksessionsDetailData,
   WorksessionsListOutput,
@@ -151,10 +149,11 @@ export class Worksessions<
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH-CHEF]ユーザーだけがチェックインできます。 <br /><br /> <b>Authentication:</b> not required
    *
    * @tags worksessions
    * @name StartPartialUpdate
+   * @summary [AUTH-CHEF]ユーザーだけがチェックインできます。
    * @request PATCH:/worksessions/{worksession_id}/start
    */
   startPartialUpdate = (
@@ -317,17 +316,19 @@ export class Worksessions<
   };
 
   /**
-   * @description Query all worksession records <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH-Operator]運営だけが全てのWorksessionを見られます。 <br /><br /> <b>Authentication:</b> required
    *
    * @tags worksessions
    * @name WorksessionsList
-   * @summary Query all worksession records
+   * @summary [AUTH-Operator]運営だけが全てのWorksessionを見られます。
    * @request GET:/worksessions
+   * @secure
    */
   worksessionsList = (params: RequestParams = {}) =>
     this.request<WorksessionsListOutput, void>({
       path: `/worksessions`,
       method: "GET",
+      secure: true,
       format: "json",
       ...params,
     });
@@ -338,40 +339,6 @@ export class Worksessions<
   ) => {
     const key = enabled ? [`/worksessions`] : null;
     const fetcher = () => this.worksessionsList(params).then((res) => res.data);
-    return [key, fetcher] as const;
-  };
-
-  /**
-   * @description Add worksession record <br /><br /> <b>Authentication:</b> not required
-   *
-   * @tags worksessions
-   * @name WorksessionsCreate
-   * @summary Add worksession record
-   * @request POST:/worksessions
-   */
-  worksessionsCreate = (
-    data: WorksessionsCreatePayload,
-    params: RequestParams = {},
-  ) =>
-    this.request<WorksessionsCreateData, void>({
-      path: `/worksessions`,
-      method: "POST",
-      body: data,
-      type: ContentType.Json,
-      format: "json",
-      ...params,
-    });
-
-  worksessionsCreateQueryArgs = (
-    params: RequestParams = {},
-    enabled: boolean = true,
-  ) => {
-    const key = enabled ? [`/worksessions`] : null;
-    const fetcher: (
-      url: string[],
-      { arg }: { arg: WorksessionsCreatePayload },
-    ) => Promise<WorksessionsCreateData> = (_, { arg }) =>
-      this.worksessionsCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 }

@@ -11,7 +11,7 @@
  */
 
 import {
-  CompanyuserNotificationsListResult,
+  CompanyuserNotificationsListData,
   CompanyusersCreateBody,
   CompanyusersCreateResult,
   CompanyusersDeleteResult,
@@ -124,7 +124,7 @@ export class Companyusers<
    * @request GET:/companyusers/{user_id}/companyuser-notifications
    */
   companyuserNotificationsList = (userId: string, params: RequestParams = {}) =>
-    this.request<CompanyuserNotificationsListResult, void>({
+    this.request<CompanyuserNotificationsListData, void>({
       path: `/companyusers/${userId}/companyuser-notifications`,
       method: "GET",
       format: "json",

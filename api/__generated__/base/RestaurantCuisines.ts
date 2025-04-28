@@ -14,12 +14,9 @@ import {
   RestaurantCuisinesCreateData,
   RestaurantCuisinesCreatePayload,
   RestaurantCuisinesDeleteData,
-  RestaurantCuisinesDetailData,
   RestaurantCuisinesListData,
   RestaurantCuisinesPartialUpdateData,
   RestaurantCuisinesPartialUpdatePayload,
-  RestaurantCuisinesUpdateData,
-  RestaurantCuisinesUpdatePayload,
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
@@ -65,39 +62,6 @@ export class RestaurantCuisines<
    * @description <br /><br /> <b>Authentication:</b> not required
    *
    * @tags restaurant-cuisines
-   * @name RestaurantCuisinesDetail
-   * @request GET:/restaurant-cuisines/{restaurant_cuisine_id}
-   */
-  restaurantCuisinesDetail = (
-    restaurantCuisineId: number,
-    params: RequestParams = {},
-  ) =>
-    this.request<RestaurantCuisinesDetailData, void>({
-      path: `/restaurant-cuisines/${restaurantCuisineId}`,
-      method: "GET",
-      format: "json",
-      ...params,
-    });
-
-  restaurantCuisinesDetailQueryArgs = (
-    restaurantCuisineId: number,
-    params: RequestParams = {},
-    enabled: boolean = true,
-  ) => {
-    const key = enabled
-      ? [`/restaurant-cuisines/${restaurantCuisineId}`]
-      : null;
-    const fetcher = () =>
-      this.restaurantCuisinesDetail(restaurantCuisineId, params).then(
-        (res) => res.data,
-      );
-    return [key, fetcher] as const;
-  };
-
-  /**
-   * @description <br /><br /> <b>Authentication:</b> not required
-   *
-   * @tags restaurant-cuisines
    * @name RestaurantCuisinesPartialUpdate
    * @request PATCH:/restaurant-cuisines/{restaurant_cuisine_id}
    */
@@ -134,27 +98,6 @@ export class RestaurantCuisines<
       ).then((res) => res.data);
     return [key, fetcher] as const;
   };
-
-  /**
-   * @description <br /><br /> <b>Authentication:</b> not required
-   *
-   * @tags restaurant-cuisines
-   * @name RestaurantCuisinesUpdate
-   * @request PUT:/restaurant-cuisines/{restaurant_cuisine_id}
-   */
-  restaurantCuisinesUpdate = (
-    restaurantCuisineId: number,
-    data: RestaurantCuisinesUpdatePayload,
-    params: RequestParams = {},
-  ) =>
-    this.request<RestaurantCuisinesUpdateData, void>({
-      path: `/restaurant-cuisines/${restaurantCuisineId}`,
-      method: "PUT",
-      body: data,
-      type: ContentType.Json,
-      format: "json",
-      ...params,
-    });
 
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
