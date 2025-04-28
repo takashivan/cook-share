@@ -28,11 +28,11 @@ export class Jobs<
   SecurityDataType = unknown,
 > extends HttpClient<SecurityDataType> {
   /**
-   * @description Query all job records <br /><br /> <b>Authentication:</b> not required
+   * @description [UNAUTHED]トップページの今後のジョブの一覧が見れる <br /><br /> <b>Authentication:</b> not required
    *
    * @tags jobs
    * @name QueryUpcomingList
-   * @summary Query all job records
+   * @summary [UNAUTHED]トップページの今後のジョブの一覧が見れる
    * @request GET:/jobs/query/upcoming
    */
   queryUpcomingList = (params: RequestParams = {}) =>
@@ -167,11 +167,11 @@ export class Jobs<
   };
 
   /**
-   * @description Edit job record <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTHED]レストランアクセスを持っているユーザーだけが編集できる <br /><br /> <b>Authentication:</b> not required
    *
    * @tags jobs
    * @name JobsPartialUpdate
-   * @summary Edit job record
+   * @summary [AUTHED]レストランアクセスを持っているユーザーだけが編集できる
    * @request PATCH:/jobs/{job_id}
    */
   jobsPartialUpdate = (
@@ -225,11 +225,11 @@ export class Jobs<
   };
 
   /**
-   * @description Add job record <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTHED]レストランアクセスを持っているユーザーだけがJOBをポストできる <br /><br /> <b>Authentication:</b> not required
    *
    * @tags jobs
    * @name JobsCreate
-   * @summary Add job record
+   * @summary [AUTHED]レストランアクセスを持っているユーザーだけがJOBをポストできる
    * @request POST:/jobs
    */
   jobsCreate = (data: JobsCreatePayload, params: RequestParams = {}) =>

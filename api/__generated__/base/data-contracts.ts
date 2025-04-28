@@ -4358,6 +4358,13 @@ export interface JobsCreateData {
   expiry_date: number | null;
 }
 
+export interface PostCreatePayload {
+  /** @format int64 */
+  id: number;
+}
+
+export type PostCreateData = object;
+
 export interface GetJob2Data {
   jobs: {
     /** @format int64 */
@@ -5531,7 +5538,9 @@ export type StaffsListData = {
   companyuser_id: string | null;
   /** @format int64 */
   restaurant_id: number;
+  /** @default "1" */
   can_edit: boolean;
+  /** @default "1" */
   can_manage_jobs: boolean;
   companyuser: {
     /** @format uuid */
@@ -6216,7 +6225,9 @@ export interface RestaurantaccessDetailData {
   companyuser_id: string | null;
   /** @format int64 */
   restaurant_id: number;
+  /** @default "1" */
   can_edit: boolean;
+  /** @default "1" */
   can_manage_jobs: boolean;
 }
 
@@ -6225,7 +6236,9 @@ export interface RestaurantaccessPartialUpdatePayload {
   companyuser_id: string | null;
   /** @format int64 */
   restaurant_id: number;
+  /** @default "1" */
   can_edit: boolean;
+  /** @default "1" */
   can_manage_jobs: boolean;
 }
 
@@ -6241,7 +6254,9 @@ export interface RestaurantaccessPartialUpdateData {
   companyuser_id: string | null;
   /** @format int64 */
   restaurant_id: number;
+  /** @default "1" */
   can_edit: boolean;
+  /** @default "1" */
   can_manage_jobs: boolean;
 }
 
@@ -6252,7 +6267,9 @@ export interface RestaurantaccessesPartialUpdatePayload {
   companyuser_id: string | null;
   /** @format int64 */
   restaurant_id: number;
+  /** @default "1" */
   can_edit: boolean;
+  /** @default "1" */
   can_manage_jobs: boolean;
 }
 
@@ -6268,7 +6285,9 @@ export interface RestaurantaccessesPartialUpdateData {
   companyuser_id: string | null;
   /** @format int64 */
   restaurant_id: number;
+  /** @default "1" */
   can_edit: boolean;
+  /** @default "1" */
   can_manage_jobs: boolean;
 }
 
@@ -6284,7 +6303,9 @@ export type RestaurantaccessesListData = {
   companyuser_id: string | null;
   /** @format int64 */
   restaurant_id: number;
+  /** @default "1" */
   can_edit: boolean;
+  /** @default "1" */
   can_manage_jobs: boolean;
 }[];
 
@@ -6293,7 +6314,9 @@ export interface RestaurantaccessesCreatePayload {
   companyuser_id: string | null;
   /** @format int64 */
   restaurant_id: number;
+  /** @default "1" */
   can_edit: boolean;
+  /** @default "1" */
   can_manage_jobs: boolean;
   /** @format email */
   staff_email: string;
@@ -6313,7 +6336,9 @@ export type RestaurantaccessListData = {
   companyuser_id: string | null;
   /** @format int64 */
   restaurant_id: number;
+  /** @default "1" */
   can_edit: boolean;
+  /** @default "1" */
   can_manage_jobs: boolean;
 }[];
 
@@ -6322,7 +6347,9 @@ export interface RestaurantaccessCreatePayload {
   companyuser_id: string | null;
   /** @format int64 */
   restaurant_id: number;
+  /** @default "1" */
   can_edit: boolean;
+  /** @default "1" */
   can_manage_jobs: boolean;
   /** @format email */
   staff_email: string;
