@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -19,7 +20,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class ChefNotification<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class ChefNotification<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -35,9 +38,14 @@ export class ChefNotification<SecurityDataType = unknown> extends HttpClient<Sec
       ...params,
     });
 
-  byUserDetailQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  byUserDetailQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/chef_notification/byUser/${userId}`] : null;
-    const fetcher = () => this.byUserDetail(userId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.byUserDetail(userId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -48,7 +56,10 @@ export class ChefNotification<SecurityDataType = unknown> extends HttpClient<Sec
    * @name ChefNotificationDelete
    * @request DELETE:/chef_notification/{chef_notification_id}
    */
-  chefNotificationDelete = (chefNotificationId: number, params: RequestParams = {}) =>
+  chefNotificationDelete = (
+    chefNotificationId: number,
+    params: RequestParams = {},
+  ) =>
     this.request<ChefNotificationDeleteData, void>({
       path: `/chef_notification/${chefNotificationId}`,
       method: "DELETE",
@@ -62,7 +73,10 @@ export class ChefNotification<SecurityDataType = unknown> extends HttpClient<Sec
     enabled: boolean = true,
   ) => {
     const key = enabled ? [`/chef_notification/${chefNotificationId}`] : null;
-    const fetcher = () => this.chefNotificationDelete(chefNotificationId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.chefNotificationDelete(chefNotificationId, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -73,7 +87,10 @@ export class ChefNotification<SecurityDataType = unknown> extends HttpClient<Sec
    * @name ChefNotificationDetail
    * @request GET:/chef_notification/{chef_notification_id}
    */
-  chefNotificationDetail = (chefNotificationId: number, params: RequestParams = {}) =>
+  chefNotificationDetail = (
+    chefNotificationId: number,
+    params: RequestParams = {},
+  ) =>
     this.request<ChefNotificationDetailData, void>({
       path: `/chef_notification/${chefNotificationId}`,
       method: "GET",
@@ -87,7 +104,10 @@ export class ChefNotification<SecurityDataType = unknown> extends HttpClient<Sec
     enabled: boolean = true,
   ) => {
     const key = enabled ? [`/chef_notification/${chefNotificationId}`] : null;
-    const fetcher = () => this.chefNotificationDetail(chefNotificationId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.chefNotificationDetail(chefNotificationId, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -106,9 +126,13 @@ export class ChefNotification<SecurityDataType = unknown> extends HttpClient<Sec
       ...params,
     });
 
-  chefNotificationListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  chefNotificationListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/chef_notification`] : null;
-    const fetcher = () => this.chefNotificationList(params).then((res) => res.data);
+    const fetcher = () =>
+      this.chefNotificationList(params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -119,7 +143,10 @@ export class ChefNotification<SecurityDataType = unknown> extends HttpClient<Sec
    * @name ChefNotificationCreate
    * @request POST:/chef_notification
    */
-  chefNotificationCreate = (data: ChefNotificationCreatePayload, params: RequestParams = {}) =>
+  chefNotificationCreate = (
+    data: ChefNotificationCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<ChefNotificationCreateData, void>({
       path: `/chef_notification`,
       method: "POST",
@@ -129,7 +156,10 @@ export class ChefNotification<SecurityDataType = unknown> extends HttpClient<Sec
       ...params,
     });
 
-  chefNotificationCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  chefNotificationCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/chef_notification`] : null;
     const fetcher: (
       url: string[],

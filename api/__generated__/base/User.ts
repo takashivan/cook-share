@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -31,7 +32,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class User<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description <br /><br /> <b>Authentication:</b> required
    *
@@ -40,7 +43,10 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
    * @request POST:/user/email/change
    * @secure
    */
-  emailChangeCreate = (data: EmailChangeCreatePayload, params: RequestParams = {}) =>
+  emailChangeCreate = (
+    data: EmailChangeCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<EmailChangeCreateData, void>({
       path: `/user/email/change`,
       method: "POST",
@@ -51,12 +57,16 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       ...params,
     });
 
-  emailChangeCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  emailChangeCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/user/email/change`] : null;
-    const fetcher: (url: string[], { arg }: { arg: EmailChangeCreatePayload }) => Promise<EmailChangeCreateData> = (
-      _,
-      { arg },
-    ) => this.emailChangeCreate(arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: EmailChangeCreatePayload },
+    ) => Promise<EmailChangeCreateData> = (_, { arg }) =>
+      this.emailChangeCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -68,7 +78,10 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
    * @request POST:/user/email/confirm
    * @secure
    */
-  emailConfirmCreate = (data: EmailConfirmCreatePayload, params: RequestParams = {}) =>
+  emailConfirmCreate = (
+    data: EmailConfirmCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<EmailConfirmCreateData, void>({
       path: `/user/email/confirm`,
       method: "POST",
@@ -79,12 +92,16 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       ...params,
     });
 
-  emailConfirmCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  emailConfirmCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/user/email/confirm`] : null;
-    const fetcher: (url: string[], { arg }: { arg: EmailConfirmCreatePayload }) => Promise<EmailConfirmCreateData> = (
-      _,
-      { arg },
-    ) => this.emailConfirmCreate(arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: EmailConfirmCreatePayload },
+    ) => Promise<EmailConfirmCreateData> = (_, { arg }) =>
+      this.emailConfirmCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -95,7 +112,10 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
    * @name StripeAccountCheckCreate
    * @request POST:/user/stripe/account-check
    */
-  stripeAccountCheckCreate = (data: StripeAccountCheckCreatePayload, params: RequestParams = {}) =>
+  stripeAccountCheckCreate = (
+    data: StripeAccountCheckCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<StripeAccountCheckCreateData, void>({
       path: `/user/stripe/account-check`,
       method: "POST",
@@ -105,7 +125,10 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       ...params,
     });
 
-  stripeAccountCheckCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  stripeAccountCheckCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/user/stripe/account-check`] : null;
     const fetcher: (
       url: string[],
@@ -122,7 +145,10 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
    * @name StripeCreateAccountLinkCreate
    * @request POST:/user/stripe/create-account-link
    */
-  stripeCreateAccountLinkCreate = (data: StripeCreateAccountLinkCreatePayload, params: RequestParams = {}) =>
+  stripeCreateAccountLinkCreate = (
+    data: StripeCreateAccountLinkCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<StripeCreateAccountLinkCreateData, void>({
       path: `/user/stripe/create-account-link`,
       method: "POST",
@@ -132,7 +158,10 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       ...params,
     });
 
-  stripeCreateAccountLinkCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  stripeCreateAccountLinkCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/user/stripe/create-account-link`] : null;
     const fetcher: (
       url: string[],
@@ -149,7 +178,10 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
    * @name StripeCreateAccountCreate
    * @request POST:/user/stripe/create-account
    */
-  stripeCreateAccountCreate = (data: StripeCreateAccountCreatePayload, params: RequestParams = {}) =>
+  stripeCreateAccountCreate = (
+    data: StripeCreateAccountCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<StripeCreateAccountCreateData, void>({
       path: `/user/stripe/create-account`,
       method: "POST",
@@ -159,7 +191,10 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       ...params,
     });
 
-  stripeCreateAccountCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  stripeCreateAccountCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/user/stripe/create-account`] : null;
     const fetcher: (
       url: string[],
@@ -184,9 +219,14 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       ...params,
     });
 
-  sessionHistoryCurrentListQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  sessionHistoryCurrentListQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/user/${userId}/sessionHistory/current`] : null;
-    const fetcher = () => this.sessionHistoryCurrentList(userId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.sessionHistoryCurrentList(userId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -206,9 +246,14 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       ...params,
     });
 
-  userDeleteQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  userDeleteQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/user/${userId}`] : null;
-    const fetcher = () => this.userDelete(userId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.userDelete(userId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -228,9 +273,14 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       ...params,
     });
 
-  userDetailQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  userDetailQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/user/${userId}`] : null;
-    const fetcher = () => this.userDetail(userId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.userDetail(userId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -242,7 +292,11 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
    * @summary Edit user record
    * @request PATCH:/user/{user_id}
    */
-  userPartialUpdate = (userId: string, data: UserPartialUpdatePayload, params: RequestParams = {}) =>
+  userPartialUpdate = (
+    userId: string,
+    data: UserPartialUpdatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<UserPartialUpdateData, void>({
       path: `/user/${userId}`,
       method: "PATCH",
@@ -252,12 +306,17 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       ...params,
     });
 
-  userPartialUpdateQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  userPartialUpdateQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/user/${userId}`] : null;
-    const fetcher: (url: string[], { arg }: { arg: UserPartialUpdatePayload }) => Promise<UserPartialUpdateData> = (
-      _,
-      { arg },
-    ) => this.userPartialUpdate(userId, arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: UserPartialUpdatePayload },
+    ) => Promise<UserPartialUpdateData> = (_, { arg }) =>
+      this.userPartialUpdate(userId, arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -301,9 +360,15 @@ export class User<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       ...params,
     });
 
-  userCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  userCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/user`] : null;
-    const fetcher: (url: string[], { arg }: { arg: UserCreatePayload }) => Promise<UserCreateData> = (_, { arg }) =>
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: UserCreatePayload },
+    ) => Promise<UserCreateData> = (_, { arg }) =>
       this.userCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };

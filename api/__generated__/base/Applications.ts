@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -25,7 +26,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class Applications<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class Applications<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -42,9 +45,16 @@ export class Applications<SecurityDataType = unknown> extends HttpClient<Securit
       ...params,
     });
 
-  meComingListQueryArgs = (query: MeComingListParams, params: RequestParams = {}, enabled: boolean = true) => {
-    const key = enabled ? [`/applications/me/coming`, ...(query ? [query] : [])] : null;
-    const fetcher = () => this.meComingList(query, params).then((res) => res.data);
+  meComingListQueryArgs = (
+    query: MeComingListParams,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled
+      ? [`/applications/me/coming`, ...(query ? [query] : [])]
+      : null;
+    const fetcher = () =>
+      this.meComingList(query, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -63,9 +73,15 @@ export class Applications<SecurityDataType = unknown> extends HttpClient<Securit
       ...params,
     });
 
-  acceptPartialUpdateQueryArgs = (applicationId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  acceptPartialUpdateQueryArgs = (
+    applicationId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/applications/${applicationId}/accept`] : null;
-    const fetcher: (url: string[]) => Promise<AcceptPartialUpdateResult> = (_) =>
+    const fetcher: (url: string[]) => Promise<AcceptPartialUpdateResult> = (
+      _,
+    ) =>
       this.acceptPartialUpdate(applicationId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
@@ -77,7 +93,10 @@ export class Applications<SecurityDataType = unknown> extends HttpClient<Securit
    * @name WorksessionsList
    * @request GET:/applications/{application_id}/worksessions
    */
-  worksessionsList = ({ applicationId, ...query }: WorksessionsListParams, params: RequestParams = {}) =>
+  worksessionsList = (
+    { applicationId, ...query }: WorksessionsListParams,
+    params: RequestParams = {},
+  ) =>
     this.request<WorksessionsListData, void>({
       path: `/applications/${applicationId}/worksessions`,
       method: "GET",
@@ -91,8 +110,16 @@ export class Applications<SecurityDataType = unknown> extends HttpClient<Securit
     params: RequestParams = {},
     enabled: boolean = true,
   ) => {
-    const key = enabled ? [`/applications/${applicationId}/worksessions`, ...(query ? [query] : [])] : null;
-    const fetcher = () => this.worksessionsList({ applicationId, ...query }, params).then((res) => res.data);
+    const key = enabled
+      ? [
+          `/applications/${applicationId}/worksessions`,
+          ...(query ? [query] : []),
+        ]
+      : null;
+    const fetcher = () =>
+      this.worksessionsList({ applicationId, ...query }, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -111,9 +138,14 @@ export class Applications<SecurityDataType = unknown> extends HttpClient<Securit
       ...params,
     });
 
-  applicationsDeleteQueryArgs = (applicationId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  applicationsDeleteQueryArgs = (
+    applicationId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/applications/${applicationId}`] : null;
-    const fetcher = () => this.applicationsDelete(applicationId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.applicationsDelete(applicationId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -132,9 +164,14 @@ export class Applications<SecurityDataType = unknown> extends HttpClient<Securit
       ...params,
     });
 
-  applicationsDetailQueryArgs = (applicationId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  applicationsDetailQueryArgs = (
+    applicationId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/applications/${applicationId}`] : null;
-    const fetcher = () => this.applicationsDetail(applicationId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.applicationsDetail(applicationId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -159,13 +196,19 @@ export class Applications<SecurityDataType = unknown> extends HttpClient<Securit
       ...params,
     });
 
-  applicationsPartialUpdateQueryArgs = (applicationId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  applicationsPartialUpdateQueryArgs = (
+    applicationId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/applications/${applicationId}`] : null;
     const fetcher: (
       url: string[],
       { arg }: { arg: ApplicationsPartialUpdatePayload },
     ) => Promise<ApplicationsPartialUpdateData> = (_, { arg }) =>
-      this.applicationsPartialUpdate(applicationId, arg, params).then((res) => res.data);
+      this.applicationsPartialUpdate(applicationId, arg, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -184,7 +227,10 @@ export class Applications<SecurityDataType = unknown> extends HttpClient<Securit
       ...params,
     });
 
-  applicationsListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  applicationsListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/applications`] : null;
     const fetcher = () => this.applicationsList(params).then((res) => res.data);
     return [key, fetcher] as const;
@@ -197,7 +243,10 @@ export class Applications<SecurityDataType = unknown> extends HttpClient<Securit
    * @name ApplicationsCreate
    * @request POST:/applications
    */
-  applicationsCreate = (data: ApplicationsCreatePayload, params: RequestParams = {}) =>
+  applicationsCreate = (
+    data: ApplicationsCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<ApplicationsCreateData, void>({
       path: `/applications`,
       method: "POST",
@@ -207,12 +256,16 @@ export class Applications<SecurityDataType = unknown> extends HttpClient<Securit
       ...params,
     });
 
-  applicationsCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  applicationsCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/applications`] : null;
-    const fetcher: (url: string[], { arg }: { arg: ApplicationsCreatePayload }) => Promise<ApplicationsCreateData> = (
-      _,
-      { arg },
-    ) => this.applicationsCreate(arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: ApplicationsCreatePayload },
+    ) => Promise<ApplicationsCreateData> = (_, { arg }) =>
+      this.applicationsCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 }

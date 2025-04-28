@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -27,7 +28,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class Application<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class Application<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -43,9 +46,14 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  getApplicationQueryArgs = (jobId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  getApplicationQueryArgs = (
+    jobId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/application/job/${jobId}`] : null;
-    const fetcher = () => this.getApplication(jobId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.getApplication(jobId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -64,9 +72,14 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  myComingDetailQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  myComingDetailQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/application/my/coming/${userId}`] : null;
-    const fetcher = () => this.myComingDetail(userId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.myComingDetail(userId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -87,9 +100,14 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  getApplication2QueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  getApplication2QueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/application/my/${userId}`] : null;
-    const fetcher = () => this.getApplication2(userId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.getApplication2(userId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -108,7 +126,11 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  acceptPartialUpdateQueryArgs = (applicationId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  acceptPartialUpdateQueryArgs = (
+    applicationId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/application/${applicationId}/accept`] : null;
     const fetcher: (url: string[]) => Promise<AcceptPartialUpdateData> = (_) =>
       this.acceptPartialUpdate(applicationId, params).then((res) => res.data);
@@ -130,7 +152,11 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  rejectPartialUpdateQueryArgs = (applicationId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  rejectPartialUpdateQueryArgs = (
+    applicationId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/application/${applicationId}/reject`] : null;
     const fetcher: (url: string[]) => Promise<RejectPartialUpdateData> = (_) =>
       this.rejectPartialUpdate(applicationId, params).then((res) => res.data);
@@ -152,9 +178,14 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  applicationDeleteQueryArgs = (applicationId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  applicationDeleteQueryArgs = (
+    applicationId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/application/${applicationId}`] : null;
-    const fetcher = () => this.applicationDelete(applicationId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.applicationDelete(applicationId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -173,9 +204,14 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  applicationDetailQueryArgs = (applicationId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  applicationDetailQueryArgs = (
+    applicationId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/application/${applicationId}`] : null;
-    const fetcher = () => this.applicationDetail(applicationId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.applicationDetail(applicationId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -200,13 +236,19 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  applicationPartialUpdateQueryArgs = (applicationId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  applicationPartialUpdateQueryArgs = (
+    applicationId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/application/${applicationId}`] : null;
     const fetcher: (
       url: string[],
       { arg }: { arg: ApplicationPartialUpdatePayload },
     ) => Promise<ApplicationPartialUpdateData> = (_, { arg }) =>
-      this.applicationPartialUpdate(applicationId, arg, params).then((res) => res.data);
+      this.applicationPartialUpdate(applicationId, arg, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -217,7 +259,11 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
    * @name ApplicationUpdate
    * @request PUT:/application/{application_id}
    */
-  applicationUpdate = (applicationId: string, data: ApplicationUpdatePayload, params: RequestParams = {}) =>
+  applicationUpdate = (
+    applicationId: string,
+    data: ApplicationUpdatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<ApplicationUpdateData, void>({
       path: `/application/${applicationId}`,
       method: "PUT",
@@ -242,7 +288,10 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  applicationListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  applicationListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/application`] : null;
     const fetcher = () => this.applicationList(params).then((res) => res.data);
     return [key, fetcher] as const;
@@ -255,7 +304,10 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
    * @name ApplicationCreate
    * @request POST:/application
    */
-  applicationCreate = (data: ApplicationCreatePayload, params: RequestParams = {}) =>
+  applicationCreate = (
+    data: ApplicationCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<ApplicationCreateData, void>({
       path: `/application`,
       method: "POST",
@@ -265,12 +317,16 @@ export class Application<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  applicationCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  applicationCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/application`] : null;
-    const fetcher: (url: string[], { arg }: { arg: ApplicationCreatePayload }) => Promise<ApplicationCreateData> = (
-      _,
-      { arg },
-    ) => this.applicationCreate(arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: ApplicationCreatePayload },
+    ) => Promise<ApplicationCreateData> = (_, { arg }) =>
+      this.applicationCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 }

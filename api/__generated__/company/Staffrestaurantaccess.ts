@@ -19,7 +19,9 @@ import {
 } from "./data-contracts";
 import { HttpClient, RequestParams } from "./http-client";
 
-export class Staffrestaurantaccess<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class Staffrestaurantaccess<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description Delete StaffRestaurantAccess record. <br /><br /> <b>Authentication:</b> not required
    *
@@ -28,13 +30,32 @@ export class Staffrestaurantaccess<SecurityDataType = unknown> extends HttpClien
    * @summary Delete StaffRestaurantAccess record.
    * @request DELETE:/staffrestaurantaccess/{staffrestaurantaccess_id}
    */
-  staffrestaurantaccessDelete = (staffrestaurantaccessId: string, params: RequestParams = {}) =>
+  staffrestaurantaccessDelete = (
+    staffrestaurantaccessId: string,
+    params: RequestParams = {},
+  ) =>
     this.request<StaffrestaurantaccessDeleteData, void>({
       path: `/staffrestaurantaccess/${staffrestaurantaccessId}`,
       method: "DELETE",
       format: "json",
       ...params,
     });
+
+  staffrestaurantaccessDeleteQueryArgs = (
+    staffrestaurantaccessId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled
+      ? [`/staffrestaurantaccess/${staffrestaurantaccessId}`]
+      : null;
+    const fetcher = () =>
+      this.staffrestaurantaccessDelete(staffrestaurantaccessId, params).then(
+        (res) => res.data,
+      );
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Get StaffRestaurantAccess record <br /><br /> <b>Authentication:</b> not required
    *
@@ -43,13 +64,32 @@ export class Staffrestaurantaccess<SecurityDataType = unknown> extends HttpClien
    * @summary Get StaffRestaurantAccess record
    * @request GET:/staffrestaurantaccess/{staffrestaurantaccess_id}
    */
-  staffrestaurantaccessDetail = (staffrestaurantaccessId: string, params: RequestParams = {}) =>
+  staffrestaurantaccessDetail = (
+    staffrestaurantaccessId: string,
+    params: RequestParams = {},
+  ) =>
     this.request<StaffrestaurantaccessDetailData, void>({
       path: `/staffrestaurantaccess/${staffrestaurantaccessId}`,
       method: "GET",
       format: "json",
       ...params,
     });
+
+  staffrestaurantaccessDetailQueryArgs = (
+    staffrestaurantaccessId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled
+      ? [`/staffrestaurantaccess/${staffrestaurantaccessId}`]
+      : null;
+    const fetcher = () =>
+      this.staffrestaurantaccessDetail(staffrestaurantaccessId, params).then(
+        (res) => res.data,
+      );
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Edit StaffRestaurantAccess record <br /><br /> <b>Authentication:</b> not required
    *
@@ -58,13 +98,35 @@ export class Staffrestaurantaccess<SecurityDataType = unknown> extends HttpClien
    * @summary Edit StaffRestaurantAccess record
    * @request PATCH:/staffrestaurantaccess/{staffrestaurantaccess_id}
    */
-  staffrestaurantaccessPartialUpdate = (staffrestaurantaccessId: string, params: RequestParams = {}) =>
+  staffrestaurantaccessPartialUpdate = (
+    staffrestaurantaccessId: string,
+    params: RequestParams = {},
+  ) =>
     this.request<StaffrestaurantaccessPartialUpdateData, void>({
       path: `/staffrestaurantaccess/${staffrestaurantaccessId}`,
       method: "PATCH",
       format: "json",
       ...params,
     });
+
+  staffrestaurantaccessPartialUpdateQueryArgs = (
+    staffrestaurantaccessId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled
+      ? [`/staffrestaurantaccess/${staffrestaurantaccessId}`]
+      : null;
+    const fetcher: (
+      url: string[],
+    ) => Promise<StaffrestaurantaccessPartialUpdateData> = (_) =>
+      this.staffrestaurantaccessPartialUpdate(
+        staffrestaurantaccessId,
+        params,
+      ).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Query all StaffRestaurantAccess records <br /><br /> <b>Authentication:</b> not required
    *
@@ -80,6 +142,17 @@ export class Staffrestaurantaccess<SecurityDataType = unknown> extends HttpClien
       format: "json",
       ...params,
     });
+
+  staffrestaurantaccessListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/staffrestaurantaccess`] : null;
+    const fetcher = () =>
+      this.staffrestaurantaccessList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Add StaffRestaurantAccess record <br /><br /> <b>Authentication:</b> not required
    *
@@ -95,4 +168,14 @@ export class Staffrestaurantaccess<SecurityDataType = unknown> extends HttpClien
       format: "json",
       ...params,
     });
+
+  staffrestaurantaccessCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/staffrestaurantaccess`] : null;
+    const fetcher: (url: string[]) => Promise<StaffrestaurantaccessCreateData> =
+      (_) => this.staffrestaurantaccessCreate(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

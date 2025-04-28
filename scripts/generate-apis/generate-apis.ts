@@ -11,6 +11,26 @@ const aPIs: ApiDefinition[] = [
     outputDir: "base",
     url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:Mv5jTolf?type=json&token=",
   },
+  {
+    outputDir: "authentication",
+    url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:xaJlLYDj?type=json&token=",
+  },
+  {
+    outputDir: "company",
+    url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:3LZoUG6X?type=json&token=",
+  },
+  {
+    outputDir: "LINE",
+    url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:iG6oGWEP?type=json&token=",
+  },
+  {
+    outputDir: "operator",
+    url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:grw3Vlqa?type=json&token=",
+  },
+  {
+    outputDir: "stripe",
+    url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:WNb8GgKn?type=json&token=",
+  },
   // シェフ側のauth、Operator、Stripe、LINE
 ];
 

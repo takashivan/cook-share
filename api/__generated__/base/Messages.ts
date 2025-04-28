@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -20,7 +21,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class Messages<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class Messages<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description Delete message record. <br /><br /> <b>Authentication:</b> not required
    *
@@ -37,9 +40,14 @@ export class Messages<SecurityDataType = unknown> extends HttpClient<SecurityDat
       ...params,
     });
 
-  messagesDeleteQueryArgs = (messageId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  messagesDeleteQueryArgs = (
+    messageId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/messages/${messageId}`] : null;
-    const fetcher = () => this.messagesDelete(messageId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.messagesDelete(messageId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -59,9 +67,14 @@ export class Messages<SecurityDataType = unknown> extends HttpClient<SecurityDat
       ...params,
     });
 
-  messagesDetailQueryArgs = (messageId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  messagesDetailQueryArgs = (
+    messageId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/messages/${messageId}`] : null;
-    const fetcher = () => this.messagesDetail(messageId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.messagesDetail(messageId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -73,7 +86,11 @@ export class Messages<SecurityDataType = unknown> extends HttpClient<SecurityDat
    * @summary Edit message record
    * @request PATCH:/messages/{message_id}
    */
-  messagesPartialUpdate = (messageId: number, data: MessagesPartialUpdatePayload, params: RequestParams = {}) =>
+  messagesPartialUpdate = (
+    messageId: number,
+    data: MessagesPartialUpdatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<MessagesPartialUpdateData, void>({
       path: `/messages/${messageId}`,
       method: "PATCH",
@@ -83,13 +100,19 @@ export class Messages<SecurityDataType = unknown> extends HttpClient<SecurityDat
       ...params,
     });
 
-  messagesPartialUpdateQueryArgs = (messageId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  messagesPartialUpdateQueryArgs = (
+    messageId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/messages/${messageId}`] : null;
     const fetcher: (
       url: string[],
       { arg }: { arg: MessagesPartialUpdatePayload },
     ) => Promise<MessagesPartialUpdateData> = (_, { arg }) =>
-      this.messagesPartialUpdate(messageId, arg, params).then((res) => res.data);
+      this.messagesPartialUpdate(messageId, arg, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -109,7 +132,10 @@ export class Messages<SecurityDataType = unknown> extends HttpClient<SecurityDat
       ...params,
     });
 
-  messagesListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  messagesListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/messages`] : null;
     const fetcher = () => this.messagesList(params).then((res) => res.data);
     return [key, fetcher] as const;
@@ -133,12 +159,16 @@ export class Messages<SecurityDataType = unknown> extends HttpClient<SecurityDat
       ...params,
     });
 
-  messagesCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  messagesCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/messages`] : null;
-    const fetcher: (url: string[], { arg }: { arg: MessagesCreatePayload }) => Promise<MessagesCreateData> = (
-      _,
-      { arg },
-    ) => this.messagesCreate(arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: MessagesCreatePayload },
+    ) => Promise<MessagesCreateData> = (_, { arg }) =>
+      this.messagesCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 }

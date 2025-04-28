@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -18,7 +19,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class RestaurantNotifications<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class RestaurantNotifications<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -26,7 +29,10 @@ export class RestaurantNotifications<SecurityDataType = unknown> extends HttpCli
    * @name RestaurantNotificationsDelete
    * @request DELETE:/restaurant-notifications/{restaurant_notification_id}
    */
-  restaurantNotificationsDelete = (restaurantNotificationId: number, params: RequestParams = {}) =>
+  restaurantNotificationsDelete = (
+    restaurantNotificationId: number,
+    params: RequestParams = {},
+  ) =>
     this.request<RestaurantNotificationsDeleteData, void>({
       path: `/restaurant-notifications/${restaurantNotificationId}`,
       method: "DELETE",
@@ -39,8 +45,13 @@ export class RestaurantNotifications<SecurityDataType = unknown> extends HttpCli
     params: RequestParams = {},
     enabled: boolean = true,
   ) => {
-    const key = enabled ? [`/restaurant-notifications/${restaurantNotificationId}`] : null;
-    const fetcher = () => this.restaurantNotificationsDelete(restaurantNotificationId, params).then((res) => res.data);
+    const key = enabled
+      ? [`/restaurant-notifications/${restaurantNotificationId}`]
+      : null;
+    const fetcher = () =>
+      this.restaurantNotificationsDelete(restaurantNotificationId, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -51,7 +62,10 @@ export class RestaurantNotifications<SecurityDataType = unknown> extends HttpCli
    * @name RestaurantNotificationsDetail
    * @request GET:/restaurant-notifications/{restaurant_notification_id}
    */
-  restaurantNotificationsDetail = (restaurantNotificationId: number, params: RequestParams = {}) =>
+  restaurantNotificationsDetail = (
+    restaurantNotificationId: number,
+    params: RequestParams = {},
+  ) =>
     this.request<RestaurantNotificationsDetailData, void>({
       path: `/restaurant-notifications/${restaurantNotificationId}`,
       method: "GET",
@@ -64,8 +78,13 @@ export class RestaurantNotifications<SecurityDataType = unknown> extends HttpCli
     params: RequestParams = {},
     enabled: boolean = true,
   ) => {
-    const key = enabled ? [`/restaurant-notifications/${restaurantNotificationId}`] : null;
-    const fetcher = () => this.restaurantNotificationsDetail(restaurantNotificationId, params).then((res) => res.data);
+    const key = enabled
+      ? [`/restaurant-notifications/${restaurantNotificationId}`]
+      : null;
+    const fetcher = () =>
+      this.restaurantNotificationsDetail(restaurantNotificationId, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -84,9 +103,13 @@ export class RestaurantNotifications<SecurityDataType = unknown> extends HttpCli
       ...params,
     });
 
-  restaurantNotificationsListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  restaurantNotificationsListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/restaurant-notifications`] : null;
-    const fetcher = () => this.restaurantNotificationsList(params).then((res) => res.data);
+    const fetcher = () =>
+      this.restaurantNotificationsList(params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -97,7 +120,10 @@ export class RestaurantNotifications<SecurityDataType = unknown> extends HttpCli
    * @name RestaurantNotificationsCreate
    * @request POST:/restaurant-notifications
    */
-  restaurantNotificationsCreate = (data: RestaurantNotificationsCreatePayload, params: RequestParams = {}) =>
+  restaurantNotificationsCreate = (
+    data: RestaurantNotificationsCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<RestaurantNotificationsCreateData, void>({
       path: `/restaurant-notifications`,
       method: "POST",
@@ -107,7 +133,10 @@ export class RestaurantNotifications<SecurityDataType = unknown> extends HttpCli
       ...params,
     });
 
-  restaurantNotificationsCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  restaurantNotificationsCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/restaurant-notifications`] : null;
     const fetcher: (
       url: string[],

@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -9,10 +10,15 @@
  * ---------------------------------------------------------------
  */
 
-import { RestaurantCuisineList2Data, RestaurantCuisineListData } from "./data-contracts";
+import {
+  RestaurantCuisineList2Data,
+  RestaurantCuisineListData,
+} from "./data-contracts";
 import { HttpClient, RequestParams } from "./http-client";
 
-export class RestaurantCuisine<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class RestaurantCuisine<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -28,9 +34,13 @@ export class RestaurantCuisine<SecurityDataType = unknown> extends HttpClient<Se
       ...params,
     });
 
-  restaurantCuisineListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  restaurantCuisineListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/restaurant-cuisine`] : null;
-    const fetcher = () => this.restaurantCuisineList(params).then((res) => res.data);
+    const fetcher = () =>
+      this.restaurantCuisineList(params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -51,9 +61,13 @@ export class RestaurantCuisine<SecurityDataType = unknown> extends HttpClient<Se
       ...params,
     });
 
-  restaurantCuisineList2QueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  restaurantCuisineList2QueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/restaurant_cuisine`] : null;
-    const fetcher = () => this.restaurantCuisineList2(params).then((res) => res.data);
+    const fetcher = () =>
+      this.restaurantCuisineList2(params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 }

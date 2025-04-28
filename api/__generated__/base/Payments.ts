@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -20,7 +21,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class Payments<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class Payments<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description Delete payment record. <br /><br /> <b>Authentication:</b> not required
    *
@@ -37,9 +40,14 @@ export class Payments<SecurityDataType = unknown> extends HttpClient<SecurityDat
       ...params,
     });
 
-  paymentsDeleteQueryArgs = (paymentId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  paymentsDeleteQueryArgs = (
+    paymentId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/payments/${paymentId}`] : null;
-    const fetcher = () => this.paymentsDelete(paymentId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.paymentsDelete(paymentId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -59,9 +67,14 @@ export class Payments<SecurityDataType = unknown> extends HttpClient<SecurityDat
       ...params,
     });
 
-  paymentsDetailQueryArgs = (paymentId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  paymentsDetailQueryArgs = (
+    paymentId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/payments/${paymentId}`] : null;
-    const fetcher = () => this.paymentsDetail(paymentId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.paymentsDetail(paymentId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -73,7 +86,11 @@ export class Payments<SecurityDataType = unknown> extends HttpClient<SecurityDat
    * @summary Edit payment record
    * @request PATCH:/payments/{payment_id}
    */
-  paymentsPartialUpdate = (paymentId: number, data: PaymentsPartialUpdatePayload, params: RequestParams = {}) =>
+  paymentsPartialUpdate = (
+    paymentId: number,
+    data: PaymentsPartialUpdatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<PaymentsPartialUpdateData, void>({
       path: `/payments/${paymentId}`,
       method: "PATCH",
@@ -83,13 +100,19 @@ export class Payments<SecurityDataType = unknown> extends HttpClient<SecurityDat
       ...params,
     });
 
-  paymentsPartialUpdateQueryArgs = (paymentId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  paymentsPartialUpdateQueryArgs = (
+    paymentId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/payments/${paymentId}`] : null;
     const fetcher: (
       url: string[],
       { arg }: { arg: PaymentsPartialUpdatePayload },
     ) => Promise<PaymentsPartialUpdateData> = (_, { arg }) =>
-      this.paymentsPartialUpdate(paymentId, arg, params).then((res) => res.data);
+      this.paymentsPartialUpdate(paymentId, arg, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -109,7 +132,10 @@ export class Payments<SecurityDataType = unknown> extends HttpClient<SecurityDat
       ...params,
     });
 
-  paymentsListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  paymentsListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/payments`] : null;
     const fetcher = () => this.paymentsList(params).then((res) => res.data);
     return [key, fetcher] as const;
@@ -133,12 +159,16 @@ export class Payments<SecurityDataType = unknown> extends HttpClient<SecurityDat
       ...params,
     });
 
-  paymentsCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  paymentsCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/payments`] : null;
-    const fetcher: (url: string[], { arg }: { arg: PaymentsCreatePayload }) => Promise<PaymentsCreateData> = (
-      _,
-      { arg },
-    ) => this.paymentsCreate(arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: PaymentsCreatePayload },
+    ) => Promise<PaymentsCreateData> = (_, { arg }) =>
+      this.paymentsCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 }

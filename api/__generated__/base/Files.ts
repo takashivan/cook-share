@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -18,7 +19,9 @@ import {
 } from "./data-contracts";
 import { HttpClient, RequestParams } from "./http-client";
 
-export class Files<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class Files<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description Delete Files record. <br /><br /> <b>Authentication:</b> not required
    *
@@ -35,9 +38,14 @@ export class Files<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       ...params,
     });
 
-  filesDeleteQueryArgs = (filesId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  filesDeleteQueryArgs = (
+    filesId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/files/${filesId}`] : null;
-    const fetcher = () => this.filesDelete(filesId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.filesDelete(filesId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -57,9 +65,14 @@ export class Files<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       ...params,
     });
 
-  filesDetailQueryArgs = (filesId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  filesDetailQueryArgs = (
+    filesId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/files/${filesId}`] : null;
-    const fetcher = () => this.filesDetail(filesId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.filesDetail(filesId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -79,7 +92,11 @@ export class Files<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       ...params,
     });
 
-  filesPartialUpdateQueryArgs = (filesId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  filesPartialUpdateQueryArgs = (
+    filesId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/files/${filesId}`] : null;
     const fetcher: (url: string[]) => Promise<FilesPartialUpdateData> = (_) =>
       this.filesPartialUpdate(filesId, params).then((res) => res.data);
@@ -102,7 +119,10 @@ export class Files<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       ...params,
     });
 
-  filesListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  filesListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/files`] : null;
     const fetcher = () => this.filesList(params).then((res) => res.data);
     return [key, fetcher] as const;
@@ -124,7 +144,10 @@ export class Files<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       ...params,
     });
 
-  filesCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  filesCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/files`] : null;
     const fetcher: (url: string[]) => Promise<FilesCreateData> = (_) =>
       this.filesCreate(params).then((res) => res.data);

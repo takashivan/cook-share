@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -24,7 +25,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class Job<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class Job<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -40,9 +43,14 @@ export class Job<SecurityDataType = unknown> extends HttpClient<SecurityDataType
       ...params,
     });
 
-  companyDetailQueryArgs = (companyId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  companyDetailQueryArgs = (
+    companyId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/job/company/${companyId}`] : null;
-    const fetcher = () => this.companyDetail(companyId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.companyDetail(companyId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -62,9 +70,13 @@ export class Job<SecurityDataType = unknown> extends HttpClient<SecurityDataType
       ...params,
     });
 
-  queryUpcomingjobsListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  queryUpcomingjobsListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/job/query/upcomingjobs`] : null;
-    const fetcher = () => this.queryUpcomingjobsList(params).then((res) => res.data);
+    const fetcher = () =>
+      this.queryUpcomingjobsList(params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -84,9 +96,13 @@ export class Job<SecurityDataType = unknown> extends HttpClient<SecurityDataType
       ...params,
     });
 
-  queryUpcomingListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  queryUpcomingListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/job/query/upcoming`] : null;
-    const fetcher = () => this.queryUpcomingList(params).then((res) => res.data);
+    const fetcher = () =>
+      this.queryUpcomingList(params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -105,9 +121,14 @@ export class Job<SecurityDataType = unknown> extends HttpClient<SecurityDataType
       ...params,
     });
 
-  restaurantDetailQueryArgs = (restaurantId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  restaurantDetailQueryArgs = (
+    restaurantId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/job/restaurant/${restaurantId}`] : null;
-    const fetcher = () => this.restaurantDetail(restaurantId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.restaurantDetail(restaurantId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -127,7 +148,11 @@ export class Job<SecurityDataType = unknown> extends HttpClient<SecurityDataType
       ...params,
     });
 
-  deleteJobQueryArgs = (jobId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  deleteJobQueryArgs = (
+    jobId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/job/${jobId}`] : null;
     const fetcher = () => this.deleteJob(jobId, params).then((res) => res.data);
     return [key, fetcher] as const;
@@ -149,7 +174,11 @@ export class Job<SecurityDataType = unknown> extends HttpClient<SecurityDataType
       ...params,
     });
 
-  getJobQueryArgs = (jobId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  getJobQueryArgs = (
+    jobId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/job/${jobId}`] : null;
     const fetcher = () => this.getJob(jobId, params).then((res) => res.data);
     return [key, fetcher] as const;
@@ -163,7 +192,11 @@ export class Job<SecurityDataType = unknown> extends HttpClient<SecurityDataType
    * @summary Edit job record
    * @request PATCH:/job/{job_id}
    */
-  patchJob = (jobId: number, data: PatchJobPayload, params: RequestParams = {}) =>
+  patchJob = (
+    jobId: number,
+    data: PatchJobPayload,
+    params: RequestParams = {},
+  ) =>
     this.request<PatchJobData, void>({
       path: `/job/${jobId}`,
       method: "PATCH",
@@ -173,9 +206,16 @@ export class Job<SecurityDataType = unknown> extends HttpClient<SecurityDataType
       ...params,
     });
 
-  patchJobQueryArgs = (jobId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  patchJobQueryArgs = (
+    jobId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/job/${jobId}`] : null;
-    const fetcher: (url: string[], { arg }: { arg: PatchJobPayload }) => Promise<PatchJobData> = (_, { arg }) =>
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: PatchJobPayload },
+    ) => Promise<PatchJobData> = (_, { arg }) =>
       this.patchJob(jobId, arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
@@ -224,7 +264,10 @@ export class Job<SecurityDataType = unknown> extends HttpClient<SecurityDataType
 
   postJobQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
     const key = enabled ? [`/job`] : null;
-    const fetcher: (url: string[], { arg }: { arg: PostJobPayload }) => Promise<PostJobData> = (_, { arg }) =>
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: PostJobPayload },
+    ) => Promise<PostJobData> = (_, { arg }) =>
       this.postJob(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };

@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -29,7 +30,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class Users<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -45,10 +48,15 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       ...params,
     });
 
-  stripeAccountLinksCreateQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  stripeAccountLinksCreateQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/users/${userId}/stripe/account-links`] : null;
-    const fetcher: (url: string[]) => Promise<StripeAccountLinksCreateData> = (_) =>
-      this.stripeAccountLinksCreate(userId, params).then((res) => res.data);
+    const fetcher: (url: string[]) => Promise<StripeAccountLinksCreateData> = (
+      _,
+    ) => this.stripeAccountLinksCreate(userId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -59,7 +67,10 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
    * @name ChefNotificationsList
    * @request GET:/users/{userId}/chef-notifications
    */
-  chefNotificationsList = ({ userId, ...query }: ChefNotificationsListParams1, params: RequestParams = {}) =>
+  chefNotificationsList = (
+    { userId, ...query }: ChefNotificationsListParams1,
+    params: RequestParams = {},
+  ) =>
     this.request<ChefNotificationsListResult, void>({
       path: `/users/${userId}/chef-notifications`,
       method: "GET",
@@ -73,8 +84,13 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
     params: RequestParams = {},
     enabled: boolean = true,
   ) => {
-    const key = enabled ? [`/users/${userId}/chef-notifications`, ...(query ? [query] : [])] : null;
-    const fetcher = () => this.chefNotificationsList({ userId, ...query }, params).then((res) => res.data);
+    const key = enabled
+      ? [`/users/${userId}/chef-notifications`, ...(query ? [query] : [])]
+      : null;
+    const fetcher = () =>
+      this.chefNotificationsList({ userId, ...query }, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -93,9 +109,14 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       ...params,
     });
 
-  applicationsListQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  applicationsListQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/users/${userId}/applications`] : null;
-    const fetcher = () => this.applicationsList(userId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.applicationsList(userId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -114,9 +135,14 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       ...params,
     });
 
-  chefReviewsListQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  chefReviewsListQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/users/${userId}/chef-reviews`] : null;
-    const fetcher = () => this.chefReviewsList(userId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.chefReviewsList(userId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -135,9 +161,14 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       ...params,
     });
 
-  restaurantReviewsListQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  restaurantReviewsListQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/users/${userId}/restaurant-reviews`] : null;
-    const fetcher = () => this.restaurantReviewsList(userId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.restaurantReviewsList(userId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -156,7 +187,11 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       ...params,
     });
 
-  stripeAccountCreateQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  stripeAccountCreateQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/users/${userId}/stripe/account`] : null;
     const fetcher: (url: string[]) => Promise<StripeAccountCreateData> = (_) =>
       this.stripeAccountCreate(userId, params).then((res) => res.data);
@@ -178,9 +213,14 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       ...params,
     });
 
-  worksessionsUserTodosListQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  worksessionsUserTodosListQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/users/${userId}/worksessions/user_todos`] : null;
-    const fetcher = () => this.worksessionsUserTodosList(userId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.worksessionsUserTodosList(userId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -199,9 +239,14 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       ...params,
     });
 
-  worksessionsListQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  worksessionsListQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/users/${userId}/worksessions`] : null;
-    const fetcher = () => this.worksessionsList(userId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.worksessionsList(userId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -221,9 +266,14 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       ...params,
     });
 
-  usersDeleteQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  usersDeleteQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/users/${userId}`] : null;
-    const fetcher = () => this.usersDelete(userId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.usersDelete(userId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -243,9 +293,14 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       ...params,
     });
 
-  usersDetailQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  usersDetailQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/users/${userId}`] : null;
-    const fetcher = () => this.usersDetail(userId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.usersDetail(userId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -257,7 +312,11 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
    * @summary Edit user record
    * @request PATCH:/users/{user_id}
    */
-  usersPartialUpdate = (userId: string, data: UsersPartialUpdatePayload, params: RequestParams = {}) =>
+  usersPartialUpdate = (
+    userId: string,
+    data: UsersPartialUpdatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<UsersPartialUpdateData, void>({
       path: `/users/${userId}`,
       method: "PATCH",
@@ -267,12 +326,17 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       ...params,
     });
 
-  usersPartialUpdateQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  usersPartialUpdateQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/users/${userId}`] : null;
-    const fetcher: (url: string[], { arg }: { arg: UsersPartialUpdatePayload }) => Promise<UsersPartialUpdateData> = (
-      _,
-      { arg },
-    ) => this.usersPartialUpdate(userId, arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: UsersPartialUpdatePayload },
+    ) => Promise<UsersPartialUpdateData> = (_, { arg }) =>
+      this.usersPartialUpdate(userId, arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -292,7 +356,10 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       ...params,
     });
 
-  usersListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  usersListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/users`] : null;
     const fetcher = () => this.usersList(params).then((res) => res.data);
     return [key, fetcher] as const;
@@ -316,9 +383,15 @@ export class Users<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       ...params,
     });
 
-  usersCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  usersCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/users`] : null;
-    const fetcher: (url: string[], { arg }: { arg: UsersCreatePayload }) => Promise<UsersCreateData> = (_, { arg }) =>
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: UsersCreatePayload },
+    ) => Promise<UsersCreateData> = (_, { arg }) =>
       this.usersCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };

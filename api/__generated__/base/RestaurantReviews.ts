@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -20,7 +21,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class RestaurantReviews<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class RestaurantReviews<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -28,7 +31,10 @@ export class RestaurantReviews<SecurityDataType = unknown> extends HttpClient<Se
    * @name RestaurantReviewsDelete
    * @request DELETE:/restaurant_reviews/{restaurant_review_id}
    */
-  restaurantReviewsDelete = (restaurantReviewId: number, params: RequestParams = {}) =>
+  restaurantReviewsDelete = (
+    restaurantReviewId: number,
+    params: RequestParams = {},
+  ) =>
     this.request<RestaurantReviewsDeleteData, void>({
       path: `/restaurant_reviews/${restaurantReviewId}`,
       method: "DELETE",
@@ -42,7 +48,10 @@ export class RestaurantReviews<SecurityDataType = unknown> extends HttpClient<Se
     enabled: boolean = true,
   ) => {
     const key = enabled ? [`/restaurant_reviews/${restaurantReviewId}`] : null;
-    const fetcher = () => this.restaurantReviewsDelete(restaurantReviewId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.restaurantReviewsDelete(restaurantReviewId, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -53,7 +62,10 @@ export class RestaurantReviews<SecurityDataType = unknown> extends HttpClient<Se
    * @name RestaurantReviewsDetail
    * @request GET:/restaurant_reviews/{restaurant_review_id}
    */
-  restaurantReviewsDetail = (restaurantReviewId: number, params: RequestParams = {}) =>
+  restaurantReviewsDetail = (
+    restaurantReviewId: number,
+    params: RequestParams = {},
+  ) =>
     this.request<RestaurantReviewsDetailData, void>({
       path: `/restaurant_reviews/${restaurantReviewId}`,
       method: "GET",
@@ -67,7 +79,10 @@ export class RestaurantReviews<SecurityDataType = unknown> extends HttpClient<Se
     enabled: boolean = true,
   ) => {
     const key = enabled ? [`/restaurant_reviews/${restaurantReviewId}`] : null;
-    const fetcher = () => this.restaurantReviewsDetail(restaurantReviewId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.restaurantReviewsDetail(restaurantReviewId, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -102,7 +117,9 @@ export class RestaurantReviews<SecurityDataType = unknown> extends HttpClient<Se
       url: string[],
       { arg }: { arg: RestaurantReviewsPartialUpdatePayload },
     ) => Promise<RestaurantReviewsPartialUpdateData> = (_, { arg }) =>
-      this.restaurantReviewsPartialUpdate(restaurantReviewId, arg, params).then((res) => res.data);
+      this.restaurantReviewsPartialUpdate(restaurantReviewId, arg, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -121,9 +138,13 @@ export class RestaurantReviews<SecurityDataType = unknown> extends HttpClient<Se
       ...params,
     });
 
-  restaurantReviewsListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  restaurantReviewsListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/restaurant_reviews`] : null;
-    const fetcher = () => this.restaurantReviewsList(params).then((res) => res.data);
+    const fetcher = () =>
+      this.restaurantReviewsList(params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -134,7 +155,10 @@ export class RestaurantReviews<SecurityDataType = unknown> extends HttpClient<Se
    * @name RestaurantReviewsCreate
    * @request POST:/restaurant_reviews
    */
-  restaurantReviewsCreate = (data: RestaurantReviewsCreatePayload, params: RequestParams = {}) =>
+  restaurantReviewsCreate = (
+    data: RestaurantReviewsCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<RestaurantReviewsCreateData, void>({
       path: `/restaurant_reviews`,
       method: "POST",
@@ -144,7 +168,10 @@ export class RestaurantReviews<SecurityDataType = unknown> extends HttpClient<Se
       ...params,
     });
 
-  restaurantReviewsCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  restaurantReviewsCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/restaurant_reviews`] : null;
     const fetcher: (
       url: string[],

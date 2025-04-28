@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -31,7 +32,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class Worksession<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class Worksession<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -39,7 +42,10 @@ export class Worksession<SecurityDataType = unknown> extends HttpClient<Security
    * @name ApplicationDetail
    * @request GET:/worksession/application/{application_id}
    */
-  applicationDetail = ({ applicationId, ...query }: ApplicationDetailParams1, params: RequestParams = {}) =>
+  applicationDetail = (
+    { applicationId, ...query }: ApplicationDetailParams1,
+    params: RequestParams = {},
+  ) =>
     this.request<ApplicationDetailResult, void>({
       path: `/worksession/application/${applicationId}`,
       method: "GET",
@@ -53,8 +59,13 @@ export class Worksession<SecurityDataType = unknown> extends HttpClient<Security
     params: RequestParams = {},
     enabled: boolean = true,
   ) => {
-    const key = enabled ? [`/worksession/application/${applicationId}`, ...(query ? [query] : [])] : null;
-    const fetcher = () => this.applicationDetail({ applicationId, ...query }, params).then((res) => res.data);
+    const key = enabled
+      ? [`/worksession/application/${applicationId}`, ...(query ? [query] : [])]
+      : null;
+    const fetcher = () =>
+      this.applicationDetail({ applicationId, ...query }, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -73,9 +84,14 @@ export class Worksession<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  restaurantTodoDetailQueryArgs = (jobId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  restaurantTodoDetailQueryArgs = (
+    jobId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/worksession/restaurant_todo/${jobId}`] : null;
-    const fetcher = () => this.restaurantTodoDetail(jobId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.restaurantTodoDetail(jobId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -94,9 +110,14 @@ export class Worksession<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  userDetailQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  userDetailQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/worksession/user/${userId}`] : null;
-    const fetcher = () => this.userDetail(userId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.userDetail(userId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -115,9 +136,14 @@ export class Worksession<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  userTodoDetailQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  userTodoDetailQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/worksession/user_todo/${userId}`] : null;
-    const fetcher = () => this.userTodoDetail(userId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.userTodoDetail(userId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -128,7 +154,11 @@ export class Worksession<SecurityDataType = unknown> extends HttpClient<Security
    * @name FinishPartialUpdate
    * @request PATCH:/worksession/{worksession_id}/finish
    */
-  finishPartialUpdate = (worksessionId: number, data: FinishPartialUpdatePayload, params: RequestParams = {}) =>
+  finishPartialUpdate = (
+    worksessionId: number,
+    data: FinishPartialUpdatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<FinishPartialUpdateData, void>({
       path: `/worksession/${worksessionId}/finish`,
       method: "PATCH",
@@ -138,12 +168,19 @@ export class Worksession<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  finishPartialUpdateQueryArgs = (worksessionId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  finishPartialUpdateQueryArgs = (
+    worksessionId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/worksession/${worksessionId}/finish`] : null;
-    const fetcher: (url: string[], { arg }: { arg: FinishPartialUpdatePayload }) => Promise<FinishPartialUpdateData> = (
-      _,
-      { arg },
-    ) => this.finishPartialUpdate(worksessionId, arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: FinishPartialUpdatePayload },
+    ) => Promise<FinishPartialUpdateData> = (_, { arg }) =>
+      this.finishPartialUpdate(worksessionId, arg, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -154,7 +191,11 @@ export class Worksession<SecurityDataType = unknown> extends HttpClient<Security
    * @name StartPartialUpdate
    * @request PATCH:/worksession/{worksession_id}/start
    */
-  startPartialUpdate = (worksessionId: number, data: StartPartialUpdatePayload, params: RequestParams = {}) =>
+  startPartialUpdate = (
+    worksessionId: number,
+    data: StartPartialUpdatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<StartPartialUpdateData, void>({
       path: `/worksession/${worksessionId}/start`,
       method: "PATCH",
@@ -164,12 +205,19 @@ export class Worksession<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  startPartialUpdateQueryArgs = (worksessionId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  startPartialUpdateQueryArgs = (
+    worksessionId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/worksession/${worksessionId}/start`] : null;
-    const fetcher: (url: string[], { arg }: { arg: StartPartialUpdatePayload }) => Promise<StartPartialUpdateData> = (
-      _,
-      { arg },
-    ) => this.startPartialUpdate(worksessionId, arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: StartPartialUpdatePayload },
+    ) => Promise<StartPartialUpdateData> = (_, { arg }) =>
+      this.startPartialUpdate(worksessionId, arg, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -180,7 +228,11 @@ export class Worksession<SecurityDataType = unknown> extends HttpClient<Security
    * @name VerifyPartialUpdate
    * @request PATCH:/worksession/{worksession_id}/verify
    */
-  verifyPartialUpdate = (worksessionId: number, data: VerifyPartialUpdatePayload, params: RequestParams = {}) =>
+  verifyPartialUpdate = (
+    worksessionId: number,
+    data: VerifyPartialUpdatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<VerifyPartialUpdateData, void>({
       path: `/worksession/${worksessionId}/verify`,
       method: "PATCH",
@@ -190,12 +242,19 @@ export class Worksession<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  verifyPartialUpdateQueryArgs = (worksessionId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  verifyPartialUpdateQueryArgs = (
+    worksessionId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/worksession/${worksessionId}/verify`] : null;
-    const fetcher: (url: string[], { arg }: { arg: VerifyPartialUpdatePayload }) => Promise<VerifyPartialUpdateData> = (
-      _,
-      { arg },
-    ) => this.verifyPartialUpdate(worksessionId, arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: VerifyPartialUpdatePayload },
+    ) => Promise<VerifyPartialUpdateData> = (_, { arg }) =>
+      this.verifyPartialUpdate(worksessionId, arg, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -215,9 +274,14 @@ export class Worksession<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  worksessionDeleteQueryArgs = (worksessionId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  worksessionDeleteQueryArgs = (
+    worksessionId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/worksession/${worksessionId}`] : null;
-    const fetcher = () => this.worksessionDelete(worksessionId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.worksessionDelete(worksessionId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -237,9 +301,14 @@ export class Worksession<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  worksessionDetailQueryArgs = (worksessionId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  worksessionDetailQueryArgs = (
+    worksessionId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/worksession/${worksessionId}`] : null;
-    const fetcher = () => this.worksessionDetail(worksessionId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.worksessionDetail(worksessionId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -265,13 +334,19 @@ export class Worksession<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  worksessionPartialUpdateQueryArgs = (worksessionId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  worksessionPartialUpdateQueryArgs = (
+    worksessionId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/worksession/${worksessionId}`] : null;
     const fetcher: (
       url: string[],
       { arg }: { arg: WorksessionPartialUpdatePayload },
     ) => Promise<WorksessionPartialUpdateData> = (_, { arg }) =>
-      this.worksessionPartialUpdate(worksessionId, arg, params).then((res) => res.data);
+      this.worksessionPartialUpdate(worksessionId, arg, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -291,7 +366,10 @@ export class Worksession<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  worksessionListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  worksessionListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/worksession`] : null;
     const fetcher = () => this.worksessionList(params).then((res) => res.data);
     return [key, fetcher] as const;
@@ -305,7 +383,10 @@ export class Worksession<SecurityDataType = unknown> extends HttpClient<Security
    * @summary Add worksession record
    * @request POST:/worksession
    */
-  worksessionCreate = (data: WorksessionCreatePayload, params: RequestParams = {}) =>
+  worksessionCreate = (
+    data: WorksessionCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<WorksessionCreateData, void>({
       path: `/worksession`,
       method: "POST",
@@ -315,12 +396,16 @@ export class Worksession<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  worksessionCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  worksessionCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/worksession`] : null;
-    const fetcher: (url: string[], { arg }: { arg: WorksessionCreatePayload }) => Promise<WorksessionCreateData> = (
-      _,
-      { arg },
-    ) => this.worksessionCreate(arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: WorksessionCreatePayload },
+    ) => Promise<WorksessionCreateData> = (_, { arg }) =>
+      this.worksessionCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 }

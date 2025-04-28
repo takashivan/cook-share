@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -20,7 +21,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class Photos<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class Photos<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description Delete Photos record. <br /><br /> <b>Authentication:</b> not required
    *
@@ -37,9 +40,14 @@ export class Photos<SecurityDataType = unknown> extends HttpClient<SecurityDataT
       ...params,
     });
 
-  photosDeleteQueryArgs = (photosId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  photosDeleteQueryArgs = (
+    photosId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/photos/${photosId}`] : null;
-    const fetcher = () => this.photosDelete(photosId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.photosDelete(photosId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -59,9 +67,14 @@ export class Photos<SecurityDataType = unknown> extends HttpClient<SecurityDataT
       ...params,
     });
 
-  photosDetailQueryArgs = (photosId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  photosDetailQueryArgs = (
+    photosId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/photos/${photosId}`] : null;
-    const fetcher = () => this.photosDetail(photosId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.photosDetail(photosId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -73,7 +86,11 @@ export class Photos<SecurityDataType = unknown> extends HttpClient<SecurityDataT
    * @summary Edit Photos record
    * @request PATCH:/photos/{photos_id}
    */
-  photosPartialUpdate = (photosId: string, data: PhotosPartialUpdatePayload, params: RequestParams = {}) =>
+  photosPartialUpdate = (
+    photosId: string,
+    data: PhotosPartialUpdatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<PhotosPartialUpdateData, void>({
       path: `/photos/${photosId}`,
       method: "PATCH",
@@ -83,12 +100,17 @@ export class Photos<SecurityDataType = unknown> extends HttpClient<SecurityDataT
       ...params,
     });
 
-  photosPartialUpdateQueryArgs = (photosId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  photosPartialUpdateQueryArgs = (
+    photosId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/photos/${photosId}`] : null;
-    const fetcher: (url: string[], { arg }: { arg: PhotosPartialUpdatePayload }) => Promise<PhotosPartialUpdateData> = (
-      _,
-      { arg },
-    ) => this.photosPartialUpdate(photosId, arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: PhotosPartialUpdatePayload },
+    ) => Promise<PhotosPartialUpdateData> = (_, { arg }) =>
+      this.photosPartialUpdate(photosId, arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -108,7 +130,10 @@ export class Photos<SecurityDataType = unknown> extends HttpClient<SecurityDataT
       ...params,
     });
 
-  photosListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  photosListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/photos`] : null;
     const fetcher = () => this.photosList(params).then((res) => res.data);
     return [key, fetcher] as const;
@@ -132,9 +157,15 @@ export class Photos<SecurityDataType = unknown> extends HttpClient<SecurityDataT
       ...params,
     });
 
-  photosCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  photosCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/photos`] : null;
-    const fetcher: (url: string[], { arg }: { arg: PhotosCreatePayload }) => Promise<PhotosCreateData> = (_, { arg }) =>
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: PhotosCreatePayload },
+    ) => Promise<PhotosCreateData> = (_, { arg }) =>
       this.photosCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };

@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -9,10 +10,15 @@
  * ---------------------------------------------------------------
  */
 
-import { JobWithCheckCreateData, JobWithCheckCreatePayload } from "./data-contracts";
+import {
+  JobWithCheckCreateData,
+  JobWithCheckCreatePayload,
+} from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class JobWithCheck<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class JobWithCheck<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description Add job record <br /><br /> <b>Authentication:</b> not required
    *
@@ -21,7 +27,10 @@ export class JobWithCheck<SecurityDataType = unknown> extends HttpClient<Securit
    * @summary Add job record
    * @request POST:/job_with_check
    */
-  jobWithCheckCreate = (data: JobWithCheckCreatePayload, params: RequestParams = {}) =>
+  jobWithCheckCreate = (
+    data: JobWithCheckCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<JobWithCheckCreateData, void>({
       path: `/job_with_check`,
       method: "POST",
@@ -31,12 +40,16 @@ export class JobWithCheck<SecurityDataType = unknown> extends HttpClient<Securit
       ...params,
     });
 
-  jobWithCheckCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  jobWithCheckCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/job_with_check`] : null;
-    const fetcher: (url: string[], { arg }: { arg: JobWithCheckCreatePayload }) => Promise<JobWithCheckCreateData> = (
-      _,
-      { arg },
-    ) => this.jobWithCheckCreate(arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: JobWithCheckCreatePayload },
+    ) => Promise<JobWithCheckCreateData> = (_, { arg }) =>
+      this.jobWithCheckCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 }

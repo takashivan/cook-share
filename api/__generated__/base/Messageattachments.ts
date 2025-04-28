@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -20,7 +21,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class Messageattachments<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class Messageattachments<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description Delete messageAttachment record. <br /><br /> <b>Authentication:</b> not required
    *
@@ -29,7 +32,10 @@ export class Messageattachments<SecurityDataType = unknown> extends HttpClient<S
    * @summary Delete messageAttachment record.
    * @request DELETE:/messageattachments/{messageattachment_id}
    */
-  messageattachmentsDelete = (messageattachmentId: string, params: RequestParams = {}) =>
+  messageattachmentsDelete = (
+    messageattachmentId: string,
+    params: RequestParams = {},
+  ) =>
     this.request<MessageattachmentsDeleteData, void>({
       path: `/messageattachments/${messageattachmentId}`,
       method: "DELETE",
@@ -43,7 +49,10 @@ export class Messageattachments<SecurityDataType = unknown> extends HttpClient<S
     enabled: boolean = true,
   ) => {
     const key = enabled ? [`/messageattachments/${messageattachmentId}`] : null;
-    const fetcher = () => this.messageattachmentsDelete(messageattachmentId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.messageattachmentsDelete(messageattachmentId, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -55,7 +64,10 @@ export class Messageattachments<SecurityDataType = unknown> extends HttpClient<S
    * @summary Get messageAttachment record
    * @request GET:/messageattachments/{messageattachment_id}
    */
-  messageattachmentsDetail = (messageattachmentId: string, params: RequestParams = {}) =>
+  messageattachmentsDetail = (
+    messageattachmentId: string,
+    params: RequestParams = {},
+  ) =>
     this.request<MessageattachmentsDetailData, void>({
       path: `/messageattachments/${messageattachmentId}`,
       method: "GET",
@@ -69,7 +81,10 @@ export class Messageattachments<SecurityDataType = unknown> extends HttpClient<S
     enabled: boolean = true,
   ) => {
     const key = enabled ? [`/messageattachments/${messageattachmentId}`] : null;
-    const fetcher = () => this.messageattachmentsDetail(messageattachmentId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.messageattachmentsDetail(messageattachmentId, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -105,7 +120,11 @@ export class Messageattachments<SecurityDataType = unknown> extends HttpClient<S
       url: string[],
       { arg }: { arg: MessageattachmentsPartialUpdatePayload },
     ) => Promise<MessageattachmentsPartialUpdateData> = (_, { arg }) =>
-      this.messageattachmentsPartialUpdate(messageattachmentId, arg, params).then((res) => res.data);
+      this.messageattachmentsPartialUpdate(
+        messageattachmentId,
+        arg,
+        params,
+      ).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -125,9 +144,13 @@ export class Messageattachments<SecurityDataType = unknown> extends HttpClient<S
       ...params,
     });
 
-  messageattachmentsListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  messageattachmentsListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/messageattachments`] : null;
-    const fetcher = () => this.messageattachmentsList(params).then((res) => res.data);
+    const fetcher = () =>
+      this.messageattachmentsList(params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -139,7 +162,10 @@ export class Messageattachments<SecurityDataType = unknown> extends HttpClient<S
    * @summary Add messageAttachment record
    * @request POST:/messageattachments
    */
-  messageattachmentsCreate = (data: MessageattachmentsCreatePayload, params: RequestParams = {}) =>
+  messageattachmentsCreate = (
+    data: MessageattachmentsCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<MessageattachmentsCreateData, void>({
       path: `/messageattachments`,
       method: "POST",
@@ -149,7 +175,10 @@ export class Messageattachments<SecurityDataType = unknown> extends HttpClient<S
       ...params,
     });
 
-  messageattachmentsCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  messageattachmentsCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/messageattachments`] : null;
     const fetcher: (
       url: string[],

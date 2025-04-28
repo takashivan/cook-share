@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -17,7 +18,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class Billing<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class Billing<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -25,7 +28,10 @@ export class Billing<SecurityDataType = unknown> extends HttpClient<SecurityData
    * @name AddInvoiceItemsCreate
    * @request POST:/billing/add-invoice-items
    */
-  addInvoiceItemsCreate = (data: AddInvoiceItemsCreatePayload, params: RequestParams = {}) =>
+  addInvoiceItemsCreate = (
+    data: AddInvoiceItemsCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<AddInvoiceItemsCreateData, void>({
       path: `/billing/add-invoice-items`,
       method: "POST",
@@ -35,7 +41,10 @@ export class Billing<SecurityDataType = unknown> extends HttpClient<SecurityData
       ...params,
     });
 
-  addInvoiceItemsCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  addInvoiceItemsCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/billing/add-invoice-items`] : null;
     const fetcher: (
       url: string[],
@@ -52,7 +61,10 @@ export class Billing<SecurityDataType = unknown> extends HttpClient<SecurityData
    * @name GenerateCompanySummaryCreate
    * @request POST:/billing/generate-company-summary
    */
-  generateCompanySummaryCreate = (data: GenerateCompanySummaryCreatePayload, params: RequestParams = {}) =>
+  generateCompanySummaryCreate = (
+    data: GenerateCompanySummaryCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<GenerateCompanySummaryCreateData, void>({
       path: `/billing/generate-company-summary`,
       method: "POST",
@@ -62,7 +74,10 @@ export class Billing<SecurityDataType = unknown> extends HttpClient<SecurityData
       ...params,
     });
 
-  generateCompanySummaryCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  generateCompanySummaryCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/billing/generate-company-summary`] : null;
     const fetcher: (
       url: string[],

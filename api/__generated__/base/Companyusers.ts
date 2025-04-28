@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -21,7 +22,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class Companyusers<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class Companyusers<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -37,9 +40,14 @@ export class Companyusers<SecurityDataType = unknown> extends HttpClient<Securit
       ...params,
     });
 
-  restaurantsListQueryArgs = (companyuserId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  restaurantsListQueryArgs = (
+    companyuserId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/companyusers/${companyuserId}/restaurants`] : null;
-    const fetcher = () => this.restaurantsList(companyuserId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.restaurantsList(companyuserId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -59,9 +67,14 @@ export class Companyusers<SecurityDataType = unknown> extends HttpClient<Securit
       ...params,
     });
 
-  companyusersDeleteQueryArgs = (companyuserId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  companyusersDeleteQueryArgs = (
+    companyuserId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/companyusers/${companyuserId}`] : null;
-    const fetcher = () => this.companyusersDelete(companyuserId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.companyusersDelete(companyuserId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -87,13 +100,19 @@ export class Companyusers<SecurityDataType = unknown> extends HttpClient<Securit
       ...params,
     });
 
-  companyusersPartialUpdateQueryArgs = (companyuserId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  companyusersPartialUpdateQueryArgs = (
+    companyuserId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/companyusers/${companyuserId}`] : null;
     const fetcher: (
       url: string[],
       { arg }: { arg: CompanyusersPartialUpdatePayload },
     ) => Promise<CompanyusersPartialUpdateData> = (_, { arg }) =>
-      this.companyusersPartialUpdate(companyuserId, arg, params).then((res) => res.data);
+      this.companyusersPartialUpdate(companyuserId, arg, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -112,9 +131,16 @@ export class Companyusers<SecurityDataType = unknown> extends HttpClient<Securit
       ...params,
     });
 
-  companyuserNotificationsListQueryArgs = (userId: string, params: RequestParams = {}, enabled: boolean = true) => {
-    const key = enabled ? [`/companyusers/${userId}/companyuser-notifications`] : null;
-    const fetcher = () => this.companyuserNotificationsList(userId, params).then((res) => res.data);
+  companyuserNotificationsListQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled
+      ? [`/companyusers/${userId}/companyuser-notifications`]
+      : null;
+    const fetcher = () =>
+      this.companyuserNotificationsList(userId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -134,7 +160,10 @@ export class Companyusers<SecurityDataType = unknown> extends HttpClient<Securit
       ...params,
     });
 
-  companyusersListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  companyusersListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/companyusers`] : null;
     const fetcher = () => this.companyusersList(params).then((res) => res.data);
     return [key, fetcher] as const;
@@ -148,7 +177,10 @@ export class Companyusers<SecurityDataType = unknown> extends HttpClient<Securit
    * @summary Add CompanyUser record
    * @request POST:/companyusers
    */
-  companyusersCreate = (data: CompanyusersCreateBody, params: RequestParams = {}) =>
+  companyusersCreate = (
+    data: CompanyusersCreateBody,
+    params: RequestParams = {},
+  ) =>
     this.request<CompanyusersCreateResult, void>({
       path: `/companyusers`,
       method: "POST",
@@ -158,12 +190,16 @@ export class Companyusers<SecurityDataType = unknown> extends HttpClient<Securit
       ...params,
     });
 
-  companyusersCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  companyusersCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/companyusers`] : null;
-    const fetcher: (url: string[], { arg }: { arg: CompanyusersCreateBody }) => Promise<CompanyusersCreateResult> = (
-      _,
-      { arg },
-    ) => this.companyusersCreate(arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: CompanyusersCreateBody },
+    ) => Promise<CompanyusersCreateResult> = (_, { arg }) =>
+      this.companyusersCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 }
