@@ -35,8 +35,6 @@ export function AddRestaurantStaffModal({
   restaurantName,
 }: AddRestaurantStaffModalProps) {
   const [email, setEmail] = useState("");
-  const [canManageJobs, setCanManageJobs] = useState(true);
-  const [canEdit, setCanEdit] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,14 +43,11 @@ export function AddRestaurantStaffModal({
 
     setIsSubmitting(true);
     try {
-      await onSubmit(email, { canManageJobs, canEdit });
+      await onSubmit(email, { canManageJobs: true, canEdit: true });
       setEmail("");
-      setCanManageJobs(true);
-      setCanEdit(false);
       onClose();
     } catch (error) {
       console.error("Error adding store staff:", error);
-      // エラー処理をここに追加
     } finally {
       setIsSubmitting(false);
     }
@@ -80,45 +75,13 @@ export function AddRestaurantStaffModal({
               />
             </div>
 
-            <div className="space-y-3">
-              <Label className="text-base">権限設定</Label>
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="can-manage-jobs"
-                    checked={canManageJobs}
-                    onCheckedChange={(checked) =>
-                      setCanManageJobs(checked as boolean)
-                    }
-                  />
-                  <Label
-                    htmlFor="can-manage-jobs"
-                    className="text-sm font-normal">
-                    求人の投稿・管理 (can_manage_jobs)
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="can-edit"
-                    checked={canEdit}
-                    onCheckedChange={(checked) =>
-                      setCanEdit(checked as boolean)
-                    }
-                  />
-                  <Label htmlFor="can-edit" className="text-sm font-normal">
-                    店舗情報の編集 (can_edit)
-                  </Label>
-                </div>
-              </div>
-            </div>
-
             <Card>
               <CardContent className="p-4 flex items-start gap-2 bg-amber-50">
                 <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
                 <div className="text-sm text-amber-800">
                   <p>
                     {restaurantName}
-                    の店舗スタッフとして招待されたユーザーは、設定した権限に基づいて店舗の管理ができます。
+                    の店舗スタッフとして招待されたユーザーは、求人の投稿・管理、店舗情報の編集を行うことができます。
                     会社全体の管理権限が必要な場合は、会社 &gt;
                     スタッフ管理から招待してください。
                   </p>

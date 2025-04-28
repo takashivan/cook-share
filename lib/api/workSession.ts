@@ -1,6 +1,6 @@
 import { API_CONFIG, apiRequest } from "./config";
 import { WorkSessionWithUser, WorkSessionWithJob } from "@/types";
-
+import { getAuthToken } from "./config";
 const WORK_SESSION_URL = API_CONFIG.baseURLs.workSession;
 
 export const workSessionApi = {
@@ -9,9 +9,17 @@ export const workSessionApi = {
     return response;
   },
   getWorkSessionsToDoByUserId: async (userId: string) => {
+    const token = getAuthToken();
+    if (!token) {
+      throw new Error("認証トークンが見つかりません");
+    }
     const response = await apiRequest(
       `${WORK_SESSION_URL}/user_todo/${userId}`,
-      "GET"
+      "GET",
+      {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      }
     );
     return response;
   },

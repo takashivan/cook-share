@@ -95,6 +95,8 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Staff } from "@/types/staff";
+import { DeleteRestaurantStaffModal } from "@/components/modals/DeleteRestaurantStaffModal";
+import { deleteRestaurantStaff } from "@/lib/api/restaurant";
 
 interface StaffData {
   id: string;
@@ -185,9 +187,10 @@ export default function RestaurantDetailPage(props: {
   //   photo: null as File | null,
   // });
 
-  const [deleteTargetStaff, setDeleteTargetStaff] = useState<StaffData | null>(
-    null
-  );
+  const [deleteTargetStaff, setDeleteTargetStaff] = useState<{
+    id: string;
+    companyuser: { name: string; email: string };
+  } | null>(null);
   const [editTargetStaff, setEditTargetStaff] = useState<CompanyusersListOutput['admin'][number] | null>(
     null
   );
@@ -195,6 +198,7 @@ export default function RestaurantDetailPage(props: {
     canEdit: false,
     canManageJobs: false,
   });
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // useEffect(() => {
   //   const fetchRestaurant = async () => {
@@ -422,28 +426,24 @@ export default function RestaurantDetailPage(props: {
   const handleDeleteStaff = async () => {
     if (!deleteTargetStaff) return;
 
+    setIsDeleting(true);
     try {
-      // TODO: Add API call to delete staff
-      // await deleteRestaurantStaff(restaurant?.id, deleteTargetStaff.id);
-
-      // Optimistically update the UI
-      const updatedStaffs = staffData?.admin?.filter(
-        (staff) => staff.id !== deleteTargetStaff.id
-      );
-      // mutateStaffs(updatedStaffs);
-
+      await deleteRestaurantStaff(Number(params.id), deleteTargetStaff.id);
       toast({
         title: "スタッフを削除しました",
-        description: `${deleteTargetStaff.companyuser.name || deleteTargetStaff.companyuser.email}を削除しました。`,
+        description: `${deleteTargetStaff.companyuser.name || deleteTargetStaff.companyuser.email}をスタッフから削除しました。`,
       });
+      // スタッフ一覧を再取得
+      mutateRestaurant();
     } catch (error) {
       console.error("Failed to delete staff:", error);
       toast({
         title: "エラーが発生しました",
-        description: "スタッフの削除に失敗しました。もう一度お試しください。",
+        description: "スタッフの削除に失敗しました。",
         variant: "destructive",
       });
     } finally {
+      setIsDeleting(false);
       setDeleteTargetStaff(null);
     }
   };
@@ -1248,18 +1248,14 @@ export default function RestaurantDetailPage(props: {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuItem
-                                    onClick={() => {
-                                      setEditTargetStaff(staff);
-                                      setEditPermissions({
-                                        canEdit: true,
-                                        canManageJobs: true,
-                                      });
-                                    }}>
-                                    権限を編集
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
                                     className="text-red-600"
-                                    // onClick={() => setDeleteTargetStaff(staff)}
+                                    onClick={() => setDeleteTargetStaff({
+                                      id: staff.id,
+                                      companyuser: {
+                                        name: staff.name,
+                                        email: staff.email
+                                      }
+                                    })}
                                   >
                                     削除
                                   </DropdownMenuItem>
@@ -1351,31 +1347,13 @@ export default function RestaurantDetailPage(props: {
         restaurantName={restaurant?.name ?? ""}
       />
 
-      {/* Delete Staff Confirmation Modal */}
-      <AlertDialog
-        open={!!deleteTargetStaff}
-        onOpenChange={() => setDeleteTargetStaff(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>スタッフを削除</AlertDialogTitle>
-            <AlertDialogDescription>
-              {deleteTargetStaff?.companyuser.name ||
-                deleteTargetStaff?.companyuser.email}
-              をスタッフから削除してもよろしいですか？
-              <br />
-              この操作は取り消せません。
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>キャンセル</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteStaff}
-              className="bg-red-600 hover:bg-red-700">
-              削除する
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteRestaurantStaffModal
+        isOpen={!!deleteTargetStaff}
+        onClose={() => setDeleteTargetStaff(null)}
+        onConfirm={handleDeleteStaff}
+        staffName={deleteTargetStaff?.companyuser.name || deleteTargetStaff?.companyuser.email || ""}
+        isLoading={isDeleting}
+      />
 
       {/* Edit Staff Permissions Modal */}
       <Dialog
