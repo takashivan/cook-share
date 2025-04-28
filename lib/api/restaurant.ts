@@ -100,6 +100,19 @@ export const restaurantStaffInvite = (
     restaurant_name,
   });
 };
+export const deleteRestaurantStaff = async (
+  restaurant_id: number,
+  user_id: string
+): Promise<void> => {
+  return apiRequest(
+    `${BASE_URL}/staff/delete`,
+    "DELETE",
+    {
+      restaurant_id,
+      user_id,
+    }
+  );
+};
 
 // レストラン情報を更新
 export const updateRestaurant = async (
@@ -149,3 +162,5 @@ export const getRestaurantNotifications = async (
   }
   return response.json();
 };
+
+

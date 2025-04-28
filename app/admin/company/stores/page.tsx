@@ -1,10 +1,29 @@
-import Link from "next/link"
-import { Download, MoreHorizontal, Plus, Search, SlidersHorizontal, Store } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Card, CardContent } from "@/components/ui/card"
+import Link from "next/link";
+import {
+  Download,
+  MoreHorizontal,
+  Plus,
+  Search,
+  SlidersHorizontal,
+  Store,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function StoresList() {
   const stores = [
@@ -48,14 +67,16 @@ export default function StoresList() {
       status: "営業中",
       jobCount: 2,
     },
-  ]
+  ];
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">店舗一覧</h2>
-          <p className="text-muted-foreground">会社に登録されている店舗の一覧です</p>
+          <p className="text-muted-foreground">
+            会社に登録されている店舗の一覧です
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button>
@@ -68,7 +89,11 @@ export default function StoresList() {
       <div className="flex flex-col md:flex-row items-center gap-4">
         <div className="relative w-full md:w-80">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input type="search" placeholder="店舗を検索..." className="w-full pl-8" />
+          <Input
+            type="search"
+            placeholder="店舗を検索..."
+            className="w-full pl-8"
+          />
         </div>
         <Button variant="outline" size="sm" className="ml-auto">
           <Download className="mr-2 h-4 w-4" />
@@ -89,7 +114,7 @@ export default function StoresList() {
                 <TableHead>店舗名</TableHead>
                 <TableHead>住所</TableHead>
                 <TableHead>ジャンル</TableHead>
-                <TableHead>ステータス</TableHead>
+
                 <TableHead>求人数</TableHead>
                 <TableHead className="w-[100px]"></TableHead>
               </TableRow>
@@ -107,15 +132,16 @@ export default function StoresList() {
                   </TableCell>
                   <TableCell>{store.address}</TableCell>
                   <TableCell>{store.type}</TableCell>
-                  <TableCell>
+                  {/* <TableCell>
                     <div
                       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        store.status === "営業中" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
+                        store.status === "営業中"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}>
                       {store.status}
                     </div>
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell>{store.jobCount}</TableCell>
                   <TableCell>
                     <DropdownMenu>
@@ -132,7 +158,9 @@ export default function StoresList() {
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem>編集</DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">削除</DropdownMenuItem>
+                        <DropdownMenuItem className="text-red-600">
+                          削除
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -155,7 +183,9 @@ export default function StoresList() {
                   </div>
                   <div>
                     <p className="font-medium">{store.name}</p>
-                    <p className="text-sm text-muted-foreground">{store.address}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {store.address}
+                    </p>
                   </div>
                 </div>
                 <DropdownMenu>
@@ -172,7 +202,9 @@ export default function StoresList() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>編集</DropdownMenuItem>
-                    <DropdownMenuItem className="text-red-600">削除</DropdownMenuItem>
+                    <DropdownMenuItem className="text-red-600">
+                      削除
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -185,22 +217,22 @@ export default function StoresList() {
                   <p className="text-muted-foreground">求人数</p>
                   <p>{store.jobCount}</p>
                 </div>
-                <div className="col-span-2">
+                {/* <div className="col-span-2">
                   <p className="text-muted-foreground">ステータス</p>
                   <div
                     className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      store.status === "営業中" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
-                    }`}
-                  >
+                      store.status === "営業中"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-yellow-100 text-yellow-800"
+                    }`}>
                     {store.status}
                   </div>
-                </div>
+                </div> */}
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
     </div>
-  )
+  );
 }
-

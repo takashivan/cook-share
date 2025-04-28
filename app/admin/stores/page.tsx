@@ -196,13 +196,16 @@ export default function StoresPage() {
                 <TableHead>店舗名</TableHead>
                 <TableHead>住所</TableHead>
                 <TableHead>ジャンル</TableHead>
-                <TableHead>ステータス</TableHead>
-                <TableHead className="w-[100px]"></TableHead>
+                {/* <TableHead>ステータス</TableHead> */}
               </TableRow>
             </TableHeader>
             <TableBody>
               {restaurants?.map((restaurant) => (
-                <TableRow key={restaurant.id}>
+                <TableRow 
+                  key={restaurant.id} 
+                  className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => window.location.href = `/admin/stores/${restaurant.id}`}
+                >
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center">
@@ -213,40 +216,6 @@ export default function StoresPage() {
                   </TableCell>
                   <TableCell>{restaurant.address}</TableCell>
                   <TableCell>{restaurant.cuisine_type}</TableCell>
-                  <TableCell>
-                    <div
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        restaurant.is_active
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}>
-                      {restaurant.is_active ? "営業中" : "準備中"}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">メニューを開く</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <Link
-                            href={`/admin/stores/${restaurant.id}`}
-                            className="w-full flex items-center">
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            詳細を表示
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Edit className="h-4 w-4 mr-2" />
-                          編集
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

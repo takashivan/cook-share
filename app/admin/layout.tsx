@@ -96,9 +96,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   useEffect(() => {
     if (user?.companies_id) {
-      dispatch(fetchMyRestaurants(user.companies_id));
+      dispatch(fetchMyRestaurants(user.id));
     }
-  }, [dispatch, user?.companies_id]);
+  }, [dispatch, user?.id]);
 
   useEffect(() => {
     const initAuth = async () => {

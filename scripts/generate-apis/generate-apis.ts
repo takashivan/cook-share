@@ -36,13 +36,6 @@ const generateApiTypes = async () => {
           ...baseConfig,
           url,
           output: path.resolve(process.cwd(), "api/__generated__", outputDir),
-          codeGenConstructs: (struct: any) => ({
-            ...struct,
-            TypeField: (content: any) => {
-              const { readonly, key, value } = content;
-              return `${readonly ? "readonly " : ""}${key}: ${value}`;
-            },
-          }),
         })
       )
     );
@@ -51,5 +44,3 @@ const generateApiTypes = async () => {
     console.error("型生成エラー:", error);
   }
 };
-
-generateApiTypes();
