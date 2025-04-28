@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -21,7 +22,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class Message<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class Message<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -37,9 +40,14 @@ export class Message<SecurityDataType = unknown> extends HttpClient<SecurityData
       ...params,
     });
 
-  worksessionDetailQueryArgs = (worksessionId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  worksessionDetailQueryArgs = (
+    worksessionId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/message/worksession/${worksessionId}`] : null;
-    const fetcher = () => this.worksessionDetail(worksessionId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.worksessionDetail(worksessionId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -59,9 +67,14 @@ export class Message<SecurityDataType = unknown> extends HttpClient<SecurityData
       ...params,
     });
 
-  messageDeleteQueryArgs = (messageId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  messageDeleteQueryArgs = (
+    messageId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/message/${messageId}`] : null;
-    const fetcher = () => this.messageDelete(messageId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.messageDelete(messageId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -81,9 +94,14 @@ export class Message<SecurityDataType = unknown> extends HttpClient<SecurityData
       ...params,
     });
 
-  messageDetailQueryArgs = (messageId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  messageDetailQueryArgs = (
+    messageId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/message/${messageId}`] : null;
-    const fetcher = () => this.messageDetail(messageId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.messageDetail(messageId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -95,7 +113,11 @@ export class Message<SecurityDataType = unknown> extends HttpClient<SecurityData
    * @summary Edit message record
    * @request PATCH:/message/{message_id}
    */
-  messagePartialUpdate = (messageId: number, data: MessagePartialUpdatePayload, params: RequestParams = {}) =>
+  messagePartialUpdate = (
+    messageId: number,
+    data: MessagePartialUpdatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<MessagePartialUpdateData, void>({
       path: `/message/${messageId}`,
       method: "PATCH",
@@ -105,7 +127,11 @@ export class Message<SecurityDataType = unknown> extends HttpClient<SecurityData
       ...params,
     });
 
-  messagePartialUpdateQueryArgs = (messageId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  messagePartialUpdateQueryArgs = (
+    messageId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/message/${messageId}`] : null;
     const fetcher: (
       url: string[],
@@ -131,7 +157,10 @@ export class Message<SecurityDataType = unknown> extends HttpClient<SecurityData
       ...params,
     });
 
-  messageListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  messageListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/message`] : null;
     const fetcher = () => this.messageList(params).then((res) => res.data);
     return [key, fetcher] as const;
@@ -155,12 +184,16 @@ export class Message<SecurityDataType = unknown> extends HttpClient<SecurityData
       ...params,
     });
 
-  messageCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  messageCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/message`] : null;
-    const fetcher: (url: string[], { arg }: { arg: MessageCreatePayload }) => Promise<MessageCreateData> = (
-      _,
-      { arg },
-    ) => this.messageCreate(arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: MessageCreatePayload },
+    ) => Promise<MessageCreateData> = (_, { arg }) =>
+      this.messageCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 }

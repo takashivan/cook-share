@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -29,7 +30,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class Restaurant<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -37,7 +40,10 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
    * @name CheckAccessList
    * @request GET:/restaurant/check-access
    */
-  checkAccessList = (query: CheckAccessListParams, params: RequestParams = {}) =>
+  checkAccessList = (
+    query: CheckAccessListParams,
+    params: RequestParams = {},
+  ) =>
     this.request<CheckAccessListData, void>({
       path: `/restaurant/check-access`,
       method: "GET",
@@ -46,9 +52,16 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
       ...params,
     });
 
-  checkAccessListQueryArgs = (query: CheckAccessListParams, params: RequestParams = {}, enabled: boolean = true) => {
-    const key = enabled ? [`/restaurant/check-access`, ...(query ? [query] : [])] : null;
-    const fetcher = () => this.checkAccessList(query, params).then((res) => res.data);
+  checkAccessListQueryArgs = (
+    query: CheckAccessListParams,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled
+      ? [`/restaurant/check-access`, ...(query ? [query] : [])]
+      : null;
+    const fetcher = () =>
+      this.checkAccessList(query, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -67,9 +80,14 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
       ...params,
     });
 
-  companyDetailQueryArgs = (companyId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  companyDetailQueryArgs = (
+    companyId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/restaurant/company/${companyId}`] : null;
-    const fetcher = () => this.companyDetail(companyId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.companyDetail(companyId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -88,9 +106,16 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
       ...params,
     });
 
-  companyusersClone0ListQueryArgs = (restaurantId: number, params: RequestParams = {}, enabled: boolean = true) => {
-    const key = enabled ? [`/restaurant/companyusers/${restaurantId}/clone_0`] : null;
-    const fetcher = () => this.companyusersClone0List(restaurantId, params).then((res) => res.data);
+  companyusersClone0ListQueryArgs = (
+    restaurantId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled
+      ? [`/restaurant/companyusers/${restaurantId}/clone_0`]
+      : null;
+    const fetcher = () =>
+      this.companyusersClone0List(restaurantId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -109,9 +134,14 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
       ...params,
     });
 
-  companyusersDetailQueryArgs = (restaurantId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  companyusersDetailQueryArgs = (
+    restaurantId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/restaurant/companyusers/${restaurantId}`] : null;
-    const fetcher = () => this.companyusersDetail(restaurantId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.companyusersDetail(restaurantId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -122,7 +152,10 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
    * @name StaffInviteCreate
    * @request POST:/restaurant/staff/invite
    */
-  staffInviteCreate = (data: StaffInviteCreateBody, params: RequestParams = {}) =>
+  staffInviteCreate = (
+    data: StaffInviteCreateBody,
+    params: RequestParams = {},
+  ) =>
     this.request<StaffInviteCreateResult, void>({
       path: `/restaurant/staff/invite`,
       method: "POST",
@@ -132,12 +165,16 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
       ...params,
     });
 
-  staffInviteCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  staffInviteCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/restaurant/staff/invite`] : null;
-    const fetcher: (url: string[], { arg }: { arg: StaffInviteCreateBody }) => Promise<StaffInviteCreateResult> = (
-      _,
-      { arg },
-    ) => this.staffInviteCreate(arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: StaffInviteCreateBody },
+    ) => Promise<StaffInviteCreateResult> = (_, { arg }) =>
+      this.staffInviteCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -157,9 +194,16 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
       ...params,
     });
 
-  staffsListQueryArgs = (query: StaffsListParams, params: RequestParams = {}, enabled: boolean = true) => {
-    const key = enabled ? [`/restaurant/staffs`, ...(query ? [query] : [])] : null;
-    const fetcher = () => this.staffsList(query, params).then((res) => res.data);
+  staffsListQueryArgs = (
+    query: StaffsListParams,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled
+      ? [`/restaurant/staffs`, ...(query ? [query] : [])]
+      : null;
+    const fetcher = () =>
+      this.staffsList(query, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -179,9 +223,14 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
       ...params,
     });
 
-  restaurantDeleteQueryArgs = (restaurantId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  restaurantDeleteQueryArgs = (
+    restaurantId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/restaurant/${restaurantId}`] : null;
-    const fetcher = () => this.restaurantDelete(restaurantId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.restaurantDelete(restaurantId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -201,9 +250,14 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
       ...params,
     });
 
-  restaurantDetailQueryArgs = (restaurantId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  restaurantDetailQueryArgs = (
+    restaurantId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/restaurant/${restaurantId}`] : null;
-    const fetcher = () => this.restaurantDetail(restaurantId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.restaurantDetail(restaurantId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -215,7 +269,11 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
    * @summary Edit restaurant record
    * @request PATCH:/restaurant/{restaurant_id}
    */
-  restaurantPartialUpdate = (restaurantId: number, data: RestaurantPartialUpdatePayload, params: RequestParams = {}) =>
+  restaurantPartialUpdate = (
+    restaurantId: number,
+    data: RestaurantPartialUpdatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<RestaurantPartialUpdateData, void>({
       path: `/restaurant/${restaurantId}`,
       method: "PATCH",
@@ -225,13 +283,19 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
       ...params,
     });
 
-  restaurantPartialUpdateQueryArgs = (restaurantId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  restaurantPartialUpdateQueryArgs = (
+    restaurantId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/restaurant/${restaurantId}`] : null;
     const fetcher: (
       url: string[],
       { arg }: { arg: RestaurantPartialUpdatePayload },
     ) => Promise<RestaurantPartialUpdateData> = (_, { arg }) =>
-      this.restaurantPartialUpdate(restaurantId, arg, params).then((res) => res.data);
+      this.restaurantPartialUpdate(restaurantId, arg, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -251,7 +315,10 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
       ...params,
     });
 
-  restaurantListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  restaurantListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/restaurant`] : null;
     const fetcher = () => this.restaurantList(params).then((res) => res.data);
     return [key, fetcher] as const;
@@ -265,7 +332,10 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
    * @summary Add restaurant record
    * @request POST:/restaurant
    */
-  restaurantCreate = (data: RestaurantCreatePayload, params: RequestParams = {}) =>
+  restaurantCreate = (
+    data: RestaurantCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<RestaurantCreateData, void>({
       path: `/restaurant`,
       method: "POST",
@@ -275,12 +345,16 @@ export class Restaurant<SecurityDataType = unknown> extends HttpClient<SecurityD
       ...params,
     });
 
-  restaurantCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  restaurantCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/restaurant`] : null;
-    const fetcher: (url: string[], { arg }: { arg: RestaurantCreatePayload }) => Promise<RestaurantCreateData> = (
-      _,
-      { arg },
-    ) => this.restaurantCreate(arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: RestaurantCreatePayload },
+    ) => Promise<RestaurantCreateData> = (_, { arg }) =>
+      this.restaurantCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 }

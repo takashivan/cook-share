@@ -52,15 +52,15 @@ type QueryParams = Record<string, string>;
 // 認証関連
 export const login = async (
   credentials: Credentials
-): Promise<{ authToken: string; user: CompanyUser }> => {
+): Promise<{ sessionToken: string; authToken: string; user: CompanyUser }> => {
   try {
-    const response = await apiRequest<{ authToken: string; user: CompanyUser }>(
+    const response = await apiRequest<{ sessionToken: string; authToken: string; user: CompanyUser }>(
       `${AUTH_URL}/login`,
       "POST",
       credentials
     );
-    if (response.authToken) {
-      setAuthToken(response.authToken, "company");
+    if (response.sessionToken) {
+      setAuthToken(response.sessionToken, "company");
     }
     return response;
   } catch (error) {
@@ -76,8 +76,9 @@ export const getMyRestaurants = async (
 
 export const register = async (
   userData: CompanyUserData
-): Promise<{ authToken: string; user: CompanyUser }> => {
+): Promise<{ sessionToken: string; authToken: string; user: CompanyUser }> => {
   const response = await apiRequest<{
+    sessionToken: string;
     authToken: string;
     user: {
       id: string;
@@ -88,8 +89,8 @@ export const register = async (
     };
   }>(`${AUTH_URL}/signup`, "POST", userData);
 
-  if (response.authToken) {
-    setAuthToken(response.authToken, "company");
+  if (response.sessionToken) {
+    setAuthToken(response.sessionToken, "company");
   }
 
   // Transform the response to match CompanyUser interface
@@ -106,6 +107,7 @@ export const register = async (
   setCurrentUser(transformedUser, "company");
 
   return {
+    sessionToken: response.sessionToken,
     authToken: response.authToken,
     user: transformedUser,
   };

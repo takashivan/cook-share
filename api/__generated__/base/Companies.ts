@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -31,7 +32,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class Companies<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description <br /><br /> <b>Authentication:</b> required
    *
@@ -40,7 +43,10 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
    * @request POST:/companies/staff/invite
    * @secure
    */
-  staffInviteCreate = (data: StaffInviteCreatePayload, params: RequestParams = {}) =>
+  staffInviteCreate = (
+    data: StaffInviteCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<StaffInviteCreateData, void>({
       path: `/companies/staff/invite`,
       method: "POST",
@@ -51,12 +57,16 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       ...params,
     });
 
-  staffInviteCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  staffInviteCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/companies/staff/invite`] : null;
-    const fetcher: (url: string[], { arg }: { arg: StaffInviteCreatePayload }) => Promise<StaffInviteCreateData> = (
-      _,
-      { arg },
-    ) => this.staffInviteCreate(arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: StaffInviteCreatePayload },
+    ) => Promise<StaffInviteCreateData> = (_, { arg }) =>
+      this.staffInviteCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -67,7 +77,11 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
    * @name CompanyusersCreate
    * @request POST:/companies/{companies_id}/companyusers
    */
-  companyusersCreate = (companiesId: string, data: CompanyusersCreatePayload, params: RequestParams = {}) =>
+  companyusersCreate = (
+    companiesId: string,
+    data: CompanyusersCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<CompanyusersCreateData, void>({
       path: `/companies/${companiesId}/companyusers`,
       method: "POST",
@@ -77,12 +91,17 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       ...params,
     });
 
-  companyusersCreateQueryArgs = (companiesId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  companyusersCreateQueryArgs = (
+    companiesId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/companies/${companiesId}/companyusers`] : null;
-    const fetcher: (url: string[], { arg }: { arg: CompanyusersCreatePayload }) => Promise<CompanyusersCreateData> = (
-      _,
-      { arg },
-    ) => this.companyusersCreate(companiesId, arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: CompanyusersCreatePayload },
+    ) => Promise<CompanyusersCreateData> = (_, { arg }) =>
+      this.companyusersCreate(companiesId, arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -102,9 +121,14 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       ...params,
     });
 
-  companiesDeleteQueryArgs = (companiesId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  companiesDeleteQueryArgs = (
+    companiesId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/companies/${companiesId}`] : null;
-    const fetcher = () => this.companiesDelete(companiesId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.companiesDelete(companiesId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -124,9 +148,14 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       ...params,
     });
 
-  companiesDetailQueryArgs = (companiesId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  companiesDetailQueryArgs = (
+    companiesId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/companies/${companiesId}`] : null;
-    const fetcher = () => this.companiesDetail(companiesId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.companiesDetail(companiesId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -138,7 +167,11 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
    * @summary Edit Companies record
    * @request PATCH:/companies/{companies_id}
    */
-  companiesPartialUpdate = (companiesId: string, data: CompaniesPartialUpdatePayload, params: RequestParams = {}) =>
+  companiesPartialUpdate = (
+    companiesId: string,
+    data: CompaniesPartialUpdatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<CompaniesPartialUpdateData, void>({
       path: `/companies/${companiesId}`,
       method: "PATCH",
@@ -148,13 +181,19 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       ...params,
     });
 
-  companiesPartialUpdateQueryArgs = (companiesId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  companiesPartialUpdateQueryArgs = (
+    companiesId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/companies/${companiesId}`] : null;
     const fetcher: (
       url: string[],
       { arg }: { arg: CompaniesPartialUpdatePayload },
     ) => Promise<CompaniesPartialUpdateData> = (_, { arg }) =>
-      this.companiesPartialUpdate(companiesId, arg, params).then((res) => res.data);
+      this.companiesPartialUpdate(companiesId, arg, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -187,8 +226,13 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
     params: RequestParams = {},
     enabled: boolean = true,
   ) => {
-    const key = enabled ? [`/companies/${companyId}/companyusers/${companyuserId}`] : null;
-    const fetcher = () => this.companyusersDelete(companyId, companyuserId, data, params).then((res) => res.data);
+    const key = enabled
+      ? [`/companies/${companyId}/companyusers/${companyuserId}`]
+      : null;
+    const fetcher = () =>
+      this.companyusersDelete(companyId, companyuserId, data, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -207,9 +251,14 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       ...params,
     });
 
-  companyusersListQueryArgs = (companyId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  companyusersListQueryArgs = (
+    companyId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/companies/${companyId}/companyusers`] : null;
-    const fetcher = () => this.companyusersList(companyId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.companyusersList(companyId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -228,9 +277,14 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       ...params,
     });
 
-  jobsListQueryArgs = (companyId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  jobsListQueryArgs = (
+    companyId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/companies/${companyId}/jobs`] : null;
-    const fetcher = () => this.jobsList(companyId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.jobsList(companyId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -249,9 +303,14 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       ...params,
     });
 
-  restaurantsListQueryArgs = (companyId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  restaurantsListQueryArgs = (
+    companyId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/companies/${companyId}/restaurants`] : null;
-    const fetcher = () => this.restaurantsList(companyId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.restaurantsList(companyId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -262,7 +321,11 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
    * @name StripeCustomersCreate
    * @request POST:/companies/{company_id}/stripe/customers
    */
-  stripeCustomersCreate = (companyId: string, data: StripeCustomersCreatePayload, params: RequestParams = {}) =>
+  stripeCustomersCreate = (
+    companyId: string,
+    data: StripeCustomersCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<StripeCustomersCreateData, void>({
       path: `/companies/${companyId}/stripe/customers`,
       method: "POST",
@@ -272,13 +335,19 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       ...params,
     });
 
-  stripeCustomersCreateQueryArgs = (companyId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  stripeCustomersCreateQueryArgs = (
+    companyId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/companies/${companyId}/stripe/customers`] : null;
     const fetcher: (
       url: string[],
       { arg }: { arg: StripeCustomersCreatePayload },
     ) => Promise<StripeCustomersCreateData> = (_, { arg }) =>
-      this.stripeCustomersCreate(companyId, arg, params).then((res) => res.data);
+      this.stripeCustomersCreate(companyId, arg, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -298,7 +367,10 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       ...params,
     });
 
-  companiesListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  companiesListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/companies`] : null;
     const fetcher = () => this.companiesList(params).then((res) => res.data);
     return [key, fetcher] as const;
@@ -312,7 +384,10 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
    * @summary Add Companies record
    * @request POST:/companies
    */
-  companiesCreate = (data: CompaniesCreatePayload, params: RequestParams = {}) =>
+  companiesCreate = (
+    data: CompaniesCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<CompaniesCreateData, void>({
       path: `/companies`,
       method: "POST",
@@ -322,12 +397,16 @@ export class Companies<SecurityDataType = unknown> extends HttpClient<SecurityDa
       ...params,
     });
 
-  companiesCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  companiesCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/companies`] : null;
-    const fetcher: (url: string[], { arg }: { arg: CompaniesCreatePayload }) => Promise<CompaniesCreateData> = (
-      _,
-      { arg },
-    ) => this.companiesCreate(arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: CompaniesCreatePayload },
+    ) => Promise<CompaniesCreateData> = (_, { arg }) =>
+      this.companiesCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 }

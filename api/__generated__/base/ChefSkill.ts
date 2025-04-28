@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -22,7 +23,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class ChefSkill<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class ChefSkill<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -38,9 +41,14 @@ export class ChefSkill<SecurityDataType = unknown> extends HttpClient<SecurityDa
       ...params,
     });
 
-  chefSkillDeleteQueryArgs = (chefSkillId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  chefSkillDeleteQueryArgs = (
+    chefSkillId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/chef_skill/${chefSkillId}`] : null;
-    const fetcher = () => this.chefSkillDelete(chefSkillId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.chefSkillDelete(chefSkillId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -59,9 +67,14 @@ export class ChefSkill<SecurityDataType = unknown> extends HttpClient<SecurityDa
       ...params,
     });
 
-  chefSkillDetailQueryArgs = (chefSkillId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  chefSkillDetailQueryArgs = (
+    chefSkillId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/chef_skill/${chefSkillId}`] : null;
-    const fetcher = () => this.chefSkillDetail(chefSkillId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.chefSkillDetail(chefSkillId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -72,7 +85,11 @@ export class ChefSkill<SecurityDataType = unknown> extends HttpClient<SecurityDa
    * @name ChefSkillPartialUpdate
    * @request PATCH:/chef_skill/{chef_skill_id}
    */
-  chefSkillPartialUpdate = (chefSkillId: number, data: ChefSkillPartialUpdatePayload, params: RequestParams = {}) =>
+  chefSkillPartialUpdate = (
+    chefSkillId: number,
+    data: ChefSkillPartialUpdatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<ChefSkillPartialUpdateData, void>({
       path: `/chef_skill/${chefSkillId}`,
       method: "PATCH",
@@ -82,13 +99,19 @@ export class ChefSkill<SecurityDataType = unknown> extends HttpClient<SecurityDa
       ...params,
     });
 
-  chefSkillPartialUpdateQueryArgs = (chefSkillId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  chefSkillPartialUpdateQueryArgs = (
+    chefSkillId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/chef_skill/${chefSkillId}`] : null;
     const fetcher: (
       url: string[],
       { arg }: { arg: ChefSkillPartialUpdatePayload },
     ) => Promise<ChefSkillPartialUpdateData> = (_, { arg }) =>
-      this.chefSkillPartialUpdate(chefSkillId, arg, params).then((res) => res.data);
+      this.chefSkillPartialUpdate(chefSkillId, arg, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -99,7 +122,11 @@ export class ChefSkill<SecurityDataType = unknown> extends HttpClient<SecurityDa
    * @name ChefSkillUpdate
    * @request PUT:/chef_skill/{chef_skill_id}
    */
-  chefSkillUpdate = (chefSkillId: number, data: ChefSkillUpdatePayload, params: RequestParams = {}) =>
+  chefSkillUpdate = (
+    chefSkillId: number,
+    data: ChefSkillUpdatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<ChefSkillUpdateData, void>({
       path: `/chef_skill/${chefSkillId}`,
       method: "PUT",
@@ -124,7 +151,10 @@ export class ChefSkill<SecurityDataType = unknown> extends HttpClient<SecurityDa
       ...params,
     });
 
-  chefSkillListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  chefSkillListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/chef_skill`] : null;
     const fetcher = () => this.chefSkillList(params).then((res) => res.data);
     return [key, fetcher] as const;
@@ -138,7 +168,10 @@ export class ChefSkill<SecurityDataType = unknown> extends HttpClient<SecurityDa
    * @request POST:/chef_skill
    * @secure
    */
-  chefSkillCreate = (data: ChefSkillCreatePayload, params: RequestParams = {}) =>
+  chefSkillCreate = (
+    data: ChefSkillCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<ChefSkillCreateData, void>({
       path: `/chef_skill`,
       method: "POST",
@@ -149,12 +182,16 @@ export class ChefSkill<SecurityDataType = unknown> extends HttpClient<SecurityDa
       ...params,
     });
 
-  chefSkillCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  chefSkillCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/chef_skill`] : null;
-    const fetcher: (url: string[], { arg }: { arg: ChefSkillCreatePayload }) => Promise<ChefSkillCreateData> = (
-      _,
-      { arg },
-    ) => this.chefSkillCreate(arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: ChefSkillCreatePayload },
+    ) => Promise<ChefSkillCreateData> = (_, { arg }) =>
+      this.chefSkillCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 }

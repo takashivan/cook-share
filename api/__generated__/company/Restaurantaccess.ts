@@ -21,7 +21,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class Restaurantaccess<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class Restaurantaccess<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description Delete RestaurantAccess record. <br /><br /> <b>Authentication:</b> not required
    *
@@ -30,13 +32,30 @@ export class Restaurantaccess<SecurityDataType = unknown> extends HttpClient<Sec
    * @summary Delete RestaurantAccess record.
    * @request DELETE:/restaurantaccess/{restaurantaccess_id}
    */
-  restaurantaccessDelete = (restaurantaccessId: string, params: RequestParams = {}) =>
+  restaurantaccessDelete = (
+    restaurantaccessId: string,
+    params: RequestParams = {},
+  ) =>
     this.request<RestaurantaccessDeleteData, void>({
       path: `/restaurantaccess/${restaurantaccessId}`,
       method: "DELETE",
       format: "json",
       ...params,
     });
+
+  restaurantaccessDeleteQueryArgs = (
+    restaurantaccessId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/restaurantaccess/${restaurantaccessId}`] : null;
+    const fetcher = () =>
+      this.restaurantaccessDelete(restaurantaccessId, params).then(
+        (res) => res.data,
+      );
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Get RestaurantAccess record <br /><br /> <b>Authentication:</b> not required
    *
@@ -45,13 +64,30 @@ export class Restaurantaccess<SecurityDataType = unknown> extends HttpClient<Sec
    * @summary Get RestaurantAccess record
    * @request GET:/restaurantaccess/{restaurantaccess_id}
    */
-  restaurantaccessDetail = (restaurantaccessId: string, params: RequestParams = {}) =>
+  restaurantaccessDetail = (
+    restaurantaccessId: string,
+    params: RequestParams = {},
+  ) =>
     this.request<RestaurantaccessDetailData, void>({
       path: `/restaurantaccess/${restaurantaccessId}`,
       method: "GET",
       format: "json",
       ...params,
     });
+
+  restaurantaccessDetailQueryArgs = (
+    restaurantaccessId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/restaurantaccess/${restaurantaccessId}`] : null;
+    const fetcher = () =>
+      this.restaurantaccessDetail(restaurantaccessId, params).then(
+        (res) => res.data,
+      );
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Edit RestaurantAccess record <br /><br /> <b>Authentication:</b> not required
    *
@@ -73,6 +109,23 @@ export class Restaurantaccess<SecurityDataType = unknown> extends HttpClient<Sec
       format: "json",
       ...params,
     });
+
+  restaurantaccessPartialUpdateQueryArgs = (
+    restaurantaccessId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/restaurantaccess/${restaurantaccessId}`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: RestaurantaccessPartialUpdatePayload },
+    ) => Promise<RestaurantaccessPartialUpdateData> = (_, { arg }) =>
+      this.restaurantaccessPartialUpdate(restaurantaccessId, arg, params).then(
+        (res) => res.data,
+      );
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Query all RestaurantAccess records <br /><br /> <b>Authentication:</b> not required
    *
@@ -88,6 +141,17 @@ export class Restaurantaccess<SecurityDataType = unknown> extends HttpClient<Sec
       format: "json",
       ...params,
     });
+
+  restaurantaccessListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/restaurantaccess`] : null;
+    const fetcher = () =>
+      this.restaurantaccessList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Add RestaurantAccess record <br /><br /> <b>Authentication:</b> not required
    *
@@ -96,7 +160,10 @@ export class Restaurantaccess<SecurityDataType = unknown> extends HttpClient<Sec
    * @summary Add RestaurantAccess record
    * @request POST:/restaurantaccess
    */
-  restaurantaccessCreate = (data: RestaurantaccessCreatePayload, params: RequestParams = {}) =>
+  restaurantaccessCreate = (
+    data: RestaurantaccessCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<RestaurantaccessCreateData, void>({
       path: `/restaurantaccess`,
       method: "POST",
@@ -105,4 +172,17 @@ export class Restaurantaccess<SecurityDataType = unknown> extends HttpClient<Sec
       format: "json",
       ...params,
     });
+
+  restaurantaccessCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/restaurantaccess`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: RestaurantaccessCreatePayload },
+    ) => Promise<RestaurantaccessCreateData> = (_, { arg }) =>
+      this.restaurantaccessCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

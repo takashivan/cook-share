@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -22,7 +23,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class Auth<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class Auth<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description <br /><br /> <b>Authentication:</b> required
    *
@@ -31,7 +34,10 @@ export class Auth<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
    * @request POST:/auth/change-password
    * @secure
    */
-  changePasswordCreate = (data: ChangePasswordCreatePayload, params: RequestParams = {}) =>
+  changePasswordCreate = (
+    data: ChangePasswordCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<ChangePasswordCreateData, void>({
       path: `/auth/change-password`,
       method: "POST",
@@ -42,7 +48,10 @@ export class Auth<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       ...params,
     });
 
-  changePasswordCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  changePasswordCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/auth/change-password`] : null;
     const fetcher: (
       url: string[],
@@ -70,9 +79,15 @@ export class Auth<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       ...params,
     });
 
-  loginCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  loginCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/auth/login`] : null;
-    const fetcher: (url: string[], { arg }: { arg: LoginCreatePayload }) => Promise<LoginCreateData> = (_, { arg }) =>
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: LoginCreatePayload },
+    ) => Promise<LoginCreateData> = (_, { arg }) =>
       this.loginCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
@@ -119,9 +134,15 @@ export class Auth<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       ...params,
     });
 
-  signupCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  signupCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/auth/signup`] : null;
-    const fetcher: (url: string[], { arg }: { arg: SignupCreatePayload }) => Promise<SignupCreateData> = (_, { arg }) =>
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: SignupCreatePayload },
+    ) => Promise<SignupCreateData> = (_, { arg }) =>
       this.signupCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
@@ -133,7 +154,10 @@ export class Auth<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
    * @name VerifyEmailCreate
    * @request POST:/auth/verify-email
    */
-  verifyEmailCreate = (data: VerifyEmailCreatePayload, params: RequestParams = {}) =>
+  verifyEmailCreate = (
+    data: VerifyEmailCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<VerifyEmailCreateData, void>({
       path: `/auth/verify-email`,
       method: "POST",
@@ -143,12 +167,16 @@ export class Auth<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       ...params,
     });
 
-  verifyEmailCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  verifyEmailCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/auth/verify-email`] : null;
-    const fetcher: (url: string[], { arg }: { arg: VerifyEmailCreatePayload }) => Promise<VerifyEmailCreateData> = (
-      _,
-      { arg },
-    ) => this.verifyEmailCreate(arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: VerifyEmailCreatePayload },
+    ) => Promise<VerifyEmailCreateData> = (_, { arg }) =>
+      this.verifyEmailCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 }

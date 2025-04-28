@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -8,10 +9,6 @@
  * ## SOURCE: https://github.com/acacode/swagger-typescript-api ##
  * ---------------------------------------------------------------
  */
-
-export type StripeAccountLinksCreateData = object;
-
-export type AdminlogDeleteData = object;
 
 export interface AdminlogDetailData {
   /** @format int64 */
@@ -30,63 +27,7 @@ export interface AdminlogDetailData {
   operator_id: string | null;
 }
 
-export interface AdminlogPartialUpdatePayload {
-  /** @format int64 */
-  target_id: number;
-  target_type: string;
-  action: string;
-  reason: string;
-  /** @format uuid */
-  operator_id: string | null;
-}
-
-export interface AdminlogPartialUpdateData {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format int64 */
-  target_id: number;
-  target_type: string;
-  action: string;
-  reason: string;
-  /** @format uuid */
-  operator_id: string | null;
-}
-
-export type AdminlogsDeleteData = object;
-
 export interface AdminlogsDetailData {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format int64 */
-  target_id: number;
-  target_type: string;
-  action: string;
-  reason: string;
-  /** @format uuid */
-  operator_id: string | null;
-}
-
-export interface AdminlogsPartialUpdatePayload {
-  /** @format int64 */
-  target_id: number;
-  target_type: string;
-  action: string;
-  reason: string;
-  /** @format uuid */
-  operator_id: string | null;
-}
-
-export interface AdminlogsPartialUpdateData {
   /** @format int64 */
   id: number;
   /**
@@ -791,178 +732,6 @@ export interface ApplicationCreateData {
   urgent: boolean;
 }
 
-export interface ChangePasswordCreatePayload {
-  current_password: string;
-  new_password: string;
-}
-
-export interface ChangePasswordCreateData {
-  user: {
-    /** @format uuid */
-    id: string;
-    /**
-     * @format timestamptz
-     * @default "now"
-     */
-    created_at: number;
-    /** @format uuid */
-    companies_id: string | null;
-    name: string;
-    /** @format email */
-    email: string;
-    phone: string | null;
-    /** @format password */
-    password: string;
-    is_admin: boolean;
-    /** @default "1" */
-    is_active: boolean;
-    is_verified: boolean;
-    /** @format timestamptz */
-    updated_at: number | null;
-    magic_link: object;
-    verify_token: string;
-    /** @format email */
-    pending_email: string;
-    email_change_token: string;
-    password_reset_token: string;
-  };
-  status: string;
-}
-
-export interface LoginCreatePayload {
-  /** @format email */
-  email: string;
-  password: string;
-}
-
-export interface LoginCreateData {
-  authToken: string;
-  user: {
-    /** @format uuid */
-    id: string;
-    /**
-     * @format timestamptz
-     * @default "now"
-     */
-    created_at: number;
-    /** @format uuid */
-    companies_id: string | null;
-    name: string;
-    /** @format email */
-    email: string;
-    phone: string | null;
-    /** @format password */
-    password: string;
-    is_admin: boolean;
-    /** @default "1" */
-    is_active: boolean;
-    is_verified: boolean;
-    /** @format timestamptz */
-    updated_at: number | null;
-  };
-}
-
-export interface GetAuthData {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format uuid */
-  companies_id: string | null;
-  name: string;
-  /** @format email */
-  email: string;
-  phone: string | null;
-  is_admin: boolean;
-  /** @default "1" */
-  is_active: boolean;
-  is_verified: boolean;
-  /** @format timestamptz */
-  updated_at: number | null;
-}
-
-export interface SignupCreatePayload {
-  name: string;
-  /** @format email */
-  email: string;
-  /** @format password */
-  password: string;
-}
-
-export interface SignupCreateData {
-  authToken: string;
-  user: {
-    /** @format uuid */
-    id: string;
-    /**
-     * @format timestamptz
-     * @default "now"
-     */
-    created_at: number;
-    /** @format uuid */
-    companies_id: string | null;
-    name: string;
-    /** @format email */
-    email: string;
-    phone: string | null;
-    /** @format password */
-    password: string;
-    is_admin: boolean;
-    /** @default "1" */
-    is_active: boolean;
-    is_verified: boolean;
-    /** @format timestamptz */
-    updated_at: number | null;
-    magic_link: object;
-    verify_token: string;
-    /** @format email */
-    pending_email: string;
-    email_change_token: string;
-    password_reset_token: string;
-  };
-}
-
-export interface VerifyEmailCreatePayload {
-  user_id: string;
-  token: string;
-}
-
-export interface VerifyEmailCreateData {
-  result1: {
-    /** @format uuid */
-    id: string;
-    /**
-     * @format timestamptz
-     * @default "now"
-     */
-    created_at: number;
-    /** @format uuid */
-    companies_id: string | null;
-    name: string;
-    /** @format email */
-    email: string;
-    phone: string | null;
-    /** @format password */
-    password: string;
-    is_admin: boolean;
-    /** @default "1" */
-    is_active: boolean;
-    is_verified: boolean;
-    /** @format timestamptz */
-    updated_at: number | null;
-    magic_link: object;
-    verify_token: string;
-    /** @format email */
-    pending_email: string;
-    email_change_token: string;
-    password_reset_token: string;
-  };
-  auth: string;
-}
-
 export interface AddInvoiceItemsCreatePayload {
   company_id: string;
   /** @format int64 */
@@ -1182,7 +951,13 @@ export interface ChefNotificationsDetailData {
    * @default "now"
    */
   created_at: number;
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   content: string;
   is_read: boolean;
   /** @format timestamptz */
@@ -1201,7 +976,13 @@ export type ChefNotificationsListData = {
    * @default "now"
    */
   created_at: number;
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   content: string;
   is_read: boolean;
   /** @format timestamptz */
@@ -1213,7 +994,13 @@ export type ChefNotificationsListData = {
 }[];
 
 export interface ChefNotificationsCreatePayload {
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   content: string;
   is_read: boolean;
   /** @format timestamptz */
@@ -1232,7 +1019,13 @@ export interface ChefNotificationsCreateData {
    * @default "now"
    */
   created_at: number;
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   content: string;
   is_read: boolean;
   /** @format timestamptz */
@@ -1434,7 +1227,13 @@ export type ByUserDetailData = {
    * @default "now"
    */
   created_at: number;
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   content: string;
   is_read: boolean;
   /** @format timestamptz */
@@ -1455,7 +1254,13 @@ export interface ChefNotificationDetailData {
    * @default "now"
    */
   created_at: number;
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   content: string;
   is_read: boolean;
   /** @format timestamptz */
@@ -1474,7 +1279,13 @@ export type ChefNotificationListData = {
    * @default "now"
    */
   created_at: number;
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   content: string;
   is_read: boolean;
   /** @format timestamptz */
@@ -1486,7 +1297,13 @@ export type ChefNotificationListData = {
 }[];
 
 export interface ChefNotificationCreatePayload {
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   content: string;
   is_read: boolean;
   /** @format timestamptz */
@@ -1505,7 +1322,13 @@ export interface ChefNotificationCreateData {
    * @default "now"
    */
   created_at: number;
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   content: string;
   is_read: boolean;
   /** @format timestamptz */
@@ -2475,7 +2298,13 @@ export interface CompanyuserNotificationsDetailData {
   created_at: number;
   /** @format uuid */
   companyuser_id: string | null;
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   related_link: string;
   is_read: boolean;
   content: string;
@@ -2488,7 +2317,13 @@ export interface CompanyuserNotificationsDetailData {
 export interface CompanyuserNotificationsPartialUpdatePayload {
   /** @format uuid */
   companyuser_id: string | null;
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   related_link: string;
   is_read: boolean;
   content: string;
@@ -2508,7 +2343,13 @@ export interface CompanyuserNotificationsPartialUpdateData {
   created_at: number;
   /** @format uuid */
   companyuser_id: string | null;
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   related_link: string;
   is_read: boolean;
   content: string;
@@ -2528,7 +2369,13 @@ export type CompanyuserNotificationsListData = {
   created_at: number;
   /** @format uuid */
   companyuser_id: string | null;
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   related_link: string;
   is_read: boolean;
   content: string;
@@ -2541,7 +2388,13 @@ export type CompanyuserNotificationsListData = {
 export interface CompanyuserNotificationsCreatePayload {
   /** @format uuid */
   companyuser_id: string | null;
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   related_link: string;
   is_read: boolean;
   content: string;
@@ -2561,7 +2414,13 @@ export interface CompanyuserNotificationsCreateData {
   created_at: number;
   /** @format uuid */
   companyuser_id: string | null;
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   related_link: string;
   is_read: boolean;
   content: string;
@@ -2731,7 +2590,13 @@ export type ByUserDetailOutput = {
   created_at: number;
   /** @format uuid */
   companyuser_id: string | null;
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   related_link: string;
   is_read: boolean;
   content: string;
@@ -2759,7 +2624,13 @@ export interface CompanyuserNotificationDetailData {
   created_at: number;
   /** @format uuid */
   companyuser_id: string | null;
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   related_link: string;
   is_read: boolean;
   content: string;
@@ -2772,7 +2643,13 @@ export interface CompanyuserNotificationDetailData {
 export interface CompanyuserNotificationPartialUpdatePayload {
   /** @format uuid */
   companyuser_id: string | null;
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   related_link: string;
   is_read: boolean;
   content: string;
@@ -2792,7 +2669,13 @@ export interface CompanyuserNotificationPartialUpdateData {
   created_at: number;
   /** @format uuid */
   companyuser_id: string | null;
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   related_link: string;
   is_read: boolean;
   content: string;
@@ -2812,7 +2695,13 @@ export interface MarkReadPartialUpdateData {
   created_at: number;
   /** @format uuid */
   companyuser_id: string | null;
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   related_link: string;
   is_read: boolean;
   content: string;
@@ -2832,7 +2721,13 @@ export type CompanyuserNotificationListData = {
   created_at: number;
   /** @format uuid */
   companyuser_id: string | null;
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   related_link: string;
   is_read: boolean;
   content: string;
@@ -2845,7 +2740,13 @@ export type CompanyuserNotificationListData = {
 export interface CompanyuserNotificationCreatePayload {
   /** @format uuid */
   companyuser_id: string | null;
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   related_link: string;
   is_read: boolean;
   content: string;
@@ -2865,7 +2766,13 @@ export interface CompanyuserNotificationCreateData {
   created_at: number;
   /** @format uuid */
   companyuser_id: string | null;
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   related_link: string;
   is_read: boolean;
   content: string;
@@ -2968,7 +2875,13 @@ export type CompanyuserNotificationsListResult = {
   created_at: number;
   /** @format uuid */
   companyuser_id: string | null;
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   related_link: string;
   is_read: boolean;
   content: string;
@@ -4213,6 +4126,13 @@ export interface JobsCreateData {
   expiry_date: number | null;
 }
 
+export interface PostCreatePayload {
+  /** @format int64 */
+  id: number;
+}
+
+export type PostCreateData = object;
+
 export interface GetJob2Data {
   jobs: {
     /** @format int64 */
@@ -5386,7 +5306,9 @@ export type StaffsListData = {
   companyuser_id: string | null;
   /** @format int64 */
   restaurant_id: number;
+  /** @default "1" */
   can_edit: boolean;
+  /** @default "1" */
   can_manage_jobs: boolean;
   companyuser: {
     /** @format uuid */
@@ -6071,7 +5993,9 @@ export interface RestaurantaccessDetailData {
   companyuser_id: string | null;
   /** @format int64 */
   restaurant_id: number;
+  /** @default "1" */
   can_edit: boolean;
+  /** @default "1" */
   can_manage_jobs: boolean;
 }
 
@@ -6080,7 +6004,9 @@ export interface RestaurantaccessPartialUpdatePayload {
   companyuser_id: string | null;
   /** @format int64 */
   restaurant_id: number;
+  /** @default "1" */
   can_edit: boolean;
+  /** @default "1" */
   can_manage_jobs: boolean;
 }
 
@@ -6096,7 +6022,9 @@ export interface RestaurantaccessPartialUpdateData {
   companyuser_id: string | null;
   /** @format int64 */
   restaurant_id: number;
+  /** @default "1" */
   can_edit: boolean;
+  /** @default "1" */
   can_manage_jobs: boolean;
 }
 
@@ -6107,7 +6035,9 @@ export interface RestaurantaccessesPartialUpdatePayload {
   companyuser_id: string | null;
   /** @format int64 */
   restaurant_id: number;
+  /** @default "1" */
   can_edit: boolean;
+  /** @default "1" */
   can_manage_jobs: boolean;
 }
 
@@ -6123,7 +6053,9 @@ export interface RestaurantaccessesPartialUpdateData {
   companyuser_id: string | null;
   /** @format int64 */
   restaurant_id: number;
+  /** @default "1" */
   can_edit: boolean;
+  /** @default "1" */
   can_manage_jobs: boolean;
 }
 
@@ -6139,7 +6071,9 @@ export type RestaurantaccessesListData = {
   companyuser_id: string | null;
   /** @format int64 */
   restaurant_id: number;
+  /** @default "1" */
   can_edit: boolean;
+  /** @default "1" */
   can_manage_jobs: boolean;
 }[];
 
@@ -6148,7 +6082,9 @@ export interface RestaurantaccessesCreatePayload {
   companyuser_id: string | null;
   /** @format int64 */
   restaurant_id: number;
+  /** @default "1" */
   can_edit: boolean;
+  /** @default "1" */
   can_manage_jobs: boolean;
   /** @format email */
   staff_email: string;
@@ -6168,7 +6104,9 @@ export type RestaurantaccessListData = {
   companyuser_id: string | null;
   /** @format int64 */
   restaurant_id: number;
+  /** @default "1" */
   can_edit: boolean;
+  /** @default "1" */
   can_manage_jobs: boolean;
 }[];
 
@@ -6177,7 +6115,9 @@ export interface RestaurantaccessCreatePayload {
   companyuser_id: string | null;
   /** @format int64 */
   restaurant_id: number;
+  /** @default "1" */
   can_edit: boolean;
+  /** @default "1" */
   can_manage_jobs: boolean;
   /** @format email */
   staff_email: string;
@@ -6982,7 +6922,13 @@ export type ChefNotificationsListResult = {
    * @default "now"
    */
   created_at: number;
-  type: "new_job" | "application_status" | "new_message" | "review" | "operator" | "payment";
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
   content: string;
   is_read: boolean;
   /** @format timestamptz */
@@ -7116,6 +7062,8 @@ export type RestaurantReviewsListOutput = {
     phone: string;
   };
 }[];
+
+export type StripeAccountLinksCreateData = object;
 
 export type StripeAccountCreateData = object;
 

@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -22,7 +23,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class BillingSummary<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class BillingSummary<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -30,7 +33,10 @@ export class BillingSummary<SecurityDataType = unknown> extends HttpClient<Secur
    * @name BillingSummaryDelete
    * @request DELETE:/billing_summary/{billing_summary_id}
    */
-  billingSummaryDelete = (billingSummaryId: string, params: RequestParams = {}) =>
+  billingSummaryDelete = (
+    billingSummaryId: string,
+    params: RequestParams = {},
+  ) =>
     this.request<BillingSummaryDeleteData, void>({
       path: `/billing_summary/${billingSummaryId}`,
       method: "DELETE",
@@ -38,9 +44,16 @@ export class BillingSummary<SecurityDataType = unknown> extends HttpClient<Secur
       ...params,
     });
 
-  billingSummaryDeleteQueryArgs = (billingSummaryId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  billingSummaryDeleteQueryArgs = (
+    billingSummaryId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/billing_summary/${billingSummaryId}`] : null;
-    const fetcher = () => this.billingSummaryDelete(billingSummaryId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.billingSummaryDelete(billingSummaryId, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -51,7 +64,10 @@ export class BillingSummary<SecurityDataType = unknown> extends HttpClient<Secur
    * @name BillingSummaryDetail
    * @request GET:/billing_summary/{billing_summary_id}
    */
-  billingSummaryDetail = (billingSummaryId: string, params: RequestParams = {}) =>
+  billingSummaryDetail = (
+    billingSummaryId: string,
+    params: RequestParams = {},
+  ) =>
     this.request<BillingSummaryDetailData, void>({
       path: `/billing_summary/${billingSummaryId}`,
       method: "GET",
@@ -59,9 +75,16 @@ export class BillingSummary<SecurityDataType = unknown> extends HttpClient<Secur
       ...params,
     });
 
-  billingSummaryDetailQueryArgs = (billingSummaryId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  billingSummaryDetailQueryArgs = (
+    billingSummaryId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/billing_summary/${billingSummaryId}`] : null;
-    const fetcher = () => this.billingSummaryDetail(billingSummaryId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.billingSummaryDetail(billingSummaryId, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -96,7 +119,9 @@ export class BillingSummary<SecurityDataType = unknown> extends HttpClient<Secur
       url: string[],
       { arg }: { arg: BillingSummaryPartialUpdatePayload },
     ) => Promise<BillingSummaryPartialUpdateData> = (_, { arg }) =>
-      this.billingSummaryPartialUpdate(billingSummaryId, arg, params).then((res) => res.data);
+      this.billingSummaryPartialUpdate(billingSummaryId, arg, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -107,7 +132,11 @@ export class BillingSummary<SecurityDataType = unknown> extends HttpClient<Secur
    * @name BillingSummaryUpdate
    * @request PUT:/billing_summary/{billing_summary_id}
    */
-  billingSummaryUpdate = (billingSummaryId: string, data: BillingSummaryUpdatePayload, params: RequestParams = {}) =>
+  billingSummaryUpdate = (
+    billingSummaryId: string,
+    data: BillingSummaryUpdatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<BillingSummaryUpdateData, void>({
       path: `/billing_summary/${billingSummaryId}`,
       method: "PUT",
@@ -132,9 +161,13 @@ export class BillingSummary<SecurityDataType = unknown> extends HttpClient<Secur
       ...params,
     });
 
-  billingSummaryListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  billingSummaryListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/billing_summary`] : null;
-    const fetcher = () => this.billingSummaryList(params).then((res) => res.data);
+    const fetcher = () =>
+      this.billingSummaryList(params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -145,7 +178,10 @@ export class BillingSummary<SecurityDataType = unknown> extends HttpClient<Secur
    * @name BillingSummaryCreate
    * @request POST:/billing_summary
    */
-  billingSummaryCreate = (data: BillingSummaryCreatePayload, params: RequestParams = {}) =>
+  billingSummaryCreate = (
+    data: BillingSummaryCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<BillingSummaryCreateData, void>({
       path: `/billing_summary`,
       method: "POST",
@@ -155,7 +191,10 @@ export class BillingSummary<SecurityDataType = unknown> extends HttpClient<Secur
       ...params,
     });
 
-  billingSummaryCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  billingSummaryCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/billing_summary`] : null;
     const fetcher: (
       url: string[],

@@ -10,100 +10,360 @@
  * ---------------------------------------------------------------
  */
 
-export interface LoginCreatePayload {
-  /** @format email */
-  email?: string;
-  password?: string;
+export interface ChangePasswordCreatePayload {
+  new_password: string;
 }
 
-export interface LoginCreateData {
-  authToken?: string;
-  user?: {
+export interface ChangePasswordCreateData {
+  result1: {
     /** @format uuid */
-    id?: string;
+    id: string;
     /**
      * @format timestamptz
      * @default "now"
      */
-    created_at?: number;
-    name?: string;
+    created_at: number;
+    name: string;
     /** @format email */
-    email?: string;
+    email: string;
     /** @format password */
-    password?: string;
+    password: string;
+    user_type: string;
+    status: string;
+    /** @format date */
+    last_login_at: string | null;
+    /** @format date */
+    updated_at: string | null;
+    skills: string[];
+    experience_level: string;
+    bio: string;
+    certifications: string[];
+    /** @format date */
+    dateofbirth: string | null;
+    profile_image: string;
+    is_approved: boolean;
+    line_user_id: string;
+    line_display_name: string;
+    line_notification_enabled: boolean;
+    is_verified: boolean;
+    verify_token: string;
+    stripe_account_id: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
+    password_reset_token: string;
+    stripe_verified: boolean;
+    stripe_requirements: object;
+    magic_link: {
+      token: string;
+      /**
+       * Time the token expires
+       * @format timestamptz
+       */
+      expiration: number;
+      used: boolean;
+    } | null;
   };
+  stat: string;
+}
+
+export interface LoginCreatePayload {
+  /** @format email */
+  email: string;
+  password: string;
+}
+
+export interface LoginCreateData {
+  authToken: string;
+  user: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    name: string;
+    /** @format email */
+    email: string;
+    /** @format password */
+    password: string;
+  };
+  sessionToken: string;
 }
 
 export interface GetAuthData {
   /** @format uuid */
-  id?: string;
+  id: string;
   /**
    * @format timestamptz
    * @default "now"
    */
-  created_at?: number;
-  name?: string;
+  created_at: number;
+  name: string;
   /** @format email */
-  email?: string;
+  email: string;
+  user_type: string;
+  status: string;
+  /** @format date */
+  last_login_at: string | null;
+  /** @format date */
+  updated_at: string | null;
+  skills: string[];
+  experience_level: string;
+  bio: string;
+  certifications: string[];
+  /** @format date */
+  dateofbirth: string | null;
+  profile_image: string;
+  is_approved: boolean;
+  line_user_id: string;
+  line_display_name: string;
+  line_notification_enabled: boolean;
+  is_verified: boolean;
+  verify_token: string;
+  stripe_account_id: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
+  password_reset_token: string;
+  magic_link: {
+    token: string;
+    /**
+     * Time the token expires
+     * @format timestamptz
+     */
+    expiration: number;
+    used: boolean;
+  } | null;
+}
+
+export interface RequestPasswordResetCreatePayload {
+  email: string;
+}
+
+export interface RequestPasswordResetCreateData {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  name: string;
+  /** @format email */
+  email: string;
   /** @format password */
-  password?: string;
-  user_type?: string;
-  status?: string;
+  password: string;
+  user_type: string;
+  status: string;
   /** @format date */
-  last_login_at?: string | null;
+  last_login_at: string | null;
   /** @format date */
-  updated_at?: string | null;
-  skills?: string[];
-  experience_level?: string;
-  bio?: string;
-  certifications?: string[];
+  updated_at: string | null;
+  skills: string[];
+  experience_level: string;
+  bio: string;
+  certifications: string[];
   /** @format date */
-  dateofbirth?: string | null;
-  profile_image?: string;
-  is_approved?: boolean;
-  line_user_id?: string;
-  line_display_name?: string;
-  line_notification_enabled?: boolean;
-}
-
-export interface SignupCreatePayload {
-  name?: string;
+  dateofbirth: string | null;
+  profile_image: string;
+  is_approved: boolean;
+  line_user_id: string;
+  line_display_name: string;
+  line_notification_enabled: boolean;
+  is_verified: boolean;
+  verify_token: string;
+  stripe_account_id: string;
   /** @format email */
-  email?: string;
-  password?: string;
+  pending_email: string;
+  email_change_token: string;
+  password_reset_token: string;
+  stripe_verified: boolean;
+  stripe_requirements: object;
+  magic_link: {
+    token: string;
+    /**
+     * Time the token expires
+     * @format timestamptz
+     */
+    expiration: number;
+    used: boolean;
+  } | null;
 }
 
-export interface SignupCreateData {
-  authToken?: string;
-  user?: {
+export interface ResetPasswordCreatePayload {
+  token: string;
+  new_password: string;
+}
+
+export interface ResetPasswordCreateData {
+  result1: {
     /** @format uuid */
-    id?: string;
+    id: string;
     /**
      * @format timestamptz
      * @default "now"
      */
-    created_at?: number;
-    name?: string;
+    created_at: number;
+    name: string;
     /** @format email */
-    email?: string;
+    email: string;
     /** @format password */
-    password?: string;
-    user_type?: string;
-    status?: string;
+    password: string;
+    user_type: string;
+    status: string;
     /** @format date */
-    last_login_at?: string | null;
+    last_login_at: string | null;
     /** @format date */
-    updated_at?: string | null;
-    skills?: string[];
-    experience_level?: string;
-    bio?: string;
-    certifications?: string[];
+    updated_at: string | null;
+    skills: string[];
+    experience_level: string;
+    bio: string;
+    certifications: string[];
     /** @format date */
-    dateofbirth?: string | null;
-    profile_image?: string;
-    is_approved?: boolean;
-    line_user_id?: string;
-    line_display_name?: string;
-    line_notification_enabled?: boolean;
+    dateofbirth: string | null;
+    profile_image: string;
+    is_approved: boolean;
+    line_user_id: string;
+    line_display_name: string;
+    line_notification_enabled: boolean;
+    is_verified: boolean;
+    verify_token: string;
+    stripe_account_id: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
+    password_reset_token: string;
+    stripe_verified: boolean;
+    stripe_requirements: object;
+    magic_link: {
+      token: string;
+      /**
+       * Time the token expires
+       * @format timestamptz
+       */
+      expiration: number;
+      used: boolean;
+    } | null;
   };
+  data: string;
+}
+
+export interface SignupCreatePayload {
+  name: string;
+  /** @format email */
+  email: string;
+  password: string;
+}
+
+export interface SignupCreateData {
+  authToken: string;
+  user: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    name: string;
+    /** @format email */
+    email: string;
+    /** @format password */
+    password: string;
+    user_type: string;
+    status: string;
+    /** @format date */
+    last_login_at: string | null;
+    /** @format date */
+    updated_at: string | null;
+    skills: string[];
+    experience_level: string;
+    bio: string;
+    certifications: string[];
+    /** @format date */
+    dateofbirth: string | null;
+    profile_image: string;
+    is_approved: boolean;
+    line_user_id: string;
+    line_display_name: string;
+    line_notification_enabled: boolean;
+    is_verified: boolean;
+    verify_token: string;
+    stripe_account_id: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
+    password_reset_token: string;
+    stripe_verified: boolean;
+    stripe_requirements: object;
+    magic_link: {
+      token: string;
+      /**
+       * Time the token expires
+       * @format timestamptz
+       */
+      expiration: number;
+      used: boolean;
+    } | null;
+  };
+}
+
+export interface VerifyEmailCreatePayload {
+  user_id: string;
+  token: string;
+}
+
+export interface VerifyEmailCreateData {
+  result1: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    name: string;
+    /** @format email */
+    email: string;
+    /** @format password */
+    password: string;
+    user_type: string;
+    status: string;
+    /** @format date */
+    last_login_at: string | null;
+    /** @format date */
+    updated_at: string | null;
+    skills: string[];
+    experience_level: string;
+    bio: string;
+    certifications: string[];
+    /** @format date */
+    dateofbirth: string | null;
+    profile_image: string;
+    is_approved: boolean;
+    line_user_id: string;
+    line_display_name: string;
+    line_notification_enabled: boolean;
+    is_verified: boolean;
+    verify_token: string;
+    stripe_account_id: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
+    password_reset_token: string;
+    stripe_verified: boolean;
+    stripe_requirements: object;
+    magic_link: {
+      token: string;
+      /**
+       * Time the token expires
+       * @format timestamptz
+       */
+      expiration: number;
+      used: boolean;
+    } | null;
+  };
+  authToken: string;
 }

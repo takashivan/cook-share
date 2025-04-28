@@ -40,7 +40,7 @@ export default function JobsPage() {
     data: jobData,
     isLoading,
     error,
-  } = useGetJobsByCompanyId({ companyId: user?.companies_id });
+  } = useGetJobsByCompanyId({ companyId: user?.companies_id ?? undefined });
   const { data: worksessionsbyJob } = useGetMultipleWorksessionsByJobId({ jobIds: jobData?.jobs.map((job) => job.id) || [] })
 
   const jobWithWorkSessions: JobWithWorkSessions[] | undefined = jobData?.jobs.map((job) => {

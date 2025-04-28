@@ -37,7 +37,6 @@ export default function LoginPage() {
         password: formData.get("password") as string,
       };
 
-      const response = await login(data);
       await setUser(data.email, data.password);
 
       toast({
