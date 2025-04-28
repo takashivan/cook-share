@@ -25,6 +25,7 @@ interface UserData {
 }
 
 interface RegisterResponse {
+  sessionToken: string;
   authToken: string;
   user: UserProfile;
 }
@@ -129,6 +130,7 @@ export const register = async (
   userData: UserData
 ): Promise<RegisterResponse> => {
   const response = await apiRequest<{
+    sessionToken: string;
     authToken: string;
     user: {
       id: string;
@@ -144,12 +146,13 @@ export const register = async (
     };
   }>(`${AUTH_URL}/signup`, "POST", userData);
 
-  if (response.authToken) {
-    setAuthToken(response.authToken, "chef");
+  if (response.sessionToken) {
+    setAuthToken(response.sessionToken, "chef");
   }
 
   return {
     authToken: response.authToken,
+    sessionToken: response.sessionToken,
     user: {
       ...response.user,
       created_at: undefined,
