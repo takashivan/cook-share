@@ -14,7 +14,11 @@ export const useCreateJob = (params: Params) => {
   const { mutate } = useSWRConfig();
 
   const jobs = getApi(Jobs);
-  return useSWRMutation(...jobs.jobsCreateQueryArgs(), {
+  return useSWRMutation(...jobs.jobsCreateQueryArgs({
+    headers: {
+      "X-User-Type": "company"
+    }
+  }), {
     onSuccess: (data) => {
       console.log('Job created successfully:', data);
 

@@ -15,7 +15,11 @@ export const useUpdateJob = (params: Params) => {
   const { mutate } = useSWRConfig();
 
   const jobs = getApi(Jobs);
-  return useSWRMutation(...jobs.jobsPartialUpdateQueryArgs(params.jobId ?? -1, {}, params.jobId != null), {
+  return useSWRMutation(...jobs.jobsPartialUpdateQueryArgs(params.jobId ?? -1, {
+    headers: {
+      "X-User-Type": "company"
+    }
+  }, params.jobId != null), {
     onSuccess: () => {
       // Jobsリストのキャッシュを更新
       const jobsKey = jobs.jobsListQueryArgs()[0];

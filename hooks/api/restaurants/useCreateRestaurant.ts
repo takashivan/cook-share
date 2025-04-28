@@ -12,7 +12,13 @@ export const useCreateRestaurant = (params: Params) => {
   const { mutate } = useSWRConfig();
 
   const restaurants = getApi(Restaurants);
-  return useSWRMutation(...restaurants.restaurantsCreateQueryArgs(), {
+  return useSWRMutation(...restaurants.restaurantsCreateQueryArgs(
+    {
+      headers: {
+        "X-User-Type": "company"
+      }
+    }
+  ), {
     onSuccess: (data) => {
       console.log('Restaurant created successfully:', data);
 

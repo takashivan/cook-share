@@ -13,7 +13,11 @@ export const useVerifyWorksession = (params: Params) => {
   const { mutate } = useSWRConfig();
 
   const worksessions = getApi(Worksessions);
-  return useSWRMutation(...worksessions.verifyPartialUpdateQueryArgs(params.worksessionId), {
+  return useSWRMutation(...worksessions.verifyPartialUpdateQueryArgs(params.worksessionId, {
+    headers: {
+      "X-User-Type": "company"
+    }
+  }), {
     onSuccess: () => {
       // 更新したWorksessionが属する求人のWorksessionリストのキャッシュを更新
       if (params.jobId) {

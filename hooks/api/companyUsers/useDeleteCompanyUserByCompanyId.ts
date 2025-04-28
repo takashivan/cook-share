@@ -24,7 +24,11 @@ export const useDeleteCompanyUserByCompanyId = (params: Params) => {
       companies_id: params.companyId ?? "",
       companyUser_id: params.companyUserId ?? "",
     },
-    {},
+    {
+      headers: {
+        "X-User-Type": "company"
+      }
+    },
     params.companyId != null && params.companyUserId != null
   ), {
     onSuccess: (data) => {
