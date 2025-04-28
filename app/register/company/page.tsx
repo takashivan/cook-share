@@ -40,7 +40,7 @@ export default function CompanyRegisterPage() {
 
       const response = await register(data);
       console.log("Registration response:", response);
-      await login(response.authToken, response.user);
+      await login(response.sessionToken, response.user);
 
       toast({
         title: "登録が完了しました",

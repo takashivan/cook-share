@@ -32,7 +32,7 @@ export function CompanyDashboard() {
   const { user } = useCompanyAuth();
   const dispatch = useDispatch<AppDispatch>();
 
-  const { data: company } = useGetCompany({ companyId: user?.companies_id });
+  const { data: company } = useGetCompany({ companyId: user?.companies_id ?? undefined });
   const {
     data: restaurants,
     isLoading: restaurantsLoading,
@@ -42,12 +42,12 @@ export function CompanyDashboard() {
     data: jobData,
     isLoading: jobsLoading,
     error: jobsError,
-  } = useGetJobsByCompanyId({ companyId: user?.companies_id });
+  } = useGetJobsByCompanyId({ companyId: user?.companies_id ?? undefined });
   const {
     data: companyUsers,
     isLoading: companyUsersLoading,
     error: companyUsersError,
-  } = useGetCompanyUsersByCompanyId({ companyId: user?.companies_id });
+  } = useGetCompanyUsersByCompanyId({ companyId: user?.companies_id ?? undefined });
 
   useEffect(() => {
     if (user?.companies_id) {

@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -27,7 +28,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class Restaurants<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class Restaurants<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -43,9 +46,14 @@ export class Restaurants<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  chefReviewsListQueryArgs = (restaurantId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  chefReviewsListQueryArgs = (
+    restaurantId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/restaurants/${restaurantId}/chef-reviews`] : null;
-    const fetcher = () => this.chefReviewsList(restaurantId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.chefReviewsList(restaurantId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -56,7 +64,10 @@ export class Restaurants<SecurityDataType = unknown> extends HttpClient<Security
    * @name CompanyuserNotificationsCreate
    * @request POST:/restaurants/{restaurant_id}/companyuser-notifications
    */
-  companyuserNotificationsCreate = (restaurantId: number, params: RequestParams = {}) =>
+  companyuserNotificationsCreate = (
+    restaurantId: number,
+    params: RequestParams = {},
+  ) =>
     this.request<CompanyuserNotificationsCreateResult, void>({
       path: `/restaurants/${restaurantId}/companyuser-notifications`,
       method: "POST",
@@ -69,9 +80,15 @@ export class Restaurants<SecurityDataType = unknown> extends HttpClient<Security
     params: RequestParams = {},
     enabled: boolean = true,
   ) => {
-    const key = enabled ? [`/restaurants/${restaurantId}/companyuser-notifications`] : null;
-    const fetcher: (url: string[]) => Promise<CompanyuserNotificationsCreateResult> = (_) =>
-      this.companyuserNotificationsCreate(restaurantId, params).then((res) => res.data);
+    const key = enabled
+      ? [`/restaurants/${restaurantId}/companyuser-notifications`]
+      : null;
+    const fetcher: (
+      url: string[],
+    ) => Promise<CompanyuserNotificationsCreateResult> = (_) =>
+      this.companyuserNotificationsCreate(restaurantId, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -90,9 +107,14 @@ export class Restaurants<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  companyusersListQueryArgs = (restaurantId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  companyusersListQueryArgs = (
+    restaurantId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/restaurants/${restaurantId}/companyusers`] : null;
-    const fetcher = () => this.companyusersList(restaurantId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.companyusersList(restaurantId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -103,7 +125,11 @@ export class Restaurants<SecurityDataType = unknown> extends HttpClient<Security
    * @name CompanyusersCreate
    * @request POST:/restaurants/{restaurant_id}/companyusers
    */
-  companyusersCreate = (restaurantId: number, data: CompanyusersCreateInput, params: RequestParams = {}) =>
+  companyusersCreate = (
+    restaurantId: number,
+    data: CompanyusersCreateInput,
+    params: RequestParams = {},
+  ) =>
     this.request<CompanyusersCreateOutput, void>({
       path: `/restaurants/${restaurantId}/companyusers`,
       method: "POST",
@@ -113,12 +139,19 @@ export class Restaurants<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  companyusersCreateQueryArgs = (restaurantId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  companyusersCreateQueryArgs = (
+    restaurantId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/restaurants/${restaurantId}/companyusers`] : null;
-    const fetcher: (url: string[], { arg }: { arg: CompanyusersCreateInput }) => Promise<CompanyusersCreateOutput> = (
-      _,
-      { arg },
-    ) => this.companyusersCreate(restaurantId, arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: CompanyusersCreateInput },
+    ) => Promise<CompanyusersCreateOutput> = (_, { arg }) =>
+      this.companyusersCreate(restaurantId, arg, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -137,9 +170,14 @@ export class Restaurants<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  jobsListQueryArgs = (restaurantId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  jobsListQueryArgs = (
+    restaurantId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/restaurants/${restaurantId}/jobs`] : null;
-    const fetcher = () => this.jobsList(restaurantId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.jobsList(restaurantId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -158,9 +196,16 @@ export class Restaurants<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  restaurantReviewsListQueryArgs = (restaurantId: number, params: RequestParams = {}, enabled: boolean = true) => {
-    const key = enabled ? [`/restaurants/${restaurantId}/restaurant-reviews`] : null;
-    const fetcher = () => this.restaurantReviewsList(restaurantId, params).then((res) => res.data);
+  restaurantReviewsListQueryArgs = (
+    restaurantId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled
+      ? [`/restaurants/${restaurantId}/restaurant-reviews`]
+      : null;
+    const fetcher = () =>
+      this.restaurantReviewsList(restaurantId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -180,9 +225,14 @@ export class Restaurants<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  restaurantsDeleteQueryArgs = (restaurantId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  restaurantsDeleteQueryArgs = (
+    restaurantId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/restaurants/${restaurantId}`] : null;
-    const fetcher = () => this.restaurantsDelete(restaurantId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.restaurantsDelete(restaurantId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -202,9 +252,14 @@ export class Restaurants<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  restaurantsDetailQueryArgs = (restaurantId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  restaurantsDetailQueryArgs = (
+    restaurantId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/restaurants/${restaurantId}`] : null;
-    const fetcher = () => this.restaurantsDetail(restaurantId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.restaurantsDetail(restaurantId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -230,13 +285,19 @@ export class Restaurants<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  restaurantsPartialUpdateQueryArgs = (restaurantId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  restaurantsPartialUpdateQueryArgs = (
+    restaurantId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/restaurants/${restaurantId}`] : null;
     const fetcher: (
       url: string[],
       { arg }: { arg: RestaurantsPartialUpdatePayload },
     ) => Promise<RestaurantsPartialUpdateData> = (_, { arg }) =>
-      this.restaurantsPartialUpdate(restaurantId, arg, params).then((res) => res.data);
+      this.restaurantsPartialUpdate(restaurantId, arg, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -256,7 +317,10 @@ export class Restaurants<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  restaurantsListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  restaurantsListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/restaurants`] : null;
     const fetcher = () => this.restaurantsList(params).then((res) => res.data);
     return [key, fetcher] as const;
@@ -270,7 +334,10 @@ export class Restaurants<SecurityDataType = unknown> extends HttpClient<Security
    * @summary Add restaurant record
    * @request POST:/restaurants
    */
-  restaurantsCreate = (data: RestaurantsCreatePayload, params: RequestParams = {}) =>
+  restaurantsCreate = (
+    data: RestaurantsCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<RestaurantsCreateData, void>({
       path: `/restaurants`,
       method: "POST",
@@ -280,12 +347,16 @@ export class Restaurants<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  restaurantsCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  restaurantsCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/restaurants`] : null;
-    const fetcher: (url: string[], { arg }: { arg: RestaurantsCreatePayload }) => Promise<RestaurantsCreateData> = (
-      _,
-      { arg },
-    ) => this.restaurantsCreate(arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: RestaurantsCreatePayload },
+    ) => Promise<RestaurantsCreateData> = (_, { arg }) =>
+      this.restaurantsCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 }

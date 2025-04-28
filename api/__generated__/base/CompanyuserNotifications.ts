@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -20,7 +21,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class CompanyuserNotifications<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class CompanyuserNotifications<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description Delete companyUser_notification record. <br /><br /> <b>Authentication:</b> not required
    *
@@ -29,7 +32,10 @@ export class CompanyuserNotifications<SecurityDataType = unknown> extends HttpCl
    * @summary Delete companyUser_notification record.
    * @request DELETE:/companyuser-notifications/{companyuser_notification_id}
    */
-  companyuserNotificationsDelete = (companyuserNotificationId: string, params: RequestParams = {}) =>
+  companyuserNotificationsDelete = (
+    companyuserNotificationId: string,
+    params: RequestParams = {},
+  ) =>
     this.request<CompanyuserNotificationsDeleteData, void>({
       path: `/companyuser-notifications/${companyuserNotificationId}`,
       method: "DELETE",
@@ -42,9 +48,14 @@ export class CompanyuserNotifications<SecurityDataType = unknown> extends HttpCl
     params: RequestParams = {},
     enabled: boolean = true,
   ) => {
-    const key = enabled ? [`/companyuser-notifications/${companyuserNotificationId}`] : null;
+    const key = enabled
+      ? [`/companyuser-notifications/${companyuserNotificationId}`]
+      : null;
     const fetcher = () =>
-      this.companyuserNotificationsDelete(companyuserNotificationId, params).then((res) => res.data);
+      this.companyuserNotificationsDelete(
+        companyuserNotificationId,
+        params,
+      ).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -56,7 +67,10 @@ export class CompanyuserNotifications<SecurityDataType = unknown> extends HttpCl
    * @summary Get companyUser_notification record
    * @request GET:/companyuser-notifications/{companyuser_notification_id}
    */
-  companyuserNotificationsDetail = (companyuserNotificationId: string, params: RequestParams = {}) =>
+  companyuserNotificationsDetail = (
+    companyuserNotificationId: string,
+    params: RequestParams = {},
+  ) =>
     this.request<CompanyuserNotificationsDetailData, void>({
       path: `/companyuser-notifications/${companyuserNotificationId}`,
       method: "GET",
@@ -69,9 +83,14 @@ export class CompanyuserNotifications<SecurityDataType = unknown> extends HttpCl
     params: RequestParams = {},
     enabled: boolean = true,
   ) => {
-    const key = enabled ? [`/companyuser-notifications/${companyuserNotificationId}`] : null;
+    const key = enabled
+      ? [`/companyuser-notifications/${companyuserNotificationId}`]
+      : null;
     const fetcher = () =>
-      this.companyuserNotificationsDetail(companyuserNotificationId, params).then((res) => res.data);
+      this.companyuserNotificationsDetail(
+        companyuserNotificationId,
+        params,
+      ).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -102,12 +121,18 @@ export class CompanyuserNotifications<SecurityDataType = unknown> extends HttpCl
     params: RequestParams = {},
     enabled: boolean = true,
   ) => {
-    const key = enabled ? [`/companyuser-notifications/${companyuserNotificationId}`] : null;
+    const key = enabled
+      ? [`/companyuser-notifications/${companyuserNotificationId}`]
+      : null;
     const fetcher: (
       url: string[],
       { arg }: { arg: CompanyuserNotificationsPartialUpdatePayload },
     ) => Promise<CompanyuserNotificationsPartialUpdateData> = (_, { arg }) =>
-      this.companyuserNotificationsPartialUpdate(companyuserNotificationId, arg, params).then((res) => res.data);
+      this.companyuserNotificationsPartialUpdate(
+        companyuserNotificationId,
+        arg,
+        params,
+      ).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -127,9 +152,13 @@ export class CompanyuserNotifications<SecurityDataType = unknown> extends HttpCl
       ...params,
     });
 
-  companyuserNotificationsListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  companyuserNotificationsListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/companyuser-notifications`] : null;
-    const fetcher = () => this.companyuserNotificationsList(params).then((res) => res.data);
+    const fetcher = () =>
+      this.companyuserNotificationsList(params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -141,7 +170,10 @@ export class CompanyuserNotifications<SecurityDataType = unknown> extends HttpCl
    * @summary Add companyUser_notification record
    * @request POST:/companyuser-notifications
    */
-  companyuserNotificationsCreate = (data: CompanyuserNotificationsCreatePayload, params: RequestParams = {}) =>
+  companyuserNotificationsCreate = (
+    data: CompanyuserNotificationsCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<CompanyuserNotificationsCreateData, void>({
       path: `/companyuser-notifications`,
       method: "POST",
@@ -151,7 +183,10 @@ export class CompanyuserNotifications<SecurityDataType = unknown> extends HttpCl
       ...params,
     });
 
-  companyuserNotificationsCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  companyuserNotificationsCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/companyuser-notifications`] : null;
     const fetcher: (
       url: string[],

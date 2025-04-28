@@ -21,7 +21,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class Alert<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class Alert<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description Delete alert record. <br /><br /> <b>Authentication:</b> not required
    *
@@ -37,6 +39,18 @@ export class Alert<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       format: "json",
       ...params,
     });
+
+  alertDeleteQueryArgs = (
+    alertId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/alert/${alertId}`] : null;
+    const fetcher = () =>
+      this.alertDelete(alertId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Get alert record <br /><br /> <b>Authentication:</b> not required
    *
@@ -52,6 +66,18 @@ export class Alert<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       format: "json",
       ...params,
     });
+
+  alertDetailQueryArgs = (
+    alertId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/alert/${alertId}`] : null;
+    const fetcher = () =>
+      this.alertDetail(alertId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Edit alert record <br /><br /> <b>Authentication:</b> not required
    *
@@ -60,7 +86,11 @@ export class Alert<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
    * @summary Edit alert record
    * @request PATCH:/alert/{alert_id}
    */
-  alertPartialUpdate = (alertId: number, data: AlertPartialUpdatePayload, params: RequestParams = {}) =>
+  alertPartialUpdate = (
+    alertId: number,
+    data: AlertPartialUpdatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<AlertPartialUpdateData, void>({
       path: `/alert/${alertId}`,
       method: "PATCH",
@@ -69,6 +99,21 @@ export class Alert<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       format: "json",
       ...params,
     });
+
+  alertPartialUpdateQueryArgs = (
+    alertId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/alert/${alertId}`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: AlertPartialUpdatePayload },
+    ) => Promise<AlertPartialUpdateData> = (_, { arg }) =>
+      this.alertPartialUpdate(alertId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Query all alert records <br /><br /> <b>Authentication:</b> not required
    *
@@ -84,6 +129,16 @@ export class Alert<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       format: "json",
       ...params,
     });
+
+  alertListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/alert`] : null;
+    const fetcher = () => this.alertList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Add alert record <br /><br /> <b>Authentication:</b> not required
    *
@@ -101,4 +156,17 @@ export class Alert<SecurityDataType = unknown> extends HttpClient<SecurityDataTy
       format: "json",
       ...params,
     });
+
+  alertCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/alert`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: AlertCreatePayload },
+    ) => Promise<AlertCreateData> = (_, { arg }) =>
+      this.alertCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }

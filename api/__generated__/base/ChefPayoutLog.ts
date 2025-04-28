@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -20,7 +21,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class ChefPayoutLog<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class ChefPayoutLog<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description Delete chef_payout_log record. <br /><br /> <b>Authentication:</b> not required
    *
@@ -37,9 +40,14 @@ export class ChefPayoutLog<SecurityDataType = unknown> extends HttpClient<Securi
       ...params,
     });
 
-  chefPayoutLogDeleteQueryArgs = (chefPayoutLogId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  chefPayoutLogDeleteQueryArgs = (
+    chefPayoutLogId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/chef_payout_log/${chefPayoutLogId}`] : null;
-    const fetcher = () => this.chefPayoutLogDelete(chefPayoutLogId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.chefPayoutLogDelete(chefPayoutLogId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -59,9 +67,14 @@ export class ChefPayoutLog<SecurityDataType = unknown> extends HttpClient<Securi
       ...params,
     });
 
-  chefPayoutLogDetailQueryArgs = (chefPayoutLogId: string, params: RequestParams = {}, enabled: boolean = true) => {
+  chefPayoutLogDetailQueryArgs = (
+    chefPayoutLogId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/chef_payout_log/${chefPayoutLogId}`] : null;
-    const fetcher = () => this.chefPayoutLogDetail(chefPayoutLogId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.chefPayoutLogDetail(chefPayoutLogId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -97,7 +110,9 @@ export class ChefPayoutLog<SecurityDataType = unknown> extends HttpClient<Securi
       url: string[],
       { arg }: { arg: ChefPayoutLogPartialUpdatePayload },
     ) => Promise<ChefPayoutLogPartialUpdateData> = (_, { arg }) =>
-      this.chefPayoutLogPartialUpdate(chefPayoutLogId, arg, params).then((res) => res.data);
+      this.chefPayoutLogPartialUpdate(chefPayoutLogId, arg, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -117,9 +132,13 @@ export class ChefPayoutLog<SecurityDataType = unknown> extends HttpClient<Securi
       ...params,
     });
 
-  chefPayoutLogListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  chefPayoutLogListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/chef_payout_log`] : null;
-    const fetcher = () => this.chefPayoutLogList(params).then((res) => res.data);
+    const fetcher = () =>
+      this.chefPayoutLogList(params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -131,7 +150,10 @@ export class ChefPayoutLog<SecurityDataType = unknown> extends HttpClient<Securi
    * @summary Add chef_payout_log record
    * @request POST:/chef_payout_log
    */
-  chefPayoutLogCreate = (data: ChefPayoutLogCreatePayload, params: RequestParams = {}) =>
+  chefPayoutLogCreate = (
+    data: ChefPayoutLogCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<ChefPayoutLogCreateData, void>({
       path: `/chef_payout_log`,
       method: "POST",
@@ -141,12 +163,16 @@ export class ChefPayoutLog<SecurityDataType = unknown> extends HttpClient<Securi
       ...params,
     });
 
-  chefPayoutLogCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  chefPayoutLogCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/chef_payout_log`] : null;
-    const fetcher: (url: string[], { arg }: { arg: ChefPayoutLogCreatePayload }) => Promise<ChefPayoutLogCreateData> = (
-      _,
-      { arg },
-    ) => this.chefPayoutLogCreate(arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: ChefPayoutLogCreatePayload },
+    ) => Promise<ChefPayoutLogCreateData> = (_, { arg }) =>
+      this.chefPayoutLogCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 }

@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -20,7 +21,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class ChefReviews<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class ChefReviews<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -36,9 +39,14 @@ export class ChefReviews<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  chefReviewsDeleteQueryArgs = (chefReviewId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  chefReviewsDeleteQueryArgs = (
+    chefReviewId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/chef-reviews/${chefReviewId}`] : null;
-    const fetcher = () => this.chefReviewsDelete(chefReviewId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.chefReviewsDelete(chefReviewId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -57,9 +65,14 @@ export class ChefReviews<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  chefReviewsDetailQueryArgs = (chefReviewId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  chefReviewsDetailQueryArgs = (
+    chefReviewId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/chef-reviews/${chefReviewId}`] : null;
-    const fetcher = () => this.chefReviewsDetail(chefReviewId, params).then((res) => res.data);
+    const fetcher = () =>
+      this.chefReviewsDetail(chefReviewId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -84,13 +97,19 @@ export class ChefReviews<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  chefReviewsPartialUpdateQueryArgs = (chefReviewId: number, params: RequestParams = {}, enabled: boolean = true) => {
+  chefReviewsPartialUpdateQueryArgs = (
+    chefReviewId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/chef-reviews/${chefReviewId}`] : null;
     const fetcher: (
       url: string[],
       { arg }: { arg: ChefReviewsPartialUpdatePayload },
     ) => Promise<ChefReviewsPartialUpdateData> = (_, { arg }) =>
-      this.chefReviewsPartialUpdate(chefReviewId, arg, params).then((res) => res.data);
+      this.chefReviewsPartialUpdate(chefReviewId, arg, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
@@ -109,7 +128,10 @@ export class ChefReviews<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  chefReviewsListQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  chefReviewsListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/chef-reviews`] : null;
     const fetcher = () => this.chefReviewsList(params).then((res) => res.data);
     return [key, fetcher] as const;
@@ -122,7 +144,10 @@ export class ChefReviews<SecurityDataType = unknown> extends HttpClient<Security
    * @name ChefReviewsCreate
    * @request POST:/chef-reviews
    */
-  chefReviewsCreate = (data: ChefReviewsCreatePayload, params: RequestParams = {}) =>
+  chefReviewsCreate = (
+    data: ChefReviewsCreatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<ChefReviewsCreateData, void>({
       path: `/chef-reviews`,
       method: "POST",
@@ -132,12 +157,16 @@ export class ChefReviews<SecurityDataType = unknown> extends HttpClient<Security
       ...params,
     });
 
-  chefReviewsCreateQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+  chefReviewsCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
     const key = enabled ? [`/chef-reviews`] : null;
-    const fetcher: (url: string[], { arg }: { arg: ChefReviewsCreatePayload }) => Promise<ChefReviewsCreateData> = (
-      _,
-      { arg },
-    ) => this.chefReviewsCreate(arg, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: ChefReviewsCreatePayload },
+    ) => Promise<ChefReviewsCreateData> = (_, { arg }) =>
+      this.chefReviewsCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 }

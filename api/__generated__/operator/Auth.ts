@@ -19,7 +19,9 @@ import {
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
-export class Auth<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class Auth<
+  SecurityDataType = unknown,
+> extends HttpClient<SecurityDataType> {
   /**
    * @description Login and retrieve an authentication token <br /><br /> <b>Authentication:</b> not required
    *
@@ -37,6 +39,20 @@ export class Auth<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       format: "json",
       ...params,
     });
+
+  loginCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/auth/login`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: LoginCreatePayload },
+    ) => Promise<LoginCreateData> = (_, { arg }) =>
+      this.loginCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Get the record belonging to the authentication token <br /><br /> <b>Authentication:</b> required
    *
@@ -54,6 +70,13 @@ export class Auth<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       format: "json",
       ...params,
     });
+
+  getAuthQueryArgs = (params: RequestParams = {}, enabled: boolean = true) => {
+    const key = enabled ? [`/auth/me`] : null;
+    const fetcher = () => this.getAuth(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description Signup and retrieve an authentication token <br /><br /> <b>Authentication:</b> not required
    *
@@ -71,4 +94,17 @@ export class Auth<SecurityDataType = unknown> extends HttpClient<SecurityDataTyp
       format: "json",
       ...params,
     });
+
+  signupCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/auth/signup`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: SignupCreatePayload },
+    ) => Promise<SignupCreateData> = (_, { arg }) =>
+      this.signupCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
 }
