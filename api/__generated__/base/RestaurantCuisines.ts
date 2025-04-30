@@ -24,10 +24,11 @@ export class RestaurantCuisines<
   SecurityDataType = unknown,
 > extends HttpClient<SecurityDataType> {
   /**
-   * @description <br /><br /> <b>Authentication:</b> required
+   * @description [AUTH-Operator]運営だけが削除できる <br /><br /> <b>Authentication:</b> required
    *
    * @tags restaurant-cuisines
    * @name RestaurantCuisinesDelete
+   * @summary [AUTH-Operator]運営だけが削除できる
    * @request DELETE:/restaurant-cuisines/{restaurant_cuisine_id}
    * @secure
    */
@@ -59,11 +60,13 @@ export class RestaurantCuisines<
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH-Operator]運営だけが編集できる <br /><br /> <b>Authentication:</b> required
    *
    * @tags restaurant-cuisines
    * @name RestaurantCuisinesPartialUpdate
+   * @summary [AUTH-Operator]運営だけが編集できる
    * @request PATCH:/restaurant-cuisines/{restaurant_cuisine_id}
+   * @secure
    */
   restaurantCuisinesPartialUpdate = (
     restaurantCuisineId: number,
@@ -74,6 +77,7 @@ export class RestaurantCuisines<
       path: `/restaurant-cuisines/${restaurantCuisineId}`,
       method: "PATCH",
       body: data,
+      secure: true,
       type: ContentType.Json,
       format: "json",
       ...params,
@@ -100,10 +104,11 @@ export class RestaurantCuisines<
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [UNAUTHED]誰でも見られます。 <br /><br /> <b>Authentication:</b> not required
    *
    * @tags restaurant-cuisines
    * @name RestaurantCuisinesList
+   * @summary [UNAUTHED]誰でも見られます。
    * @request GET:/restaurant-cuisines
    */
   restaurantCuisinesList = (params: RequestParams = {}) =>
@@ -125,11 +130,13 @@ export class RestaurantCuisines<
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH-Operator]運営だけが追加できる <br /><br /> <b>Authentication:</b> required
    *
    * @tags restaurant-cuisines
    * @name RestaurantCuisinesCreate
+   * @summary [AUTH-Operator]運営だけが追加できる
    * @request POST:/restaurant-cuisines
+   * @secure
    */
   restaurantCuisinesCreate = (
     data: RestaurantCuisinesCreatePayload,
@@ -139,6 +146,7 @@ export class RestaurantCuisines<
       path: `/restaurant-cuisines`,
       method: "POST",
       body: data,
+      secure: true,
       type: ContentType.Json,
       format: "json",
       ...params,

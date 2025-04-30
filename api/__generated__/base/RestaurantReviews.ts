@@ -149,10 +149,11 @@ export class RestaurantReviews<
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH-CompanyUser]レストランのスタッフだけが追加できる <br /><br /> <b>Authentication:</b> not required
    *
    * @tags restaurant_reviews
    * @name RestaurantReviewsCreate
+   * @summary [AUTH-CompanyUser]レストランのスタッフだけが追加できる
    * @request POST:/restaurant_reviews
    */
   restaurantReviewsCreate = (

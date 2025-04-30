@@ -52,7 +52,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ChatSheet } from "@/components/chat/ChatSheet";
-import { useSubscriptionMessagesByWorksessionId } from "@/hooks/api/messages/useSubscriptionMessagesByWorksessionId";
+import { useSubscriptionMessagesByUserId } from "@/hooks/api/messages/useSubscriptionMessagesByUserId";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 interface JobDetail {
   job: {
@@ -98,6 +99,9 @@ export default function JobDetail({ params }: PageProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const from = searchParams.get("from") || "schedule";
+
+  const { user } = useAuth();
+
   const [isQrScanned, setIsQrScanned] = useState(false);
   const [scannedData, setScannedData] = useState<string | null>(null);
   const [scanner, setScanner] = useState<Html5QrcodeScanner | null>(null);
@@ -133,15 +137,15 @@ export default function JobDetail({ params }: PageProps) {
   );
 
   // メッセージの取得
-  const { messages, sendMessage } = useSubscriptionMessagesByWorksessionId({
+  const { messagesData, sendMessage } = useSubscriptionMessagesByUserId({
+    userId: user?.id,
     workSessionId: workSession?.id,
     applicationId: application?.id.toString() || "",
-    userType: 'chef',
   })
 
   // 未読メッセージのカウント
   const unreadCount =
-    messages?.filter((msg) => msg.sender_type === "restaurant" && !msg.is_read)
+    messagesData?.messages?.filter((msg) => msg.sender_type === "restaurant" && !msg.is_read)
       .length || 0;
 
   const handleOpenDialog = () => {
@@ -607,7 +611,8 @@ export default function JobDetail({ params }: PageProps) {
         <ChatSheet
           isOpen={isChatOpen}
           onClose={() => setIsChatOpen(false)}
-          messages={messages || []}
+          worksessionId={workSession.id}
+          messagesData={messagesData}
           onSendMessage={sendMessage}
           restaurantName={restaurant?.name || ""}
           restaurantImage={restaurant?.profile_image}

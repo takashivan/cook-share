@@ -14,7 +14,7 @@ import {
   ApplicationsListOutput,
   ChefNotificationsListData,
   ChefNotificationsListParams,
-  ChefReviewsListOutput,
+  ChefReviewsListResult,
   RestaurantReviewsListOutput,
   StripeAccountCreateData,
   StripeAccountLinksCreateData,
@@ -26,6 +26,7 @@ import {
   UsersPartialUpdateData,
   UsersPartialUpdatePayload,
   WorksessionsListResult,
+  WorksessionsMessagesListResult,
   WorksessionsUserTodosListData,
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
@@ -101,7 +102,7 @@ export class Users<
    * @request GET:/users/{user_id}/chef-reviews
    */
   chefReviewsList = (userId: string, params: RequestParams = {}) =>
-    this.request<ChefReviewsListOutput, void>({
+    this.request<ChefReviewsListResult, void>({
       path: `/users/${userId}/chef-reviews`,
       method: "GET",
       format: "json",
@@ -221,6 +222,42 @@ export class Users<
     const key = enabled ? [`/users/${userId}/worksessions/user_todos`] : null;
     const fetcher = () =>
       this.worksessionsUserTodosList(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description [AUTH-CHEF]働くシェフだけがメッセージを見られます。 <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags users
+   * @name WorksessionsMessagesList
+   * @summary [AUTH-CHEF]働くシェフだけがメッセージを見られます。
+   * @request GET:/users/{user_id}/worksessions/{worksession_id}/messages
+   */
+  worksessionsMessagesList = (
+    userId: string,
+    worksessionId: number,
+    params: RequestParams = {},
+  ) =>
+    this.request<WorksessionsMessagesListResult, void>({
+      path: `/users/${userId}/worksessions/${worksessionId}/messages`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  worksessionsMessagesListQueryArgs = (
+    userId: string,
+    worksessionId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled
+      ? [`/users/${userId}/worksessions/${worksessionId}/messages`]
+      : null;
+    const fetcher = () =>
+      this.worksessionsMessagesList(userId, worksessionId, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 

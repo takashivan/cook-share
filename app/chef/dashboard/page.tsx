@@ -13,6 +13,10 @@ import { workSessionApi } from "@/lib/api/workSession";
 import { Button } from "@/components/ui/button";
 import { RestaurantNotificationDropdown } from "@/components/notifications/RestaurantNotificationDropdown";
 import { ChefNotificationDropdown } from "@/components/notifications/ChefNotificationDropdown";
+import { UnreadMessageWithWorksession, useSubscriptionUnreadMessagesByUser } from "@/hooks/api/messages/useSubscriptionUnreadMessagesByUser";
+import { ChatSheet } from "@/components/chat/ChatSheet";
+import { useSubscriptionMessagesByUserId } from "@/hooks/api/messages/useSubscriptionMessagesByUserId";
+import { Badge } from "@/components/ui/badge";
 
 interface ApplicationWithJob extends Application {
   job?: Job & {
@@ -29,6 +33,7 @@ export default function ChefDashboard() {
   const { user } = useAuth();
   const [workSessions, setWorkSessions] = useState<WorkSessionWithJob[]>([]);
   const [isUpcomingJob, setIsUpcomingJob] = useState(false);
+  const [selectedWorkSession, setSelectedWorkSession] = useState<UnreadMessageWithWorksession['worksession'] | null>(null);
 
   const { data: workSessionsData = [] } = useSWR<WorkSessionWithJob[]>(
     "workSessions",
@@ -55,6 +60,36 @@ export default function ChefDashboard() {
     );
     setIsUpcomingJob(hasUpcomingJob);
   }, [workSessionsData]);
+
+  // メッセージの取得
+  const { messagesData, sendMessage } = useSubscriptionMessagesByUserId({
+    userId: user?.id,
+    workSessionId: selectedWorkSession?.id ?? undefined,
+    applicationId: selectedWorkSession?.application_id ?? undefined,
+  })
+
+  // 未読メッセージの取得
+  const { unreadMessagesData } = useSubscriptionUnreadMessagesByUser({
+    userId: user?.id,
+  });
+
+  const openChat = (worksession: UnreadMessageWithWorksession['worksession']) => {
+    setSelectedWorkSession(worksession);
+  };
+
+  const closeChat = () => {
+    setSelectedWorkSession(null);
+  };
+
+  const handleSendMessage = async (message: string) => {
+    if (!message.trim() || !selectedWorkSession) return;
+
+    try {
+      sendMessage(message)
+    } catch (error) {
+      console.error("Failed to send message:", error);
+    }
+  };
 
   // const { data: applications } = useSWR<ApplicationWithJob[]>(
   //   user ? ["applications", user.id.toString()] : null,
@@ -182,26 +217,59 @@ export default function ChefDashboard() {
       <section className="mb-10">
         <h2 className="text-xl font-bold mb-4">未読メッセージ</h2>
         <div className="space-y-4">
-          <div className="bg-white rounded-lg shadow-md p-4">
-            <div className="flex items-center gap-3 mb-2">
-              <MessageSquare className="h-5 w-5 text-gray-700" />
-              <div className="font-medium">洋食 黒船亭</div>
-            </div>
-            <p className="text-gray-600 truncate">
-              はじめまして。この度はご応募いただきありがとう...
-            </p>
-          </div>
+          {unreadMessagesData && unreadMessagesData.length > 0 && unreadMessagesData.some((messageData) => messageData.unread_message_count > 0) ? (
+            unreadMessagesData.filter((messageData) => messageData.unread_message_count > 0).map((messageData) => {
+              // 最新のメッセージを取得（message_seqが最大のもの）
+              let latestMessage = null;
+              for (const message of messageData.unread_messages) {
+                if (!latestMessage || message.message_seq > latestMessage.message_seq) {
+                  latestMessage = message;
+                }
+              }
 
-          <div className="bg-white rounded-lg shadow-md p-4">
-            <div className="flex items-center gap-3 mb-2">
-              <MessageSquare className="h-5 w-5 text-gray-700" />
-              <div className="font-medium">くっくぴざすし</div>
+              return (
+                <Link
+                  key={messageData.worksession.id}
+                  href=''
+                  className="block"
+                  onClick={() => {
+                    openChat(messageData.worksession)
+                  }}
+                >
+                  <div className="bg-white rounded-lg shadow-md p-4">
+                    <div className="flex items-center gap-3 mb-2 relative">
+                      <MessageSquare className="h-5 w-5 text-gray-700" />
+                      <div className="font-medium">{messageData.worksession.restaurant.name}</div>
+                      {messageData.unread_messages.length > 0 && (
+                        <Badge className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[1.25rem] h-5 flex items-center justify-center bg-red-500 text-white">
+                          {messageData.unread_messages.length}
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-gray-600 truncate">
+                      {latestMessage?.content ?? ''}
+                    </p>
+                  </div>
+                </Link>
+              )
+            })
+          ) : (
+            <div className="bg-gray-50 rounded-lg p-8 text-center text-gray-500">
+              未読メッセージはありません
             </div>
-            <p className="text-gray-600 truncate">
-              はじめまして。この度はご応募いただきありがとう...
-            </p>
-          </div>
+          )}
         </div>
+        <ChatSheet
+          isOpen={selectedWorkSession !== null}
+          onClose={closeChat}
+          worksessionId={selectedWorkSession?.id ?? undefined}
+          messagesData={messagesData}
+          onSendMessage={handleSendMessage}
+          restaurantName={selectedWorkSession?.restaurant?.name || ""}
+          restaurantImage={selectedWorkSession?.restaurant?.profile_image || ""}
+          workDate={selectedWorkSession?.job?.work_date || ""}
+          startTime={selectedWorkSession?.job?.start_time || 0}
+        />
       </section>
     </div>
   );
