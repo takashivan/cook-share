@@ -78,7 +78,7 @@ export function ChatSheet({
       worksession_id: worksessionId,
       last_read_message_seq: latestMessage.message_seq,
     });
-  }, [messagesData, worksessionId, scrollToBottom]);
+  }, [messagesData, worksessionId, scrollToBottom, updateReadMessageTrigger]);
 
   const handleSendMessage = () => {
     try {

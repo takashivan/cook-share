@@ -78,6 +78,7 @@ import { getApi } from "@/api/api-factory";
 import { Worksessions } from "@/api/__generated__/base/Worksessions";
 import { useSubscriptionMessagesByCompanyUserId } from "@/hooks/api/messages/useSubscriptionMessagesByCompanyUserId";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
+import { useUpdateReadMessageByCompanyUser } from "@/hooks/api/messages/useUpdateReadMessageByCompanyUser";
 
 interface Message {
   id: number;
@@ -121,6 +122,12 @@ export default function JobDetail({ params }: PageParams) {
     applicationId: selectedWorkSession?.application_id,
   })
 
+  const { trigger: updateReadMessageTrigger } = useUpdateReadMessageByCompanyUser({
+    companyUserId: user?.id,
+    workSessionId: selectedWorkSession?.id,
+    restaurantId: restaurant?.id,
+  })
+
   const handleSendMessage = async () => {
     try {
       sendMessage(messageInput)
@@ -159,8 +166,33 @@ export default function JobDetail({ params }: PageParams) {
   };
 
   useEffect(() => {
+    // メッセージが更新されたらスクロール
     scrollToBottom();
-  }, [messagesData]);
+
+    if (!messagesData || !messagesData.messages || messagesData.messages.length === 0) {
+      return;
+    }
+
+    // 最新のメッセージを取得（message_seqが最大のもの）
+    let latestMessage = null;
+    for (const message of messagesData.messages) {
+      if (!latestMessage || message.message_seq > latestMessage.message_seq) {
+        latestMessage = message;
+      }
+    }
+
+    console.log('latestMessage', latestMessage)
+
+    if (!latestMessage || !selectedWorkSession) return;
+    // 既読情報が最新のメッセージと同じ場合は何もしない
+    if (latestMessage.message_seq === messagesData.restaurant_last_read.last_read_message_seq) return;
+
+    // 既読情報更新
+    updateReadMessageTrigger({
+      worksession_id: selectedWorkSession.id,
+      last_read_message_seq: latestMessage.message_seq,
+    });
+  }, [messagesData, selectedWorkSession, scrollToBottom, updateReadMessageTrigger]);
 
   // 型チェックとデータ変換
   const formattedJob: JobsDetailData['job'] | null = job
