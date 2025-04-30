@@ -204,12 +204,10 @@ export default function ChefLayout({
             <Link href="#" className="text-white hover:underline">
               運営会社
             </Link>
-            <Link href="#" className="text-white hover:underline">
-              シェフ向け利用規約
+            <Link href="/terms" className="hover:underline">
+              利用規約
             </Link>
-            <Link href="#" className="text-white hover:underline">
-              飲食業社向け利用規約
-            </Link>
+            
             <Link href="https://corp.cookbiz.co.jp/privacy-policy/" className="text-white hover:underline">
               プライバシーポリシー
             </Link>
