@@ -609,7 +609,8 @@ export default function JobDetail({ params }: PageProps) {
         <ChatSheet
           isOpen={isChatOpen}
           onClose={() => setIsChatOpen(false)}
-          messages={messagesData?.messages}
+          worksessionId={workSession.id}
+          messagesData={messagesData}
           onSendMessage={sendMessage}
           restaurantName={restaurant?.name || ""}
           restaurantImage={restaurant?.profile_image}

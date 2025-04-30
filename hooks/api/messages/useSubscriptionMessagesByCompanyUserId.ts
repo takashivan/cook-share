@@ -6,6 +6,7 @@ import { Messages } from "@/api/__generated__/base/Messages";
 import { MessagesCreatePayload } from "@/api/__generated__/base/data-contracts";
 import realTimeClient from "@/api/xano";
 import { Companyusers } from "@/api/__generated__/base/Companyusers";
+import { XanoRealtimeChannel } from "@xano/js-sdk/lib/models/realtime-channel";
 
 export interface Params {
   companyUserId?: string;
@@ -34,18 +35,29 @@ export const useSubscriptionMessagesByCompanyUserId = (params: Params, config?: 
     ([_key], { next }) => {
       if (!key) return;
 
-      const channel = realTimeClient.channel(channelKey);
-      console.log("Channel setup for key:", channelKey);
+      let channel: XanoRealtimeChannel;
+      try {
+        channel = realTimeClient.channel(channelKey);
+        console.log("Channel setup for key:", channelKey);
 
-      // メッセージの購読
-      channel.on((message: any) => {
-        console.log("Received message:", message);
-        getRequest.mutate();
-        next();
-      });
+        // メッセージの購読
+        channel.on((message: any) => {
+          console.log("Received message:", message);
+          getRequest.mutate();
+          next();
+        });
+      } catch (error) {
+        console.error("Error setting up channel:", error);
+      }
 
       return () => {
-        channel.destroy();
+        try {
+          if (channel) {
+            channel.destroy();
+          }
+        } catch (error) {
+          console.error("Error destroying channel:", error);
+        }
       };
     },
   )

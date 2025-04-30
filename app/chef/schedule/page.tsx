@@ -142,7 +142,8 @@ export default function SchedulePage() {
       <ChatSheet
         isOpen={selectedJobId !== null}
         onClose={closeChat}
-        messages={messagesData?.messages}
+        worksessionId={selectedWorkSession?.id}
+        messagesData={messagesData}
         onSendMessage={handleSendMessage}
         restaurantName={selectedWorkSession?.job?.restaurant.name || ""}
         restaurantImage={selectedWorkSession?.job?.restaurant.profile_image || ""}
