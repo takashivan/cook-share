@@ -360,16 +360,28 @@ export default function Home() {
               運営会社
             </Link>
             <span>|</span>
-            <Link href="#" className="hover:underline">
-              シェフ向け利用規約
+            <Link href="/terms" className="hover:underline">
+              利用規約
             </Link>
+
             <span>|</span>
-            <Link href="#" className="hover:underline">
-              飲食業社向け利用規約
-            </Link>
-            <span>|</span>
-            <Link href="#" className="hover:underline">
+            <Link
+              href="https://corp.cookbiz.co.jp/privacy-policy/"
+              className="hover:underline">
               プライバシーポリシー
+            </Link>
+
+            <span>|</span>
+            <Link
+              href="https://corp.cookbiz.co.jp/privacy-policy-treatment/ "
+              className="hover:underline">
+              個人情報の取扱いについて
+            </Link>
+            <span>|</span>
+            <Link
+              href="https://corp.cookbiz.co.jp/privacy-policy-publication/"
+              className="hover:underline">
+              個人情報に関する公表文
             </Link>
             <span>|</span>
             <Link href="/contact" className="hover:underline">

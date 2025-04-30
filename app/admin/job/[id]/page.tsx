@@ -27,6 +27,9 @@ import {
   QrCode,
   CheckCircle,
   MoreHorizontal,
+  AlertCircle,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -80,6 +83,15 @@ import { useSubscriptionMessagesByCompanyUserId } from "@/hooks/api/messages/use
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { useUpdateReadMessageByCompanyUser } from "@/hooks/api/messages/useUpdateReadMessageByCompanyUser";
 import { useSubscriptionUnreadMessagesByRestaurantId } from "@/hooks/api/messages/useSubscriptionUnreadMessagesByRestaurantId";
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { useRouter } from "next/navigation";
+import { differenceInDays } from "date-fns";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Message {
   id: number;
@@ -95,6 +107,7 @@ interface PageParams {
 export default function JobDetail({ params }: PageParams) {
   const { id: jobId } = use(params);
   const { user } = useCompanyAuth();
+  const router = useRouter();
 
   const [selectedApplicant, setSelectedApplicant] = useState<number | null>(
     null
@@ -107,6 +120,14 @@ export default function JobDetail({ params }: PageParams) {
   const [chefReview, setChefReview] = useState<any>(null);
   const [isEditJobModalOpen, setIsEditJobModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [cancellationPenalty, setCancellationPenalty] = useState<{
+    penalty: number;
+    message: string;
+    status: string;
+  } | null>(null);
+  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
 
   const { data: jobData, error: jobError } = useGetJob({ jobId: Number(jobId) });
   const { data: workSessions, error: workSessionsError } = useGetWorksessionsByJobId({ jobId: Number(jobId) });
@@ -247,6 +268,55 @@ export default function JobDetail({ params }: PageParams) {
     }
   };
 
+  const calculateCancellationPenalty = () => {
+    if (!job) return null;
+    
+    const now = new Date();
+    const workDate = new Date(job.work_date);
+    const daysDifference = differenceInDays(workDate, now);
+
+    if (daysDifference >= 2) {
+      return {
+        penalty: 0,
+        message: "2日以上前のキャンセルは違約金なしで可能です。",
+        status: "cancelled_by_restaurant"
+      };
+    } else {
+      return {
+        penalty: job.fee,
+        message: "1日前以降のキャンセルは報酬予定額の100%の違約金とキャンセル手数料が発生します。",
+        status: "cancelled_by_restaurant_late"
+      };
+    }
+  };
+
+  const handleCancelClick = () => {
+    if (!job) return;
+    setCancellationPenalty(calculateCancellationPenalty());
+    setIsCancelModalOpen(true);
+  };
+
+  const handleCancelConfirm = async () => {
+    if (!cancellationPenalty || !job || !isConfirmed || !cancelReason) return;
+
+    try {
+      // TODO: APIを呼び出してキャンセル処理を実行
+      // await cancelJob(job.id, cancellationPenalty.status, cancelReason);
+      toast({
+        title: "キャンセル完了",
+        description: "お仕事のキャンセルが完了しました。",
+      });
+      setIsCancelModalOpen(false);
+      router.refresh();
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "キャンセル処理に失敗しました。",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* ヘッダー */}
@@ -268,7 +338,6 @@ export default function JobDetail({ params }: PageParams) {
               {formatJobPostingJapaneseStatus(job?.status || "")}
             </Badge>
             <Badge variant="outline" className="text-sm bg-white py-1">
-              {/* <Calendar className="h-4 w-4" /> */}
               {job?.work_date
                 ? format(new Date(job.work_date), "MM/dd")
                 : "未定"}
@@ -309,8 +378,6 @@ export default function JobDetail({ params }: PageParams) {
                 表示
               </Link>
             </Button>
-
-            <div className="flex items-center gap-1"></div>
           </div>
         </div>
         <div className="ml-auto"></div>
@@ -565,34 +632,55 @@ export default function JobDetail({ params }: PageParams) {
                     </Dialog>
 
                     {selectedWorkSession.status === "SCHEDULED" && (
-                      <Dialog
-                        open={isQrDialogOpen}
-                        onOpenChange={setIsQrDialogOpen}>
-                        <DialogTrigger asChild>
-                          <Button variant="outline" size="sm">
-                            <QrCode className="h-4 w-4 mr-2" />
-                            チェックインQR
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>チェックインQRコード</DialogTitle>
-                            <DialogDescription>
-                              シェフにこのQRコードを提示してください
-                            </DialogDescription>
-                          </DialogHeader>
-                          <div className="flex flex-col items-center justify-center p-4">
-                            <div className="bg-white p-4 rounded-lg shadow-md">
-                              <QRCodeSVG
-                                value={selectedWorkSession.application_id}
-                                size={200}
-                                level="H"
-                                includeMargin={true}
-                              />
+                      <>
+                        <Dialog
+                          open={isQrDialogOpen}
+                          onOpenChange={setIsQrDialogOpen}>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <QrCode className="h-4 w-4 mr-2" />
+                              チェックインQR
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>チェックインQRコード</DialogTitle>
+                              <DialogDescription>
+                                シェフにこのQRコードを提示してください
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="flex flex-col items-center justify-center p-4">
+                              <div className="bg-white p-4 rounded-lg shadow-md">
+                                <QRCodeSVG
+                                  value={selectedWorkSession.application_id}
+                                  size={200}
+                                  level="H"
+                                  includeMargin={true}
+                                />
+                              </div>
                             </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
+                          </DialogContent>
+                        </Dialog>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedWorkSession(selectedWorkSession);
+                                handleCancelClick();
+                              }}
+                              className="text-red-600 focus:text-red-600 focus:bg-red-50">
+                              <XCircle className="h-4 w-4 mr-2" />
+                              キャンセル
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </>
                     )}
 
                     {selectedWorkSession.status === "COMPLETED" && (
@@ -846,6 +934,77 @@ export default function JobDetail({ params }: PageParams) {
           job={formattedJob}
         />
       }
+
+      <AlertDialog open={isCancelModalOpen} onOpenChange={setIsCancelModalOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertCircle className="h-5 w-5" />
+              お仕事のキャンセル確認
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4">
+              <div className="bg-red-50 p-4 rounded-lg">
+                <p className="text-red-800 font-medium">
+                  {cancellationPenalty?.message}
+                </p>
+                {cancellationPenalty?.penalty !== undefined && cancellationPenalty.penalty > 0 && (
+                  <div className="mt-2">
+                    <p className="text-red-800 font-semibold">
+                      違約金: ¥{cancellationPenalty.penalty.toLocaleString()}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-yellow-50 p-4 rounded-lg">
+                <p className="text-yellow-800 text-sm">
+                  ※ 度重なるキャンセルや不当な理由でのキャンセルは、今後のご利用停止となる可能性があります。
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="cancel-reason" className="block text-sm font-medium text-gray-700">
+                  キャンセル理由
+                </label>
+                <textarea
+                  id="cancel-reason"
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  className="w-full h-24 p-2 border rounded-md text-sm bg-white"
+                  placeholder="キャンセルの理由を具体的にご記入ください"
+                  required
+                />
+              </div>
+
+              <div className="flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  id="confirm-cancel"
+                  checked={isConfirmed}
+                  onChange={(e) => setIsConfirmed(e.target.checked)}
+                  className="mt-1"
+                />
+                <label htmlFor="confirm-cancel" className="text-sm text-gray-600">
+                  上記の内容を確認し、キャンセルに同意します
+                </label>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex justify-end gap-4 mt-4">
+            <Button variant="outline" onClick={() => setIsCancelModalOpen(false)}>
+              閉じる
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancelConfirm}
+              disabled={!isConfirmed || !cancelReason}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              キャンセルを確定
+            </Button>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
