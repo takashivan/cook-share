@@ -71,7 +71,7 @@ export function ChatSheet({
 
     if (!latestMessage || !worksessionId) return;
     // 既読情報が最新のメッセージと同じ場合は何もしない
-    if (latestMessage.message_seq === messagesData.chef_last_read.last_read_message_seq) return;
+    if (latestMessage.message_seq === messagesData.chef_last_read?.last_read_message_seq) return;
 
     // 既読情報更新
     updateReadMessageTrigger({
