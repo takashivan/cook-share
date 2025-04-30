@@ -11,6 +11,8 @@
  */
 
 import {
+  CancelByRestaurantPartialUpdateData,
+  CancelByRestaurantPartialUpdatePayload,
   ChefReviewListResult,
   FinishPartialUpdateBody,
   FinishPartialUpdateResult,
@@ -31,6 +33,45 @@ import { ContentType, HttpClient, RequestParams } from "./http-client";
 export class Worksessions<
   SecurityDataType = unknown,
 > extends HttpClient<SecurityDataType> {
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags worksessions
+   * @name CancelByRestaurantPartialUpdate
+   * @request PATCH:/worksessions/{worksession_id}/cancel-by-restaurant
+   */
+  cancelByRestaurantPartialUpdate = (
+    worksessionId: number,
+    data: CancelByRestaurantPartialUpdatePayload,
+    params: RequestParams = {},
+  ) =>
+    this.request<CancelByRestaurantPartialUpdateData, void>({
+      path: `/worksessions/${worksessionId}/cancel-by-restaurant`,
+      method: "PATCH",
+      body: data,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+
+  cancelByRestaurantPartialUpdateQueryArgs = (
+    worksessionId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled
+      ? [`/worksessions/${worksessionId}/cancel-by-restaurant`]
+      : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: CancelByRestaurantPartialUpdatePayload },
+    ) => Promise<CancelByRestaurantPartialUpdateData> = (_, { arg }) =>
+      this.cancelByRestaurantPartialUpdate(worksessionId, arg, params).then(
+        (res) => res.data,
+      );
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *

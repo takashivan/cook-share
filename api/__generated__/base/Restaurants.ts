@@ -11,7 +11,7 @@
  */
 
 import {
-  ChefReviewsListResult,
+  ChefReviewsListData,
   CompanyuserNotificationsCreateData,
   CompanyusersCreateInput,
   CompanyusersCreateOutput,
@@ -74,7 +74,7 @@ export class Restaurants<
    * @request GET:/restaurants/{restaurant_id}/chef-reviews
    */
   chefReviewsList = (restaurantId: number, params: RequestParams = {}) =>
-    this.request<ChefReviewsListResult, void>({
+    this.request<ChefReviewsListData, void>({
       path: `/restaurants/${restaurantId}/chef-reviews`,
       method: "GET",
       format: "json",
