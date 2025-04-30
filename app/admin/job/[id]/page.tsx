@@ -76,7 +76,8 @@ import { useVerifyWorksession } from "@/hooks/api/worksessions/useVerifyWorksess
 import { useUpdateJob } from "@/hooks/api/jobs/useUpdateJob";
 import { getApi } from "@/api/api-factory";
 import { Worksessions } from "@/api/__generated__/base/Worksessions";
-import { useSubscriptionMessagesByWorksessionId } from "@/hooks/api/messages/useSubscriptionMessagesByWorksessionId";
+import { useSubscriptionMessagesByCompanyUserId } from "@/hooks/api/messages/useSubscriptionMessagesByCompanyUserId";
+import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 
 interface Message {
   id: number;
@@ -91,6 +92,8 @@ interface PageParams {
 
 export default function JobDetail({ params }: PageParams) {
   const { id: jobId } = use(params);
+  const { user } = useCompanyAuth();
+
   const [selectedApplicant, setSelectedApplicant] = useState<number | null>(
     null
   );
@@ -112,10 +115,10 @@ export default function JobDetail({ params }: PageParams) {
   const { trigger: updateJobTrigger } = useUpdateJob({ jobId: Number(jobId), companyId: restaurant?.companies_id ?? undefined, restaurantId: restaurant?.id ?? undefined});
   const { trigger: verifyWorksessionTrigger } = useVerifyWorksession({ worksessionId: selectedWorkSession?.id || 0, jobId: Number(jobId) });
 
-  const { messages, sendMessage } = useSubscriptionMessagesByWorksessionId({
+  const { messagesData, sendMessage } = useSubscriptionMessagesByCompanyUserId({
+    companyUserId: user?.id,
     workSessionId: selectedWorkSession?.id,
     applicationId: selectedWorkSession?.application_id,
-    userType: 'company',
   })
 
   const handleSendMessage = async () => {
@@ -157,7 +160,7 @@ export default function JobDetail({ params }: PageParams) {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messagesData]);
 
   // 型チェックとデータ変換
   const formattedJob: JobsDetailData['job'] | null = job
@@ -568,7 +571,7 @@ export default function JobDetail({ params }: PageParams) {
                     value="chat"
                     className="flex-1 flex flex-col p-4 overflow-hidden">
                     <div className="flex-1 overflow-y-auto mb-4 space-y-4 max-h-[calc(100vh-400px)]">
-                      {messages?.map((message: any) => (
+                      {messagesData?.messages.map((message) => (
                         <div
                           key={message.id}
                           className={`flex ${message.sender_type === "restaurant" ? "justify-end" : "justify-start"}`}>

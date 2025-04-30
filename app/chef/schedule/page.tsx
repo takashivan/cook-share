@@ -12,7 +12,7 @@ import useSWR from "swr";
 import { ChatSheet } from "@/components/chat/ChatSheet";
 import { useGetWorksessionsByUserId } from "@/hooks/api/worksessions/useGetWorksessionsByUserId";
 import { WorksessionsListResult } from "@/api/__generated__/base/data-contracts";
-import { useSubscriptionMessagesByWorksessionId } from "@/hooks/api/messages/useSubscriptionMessagesByWorksessionId";
+import { useSubscriptionMessagesByUserId } from "@/hooks/api/messages/useSubscriptionMessagesByUserId";
 
 export default function SchedulePage() {
   const { user } = useAuth();
@@ -29,10 +29,10 @@ export default function SchedulePage() {
   );
 
   // メッセージの取得
-  const { messages, sendMessage } = useSubscriptionMessagesByWorksessionId({
+  const { messagesData, sendMessage } = useSubscriptionMessagesByUserId({
+    userId: user?.id,
     workSessionId: selectedWorkSession?.id,
     applicationId: selectedWorkSession?.application_id,
-    userType: 'chef',
   })
 
   const handleSendMessage = async (message: string) => {
@@ -142,7 +142,7 @@ export default function SchedulePage() {
       <ChatSheet
         isOpen={selectedJobId !== null}
         onClose={closeChat}
-        messages={messages}
+        messages={messagesData?.messages}
         onSendMessage={handleSendMessage}
         restaurantName={selectedWorkSession?.job?.restaurant.name || ""}
         restaurantImage={selectedWorkSession?.job?.restaurant.profile_image || ""}

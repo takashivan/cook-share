@@ -1,29 +1,29 @@
 import { getApi } from "@/api/api-factory";
 import { QueryConfigType } from "../config-type";
-import { Worksessions } from "@/api/__generated__/base/Worksessions";
 import useSWR from "swr";
 import useSWRSubscription from 'swr/subscription';
 import { Messages } from "@/api/__generated__/base/Messages";
 import { MessagesCreatePayload } from "@/api/__generated__/base/data-contracts";
 import realTimeClient from "@/api/xano";
+import { Users } from "@/api/__generated__/base/Users";
 
 export interface Params {
+  userId?: string;
   workSessionId?: number;
   applicationId?: string;
-  userType?: "chef" | "company";
 }
 
-export const useSubscriptionMessagesByWorksessionId = (params: Params, config?: QueryConfigType) => {
+export const useSubscriptionMessagesByUserId = (params: Params, config?: QueryConfigType) => {
   const { dedupingInterval } = config || {};
-  const worksessionsApi = getApi(Worksessions);
+  const usersApi = getApi(Users);
   const messagesApi = getApi(Messages);
   const channelKey = `worksession/${params.workSessionId}`;
 
-  const [key, fetcher] = worksessionsApi.messagesListQueryArgs(params.workSessionId ?? -1, {
+  const [key, fetcher] = usersApi.worksessionsMessagesListQueryArgs(params.userId ?? '', params.workSessionId ?? -1, {
     headers: {
-      "X-User-Type": params.userType ?? "chef"
+      "X-User-Type": "chef"
     }
-  }, params.workSessionId != null);
+  }, params.userId != null && params.workSessionId != null);
 
   const getRequest = useSWR(key, fetcher, {
     dedupingInterval
@@ -58,26 +58,26 @@ export const useSubscriptionMessagesByWorksessionId = (params: Params, config?: 
         content: message,
         worksession_id: params.workSessionId,
         application_id: params.applicationId,
-        sender_type: params.userType === "chef" ? "chef" : "restaurant",
+        sender_type: "chef",
       };
 
       await messagesApi.messagesCreate(messageParams, {
         headers: {
-          "X-User-Type": params.userType ?? "chef"
+          "X-User-Type": "chef"
         }
       });
 
       const channel = realTimeClient.channel(channelKey);
       channel.message(messageParams);
 
-      getRequest.mutate(); // 手動で再取得
+      getRequest.mutate();
     } catch (error) {
       console.error('Failed to send message:', error);
     }
   };
 
   return {
-    messages: getRequest.data,
+    messagesData: getRequest.data,
     mutateMessages: getRequest.mutate,
     sendMessage,
   };

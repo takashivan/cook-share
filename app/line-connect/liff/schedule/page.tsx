@@ -20,7 +20,7 @@ import type { Message, WorkSessionWithJob } from "@/types";
 import { getWorkSessionsByUserId } from "@/lib/api/workSession";
 import { messageApi, CreateMessageParams } from "@/lib/api/message";
 import useSWR from "swr";
-import { useSubscriptionMessagesByWorksessionId } from "@/hooks/api/messages/useSubscriptionMessagesByWorksessionId";
+import { useSubscriptionMessagesByUserId } from "@/hooks/api/messages/useSubscriptionMessagesByUserId";
 
 interface AnimatedSectionProps {
   children: React.ReactNode;
@@ -74,10 +74,10 @@ function SchedulePage({ profile }: { profile: any }) {
   );
 
   // メッセージの取得
-  const { messages, sendMessage } = useSubscriptionMessagesByWorksessionId({
+  const { messagesData, sendMessage } = useSubscriptionMessagesByUserId({
+    userId: user?.id,
     workSessionId: selectedWorkSession?.id,
     applicationId: selectedWorkSession?.application_id,
-    userType: 'chef',
   })
 
   const handleSendMessage = async () => {
@@ -224,7 +224,7 @@ function SchedulePage({ profile }: { profile: any }) {
         <SheetContent side="bottom" className="h-[80vh]">
           <div className="flex flex-col h-full">
             <div className="flex-1 overflow-y-auto p-4">
-              {messages?.map((message) => (
+              {messagesData?.messages?.map((message) => (
                 <div
                   key={message.id}
                   className={`mb-4 ${
