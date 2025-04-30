@@ -8,6 +8,28 @@ import realTimeClient from "@/api/xano";
 import { XanoRealtimeChannel } from "@xano/js-sdk/lib/models/realtime-channel";
 
 // XANOから生成されるSwaggerの定義が不完全なため、レスポンスの型を手動で定義する
+// レストランの型定義
+interface Restaurant {
+  id: number;
+  created_at: number;
+  name: string;
+  address: string;
+  cuisine_type: string;
+  business_hours: string;
+  contact_info: string;
+  profile_image: string;
+  updated_at: number;
+  is_active: boolean;
+  companies_id: string;
+  station: string;
+  access: string;
+  rating: number;
+  is_approved: boolean;
+  restaurant_cuisine_id: number[];
+  description: string;
+  phone: string;
+}
+
 // ワークセッションのジョブの型
 interface Job {
   id: number;
@@ -55,6 +77,7 @@ interface Worksession {
   chef_rating: number;
   restaurant_rating: number;
   job: Job;
+  restaurant: Restaurant;
 }
 
 // シェフ画面用の未読メッセージサマリー

@@ -216,8 +216,8 @@ export default function ChefDashboard() {
       <section className="mb-10">
         <h2 className="text-xl font-bold mb-4">未読メッセージ</h2>
         <div className="space-y-4">
-          {unreadMessagesData && unreadMessagesData.length > 0 ? (
-            unreadMessagesData.map((messageData) => {
+          {unreadMessagesData && unreadMessagesData.length > 0 && unreadMessagesData.some((messageData) => messageData.unread_message_count > 0) ? (
+            unreadMessagesData.filter((messageData) => messageData.unread_message_count > 0).map((messageData) => {
               // 最新のメッセージを取得（message_seqが最大のもの）
               let latestMessage = null;
               for (const message of messageData.unread_messages) {
@@ -238,7 +238,7 @@ export default function ChefDashboard() {
                   <div className="bg-white rounded-lg shadow-md p-4">
                     <div className="flex items-center gap-3 mb-2 relative">
                       <MessageSquare className="h-5 w-5 text-gray-700" />
-                      <div className="font-medium">{messageData.worksession.job.title}</div>
+                      <div className="font-medium">{messageData.worksession.restaurant.name}</div>
                       {messageData.unread_messages.length > 0 && (
                         <Badge className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[1.25rem] h-5 flex items-center justify-center bg-red-500 text-white">
                           {messageData.unread_messages.length}
@@ -264,11 +264,8 @@ export default function ChefDashboard() {
           worksessionId={selectedWorkSession?.id ?? undefined}
           messagesData={messagesData}
           onSendMessage={handleSendMessage}
-          // TODO: レストラン情報がレスポンスから取得できるようになり次第修正
-          // restaurantName={selectedWorkSession?.job?.restaurant.name || ""}
-          // restaurantImage={selectedWorkSession?.job?.restaurant.profile_image || ""}
-          restaurantName={""}
-          restaurantImage={""}
+          restaurantName={selectedWorkSession?.restaurant?.name || ""}
+          restaurantImage={selectedWorkSession?.restaurant?.profile_image || ""}
           workDate={selectedWorkSession?.job?.work_date || ""}
           startTime={selectedWorkSession?.job?.start_time || 0}
         />
