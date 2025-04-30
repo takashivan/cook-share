@@ -712,7 +712,23 @@ export interface UpdateReadRestaurantPartialUpdatePayload {
   last_read_message_seq: number;
 }
 
-export type UpdateReadRestaurantPartialUpdateData = object;
+export interface UpdateReadRestaurantPartialUpdateData {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format int64 */
+  worksession_id: number;
+  /** @format int64 */
+  restaurant_id: number;
+  /** @format int64 */
+  last_read_message_seq: number;
+  /** @format timestamptz */
+  updated_at: number | null;
+}
 
 export type ChefReviewsDeleteData = object;
 
@@ -2244,6 +2260,16 @@ export interface CompanyuserCreateData {
   email_change_token: string;
   password_reset_token: string;
 }
+
+export interface ContactCreatePayload {
+  name: string;
+  email: string;
+  message: string;
+  title: string;
+  type: string;
+}
+
+export type ContactCreateData = object;
 
 export interface CompanyDetailResult {
   result1: {
