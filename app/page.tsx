@@ -204,12 +204,14 @@ export default function Home() {
                           <Badge
                             variant="secondary"
                             className={`${
-                              job.number_of_spots > 0 && job.expiry_date != null &&
+                              job.number_of_spots > 0 &&
+                              job.expiry_date != null &&
                               new Date(job.expiry_date) > new Date()
                                 ? "bg-black text-white"
                                 : "bg-gray-500 text-white"
                             }`}>
-                            {job.number_of_spots > 0 && job.expiry_date != null &&
+                            {job.number_of_spots > 0 &&
+                            job.expiry_date != null &&
                             new Date(job.expiry_date) > new Date()
                               ? `残り${job.number_of_spots}名募集中`
                               : "締め切りました"}
@@ -370,7 +372,7 @@ export default function Home() {
               プライバシーポリシー
             </Link>
             <span>|</span>
-            <Link href="#" className="hover:underline">
+            <Link href="/contact" className="hover:underline">
               お問い合わせ
             </Link>
           </div>
