@@ -92,6 +92,8 @@ type PageProps = {
   }>;
 };
 
+
+
 export default function JobDetail({ params }: PageProps) {
   const { id } = use(params);
   const searchParams = useSearchParams();

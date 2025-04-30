@@ -48,6 +48,7 @@ export default function ChefDashboard() {
   const upcomingJobs = workSessionsData.filter(
     (session) => session.status === "SCHEDULED"
   );
+  console.log("upcomingJobs", upcomingJobs);
 
   const inProgressJobs = workSessionsData.filter(
     (session) => session.status === "IN_PROGRESS"

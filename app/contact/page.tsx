@@ -9,6 +9,7 @@ import { Send, Mail } from "lucide-react";
 import Link from "next/link";
 import { contactApi } from "@/lib/api/contact";
 import { useToast } from "@/hooks/use-toast";
+import { Header } from "@/components/layout/header";
 import {
   Dialog,
   DialogContent,
@@ -35,7 +36,7 @@ export default function ContactPage() {
       await contactApi.createContact({
         ...formData,
         title: formData.subject,
-        type: "chef",
+        type: "general",
       });
 
       setIsThanksModalOpen(true);
@@ -66,8 +67,11 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="max-w-3xl mx-auto">
+    <div>
+      <Header />
+      <div className="max-w-3xl mx-auto mt-16">
+        <h1 className="text-3xl font-bold mb-8 text-center">お問い合わせ</h1>
+
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-lg font-bold mb-4">お問い合わせフォーム</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -91,7 +95,7 @@ export default function ContactPage() {
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="example@cookchef.jp"
+                placeholder="example@example.com"
                 required
               />
             </div>
@@ -123,8 +127,7 @@ export default function ContactPage() {
 
             <Button
               type="submit"
-              className="w-full"
-              style={{ backgroundColor: "#DB3F1C", color: "white" }}
+              className="w-full bg-primary hover:bg-primary/90"
               disabled={isSubmitting}>
               <Send className="mr-2 h-4 w-4" />
               {isSubmitting ? "送信中..." : "送信する"}
@@ -137,10 +140,10 @@ export default function ContactPage() {
 
           <div className="space-y-4">
             <div className="flex items-start gap-3">
-              <Mail className="h-5 w-5" style={{ color: "#DB3F1C" }} />
+              <Mail className="h-5 w-5 text-primary" />
               <div>
                 <h3 className="font-medium">メールでのお問い合わせ</h3>
-                <p className="text-sm">info@chefdom.jp</p>
+                <p className="text-sm">info@cookchef.jp</p>
                 <p className="text-xs text-gray-500">
                   24時間受付・平日3営業日以内に返信
                 </p>
@@ -155,11 +158,10 @@ export default function ContactPage() {
             お問い合わせの前に、よくある質問をご確認ください。
             解決しない場合は、お問い合わせフォームよりご連絡ください。
           </p>
-          <Link href="/chef/faq">
+          <Link href="/faq">
             <Button
               variant="outline"
-              className="w-full"
-              style={{ borderColor: "#DB3F1C", color: "#DB3F1C" }}>
+              className="w-full border-primary text-primary hover:bg-primary/10">
               よくある質問を確認する
             </Button>
           </Link>
@@ -181,8 +183,7 @@ export default function ContactPage() {
             </p>
             <Button
               onClick={() => setIsThanksModalOpen(false)}
-              className="w-full"
-              style={{ backgroundColor: "#DB3F1C", color: "white" }}>
+              className="w-full bg-primary hover:bg-primary/90">
               閉じる
             </Button>
           </div>
