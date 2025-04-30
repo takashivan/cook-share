@@ -19,6 +19,8 @@ import {
   Shield,
   ChevronDown,
   Send,
+  AlertCircle,
+  CheckCircle2,
 } from "lucide-react";
 import { jobApi, getJobDetails } from "@/lib/api/job";
 import {
@@ -28,7 +30,7 @@ import {
 } from "@/lib/api/workSession";
 import { messageApi } from "@/lib/api/message";
 import { applicationApi } from "@/lib/api/application";
-import { format } from "date-fns";
+import { format, differenceInDays, isBefore, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import useSWR, { mutate } from "swr";
 import type { Job, WorkSession, Message, Application } from "@/types";
@@ -108,6 +110,14 @@ export default function JobDetail({ params }: PageProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [cancellationPenalty, setCancellationPenalty] = useState<{
+    penalty: number;
+    message: string;
+    status: string;
+  } | null>(null);
+  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
 
   // 応募情報の取得
   const { data: application } = useSWR<Application>(
@@ -380,6 +390,61 @@ export default function JobDetail({ params }: PageProps) {
     }
   };
 
+  const calculateCancellationPenalty = () => {
+    if (!job) return null;
+    
+    const now = new Date();
+    const workDate = new Date(job.work_date);
+    const daysDifference = differenceInDays(workDate, now);
+
+    if (daysDifference >= 2) {
+      return {
+        penalty: 0,
+        message: "2日以上前のキャンセルは違約金なしで可能です。",
+        status: "cancelled_by_chef"
+      };
+    } else if (daysDifference >= 1) {
+      return {
+        penalty: job.fee * 0.8,
+        message: "2日前〜前日のキャンセルは報酬予定額の80%の違約金が発生します。",
+        status: "cancelled_by_chef_late"
+      };
+    } else {
+      return {
+        penalty: job.fee,
+        message: "当日のキャンセルは報酬予定額の100%の違約金が発生します。",
+        status: "cancelled_by_chef_same_day"
+      };
+    }
+  };
+
+  const handleCancelClick = () => {
+    if (!job) return;
+    setCancellationPenalty(calculateCancellationPenalty());
+    setIsCancelModalOpen(true);
+  };
+
+  const handleCancelConfirm = async () => {
+    if (!cancellationPenalty || !job || !isConfirmed || !cancelReason) return;
+
+    try {
+      // TODO: APIを呼び出してキャンセル処理を実行
+      // await cancelJob(job.id, cancellationPenalty.status, cancelReason);
+      toast({
+        title: "キャンセル完了",
+        description: "お仕事のキャンセルが完了しました。",
+      });
+      setIsCancelModalOpen(false);
+      router.push("/chef/schedule");
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "キャンセル処理に失敗しました。",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (!job) {
     return (
       <div className="container mx-auto px-4 py-6 max-w-md">
@@ -528,6 +593,12 @@ export default function JobDetail({ params }: PageProps) {
             <span>報酬</span>
             <span>¥{job.fee.toLocaleString()}</span>
           </div>
+          <button
+            onClick={handleCancelClick}
+            className="text-sm text-gray-500 hover:text-red-500 transition-colors"
+          >
+            お仕事をキャンセルする
+          </button>
         </div>
       </div>
 
@@ -620,6 +691,77 @@ export default function JobDetail({ params }: PageProps) {
           startTime={job?.start_time || 0}
         />
       )}
+
+      <AlertDialog open={isCancelModalOpen} onOpenChange={setIsCancelModalOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertCircle className="h-5 w-5" />
+              お仕事のキャンセル確認
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4">
+              <div className="bg-red-50 p-4 rounded-lg">
+                <p className="text-red-800 font-medium">
+                  {cancellationPenalty?.message}
+                </p>
+                {cancellationPenalty?.penalty !== undefined && cancellationPenalty.penalty > 0 && (
+                  <div className="mt-2">
+                    <p className="text-red-800 font-semibold">
+                      違約金: ¥{cancellationPenalty.penalty.toLocaleString()}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-yellow-50 p-4 rounded-lg">
+                <p className="text-yellow-800 text-sm">
+                  ※ 度重なるキャンセルや不当な理由でのキャンセルは、今後のご利用停止となる可能性があります。
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="cancel-reason" className="block text-sm font-medium text-gray-700">
+                  キャンセル理由
+                </label>
+                <textarea
+                  id="cancel-reason"
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  className="w-full h-24 p-2 border rounded-md text-sm bg-white"
+                  placeholder="キャンセルの理由を具体的にご記入ください"
+                  required
+                />
+              </div>
+
+              <div className="flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  id="confirm-cancel"
+                  checked={isConfirmed}
+                  onChange={(e) => setIsConfirmed(e.target.checked)}
+                  className="mt-1"
+                />
+                <label htmlFor="confirm-cancel" className="text-sm text-gray-600">
+                  上記の内容を確認し、キャンセルに同意します
+                </label>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex justify-end gap-4 mt-4">
+            <Button variant="outline" onClick={() => setIsCancelModalOpen(false)}>
+              閉じる
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancelConfirm}
+              disabled={!isConfirmed || !cancelReason}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              キャンセルを確定
+            </Button>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
