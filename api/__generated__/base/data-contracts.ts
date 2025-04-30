@@ -680,14 +680,14 @@ export type UnreadSummaryChefListData = object;
 
 export type UnreadSummaryRestaurantDetailData = object;
 
-export interface UpdateReadChefCreatePayload {
+export interface UpdateReadChefPartialUpdatePayload {
   /** @format int64 */
   worksession_id: number;
   /** @format int64 */
   last_read_message_seq: number;
 }
 
-export interface UpdateReadChefCreateData {
+export interface UpdateReadChefPartialUpdateData {
   /** @format uuid */
   id: string;
   /**
@@ -705,30 +705,14 @@ export interface UpdateReadChefCreateData {
   updated_at: number | null;
 }
 
-export interface UpdateReadRestaurantCreatePayload {
+export interface UpdateReadRestaurantPartialUpdatePayload {
   /** @format int64 */
   worksession_id: number;
   /** @format int64 */
   last_read_message_seq: number;
 }
 
-export interface UpdateReadRestaurantCreateData {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format int64 */
-  worksession_id: number;
-  /** @format uuid */
-  user_id: string | null;
-  /** @format int64 */
-  last_read_message_seq: number;
-  /** @format timestamptz */
-  updated_at: number | null;
-}
+export type UpdateReadRestaurantPartialUpdateData = object;
 
 export type ChefReviewsDeleteData = object;
 

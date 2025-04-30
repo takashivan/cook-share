@@ -13,10 +13,10 @@
 import {
   UnreadSummaryChefListData,
   UnreadSummaryRestaurantDetailData,
-  UpdateReadChefCreateData,
-  UpdateReadChefCreatePayload,
-  UpdateReadRestaurantCreateData,
-  UpdateReadRestaurantCreatePayload,
+  UpdateReadChefPartialUpdateData,
+  UpdateReadChefPartialUpdatePayload,
+  UpdateReadRestaurantPartialUpdateData,
+  UpdateReadRestaurantPartialUpdatePayload,
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
@@ -85,32 +85,32 @@ export class Chat<
    * @description <br /><br /> <b>Authentication:</b> not required
    *
    * @tags chat
-   * @name UpdateReadChefCreate
-   * @request POST:/chat/update-read-chef
+   * @name UpdateReadChefPartialUpdate
+   * @request PATCH:/chat/update-read-chef
    */
-  updateReadChefCreate = (
-    data: UpdateReadChefCreatePayload,
+  updateReadChefPartialUpdate = (
+    data: UpdateReadChefPartialUpdatePayload,
     params: RequestParams = {},
   ) =>
-    this.request<UpdateReadChefCreateData, void>({
+    this.request<UpdateReadChefPartialUpdateData, void>({
       path: `/chat/update-read-chef`,
-      method: "POST",
+      method: "PATCH",
       body: data,
       type: ContentType.Json,
       format: "json",
       ...params,
     });
 
-  updateReadChefCreateQueryArgs = (
+  updateReadChefPartialUpdateQueryArgs = (
     params: RequestParams = {},
     enabled: boolean = true,
   ) => {
     const key = enabled ? [`/chat/update-read-chef`] : null;
     const fetcher: (
       url: string[],
-      { arg }: { arg: UpdateReadChefCreatePayload },
-    ) => Promise<UpdateReadChefCreateData> = (_, { arg }) =>
-      this.updateReadChefCreate(arg, params).then((res) => res.data);
+      { arg }: { arg: UpdateReadChefPartialUpdatePayload },
+    ) => Promise<UpdateReadChefPartialUpdateData> = (_, { arg }) =>
+      this.updateReadChefPartialUpdate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -118,32 +118,34 @@ export class Chat<
    * @description <br /><br /> <b>Authentication:</b> not required
    *
    * @tags chat
-   * @name UpdateReadRestaurantCreate
-   * @request POST:/chat/update-read-restaurant
+   * @name UpdateReadRestaurantPartialUpdate
+   * @request PATCH:/chat/update-read-restaurant
    */
-  updateReadRestaurantCreate = (
-    data: UpdateReadRestaurantCreatePayload,
+  updateReadRestaurantPartialUpdate = (
+    data: UpdateReadRestaurantPartialUpdatePayload,
     params: RequestParams = {},
   ) =>
-    this.request<UpdateReadRestaurantCreateData, void>({
+    this.request<UpdateReadRestaurantPartialUpdateData, void>({
       path: `/chat/update-read-restaurant`,
-      method: "POST",
+      method: "PATCH",
       body: data,
       type: ContentType.Json,
       format: "json",
       ...params,
     });
 
-  updateReadRestaurantCreateQueryArgs = (
+  updateReadRestaurantPartialUpdateQueryArgs = (
     params: RequestParams = {},
     enabled: boolean = true,
   ) => {
     const key = enabled ? [`/chat/update-read-restaurant`] : null;
     const fetcher: (
       url: string[],
-      { arg }: { arg: UpdateReadRestaurantCreatePayload },
-    ) => Promise<UpdateReadRestaurantCreateData> = (_, { arg }) =>
-      this.updateReadRestaurantCreate(arg, params).then((res) => res.data);
+      { arg }: { arg: UpdateReadRestaurantPartialUpdatePayload },
+    ) => Promise<UpdateReadRestaurantPartialUpdateData> = (_, { arg }) =>
+      this.updateReadRestaurantPartialUpdate(arg, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 }

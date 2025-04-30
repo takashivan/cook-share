@@ -34,10 +34,11 @@ export class Restaurants<
   SecurityDataType = unknown,
 > extends HttpClient<SecurityDataType> {
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH-CompanyUser]レストランのスタッフだけが追加できます。 <br /><br /> <b>Authentication:</b> not required
    *
    * @tags restaurants
    * @name StaffInviteCreate
+   * @summary [AUTH-CompanyUser]レストランのスタッフだけが追加できます。
    * @request POST:/restaurants/staff/invite
    */
   staffInviteCreate = (
@@ -362,11 +363,11 @@ export class Restaurants<
   };
 
   /**
-   * @description Add restaurant record <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH-CompanyUser]会社のis_adminだけが追加できます。 <br /><br /> <b>Authentication:</b> not required
    *
    * @tags restaurants
    * @name RestaurantsCreate
-   * @summary Add restaurant record
+   * @summary [AUTH-CompanyUser]会社のis_adminだけが追加できます。
    * @request POST:/restaurants
    */
   restaurantsCreate = (
