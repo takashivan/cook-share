@@ -29,6 +29,7 @@ export const API_CONFIG = {
     operatorAuth: "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/auth",
     line: "https://xcti-onox-8bdw.n7e.xano.io/api:iG6oGWEP/",
     alert: "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/alert",
+    contact: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/contact",
   },
   // 共通ヘッダー
   headers: {
