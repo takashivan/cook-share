@@ -200,10 +200,11 @@ export class Users<
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH-CHef]自分のデータだけ取れる <br /><br /> <b>Authentication:</b> not required
    *
    * @tags users
    * @name WorksessionsUserTodosList
+   * @summary [AUTH-CHef]自分のデータだけ取れる
    * @request GET:/users/{user_id}/worksessions/user_todos
    */
   worksessionsUserTodosList = (userId: string, params: RequestParams = {}) =>

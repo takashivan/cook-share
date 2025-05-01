@@ -431,6 +431,8 @@ export type WorksessionsThismonthListData = {
   chef_rating: number;
   /** @format int64 */
   restaurant_rating: number;
+  /** @format timestamptz */
+  start_time: number | null;
   user: {
     /** @format uuid */
     id: string;
@@ -682,6 +684,8 @@ export interface SessionHistoryCurrentListData {
     chef_rating: number;
     /** @format int64 */
     restaurant_rating: number;
+    /** @format timestamptz */
+    start_time: number | null;
   }[];
   star: string;
   end: string;
