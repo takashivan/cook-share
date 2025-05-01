@@ -13,11 +13,11 @@ import { workSessionApi } from "@/lib/api/workSession";
 import { Button } from "@/components/ui/button";
 import { RestaurantNotificationDropdown } from "@/components/notifications/RestaurantNotificationDropdown";
 import { ChefNotificationDropdown } from "@/components/notifications/ChefNotificationDropdown";
-import { UnreadMessageWithWorksession, useSubscriptionUnreadMessagesByUser } from "@/hooks/api/messages/useSubscriptionUnreadMessagesByUser";
+import { UnreadMessageWithWorksession, useSubscriptionUnreadMessagesByUser } from "@/hooks/api/user/messages/useSubscriptionUnreadMessagesByUser";
 import { ChatSheet } from "@/components/chat/ChatSheet";
-import { useSubscriptionMessagesByUserId } from "@/hooks/api/messages/useSubscriptionMessagesByUserId";
+import { useSubscriptionMessagesByUserId } from "@/hooks/api/user/messages/useSubscriptionMessagesByUserId";
 import { Badge } from "@/components/ui/badge";
-import { useGetWorksessionsByUserIdByTodo } from "@/hooks/api/worksessions/useGetWorksessionsByUserIdByTodo";
+import { useGetWorksessionsByUserIdByTodo } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserIdByTodo";
 
 interface ApplicationWithJob extends Application {
   job?: Job & {

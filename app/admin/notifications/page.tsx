@@ -11,7 +11,7 @@ import {
   markCompanyUserNotificationAsRead,
   markAllCompanyUserNotificationsAsRead,
 } from "@/lib/api/companyUserNotification";
-import { useGetCompanyUserNotificationsByUserId } from "@/hooks/api/companyUserNotifications/useGetCompanyUserNotificationsByUserId";
+import { useGetCompanyUserNotificationsByUserId } from "@/hooks/api/companyuser/companyUserNotifications/useGetCompanyUserNotificationsByUserId";
 
 export default function RestaurantNotificationsPage() {
   const { user } = useCompanyAuth();

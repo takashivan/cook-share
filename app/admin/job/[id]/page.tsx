@@ -72,17 +72,17 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useGetJob } from "@/hooks/api/jobs/useGetJob";
-import { useGetWorksessionsByJobId } from "@/hooks/api/worksessions/useGetWorksessionsByJobId";
+import { useGetJob } from "@/hooks/api/companyuser/jobs/useGetJob";
+import { useGetWorksessionsByJobId } from "@/hooks/api/companyuser/worksessions/useGetWorksessionsByJobId";
 import { JobsDetailData, JobsPartialUpdatePayload, WorksessionsRestaurantTodosListData } from "@/api/__generated__/base/data-contracts";
-import { useVerifyWorksession } from "@/hooks/api/worksessions/useVerifyWorksession";
-import { useUpdateJob } from "@/hooks/api/jobs/useUpdateJob";
+import { useVerifyWorksession } from "@/hooks/api/companyuser/worksessions/useVerifyWorksession";
+import { useUpdateJob } from "@/hooks/api/companyuser/jobs/useUpdateJob";
 import { getApi } from "@/api/api-factory";
 import { Worksessions } from "@/api/__generated__/base/Worksessions";
-import { useSubscriptionMessagesByCompanyUserId } from "@/hooks/api/messages/useSubscriptionMessagesByCompanyUserId";
+import { useSubscriptionMessagesByCompanyUserId } from "@/hooks/api/companyuser/messages/useSubscriptionMessagesByCompanyUserId";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
-import { useUpdateReadMessageByCompanyUser } from "@/hooks/api/messages/useUpdateReadMessageByCompanyUser";
-import { useSubscriptionUnreadMessagesByRestaurantId } from "@/hooks/api/messages/useSubscriptionUnreadMessagesByRestaurantId";
+import { useUpdateReadMessageByCompanyUser } from "@/hooks/api/companyuser/messages/useUpdateReadMessageByCompanyUser";
+import { useSubscriptionUnreadMessagesByRestaurantId } from "@/hooks/api/companyuser/messages/useSubscriptionUnreadMessagesByRestaurantId";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
 import { differenceInDays } from "date-fns";

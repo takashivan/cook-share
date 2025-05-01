@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { WorksessionsMessagesListResult } from "@/api/__generated__/base/data-contracts";
-import { useUpdateReadMessageByUser } from "@/hooks/api/messages/useUpdateReadMessageByUser";
+import { useUpdateReadMessageByUser } from "@/hooks/api/user/messages/useUpdateReadMessageByUser";
 import { useAuth } from "@/lib/contexts/AuthContext";
 
 interface ChatSheetProps {

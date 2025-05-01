@@ -37,10 +37,10 @@ import {
   Store,
 } from "lucide-react";
 import Link from "next/link";
-import { useGetRestaurantsByCompanyId } from "@/hooks/api/restaurants/useGetRestaurantsByCompanyId";
-import { useCreateRestaurant } from "@/hooks/api/restaurants/useCreateRestaurant";
+import { useGetRestaurantsByCompanyId } from "@/hooks/api/companyuser/restaurants/useGetRestaurantsByCompanyId";
+import { useCreateRestaurant } from "@/hooks/api/companyuser/restaurants/useCreateRestaurant";
 import { RestaurantsCreatePayload } from "@/api/__generated__/base/data-contracts";
-import { useGetRestaurantsByCompanyUserId } from "@/hooks/api/restaurants/useGetRestaurantsByCompanyUserId";
+import { useGetRestaurantsByCompanyUserId } from "@/hooks/api/companyuser/restaurants/useGetRestaurantsByCompanyUserId";
 
 export default function StoresPage() {
   const { user } = useCompanyAuth();

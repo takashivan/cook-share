@@ -1,5 +1,5 @@
 import { Jobs } from "@/api/__generated__/base/Jobs";
-import { QueryConfigType } from "../config-type";
+import { QueryConfigType } from "../../config-type";
 import { getApi } from "@/api/api-factory";
 import useSWR from "swr";
 import { WorksessionsRestaurantTodosListData } from "@/api/__generated__/base/data-contracts";

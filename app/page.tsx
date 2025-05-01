@@ -10,7 +10,7 @@ import { Header } from "@/components/layout/header";
 import { Card } from "@/components/ui/card";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { Badge } from "@/components/ui/badge";
-import { useGetJobsByUpcoming } from "@/hooks/api/jobs/useGetJobsByUpcoming";
+import { useGetJobsByUpcoming } from "@/hooks/api/all/jobs/useGetJobsByUpcoming";
 import { motion } from "framer-motion";
 
 export default function Home() {

@@ -54,13 +54,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ChatSheet } from "@/components/chat/ChatSheet";
-import { useSubscriptionMessagesByUserId } from "@/hooks/api/messages/useSubscriptionMessagesByUserId";
+import { useSubscriptionMessagesByUserId } from "@/hooks/api/user/messages/useSubscriptionMessagesByUserId";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useStartWorksession } from "@/hooks/api/user/worksessions/useStartWorksession";
 import { useFinishWorksession } from "@/hooks/api/user/worksessions/useFinishWorksession";
-import { useGetJob } from "@/hooks/api/jobs/useGetJob";
-import { useGetWorksessionsByUserId } from "@/hooks/api/worksessions/useGetWorksessionsByUserId";
-import { useSubscriptionUnreadMessagesByUser } from "@/hooks/api/messages/useSubscriptionUnreadMessagesByUser";
+import { useGetJob } from "@/hooks/api/companyuser/jobs/useGetJob";
+import { useGetWorksessionsByUserId } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserId";
+import { useSubscriptionUnreadMessagesByUser } from "@/hooks/api/user/messages/useSubscriptionUnreadMessagesByUser";
 
 interface JobDetail {
   job: {
