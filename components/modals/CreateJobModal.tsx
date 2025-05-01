@@ -78,7 +78,7 @@ export const CreateJobModal = ({
       // 日付文字列を作成（YYYY-MM-DDThh:mm:ss）
       const startDateTimeStr = `${data.work_date}T${data.start_time}:00`;
       const endDateTimeStr = `${data.work_date}T${data.end_time}:00`;
-      const expiryTimestamp =`${data.expiry_date}T00:00:00`;
+      const expiryTimestamp = `${data.expiry_date}T00:00:00`;
 
       // Unix タイムスタンプを計算（ミリ秒単位）
       const startTimestamp = Date.parse(startDateTimeStr);
@@ -121,7 +121,7 @@ export const CreateJobModal = ({
         start_time: startTimestamp,
         end_time: endTimestamp,
         expiry_date: expiryDateTimestamp,
-      }
+      };
 
       await onSubmit(newData);
       reset();
@@ -149,7 +149,7 @@ export const CreateJobModal = ({
       // 日付文字列を作成（YYYY-MM-DDThh:mm:ss）
       const startDateTimeStr = `${data.work_date}T${data.start_time}:00`;
       const endDateTimeStr = `${data.work_date}T${data.end_time}:00`;
-      const expiryTimestamp =`${data.expiry_date}T00:00:00`;
+      const expiryTimestamp = `${data.expiry_date}T00:00:00`;
 
       // Unix タイムスタンプを計算（ミリ秒単位）
       const startTimestamp = Date.parse(startDateTimeStr);
@@ -184,9 +184,9 @@ export const CreateJobModal = ({
         expiry_date: expiryDateTimestamp,
         // ステータスをDRAFTに設定
         status: "DRAFT",
-      }
+      };
 
-      console.log('Create Job', data, newData);
+      console.log("Create Job", data, newData);
 
       await onSubmit(newData);
       reset();
@@ -213,7 +213,7 @@ export const CreateJobModal = ({
       // 日付文字列を作成（YYYY-MM-DDThh:mm:ss）
       const startDateTimeStr = `${data.work_date}T${data.start_time}:00`;
       const endDateTimeStr = `${data.work_date}T${data.end_time}:00`;
-      const expiryTimestamp =`${data.expiry_date}T00:00:00`;
+      const expiryTimestamp = `${data.expiry_date}T00:00:00`;
 
       // Unix タイムスタンプを計算（ミリ秒単位）
       const startTimestamp = Date.parse(startDateTimeStr);
@@ -248,7 +248,7 @@ export const CreateJobModal = ({
         expiry_date: expiryDateTimestamp,
         // ステータスをPUBLISHEDに設定
         status: "PUBLISHED",
-      }
+      };
 
       await onSubmit(newData);
       reset();
@@ -443,7 +443,9 @@ export const CreateJobModal = ({
                               const hourlyRate = Number(value) / hours;
 
                               if (hourlyRate < 1500) {
-                                return `時給ベースで1500円を下回らないように設定してください（現在: ${Math.floor(hourlyRate)}円）`;
+                                return `時給ベースで1500円を下回らないように設定してください（現在: ${Math.floor(
+                                  hourlyRate
+                                )}円）`;
                               }
                               return true;
                             },
@@ -458,27 +460,7 @@ export const CreateJobModal = ({
                           </p>
                         )}
                       </div>
-                      <div>
-                        <Label htmlFor="number_of_spots">募集人数 *</Label>
-                        <Input
-                          id="number_of_spots"
-                          type="number"
-                          {...register("number_of_spots", {
-                            required: "募集人数は必須です",
-                            min: {
-                              value: 1,
-                              message: "募集人数は1人以上で設定してください",
-                            },
-                          })}
-                          className="mt-1"
-                          placeholder="例：1"
-                        />
-                        {errors.number_of_spots && (
-                          <p className="mt-1 text-sm text-red-600">
-                            {errors.number_of_spots.message}
-                          </p>
-                        )}
-                      </div>
+
                       <div>
                         <Label htmlFor="expiry_date">締め切り</Label>
                         <Input
@@ -491,7 +473,7 @@ export const CreateJobModal = ({
                               message:
                                 "締め切りは今日以降の日付で設定してください",
                             },
-                           
+
                             validate: (value) => {
                               const formValues = watch();
                               if (

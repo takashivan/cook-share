@@ -78,7 +78,7 @@ function SchedulePage({ profile }: { profile: any }) {
     userId: user?.id,
     workSessionId: selectedWorkSession?.id,
     applicationId: selectedWorkSession?.application_id,
-  })
+  });
 
   const handleSendMessage = async () => {
     try {

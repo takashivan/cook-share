@@ -213,7 +213,7 @@ export default function Home() {
                             {job.number_of_spots > 0 &&
                             job.expiry_date != null &&
                             new Date(job.expiry_date) > new Date()
-                              ? `残り${job.number_of_spots}名募集中`
+                              ? `募集中`
                               : "締め切りました"}
                           </Badge>
                         </div>
@@ -324,17 +324,21 @@ export default function Home() {
               </div>
 
               <div className="flex flex-col md:flex-row gap-4">
-                <Button
-                  variant="outline"
-                  className="border rounded-md py-2 px-4 text-center">
-                  シェフのご登録はこちら
-                </Button>
+                <Link href="/register/chef">
+                  <Button
+                    variant="outline"
+                    className="border rounded-md py-2 px-4 text-center">
+                    シェフのご登録はこちら
+                  </Button>
+                </Link>
 
-                <Button
-                  variant="outline"
-                  className="border rounded-md py-2 px-4 text-center">
-                  飲食業社のご登録・ご相談はこちら
-                </Button>
+                <Link href="/register/company">
+                  <Button
+                    variant="outline"
+                    className="border rounded-md py-2 px-4 text-center">
+                    飲食業社のご登録はこちら
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>

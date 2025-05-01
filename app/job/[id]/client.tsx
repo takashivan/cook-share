@@ -297,7 +297,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                       }`}>
                       {jobDetail.job.number_of_spots > 0 &&
                       new Date(jobDetail.job.expiry_date) > new Date()
-                        ? `残り${jobDetail.job.number_of_spots}名募集中`
+                        ? `募集中`
                         : "締め切りました"}
                     </Badge>
 
@@ -584,7 +584,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                       }`}>
                       {jobDetail.job.number_of_spots > 0 &&
                       new Date(jobDetail.job.expiry_date) > new Date()
-                        ? `残り${jobDetail.job.number_of_spots}名`
+                        ? `募集中`
                         : "締め切り"}
                     </Badge>
                   </div>
