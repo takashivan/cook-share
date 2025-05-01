@@ -1,65 +1,36 @@
 "use client";
 
 import Link from "next/link";
-import { MessageSquare, Star, Edit } from "lucide-react";
+import { MessageSquare, Edit } from "lucide-react";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import useSWR from "swr";
-import { applicationApi } from "@/lib/api/application";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import type { Application, Job, WorkSessionWithJob } from "@/types";
-import { useEffect, useState } from "react";
-import { workSessionApi } from "@/lib/api/workSession";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { RestaurantNotificationDropdown } from "@/components/notifications/RestaurantNotificationDropdown";
 import { ChefNotificationDropdown } from "@/components/notifications/ChefNotificationDropdown";
-import { UnreadMessageWithWorksession, useSubscriptionUnreadMessagesByUser } from "@/hooks/api/messages/useSubscriptionUnreadMessagesByUser";
+import { UnreadMessageWithWorksession, useSubscriptionUnreadMessagesByUser } from "@/hooks/api/user/messages/useSubscriptionUnreadMessagesByUser";
 import { ChatSheet } from "@/components/chat/ChatSheet";
-import { useSubscriptionMessagesByUserId } from "@/hooks/api/messages/useSubscriptionMessagesByUserId";
+import { useSubscriptionMessagesByUserId } from "@/hooks/api/user/messages/useSubscriptionMessagesByUserId";
 import { Badge } from "@/components/ui/badge";
-
-interface ApplicationWithJob extends Application {
-  job?: Job & {
-    restaurant: {
-      id: number;
-      name: string;
-      address: string;
-      image: string | null;
-    };
-  };
-}
+import { useGetWorksessionsByUserIdByTodo } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserIdByTodo";
 
 export default function ChefDashboard() {
   const { user } = useAuth();
-  const [workSessions, setWorkSessions] = useState<WorkSessionWithJob[]>([]);
-  const [isUpcomingJob, setIsUpcomingJob] = useState(false);
   const [selectedWorkSession, setSelectedWorkSession] = useState<UnreadMessageWithWorksession['worksession'] | null>(null);
 
-  const { data: workSessionsData = [] } = useSWR<WorkSessionWithJob[]>(
-    "workSessions",
-    async () => {
-      const result = await workSessionApi.getWorkSessionsToDoByUserId(
-        user?.id.toString() || ""
-      );
-      return result as WorkSessionWithJob[];
-    }
-  );
+  // ワークセッションの取得
+  const { data: workSessionsData } = useGetWorksessionsByUserIdByTodo({
+    userId: user?.id?.toString()
+  });
 
-  const upcomingJobs = workSessionsData.filter(
+  const upcomingJobs = workSessionsData?.filter(
     (session) => session.status === "SCHEDULED"
-  );
+  ) ?? [];
   console.log("upcomingJobs", upcomingJobs);
 
-  const inProgressJobs = workSessionsData.filter(
+  const inProgressJobs = workSessionsData?.filter(
     (session) => session.status === "IN_PROGRESS"
-  );
-
-  useEffect(() => {
-    const hasUpcomingJob = workSessionsData.some(
-      (session) => session.status === "SCHEDULED"
-    );
-    setIsUpcomingJob(hasUpcomingJob);
-  }, [workSessionsData]);
+  ) ?? [];
 
   // メッセージの取得
   const { messagesData, sendMessage } = useSubscriptionMessagesByUserId({
@@ -128,7 +99,7 @@ export default function ChefDashboard() {
             upcomingJobs.map((session) => (
               <Link
                 key={session.id}
-                href={`/chef/job/${session.application_id}`}
+                href={`/chef/job/${session.job_id}`}
                 className="block">
                 <div className="bg-white rounded-lg shadow-md p-4">
                   <div className="flex justify-between items-center mb-2">
@@ -173,7 +144,7 @@ export default function ChefDashboard() {
             inProgressJobs.map((session) => (
               <Link
                 key={session.id}
-                href={`/chef/job/${session.application_id}`}
+                href={`/chef/job/${session.job_id}`}
                 className="block">
                 <div
                   key={session.id}
@@ -218,10 +189,10 @@ export default function ChefDashboard() {
         <h2 className="text-xl font-bold mb-4">未読メッセージ</h2>
         <div className="space-y-4">
           {unreadMessagesData && unreadMessagesData.length > 0 && unreadMessagesData.some((messageData) => messageData.unread_message_count > 0) ? (
-            unreadMessagesData.filter((messageData) => messageData.unread_message_count > 0).map((messageData) => {
+            unreadMessagesData.filter((unreadMessageData) => unreadMessageData.unread_message_count > 0).map((unreadMessageData) => {
               // 最新のメッセージを取得（message_seqが最大のもの）
               let latestMessage = null;
-              for (const message of messageData.unread_messages) {
+              for (const message of unreadMessageData.unread_messages) {
                 if (!latestMessage || message.message_seq > latestMessage.message_seq) {
                   latestMessage = message;
                 }
@@ -229,20 +200,20 @@ export default function ChefDashboard() {
 
               return (
                 <Link
-                  key={messageData.worksession.id}
+                  key={unreadMessageData.worksession.id}
                   href=''
                   className="block"
                   onClick={() => {
-                    openChat(messageData.worksession)
+                    openChat(unreadMessageData.worksession)
                   }}
                 >
                   <div className="bg-white rounded-lg shadow-md p-4">
                     <div className="flex items-center gap-3 mb-2 relative">
                       <MessageSquare className="h-5 w-5 text-gray-700" />
-                      <div className="font-medium">{messageData.worksession.restaurant.name}</div>
-                      {messageData.unread_messages.length > 0 && (
+                      <div className="font-medium">{unreadMessageData.worksession.restaurant.name}</div>
+                      {unreadMessageData.unread_messages.length > 0 && (
                         <Badge className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[1.25rem] h-5 flex items-center justify-center bg-red-500 text-white">
-                          {messageData.unread_messages.length}
+                          {unreadMessageData.unread_messages.length}
                         </Badge>
                       )}
                     </div>

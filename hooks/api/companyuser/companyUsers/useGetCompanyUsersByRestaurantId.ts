@@ -1,6 +1,6 @@
 import { getApi } from "@/api/api-factory"
 import useSWR from "swr"
-import { QueryConfigType } from "../config-type";
+import { QueryConfigType } from "../../config-type";
 import { Restaurants } from "@/api/__generated__/base/Restaurants";
 
 export interface Params {

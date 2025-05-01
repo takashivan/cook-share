@@ -1,19 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { Card, CardContent } from "@/components/ui/card";
-import type { Message } from "@/types";
-import { messageApi, CreateMessageParams } from "@/lib/api/message";
-import useSWR from "swr";
 import { ChatSheet } from "@/components/chat/ChatSheet";
-import { useGetWorksessionsByUserId } from "@/hooks/api/worksessions/useGetWorksessionsByUserId";
+import { useGetWorksessionsByUserId } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserId";
 import { WorksessionsListResult } from "@/api/__generated__/base/data-contracts";
-import { useSubscriptionMessagesByUserId } from "@/hooks/api/messages/useSubscriptionMessagesByUserId";
-import { useSubscriptionUnreadMessagesByUser } from "@/hooks/api/messages/useSubscriptionUnreadMessagesByUser";
+import { useSubscriptionMessagesByUserId } from "@/hooks/api/user/messages/useSubscriptionMessagesByUserId";
+import { useSubscriptionUnreadMessagesByUser } from "@/hooks/api/user/messages/useSubscriptionUnreadMessagesByUser";
 import { Badge } from "@/components/ui/badge";
 
 export default function SchedulePage() {

@@ -20,7 +20,7 @@ import type { Message, WorkSessionWithJob } from "@/types";
 import { getWorkSessionsByUserId } from "@/lib/api/workSession";
 import { messageApi, CreateMessageParams } from "@/lib/api/message";
 import useSWR from "swr";
-import { useSubscriptionMessagesByUserId } from "@/hooks/api/messages/useSubscriptionMessagesByUserId";
+import { useSubscriptionMessagesByUserId } from "@/hooks/api/user/messages/useSubscriptionMessagesByUserId";
 
 interface AnimatedSectionProps {
   children: React.ReactNode;

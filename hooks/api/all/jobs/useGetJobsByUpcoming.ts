@@ -1,7 +1,7 @@
 import { Jobs } from "@/api/__generated__/base/Jobs"
 import { getApi } from "@/api/api-factory"
 import useSWR from "swr"
-import { QueryConfigType } from "../config-type";
+import { QueryConfigType } from "../../config-type";
 
 export const useGetJobsByUpcoming = (config?: QueryConfigType) => {
   const { dedupingInterval } = config || {};

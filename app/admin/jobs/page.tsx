@@ -26,8 +26,8 @@ import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { useGetJobsByCompanyId } from "@/hooks/api/jobs/useGetJobsByCompanyId";
-import { useGetMultipleWorksessionsByJobId } from "@/hooks/api/worksessions/useGetMultipleWorksessionsByJobId";
+import { useGetJobsByCompanyId } from "@/hooks/api/companyuser/jobs/useGetJobsByCompanyId";
+import { useGetMultipleWorksessionsByJobId } from "@/hooks/api/companyuser/worksessions/useGetMultipleWorksessionsByJobId";
 import { JobsListData } from "@/api/__generated__/base/data-contracts";
 
 interface JobWithWorkSessions extends Omit<JobsListData["jobs"][number], "workSessionCount"> {

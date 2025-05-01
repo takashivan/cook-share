@@ -36,7 +36,7 @@ import Link from "next/link";
 import { AddCompanyStaffModal } from "@/components/modals/AddCompanyStaff";
 import { companyStaffInvite, deleteCompanyStaff } from "@/lib/api/company";
 import { toast } from "@/hooks/use-toast";
-import { useGetCompanyUsersByCompanyId } from "@/hooks/api/companyUsers/useGetCompanyUsersByCompanyId";
+import { useGetCompanyUsersByCompanyId } from "@/hooks/api/companyuser/companyUsers/useGetCompanyUsersByCompanyId";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,7 +48,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { CompanyUser } from "@/lib/api/companyUser";
-import { useDeleteCompanyUserByCompanyId } from "@/hooks/api/companyUsers/useDeleteCompanyUserByCompanyId";
+import { useDeleteCompanyUserByCompanyId } from "@/hooks/api/companyuser/companyUsers/useDeleteCompanyUserByCompanyId";
 import { CompanyusersListData } from "@/api/__generated__/base/data-contracts";
 
 export default function StaffPage() {

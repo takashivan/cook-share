@@ -1,16 +1,16 @@
 import { getApi } from "@/api/api-factory"
 import useSWR from "swr"
-import { QueryConfigType } from "../config-type";
+import { QueryConfigType } from "../../config-type";
 import { Restaurants } from "@/api/__generated__/base/Restaurants";
 
 export interface Params {
   restaurantId?: number;
 }
 
-export const useGetJobsByRestaurantId = (params: Params, config?: QueryConfigType) => {
+export const useGetRestaurant = (params: Params, config?: QueryConfigType) => {
   const { dedupingInterval } = config || {};
-  const restaurant = getApi(Restaurants);
-  return useSWR(...restaurant.jobsListQueryArgs(params.restaurantId ?? -1, {
+  const restaurants = getApi(Restaurants);
+  return useSWR(...restaurants.restaurantsDetailQueryArgs(params.restaurantId ?? -1, {
     headers: {
       "X-User-Type": "company"
     }

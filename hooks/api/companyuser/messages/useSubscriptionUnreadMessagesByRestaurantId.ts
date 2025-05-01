@@ -1,6 +1,6 @@
 import { getApi } from "@/api/api-factory"
 import useSWR from "swr"
-import { QueryConfigType } from "../config-type";
+import { QueryConfigType } from "../../config-type";
 import { Chat } from "@/api/__generated__/base/Chat";
 import useSWRSubscription from "swr/subscription";
 import { XanoRealtimeChannel } from "@xano/js-sdk/lib/models/realtime-channel";

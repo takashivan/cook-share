@@ -1,5 +1,5 @@
 import { getApi } from "@/api/api-factory";
-import { QueryConfigType } from "../config-type";
+import { QueryConfigType } from "../../config-type";
 import useSWR from "swr";
 import useSWRSubscription from 'swr/subscription';
 import { Messages } from "@/api/__generated__/base/Messages";
