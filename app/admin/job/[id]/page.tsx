@@ -66,6 +66,7 @@ import { chefReviewApi } from "@/lib/api/chefReview";
 import { FaStar } from "react-icons/fa";
 import { EditJobModal } from "@/components/modals/EditJobModal";
 import { useUserCancelWorksessionByRestaurant } from "@/hooks/api/companyuser/worksessions/useCancelWorksessionByRestaurant";
+import { useNoShowWorksessionByRestaurant } from "@/hooks/api/companyuser/worksessions/useNoShowWorksessionByRestaurant";
 import { toast } from "@/hooks/use-toast";
 import {
   Tooltip,
@@ -129,7 +130,7 @@ export default function JobDetail({ params }: PageParams) {
   } | null>(null);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
-
+  const [isNoShowModalOpen, setIsNoShowModalOpen] = useState(false);
   const { data: jobData, error: jobError } = useGetJob({ jobId: Number(jobId) });
   const { data: workSessions, error: workSessionsError } = useGetWorksessionsByJobId({ jobId: Number(jobId) });
 
@@ -142,6 +143,9 @@ export default function JobDetail({ params }: PageParams) {
   const { trigger: cancelWorksessionTrigger } = useUserCancelWorksessionByRestaurant({
     worksession_id: selectedWorkSession?.id || 0,
     reason: cancelReason
+  });
+  const { trigger: noShowWorksessionTrigger } = useNoShowWorksessionByRestaurant({
+    worksession_id: selectedWorkSession?.id || 0
   });
 
   // メッセージの取得
@@ -322,6 +326,37 @@ export default function JobDetail({ params }: PageParams) {
         variant: "destructive",
       });
     }
+  };
+
+  const handleNoShowClick = () => {
+    setIsNoShowModalOpen(true);
+  };
+
+  const handleNoShowConfirm = async () => {
+    if (!selectedWorkSession) return;
+
+    try {
+      await noShowWorksessionTrigger();
+      toast({
+        title: "ノーショー報告完了",
+        description: "シェフのノーショーを報告しました。",
+      });
+      setIsNoShowModalOpen(false);
+      router.refresh();
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "ノーショー報告に失敗しました。",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const shouldShowNoShowOption = (workSession: any) => {
+    if (!workSession || !job) return false;
+    const now = new Date();
+    const startTime = new Date(job.start_time);
+    return now > startTime;
   };
 
   return (
@@ -685,6 +720,17 @@ export default function JobDetail({ params }: PageParams) {
                               <XCircle className="h-4 w-4 mr-2" />
                               キャンセル
                             </DropdownMenuItem>
+                            {shouldShowNoShowOption(selectedWorkSession) && (
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedWorkSession(selectedWorkSession);
+                                  handleNoShowClick();
+                                }}
+                                className="text-red-600 focus:text-red-600 focus:bg-red-50">
+                                <XCircle className="h-4 w-4 mr-2" />
+                                ノーショー報告
+                              </DropdownMenuItem>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </>
@@ -1008,6 +1054,28 @@ export default function JobDetail({ params }: PageParams) {
               className="bg-red-600 hover:bg-red-700"
             >
               キャンセルを確定
+            </Button>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={isNoShowModalOpen} onOpenChange={setIsNoShowModalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>ノーショー報告</AlertDialogTitle>
+            <AlertDialogDescription>
+              シェフが来ませんでした。報告しますか？
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex justify-end gap-4 mt-4">
+            <Button variant="outline" onClick={() => setIsNoShowModalOpen(false)}>
+              キャンセル
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleNoShowConfirm}
+            >
+              報告する
             </Button>
           </div>
         </AlertDialogContent>

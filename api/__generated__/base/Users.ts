@@ -15,7 +15,10 @@ import {
   ChefNotificationsListData,
   ChefNotificationsListParams,
   ChefReviewsListResult,
+  PayoutLogsListData,
   RestaurantReviewsListOutput,
+  ReviewsListResult,
+  SessionHistoryCurrentListResult,
   StripeAccountCreateData,
   StripeAccountLinksCreateData,
   UsersCreateData,
@@ -124,6 +127,32 @@ export class Users<
    * @description <br /><br /> <b>Authentication:</b> not required
    *
    * @tags users
+   * @name PayoutLogsList
+   * @request GET:/users/{user_id}/payout-logs
+   */
+  payoutLogsList = (userId: string, params: RequestParams = {}) =>
+    this.request<PayoutLogsListData, void>({
+      path: `/users/${userId}/payout-logs`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  payoutLogsListQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/users/${userId}/payout-logs`] : null;
+    const fetcher = () =>
+      this.payoutLogsList(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags users
    * @name RestaurantReviewsList
    * @request GET:/users/{user_id}/restaurant-reviews
    */
@@ -143,6 +172,58 @@ export class Users<
     const key = enabled ? [`/users/${userId}/restaurant-reviews`] : null;
     const fetcher = () =>
       this.restaurantReviewsList(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags users
+   * @name ReviewsList
+   * @request GET:/users/{user_id}/reviews
+   */
+  reviewsList = (userId: string, params: RequestParams = {}) =>
+    this.request<ReviewsListResult, void>({
+      path: `/users/${userId}/reviews`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  reviewsListQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/users/${userId}/reviews`] : null;
+    const fetcher = () =>
+      this.reviewsList(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags users
+   * @name SessionHistoryCurrentList
+   * @request GET:/users/{user_id}/sessionHistory/current
+   */
+  sessionHistoryCurrentList = (userId: string, params: RequestParams = {}) =>
+    this.request<SessionHistoryCurrentListResult, void>({
+      path: `/users/${userId}/sessionHistory/current`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  sessionHistoryCurrentListQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/users/${userId}/sessionHistory/current`] : null;
+    const fetcher = () =>
+      this.sessionHistoryCurrentList(userId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 

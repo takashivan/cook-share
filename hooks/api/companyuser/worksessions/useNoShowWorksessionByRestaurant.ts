@@ -6,7 +6,6 @@ import useSWRMutation from "swr/mutation";
 
 interface Params {
   worksession_id: number;
-  reason: string;
 }
 
 export const useNoShowWorksessionByRestaurant = (params: Params) => {

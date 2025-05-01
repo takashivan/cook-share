@@ -84,11 +84,7 @@ export default function ChefDashboard() {
         <h1 className="text-2xl font-bold">
           ようこそ、{user?.name || "ゲスト"}さん
         </h1>
-        <ChefNotificationDropdown
-          notifications={[]}
-          onMarkAsRead={() => {}}
-          onMarkAllAsRead={() => {}}
-        />
+        
       </div>
 
       {/* 次のお仕事 */}

@@ -9,74 +9,24 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { getWorksessionHistories } from "@/lib/api/user";
 import { WorksessionDetailResult } from "@/api/__generated__/chef-connect/data-contracts";
+import { useGetPayoutLogsByUserId } from "@/hooks/api/user/payout-logs/useGetPayoutLogsByUserId";
+import { useGetWorksessionHistoryCurrentMonth } from "@/hooks/api/user/worksessions/useGetWorksessionHistoryCurrentMonth";
+import { useGetWorksessionsByUserId } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserId";
+import { WorksessionsListResult } from "@/api/__generated__/base/data-contracts";
+import { SessionHistoryCurrentListResult } from "@/api/__generated__/base/data-contracts";
 
 export default function ChefSalary() {
   const { user } = useAuth();
   const [monthlyIncome, setMonthlyIncome] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: payoutLogs } = useGetPayoutLogsByUserId({ userId: user?.id });
 
-  const months = [
-    { id: 1, month: "2024年3月", amount: "¥120,500", status: "支払い済み" },
-    { id: 2, month: "2024年2月", amount: "¥98,000", status: "支払い済み" },
-    { id: 3, month: "2024年1月", amount: "¥105,500", status: "支払い済み" },
-    { id: 4, month: "2023年12月", amount: "¥87,000", status: "支払い済み" },
-  ];
-
-  const jobs = [
-    {
-      id: 1,
-      date: "2024/03/31",
-      store: "洋食 黒船亭",
-      title: "【明治創業】上野駅徒歩5分、老舗洋食店での勤務",
-      amount: "¥20,500",
-    },
-    {
-      id: 2,
-      date: "2024/03/28",
-      store: "COOKBIZ CAFE",
-      title: "八丁堀駅直結、カフェでのホールスタッフ",
-      amount: "¥15,000",
-    },
-    {
-      id: 3,
-      date: "2024/03/25",
-      store: "和食 さくら",
-      title: "【週末限定】新宿の和食店での調理補助",
-      amount: "¥18,000",
-    },
-    {
-      id: 4,
-      date: "2024/03/20",
-      store: "イタリアン ベラ",
-      title: "渋谷のイタリアンレストランでのディナー勤務",
-      amount: "¥22,000",
-    },
-  ];
-
-  useEffect(() => {
-    const fetchMonthlyIncome = async () => {
-      try {
-        if (!user?.id) return;
-        const sessions = await getWorksessionHistories(user.id);
-
-        // 合計金額を計算
-        const total = sessions.reduce(
-          (sum: number, session: WorksessionDetailResult) => {
-            return sum + (session.paid_amount || 0);
-          },
-          0
-        );
-
-        setMonthlyIncome(total);
-      } catch (error) {
-        console.error("Failed to fetch monthly income:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchMonthlyIncome();
-  }, [user?.id]);
+  const { data: worksessionHistory, isLoading } =
+    useGetWorksessionHistoryCurrentMonth({
+      userId: user?.id,
+    });
+  const { data: worksessions } = useGetWorksessionsByUserId({
+    userId: user?.id,
+  });
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("ja-JP", {
@@ -84,6 +34,89 @@ export default function ChefSalary() {
       currency: "JPY",
     }).format(amount);
   };
+
+  console.log("userId:", user?.id);
+  console.log("isLoading:", isLoading);
+  console.log("worksessionHistory type:", typeof worksessionHistory);
+  console.log("worksessionHistory:", worksessionHistory);
+  console.log(
+    "worksessionHistory is array?",
+    Array.isArray(worksessionHistory)
+  );
+
+  const total =
+    worksessionHistory?.reduce(
+      (sum: number, session: SessionHistoryCurrentListResult[number]) => {
+        return sum + (session.paid_amount ?? 0);
+      },
+      0
+    ) ?? 0;
+
+  const workSessionCount = worksessionHistory?.length ?? 0;
+
+  const months =
+    payoutLogs?.map((log) => ({
+      id: log.id,
+      month: format(new Date(log.created_at), "yyyy年M月", { locale: ja }),
+      amount: formatCurrency(log.total_amount),
+      status: log.status === "PAID" ? "支払い済み" : "処理中",
+    })) ?? [];
+
+  const [selectedMonth, setSelectedMonth] = useState<string>(
+    format(new Date(), "yyyy-MM")
+  );
+
+  // 過去12ヶ月の選択肢を生成
+  const monthOptions = Array.from({ length: 12 }, (_, i) => {
+    const date = new Date();
+    date.setMonth(date.getMonth() - i);
+    return {
+      value: format(date, "yyyy-MM"),
+      label: format(date, "yyyy年M月", { locale: ja }),
+    };
+  });
+
+  // 選択された月の勤務履歴をフィルタリング
+  const filteredJobs =
+    worksessions
+      ?.filter((session) => {
+        const sessionMonth = format(new Date(session.created_at), "yyyy-MM");
+        return sessionMonth === selectedMonth;
+      })
+      .map((session) => ({
+        id: session.id,
+        date: format(new Date(session.created_at), "yyyy/MM/dd", {
+          locale: ja,
+        }),
+        store: session.job?.restaurant?.name ?? "未設定",
+        title: session.job?.title ?? "未設定",
+        amount: formatCurrency(session.paid_amount),
+      })) ?? [];
+
+  // useEffect(() => {
+  //   const fetchMonthlyIncome = async () => {
+  //     try {
+  //       if (!user?.id) return;
+  //       const sessions = await getWorksessionHistories(user.id);
+
+  //       // 合計金額を計算
+  //       const total = sessions.reduce(
+  //         (sum: number, session: WorksessionDetailResult) => {
+  //           return sum + (session.paid_amount || 0);
+  //         },
+  //         0
+  //       );
+
+  //       setMonthlyIncome(total);
+  //     } catch (error) {
+  //       console.error("Failed to fetch monthly income:", error);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+
+  //   fetchMonthlyIncome();
+  // }, [user?.id]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -94,39 +127,47 @@ export default function ChefSalary() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="bg-white rounded-lg shadow-lg p-6 mb-6">
-        <h2 className="text-lg font-bold mb-4">今月の収入</h2>
+        <h2 className="text-lg font-bold mb-4">今月の見込み</h2>
         <div className="flex justify-between items-center mb-4">
-          <span className="text-gray-500">
-            {format(new Date(), "M月", { locale: ja })}の合計
-          </span>
-          {isLoading ? (
+          <div className="space-y-1">
+            <span className="text-gray-500 block">
+              {format(new Date(), "M月", { locale: ja })}の合計
+            </span>
+            <span className="text-sm text-gray-500">
+              {workSessionCount}回の勤務
+            </span>
+          </div>
+          {isLoading || !worksessionHistory ? (
             <div className="flex items-center">
               <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
             </div>
           ) : (
-            <motion.span
+            <motion.div
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{
                 type: "spring",
-                stiffness: 260,
-                damping: 20,
+                stiffness: 300,
+                damping: 15,
                 delay: 0.1,
               }}
-              className="text-3xl font-bold text-primary">
-              {formatCurrency(monthlyIncome)}
-            </motion.span>
+              className="text-right">
+              <motion.span
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="text-3xl font-bold text-primary block">
+                {formatCurrency(total)}
+              </motion.span>
+              <motion.span
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="text-sm text-green-600 font-medium">
+                確認済み
+              </motion.span>
+            </motion.div>
           )}
-        </div>
-        <div className="flex justify-between items-center text-sm">
-          <span className="text-gray-500">支払い状況</span>
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="text-green-600 font-medium">
-            確認済み
-          </motion.span>
         </div>
       </motion.div>
 
@@ -155,24 +196,42 @@ export default function ChefSalary() {
 
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold">3月の勤務履歴</h2>
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            明細書
-          </Button>
+          <h2 className="text-lg font-bold">過去の勤務履歴</h2>
+          <div className="flex items-center gap-2">
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="border rounded-md px-3 py-1 text-sm bg-white">
+              {monthOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            {/* <Button variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-2" />
+              明細書
+            </Button> */}
+          </div>
         </div>
 
         <div className="space-y-4">
-          {jobs.map((job) => (
-            <div key={job.id} className="p-3 border rounded-lg">
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-sm text-gray-500">{job.date}</span>
-                <span className="font-bold">{job.amount}</span>
+          {filteredJobs.length > 0 ? (
+            filteredJobs.map((job) => (
+              <div key={job.id} className="p-3 border rounded-lg">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-sm text-gray-500">{job.date}</span>
+                  <span className="font-bold">{job.amount}</span>
+                </div>
+                <p className="text-sm text-gray-500">{job.store}</p>
+                <p className="text-sm font-medium truncate">{job.title}</p>
               </div>
-              <p className="text-sm text-gray-500">{job.store}</p>
-              <p className="text-sm font-medium truncate">{job.title}</p>
+            ))
+          ) : (
+            <div className="text-center py-4 text-gray-500">
+              選択された月の勤務履歴はありません
             </div>
-          ))}
+          )}
         </div>
       </div>
     </div>
