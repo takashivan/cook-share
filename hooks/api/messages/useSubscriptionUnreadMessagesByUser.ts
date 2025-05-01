@@ -1,5 +1,5 @@
-import { getApi } from "@/api/api-factory"
-import useSWR from "swr"
+import { getApi } from "@/api/api-factory";
+import useSWR from "swr";
 import { QueryConfigType } from "../config-type";
 import { Chat } from "@/api/__generated__/base/Chat";
 import { UnreadMessage } from "./useSubscriptionUnreadMessagesByRestaurantId";
@@ -91,59 +91,60 @@ export interface Params {
   userId?: string;
 }
 
-export const useSubscriptionUnreadMessagesByUser = (params: Params, config?: QueryConfigType) => {
+export const useSubscriptionUnreadMessagesByUser = (
+  params: Params,
+  config?: QueryConfigType
+) => {
   const { dedupingInterval } = config || {};
   const chatApi = getApi(Chat);
   const channelKey = `user_chat/${params.userId}`;
 
   const [key, fetcher] = chatApi.unreadSummaryChefListQueryArgs({
     headers: {
-      "X-User-Type": "chef"
-    }
+      "X-User-Type": "chef",
+    },
   });
 
   const getRequest = useSWR(
     key,
     fetcher as unknown as () => Promise<UnreadMessageWithWorksession[]>,
     {
-      dedupingInterval
+      dedupingInterval,
     }
   );
 
-  useSWRSubscription(
-    key,
-    ([_key], { next }) => {
-      if (!key) return;
+  useSWRSubscription(key, ([_key], { next }) => {
+    if (!key) return;
 
-      let channel: XanoRealtimeChannel;
+    let channel: XanoRealtimeChannel;
+
+    try {
+      channel = realTimeClient.channel(channelKey);
+      console.log("Channel setup for key:", channelKey);
+
+      // メッセージの購読
+      channel.on((message: any) => {
+        console.log("Received message:", message);
+        getRequest.mutate();
+        next();
+      });
+    } catch (error) {
+      console.error("Error setting up channel:", error);
+    }
+
+    return () => {
       try {
-        channel = realTimeClient.channel(channelKey);
-        console.log("Channel setup for key:", channelKey);
-
-        // メッセージの購読
-        channel.on((message: any) => {
-          console.log("Received message:", message);
-          getRequest.mutate();
-          next();
-        });
-      } catch (error) {
-        console.error("Error setting up channel:", error);
-      }
-
-      return () => {
-        try {
-          if (channel) {
-            channel.destroy();
-          }
-        } catch (error) {
-          console.error("Error destroying channel:", error);
+        if (channel) {
+          channel.destroy();
         }
-      };
-    },
-  )
+      } catch (error) {
+        console.error("Error destroying channel:", error);
+      }
+    };
+  });
 
   return {
     unreadMessagesData: getRequest.data,
     mutateUnreadMessages: getRequest.mutate,
   };
-}
+};

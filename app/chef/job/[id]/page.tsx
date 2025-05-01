@@ -571,7 +571,7 @@ export default function JobDetail({ params }: PageProps) {
             <div>
               <h4 className="font-medium">勤務時間</h4>
               <p className="text-sm">
-                {startTime} 〜 {endTime}（休憩あり）
+                {startTime} 〜 {endTime}
               </p>
             </div>
           </div>

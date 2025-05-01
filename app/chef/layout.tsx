@@ -110,6 +110,13 @@ export default function ChefLayout({
               <SheetContent side="right" className="p-0 w-full max-w-xs">
                 <div className="flex flex-col h-full">
                   <div className="p-6 space-y-6 mt-10">
+                  <Link
+                      href="/"
+                      className="flex items-center justify-between py-4 border-b"
+                      onClick={() => setIsMenuOpen(false)}>
+                      <span className="text-xl font-bold">お仕事を探す</span>
+                      <ChevronRight className="h-6 w-6" />
+                    </Link>
                     <Link
                       href="/chef/dashboard"
                       className="flex items-center justify-between py-4 border-b"
