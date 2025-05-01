@@ -13,7 +13,7 @@
 import {
   ByRestaurantDetailData,
   BySessionDetailData,
-  ByUserDetailData,
+  ByUserDetailResult,
   ChefReviewCreateData,
   ChefReviewCreatePayload,
   ChefReviewDeleteData,
@@ -87,7 +87,7 @@ export class ChefReview<
    * @request GET:/chef_review/byUser/{user_id}
    */
   byUserDetail = (userId: string, params: RequestParams = {}) =>
-    this.request<ByUserDetailData, void>({
+    this.request<ByUserDetailResult, void>({
       path: `/chef_review/byUser/${userId}`,
       method: "GET",
       format: "json",

@@ -11,11 +11,10 @@
  */
 
 import {
-  ChefNotificationsCreateData,
-  ChefNotificationsCreatePayload,
-  ChefNotificationsDetailData,
-  ChefNotificationsListData,
-  Clone0DeleteData,
+  ByUserDetailData,
+  MarkReadAllPartialUpdateData,
+  MarkReadAllPartialUpdatePayload,
+  ReadPartialUpdateData,
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
@@ -23,119 +22,97 @@ export class ChefNotifications<
   SecurityDataType = unknown,
 > extends HttpClient<SecurityDataType> {
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH-CHEF]自分の通知だけが見られます。 <br /><br /> <b>Authentication:</b> not required
    *
    * @tags chef-notifications
-   * @name Clone0Delete
-   * @request DELETE:/chef-notifications/{chef_notification_id}/clone_0
+   * @name ByUserDetail
+   * @summary [AUTH-CHEF]自分の通知だけが見られます。
+   * @request GET:/chef-notifications/byUser/{user_id}
    */
-  clone0Delete = (chefNotificationId: number, params: RequestParams = {}) =>
-    this.request<Clone0DeleteData, void>({
-      path: `/chef-notifications/${chefNotificationId}/clone_0`,
-      method: "DELETE",
-      format: "json",
-      ...params,
-    });
-
-  clone0DeleteQueryArgs = (
-    chefNotificationId: number,
-    params: RequestParams = {},
-    enabled: boolean = true,
-  ) => {
-    const key = enabled
-      ? [`/chef-notifications/${chefNotificationId}/clone_0`]
-      : null;
-    const fetcher = () =>
-      this.clone0Delete(chefNotificationId, params).then((res) => res.data);
-    return [key, fetcher] as const;
-  };
-
-  /**
-   * @description <br /><br /> <b>Authentication:</b> not required
-   *
-   * @tags chef-notifications
-   * @name ChefNotificationsDetail
-   * @request GET:/chef-notifications/{chef_notification_id}
-   */
-  chefNotificationsDetail = (
-    chefNotificationId: number,
-    params: RequestParams = {},
-  ) =>
-    this.request<ChefNotificationsDetailData, void>({
-      path: `/chef-notifications/${chefNotificationId}`,
+  byUserDetail = (userId: string, params: RequestParams = {}) =>
+    this.request<ByUserDetailData, void>({
+      path: `/chef-notifications/byUser/${userId}`,
       method: "GET",
       format: "json",
       ...params,
     });
 
-  chefNotificationsDetailQueryArgs = (
-    chefNotificationId: number,
+  byUserDetailQueryArgs = (
+    userId: string,
     params: RequestParams = {},
     enabled: boolean = true,
   ) => {
-    const key = enabled ? [`/chef-notifications/${chefNotificationId}`] : null;
+    const key = enabled ? [`/chef-notifications/byUser/${userId}`] : null;
     const fetcher = () =>
-      this.chefNotificationsDetail(chefNotificationId, params).then(
-        (res) => res.data,
-      );
+      this.byUserDetail(userId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH-CHEF]自分の通知だけを全て既読にできます。 <br /><br /> <b>Authentication:</b> not required
    *
    * @tags chef-notifications
-   * @name ChefNotificationsList
-   * @request GET:/chef-notifications
+   * @name MarkReadAllPartialUpdate
+   * @summary [AUTH-CHEF]自分の通知だけを全て既読にできます。
+   * @request PATCH:/chef-notifications/mark-read/all
    */
-  chefNotificationsList = (params: RequestParams = {}) =>
-    this.request<ChefNotificationsListData, void>({
-      path: `/chef-notifications`,
-      method: "GET",
-      format: "json",
-      ...params,
-    });
-
-  chefNotificationsListQueryArgs = (
-    params: RequestParams = {},
-    enabled: boolean = true,
-  ) => {
-    const key = enabled ? [`/chef-notifications`] : null;
-    const fetcher = () =>
-      this.chefNotificationsList(params).then((res) => res.data);
-    return [key, fetcher] as const;
-  };
-
-  /**
-   * @description <br /><br /> <b>Authentication:</b> not required
-   *
-   * @tags chef-notifications
-   * @name ChefNotificationsCreate
-   * @request POST:/chef-notifications
-   */
-  chefNotificationsCreate = (
-    data: ChefNotificationsCreatePayload,
+  markReadAllPartialUpdate = (
+    data: MarkReadAllPartialUpdatePayload,
     params: RequestParams = {},
   ) =>
-    this.request<ChefNotificationsCreateData, void>({
-      path: `/chef-notifications`,
-      method: "POST",
+    this.request<MarkReadAllPartialUpdateData, void>({
+      path: `/chef-notifications/mark-read/all`,
+      method: "PATCH",
       body: data,
       type: ContentType.Json,
       format: "json",
       ...params,
     });
 
-  chefNotificationsCreateQueryArgs = (
+  markReadAllPartialUpdateQueryArgs = (
     params: RequestParams = {},
     enabled: boolean = true,
   ) => {
-    const key = enabled ? [`/chef-notifications`] : null;
+    const key = enabled ? [`/chef-notifications/mark-read/all`] : null;
     const fetcher: (
       url: string[],
-      { arg }: { arg: ChefNotificationsCreatePayload },
-    ) => Promise<ChefNotificationsCreateData> = (_, { arg }) =>
-      this.chefNotificationsCreate(arg, params).then((res) => res.data);
+      { arg }: { arg: MarkReadAllPartialUpdatePayload },
+    ) => Promise<MarkReadAllPartialUpdateData> = (_, { arg }) =>
+      this.markReadAllPartialUpdate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description [AUTH-CHEF]自分の通知だけを既読にできます。 <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags chef-notifications
+   * @name ReadPartialUpdate
+   * @summary [AUTH-CHEF]自分の通知だけを既読にできます。
+   * @request PATCH:/chef-notifications/{chef_notification_id}/read
+   */
+  readPartialUpdate = (
+    chefNotificationId: number,
+    params: RequestParams = {},
+  ) =>
+    this.request<ReadPartialUpdateData, void>({
+      path: `/chef-notifications/${chefNotificationId}/read`,
+      method: "PATCH",
+      format: "json",
+      ...params,
+    });
+
+  readPartialUpdateQueryArgs = (
+    chefNotificationId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled
+      ? [`/chef-notifications/${chefNotificationId}/read`]
+      : null;
+    const fetcher: (url: string[]) => Promise<ReadPartialUpdateData> = (_) =>
+      this.readPartialUpdate(chefNotificationId, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 }
