@@ -21,11 +21,11 @@ import { AppDispatch } from "@/lib/store/store";
 import { getCompanyUserByCompanyId } from "@/lib/api/companyUser";
 import { fetchJobsByCompanyId } from "@/lib/store/jobSlice";
 import { fetchMyRestaurants } from "@/lib/store/restaurantSlice";
-import { useGetCompany } from "@/hooks/api/companies/useGetCompany";
-import { useGetRestaurantsByCompanyId } from "@/hooks/api/restaurants/useGetRestaurantsByCompanyId";
-import { useGetJobsByCompanyId } from "@/hooks/api/jobs/useGetJobsByCompanyId";
-import { useGetCompanyUsersByCompanyId } from "@/hooks/api/companyUsers/useGetCompanyUsersByCompanyId";
-import { useGetRestaurantsByCompanyUserId } from "@/hooks/api/restaurants/useGetRestaurantsByCompanyUserId";
+import { useGetCompany } from "@/hooks/api/companyuser/companies/useGetCompany";
+import { useGetRestaurantsByCompanyId } from "@/hooks/api/companyuser/restaurants/useGetRestaurantsByCompanyId";
+import { useGetJobsByCompanyId } from "@/hooks/api/companyuser/jobs/useGetJobsByCompanyId";
+import { useGetCompanyUsersByCompanyId } from "@/hooks/api/companyuser/companyUsers/useGetCompanyUsersByCompanyId";
+import { useGetRestaurantsByCompanyUserId } from "@/hooks/api/companyuser/restaurants/useGetRestaurantsByCompanyUserId";
 
 export function CompanyDashboard() {
   // const dispatch = useDispatch<AppDispatch>();

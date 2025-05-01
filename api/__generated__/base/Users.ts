@@ -14,8 +14,11 @@ import {
   ApplicationsListOutput,
   ChefNotificationsListData,
   ChefNotificationsListParams,
-  ChefReviewsListOutput,
+  ChefReviewsListResult,
+  PayoutLogsListData,
   RestaurantReviewsListOutput,
+  ReviewsListResult,
+  SessionHistoryCurrentListResult,
   StripeAccountCreateData,
   StripeAccountLinksCreateData,
   UsersCreateData,
@@ -26,6 +29,7 @@ import {
   UsersPartialUpdateData,
   UsersPartialUpdatePayload,
   WorksessionsListResult,
+  WorksessionsMessagesListResult,
   WorksessionsUserTodosListData,
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
@@ -101,7 +105,7 @@ export class Users<
    * @request GET:/users/{user_id}/chef-reviews
    */
   chefReviewsList = (userId: string, params: RequestParams = {}) =>
-    this.request<ChefReviewsListOutput, void>({
+    this.request<ChefReviewsListResult, void>({
       path: `/users/${userId}/chef-reviews`,
       method: "GET",
       format: "json",
@@ -116,6 +120,32 @@ export class Users<
     const key = enabled ? [`/users/${userId}/chef-reviews`] : null;
     const fetcher = () =>
       this.chefReviewsList(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags users
+   * @name PayoutLogsList
+   * @request GET:/users/{user_id}/payout-logs
+   */
+  payoutLogsList = (userId: string, params: RequestParams = {}) =>
+    this.request<PayoutLogsListData, void>({
+      path: `/users/${userId}/payout-logs`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  payoutLogsListQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/users/${userId}/payout-logs`] : null;
+    const fetcher = () =>
+      this.payoutLogsList(userId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -142,6 +172,58 @@ export class Users<
     const key = enabled ? [`/users/${userId}/restaurant-reviews`] : null;
     const fetcher = () =>
       this.restaurantReviewsList(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags users
+   * @name ReviewsList
+   * @request GET:/users/{user_id}/reviews
+   */
+  reviewsList = (userId: string, params: RequestParams = {}) =>
+    this.request<ReviewsListResult, void>({
+      path: `/users/${userId}/reviews`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  reviewsListQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/users/${userId}/reviews`] : null;
+    const fetcher = () =>
+      this.reviewsList(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags users
+   * @name SessionHistoryCurrentList
+   * @request GET:/users/{user_id}/sessionHistory/current
+   */
+  sessionHistoryCurrentList = (userId: string, params: RequestParams = {}) =>
+    this.request<SessionHistoryCurrentListResult, void>({
+      path: `/users/${userId}/sessionHistory/current`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  sessionHistoryCurrentListQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/users/${userId}/sessionHistory/current`] : null;
+    const fetcher = () =>
+      this.sessionHistoryCurrentList(userId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
@@ -199,10 +281,11 @@ export class Users<
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH-CHef]自分のデータだけ取れる <br /><br /> <b>Authentication:</b> not required
    *
    * @tags users
    * @name WorksessionsUserTodosList
+   * @summary [AUTH-CHef]自分のデータだけ取れる
    * @request GET:/users/{user_id}/worksessions/user_todos
    */
   worksessionsUserTodosList = (userId: string, params: RequestParams = {}) =>
@@ -221,6 +304,42 @@ export class Users<
     const key = enabled ? [`/users/${userId}/worksessions/user_todos`] : null;
     const fetcher = () =>
       this.worksessionsUserTodosList(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description [AUTH-CHEF]働くシェフだけがメッセージを見られます。 <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags users
+   * @name WorksessionsMessagesList
+   * @summary [AUTH-CHEF]働くシェフだけがメッセージを見られます。
+   * @request GET:/users/{user_id}/worksessions/{worksession_id}/messages
+   */
+  worksessionsMessagesList = (
+    userId: string,
+    worksessionId: number,
+    params: RequestParams = {},
+  ) =>
+    this.request<WorksessionsMessagesListResult, void>({
+      path: `/users/${userId}/worksessions/${worksessionId}/messages`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  worksessionsMessagesListQueryArgs = (
+    userId: string,
+    worksessionId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled
+      ? [`/users/${userId}/worksessions/${worksessionId}/messages`]
+      : null;
+    const fetcher = () =>
+      this.worksessionsMessagesList(userId, worksessionId, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 

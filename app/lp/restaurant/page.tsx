@@ -718,9 +718,24 @@ export default function RestaurantLandingPage() {
                 </li>
                 <li>
                   <Link
-                    href="#"
+                    href="https://corp.cookbiz.co.jp/privacy-policy/"
                     className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                     プライバシーポリシー
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
+                    href="https://corp.cookbiz.co.jp/privacy-policy-treatment/"
+                    className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                    個人情報の取扱いについて
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="https://corp.cookbiz.co.jp/privacy-policy-publication/"
+                    className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                    個人情報に関する公表文
                   </Link>
                 </li>
                 <li>

@@ -15,9 +15,6 @@ import {
   ChefReviewsCreatePayload,
   ChefReviewsDeleteData,
   ChefReviewsDetailData,
-  ChefReviewsListData,
-  ChefReviewsPartialUpdateData,
-  ChefReviewsPartialUpdatePayload,
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
@@ -77,71 +74,11 @@ export class ChefReviews<
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
-   *
-   * @tags chef-reviews
-   * @name ChefReviewsPartialUpdate
-   * @request PATCH:/chef-reviews/{chef_review_id}
-   */
-  chefReviewsPartialUpdate = (
-    chefReviewId: number,
-    data: ChefReviewsPartialUpdatePayload,
-    params: RequestParams = {},
-  ) =>
-    this.request<ChefReviewsPartialUpdateData, void>({
-      path: `/chef-reviews/${chefReviewId}`,
-      method: "PATCH",
-      body: data,
-      type: ContentType.Json,
-      format: "json",
-      ...params,
-    });
-
-  chefReviewsPartialUpdateQueryArgs = (
-    chefReviewId: number,
-    params: RequestParams = {},
-    enabled: boolean = true,
-  ) => {
-    const key = enabled ? [`/chef-reviews/${chefReviewId}`] : null;
-    const fetcher: (
-      url: string[],
-      { arg }: { arg: ChefReviewsPartialUpdatePayload },
-    ) => Promise<ChefReviewsPartialUpdateData> = (_, { arg }) =>
-      this.chefReviewsPartialUpdate(chefReviewId, arg, params).then(
-        (res) => res.data,
-      );
-    return [key, fetcher] as const;
-  };
-
-  /**
-   * @description <br /><br /> <b>Authentication:</b> not required
-   *
-   * @tags chef-reviews
-   * @name ChefReviewsList
-   * @request GET:/chef-reviews
-   */
-  chefReviewsList = (params: RequestParams = {}) =>
-    this.request<ChefReviewsListData, void>({
-      path: `/chef-reviews`,
-      method: "GET",
-      format: "json",
-      ...params,
-    });
-
-  chefReviewsListQueryArgs = (
-    params: RequestParams = {},
-    enabled: boolean = true,
-  ) => {
-    const key = enabled ? [`/chef-reviews`] : null;
-    const fetcher = () => this.chefReviewsList(params).then((res) => res.data);
-    return [key, fetcher] as const;
-  };
-
-  /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH-Chef]仕事したシェフだけが投稿できます。 <br /><br /> <b>Authentication:</b> not required
    *
    * @tags chef-reviews
    * @name ChefReviewsCreate
+   * @summary [AUTH-Chef]仕事したシェフだけが投稿できます。
    * @request POST:/chef-reviews
    */
   chefReviewsCreate = (

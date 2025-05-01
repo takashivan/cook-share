@@ -64,16 +64,16 @@ import { toast } from "@/hooks/use-toast";
 import { AddRestaurantStaffModal } from "@/components/modals/AddRestaurantStaff";
 import { restaurantStaffInvite } from "@/lib/api/restaurant";
 import { EditRestaurantModal } from "@/components/modals/EditRestaurantModal";
-import { useGetRestaurant } from "@/hooks/api/restaurants/useGetRestaurant";
-import { useGetJobsByRestaurantId } from "@/hooks/api/jobs/useGetJobsByRestaurantId";
-import { useGetMultipleWorksessionsByJobId } from "@/hooks/api/worksessions/useGetMultipleWorksessionsByJobId";
+import { useGetRestaurant } from "@/hooks/api/companyuser/restaurants/useGetRestaurant";
+import { useGetJobsByRestaurantId } from "@/hooks/api/companyuser/jobs/useGetJobsByRestaurantId";
+import { useGetMultipleWorksessionsByJobId } from "@/hooks/api/companyuser/worksessions/useGetMultipleWorksessionsByJobId";
 import { CompanyusersCreateInput, CompanyusersListData, CompanyusersListOutput, JobsCreatePayload, JobsListOutput } from "@/api/__generated__/base/data-contracts";
-import { useGetCompanyUsersByRestaurantId } from "@/hooks/api/companyUsers/useGetCompanyUsersByRestaurantId";
-import { useCreateJob } from "@/hooks/api/jobs/useCreateJob";
+import { useGetCompanyUsersByRestaurantId } from "@/hooks/api/companyuser/companyUsers/useGetCompanyUsersByRestaurantId";
+import { useCreateJob } from "@/hooks/api/companyuser/jobs/useCreateJob";
 import { workSessionApi } from "@/lib/api/workSession";
 import type { WorkSessionWithJob } from "@/types";
 import Image from "next/image";
-import { useCreateCompanyUserByRestaurantId } from "@/hooks/api/companyUsers/useCreateCompanyUserByRestaurantId";
+import { useCreateCompanyUserByRestaurantId } from "@/hooks/api/companyuser/companyUsers/useCreateCompanyUserByRestaurantId";
 import {
   AlertDialog,
   AlertDialogAction,

@@ -10,7 +10,7 @@ import { Header } from "@/components/layout/header";
 import { Card } from "@/components/ui/card";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { Badge } from "@/components/ui/badge";
-import { useGetJobsByUpcoming } from "@/hooks/api/jobs/useGetJobsByUpcoming";
+import { useGetJobsByUpcoming } from "@/hooks/api/all/jobs/useGetJobsByUpcoming";
 import { motion } from "framer-motion";
 
 export default function Home() {
@@ -204,12 +204,14 @@ export default function Home() {
                           <Badge
                             variant="secondary"
                             className={`${
-                              job.number_of_spots > 0 && job.expiry_date != null &&
+                              job.number_of_spots > 0 &&
+                              job.expiry_date != null &&
                               new Date(job.expiry_date) > new Date()
                                 ? "bg-black text-white"
                                 : "bg-gray-500 text-white"
                             }`}>
-                            {job.number_of_spots > 0 && job.expiry_date != null &&
+                            {job.number_of_spots > 0 &&
+                            job.expiry_date != null &&
                             new Date(job.expiry_date) > new Date()
                               ? `残り${job.number_of_spots}名募集中`
                               : "締め切りました"}
@@ -358,19 +360,31 @@ export default function Home() {
               運営会社
             </Link>
             <span>|</span>
-            <Link href="#" className="hover:underline">
-              シェフ向け利用規約
+            <Link href="/terms" className="hover:underline">
+              利用規約
             </Link>
+
             <span>|</span>
-            <Link href="#" className="hover:underline">
-              飲食業社向け利用規約
-            </Link>
-            <span>|</span>
-            <Link href="#" className="hover:underline">
+            <Link
+              href="https://corp.cookbiz.co.jp/privacy-policy/"
+              className="hover:underline">
               プライバシーポリシー
             </Link>
+
             <span>|</span>
-            <Link href="#" className="hover:underline">
+            <Link
+              href="https://corp.cookbiz.co.jp/privacy-policy-treatment/ "
+              className="hover:underline">
+              個人情報の取扱いについて
+            </Link>
+            <span>|</span>
+            <Link
+              href="https://corp.cookbiz.co.jp/privacy-policy-publication/"
+              className="hover:underline">
+              個人情報に関する公表文
+            </Link>
+            <span>|</span>
+            <Link href="/contact" className="hover:underline">
               お問い合わせ
             </Link>
           </div>

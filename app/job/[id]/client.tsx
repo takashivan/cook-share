@@ -566,19 +566,25 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
               運営会社
             </Link>
             <span>|</span>
-            <Link href="#" className="hover:underline">
-              シェフ向け利用規約
+            <Link href="/terms" className="hover:underline">
+              利用規約
             </Link>
+            
+            
             <span>|</span>
-            <Link href="#" className="hover:underline">
-              飲食業社向け利用規約
-            </Link>
-            <span>|</span>
-            <Link href="#" className="hover:underline">
+            <Link href="https://corp.cookbiz.co.jp/privacy-policy/" className="hover:underline">
               プライバシーポリシー
             </Link>
             <span>|</span>
-            <Link href="#" className="hover:underline">
+            <Link href="https://corp.cookbiz.co.jp/privacy-policy-treatment/" className="hover:underline">
+              個人情報保護方針
+            </Link>
+            <span>|</span>
+            <Link href="https://corp.cookbiz.co.jp/privacy-policy-treatment/" className="hover:underline">
+              個人情報の取扱いについて
+            </Link>
+            <span>|</span>
+            <Link href="/contact" className="hover:underline">
               お問い合わせ
             </Link>
           </div>
@@ -640,7 +646,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
               </a>
 
               <Button
-                onClick={() => router.push(`/chef/job/${applicationId}`)}
+                onClick={() => router.push(`/chef/job/${jobDetail.job.id}`)}
                 className="w-full flex items-center justify-center gap-2"
                 style={{ backgroundColor: "#DB3F1C" }}>
                 <ArrowRight className="w-4 h-4" />

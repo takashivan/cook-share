@@ -117,17 +117,19 @@ export class ChefPayoutLog<
   };
 
   /**
-   * @description Query all chef_payout_log records <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH-Operator]運営だけ取得 <br /><br /> <b>Authentication:</b> required
    *
    * @tags chef_payout_log
    * @name ChefPayoutLogList
-   * @summary Query all chef_payout_log records
+   * @summary [AUTH-Operator]運営だけ取得
    * @request GET:/chef_payout_log
+   * @secure
    */
   chefPayoutLogList = (params: RequestParams = {}) =>
     this.request<ChefPayoutLogListData, void>({
       path: `/chef_payout_log`,
       method: "GET",
+      secure: true,
       format: "json",
       ...params,
     });

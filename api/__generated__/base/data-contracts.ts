@@ -449,6 +449,8 @@ export interface WorksessionsListData {
     chef_rating: number;
     /** @format int64 */
     restaurant_rating: number;
+    /** @format timestamptz */
+    start_time: number | null;
   };
   messages: {
     /** @format int64 */
@@ -471,6 +473,11 @@ export interface WorksessionsListData {
     restaurant_id: number | null;
     /** @format int64 */
     worksession_id: number;
+    /**
+     * ルームごとのmessage number
+     * @format int64
+     */
+    message_seq: number;
   }[];
 }
 
@@ -671,9 +678,7 @@ export interface ApplicationCreateData {
   urgent: boolean;
 }
 
-export type BillingSummaryDeleteData = object;
-
-export interface BillingSummaryDetailData {
+export type CancelBychefLogsListData = {
   /** @format uuid */
   id: string;
   /**
@@ -681,160 +686,27 @@ export interface BillingSummaryDetailData {
    * @default "now"
    */
   created_at: number;
+  /** @format timestamptz */
+  canceled_datetime: number | null;
+  /** @format int64 */
+  job_id: number;
   /** @format uuid */
-  companies_id: string | null;
-  month: string;
+  user_id: string | null;
   /** @format int64 */
-  amount: number;
-  /** stripe invoice id */
-  invoice_id: string;
-  status: "PENDING" | "PAID" | "FAILED";
-  fee_rate: number;
+  restaurant_id: number;
+  category:
+    | "cancelled_by_chef_late"
+    | "cancelled_by_chef_same_day"
+    | "no_show"
+    | "cancelled_by_chef";
   /** @format int64 */
-  session_count: number;
-  start_date: string;
-  end_date: string;
-  hosted_invoice_url: string;
-  invoice_pdf: string;
-  invoice_number: string;
-}
-
-export interface BillingSummaryPartialUpdatePayload {
-  /** @format uuid */
-  companies_id: string | null;
-  month: string;
+  cancel_fee: number;
+  reason: string;
   /** @format int64 */
-  amount: number;
-  /** stripe invoice id */
-  invoice_id: string;
-  status: "PENDING" | "PAID" | "FAILED";
-  fee_rate: number;
-  /** @format int64 */
-  session_count: number;
-  start_date: string;
-  end_date: string;
-  hosted_invoice_url: string;
-  invoice_pdf: string;
-  invoice_number: string;
-}
-
-export interface BillingSummaryPartialUpdateData {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format uuid */
-  companies_id: string | null;
-  month: string;
-  /** @format int64 */
-  amount: number;
-  /** stripe invoice id */
-  invoice_id: string;
-  status: "PENDING" | "PAID" | "FAILED";
-  fee_rate: number;
-  /** @format int64 */
-  session_count: number;
-  start_date: string;
-  end_date: string;
-  hosted_invoice_url: string;
-  invoice_pdf: string;
-  invoice_number: string;
-}
-
-export interface BillingSummaryUpdatePayload {
-  /** @format uuid */
-  companies_id: string | null;
-  month: string;
-  /** @format int64 */
-  amount: number;
-  /** stripe invoice id */
-  invoice_id: string;
-  status: "PENDING" | "PAID" | "FAILED";
-  fee_rate: number;
-  /** @format int64 */
-  session_count: number;
-  start_date: string;
-  end_date: string;
-  hosted_invoice_url: string;
-  invoice_pdf: string;
-  invoice_number: string;
-}
-
-export interface BillingSummaryUpdateData {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format uuid */
-  companies_id: string | null;
-  month: string;
-  /** @format int64 */
-  amount: number;
-  /** stripe invoice id */
-  invoice_id: string;
-  status: "PENDING" | "PAID" | "FAILED";
-  fee_rate: number;
-  /** @format int64 */
-  session_count: number;
-  start_date: string;
-  end_date: string;
-  hosted_invoice_url: string;
-  invoice_pdf: string;
-  invoice_number: string;
-}
-
-export type BillingSummaryListData = {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format uuid */
-  companies_id: string | null;
-  month: string;
-  /** @format int64 */
-  amount: number;
-  /** stripe invoice id */
-  invoice_id: string;
-  status: "PENDING" | "PAID" | "FAILED";
-  fee_rate: number;
-  /** @format int64 */
-  session_count: number;
-  start_date: string;
-  end_date: string;
-  hosted_invoice_url: string;
-  invoice_pdf: string;
-  invoice_number: string;
+  worksession_id: number;
 }[];
 
-export interface BillingSummaryCreatePayload {
-  /** @format uuid */
-  companies_id: string | null;
-  month: string;
-  /** @format int64 */
-  amount: number;
-  /** stripe invoice id */
-  invoice_id: string;
-  status: "PENDING" | "PAID" | "FAILED";
-  fee_rate: number;
-  /** @format int64 */
-  session_count: number;
-  start_date: string;
-  end_date: string;
-  hosted_invoice_url: string;
-  invoice_pdf: string;
-  invoice_number: string;
-}
-
-export interface BillingSummaryCreateData {
+export type CancelByrestaurantLogsListData = {
   /** @format uuid */
   id: string;
   /**
@@ -842,22 +714,153 @@ export interface BillingSummaryCreateData {
    * @default "now"
    */
   created_at: number;
+  /** @format timestamptz */
+  canceled_datetime: number | null;
+  /** @format int64 */
+  job_id: number;
   /** @format uuid */
-  companies_id: string | null;
-  month: string;
+  user_id: string | null;
   /** @format int64 */
-  amount: number;
-  /** stripe invoice id */
-  invoice_id: string;
-  status: "PENDING" | "PAID" | "FAILED";
-  fee_rate: number;
+  restaurant_id: number;
+  category: "cancelled_by_restaurant" | "cancelled_by_restaurant_late";
   /** @format int64 */
-  session_count: number;
-  start_date: string;
-  end_date: string;
-  hosted_invoice_url: string;
-  invoice_pdf: string;
-  invoice_number: string;
+  cancel_fee: number;
+  reason: string;
+  /** @format int64 */
+  worksession_id: number;
+}[];
+
+export type UnreadSummaryChefListData = object;
+
+export type UnreadSummaryRestaurantDetailData = object;
+
+export interface UpdateReadChefPartialUpdatePayload {
+  /** @format int64 */
+  worksession_id: number;
+  /** @format int64 */
+  last_read_message_seq: number;
+}
+
+export interface UpdateReadChefPartialUpdateData {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format int64 */
+  worksession_id: number;
+  /** @format uuid */
+  user_id: string | null;
+  /** @format int64 */
+  last_read_message_seq: number;
+  /** @format timestamptz */
+  updated_at: number | null;
+}
+
+export interface UpdateReadRestaurantPartialUpdatePayload {
+  /** @format int64 */
+  worksession_id: number;
+  /** @format int64 */
+  last_read_message_seq: number;
+}
+
+export interface UpdateReadRestaurantPartialUpdateData {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format int64 */
+  worksession_id: number;
+  /** @format int64 */
+  restaurant_id: number;
+  /** @format int64 */
+  last_read_message_seq: number;
+  /** @format timestamptz */
+  updated_at: number | null;
+}
+
+export type ByUserDetailData = {
+  /** @format int64 */
+  id: number;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
+  content: string;
+  is_read: boolean;
+  /** @format timestamptz */
+  updated_at: number;
+  /** @format uuid */
+  user_id: string;
+  /** url */
+  related_link: string;
+}[];
+
+export interface MarkReadAllPartialUpdatePayload {
+  user_id: string;
+}
+
+export type MarkReadAllPartialUpdateData = {
+  /** @format int64 */
+  id: number;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
+  content: string;
+  is_read: boolean;
+  /** @format timestamptz */
+  updated_at: number;
+  /** @format uuid */
+  user_id: string;
+  /** url */
+  related_link: string;
+}[];
+
+export interface ReadPartialUpdateData {
+  /** @format int64 */
+  id: number;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
+  content: string;
+  is_read: boolean;
+  /** @format timestamptz */
+  updated_at: number;
+  /** @format uuid */
+  user_id: string;
+  /** url */
+  related_link: string;
 }
 
 export type ChefReviewsDeleteData = object;
@@ -882,62 +885,6 @@ export interface ChefReviewsDetailData {
   /** @format int64 */
   reviewee_id: number;
 }
-
-export interface ChefReviewsPartialUpdatePayload {
-  /** @format int64 */
-  rating: number;
-  comment: string;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format int64 */
-  session_id: number;
-  /** @format uuid */
-  reviewer_id: string;
-  /** @format int64 */
-  reviewee_id: number;
-}
-
-export interface ChefReviewsPartialUpdateData {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format int64 */
-  rating: number;
-  comment: string;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format int64 */
-  session_id: number;
-  /** @format uuid */
-  reviewer_id: string;
-  /** @format int64 */
-  reviewee_id: number;
-}
-
-export type ChefReviewsListData = {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format int64 */
-  rating: number;
-  comment: string;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format int64 */
-  session_id: number;
-  /** @format uuid */
-  reviewer_id: string;
-  /** @format int64 */
-  reviewee_id: number;
-}[];
 
 export interface ChefReviewsCreatePayload {
   /** @format int64 */
@@ -1275,6 +1222,8 @@ export interface BySessionDetailData {
     chef_rating: number;
     /** @format int64 */
     restaurant_rating: number;
+    /** @format timestamptz */
+    start_time: number | null;
   };
   restaurant: {
     /** @format int64 */
@@ -1354,7 +1303,7 @@ export interface BySessionDetailData {
   };
 }
 
-export type ByUserDetailData = {
+export type ByUserDetailResult = {
   /** @format int64 */
   id: number;
   /**
@@ -1990,6 +1939,88 @@ export interface CompaniesCreateData {
   };
 }
 
+export type ByUserDetailOutput = {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format uuid */
+  companyuser_id: string | null;
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
+  related_link: string;
+  is_read: boolean;
+  content: string;
+  /** @format int64 */
+  job_id: number | null;
+  /** @format int64 */
+  restaurant_id: number | null;
+}[];
+
+export interface MarkReadAllPartialUpdateBody {
+  user_id: string;
+}
+
+export type MarkReadAllPartialUpdateResult = {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format uuid */
+  companyuser_id: string | null;
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
+  related_link: string;
+  is_read: boolean;
+  content: string;
+  /** @format int64 */
+  job_id: number | null;
+  /** @format int64 */
+  restaurant_id: number | null;
+}[];
+
+export interface MarkReadPartialUpdateData {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format uuid */
+  companyuser_id: string | null;
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment";
+  related_link: string;
+  is_read: boolean;
+  content: string;
+  /** @format int64 */
+  job_id: number | null;
+  /** @format int64 */
+  restaurant_id: number | null;
+}
+
 export type CompanyDetailData = {
   /** @format uuid */
   id: string;
@@ -2167,6 +2198,44 @@ export type RestaurantsListResult = {
   description: string;
   phone: string;
 }[];
+
+export interface WorksessionsMessagesListData {
+  messages: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    content: string;
+    is_read: boolean;
+    /** @format timestamptz */
+    updated_at: number;
+    /** @format uuid */
+    application_id: string;
+    /** @format uuid */
+    chef_id: string;
+    sender_type: "chef" | "restaurant";
+    /** @format int64 */
+    restaurant_id: number | null;
+    /** @format int64 */
+    worksession_id: number;
+    /**
+     * ルームごとのmessage number
+     * @format int64
+     */
+    message_seq: number;
+  }[];
+  chef_last_read: {
+    /** @format int64 */
+    last_read_message_seq: number;
+  };
+  restaurant_last_read: {
+    /** @format int64 */
+    last_read_message_seq: number;
+  };
+}
 
 export type CompanyusersDeleteResult = object;
 
@@ -2408,6 +2477,16 @@ export interface CompanyuserCreateData {
   email_change_token: string;
   password_reset_token: string;
 }
+
+export interface ContactCreatePayload {
+  name: string;
+  email: string;
+  message: string;
+  title: string;
+  type: string;
+}
+
+export type ContactCreateData = object;
 
 export interface CompanyDetailResult {
   result1: {
@@ -3025,6 +3104,8 @@ export type WorksessionsRestaurantTodosListData = {
   chef_rating: number;
   /** @format int64 */
   restaurant_rating: number;
+  /** @format timestamptz */
+  start_time: number | null;
   user: {
     /** @format uuid */
     id: string;
@@ -3563,28 +3644,43 @@ export interface PostJobData {
   expiry_date: number | null;
 }
 
-export type WorksessionDetailData = {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  content: string;
-  is_read: boolean;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format uuid */
-  application_id: string;
-  /** @format uuid */
-  chef_id: string;
-  sender_type: "chef" | "restaurant";
-  /** @format int64 */
-  restaurant_id: number | null;
-  /** @format int64 */
-  worksession_id: number;
-}[];
+export interface WorksessionDetailData {
+  result1: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    content: string;
+    is_read: boolean;
+    /** @format timestamptz */
+    updated_at: number;
+    /** @format uuid */
+    application_id: string;
+    /** @format uuid */
+    chef_id: string;
+    sender_type: "chef" | "restaurant";
+    /** @format int64 */
+    restaurant_id: number | null;
+    /** @format int64 */
+    worksession_id: number;
+    /**
+     * ルームごとのmessage number
+     * @format int64
+     */
+    message_seq: number;
+  }[];
+  chef_last_read: {
+    /** @format int64 */
+    last_read_message_seq: number;
+  };
+  restaurant_last_read: {
+    /** @format int64 */
+    last_read_message_seq: number;
+  };
+}
 
 export type MessageDeleteData = object;
 
@@ -3609,6 +3705,11 @@ export interface MessageDetailData {
   restaurant_id: number | null;
   /** @format int64 */
   worksession_id: number;
+  /**
+   * ルームごとのmessage number
+   * @format int64
+   */
+  message_seq: number;
 }
 
 export interface MessagePartialUpdatePayload {
@@ -3625,6 +3726,11 @@ export interface MessagePartialUpdatePayload {
   restaurant_id: number | null;
   /** @format int64 */
   worksession_id: number;
+  /**
+   * ルームごとのmessage number
+   * @format int64
+   */
+  message_seq: number;
 }
 
 export interface MessagePartialUpdateData {
@@ -3648,96 +3754,11 @@ export interface MessagePartialUpdateData {
   restaurant_id: number | null;
   /** @format int64 */
   worksession_id: number;
-}
-
-export type MessageattachmentsDeleteData = object;
-
-export interface MessageattachmentsDetailData {
-  /** @format uuid */
-  id: string;
   /**
-   * @format timestamptz
-   * @default "now"
+   * ルームごとのmessage number
+   * @format int64
    */
-  created_at: number;
-  /** @format int64 */
-  message_id: number;
-  file_name: string;
-  file_path: string;
-  file_type: string;
-  /** @format int64 */
-  file_size: number;
-}
-
-export interface MessageattachmentsPartialUpdatePayload {
-  /** @format int64 */
-  message_id: number;
-  file_name: string;
-  file_path: string;
-  file_type: string;
-  /** @format int64 */
-  file_size: number;
-}
-
-export interface MessageattachmentsPartialUpdateData {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format int64 */
-  message_id: number;
-  file_name: string;
-  file_path: string;
-  file_type: string;
-  /** @format int64 */
-  file_size: number;
-}
-
-export type MessageattachmentsListData = {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format int64 */
-  message_id: number;
-  file_name: string;
-  file_path: string;
-  file_type: string;
-  /** @format int64 */
-  file_size: number;
-}[];
-
-export interface MessageattachmentsCreatePayload {
-  /** @format int64 */
-  message_id: number;
-  file_name: string;
-  file_path: string;
-  file_type: string;
-  /** @format int64 */
-  file_size: number;
-}
-
-export interface MessageattachmentsCreateData {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format int64 */
-  message_id: number;
-  file_name: string;
-  file_path: string;
-  file_type: string;
-  /** @format int64 */
-  file_size: number;
+  message_seq: number;
 }
 
 export type MessagesDeleteData = object;
@@ -3763,6 +3784,11 @@ export interface MessagesDetailData {
   restaurant_id: number | null;
   /** @format int64 */
   worksession_id: number;
+  /**
+   * ルームごとのmessage number
+   * @format int64
+   */
+  message_seq: number;
 }
 
 export interface MessagesPartialUpdatePayload {
@@ -3779,6 +3805,11 @@ export interface MessagesPartialUpdatePayload {
   restaurant_id: number | null;
   /** @format int64 */
   worksession_id: number;
+  /**
+   * ルームごとのmessage number
+   * @format int64
+   */
+  message_seq: number;
 }
 
 export interface MessagesPartialUpdateData {
@@ -3802,6 +3833,11 @@ export interface MessagesPartialUpdateData {
   restaurant_id: number | null;
   /** @format int64 */
   worksession_id: number;
+  /**
+   * ルームごとのmessage number
+   * @format int64
+   */
+  message_seq: number;
 }
 
 export type MessagesListData = {
@@ -3825,6 +3861,11 @@ export type MessagesListData = {
   restaurant_id: number | null;
   /** @format int64 */
   worksession_id: number;
+  /**
+   * ルームごとのmessage number
+   * @format int64
+   */
+  message_seq: number;
 }[];
 
 export interface MessagesCreatePayload {
@@ -3857,6 +3898,11 @@ export interface MessagesCreateData {
   restaurant_id: number | null;
   /** @format int64 */
   worksession_id: number;
+  /**
+   * ルームごとのmessage number
+   * @format int64
+   */
+  message_seq: number;
 }
 
 export type MessageListData = {
@@ -3880,6 +3926,11 @@ export type MessageListData = {
   restaurant_id: number | null;
   /** @format int64 */
   worksession_id: number;
+  /**
+   * ルームごとのmessage number
+   * @format int64
+   */
+  message_seq: number;
 }[];
 
 export interface MessageCreatePayload {
@@ -3894,6 +3945,11 @@ export interface MessageCreatePayload {
   restaurant_id: number | null;
   /** @format int64 */
   worksession_id: number;
+  /**
+   * ルームごとのmessage number
+   * @format int64
+   */
+  message_seq: number;
 }
 
 export interface MessageCreateData {
@@ -3917,111 +3973,27 @@ export interface MessageCreateData {
   restaurant_id: number | null;
   /** @format int64 */
   worksession_id: number;
+  /**
+   * ルームごとのmessage number
+   * @format int64
+   */
+  message_seq: number;
 }
 
-export type PaymentsDeleteData = object;
-
-export interface PaymentsDetailData {
-  /** @format int64 */
-  id: number;
+export interface RestaurantCuisinesDeleteData {
+  /** @format uuid */
+  id: string;
   /**
    * @format timestamptz
    * @default "now"
    */
   created_at: number;
-  amount: number;
-  status: string;
-  /** @format date */
-  transaction_date: string;
-  invoice_number: string;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format int64 */
-  session_id: number;
+  /** @format email */
+  email: string;
+  /** @format password */
+  password: string;
+  name: string;
 }
-
-export interface PaymentsPartialUpdatePayload {
-  amount: number;
-  status: string;
-  /** @format date */
-  transaction_date: string;
-  invoice_number: string;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format int64 */
-  session_id: number;
-}
-
-export interface PaymentsPartialUpdateData {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  amount: number;
-  status: string;
-  /** @format date */
-  transaction_date: string;
-  invoice_number: string;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format int64 */
-  session_id: number;
-}
-
-export type PaymentsListData = {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  amount: number;
-  status: string;
-  /** @format date */
-  transaction_date: string;
-  invoice_number: string;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format int64 */
-  session_id: number;
-}[];
-
-export interface PaymentsCreatePayload {
-  amount: number;
-  status: string;
-  /** @format date */
-  transaction_date: string;
-  invoice_number: string;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format int64 */
-  session_id: number;
-}
-
-export interface PaymentsCreateData {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  amount: number;
-  status: string;
-  /** @format date */
-  transaction_date: string;
-  invoice_number: string;
-  /** @format timestamptz */
-  updated_at: number;
-  /** @format int64 */
-  session_id: number;
-}
-
-export type RestaurantCuisinesDeleteData = object;
 
 export interface RestaurantCuisinesPartialUpdatePayload {
   /** Whether this cuisine is the primary cuisine for the restaurant. */
@@ -4471,6 +4443,8 @@ export interface BySessionDetailResult {
     chef_rating: number;
     /** @format int64 */
     restaurant_rating: number;
+    /** @format timestamptz */
+    start_time: number | null;
   };
   user: {
     /** @format uuid */
@@ -4937,7 +4911,7 @@ export interface StaffInviteCreateInput {
 
 export type StaffInviteCreateOutput = object;
 
-export type ChefReviewsListResult = {
+export type ChefReviewsListData = {
   /** @format int64 */
   id: number;
   /**
@@ -5178,6 +5152,27 @@ export type RestaurantReviewsListResult = {
       used: boolean;
     } | null;
   };
+}[];
+
+export type ReviewsListData = {
+  /** @format int64 */
+  id: number;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format int64 */
+  rating: number;
+  comment: string;
+  /** @format timestamptz */
+  updated_at: number;
+  /** @format int64 */
+  session_id: number;
+  /** @format uuid */
+  reviewer_id: string;
+  /** @format int64 */
+  reviewee_id: number;
 }[];
 
 export type RestaurantsDeleteData = object;
@@ -5559,6 +5554,8 @@ export type SessionHistoryCurrentListData = {
   chef_rating: number;
   /** @format int64 */
   restaurant_rating: number;
+  /** @format timestamptz */
+  start_time: number | null;
   restaurant: {
     /** @format int64 */
     id: number;
@@ -5775,7 +5772,7 @@ export type ApplicationsListOutput = {
   urgent: boolean;
 }[];
 
-export type ChefReviewsListOutput = {
+export type ChefReviewsListResult = {
   /** @format int64 */
   id: number;
   /**
@@ -5823,6 +5820,25 @@ export type ChefReviewsListOutput = {
     description: string;
     phone: string;
   };
+}[];
+
+export type PayoutLogsListData = {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format uuid */
+  user_id: string | null;
+  month: string;
+  /** @format int64 */
+  total_amount: number;
+  transfer_id: string;
+  status: "PAID" | "PENDING";
+  /** @format timestamptz */
+  paid_at: number | null;
 }[];
 
 export type RestaurantReviewsListOutput = {
@@ -5875,6 +5891,171 @@ export type RestaurantReviewsListOutput = {
   };
 }[];
 
+export type ReviewsListResult = {
+  /** @format int64 */
+  id: number;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format int64 */
+  rating: number;
+  comment: string;
+  /** @format timestamptz */
+  updated_at: number;
+  /** @format int64 */
+  session_id: number;
+  /** @format int64 */
+  reviewer_id: number;
+  /** @format uuid */
+  reviewee_id: string;
+  restaurant: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    name: string;
+    address: string;
+    cuisine_type: string;
+    business_hours: string;
+    contact_info: string;
+    profile_image: string;
+    /** @format timestamptz */
+    updated_at: number;
+    /** Whether the restaurant is active. */
+    is_active: boolean;
+    /** @format uuid */
+    companies_id: string | null;
+    station: string;
+    access: string;
+    rating: number;
+    /** @default "1" */
+    is_approved: boolean;
+    restaurant_cuisine_id: number[];
+    description: string;
+    phone: string;
+  };
+}[];
+
+export type SessionHistoryCurrentListResult = {
+  /** @format int64 */
+  id: number;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format timestamptz */
+  check_in_time: number;
+  /** @format timestamptz */
+  check_out_time: number;
+  total_hours: number;
+  location_data: string;
+  status:
+    | "SCHEDULED"
+    | "IN_PROGRESS"
+    | "CANCELED_BY_CHEF"
+    | "CANCELED_BY_RESTAURANT"
+    | "COMPLETED"
+    | "VERIFIED"
+    | "DISPUTE"
+    | "ESCALATED"
+    | "PAID"
+    | "CANCELED";
+  /** @format timestamptz */
+  updated_at: number;
+  /** @format uuid */
+  application_id: string;
+  /** @format uuid */
+  user_id: string | null;
+  /** @format int64 */
+  restaurant_id: number;
+  /** @format int64 */
+  job_id: number;
+  /** @format int64 */
+  paid_amount: number;
+  chef_feedback: string;
+  restaurant_feedback: string;
+  /** @format int64 */
+  chef_rating: number;
+  /** @format int64 */
+  restaurant_rating: number;
+  /** @format timestamptz */
+  start_time: number | null;
+  restaurant: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    name: string;
+    address: string;
+    cuisine_type: string;
+    business_hours: string;
+    contact_info: string;
+    profile_image: string;
+    /** @format timestamptz */
+    updated_at: number;
+    /** Whether the restaurant is active. */
+    is_active: boolean;
+    /** @format uuid */
+    companies_id: string | null;
+    station: string;
+    access: string;
+    rating: number;
+    /** @default "1" */
+    is_approved: boolean;
+    restaurant_cuisine_id: number[];
+    description: string;
+    phone: string;
+  };
+  job: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    title: string;
+    description: string;
+    /** @format date */
+    work_date: string;
+    /** @format timestamptz */
+    start_time: number;
+    /** @format timestamptz */
+    end_time: number;
+    hourly_rate: number;
+    required_skills: string[];
+    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    /** @format timestamptz */
+    updated_at: number;
+    /** @format int64 */
+    restaurant_id: number;
+    image: string;
+    task: string;
+    skill: string;
+    whattotake: string;
+    note: string;
+    point: string;
+    transportation: string;
+    /** @default "1" */
+    is_approved: boolean;
+    /** @format int64 */
+    number_of_spots: number;
+    /** @format int64 */
+    fee: number;
+    /** @format timestamptz */
+    expiry_date: number | null;
+  };
+}[];
+
 export type StripeAccountLinksCreateData = object;
 
 export type StripeAccountCreateData = object;
@@ -5922,6 +6103,8 @@ export type WorksessionsUserTodosListData = {
   chef_rating: number;
   /** @format int64 */
   restaurant_rating: number;
+  /** @format timestamptz */
+  start_time: number | null;
   job: {
     /** @format int64 */
     id: number;
@@ -5992,6 +6175,44 @@ export type WorksessionsUserTodosListData = {
   };
 }[];
 
+export interface WorksessionsMessagesListResult {
+  messages: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    content: string;
+    is_read: boolean;
+    /** @format timestamptz */
+    updated_at: number;
+    /** @format uuid */
+    application_id: string;
+    /** @format uuid */
+    chef_id: string;
+    sender_type: "chef" | "restaurant";
+    /** @format int64 */
+    restaurant_id: number | null;
+    /** @format int64 */
+    worksession_id: number;
+    /**
+     * ルームごとのmessage number
+     * @format int64
+     */
+    message_seq: number;
+  }[];
+  chef_last_read: {
+    /** @format int64 */
+    last_read_message_seq: number;
+  };
+  restaurant_last_read: {
+    /** @format int64 */
+    last_read_message_seq: number;
+  };
+}
+
 export type WorksessionsListResult = {
   /** @format int64 */
   id: number;
@@ -6035,6 +6256,8 @@ export type WorksessionsListResult = {
   chef_rating: number;
   /** @format int64 */
   restaurant_rating: number;
+  /** @format timestamptz */
+  start_time: number | null;
   job: {
     /** @format int64 */
     id: number;
@@ -6528,6 +6751,8 @@ export interface ApplicationDetailResult {
     chef_rating: number;
     /** @format int64 */
     restaurant_rating: number;
+    /** @format timestamptz */
+    start_time: number | null;
   };
   messages: {
     /** @format int64 */
@@ -6550,6 +6775,11 @@ export interface ApplicationDetailResult {
     restaurant_id: number | null;
     /** @format int64 */
     worksession_id: number;
+    /**
+     * ルームごとのmessage number
+     * @format int64
+     */
+    message_seq: number;
   }[];
 }
 
@@ -6596,6 +6826,8 @@ export type RestaurantTodoDetailData = {
   chef_rating: number;
   /** @format int64 */
   restaurant_rating: number;
+  /** @format timestamptz */
+  start_time: number | null;
   user: {
     /** @format uuid */
     id: string;
@@ -6727,6 +6959,8 @@ export type UserDetailResult = {
   chef_rating: number;
   /** @format int64 */
   restaurant_rating: number;
+  /** @format timestamptz */
+  start_time: number | null;
   job: {
     /** @format int64 */
     id: number;
@@ -6840,6 +7074,8 @@ export type UserTodoDetailData = {
   chef_rating: number;
   /** @format int64 */
   restaurant_rating: number;
+  /** @format timestamptz */
+  start_time: number | null;
   job: {
     /** @format int64 */
     id: number;
@@ -6962,6 +7198,8 @@ export interface FinishPartialUpdateData {
     chef_rating: number;
     /** @format int64 */
     restaurant_rating: number;
+    /** @format timestamptz */
+    start_time: number | null;
   };
   review: {
     /** @format int64 */
@@ -7033,6 +7271,8 @@ export interface StartPartialUpdateData {
   chef_rating: number;
   /** @format int64 */
   restaurant_rating: number;
+  /** @format timestamptz */
+  start_time: number | null;
 }
 
 export interface VerifyPartialUpdatePayload {
@@ -7085,6 +7325,8 @@ export interface VerifyPartialUpdateData {
     chef_rating: number;
     /** @format int64 */
     restaurant_rating: number;
+    /** @format timestamptz */
+    start_time: number | null;
   };
   review: {
     /** @format int64 */
@@ -7153,6 +7395,8 @@ export interface WorksessionDetailResult {
   chef_rating: number;
   /** @format int64 */
   restaurant_rating: number;
+  /** @format timestamptz */
+  start_time: number | null;
 }
 
 export interface WorksessionPartialUpdatePayload {
@@ -7191,6 +7435,8 @@ export interface WorksessionPartialUpdatePayload {
   chef_rating: number;
   /** @format int64 */
   restaurant_rating: number;
+  /** @format timestamptz */
+  start_time: number | null;
 }
 
 export interface WorksessionPartialUpdateData {
@@ -7236,6 +7482,204 @@ export interface WorksessionPartialUpdateData {
   chef_rating: number;
   /** @format int64 */
   restaurant_rating: number;
+  /** @format timestamptz */
+  start_time: number | null;
+}
+
+export interface CancelByChefPartialUpdatePayload {
+  reason: string;
+}
+
+export interface CancelByChefPartialUpdateData {
+  result1: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format timestamptz */
+    check_in_time: number;
+    /** @format timestamptz */
+    check_out_time: number;
+    total_hours: number;
+    location_data: string;
+    status:
+      | "SCHEDULED"
+      | "IN_PROGRESS"
+      | "CANCELED_BY_CHEF"
+      | "CANCELED_BY_RESTAURANT"
+      | "COMPLETED"
+      | "VERIFIED"
+      | "DISPUTE"
+      | "ESCALATED"
+      | "PAID"
+      | "CANCELED";
+    /** @format timestamptz */
+    updated_at: number;
+    /** @format uuid */
+    application_id: string;
+    /** @format uuid */
+    user_id: string | null;
+    /** @format int64 */
+    restaurant_id: number;
+    /** @format int64 */
+    job_id: number;
+    /** @format int64 */
+    paid_amount: number;
+    chef_feedback: string;
+    restaurant_feedback: string;
+    /** @format int64 */
+    chef_rating: number;
+    /** @format int64 */
+    restaurant_rating: number;
+    /** @format timestamptz */
+    start_time: number | null;
+  };
+  cancel_log: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format timestamptz */
+    canceled_datetime: number | null;
+    /** @format int64 */
+    job_id: number;
+    /** @format uuid */
+    user_id: string | null;
+    /** @format int64 */
+    restaurant_id: number;
+    category:
+      | "cancelled_by_chef_late"
+      | "cancelled_by_chef_same_day"
+      | "no_show"
+      | "cancelled_by_chef";
+    /** @format int64 */
+    cancel_fee: number;
+    reason: string;
+    /** @format int64 */
+    worksession_id: number;
+  };
+  job: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    title: string;
+    description: string;
+    /** @format date */
+    work_date: string;
+    /** @format timestamptz */
+    start_time: number;
+    /** @format timestamptz */
+    end_time: number;
+    hourly_rate: number;
+    required_skills: string[];
+    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    /** @format timestamptz */
+    updated_at: number;
+    /** @format int64 */
+    restaurant_id: number;
+    image: string;
+    task: string;
+    skill: string;
+    whattotake: string;
+    note: string;
+    point: string;
+    transportation: string;
+    /** @default "1" */
+    is_approved: boolean;
+    /** @format int64 */
+    number_of_spots: number;
+    /** @format int64 */
+    fee: number;
+    /** @format timestamptz */
+    expiry_date: number | null;
+  };
+  x1: string;
+}
+
+export interface CancelByRestaurantPartialUpdatePayload {
+  reason: string;
+}
+
+export interface CancelByRestaurantPartialUpdateData {
+  result1: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format timestamptz */
+    check_in_time: number;
+    /** @format timestamptz */
+    check_out_time: number;
+    total_hours: number;
+    location_data: string;
+    status:
+      | "SCHEDULED"
+      | "IN_PROGRESS"
+      | "CANCELED_BY_CHEF"
+      | "CANCELED_BY_RESTAURANT"
+      | "COMPLETED"
+      | "VERIFIED"
+      | "DISPUTE"
+      | "ESCALATED"
+      | "PAID"
+      | "CANCELED";
+    /** @format timestamptz */
+    updated_at: number;
+    /** @format uuid */
+    application_id: string;
+    /** @format uuid */
+    user_id: string | null;
+    /** @format int64 */
+    restaurant_id: number;
+    /** @format int64 */
+    job_id: number;
+    /** @format int64 */
+    paid_amount: number;
+    chef_feedback: string;
+    restaurant_feedback: string;
+    /** @format int64 */
+    chef_rating: number;
+    /** @format int64 */
+    restaurant_rating: number;
+    /** @format timestamptz */
+    start_time: number | null;
+  };
+  cancel_log: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format timestamptz */
+    canceled_datetime: number | null;
+    /** @format int64 */
+    job_id: number;
+    /** @format uuid */
+    user_id: string | null;
+    /** @format int64 */
+    restaurant_id: number;
+    category: "cancelled_by_restaurant" | "cancelled_by_restaurant_late";
+    /** @format int64 */
+    cancel_fee: number;
+    reason: string;
+    /** @format int64 */
+    worksession_id: number;
+  };
 }
 
 export interface ChefReviewListResult {
@@ -7300,6 +7744,8 @@ export interface ChefReviewListResult {
     chef_rating: number;
     /** @format int64 */
     restaurant_rating: number;
+    /** @format timestamptz */
+    start_time: number | null;
   };
   restaurant: {
     /** @format int64 */
@@ -7431,6 +7877,8 @@ export interface FinishPartialUpdateResult {
     chef_rating: number;
     /** @format int64 */
     restaurant_rating: number;
+    /** @format timestamptz */
+    start_time: number | null;
   };
   review: {
     /** @format int64 */
@@ -7475,7 +7923,88 @@ export type MessagesListResult = {
   restaurant_id: number | null;
   /** @format int64 */
   worksession_id: number;
+  /**
+   * ルームごとのmessage number
+   * @format int64
+   */
+  message_seq: number;
 }[];
+
+export interface NoShowPartialUpdateData {
+  result1: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format timestamptz */
+    check_in_time: number;
+    /** @format timestamptz */
+    check_out_time: number;
+    total_hours: number;
+    location_data: string;
+    status:
+      | "SCHEDULED"
+      | "IN_PROGRESS"
+      | "CANCELED_BY_CHEF"
+      | "CANCELED_BY_RESTAURANT"
+      | "COMPLETED"
+      | "VERIFIED"
+      | "DISPUTE"
+      | "ESCALATED"
+      | "PAID"
+      | "CANCELED";
+    /** @format timestamptz */
+    updated_at: number;
+    /** @format uuid */
+    application_id: string;
+    /** @format uuid */
+    user_id: string | null;
+    /** @format int64 */
+    restaurant_id: number;
+    /** @format int64 */
+    job_id: number;
+    /** @format int64 */
+    paid_amount: number;
+    chef_feedback: string;
+    restaurant_feedback: string;
+    /** @format int64 */
+    chef_rating: number;
+    /** @format int64 */
+    restaurant_rating: number;
+    /** @format timestamptz */
+    start_time: number | null;
+  };
+  cancel_log: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format timestamptz */
+    canceled_datetime: number | null;
+    /** @format int64 */
+    job_id: number;
+    /** @format uuid */
+    user_id: string | null;
+    /** @format int64 */
+    restaurant_id: number;
+    category:
+      | "cancelled_by_chef_late"
+      | "cancelled_by_chef_same_day"
+      | "no_show"
+      | "cancelled_by_chef";
+    /** @format int64 */
+    cancel_fee: number;
+    reason: string;
+    /** @format int64 */
+    worksession_id: number;
+  };
+}
 
 export interface RestaurantReviewListResult {
   /** @format int64 */
@@ -7539,6 +8068,8 @@ export interface RestaurantReviewListResult {
     chef_rating: number;
     /** @format int64 */
     restaurant_rating: number;
+    /** @format timestamptz */
+    start_time: number | null;
   };
   user: {
     /** @format uuid */
@@ -7666,6 +8197,8 @@ export interface StartPartialUpdateResult {
   chef_rating: number;
   /** @format int64 */
   restaurant_rating: number;
+  /** @format timestamptz */
+  start_time: number | null;
 }
 
 export interface VerifyPartialUpdateBody {
@@ -7718,6 +8251,8 @@ export interface VerifyPartialUpdateResult {
     chef_rating: number;
     /** @format int64 */
     restaurant_rating: number;
+    /** @format timestamptz */
+    start_time: number | null;
   };
   review: {
     /** @format int64 */
@@ -7786,6 +8321,8 @@ export interface WorksessionsDetailData {
   chef_rating: number;
   /** @format int64 */
   restaurant_rating: number;
+  /** @format timestamptz */
+  start_time: number | null;
 }
 
 export interface WorksessionsPartialUpdatePayload {
@@ -7824,6 +8361,8 @@ export interface WorksessionsPartialUpdatePayload {
   chef_rating: number;
   /** @format int64 */
   restaurant_rating: number;
+  /** @format timestamptz */
+  start_time: number | null;
 }
 
 export interface WorksessionsPartialUpdateData {
@@ -7869,6 +8408,8 @@ export interface WorksessionsPartialUpdateData {
   chef_rating: number;
   /** @format int64 */
   restaurant_rating: number;
+  /** @format timestamptz */
+  start_time: number | null;
 }
 
 export type WorksessionsListOutput = {
@@ -7914,6 +8455,8 @@ export type WorksessionsListOutput = {
   chef_rating: number;
   /** @format int64 */
   restaurant_rating: number;
+  /** @format timestamptz */
+  start_time: number | null;
 }[];
 
 export type WorksessionListData = {
@@ -7959,6 +8502,8 @@ export type WorksessionListData = {
   chef_rating: number;
   /** @format int64 */
   restaurant_rating: number;
+  /** @format timestamptz */
+  start_time: number | null;
 }[];
 
 export interface WorksessionCreatePayload {
@@ -7997,6 +8542,8 @@ export interface WorksessionCreatePayload {
   chef_rating: number;
   /** @format int64 */
   restaurant_rating: number;
+  /** @format timestamptz */
+  start_time: number | null;
 }
 
 export interface WorksessionCreateData {
@@ -8042,4 +8589,6 @@ export interface WorksessionCreateData {
   chef_rating: number;
   /** @format int64 */
   restaurant_rating: number;
+  /** @format timestamptz */
+  start_time: number | null;
 }

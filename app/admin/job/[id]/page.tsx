@@ -27,6 +27,9 @@ import {
   QrCode,
   CheckCircle,
   MoreHorizontal,
+  AlertCircle,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,6 +65,8 @@ import { RestaurantReviewModal } from "@/components/modals/RestaurantReviewModal
 import { chefReviewApi } from "@/lib/api/chefReview";
 import { FaStar } from "react-icons/fa";
 import { EditJobModal } from "@/components/modals/EditJobModal";
+import { useUserCancelWorksessionByRestaurant } from "@/hooks/api/companyuser/worksessions/useCancelWorksessionByRestaurant";
+import { useNoShowWorksessionByRestaurant } from "@/hooks/api/companyuser/worksessions/useNoShowWorksessionByRestaurant";
 import { toast } from "@/hooks/use-toast";
 import {
   Tooltip,
@@ -69,14 +74,26 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useGetJob } from "@/hooks/api/jobs/useGetJob";
-import { useGetWorksessionsByJobId } from "@/hooks/api/worksessions/useGetWorksessionsByJobId";
+import { useGetJob } from "@/hooks/api/companyuser/jobs/useGetJob";
+import { useGetWorksessionsByJobId } from "@/hooks/api/companyuser/worksessions/useGetWorksessionsByJobId";
 import { JobsDetailData, JobsPartialUpdatePayload, WorksessionsRestaurantTodosListData } from "@/api/__generated__/base/data-contracts";
-import { useVerifyWorksession } from "@/hooks/api/worksessions/useVerifyWorksession";
-import { useUpdateJob } from "@/hooks/api/jobs/useUpdateJob";
+import { useVerifyWorksession } from "@/hooks/api/companyuser/worksessions/useVerifyWorksession";
+import { useUpdateJob } from "@/hooks/api/companyuser/jobs/useUpdateJob";
 import { getApi } from "@/api/api-factory";
 import { Worksessions } from "@/api/__generated__/base/Worksessions";
-import { useSubscriptionMessagesByWorksessionId } from "@/hooks/api/messages/useSubscriptionMessagesByWorksessionId";
+import { useSubscriptionMessagesByCompanyUserId } from "@/hooks/api/companyuser/messages/useSubscriptionMessagesByCompanyUserId";
+import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
+import { useUpdateReadMessageByCompanyUser } from "@/hooks/api/companyuser/messages/useUpdateReadMessageByCompanyUser";
+import { useSubscriptionUnreadMessagesByRestaurantId } from "@/hooks/api/companyuser/messages/useSubscriptionUnreadMessagesByRestaurantId";
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { useRouter } from "next/navigation";
+import { differenceInDays } from "date-fns";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Message {
   id: number;
@@ -91,6 +108,9 @@ interface PageParams {
 
 export default function JobDetail({ params }: PageParams) {
   const { id: jobId } = use(params);
+  const { user } = useCompanyAuth();
+  const router = useRouter();
+
   const [selectedApplicant, setSelectedApplicant] = useState<number | null>(
     null
   );
@@ -102,7 +122,15 @@ export default function JobDetail({ params }: PageParams) {
   const [chefReview, setChefReview] = useState<any>(null);
   const [isEditJobModalOpen, setIsEditJobModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [cancellationPenalty, setCancellationPenalty] = useState<{
+    penalty: number;
+    message: string;
+    status: string;
+  } | null>(null);
+  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [isNoShowModalOpen, setIsNoShowModalOpen] = useState(false);
   const { data: jobData, error: jobError } = useGetJob({ jobId: Number(jobId) });
   const { data: workSessions, error: workSessionsError } = useGetWorksessionsByJobId({ jobId: Number(jobId) });
 
@@ -112,10 +140,30 @@ export default function JobDetail({ params }: PageParams) {
   const { trigger: updateJobTrigger } = useUpdateJob({ jobId: Number(jobId), companyId: restaurant?.companies_id ?? undefined, restaurantId: restaurant?.id ?? undefined});
   const { trigger: verifyWorksessionTrigger } = useVerifyWorksession({ worksessionId: selectedWorkSession?.id || 0, jobId: Number(jobId) });
 
-  const { messages, sendMessage } = useSubscriptionMessagesByWorksessionId({
+  const { trigger: cancelWorksessionTrigger } = useUserCancelWorksessionByRestaurant({
+    worksession_id: selectedWorkSession?.id || 0,
+    reason: cancelReason
+  });
+  const { trigger: noShowWorksessionTrigger } = useNoShowWorksessionByRestaurant({
+    worksession_id: selectedWorkSession?.id || 0
+  });
+
+  // メッセージの取得
+  const { messagesData, sendMessage } = useSubscriptionMessagesByCompanyUserId({
+    companyUserId: user?.id,
     workSessionId: selectedWorkSession?.id,
     applicationId: selectedWorkSession?.application_id,
-    userType: 'company',
+  })
+
+  // 未読メッセージの取得
+  const { unreadMessagesData } = useSubscriptionUnreadMessagesByRestaurantId({
+    restaurantId: restaurant?.id,
+  });
+
+  const { trigger: updateReadMessageTrigger } = useUpdateReadMessageByCompanyUser({
+    companyUserId: user?.id,
+    workSessionId: selectedWorkSession?.id,
+    restaurantId: restaurant?.id,
   })
 
   const handleSendMessage = async () => {
@@ -156,8 +204,33 @@ export default function JobDetail({ params }: PageParams) {
   };
 
   useEffect(() => {
+    // メッセージが更新されたらスクロール
     scrollToBottom();
-  }, [messages]);
+
+    if (!messagesData || !messagesData.messages || messagesData.messages.length === 0) {
+      return;
+    }
+
+    // 最新のメッセージを取得（message_seqが最大のもの）
+    let latestMessage = null;
+    for (const message of messagesData.messages) {
+      if (!latestMessage || message.message_seq > latestMessage.message_seq) {
+        latestMessage = message;
+      }
+    }
+
+    console.log('latestMessage', latestMessage)
+
+    if (!latestMessage || !selectedWorkSession) return;
+    // 既読情報が最新のメッセージと同じ場合は何もしない
+    if (latestMessage.message_seq === messagesData.restaurant_last_read?.last_read_message_seq) return;
+
+    // 既読情報更新
+    updateReadMessageTrigger({
+      worksession_id: selectedWorkSession.id,
+      last_read_message_seq: latestMessage.message_seq,
+    });
+  }, [messagesData, selectedWorkSession, scrollToBottom, updateReadMessageTrigger]);
 
   // 型チェックとデータ変換
   const formattedJob: JobsDetailData['job'] | null = job
@@ -205,6 +278,87 @@ export default function JobDetail({ params }: PageParams) {
     }
   };
 
+  const calculateCancellationPenalty = () => {
+    if (!job) return null;
+    
+    const now = new Date();
+    const workDate = new Date(job.work_date);
+    const daysDifference = differenceInDays(workDate, now);
+
+    if (daysDifference >= 2) {
+      return {
+        penalty: 0,
+        message: "2日以上前のキャンセルは違約金なしで可能です。",
+        status: "cancelled_by_restaurant"
+      };
+    } else {
+      return {
+        penalty: job.fee,
+        message: "1日前以降のキャンセルは報酬予定額の100%の違約金とキャンセル手数料が発生します。",
+        status: "cancelled_by_restaurant_late"
+      };
+    }
+  };
+
+  const handleCancelClick = () => {
+    if (!job) return;
+    setCancellationPenalty(calculateCancellationPenalty());
+    setIsCancelModalOpen(true);
+  };
+
+  const handleCancelConfirm = async () => {
+    if (!cancellationPenalty || !job || !isConfirmed || !cancelReason) return;
+
+    try {
+      // TODO: APIを呼び出してキャンセル処理を実行
+      await cancelWorksessionTrigger();
+      // await cancelJob(job.id, cancellationPenalty.status, cancelReason);
+      toast({
+        title: "キャンセル完了",
+        description: "お仕事のキャンセルが完了しました。",
+      });
+      setIsCancelModalOpen(false);
+      router.refresh();
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "キャンセル処理に失敗しました。",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleNoShowClick = () => {
+    setIsNoShowModalOpen(true);
+  };
+
+  const handleNoShowConfirm = async () => {
+    if (!selectedWorkSession) return;
+
+    try {
+      await noShowWorksessionTrigger();
+      toast({
+        title: "ノーショー報告完了",
+        description: "シェフのノーショーを報告しました。",
+      });
+      setIsNoShowModalOpen(false);
+      router.refresh();
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "ノーショー報告に失敗しました。",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const shouldShowNoShowOption = (workSession: any) => {
+    if (!workSession || !job) return false;
+    const now = new Date();
+    const startTime = new Date(job.start_time);
+    return now > startTime;
+  };
+
   return (
     <div className="space-y-6">
       {/* ヘッダー */}
@@ -226,7 +380,6 @@ export default function JobDetail({ params }: PageParams) {
               {formatJobPostingJapaneseStatus(job?.status || "")}
             </Badge>
             <Badge variant="outline" className="text-sm bg-white py-1">
-              {/* <Calendar className="h-4 w-4" /> */}
               {job?.work_date
                 ? format(new Date(job.work_date), "MM/dd")
                 : "未定"}
@@ -267,8 +420,6 @@ export default function JobDetail({ params }: PageParams) {
                 表示
               </Link>
             </Button>
-
-            <div className="flex items-center gap-1"></div>
           </div>
         </div>
         <div className="ml-auto"></div>
@@ -290,50 +441,64 @@ export default function JobDetail({ params }: PageParams) {
             </CardHeader> */}
             <CardContent className="p-0">
               <div className="divide-y">
-                {workSessions?.map((session) => (
-                  <div
-                    key={session.id}
-                    className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
-                      selectedApplicant === session.id ? "bg-gray-50" : ""
-                    }`}
-                    onClick={() => {
-                      setSelectedApplicant(session.id);
-                      setSelectedWorkSession(session);
-                    }}>
-                    <div className="flex items-start gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage
-                          src={session.user.profile_image || "/chef-logo.png"}
-                          alt={session.user.name.charAt(0)}
-                        />
-                        <AvatarFallback>
-                          {session.user.name.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <p className="font-medium">
-                            {session.user.name}
-                            &nbsp;
-                            <span className="text-xs text-muted-foreground">
-                              シェフ
-                            </span>
-                          </p>
-                          <Badge variant="outline" className=" text-xs">
-                            {formatWorkSessionJapaneseStatus(session.status)}
-                          </Badge>
-                          {/* <p className="text-xs text-muted-foreground">
-                            {format(new Date(session.created_at), "MM/dd")}
-                          </p> */}
-                        </div>
+                {workSessions?.map((session) => {
+                  const unreadMessageData = unreadMessagesData?.find(
+                    (unreadMessageData) => unreadMessageData.unread_messages.some((message) => message.worksession_id === session.id)
+                  );
+                  const unreadMessageCount = unreadMessageData
+                    ? unreadMessageData.unread_messages.length
+                    : 0;
 
-                        <p className="text-sm text-muted-foreground truncate mt-1">
-                          {session.user.skills?.join(", ")}
-                        </p>
+                  return (
+                    <div
+                      key={session.id}
+                      className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors relative ${
+                        selectedApplicant === session.id ? "bg-gray-50" : ""
+                      }`}
+                      onClick={() => {
+                        setSelectedApplicant(session.id);
+                        setSelectedWorkSession(session);
+                      }}>
+                      <div className="flex items-start gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage
+                            src={session.user.profile_image || "/chef-logo.png"}
+                            alt={session.user.name.charAt(0)}
+                          />
+                          <AvatarFallback>
+                            {session.user.name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <p className="font-medium">
+                              {session.user.name}
+                              &nbsp;
+                              <span className="text-xs text-muted-foreground">
+                                シェフ
+                              </span>
+                            </p>
+                            <Badge variant="outline" className=" text-xs">
+                              {formatWorkSessionJapaneseStatus(session.status)}
+                            </Badge>
+                            {unreadMessageCount > 0 && (
+                              <Badge className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[1.25rem] h-5 flex items-center justify-center bg-red-500 text-white">
+                                {unreadMessageCount}
+                              </Badge>
+                            )}
+                            {/* <p className="text-xs text-muted-foreground">
+                              {format(new Date(session.created_at), "MM/dd")}
+                            </p> */}
+                          </div>
+
+                          <p className="text-sm text-muted-foreground truncate mt-1">
+                            {session.user.skills?.join(", ")}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
@@ -509,34 +674,66 @@ export default function JobDetail({ params }: PageParams) {
                     </Dialog>
 
                     {selectedWorkSession.status === "SCHEDULED" && (
-                      <Dialog
-                        open={isQrDialogOpen}
-                        onOpenChange={setIsQrDialogOpen}>
-                        <DialogTrigger asChild>
-                          <Button variant="outline" size="sm">
-                            <QrCode className="h-4 w-4 mr-2" />
-                            チェックインQR
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>チェックインQRコード</DialogTitle>
-                            <DialogDescription>
-                              シェフにこのQRコードを提示してください
-                            </DialogDescription>
-                          </DialogHeader>
-                          <div className="flex flex-col items-center justify-center p-4">
-                            <div className="bg-white p-4 rounded-lg shadow-md">
-                              <QRCodeSVG
-                                value={selectedWorkSession.application_id}
-                                size={200}
-                                level="H"
-                                includeMargin={true}
-                              />
+                      <>
+                        <Dialog
+                          open={isQrDialogOpen}
+                          onOpenChange={setIsQrDialogOpen}>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <QrCode className="h-4 w-4 mr-2" />
+                              チェックインQR
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>チェックインQRコード</DialogTitle>
+                              <DialogDescription>
+                                シェフにこのQRコードを提示してください
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="flex flex-col items-center justify-center p-4">
+                              <div className="bg-white p-4 rounded-lg shadow-md">
+                                <QRCodeSVG
+                                  value={selectedWorkSession.application_id}
+                                  size={200}
+                                  level="H"
+                                  includeMargin={true}
+                                />
+                              </div>
                             </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
+                          </DialogContent>
+                        </Dialog>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedWorkSession(selectedWorkSession);
+                                handleCancelClick();
+                              }}
+                              className="text-red-600 focus:text-red-600 focus:bg-red-50">
+                              <XCircle className="h-4 w-4 mr-2" />
+                              キャンセル
+                            </DropdownMenuItem>
+                            {shouldShowNoShowOption(selectedWorkSession) && (
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedWorkSession(selectedWorkSession);
+                                  handleNoShowClick();
+                                }}
+                                className="text-red-600 focus:text-red-600 focus:bg-red-50">
+                                <XCircle className="h-4 w-4 mr-2" />
+                                ノーショー報告
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </>
                     )}
 
                     {selectedWorkSession.status === "COMPLETED" && (
@@ -568,7 +765,7 @@ export default function JobDetail({ params }: PageParams) {
                     value="chat"
                     className="flex-1 flex flex-col p-4 overflow-hidden">
                     <div className="flex-1 overflow-y-auto mb-4 space-y-4 max-h-[calc(100vh-400px)]">
-                      {messages?.map((message: any) => (
+                      {messagesData?.messages.map((message) => (
                         <div
                           key={message.id}
                           className={`flex ${message.sender_type === "restaurant" ? "justify-end" : "justify-start"}`}>
@@ -790,6 +987,99 @@ export default function JobDetail({ params }: PageParams) {
           job={formattedJob}
         />
       }
+
+      <AlertDialog open={isCancelModalOpen} onOpenChange={setIsCancelModalOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertCircle className="h-5 w-5" />
+              お仕事のキャンセル確認
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4">
+              <div className="bg-red-50 p-4 rounded-lg">
+                <p className="text-red-800 font-medium">
+                  {cancellationPenalty?.message}
+                </p>
+                {cancellationPenalty?.penalty !== undefined && cancellationPenalty.penalty > 0 && (
+                  <div className="mt-2">
+                    <p className="text-red-800 font-semibold">
+                      違約金: ¥{cancellationPenalty.penalty.toLocaleString()}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-yellow-50 p-4 rounded-lg">
+                <p className="text-yellow-800 text-sm">
+                  ※ 度重なるキャンセルや不当な理由でのキャンセルは、今後のご利用停止となる可能性があります。
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="cancel-reason" className="block text-sm font-medium text-gray-700">
+                  キャンセル理由
+                </label>
+                <textarea
+                  id="cancel-reason"
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  className="w-full h-24 p-2 border rounded-md text-sm bg-white"
+                  placeholder="キャンセルの理由を具体的にご記入ください"
+                  required
+                />
+              </div>
+
+              <div className="flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  id="confirm-cancel"
+                  checked={isConfirmed}
+                  onChange={(e) => setIsConfirmed(e.target.checked)}
+                  className="mt-1"
+                />
+                <label htmlFor="confirm-cancel" className="text-sm text-gray-600">
+                  上記の内容を確認し、キャンセルに同意します
+                </label>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex justify-end gap-4 mt-4">
+            <Button variant="outline" onClick={() => setIsCancelModalOpen(false)}>
+              閉じる
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancelConfirm}
+              disabled={!isConfirmed || !cancelReason}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              キャンセルを確定
+            </Button>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={isNoShowModalOpen} onOpenChange={setIsNoShowModalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>ノーショー報告</AlertDialogTitle>
+            <AlertDialogDescription>
+              シェフが来ませんでした。報告しますか？
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex justify-end gap-4 mt-4">
+            <Button variant="outline" onClick={() => setIsNoShowModalOpen(false)}>
+              キャンセル
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleNoShowConfirm}
+            >
+              報告する
+            </Button>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

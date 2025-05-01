@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
-import { useEffect, use, useState, useRef } from "react";
+import { useEffect, use, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   ChevronLeft,
@@ -10,37 +9,12 @@ import {
   Clock,
   MapPin,
   MessageSquare,
-  MapPinIcon,
   QrCode,
-  ArrowRight,
-  CheckCircle,
-  CreditCard,
-  DollarSign,
-  Shield,
-  ChevronDown,
-  Send,
+  AlertCircle,
 } from "lucide-react";
-import { jobApi, getJobDetails } from "@/lib/api/job";
-import {
-  workSessionApi,
-  updateWorkSessionToCheckIn,
-  updateWorkSessionToCheckOut,
-} from "@/lib/api/workSession";
-import { messageApi } from "@/lib/api/message";
-import { applicationApi } from "@/lib/api/application";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { ja } from "date-fns/locale";
-import useSWR, { mutate } from "swr";
-import type { Job, WorkSession, Message, Application } from "@/types";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { ChefReviewModal } from "@/components/modals/ChefReviewModal";
 import { toast } from "@/hooks/use-toast";
@@ -52,7 +26,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ChatSheet } from "@/components/chat/ChatSheet";
-import { useSubscriptionMessagesByWorksessionId } from "@/hooks/api/messages/useSubscriptionMessagesByWorksessionId";
+import { useSubscriptionMessagesByUserId } from "@/hooks/api/user/messages/useSubscriptionMessagesByUserId";
+import { useAuth } from "@/lib/contexts/AuthContext";
+import { useStartWorksession } from "@/hooks/api/user/worksessions/useStartWorksession";
+import { useFinishWorksession } from "@/hooks/api/user/worksessions/useFinishWorksession";
+import { useGetJob } from "@/hooks/api/companyuser/jobs/useGetJob";
+import { useCancelWorksessionByChef } from "@/hooks/api/user/worksessions/useCancelWorksessionByChef";
+import { useGetWorksessionsByUserId } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserId";
+import { useSubscriptionUnreadMessagesByUser } from "@/hooks/api/user/messages/useSubscriptionUnreadMessagesByUser";
 
 interface JobDetail {
   job: {
@@ -91,58 +72,75 @@ type PageProps = {
   }>;
 };
 
-
-
 export default function JobDetail({ params }: PageProps) {
   const { id } = use(params);
   const searchParams = useSearchParams();
   const router = useRouter();
   const from = searchParams.get("from") || "schedule";
+
+  const { user } = useAuth();
+
   const [isQrScanned, setIsQrScanned] = useState(false);
   const [scannedData, setScannedData] = useState<string | null>(null);
   const [scanner, setScanner] = useState<Html5QrcodeScanner | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
-
-  // 応募情報の取得
-  const { data: application } = useSWR<Application>(
-    id ? `application-${id}` : null,
-    () => applicationApi.getApplication(id)
-  );
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [cancellationPenalty, setCancellationPenalty] = useState<{
+    penalty: number;
+    message: string;
+    status: string;
+  } | null>(null);
+  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
 
   // ジョブ詳細の取得
-  const { data: jobDetail } = useSWR<JobDetail>(
-    application?.job_id ? `job-${application.job_id}` : null,
-    () => getJobDetails(application!.job_id.toString())
-  );
+  const { data: jobDetail } = useGetJob({ jobId: Number(id) });
 
   const job = jobDetail?.job;
   const restaurant = jobDetail?.restaurant;
 
   // ワークセッションの取得
-  const { data: workSession } = useSWR<WorkSession | null>(
-    application?.id ? `workSession-${application.id}` : null,
-    async () => {
-      const sessions = await workSessionApi.getWorkSessions();
-      const matchingSession = (sessions as WorkSession[]).find(
-        (ws) => ws.application_id === application?.id.toString()
-      );
-      return matchingSession || null;
-    }
+  const { data: workSessions } = useGetWorksessionsByUserId({
+    userId: user?.id,
+  })
+  
+  const workSession = workSessions?.find(
+    (session) => session.job_id === job?.id
   );
 
+  const { trigger: startWorksessionTrigger } = useStartWorksession({
+    worksessionId: workSession?.id || 0,
+    userId: user?.id,
+  });
+
+  const { trigger: finishWorksessionTrigger } = useFinishWorksession({
+    worksessionId: workSession?.id || 0,
+    userId: user?.id,
+  });
+
+  const { trigger: cancelWorksessionTrigger } = useCancelWorksessionByChef({
+    worksession_id: workSession?.id || 0,
+    reason: cancelReason
+  });
+
   // メッセージの取得
-  const { messages, sendMessage } = useSubscriptionMessagesByWorksessionId({
+  const { messagesData, sendMessage } = useSubscriptionMessagesByUserId({
+    userId: user?.id,
     workSessionId: workSession?.id,
-    applicationId: application?.id.toString() || "",
-    userType: 'chef',
+    applicationId: workSession?.application_id,
+  })
+
+  // 未読メッセージの取得
+  const { unreadMessagesData } = useSubscriptionUnreadMessagesByUser({
+    userId: user?.id,
   })
 
   // 未読メッセージのカウント
-  const unreadCount =
-    messages?.filter((msg) => msg.sender_type === "restaurant" && !msg.is_read)
-      .length || 0;
+  const unreadCount = unreadMessagesData?.find(
+    (messageData) => messageData.worksession.id === workSession?.id
+  )?.unread_message_count || 0;
 
   const handleOpenDialog = () => {
     setIsDialogOpen(true);
@@ -260,7 +258,7 @@ export default function JobDetail({ params }: PageProps) {
 
         currentScanner.render(
           (decodedText: string) => {
-            if (application?.id.toString() === decodedText) {
+            if (workSession?.application_id === decodedText) {
               setIsQrScanned(true);
               setScannedData(decodedText);
               currentScanner?.clear();
@@ -288,23 +286,17 @@ export default function JobDetail({ params }: PageProps) {
         }
       };
     }
-  }, [isDialogOpen, isQrScanned, application?.id]);
+  }, [isDialogOpen, isQrScanned, workSession]);
 
   const handleSuccessfulScan = async () => {
     if (!workSession) return;
 
     try {
       console.log("チェックイン処理を開始します");
-      await updateWorkSessionToCheckIn(workSession.id);
+      await startWorksessionTrigger({
+        check_in_time: Date.now(),
+      });
       console.log("チェックインが完了しました");
-
-      const updatedWorkSession = {
-        ...workSession,
-        status: "IN_PROGRESS",
-        check_in_time: new Date().toISOString(),
-      };
-
-      await mutate(`workSession-${application?.id}`, updatedWorkSession, false);
       router.refresh();
     } catch (error) {
       console.error("チェックイン処理に失敗しました:", error);
@@ -318,22 +310,12 @@ export default function JobDetail({ params }: PageProps) {
 
     try {
       console.log("チェックアウト処理を開始します");
-      await updateWorkSessionToCheckOut(
-        workSession.id.toString(),
-        comment,
-        rating
-      );
+      await finishWorksessionTrigger({
+        check_out_time: Date.now(),
+        rating,
+        feedback: comment
+      });
       console.log("チェックアウトが完了しました");
-
-      // ワークセッションのデータを更新
-      const updatedWorkSession = {
-        ...workSession,
-        status: "COMPLETED",
-        check_out_time: Math.floor(Date.now() / 1000), // Unix timestamp in seconds
-      };
-
-      // SWRのキャッシュを更新
-      await mutate(`workSession-${application?.id}`, updatedWorkSession, false);
 
       // ページをリロードして状態を更新
       router.refresh();
@@ -373,6 +355,61 @@ export default function JobDetail({ params }: PageProps) {
         );
       default:
         return null;
+    }
+  };
+
+  const calculateCancellationPenalty = () => {
+    if (!job) return null;
+    
+    const now = new Date();
+    const workDate = new Date(job.work_date);
+    const daysDifference = differenceInDays(workDate, now);
+
+    if (daysDifference >= 2) {
+      return {
+        penalty: 0,
+        message: "2日以上前のキャンセルは違約金なしで可能です。",
+        status: "cancelled_by_chef"
+      };
+    } else if (daysDifference >= 1) {
+      return {
+        penalty: job.fee * 0.8,
+        message: "2日前〜前日のキャンセルは報酬予定額の80%の違約金が発生します。",
+        status: "cancelled_by_chef_late"
+      };
+    } else {
+      return {
+        penalty: job.fee,
+        message: "当日のキャンセルは報酬予定額の100%の違約金が発生します。",
+        status: "cancelled_by_chef_same_day"
+      };
+    }
+  };
+
+  const handleCancelClick = () => {
+    if (!job) return;
+    setCancellationPenalty(calculateCancellationPenalty());
+    setIsCancelModalOpen(true);
+  };
+
+  const handleCancelConfirm = async () => {
+    if (!cancellationPenalty || !job || !isConfirmed || !cancelReason) return;
+
+    try {
+      // TODO: APIを呼び出してキャンセル処理を実行
+      // await cancelJob(job.id, cancellationPenalty.status, cancelReason);
+      toast({
+        title: "キャンセル完了",
+        description: "お仕事のキャンセルが完了しました。",
+      });
+      setIsCancelModalOpen(false);
+      router.push("/chef/schedule");
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "キャンセル処理に失敗しました。",
+        variant: "destructive",
+      });
     }
   };
 
@@ -502,7 +539,7 @@ export default function JobDetail({ params }: PageProps) {
             <div>
               <h4 className="font-medium">勤務時間</h4>
               <p className="text-sm">
-                {startTime} 〜 {endTime}（休憩あり）
+                {startTime} 〜 {endTime}
               </p>
             </div>
           </div>
@@ -524,6 +561,12 @@ export default function JobDetail({ params }: PageProps) {
             <span>報酬</span>
             <span>¥{job.fee.toLocaleString()}</span>
           </div>
+          <button
+            onClick={handleCancelClick}
+            className="text-sm text-gray-500 hover:text-red-500 transition-colors"
+          >
+            お仕事をキャンセルする
+          </button>
         </div>
       </div>
 
@@ -607,7 +650,8 @@ export default function JobDetail({ params }: PageProps) {
         <ChatSheet
           isOpen={isChatOpen}
           onClose={() => setIsChatOpen(false)}
-          messages={messages || []}
+          worksessionId={workSession.id}
+          messagesData={messagesData}
           onSendMessage={sendMessage}
           restaurantName={restaurant?.name || ""}
           restaurantImage={restaurant?.profile_image}
@@ -615,6 +659,77 @@ export default function JobDetail({ params }: PageProps) {
           startTime={job?.start_time || 0}
         />
       )}
+
+      <AlertDialog open={isCancelModalOpen} onOpenChange={setIsCancelModalOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertCircle className="h-5 w-5" />
+              お仕事のキャンセル確認
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4">
+              <div className="bg-red-50 p-4 rounded-lg">
+                <p className="text-red-800 font-medium">
+                  {cancellationPenalty?.message}
+                </p>
+                {cancellationPenalty?.penalty !== undefined && cancellationPenalty.penalty > 0 && (
+                  <div className="mt-2">
+                    <p className="text-red-800 font-semibold">
+                      違約金: ¥{cancellationPenalty.penalty.toLocaleString()}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-yellow-50 p-4 rounded-lg">
+                <p className="text-yellow-800 text-sm">
+                  ※ 度重なるキャンセルや不当な理由でのキャンセルは、今後のご利用停止となる可能性があります。
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="cancel-reason" className="block text-sm font-medium text-gray-700">
+                  キャンセル理由
+                </label>
+                <textarea
+                  id="cancel-reason"
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  className="w-full h-24 p-2 border rounded-md text-sm bg-white"
+                  placeholder="キャンセルの理由を具体的にご記入ください"
+                  required
+                />
+              </div>
+
+              <div className="flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  id="confirm-cancel"
+                  checked={isConfirmed}
+                  onChange={(e) => setIsConfirmed(e.target.checked)}
+                  className="mt-1"
+                />
+                <label htmlFor="confirm-cancel" className="text-sm text-gray-600">
+                  上記の内容を確認し、キャンセルに同意します
+                </label>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex justify-end gap-4 mt-4">
+            <Button variant="outline" onClick={() => setIsCancelModalOpen(false)}>
+              閉じる
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancelConfirm}
+              disabled={!isConfirmed || !cancelReason}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              キャンセルを確定
+            </Button>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

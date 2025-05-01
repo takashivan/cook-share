@@ -1088,13 +1088,19 @@ export default function ChefLandingPage() {
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <a href="https://corp.cookbiz.co.jp/privacy-policy/" className="text-gray-400 hover:text-white transition-colors">
                     プライバシーポリシー
                   </a>
                 </li>
+                
                 <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                    特定商取引法に基づく表記
+                  <a href="https://corp.cookbiz.co.jp/privacy-policy-treatment/" className="text-gray-400 hover:text-white transition-colors">
+                    個人情報の取扱いについて
+                  </a>
+                </li>
+                <li>
+                  <a href="https://corp.cookbiz.co.jp/privacy-policy-publication/" className="text-gray-400 hover:text-white transition-colors">
+                    個人情報に関する公表文
                   </a>
                 </li>
               </ul>

@@ -11,10 +11,15 @@
  */
 
 import {
+  CancelByChefPartialUpdateData,
+  CancelByChefPartialUpdatePayload,
+  CancelByRestaurantPartialUpdateData,
+  CancelByRestaurantPartialUpdatePayload,
   ChefReviewListResult,
   FinishPartialUpdateBody,
   FinishPartialUpdateResult,
   MessagesListResult,
+  NoShowPartialUpdateData,
   RestaurantReviewListResult,
   StartPartialUpdateBody,
   StartPartialUpdateResult,
@@ -31,6 +36,86 @@ import { ContentType, HttpClient, RequestParams } from "./http-client";
 export class Worksessions<
   SecurityDataType = unknown,
 > extends HttpClient<SecurityDataType> {
+  /**
+   * @description [AUTH-Chef]自分のものしかキャンセルできない <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags worksessions
+   * @name CancelByChefPartialUpdate
+   * @summary [AUTH-Chef]自分のものしかキャンセルできない
+   * @request PATCH:/worksessions/{worksession_id}/cancel-by-chef
+   */
+  cancelByChefPartialUpdate = (
+    worksessionId: number,
+    data: CancelByChefPartialUpdatePayload,
+    params: RequestParams = {},
+  ) =>
+    this.request<CancelByChefPartialUpdateData, void>({
+      path: `/worksessions/${worksessionId}/cancel-by-chef`,
+      method: "PATCH",
+      body: data,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+
+  cancelByChefPartialUpdateQueryArgs = (
+    worksessionId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled
+      ? [`/worksessions/${worksessionId}/cancel-by-chef`]
+      : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: CancelByChefPartialUpdatePayload },
+    ) => Promise<CancelByChefPartialUpdateData> = (_, { arg }) =>
+      this.cancelByChefPartialUpdate(worksessionId, arg, params).then(
+        (res) => res.data,
+      );
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description [AUTH-CompanyUser]レストランのスタッフしかキャンセルできない <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags worksessions
+   * @name CancelByRestaurantPartialUpdate
+   * @summary [AUTH-CompanyUser]レストランのスタッフしかキャンセルできない
+   * @request PATCH:/worksessions/{worksession_id}/cancel-by-restaurant
+   */
+  cancelByRestaurantPartialUpdate = (
+    worksessionId: number,
+    data: CancelByRestaurantPartialUpdatePayload,
+    params: RequestParams = {},
+  ) =>
+    this.request<CancelByRestaurantPartialUpdateData, void>({
+      path: `/worksessions/${worksessionId}/cancel-by-restaurant`,
+      method: "PATCH",
+      body: data,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+
+  cancelByRestaurantPartialUpdateQueryArgs = (
+    worksessionId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled
+      ? [`/worksessions/${worksessionId}/cancel-by-restaurant`]
+      : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: CancelByRestaurantPartialUpdatePayload },
+    ) => Promise<CancelByRestaurantPartialUpdateData> = (_, { arg }) =>
+      this.cancelByRestaurantPartialUpdate(worksessionId, arg, params).then(
+        (res) => res.data,
+      );
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
@@ -117,6 +202,32 @@ export class Worksessions<
     const key = enabled ? [`/worksessions/${worksessionId}/messages`] : null;
     const fetcher = () =>
       this.messagesList(worksessionId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags worksessions
+   * @name NoShowPartialUpdate
+   * @request PATCH:/worksessions/{worksession_id}/no-show
+   */
+  noShowPartialUpdate = (worksessionId: number, params: RequestParams = {}) =>
+    this.request<NoShowPartialUpdateData, void>({
+      path: `/worksessions/${worksessionId}/no-show`,
+      method: "PATCH",
+      format: "json",
+      ...params,
+    });
+
+  noShowPartialUpdateQueryArgs = (
+    worksessionId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/worksessions/${worksessionId}/no-show`] : null;
+    const fetcher: (url: string[]) => Promise<NoShowPartialUpdateData> = (_) =>
+      this.noShowPartialUpdate(worksessionId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 

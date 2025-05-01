@@ -122,11 +122,11 @@ export class Restaurantaccesses<
   };
 
   /**
-   * @description Add RestaurantAccess record <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH-CompanyUser]レストランのスタッフだけが追加できる <br /><br /> <b>Authentication:</b> not required
    *
    * @tags restaurantaccesses
    * @name RestaurantaccessesCreate
-   * @summary Add RestaurantAccess record
+   * @summary [AUTH-CompanyUser]レストランのスタッフだけが追加できる
    * @request POST:/restaurantaccesses
    */
   restaurantaccessesCreate = (

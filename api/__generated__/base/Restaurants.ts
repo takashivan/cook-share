@@ -11,7 +11,7 @@
  */
 
 import {
-  ChefReviewsListResult,
+  ChefReviewsListData,
   CompanyuserNotificationsCreateData,
   CompanyusersCreateInput,
   CompanyusersCreateOutput,
@@ -25,6 +25,7 @@ import {
   RestaurantsListOutput,
   RestaurantsPartialUpdateData,
   RestaurantsPartialUpdatePayload,
+  ReviewsListData,
   StaffInviteCreateInput,
   StaffInviteCreateOutput,
 } from "./data-contracts";
@@ -34,10 +35,11 @@ export class Restaurants<
   SecurityDataType = unknown,
 > extends HttpClient<SecurityDataType> {
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH-CompanyUser]レストランのスタッフだけが追加できます。 <br /><br /> <b>Authentication:</b> not required
    *
    * @tags restaurants
    * @name StaffInviteCreate
+   * @summary [AUTH-CompanyUser]レストランのスタッフだけが追加できます。
    * @request POST:/restaurants/staff/invite
    */
   staffInviteCreate = (
@@ -74,7 +76,7 @@ export class Restaurants<
    * @request GET:/restaurants/{restaurant_id}/chef-reviews
    */
   chefReviewsList = (restaurantId: number, params: RequestParams = {}) =>
-    this.request<ChefReviewsListResult, void>({
+    this.request<ChefReviewsListData, void>({
       path: `/restaurants/${restaurantId}/chef-reviews`,
       method: "GET",
       format: "json",
@@ -245,6 +247,32 @@ export class Restaurants<
   };
 
   /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags restaurants
+   * @name ReviewsList
+   * @request GET:/restaurants/{restaurant_id}/reviews
+   */
+  reviewsList = (restaurantId: number, params: RequestParams = {}) =>
+    this.request<ReviewsListData, void>({
+      path: `/restaurants/${restaurantId}/reviews`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  reviewsListQueryArgs = (
+    restaurantId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/restaurants/${restaurantId}/reviews`] : null;
+    const fetcher = () =>
+      this.reviewsList(restaurantId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
    * @description Delete restaurant record. <br /><br /> <b>Authentication:</b> not required
    *
    * @tags restaurants
@@ -362,11 +390,11 @@ export class Restaurants<
   };
 
   /**
-   * @description Add restaurant record <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH-CompanyUser]会社のis_adminだけが追加できます。 <br /><br /> <b>Authentication:</b> not required
    *
    * @tags restaurants
    * @name RestaurantsCreate
-   * @summary Add restaurant record
+   * @summary [AUTH-CompanyUser]会社のis_adminだけが追加できます。
    * @request POST:/restaurants
    */
   restaurantsCreate = (

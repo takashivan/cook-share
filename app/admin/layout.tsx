@@ -22,6 +22,7 @@ import {
   Home,
   Bell,
   ChevronDown,
+  Mail,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { XanoClient } from "@xano/js-sdk/lib";
@@ -318,13 +319,20 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           active: pathname === "/admin/settings",
           show: true,
         },
-        {
-          title: "すべての通知",
-          href: "/admin/notifications",
-          icon: Bell,
-          active: pathname === "/admin/notifications",
-          show: true,
-        },
+          {
+            title: "すべての通知",
+            href: "/admin/notifications",
+            icon: Bell,
+            active: pathname === "/admin/notifications",
+            show: true,
+          },
+          {
+            title: "お問い合わせ",
+            href: "/admin/contact",
+            icon: Mail,
+            active: pathname === "/admin/contact",
+            show: true,
+          },
       ],
     },
   ];

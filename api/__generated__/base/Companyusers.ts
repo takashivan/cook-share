@@ -19,6 +19,7 @@ import {
   CompanyusersPartialUpdateData,
   CompanyusersPartialUpdatePayload,
   RestaurantsListResult,
+  WorksessionsMessagesListData,
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
@@ -48,6 +49,44 @@ export class Companyusers<
     const key = enabled ? [`/companyusers/${companyuserId}/restaurants`] : null;
     const fetcher = () =>
       this.restaurantsList(companyuserId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description [AUTH-CompanyUser]該当レストランのスタッフだけがメッセージを見られます。 <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags companyusers
+   * @name WorksessionsMessagesList
+   * @summary [AUTH-CompanyUser]該当レストランのスタッフだけがメッセージを見られます。
+   * @request GET:/companyusers/{companyuser_id}/worksessions/{worksession_id}/messages
+   */
+  worksessionsMessagesList = (
+    companyuserId: string,
+    worksessionId: number,
+    params: RequestParams = {},
+  ) =>
+    this.request<WorksessionsMessagesListData, void>({
+      path: `/companyusers/${companyuserId}/worksessions/${worksessionId}/messages`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  worksessionsMessagesListQueryArgs = (
+    companyuserId: string,
+    worksessionId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled
+      ? [
+          `/companyusers/${companyuserId}/worksessions/${worksessionId}/messages`,
+        ]
+      : null;
+    const fetcher = () =>
+      this.worksessionsMessagesList(companyuserId, worksessionId, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 

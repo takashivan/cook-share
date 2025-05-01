@@ -19,8 +19,8 @@ import {
   PatchJobPayload,
   PostJobData,
   PostJobPayload,
-  QueryUpcomingListData,
   QueryUpcomingjobsListData,
+  QueryUpcomingListData,
   RestaurantDetailData,
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";

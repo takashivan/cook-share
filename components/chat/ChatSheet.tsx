@@ -10,13 +10,15 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Message } from "@/types";
-import { MessagesListResult } from "@/api/__generated__/base/data-contracts";
+import { WorksessionsMessagesListResult } from "@/api/__generated__/base/data-contracts";
+import { useUpdateReadMessageByUser } from "@/hooks/api/user/messages/useUpdateReadMessageByUser";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 interface ChatSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  messages: MessagesListResult | undefined;
+  worksessionId?: number;
+  messagesData: WorksessionsMessagesListResult | undefined;
   onSendMessage: (message: string) => void;
   restaurantName: string;
   restaurantImage?: string;
@@ -27,24 +29,56 @@ interface ChatSheetProps {
 export function ChatSheet({
   isOpen,
   onClose,
-  messages,
+  worksessionId,
+  messagesData,
   onSendMessage,
   restaurantName,
   restaurantImage,
   workDate,
   startTime,
 }: ChatSheetProps) {
+  const { user } = useAuth();
+
   const [messageInput, setMessageInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const { trigger: updateReadMessageTrigger } = useUpdateReadMessageByUser({
+    userId: user?.id,
+    workSessionId: worksessionId,
+  })
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // メッセージが更新されたらスクロール
   useEffect(() => {
+    // メッセージが更新されたらスクロール
     scrollToBottom();
-  }, [messages]);
+
+    if (!messagesData || !messagesData.messages || messagesData.messages.length === 0) {
+      return;
+    }
+
+    // 最新のメッセージを取得（message_seqが最大のもの）
+    let latestMessage = null;
+    for (const message of messagesData.messages) {
+      if (!latestMessage || message.message_seq > latestMessage.message_seq) {
+        latestMessage = message;
+      }
+    }
+
+    console.log('latestMessage', latestMessage)
+
+    if (!latestMessage || !worksessionId) return;
+    // 既読情報が最新のメッセージと同じ場合は何もしない
+    if (latestMessage.message_seq === messagesData.chef_last_read?.last_read_message_seq) return;
+
+    // 既読情報更新
+    updateReadMessageTrigger({
+      worksession_id: worksessionId,
+      last_read_message_seq: latestMessage.message_seq,
+    });
+  }, [messagesData, worksessionId, scrollToBottom, updateReadMessageTrigger]);
 
   const handleSendMessage = () => {
     try {
@@ -93,8 +127,8 @@ export function ChatSheet({
 
           {/* メッセージエリア */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages && messages.length > 0 ? (
-              messages.map((message) => (
+            {messagesData && messagesData.messages && messagesData.messages.length > 0 ? (
+              messagesData.messages.map((message) => (
                 <div
                   key={message.id}
                   className={`flex ${
