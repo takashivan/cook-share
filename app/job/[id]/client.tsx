@@ -646,7 +646,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
               </a>
 
               <Button
-                onClick={() => router.push(`/chef/job/${applicationId}`)}
+                onClick={() => router.push(`/chef/job/${jobDetail.job.id}`)}
                 className="w-full flex items-center justify-center gap-2"
                 style={{ backgroundColor: "#DB3F1C" }}>
                 <ArrowRight className="w-4 h-4" />

@@ -115,7 +115,7 @@ export default function ChefDashboard() {
             upcomingJobs.map((session) => (
               <Link
                 key={session.id}
-                href={`/chef/job/${session.application_id}`}
+                href={`/chef/job/${session.job_id}`}
                 className="block">
                 <div className="bg-white rounded-lg shadow-md p-4">
                   <div className="flex justify-between items-center mb-2">
@@ -160,7 +160,7 @@ export default function ChefDashboard() {
             inProgressJobs.map((session) => (
               <Link
                 key={session.id}
-                href={`/chef/job/${session.application_id}`}
+                href={`/chef/job/${session.job_id}`}
                 className="block">
                 <div
                   key={session.id}

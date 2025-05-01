@@ -56,6 +56,11 @@ import {
 import { ChatSheet } from "@/components/chat/ChatSheet";
 import { useSubscriptionMessagesByUserId } from "@/hooks/api/messages/useSubscriptionMessagesByUserId";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { useStartWorksession } from "@/hooks/api/user/worksessions/useStartWorksession";
+import { useFinishWorksession } from "@/hooks/api/user/worksessions/useFinishWorksession";
+import { useGetJob } from "@/hooks/api/jobs/useGetJob";
+import { useGetWorksessionsByUserId } from "@/hooks/api/worksessions/useGetWorksessionsByUserId";
+import { useSubscriptionUnreadMessagesByUser } from "@/hooks/api/messages/useSubscriptionUnreadMessagesByUser";
 
 interface JobDetail {
   job: {
@@ -94,8 +99,6 @@ type PageProps = {
   }>;
 };
 
-
-
 export default function JobDetail({ params }: PageProps) {
   const { id } = use(params);
   const searchParams = useSearchParams();
@@ -119,44 +122,47 @@ export default function JobDetail({ params }: PageProps) {
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
 
-  // 応募情報の取得
-  const { data: application } = useSWR<Application>(
-    id ? `application-${id}` : null,
-    () => applicationApi.getApplication(id)
-  );
-
   // ジョブ詳細の取得
-  const { data: jobDetail } = useSWR<JobDetail>(
-    application?.job_id ? `job-${application.job_id}` : null,
-    () => getJobDetails(application!.job_id.toString())
-  );
+  const { data: jobDetail } = useGetJob({ jobId: Number(id) });
 
   const job = jobDetail?.job;
   const restaurant = jobDetail?.restaurant;
 
   // ワークセッションの取得
-  const { data: workSession } = useSWR<WorkSession | null>(
-    application?.id ? `workSession-${application.id}` : null,
-    async () => {
-      const sessions = await workSessionApi.getWorkSessions();
-      const matchingSession = (sessions as WorkSession[]).find(
-        (ws) => ws.application_id === application?.id.toString()
-      );
-      return matchingSession || null;
-    }
+  const { data: workSessions } = useGetWorksessionsByUserId({
+    userId: user?.id,
+  })
+  
+  const workSession = workSessions?.find(
+    (session) => session.job_id === job?.id
   );
+
+  const { trigger: startWorksessionTrigger } = useStartWorksession({
+    worksessionId: workSession?.id || 0,
+    userId: user?.id,
+  });
+
+  const { trigger: finishWorksessionTrigger } = useFinishWorksession({
+    worksessionId: workSession?.id || 0,
+    userId: user?.id,
+  });
 
   // メッセージの取得
   const { messagesData, sendMessage } = useSubscriptionMessagesByUserId({
     userId: user?.id,
     workSessionId: workSession?.id,
-    applicationId: application?.id.toString() || "",
+    applicationId: workSession?.application_id,
+  })
+
+  // 未読メッセージの取得
+  const { unreadMessagesData } = useSubscriptionUnreadMessagesByUser({
+    userId: user?.id,
   })
 
   // 未読メッセージのカウント
-  const unreadCount =
-    messagesData?.messages?.filter((msg) => msg.sender_type === "restaurant" && !msg.is_read)
-      .length || 0;
+  const unreadCount = unreadMessagesData?.find(
+    (messageData) => messageData.worksession.id === workSession?.id
+  )?.unread_message_count || 0;
 
   const handleOpenDialog = () => {
     setIsDialogOpen(true);
@@ -274,7 +280,7 @@ export default function JobDetail({ params }: PageProps) {
 
         currentScanner.render(
           (decodedText: string) => {
-            if (application?.id.toString() === decodedText) {
+            if (workSession?.application_id === decodedText) {
               setIsQrScanned(true);
               setScannedData(decodedText);
               currentScanner?.clear();
@@ -302,23 +308,17 @@ export default function JobDetail({ params }: PageProps) {
         }
       };
     }
-  }, [isDialogOpen, isQrScanned, application?.id]);
+  }, [isDialogOpen, isQrScanned, workSession]);
 
   const handleSuccessfulScan = async () => {
     if (!workSession) return;
 
     try {
       console.log("チェックイン処理を開始します");
-      await updateWorkSessionToCheckIn(workSession.id);
+      await startWorksessionTrigger({
+        check_in_time: Date.now(),
+      });
       console.log("チェックインが完了しました");
-
-      const updatedWorkSession = {
-        ...workSession,
-        status: "IN_PROGRESS",
-        check_in_time: new Date().toISOString(),
-      };
-
-      await mutate(`workSession-${application?.id}`, updatedWorkSession, false);
       router.refresh();
     } catch (error) {
       console.error("チェックイン処理に失敗しました:", error);
@@ -332,22 +332,12 @@ export default function JobDetail({ params }: PageProps) {
 
     try {
       console.log("チェックアウト処理を開始します");
-      await updateWorkSessionToCheckOut(
-        workSession.id.toString(),
-        comment,
-        rating
-      );
+      await finishWorksessionTrigger({
+        check_out_time: Date.now(),
+        rating,
+        feedback: comment
+      });
       console.log("チェックアウトが完了しました");
-
-      // ワークセッションのデータを更新
-      const updatedWorkSession = {
-        ...workSession,
-        status: "COMPLETED",
-        check_out_time: Math.floor(Date.now() / 1000), // Unix timestamp in seconds
-      };
-
-      // SWRのキャッシュを更新
-      await mutate(`workSession-${application?.id}`, updatedWorkSession, false);
 
       // ページをリロードして状態を更新
       router.refresh();
