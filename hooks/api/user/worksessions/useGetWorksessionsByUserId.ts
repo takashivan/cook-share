@@ -14,15 +14,16 @@ export const useGetWorksessionsByUserId = (
   const { dedupingInterval } = config || {};
   const users = getApi(Users);
   return useSWR(
-    ...users.worksessionsListQueryArgs(
-      params.userId ?? "",
-      {
+    params.userId ? ["worksessionsList", params.userId] : null,
+    async () => {
+      if (!params.userId) return [];
+      const response = await users.worksessionsList(params.userId, {
         headers: {
           "X-User-Type": "chef",
         },
-      },
-      params.userId != null
-    ),
+      });
+      return response.data;
+    },
     {
       dedupingInterval,
     }
