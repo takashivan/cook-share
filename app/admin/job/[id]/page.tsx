@@ -68,6 +68,8 @@ import { EditJobModal } from "@/components/modals/EditJobModal";
 import { useUserCancelWorksessionByRestaurant } from "@/hooks/api/companyuser/worksessions/useCancelWorksessionByRestaurant";
 import { useNoShowWorksessionByRestaurant } from "@/hooks/api/companyuser/worksessions/useNoShowWorksessionByRestaurant";
 import { toast } from "@/hooks/use-toast";
+import { useGetReviewsByUserId } from "@/hooks/api/user/reviews/useGetReviewsByUserId";
+
 import {
   Tooltip,
   TooltipContent,
@@ -76,7 +78,11 @@ import {
 } from "@/components/ui/tooltip";
 import { useGetJob } from "@/hooks/api/companyuser/jobs/useGetJob";
 import { useGetWorksessionsByJobId } from "@/hooks/api/companyuser/worksessions/useGetWorksessionsByJobId";
-import { JobsDetailData, JobsPartialUpdatePayload, WorksessionsRestaurantTodosListData } from "@/api/__generated__/base/data-contracts";
+import {
+  JobsDetailData,
+  JobsPartialUpdatePayload,
+  WorksessionsRestaurantTodosListData,
+} from "@/api/__generated__/base/data-contracts";
 import { useVerifyWorksession } from "@/hooks/api/companyuser/worksessions/useVerifyWorksession";
 import { useUpdateJob } from "@/hooks/api/companyuser/jobs/useUpdateJob";
 import { getApi } from "@/api/api-factory";
@@ -85,7 +91,13 @@ import { useSubscriptionMessagesByCompanyUserId } from "@/hooks/api/companyuser/
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { useUpdateReadMessageByCompanyUser } from "@/hooks/api/companyuser/messages/useUpdateReadMessageByCompanyUser";
 import { useSubscriptionUnreadMessagesByRestaurantId } from "@/hooks/api/companyuser/messages/useSubscriptionUnreadMessagesByRestaurantId";
-import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
 import { differenceInDays } from "date-fns";
 import {
@@ -114,10 +126,17 @@ export default function JobDetail({ params }: PageParams) {
   const [selectedApplicant, setSelectedApplicant] = useState<number | null>(
     null
   );
+
   const [messageInput, setMessageInput] = useState("");
   const [isQrDialogOpen, setIsQrDialogOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [selectedWorkSession, setSelectedWorkSession] = useState<WorksessionsRestaurantTodosListData[number] | null>(null);
+  const [selectedWorkSession, setSelectedWorkSession] = useState<
+    WorksessionsRestaurantTodosListData[number] | null
+  >(null);
+  const { data: reviewsData } = useGetReviewsByUserId({
+    userId: selectedWorkSession?.user_id || "",
+  });
+  console.log("reviewsData", reviewsData);
   const [isChefReviewModalOpen, setIsChefReviewModalOpen] = useState(false);
   const [chefReview, setChefReview] = useState<any>(null);
   const [isEditJobModalOpen, setIsEditJobModalOpen] = useState(false);
@@ -131,44 +150,57 @@ export default function JobDetail({ params }: PageParams) {
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [isNoShowModalOpen, setIsNoShowModalOpen] = useState(false);
-  const { data: jobData, error: jobError } = useGetJob({ jobId: Number(jobId) });
-  const { data: workSessions, error: workSessionsError } = useGetWorksessionsByJobId({ jobId: Number(jobId) });
+  const { data: jobData, error: jobError } = useGetJob({
+    jobId: Number(jobId),
+  });
+  const { data: workSessions, error: workSessionsError } =
+    useGetWorksessionsByJobId({ jobId: Number(jobId) });
 
   const job = jobData?.job;
   const restaurant = jobData?.restaurant;
 
-  const { trigger: updateJobTrigger } = useUpdateJob({ jobId: Number(jobId), companyId: restaurant?.companies_id ?? undefined, restaurantId: restaurant?.id ?? undefined});
-  const { trigger: verifyWorksessionTrigger } = useVerifyWorksession({ worksessionId: selectedWorkSession?.id || 0, jobId: Number(jobId) });
+  const { trigger: updateJobTrigger } = useUpdateJob({
+    jobId: Number(jobId),
+    companyId: restaurant?.companies_id ?? undefined,
+    restaurantId: restaurant?.id ?? undefined,
+  });
+  const { trigger: verifyWorksessionTrigger } = useVerifyWorksession({
+    worksessionId: selectedWorkSession?.id || 0,
+    jobId: Number(jobId),
+  });
 
-  const { trigger: cancelWorksessionTrigger } = useUserCancelWorksessionByRestaurant({
-    worksession_id: selectedWorkSession?.id || 0,
-    reason: cancelReason
-  });
-  const { trigger: noShowWorksessionTrigger } = useNoShowWorksessionByRestaurant({
-    worksession_id: selectedWorkSession?.id || 0
-  });
+  const { trigger: cancelWorksessionTrigger } =
+    useUserCancelWorksessionByRestaurant({
+      worksession_id: selectedWorkSession?.id || 0,
+      reason: cancelReason,
+    });
+  const { trigger: noShowWorksessionTrigger } =
+    useNoShowWorksessionByRestaurant({
+      worksession_id: selectedWorkSession?.id || 0,
+    });
 
   // メッセージの取得
   const { messagesData, sendMessage } = useSubscriptionMessagesByCompanyUserId({
     companyUserId: user?.id,
     workSessionId: selectedWorkSession?.id,
     applicationId: selectedWorkSession?.application_id,
-  })
+  });
 
   // 未読メッセージの取得
   const { unreadMessagesData } = useSubscriptionUnreadMessagesByRestaurantId({
     restaurantId: restaurant?.id,
   });
 
-  const { trigger: updateReadMessageTrigger } = useUpdateReadMessageByCompanyUser({
-    companyUserId: user?.id,
-    workSessionId: selectedWorkSession?.id,
-    restaurantId: restaurant?.id,
-  })
+  const { trigger: updateReadMessageTrigger } =
+    useUpdateReadMessageByCompanyUser({
+      companyUserId: user?.id,
+      workSessionId: selectedWorkSession?.id,
+      restaurantId: restaurant?.id,
+    });
 
   const handleSendMessage = async () => {
     try {
-      sendMessage(messageInput)
+      sendMessage(messageInput);
       setMessageInput("");
     } catch (error) {
       console.error("Failed to send message:", error);
@@ -185,8 +217,8 @@ export default function JobDetail({ params }: PageParams) {
     try {
       await verifyWorksessionTrigger({
         rating,
-        feedback: comment
-      })
+        feedback: comment,
+      });
 
       const worksessionsClient = getApi(Worksessions);
       const review = await worksessionsClient.chefReviewList(
@@ -207,7 +239,11 @@ export default function JobDetail({ params }: PageParams) {
     // メッセージが更新されたらスクロール
     scrollToBottom();
 
-    if (!messagesData || !messagesData.messages || messagesData.messages.length === 0) {
+    if (
+      !messagesData ||
+      !messagesData.messages ||
+      messagesData.messages.length === 0
+    ) {
       return;
     }
 
@@ -219,21 +255,30 @@ export default function JobDetail({ params }: PageParams) {
       }
     }
 
-    console.log('latestMessage', latestMessage)
+    console.log("latestMessage", latestMessage);
 
     if (!latestMessage || !selectedWorkSession) return;
     // 既読情報が最新のメッセージと同じ場合は何もしない
-    if (latestMessage.message_seq === messagesData.restaurant_last_read?.last_read_message_seq) return;
+    if (
+      latestMessage.message_seq ===
+      messagesData.restaurant_last_read?.last_read_message_seq
+    )
+      return;
 
     // 既読情報更新
     updateReadMessageTrigger({
       worksession_id: selectedWorkSession.id,
       last_read_message_seq: latestMessage.message_seq,
     });
-  }, [messagesData, selectedWorkSession, scrollToBottom, updateReadMessageTrigger]);
+  }, [
+    messagesData,
+    selectedWorkSession,
+    scrollToBottom,
+    updateReadMessageTrigger,
+  ]);
 
   // 型チェックとデータ変換
-  const formattedJob: JobsDetailData['job'] | null = job
+  const formattedJob: JobsDetailData["job"] | null = job
     ? {
         id: job.id || 0,
         created_at: job.created_at ? Number(job.created_at) : 0,
@@ -280,7 +325,7 @@ export default function JobDetail({ params }: PageParams) {
 
   const calculateCancellationPenalty = () => {
     if (!job) return null;
-    
+
     const now = new Date();
     const workDate = new Date(job.work_date);
     const daysDifference = differenceInDays(workDate, now);
@@ -289,13 +334,14 @@ export default function JobDetail({ params }: PageParams) {
       return {
         penalty: 0,
         message: "2日以上前のキャンセルは違約金なしで可能です。",
-        status: "cancelled_by_restaurant"
+        status: "cancelled_by_restaurant",
       };
     } else {
       return {
         penalty: job.fee,
-        message: "1日前以降のキャンセルは報酬予定額の100%の違約金とキャンセル手数料が発生します。",
-        status: "cancelled_by_restaurant_late"
+        message:
+          "1日前以降のキャンセルは報酬予定額の100%の違約金とキャンセル手数料が発生します。",
+        status: "cancelled_by_restaurant_late",
       };
     }
   };
@@ -443,7 +489,10 @@ export default function JobDetail({ params }: PageParams) {
               <div className="divide-y">
                 {workSessions?.map((session) => {
                   const unreadMessageData = unreadMessagesData?.find(
-                    (unreadMessageData) => unreadMessageData.unread_messages.some((message) => message.worksession_id === session.id)
+                    (unreadMessageData) =>
+                      unreadMessageData.unread_messages.some(
+                        (message) => message.worksession_id === session.id
+                      )
                   );
                   const unreadMessageCount = unreadMessageData
                     ? unreadMessageData.unread_messages.length
@@ -668,6 +717,48 @@ export default function JobDetail({ params }: PageParams) {
                                 </div>
                               </div>
                             )}
+                            {reviewsData && reviewsData.length > 0 && (
+                              <div>
+                                <h4 className="text-sm font-medium mb-1">
+                                  店舗からの評価
+                                </h4>
+                                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+                                  {reviewsData.map((review) => (
+                                    <div
+                                      key={review.id}
+                                      className="border rounded-lg p-3">
+                                      <div className="flex items-center gap-2 mb-1">
+                                        <div className="flex">
+                                          {[...Array(5)].map((_, i) => (
+                                            <FaStar
+                                              key={i}
+                                              className={`h-3 w-3 ${
+                                                i < review.rating
+                                                  ? "text-yellow-400 fill-yellow-400"
+                                                  : "text-gray-300"
+                                              }`}
+                                            />
+                                          ))}
+                                        </div>
+                                        <span className="text-sm font-medium">
+                                          {review.rating.toFixed(1)}
+                                        </span>
+                                      </div>
+                                      <p className="text-sm text-gray-700 mb-1">
+                                        {review.comment}
+                                      </p>
+                                      <div className="text-xs text-gray-500">
+                                        {format(
+                                          new Date(review.created_at),
+                                          "yyyy年MM月dd日",
+                                          { locale: ja }
+                                        )}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </DialogContent>
@@ -768,7 +859,11 @@ export default function JobDetail({ params }: PageParams) {
                       {messagesData?.messages.map((message) => (
                         <div
                           key={message.id}
-                          className={`flex ${message.sender_type === "restaurant" ? "justify-end" : "justify-start"}`}>
+                          className={`flex ${
+                            message.sender_type === "restaurant"
+                              ? "justify-end"
+                              : "justify-start"
+                          }`}>
                           <div
                             className={`max-w-[80%] rounded-lg px-4 py-2 ${
                               message.sender_type === "restaurant"
@@ -925,7 +1020,13 @@ export default function JobDetail({ params }: PageParams) {
         jobTime={
           selectedWorkSession?.job.start_time &&
           selectedWorkSession?.job.end_time
-            ? `${format(new Date(selectedWorkSession.job.start_time), "HH:mm")}〜${format(new Date(selectedWorkSession.job.end_time), "HH:mm")}`
+            ? `${format(
+                new Date(selectedWorkSession.job.start_time),
+                "HH:mm"
+              )}〜${format(
+                new Date(selectedWorkSession.job.end_time),
+                "HH:mm"
+              )}`
             : "未定"
         }
       />
@@ -979,14 +1080,14 @@ export default function JobDetail({ params }: PageParams) {
         </DialogContent>
       </Dialog>
 
-      {formattedJob && 
+      {formattedJob && (
         <EditJobModal
           isOpen={isEditJobModalOpen}
           onClose={() => setIsEditJobModalOpen(false)}
           onSubmit={handleEditJobSubmit}
           job={formattedJob}
         />
-      }
+      )}
 
       <AlertDialog open={isCancelModalOpen} onOpenChange={setIsCancelModalOpen}>
         <AlertDialogContent className="max-w-md">
@@ -1000,23 +1101,27 @@ export default function JobDetail({ params }: PageParams) {
                 <p className="text-red-800 font-medium">
                   {cancellationPenalty?.message}
                 </p>
-                {cancellationPenalty?.penalty !== undefined && cancellationPenalty.penalty > 0 && (
-                  <div className="mt-2">
-                    <p className="text-red-800 font-semibold">
-                      違約金: ¥{cancellationPenalty.penalty.toLocaleString()}
-                    </p>
-                  </div>
-                )}
+                {cancellationPenalty?.penalty !== undefined &&
+                  cancellationPenalty.penalty > 0 && (
+                    <div className="mt-2">
+                      <p className="text-red-800 font-semibold">
+                        違約金: ¥{cancellationPenalty.penalty.toLocaleString()}
+                      </p>
+                    </div>
+                  )}
               </div>
 
               <div className="bg-yellow-50 p-4 rounded-lg">
                 <p className="text-yellow-800 text-sm">
-                  ※ 度重なるキャンセルや不当な理由でのキャンセルは、今後のご利用停止となる可能性があります。
+                  ※
+                  度重なるキャンセルや不当な理由でのキャンセルは、今後のご利用停止となる可能性があります。
                 </p>
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="cancel-reason" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="cancel-reason"
+                  className="block text-sm font-medium text-gray-700">
                   キャンセル理由
                 </label>
                 <textarea
@@ -1037,22 +1142,25 @@ export default function JobDetail({ params }: PageParams) {
                   onChange={(e) => setIsConfirmed(e.target.checked)}
                   className="mt-1"
                 />
-                <label htmlFor="confirm-cancel" className="text-sm text-gray-600">
+                <label
+                  htmlFor="confirm-cancel"
+                  className="text-sm text-gray-600">
                   上記の内容を確認し、キャンセルに同意します
                 </label>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex justify-end gap-4 mt-4">
-            <Button variant="outline" onClick={() => setIsCancelModalOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsCancelModalOpen(false)}>
               閉じる
             </Button>
             <Button
               variant="destructive"
               onClick={handleCancelConfirm}
               disabled={!isConfirmed || !cancelReason}
-              className="bg-red-600 hover:bg-red-700"
-            >
+              className="bg-red-600 hover:bg-red-700">
               キャンセルを確定
             </Button>
           </div>
@@ -1068,13 +1176,12 @@ export default function JobDetail({ params }: PageParams) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex justify-end gap-4 mt-4">
-            <Button variant="outline" onClick={() => setIsNoShowModalOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsNoShowModalOpen(false)}>
               キャンセル
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleNoShowConfirm}
-            >
+            <Button variant="destructive" onClick={handleNoShowConfirm}>
               報告する
             </Button>
           </div>
