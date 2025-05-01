@@ -1,12 +1,7 @@
 "use client";
 
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -30,7 +25,8 @@ import { useGetJobsByCompanyId } from "@/hooks/api/companyuser/jobs/useGetJobsBy
 import { useGetMultipleWorksessionsByJobId } from "@/hooks/api/companyuser/worksessions/useGetMultipleWorksessionsByJobId";
 import { JobsListData } from "@/api/__generated__/base/data-contracts";
 
-interface JobWithWorkSessions extends Omit<JobsListData["jobs"][number], "workSessionCount"> {
+interface JobWithWorkSessions
+  extends Omit<JobsListData["jobs"][number], "workSessionCount"> {
   workSessionCount: number;
 }
 
@@ -41,15 +37,21 @@ export default function JobsPage() {
     isLoading,
     error,
   } = useGetJobsByCompanyId({ companyId: user?.companies_id ?? undefined });
-  const { data: worksessionsbyJob } = useGetMultipleWorksessionsByJobId({ jobIds: jobData?.jobs.map((job) => job.id) || [] })
-
-  const jobWithWorkSessions: JobWithWorkSessions[] | undefined = jobData?.jobs.map((job) => {
-    const workSessionCount = worksessionsbyJob?.find((workSessions) => workSessions.some((workSession) => workSession.job_id === job.id))?.length || 0;
-    return {
-      ...job,
-      workSessionCount,
-    };
+  const { data: worksessionsbyJob } = useGetMultipleWorksessionsByJobId({
+    jobIds: jobData?.jobs.map((job) => job.id) || [],
   });
+
+  const jobWithWorkSessions: JobWithWorkSessions[] | undefined =
+    jobData?.jobs.map((job) => {
+      const workSessionCount =
+        worksessionsbyJob?.find((workSessions) =>
+          workSessions.some((workSession) => workSession.job_id === job.id)
+        )?.length || 0;
+      return {
+        ...job,
+        workSessionCount,
+      };
+    });
 
   if (isLoading) {
     return (
@@ -106,7 +108,9 @@ export default function JobsPage() {
             <Briefcase className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{jobWithWorkSessions.length}</div>
+            <div className="text-2xl font-bold">
+              {jobWithWorkSessions.length}
+            </div>
           </CardContent>
         </Card>
 
@@ -117,7 +121,10 @@ export default function JobsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {jobWithWorkSessions.filter((job) => job.status === "PUBLISHED").length}
+              {
+                jobWithWorkSessions.filter((job) => job.status === "PUBLISHED")
+                  .length
+              }
             </div>
           </CardContent>
         </Card>
@@ -171,7 +178,11 @@ export default function JobsPage() {
                       </div>
                       <div className="flex items-center gap-1">
                         <span
-                          className={`text-lg font-bold ${job.workSessionCount >= job.number_of_spots ? "text-primary" : ""}`}>
+                          className={`text-lg font-bold ${
+                            job.workSessionCount >= job.number_of_spots
+                              ? "text-primary"
+                              : ""
+                          }`}>
                           {job.workSessionCount || 0}
                         </span>
                         <span className="text-gray-500">/</span>
@@ -182,7 +193,11 @@ export default function JobsPage() {
                       </div>
                       <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
                         <div
-                          className={`h-full ${(job.workSessionCount || 0) >= job.number_of_spots ? "bg-primary" : "bg-blue-400"}`}
+                          className={`h-full ${
+                            (job.workSessionCount || 0) >= job.number_of_spots
+                              ? "bg-primary"
+                              : "bg-blue-400"
+                          }`}
                           style={{
                             width: `${Math.min(
                               ((job.workSessionCount || 0) /
@@ -250,7 +265,11 @@ export default function JobsPage() {
                       </div>
                       <div className="flex items-center gap-1">
                         <span
-                          className={`text-lg font-bold ${(job.workSessionCount || 0) >= job.number_of_spots ? "text-primary" : ""}`}>
+                          className={`text-lg font-bold ${
+                            (job.workSessionCount || 0) >= job.number_of_spots
+                              ? "text-primary"
+                              : ""
+                          }`}>
                           {job.workSessionCount || 0}
                         </span>
                         <span className="text-gray-500">/</span>
@@ -261,7 +280,11 @@ export default function JobsPage() {
                       </div>
                       <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
                         <div
-                          className={`h-full ${(job.workSessionCount || 0) >= job.number_of_spots ? "bg-primary" : "bg-blue-400"}`}
+                          className={`h-full ${
+                            (job.workSessionCount || 0) >= job.number_of_spots
+                              ? "bg-primary"
+                              : "bg-blue-400"
+                          }`}
                           style={{
                             width: `${Math.min(
                               ((job.workSessionCount || 0) /
@@ -329,7 +352,11 @@ export default function JobsPage() {
                       </div>
                       <div className="flex items-center gap-1">
                         <span
-                          className={`text-lg font-bold ${(job.workSessionCount || 0) >= job.number_of_spots ? "text-primary" : ""}`}>
+                          className={`text-lg font-bold ${
+                            (job.workSessionCount || 0) >= job.number_of_spots
+                              ? "text-primary"
+                              : ""
+                          }`}>
                           {job.workSessionCount || 0}
                         </span>
                         <span className="text-gray-500">/</span>
@@ -340,7 +367,11 @@ export default function JobsPage() {
                       </div>
                       <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
                         <div
-                          className={`h-full ${(job.workSessionCount || 0) >= job.number_of_spots ? "bg-primary" : "bg-blue-400"}`}
+                          className={`h-full ${
+                            (job.workSessionCount || 0) >= job.number_of_spots
+                              ? "bg-primary"
+                              : "bg-blue-400"
+                          }`}
                           style={{
                             width: `${Math.min(
                               ((job.workSessionCount || 0) /
@@ -408,7 +439,11 @@ export default function JobsPage() {
                       </div>
                       <div className="flex items-center gap-1">
                         <span
-                          className={`text-lg font-bold ${(job.workSessionCount || 0) >= job.number_of_spots ? "text-primary" : ""}`}>
+                          className={`text-lg font-bold ${
+                            (job.workSessionCount || 0) >= job.number_of_spots
+                              ? "text-primary"
+                              : ""
+                          }`}>
                           {job.workSessionCount || 0}
                         </span>
                         <span className="text-gray-500">/</span>
@@ -419,7 +454,11 @@ export default function JobsPage() {
                       </div>
                       <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
                         <div
-                          className={`h-full ${(job.workSessionCount || 0) >= job.number_of_spots ? "bg-primary" : "bg-blue-400"}`}
+                          className={`h-full ${
+                            (job.workSessionCount || 0) >= job.number_of_spots
+                              ? "bg-primary"
+                              : "bg-blue-400"
+                          }`}
                           style={{
                             width: `${Math.min(
                               ((job.workSessionCount || 0) /
@@ -521,14 +560,14 @@ export default function JobsPage() {
                       job.status === "PUBLISHED"
                         ? "bg-green-100 text-green-800"
                         : job.status === "DRAFT"
-                          ? "bg-gray-100 text-gray-800"
-                          : "bg-yellow-100 text-yellow-800"
+                        ? "bg-gray-100 text-gray-800"
+                        : "bg-yellow-100 text-yellow-800"
                     }`}>
                     {job.status === "PUBLISHED"
                       ? "公開中"
                       : job.status === "DRAFT"
-                        ? "下書き"
-                        : "終了"}
+                      ? "下書き"
+                      : "終了"}
                   </div>
                 </div>
               </div>

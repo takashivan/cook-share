@@ -10,9 +10,16 @@ import { toast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { Job } from "@/types";
 import { format } from "date-fns";
-import { JobsDetailData, JobsPartialUpdatePayload } from "@/api/__generated__/base/data-contracts";
+import {
+  JobsDetailData,
+  JobsPartialUpdatePayload,
+} from "@/api/__generated__/base/data-contracts";
 
-interface UpdateJob extends Omit<JobsPartialUpdatePayload, 'start_time' | 'end_time' | 'expiry_date'> {
+interface UpdateJob
+  extends Omit<
+    JobsPartialUpdatePayload,
+    "start_time" | "end_time" | "expiry_date"
+  > {
   start_time: string;
   end_time: string;
   expiry_date: string;
@@ -22,7 +29,7 @@ interface EditJobModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: JobsPartialUpdatePayload) => Promise<void>;
-  job: JobsDetailData['job'];
+  job: JobsDetailData["job"];
 }
 
 export const EditJobModal = ({
@@ -160,7 +167,7 @@ export const EditJobModal = ({
       // 日付文字列を作成（YYYY-MM-DDThh:mm:ss）
       const startDateTimeStr = `${data.work_date}T${data.start_time}:00`;
       const endDateTimeStr = `${data.work_date}T${data.end_time}:00`;
-      const expiryTimestamp =`${data.expiry_date}:00`;
+      const expiryTimestamp = `${data.expiry_date}:00`;
 
       // Unix タイムスタンプを計算（ミリ秒単位）
       const startTimestamp = Date.parse(startDateTimeStr);
@@ -196,9 +203,9 @@ export const EditJobModal = ({
         expiry_date: expiryDateTimestamp,
         // 既存のステータスを維持
         status: job.status,
-      }
+      };
 
-      console.log('確認', data, newData)
+      console.log("確認", data, newData);
 
       await onSubmit(newData);
       reset();
@@ -234,7 +241,7 @@ export const EditJobModal = ({
       // 日付文字列を作成（YYYY-MM-DDThh:mm:ss）
       const startDateTimeStr = `${data.work_date}T${data.start_time}:00`;
       const endDateTimeStr = `${data.work_date}T${data.end_time}:00`;
-      const expiryTimestamp =`${data.expiry_date}T00:00:00`;
+      const expiryTimestamp = `${data.expiry_date}T00:00:00`;
 
       // Unix タイムスタンプを計算（ミリ秒単位）
       const startTimestamp = Date.parse(startDateTimeStr);
@@ -268,7 +275,7 @@ export const EditJobModal = ({
         expiry_date: expiryDateTimestamp,
         // ステータスをPUBLISHEDに設定
         status: "PUBLISHED",
-      }
+      };
 
       await onSubmit(newData);
       reset();
@@ -407,7 +414,9 @@ export const EditJobModal = ({
                               const hourlyRate = Number(value) / hours;
 
                               if (hourlyRate < 1500) {
-                                return `時給ベースで1500円を下回らないように設定してください（現在: ${Math.floor(hourlyRate)}円）`;
+                                return `時給ベースで1500円を下回らないように設定してください（現在: ${Math.floor(
+                                  hourlyRate
+                                )}円）`;
                               }
                               return true;
                             },
@@ -419,27 +428,6 @@ export const EditJobModal = ({
                         {errors.fee && (
                           <p className="mt-1 text-sm text-red-600">
                             {errors.fee.message}
-                          </p>
-                        )}
-                      </div>
-                      <div>
-                        <Label htmlFor="number_of_spots">募集人数 *</Label>
-                        <Input
-                          id="number_of_spots"
-                          type="number"
-                          {...register("number_of_spots", {
-                            required: "募集人数は必須です",
-                            min: {
-                              value: 1,
-                              message: "募集人数は1人以上で設定してください",
-                            },
-                          })}
-                          className="mt-1"
-                          placeholder="例：1"
-                        />
-                        {errors.number_of_spots && (
-                          <p className="mt-1 text-sm text-red-600">
-                            {errors.number_of_spots.message}
                           </p>
                         )}
                       </div>

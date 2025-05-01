@@ -13,23 +13,22 @@ export function Providers({ children }: { children: React.ReactNode }) {
       defaultTheme="system"
       enableSystem
       disableTransitionOnChange>
-        <SWRConfig
-          value={{
-            // この期間内での同じキーのリクエストを重複として排除する
-            dedupingInterval: 10000,
-            // ウィンドウがフォーカスされたときに自動的に再検証するか否か
-            revalidateOnFocus: false,
-            // ブラウザがネットワーク接続を回復すると自動的に再検証するか否か
-            revalidateOnReconnect: false,
-          }}
-        >
-          <AuthProvider>
-            <CompanyAuthProvider>
-              {children}
-              <Toaster />
-            </CompanyAuthProvider>
-          </AuthProvider>
-        </SWRConfig>
+      <SWRConfig
+        value={{
+          // この期間内での同じキーのリクエストを重複として排除する
+          dedupingInterval: 10000,
+          // ウィンドウがフォーカスされたときに自動的に再検証するか否か
+          revalidateOnFocus: false,
+          // ブラウザがネットワーク接続を回復すると自動的に再検証するか否か
+          revalidateOnReconnect: false,
+        }}>
+        <AuthProvider>
+          <CompanyAuthProvider>
+            {children}
+            <Toaster />
+          </CompanyAuthProvider>
+        </AuthProvider>
+      </SWRConfig>
     </ThemeProvider>
   );
 }

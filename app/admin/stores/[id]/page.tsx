@@ -954,10 +954,10 @@ export default function RestaurantDetailPage(props: {
                                             width: `${progress}%`,
                                           }}></div>
                                       </div>
-                                      <span className="text-[10px] whitespace-nowrap">
+                                      {/* <span className="text-[10px] whitespace-nowrap">
                                         {job.workSessionCount}/
                                         {job.number_of_spots}
-                                      </span>
+                                      </span> */}
                                     </div>
                                   </div>
                                 );
@@ -989,85 +989,83 @@ export default function RestaurantDetailPage(props: {
                         .map((job) => (
                           <div
                             key={job.id}
-                            className=" items-center justify-between p-4 border rounded-lg">
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <h3 className="font-medium">{job.title}</h3>
+                            className="items-center justify-between p-3 border rounded-lg bg-white/50 hover:bg-white/80 transition-colors cursor-pointer"
+                            onClick={() => router.push(`/admin/job/${job.id}`)}>
+                            <div className="space-y-1.5">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  {job.status === "PUBLISHED" && (
+                                    <Badge className="bg-green-500 hover:bg-green-600">
+                                      公開中
+                                    </Badge>
+                                  )}
+                                  {job.status === "DRAFT" && (
+                                    <Badge className="bg-gray-500 hover:bg-gray-600">
+                                      下書き
+                                    </Badge>
+                                  )}
+                                  {job.status === "PENDING" && (
+                                    <Badge className="bg-yellow-500 hover:bg-yellow-600">
+                                      一時停止中
+                                    </Badge>
+                                  )}
+                                  {job.expiry_date &&
+                                    job.expiry_date <= Date.now() && (
+                                      <Badge className="bg-red-500 hover:bg-red-600">
+                                        募集終了
+                                      </Badge>
+                                    )}
+                                </div>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon">
+                                      <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem asChild>
+                                      <Link href={`/admin/job/${job.id}`}>
+                                        詳細を見る
+                                      </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => handleCopyJob(job)}>
+                                      コピーして新規作成
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               </div>
 
-                              <div className="flex items-center gap-2 mt-2">
-                                <Badge variant="outline" className="text-sm">
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-medium text-sm">
+                                  {job.title}
+                                </h3>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="text-xs">
                                   {job.formattedWorkDate}
                                 </Badge>
-                                <span className="text-sm text-gray-500">
+                                <span className="text-xs text-gray-500">
                                   {job.formattedTime}
                                 </span>
-                                <span className="text-sm text-gray-500">
+                                <span className="text-xs text-gray-500">
                                   {job.fee}円
                                 </span>
                               </div>
-                              <div className="flex items-center justify-between gap-4 mt-2">
-                                <Badge variant="outline" className="text-sm">
-                                  公開中
-                                </Badge>
-                                <div className="flex-1">
-                                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                                    <div
-                                      className={`h-full ${
-                                        job.workSessionCount >=
-                                        job.number_of_spots
-                                          ? "bg-primary"
-                                          : "bg-blue-400"
-                                      }`}
-                                      style={{
-                                        width: `${Math.min(
-                                          (job.workSessionCount /
-                                            job.number_of_spots) *
-                                            100,
-                                          100
-                                        )}%`,
-                                      }}
-                                    />
+
+                              <div className="flex items-center gap-2">
+                                {job.workSessionCount > 0 ? (
+                                  <div className="flex items-center gap-1 text-muted-foreground">
+                                    <Users className="h-4 w-4" />
+                                    <span className="text-sm">応募あり</span>
                                   </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <div className="flex items-center gap-1">
-                                    <span
-                                      className={`text-lg font-bold ${
-                                        job.workSessionCount >=
-                                        job.number_of_spots
-                                          ? "text-primary"
-                                          : ""
-                                      }`}>
-                                      {job.workSessionCount}
-                                    </span>
-                                    <span className="text-gray-500">/</span>
-                                    <span className="text-lg font-bold">
-                                      {job.number_of_spots}
-                                    </span>
-                                    <span className="text-sm text-gray-500">
-                                      人
-                                    </span>
+                                ) : (
+                                  <div className="flex items-center gap-1 text-muted-foreground">
+                                    <Users className="h-4 w-4" />
+                                    <span className="text-sm">応募なし</span>
                                   </div>
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="icon">
-                                        <MoreHorizontal className="h-4 w-4" />
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                      <DropdownMenuItem asChild>
-                                        <Link href={`/admin/job/${job.id}`}>
-                                          詳細を見る
-                                        </Link>
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem
-                                        onClick={() => handleCopyJob(job)}>
-                                        コピーして新規作成
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                </div>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -1082,85 +1080,67 @@ export default function RestaurantDetailPage(props: {
                         .map((job) => (
                           <div
                             key={job.id}
-                            className="items-center justify-between p-4 border rounded-lg">
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <h3 className="font-medium">{job.title}</h3>
+                            className="items-center justify-between p-3 border rounded-lg bg-white/50 hover:bg-white/80 transition-colors cursor-pointer"
+                            onClick={() => router.push(`/admin/job/${job.id}`)}>
+                            <div className="space-y-1.5">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  {job.status === "DRAFT" && (
+                                    <Badge className="bg-gray-500 hover:bg-gray-600">
+                                      下書き
+                                    </Badge>
+                                  )}
+                                </div>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon">
+                                      <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem asChild>
+                                      <Link href={`/admin/job/${job.id}`}>
+                                        詳細を見る
+                                      </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => handleCopyJob(job)}>
+                                      コピーして新規作成
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               </div>
 
-                              <div className="flex items-center gap-2 mt-2">
-                                <Badge variant="outline" className="text-sm">
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-medium text-sm">
+                                  {job.title}
+                                </h3>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="text-xs">
                                   {job.formattedWorkDate}
                                 </Badge>
-                                <span className="text-sm text-gray-500">
+                                <span className="text-xs text-gray-500">
                                   {job.formattedTime}
                                 </span>
-                                <span className="text-sm text-gray-500">
+                                <span className="text-xs text-gray-500">
                                   {job.fee}円
                                 </span>
                               </div>
-                              <div className="flex items-center justify-between gap-4 mt-2">
-                                <Badge variant="outline" className="text-sm">
-                                  下書き
-                                </Badge>
-                                <div className="flex-1">
-                                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                                    <div
-                                      className={`h-full ${
-                                        job.workSessionCount >=
-                                        job.number_of_spots
-                                          ? "bg-primary"
-                                          : "bg-blue-400"
-                                      }`}
-                                      style={{
-                                        width: `${Math.min(
-                                          (job.workSessionCount /
-                                            job.number_of_spots) *
-                                            100,
-                                          100
-                                        )}%`,
-                                      }}
-                                    />
+
+                              <div className="flex items-center gap-2">
+                                {job.workSessionCount > 0 ? (
+                                  <div className="flex items-center gap-1 text-muted-foreground">
+                                    <Users className="h-4 w-4" />
+                                    <span className="text-sm">応募あり</span>
                                   </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <div className="flex items-center gap-1">
-                                    <span
-                                      className={`text-lg font-bold ${
-                                        job.workSessionCount >=
-                                        job.number_of_spots
-                                          ? "text-primary"
-                                          : ""
-                                      }`}>
-                                      {job.workSessionCount}
-                                    </span>
-                                    <span className="text-gray-500">/</span>
-                                    <span className="text-lg font-bold">
-                                      {job.number_of_spots}
-                                    </span>
-                                    <span className="text-sm text-gray-500">
-                                      人
-                                    </span>
+                                ) : (
+                                  <div className="flex items-center gap-1 text-muted-foreground">
+                                    <Users className="h-4 w-4" />
+                                    <span className="text-sm">応募なし</span>
                                   </div>
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="icon">
-                                        <MoreHorizontal className="h-4 w-4" />
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                      <DropdownMenuItem asChild>
-                                        <Link href={`/admin/job/${job.id}`}>
-                                          詳細を見る
-                                        </Link>
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem
-                                        onClick={() => handleCopyJob(job)}>
-                                        コピーして新規作成
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                </div>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -1175,85 +1155,67 @@ export default function RestaurantDetailPage(props: {
                         .map((job) => (
                           <div
                             key={job.id}
-                            className="items-center justify-between p-4 border rounded-lg">
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <h3 className="font-medium">{job.title}</h3>
+                            className="items-center justify-between p-3 border rounded-lg bg-white/50 hover:bg-white/80 transition-colors cursor-pointer"
+                            onClick={() => router.push(`/admin/job/${job.id}`)}>
+                            <div className="space-y-1.5">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  {job.status === "PENDING" && (
+                                    <Badge className="bg-yellow-500 hover:bg-yellow-600">
+                                      一時停止中
+                                    </Badge>
+                                  )}
+                                </div>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon">
+                                      <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem asChild>
+                                      <Link href={`/admin/job/${job.id}`}>
+                                        詳細を見る
+                                      </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => handleCopyJob(job)}>
+                                      コピーして新規作成
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               </div>
 
-                              <div className="flex items-center gap-2 mt-2">
-                                <Badge variant="outline" className="text-sm">
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-medium text-sm">
+                                  {job.title}
+                                </h3>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="text-xs">
                                   {job.formattedWorkDate}
                                 </Badge>
-                                <span className="text-sm text-gray-500">
+                                <span className="text-xs text-gray-500">
                                   {job.formattedTime}
                                 </span>
-                                <span className="text-sm text-gray-500">
+                                <span className="text-xs text-gray-500">
                                   {job.fee}円
                                 </span>
                               </div>
-                              <div className="flex items-center justify-between gap-4 mt-2">
-                                <Badge variant="outline" className="text-sm">
-                                  一時停止中
-                                </Badge>
-                                <div className="flex-1">
-                                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                                    <div
-                                      className={`h-full ${
-                                        job.workSessionCount >=
-                                        job.number_of_spots
-                                          ? "bg-primary"
-                                          : "bg-blue-400"
-                                      }`}
-                                      style={{
-                                        width: `${Math.min(
-                                          (job.workSessionCount /
-                                            job.number_of_spots) *
-                                            100,
-                                          100
-                                        )}%`,
-                                      }}
-                                    />
+
+                              <div className="flex items-center gap-2">
+                                {job.workSessionCount > 0 ? (
+                                  <div className="flex items-center gap-1 text-muted-foreground">
+                                    <Users className="h-4 w-4" />
+                                    <span className="text-sm">応募あり</span>
                                   </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <div className="flex items-center gap-1">
-                                    <span
-                                      className={`text-lg font-bold ${
-                                        job.workSessionCount >=
-                                        job.number_of_spots
-                                          ? "text-primary"
-                                          : ""
-                                      }`}>
-                                      {job.workSessionCount}
-                                    </span>
-                                    <span className="text-gray-500">/</span>
-                                    <span className="text-lg font-bold">
-                                      {job.number_of_spots}
-                                    </span>
-                                    <span className="text-sm text-gray-500">
-                                      人
-                                    </span>
+                                ) : (
+                                  <div className="flex items-center gap-1 text-muted-foreground">
+                                    <Users className="h-4 w-4" />
+                                    <span className="text-sm">応募なし</span>
                                   </div>
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="icon">
-                                        <MoreHorizontal className="h-4 w-4" />
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                      <DropdownMenuItem asChild>
-                                        <Link href={`/admin/job/${job.id}`}>
-                                          詳細を見る
-                                        </Link>
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem
-                                        onClick={() => handleCopyJob(job)}>
-                                        コピーして新規作成
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                </div>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -1271,85 +1233,73 @@ export default function RestaurantDetailPage(props: {
                         .map((job) => (
                           <div
                             key={job.id}
-                            className="items-center justify-between p-4 border rounded-lg">
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <h3 className="font-medium">{job.title}</h3>
+                            className="items-center justify-between p-3 border rounded-lg bg-white/50 hover:bg-white/80 transition-colors cursor-pointer"
+                            onClick={() => router.push(`/admin/job/${job.id}`)}>
+                            <div className="space-y-1.5">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  {job.status === "PUBLISHED" && (
+                                    <Badge className="bg-green-500 hover:bg-green-600">
+                                      公開中
+                                    </Badge>
+                                  )}
+                                  {job.expiry_date &&
+                                    job.expiry_date <= Date.now() && (
+                                      <Badge className="bg-red-500 hover:bg-red-600">
+                                        募集終了
+                                      </Badge>
+                                    )}
+                                </div>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon">
+                                      <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem asChild>
+                                      <Link href={`/admin/job/${job.id}`}>
+                                        詳細を見る
+                                      </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => handleCopyJob(job)}>
+                                      コピーして新規作成
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               </div>
 
-                              <div className="flex items-center gap-2 mt-2">
-                                <Badge variant="outline" className="text-sm">
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-medium text-sm">
+                                  {job.title}
+                                </h3>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="text-xs">
                                   {job.formattedWorkDate}
                                 </Badge>
-                                <span className="text-sm text-gray-500">
+                                <span className="text-xs text-gray-500">
                                   {job.formattedTime}
                                 </span>
-                                <span className="text-sm text-gray-500">
+                                <span className="text-xs text-gray-500">
                                   {job.fee}円
                                 </span>
                               </div>
-                              <div className="flex items-center justify-between gap-4 mt-2">
-                                <Badge variant="outline" className="text-sm">
-                                  募集終了
-                                </Badge>
-                                <div className="flex-1">
-                                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                                    <div
-                                      className={`h-full ${
-                                        job.workSessionCount >=
-                                        job.number_of_spots
-                                          ? "bg-primary"
-                                          : "bg-blue-400"
-                                      }`}
-                                      style={{
-                                        width: `${Math.min(
-                                          (job.workSessionCount /
-                                            job.number_of_spots) *
-                                            100,
-                                          100
-                                        )}%`,
-                                      }}
-                                    />
+
+                              <div className="flex items-center gap-2">
+                                {job.workSessionCount > 0 ? (
+                                  <div className="flex items-center gap-1 text-muted-foreground">
+                                    <Users className="h-4 w-4" />
+                                    <span className="text-sm">応募あり</span>
                                   </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <div className="flex items-center gap-1">
-                                    <span
-                                      className={`text-lg font-bold ${
-                                        job.workSessionCount >=
-                                        job.number_of_spots
-                                          ? "text-primary"
-                                          : ""
-                                      }`}>
-                                      {job.workSessionCount}
-                                    </span>
-                                    <span className="text-gray-500">/</span>
-                                    <span className="text-lg font-bold">
-                                      {job.number_of_spots}
-                                    </span>
-                                    <span className="text-sm text-gray-500">
-                                      人
-                                    </span>
+                                ) : (
+                                  <div className="flex items-center gap-1 text-muted-foreground">
+                                    <Users className="h-4 w-4" />
+                                    <span className="text-sm">応募なし</span>
                                   </div>
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="icon">
-                                        <MoreHorizontal className="h-4 w-4" />
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                      <DropdownMenuItem asChild>
-                                        <Link href={`/admin/job/${job.id}`}>
-                                          詳細を見る
-                                        </Link>
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem
-                                        onClick={() => handleCopyJob(job)}>
-                                        コピーして新規作成
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                </div>
+                                )}
                               </div>
                             </div>
                           </div>
