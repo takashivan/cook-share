@@ -1,5 +1,5 @@
-import { getApi } from "@/api/api-factory"
-import useSWR from "swr"
+import { getApi } from "@/api/api-factory";
+import useSWR from "swr";
 import { QueryConfigType } from "../../config-type";
 import { Jobs } from "@/api/__generated__/base/Jobs";
 
@@ -10,11 +10,18 @@ export interface Params {
 export const useGetJob = (params: Params, config?: QueryConfigType) => {
   const { dedupingInterval } = config || {};
   const jobs = getApi(Jobs);
-  return useSWR(...jobs.jobsDetailQueryArgs(params.jobId ?? -1, {
-    headers: {
-      "X-User-Type": "company"
+  return useSWR(
+    ...jobs.jobsDetailQueryArgs(
+      params.jobId ?? -1,
+      {
+        headers: {
+          "X-User-Type": "company",
+        },
+      },
+      params.jobId != null
+    ),
+    {
+      dedupingInterval,
     }
-  }, params.jobId != null), {
-    dedupingInterval
-  });
-}
+  );
+};
