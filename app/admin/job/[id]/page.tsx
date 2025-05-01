@@ -65,7 +65,7 @@ import { RestaurantReviewModal } from "@/components/modals/RestaurantReviewModal
 import { chefReviewApi } from "@/lib/api/chefReview";
 import { FaStar } from "react-icons/fa";
 import { EditJobModal } from "@/components/modals/EditJobModal";
-import { useUserCancelWorksessionByRestaurant } from "@/hooks/api/companyuser/worksessions/userCancelWorksessionByRestaurant";
+import { useUserCancelWorksessionByRestaurant } from "@/hooks/api/companyuser/worksessions/useCancelWorksessionByRestaurant";
 import { toast } from "@/hooks/use-toast";
 import {
   Tooltip,
