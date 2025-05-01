@@ -25,6 +25,7 @@ import {
   RestaurantsListOutput,
   RestaurantsPartialUpdateData,
   RestaurantsPartialUpdatePayload,
+  ReviewsListData,
   StaffInviteCreateInput,
   StaffInviteCreateOutput,
 } from "./data-contracts";
@@ -242,6 +243,32 @@ export class Restaurants<
       : null;
     const fetcher = () =>
       this.restaurantReviewsList(restaurantId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags restaurants
+   * @name ReviewsList
+   * @request GET:/restaurants/{restaurant_id}/reviews
+   */
+  reviewsList = (restaurantId: number, params: RequestParams = {}) =>
+    this.request<ReviewsListData, void>({
+      path: `/restaurants/${restaurantId}/reviews`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  reviewsListQueryArgs = (
+    restaurantId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/restaurants/${restaurantId}/reviews`] : null;
+    const fetcher = () =>
+      this.reviewsList(restaurantId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 

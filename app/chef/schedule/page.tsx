@@ -19,7 +19,9 @@ export default function SchedulePage() {
   const [activeTab, setActiveTab] = useState("upcoming");
 
   // ワークセッション一覧の取得
-  const { data: workSessions } = useGetWorksessionsByUserId({ userId: user?.id })
+  const { data: workSessions } = useGetWorksessionsByUserId({
+    userId: user?.id,
+  });
   console.log(workSessions);
 
   // 選択されたワークセッション
@@ -43,7 +45,7 @@ export default function SchedulePage() {
     if (!message.trim() || !selectedWorkSession) return;
 
     try {
-      sendMessage(message)
+      sendMessage(message);
     } catch (error) {
       console.error("Failed to send message:", error);
     }
@@ -66,7 +68,9 @@ export default function SchedulePage() {
       ) || [],
   };
 
-  const renderWorkSessionCard = (workSession: WorksessionsListResult[number]) => {
+  const renderWorkSessionCard = (
+    workSession: WorksessionsListResult[number]
+  ) => {
     if (!workSession.job) return null;
 
     const workDate = format(
@@ -162,7 +166,9 @@ export default function SchedulePage() {
         messagesData={messagesData}
         onSendMessage={handleSendMessage}
         restaurantName={selectedWorkSession?.job?.restaurant.name || ""}
-        restaurantImage={selectedWorkSession?.job?.restaurant.profile_image || ""}
+        restaurantImage={
+          selectedWorkSession?.job?.restaurant.profile_image || ""
+        }
         workDate={selectedWorkSession?.job?.work_date || ""}
         startTime={selectedWorkSession?.job?.start_time || 0}
       />
