@@ -13,33 +13,36 @@ export const useUpdateReadMessageByUser = (params: Params) => {
   const { mutate } = useSWRConfig();
 
   const chat = getApi(Chat);
-  return useSWRMutation(
-    ...chat.updateReadChefPartialUpdateQueryArgs({
-      headers: {
-        "X-User-Type": "chef",
-      },
-    }),
-    {
-      onSuccess: () => {
-        // Messagesリストのキャッシュを更新
-        if (params.userId && params.workSessionId) {
-          const usersApi = getApi(Users);
-          const messagesByUserIdKey =
-            usersApi.worksessionsMessagesListQueryArgs(
-              params.userId,
-              params.workSessionId
-            )[0];
-          mutate(messagesByUserIdKey);
-        }
+  const [key, fetcher] = chat.updateReadChefPartialUpdateQueryArgs({
+    headers: {
+      "X-User-Type": "chef",
+    },
+  });
 
-        // 未読のMessagesリストのキャッシュを更新
-        const unreadMessagesByUserIdKey = chat.unreadSummaryChefListQueryArgs({
-          headers: {
-            "X-User-Type": "chef",
-          },
-        })[0];
-        mutate(unreadMessagesByUserIdKey);
-      },
-    }
-  );
+  return useSWRMutation(key, fetcher, {
+    onSuccess: () => {
+      // Messagesリストのキャッシュを更新
+      if (params.userId && params.workSessionId) {
+        const usersApi = getApi(Users);
+        const messagesByUserIdKey = usersApi.worksessionsMessagesListQueryArgs(
+          params.userId,
+          params.workSessionId,
+          {
+            headers: {
+              "X-User-Type": "chef",
+            },
+          }
+        )[0];
+        mutate(messagesByUserIdKey);
+      }
+
+      // 未読のMessagesリストのキャッシュを更新
+      const unreadMessagesByUserIdKey = chat.unreadSummaryChefListQueryArgs({
+        headers: {
+          "X-User-Type": "chef",
+        },
+      })[0];
+      mutate(unreadMessagesByUserIdKey);
+    },
+  });
 };
