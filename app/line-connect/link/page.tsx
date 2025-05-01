@@ -106,9 +106,9 @@ export default function LinkAccountPage() {
               router.push(
                 `/line-connect/register?line_user_id=${encodeURIComponent(
                   lineUserId || ""
-                )}&name=${encodeURIComponent(name || "")}&picture=${encodeURIComponent(
-                  picture || ""
-                )}`
+                )}&name=${encodeURIComponent(
+                  name || ""
+                )}&picture=${encodeURIComponent(picture || "")}`
               );
             }}>
             新規アカウントを作成する

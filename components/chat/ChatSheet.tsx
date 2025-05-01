@@ -45,7 +45,7 @@ export function ChatSheet({
   const { trigger: updateReadMessageTrigger } = useUpdateReadMessageByUser({
     userId: user?.id,
     workSessionId: worksessionId,
-  })
+  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -55,7 +55,11 @@ export function ChatSheet({
     // メッセージが更新されたらスクロール
     scrollToBottom();
 
-    if (!messagesData || !messagesData.messages || messagesData.messages.length === 0) {
+    if (
+      !messagesData ||
+      !messagesData.messages ||
+      messagesData.messages.length === 0
+    ) {
       return;
     }
 
@@ -67,11 +71,15 @@ export function ChatSheet({
       }
     }
 
-    console.log('latestMessage', latestMessage)
+    console.log("latestMessage", latestMessage);
 
     if (!latestMessage || !worksessionId) return;
     // 既読情報が最新のメッセージと同じ場合は何もしない
-    if (latestMessage.message_seq === messagesData.chef_last_read?.last_read_message_seq) return;
+    if (
+      latestMessage.message_seq ===
+      messagesData.chef_last_read?.last_read_message_seq
+    )
+      return;
 
     // 既読情報更新
     updateReadMessageTrigger({
@@ -119,15 +127,17 @@ export function ChatSheet({
                   </p>
                 </div>
               </div>
-              <button onClick={onClose} className="p-2">
+              {/* <button onClick={onClose} className="p-2">
                 <ChevronDown className="h-6 w-6" />
-              </button>
+              </button> */}
             </div>
           </div>
 
           {/* メッセージエリア */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messagesData && messagesData.messages && messagesData.messages.length > 0 ? (
+            {messagesData &&
+            messagesData.messages &&
+            messagesData.messages.length > 0 ? (
               messagesData.messages.map((message) => (
                 <div
                   key={message.id}
@@ -155,33 +165,85 @@ export function ChatSheet({
                 </div>
               ))
             ) : (
-              <div className="text-center text-gray-500 py-4">
-                メッセージはまだありません
+              <div className="text-center py-8">
+                <p className="text-gray-500 mb-4">メッセージはまだありません</p>
+                <p className="text-sm text-muted-foreground">
+                  まずは「はじめまして」の挨拶から始めてみましょう！
+                </p>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
 
           {/* 入力エリア */}
-          <div className="border-t p-4 flex gap-2">
-            <Input
-              placeholder="メッセージを入力..."
-              value={messageInput}
-              onChange={(e) => setMessageInput(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSendMessage();
-                }
-              }}
-              className="flex-1"
-            />
-            <Button
-              size="icon"
-              onClick={handleSendMessage}
-              disabled={!messageInput.trim()}>
-              <Send className="h-4 w-4" />
-            </Button>
+          <div className="border-t bg-background">
+            <div className="px-4 py-3 border-b">
+              <p className="text-sm text-muted-foreground mb-2">
+                クイックメッセージ
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setMessageInput(
+                      "はじめまして！この度は採用いただき、ありがとうございます。"
+                    )
+                  }>
+                  👋 はじめまして
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setMessageInput(
+                      `集合時間・場所の確認をさせていただきます。\n\n${format(
+                        new Date(workDate),
+                        "MM月dd日"
+                      )} ${format(
+                        new Date(startTime * 1000),
+                        "HH:mm"
+                      )}に${restaurantName}に伺えばよろしいでしょうか？`
+                    )
+                  }>
+                  🕒 集合時間の確認
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setMessageInput(
+                      "持ち物について確認させていただきたいのですが、必要な物はありますでしょうか？"
+                    )
+                  }>
+                  📋 持ち物の確認
+                </Button>
+              </div>
+            </div>
+            <div className="border-t p-4 flex gap-2">
+              <Input
+                placeholder="メッセージを入力..."
+                value={messageInput}
+                onChange={(e) => setMessageInput(e.target.value)}
+                onKeyPress={(e) => {
+                  if (
+                    e.key === "Enter" &&
+                    !e.shiftKey &&
+                    !e.nativeEvent.isComposing
+                  ) {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }
+                }}
+                className="flex-1"
+              />
+              <Button
+                size="icon"
+                onClick={handleSendMessage}
+                disabled={!messageInput.trim()}>
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </SheetContent>
