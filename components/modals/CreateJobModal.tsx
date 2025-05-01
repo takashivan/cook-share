@@ -491,14 +491,7 @@ export const CreateJobModal = ({
                               message:
                                 "締め切りは今日以降の日付で設定してください",
                             },
-                            max: {
-                              value: new Date(
-                                new Date().setDate(new Date().getDate() + 30)
-                              )
-                                .toISOString()
-                                .split("T")[0],
-                              message: "締め切りは30日以内で設定してください",
-                            },
+                           
                             validate: (value) => {
                               const formValues = watch();
                               if (

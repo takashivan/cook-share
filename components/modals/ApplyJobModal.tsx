@@ -48,6 +48,7 @@ export const ApplyJobModal = ({
     tasks: false,
     skills: false,
     notes: false,
+    cancellation: false,
   });
 
   const onSubmitForm = (data: ApplyFormData) => {
@@ -150,6 +151,41 @@ export const ApplyJobModal = ({
                       />
                       <span className="ml-2 text-sm text-gray-600">
                         注意事項を確認しました
+                      </span>
+                    </label>
+                  </div>
+
+                  <div className="rounded-lg bg-red-50 p-4">
+                    <h4 className="font-medium text-red-900">
+                      キャンセルについて
+                    </h4>
+                    <div className="mt-2 space-y-2 text-sm text-red-800">
+                      <p>お仕事のキャンセルは以下の条件で可能です：</p>
+                      <ul className="list-disc pl-4 space-y-1">
+                        <li>2日以上前のキャンセル：違約金なし</li>
+                        <li>
+                          1日前以降のキャンセル：報酬予定額の100%の違約金とキャンセル手数料が発生
+                        </li>
+                      </ul>
+                      <p className="mt-2">
+                        ※
+                        度重なるキャンセルや不当な理由でのキャンセルは、今後のご利用停止となる可能性があります。
+                      </p>
+                    </div>
+                    <label className="mt-2 flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={confirmations.cancellation}
+                        onChange={(e) =>
+                          setConfirmations((prev) => ({
+                            ...prev,
+                            cancellation: e.target.checked,
+                          }))
+                        }
+                        className="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                      />
+                      <span className="ml-2 text-sm text-red-800">
+                        キャンセル条件を確認しました
                       </span>
                     </label>
                   </div>
