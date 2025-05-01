@@ -65,6 +65,7 @@ import { RestaurantReviewModal } from "@/components/modals/RestaurantReviewModal
 import { chefReviewApi } from "@/lib/api/chefReview";
 import { FaStar } from "react-icons/fa";
 import { EditJobModal } from "@/components/modals/EditJobModal";
+import { useUserCancelWorksessionByRestaurant } from "@/hooks/api/companyuser/worksessions/userCancelWorksessionByRestaurant";
 import { toast } from "@/hooks/use-toast";
 import {
   Tooltip,
@@ -137,6 +138,11 @@ export default function JobDetail({ params }: PageParams) {
 
   const { trigger: updateJobTrigger } = useUpdateJob({ jobId: Number(jobId), companyId: restaurant?.companies_id ?? undefined, restaurantId: restaurant?.id ?? undefined});
   const { trigger: verifyWorksessionTrigger } = useVerifyWorksession({ worksessionId: selectedWorkSession?.id || 0, jobId: Number(jobId) });
+
+  const { trigger: cancelWorksessionTrigger } = useUserCancelWorksessionByRestaurant({
+    worksession_id: selectedWorkSession?.id || 0,
+    reason: cancelReason
+  });
 
   // メッセージの取得
   const { messagesData, sendMessage } = useSubscriptionMessagesByCompanyUserId({
@@ -301,6 +307,7 @@ export default function JobDetail({ params }: PageParams) {
 
     try {
       // TODO: APIを呼び出してキャンセル処理を実行
+      await cancelWorksessionTrigger();
       // await cancelJob(job.id, cancellationPenalty.status, cancelReason);
       toast({
         title: "キャンセル完了",

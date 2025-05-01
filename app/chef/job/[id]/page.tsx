@@ -31,6 +31,7 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { useStartWorksession } from "@/hooks/api/user/worksessions/useStartWorksession";
 import { useFinishWorksession } from "@/hooks/api/user/worksessions/useFinishWorksession";
 import { useGetJob } from "@/hooks/api/companyuser/jobs/useGetJob";
+import { useCancelWorksessionByChef } from "@/hooks/api/user/worksessions/useCancelWorksessionByChef";
 import { useGetWorksessionsByUserId } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserId";
 import { useSubscriptionUnreadMessagesByUser } from "@/hooks/api/user/messages/useSubscriptionUnreadMessagesByUser";
 
@@ -117,6 +118,11 @@ export default function JobDetail({ params }: PageProps) {
   const { trigger: finishWorksessionTrigger } = useFinishWorksession({
     worksessionId: workSession?.id || 0,
     userId: user?.id,
+  });
+
+  const { trigger: cancelWorksessionTrigger } = useCancelWorksessionByChef({
+    worksession_id: workSession?.id || 0,
+    reason: cancelReason
   });
 
   // メッセージの取得
