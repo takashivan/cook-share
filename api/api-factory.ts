@@ -4,7 +4,7 @@ import axiosInstance from './axios';
 type Constructor<T> = new (args: { axiosInstance: AxiosInstance }) => T;
 
 // 自動で API クラスのマップを作る（PascalCase 前提）
-const apiCache = new Map<string, any>();
+const apiCache = new WeakMap<Constructor<any>, any>();
 
 /**
 * @description
@@ -14,10 +14,11 @@ const apiCache = new Map<string, any>();
 * @returns - 指定された API クラスのインスタンス
 */
 export function getApi<T>(ApiClass: Constructor<T>): T {
-  const className = ApiClass.name;
-  if (!apiCache.has(className)) {
+  console.log('getApi', ApiClass);
+  if (!apiCache.has(ApiClass)) {
     // axios のインスタンスを渡して API クラスを初期化
-    apiCache.set(className, new ApiClass({ axiosInstance: axiosInstance }));
+    apiCache.set(ApiClass, new ApiClass({ axiosInstance: axiosInstance }));
+    console.log('apiCache', apiCache);
   }
-  return apiCache.get(className);
+  return apiCache.get(ApiClass);
 }
