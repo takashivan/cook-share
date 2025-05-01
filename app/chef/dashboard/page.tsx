@@ -1,34 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { MessageSquare, Star, Edit } from "lucide-react";
+import { MessageSquare, Edit } from "lucide-react";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import useSWR from "swr";
-import { applicationApi } from "@/lib/api/application";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import type { Application, Job, WorkSessionWithJob } from "@/types";
-import { useEffect, useState } from "react";
-import { workSessionApi } from "@/lib/api/workSession";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { RestaurantNotificationDropdown } from "@/components/notifications/RestaurantNotificationDropdown";
 import { ChefNotificationDropdown } from "@/components/notifications/ChefNotificationDropdown";
 import { UnreadMessageWithWorksession, useSubscriptionUnreadMessagesByUser } from "@/hooks/api/user/messages/useSubscriptionUnreadMessagesByUser";
 import { ChatSheet } from "@/components/chat/ChatSheet";
 import { useSubscriptionMessagesByUserId } from "@/hooks/api/user/messages/useSubscriptionMessagesByUserId";
 import { Badge } from "@/components/ui/badge";
 import { useGetWorksessionsByUserIdByTodo } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserIdByTodo";
-
-interface ApplicationWithJob extends Application {
-  job?: Job & {
-    restaurant: {
-      id: number;
-      name: string;
-      address: string;
-      image: string | null;
-    };
-  };
-}
 
 export default function ChefDashboard() {
   const { user } = useAuth();

@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
-import { useEffect, use, useState, useRef } from "react";
+import { useEffect, use, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   ChevronLeft,
@@ -10,39 +9,12 @@ import {
   Clock,
   MapPin,
   MessageSquare,
-  MapPinIcon,
   QrCode,
-  ArrowRight,
-  CheckCircle,
-  CreditCard,
-  DollarSign,
-  Shield,
-  ChevronDown,
-  Send,
   AlertCircle,
-  CheckCircle2,
 } from "lucide-react";
-import { jobApi, getJobDetails } from "@/lib/api/job";
-import {
-  workSessionApi,
-  updateWorkSessionToCheckIn,
-  updateWorkSessionToCheckOut,
-} from "@/lib/api/workSession";
-import { messageApi } from "@/lib/api/message";
-import { applicationApi } from "@/lib/api/application";
-import { format, differenceInDays, isBefore, isSameDay } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { ja } from "date-fns/locale";
-import useSWR, { mutate } from "swr";
-import type { Job, WorkSession, Message, Application } from "@/types";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { ChefReviewModal } from "@/components/modals/ChefReviewModal";
 import { toast } from "@/hooks/use-toast";

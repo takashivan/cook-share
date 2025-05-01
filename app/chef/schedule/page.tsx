@@ -1,14 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { Card, CardContent } from "@/components/ui/card";
-import type { Message } from "@/types";
-import { messageApi, CreateMessageParams } from "@/lib/api/message";
-import useSWR from "swr";
 import { ChatSheet } from "@/components/chat/ChatSheet";
 import { useGetWorksessionsByUserId } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserId";
 import { WorksessionsListResult } from "@/api/__generated__/base/data-contracts";
