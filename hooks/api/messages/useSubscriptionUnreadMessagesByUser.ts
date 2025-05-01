@@ -2,7 +2,7 @@ import { getApi } from "@/api/api-factory"
 import useSWR from "swr"
 import { QueryConfigType } from "../config-type";
 import { Chat } from "@/api/__generated__/base/Chat";
-import { UnreadMessage } from "./useGetUnreadMessagesByCompanyUserId";
+import { UnreadMessage } from "./useSubscriptionUnreadMessagesByRestaurantId";
 import useSWRSubscription from "swr/subscription";
 import realTimeClient from "@/api/xano";
 import { XanoRealtimeChannel } from "@xano/js-sdk/lib/models/realtime-channel";

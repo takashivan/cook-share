@@ -13,6 +13,8 @@ import { ChatSheet } from "@/components/chat/ChatSheet";
 import { useGetWorksessionsByUserId } from "@/hooks/api/worksessions/useGetWorksessionsByUserId";
 import { WorksessionsListResult } from "@/api/__generated__/base/data-contracts";
 import { useSubscriptionMessagesByUserId } from "@/hooks/api/messages/useSubscriptionMessagesByUserId";
+import { useSubscriptionUnreadMessagesByUser } from "@/hooks/api/messages/useSubscriptionUnreadMessagesByUser";
+import { Badge } from "@/components/ui/badge";
 
 export default function SchedulePage() {
   const { user } = useAuth();
@@ -33,7 +35,12 @@ export default function SchedulePage() {
     userId: user?.id,
     workSessionId: selectedWorkSession?.id,
     applicationId: selectedWorkSession?.application_id,
-  })
+  });
+
+  // 未読メッセージの取得
+  const { unreadMessagesData } = useSubscriptionUnreadMessagesByUser({
+    userId: user?.id,
+  });
 
   const handleSendMessage = async (message: string) => {
     if (!message.trim() || !selectedWorkSession) return;
@@ -78,13 +85,20 @@ export default function SchedulePage() {
     );
     const endTime = format(new Date(workSession.job.end_time * 1000), "HH:mm");
 
+    const unreadMessageData = unreadMessagesData?.find(
+      (unreadMessageData) => unreadMessageData.worksession.id === workSession.id
+    );
+    const unreadMessageCount = unreadMessageData
+      ? unreadMessageData.unread_messages.length
+      : 0;
+
     return (
       <Card
         key={workSession.id}
         className="mb-4 hover:bg-gray-50 transition-colors"
         onClick={() => openChat(workSession.job.id)}>
         <CardContent className="p-4">
-          <div className="flex justify-between items-start mb-2">
+          <div className="flex justify-between items-start mb-2 relative">
             <div className="flex items-center gap-2">
               <span className="font-medium">{workDate}</span>
               <span className="text-gray-500">|</span>
@@ -92,6 +106,11 @@ export default function SchedulePage() {
                 {startTime} 〜 {endTime}
               </span>
             </div>
+            {unreadMessageCount > 0 && (
+              <Badge className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[1.25rem] h-5 flex items-center justify-center bg-red-500 text-white">
+                {unreadMessageCount}
+              </Badge>
+            )}
           </div>
           <div className="text-gray-500 mb-1">
             {workSession.job.restaurant.name}

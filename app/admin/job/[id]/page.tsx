@@ -82,6 +82,7 @@ import { Worksessions } from "@/api/__generated__/base/Worksessions";
 import { useSubscriptionMessagesByCompanyUserId } from "@/hooks/api/messages/useSubscriptionMessagesByCompanyUserId";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { useUpdateReadMessageByCompanyUser } from "@/hooks/api/messages/useUpdateReadMessageByCompanyUser";
+import { useSubscriptionUnreadMessagesByRestaurantId } from "@/hooks/api/messages/useSubscriptionUnreadMessagesByRestaurantId";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
 import { differenceInDays } from "date-fns";
@@ -137,11 +138,17 @@ export default function JobDetail({ params }: PageParams) {
   const { trigger: updateJobTrigger } = useUpdateJob({ jobId: Number(jobId), companyId: restaurant?.companies_id ?? undefined, restaurantId: restaurant?.id ?? undefined});
   const { trigger: verifyWorksessionTrigger } = useVerifyWorksession({ worksessionId: selectedWorkSession?.id || 0, jobId: Number(jobId) });
 
+  // メッセージの取得
   const { messagesData, sendMessage } = useSubscriptionMessagesByCompanyUserId({
     companyUserId: user?.id,
     workSessionId: selectedWorkSession?.id,
     applicationId: selectedWorkSession?.application_id,
   })
+
+  // 未読メッセージの取得
+  const { unreadMessagesData } = useSubscriptionUnreadMessagesByRestaurantId({
+    restaurantId: restaurant?.id,
+  });
 
   const { trigger: updateReadMessageTrigger } = useUpdateReadMessageByCompanyUser({
     companyUserId: user?.id,
@@ -206,7 +213,7 @@ export default function JobDetail({ params }: PageParams) {
 
     if (!latestMessage || !selectedWorkSession) return;
     // 既読情報が最新のメッセージと同じ場合は何もしない
-    if (latestMessage.message_seq === messagesData.restaurant_last_read.last_read_message_seq) return;
+    if (latestMessage.message_seq === messagesData.restaurant_last_read?.last_read_message_seq) return;
 
     // 既読情報更新
     updateReadMessageTrigger({
@@ -392,50 +399,64 @@ export default function JobDetail({ params }: PageParams) {
             </CardHeader> */}
             <CardContent className="p-0">
               <div className="divide-y">
-                {workSessions?.map((session) => (
-                  <div
-                    key={session.id}
-                    className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
-                      selectedApplicant === session.id ? "bg-gray-50" : ""
-                    }`}
-                    onClick={() => {
-                      setSelectedApplicant(session.id);
-                      setSelectedWorkSession(session);
-                    }}>
-                    <div className="flex items-start gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage
-                          src={session.user.profile_image || "/chef-logo.png"}
-                          alt={session.user.name.charAt(0)}
-                        />
-                        <AvatarFallback>
-                          {session.user.name.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <p className="font-medium">
-                            {session.user.name}
-                            &nbsp;
-                            <span className="text-xs text-muted-foreground">
-                              シェフ
-                            </span>
-                          </p>
-                          <Badge variant="outline" className=" text-xs">
-                            {formatWorkSessionJapaneseStatus(session.status)}
-                          </Badge>
-                          {/* <p className="text-xs text-muted-foreground">
-                            {format(new Date(session.created_at), "MM/dd")}
-                          </p> */}
-                        </div>
+                {workSessions?.map((session) => {
+                  const unreadMessageData = unreadMessagesData?.find(
+                    (unreadMessageData) => unreadMessageData.unread_messages.some((message) => message.worksession_id === session.id)
+                  );
+                  const unreadMessageCount = unreadMessageData
+                    ? unreadMessageData.unread_messages.length
+                    : 0;
 
-                        <p className="text-sm text-muted-foreground truncate mt-1">
-                          {session.user.skills?.join(", ")}
-                        </p>
+                  return (
+                    <div
+                      key={session.id}
+                      className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors relative ${
+                        selectedApplicant === session.id ? "bg-gray-50" : ""
+                      }`}
+                      onClick={() => {
+                        setSelectedApplicant(session.id);
+                        setSelectedWorkSession(session);
+                      }}>
+                      <div className="flex items-start gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage
+                            src={session.user.profile_image || "/chef-logo.png"}
+                            alt={session.user.name.charAt(0)}
+                          />
+                          <AvatarFallback>
+                            {session.user.name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <p className="font-medium">
+                              {session.user.name}
+                              &nbsp;
+                              <span className="text-xs text-muted-foreground">
+                                シェフ
+                              </span>
+                            </p>
+                            <Badge variant="outline" className=" text-xs">
+                              {formatWorkSessionJapaneseStatus(session.status)}
+                            </Badge>
+                            {unreadMessageCount > 0 && (
+                              <Badge className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[1.25rem] h-5 flex items-center justify-center bg-red-500 text-white">
+                                {unreadMessageCount}
+                              </Badge>
+                            )}
+                            {/* <p className="text-xs text-muted-foreground">
+                              {format(new Date(session.created_at), "MM/dd")}
+                            </p> */}
+                          </div>
+
+                          <p className="text-sm text-muted-foreground truncate mt-1">
+                            {session.user.skills?.join(", ")}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
