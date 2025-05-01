@@ -19,6 +19,7 @@ import {
   List,
   Store,
   Calendar,
+  Star,
 } from "lucide-react";
 import {
   Card,
@@ -67,7 +68,13 @@ import { EditRestaurantModal } from "@/components/modals/EditRestaurantModal";
 import { useGetRestaurant } from "@/hooks/api/companyuser/restaurants/useGetRestaurant";
 import { useGetJobsByRestaurantId } from "@/hooks/api/companyuser/jobs/useGetJobsByRestaurantId";
 import { useGetMultipleWorksessionsByJobId } from "@/hooks/api/companyuser/worksessions/useGetMultipleWorksessionsByJobId";
-import { CompanyusersCreateInput, CompanyusersListData, CompanyusersListOutput, JobsCreatePayload, JobsListOutput } from "@/api/__generated__/base/data-contracts";
+import {
+  CompanyusersCreateInput,
+  CompanyusersListData,
+  CompanyusersListOutput,
+  JobsCreatePayload,
+  JobsListOutput,
+} from "@/api/__generated__/base/data-contracts";
 import { useGetCompanyUsersByRestaurantId } from "@/hooks/api/companyuser/companyUsers/useGetCompanyUsersByRestaurantId";
 import { useCreateJob } from "@/hooks/api/companyuser/jobs/useCreateJob";
 import { workSessionApi } from "@/lib/api/workSession";
@@ -97,6 +104,7 @@ import { Label } from "@/components/ui/label";
 import { Staff } from "@/types/staff";
 import { DeleteRestaurantStaffModal } from "@/components/modals/DeleteRestaurantStaffModal";
 import { deleteRestaurantStaff } from "@/lib/api/restaurant";
+import { useGetRestaurantReviewByRestaurantId } from "@/hooks/api/companyuser/reviews/useGetRestaurantReviewByRestaurantId";
 
 interface StaffData {
   id: string;
@@ -109,7 +117,8 @@ interface StaffData {
   };
 }
 
-interface JobWithWorkSessions extends Omit<JobsListOutput[number], "workSessionCount"> {
+interface JobWithWorkSessions
+  extends Omit<JobsListOutput[number], "workSessionCount"> {
   formattedWorkDate: string;
   formattedTime: string;
   workSessionCount: number;
@@ -133,45 +142,55 @@ export default function RestaurantDetailPage(props: {
     error: restaurantError,
     mutate: mutateRestaurant,
   } = useGetRestaurant({ restaurantId: Number(params.id) });
-  const { data: jobs, error: jobsError } = useGetJobsByRestaurantId({ restaurantId: Number(params.id) });
-  const { data: worksessionsbyJob } = useGetMultipleWorksessionsByJobId({ jobIds: jobs?.map((job) => job.id) || [] })
-  const { data: staffData } = useGetCompanyUsersByRestaurantId({ restaurantId: Number(params.id) });
+  const { data: jobs, error: jobsError } = useGetJobsByRestaurantId({
+    restaurantId: Number(params.id),
+  });
+  const { data: worksessionsbyJob } = useGetMultipleWorksessionsByJobId({
+    jobIds: jobs?.map((job) => job.id) || [],
+  });
+  const { data: staffData } = useGetCompanyUsersByRestaurantId({
+    restaurantId: Number(params.id),
+  });
+  const { data: restaurantReview } = useGetRestaurantReviewByRestaurantId({
+    restaurantId: Number(params.id),
+  });
 
-  const jobWithWorkSessions: JobWithWorkSessions[] | undefined = jobs?.map((job) => {
-    const workSessionCount = worksessionsbyJob?.find((workSessions) => workSessions.some((workSession) => workSession.job_id === job.id))?.length || 0;
-    return {
-      ...job,
-      formattedWorkDate: format(
-        new Date(job.work_date),
-        "yyyy年MM月dd日",
-        {
+  const jobWithWorkSessions: JobWithWorkSessions[] | undefined =
+    jobs?.map((job) => {
+      const workSessionCount =
+        worksessionsbyJob?.find((workSessions) =>
+          workSessions.some((workSession) => workSession.job_id === job.id)
+        )?.length || 0;
+      return {
+        ...job,
+        formattedWorkDate: format(new Date(job.work_date), "yyyy年MM月dd日", {
           locale: ja,
-        }
-      ),
-      formattedTime: `${format(
-        new Date(job.start_time),
-        "HH:mm"
-      )} 〜 ${format(new Date(job.end_time), "HH:mm")}`,
-      workSessionCount,
-    };
-  }) ?? [];
+        }),
+        formattedTime: `${format(
+          new Date(job.start_time),
+          "HH:mm"
+        )} 〜 ${format(new Date(job.end_time), "HH:mm")}`,
+        workSessionCount,
+      };
+    }) ?? [];
 
   const { trigger: createJobTrigger } = useCreateJob({
     companyId: restaurant?.companies_id ?? undefined,
     restaurantId: restaurant?.id,
   });
 
-  const { trigger: createCompanyUserTrigger } = useCreateCompanyUserByRestaurantId({
-    restaurantId: restaurant?.id,
-    companyId: restaurant?.companies_id ?? undefined,
-  })
+  const { trigger: createCompanyUserTrigger } =
+    useCreateCompanyUserByRestaurantId({
+      restaurantId: restaurant?.id,
+      companyId: restaurant?.companies_id ?? undefined,
+    });
 
   console.log("restaurant", restaurant);
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
-  
+
   // const [formDataState, setFormDataState] = useState({
   //   name: "",
   //   email: "",
@@ -191,9 +210,9 @@ export default function RestaurantDetailPage(props: {
     id: string;
     companyuser: { name: string; email: string };
   } | null>(null);
-  const [editTargetStaff, setEditTargetStaff] = useState<CompanyusersListOutput['admin'][number] | null>(
-    null
-  );
+  const [editTargetStaff, setEditTargetStaff] = useState<
+    CompanyusersListOutput["admin"][number] | null
+  >(null);
   const [editPermissions, setEditPermissions] = useState<EditStaffPermissions>({
     canEdit: false,
     canManageJobs: false,
@@ -328,12 +347,12 @@ export default function RestaurantDetailPage(props: {
       console.log("permissions.canManageJobs", permissions.canManageJobs);
       console.log("restaurant.name", restaurant.name);
       const data: CompanyusersCreateInput = {
-        companies_id: restaurant.companies_id ?? '',
+        companies_id: restaurant.companies_id ?? "",
         email,
         can_edit: permissions.canEdit,
         can_manage_jobs: permissions.canManageJobs,
-        restaurant_name: restaurant.name
-      }
+        restaurant_name: restaurant.name,
+      };
       await createCompanyUserTrigger(data);
       toast({
         title: "招待を送信しました",
@@ -431,7 +450,10 @@ export default function RestaurantDetailPage(props: {
       await deleteRestaurantStaff(Number(params.id), deleteTargetStaff.id);
       toast({
         title: "スタッフを削除しました",
-        description: `${deleteTargetStaff.companyuser.name || deleteTargetStaff.companyuser.email}をスタッフから削除しました。`,
+        description: `${
+          deleteTargetStaff.companyuser.name ||
+          deleteTargetStaff.companyuser.email
+        }をスタッフから削除しました。`,
       });
       // スタッフ一覧を再取得
       mutateRestaurant();
@@ -457,7 +479,9 @@ export default function RestaurantDetailPage(props: {
 
       toast({
         title: "権限を更新しました",
-        description: `${editTargetStaff.name || editTargetStaff.email}の権限を更新しました。`,
+        description: `${
+          editTargetStaff.name || editTargetStaff.email
+        }の権限を更新しました。`,
       });
     } catch (error) {
       console.error("Failed to update staff permissions:", error);
@@ -526,6 +550,43 @@ export default function RestaurantDetailPage(props: {
                       className="bg-white/20 backdrop-blur-sm text-white border-white/40">
                       {restaurant?.cuisine_type}
                     </Badge>
+                    {restaurantReview && restaurantReview.length > 0 && (
+                      <Badge
+                        variant="outline"
+                        className="bg-white/20 backdrop-blur-sm text-white border-white/40">
+                        <div className="flex items-center gap-1">
+                          <div className="flex">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`h-3 w-3 ${
+                                  i <
+                                  Math.round(
+                                    restaurantReview.reduce(
+                                      (acc, review) => acc + review.rating,
+                                      0
+                                    ) / restaurantReview.length
+                                  )
+                                    ? "text-yellow-400 fill-yellow-400"
+                                    : "text-gray-300"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <span className="text-sm">
+                            {(
+                              restaurantReview.reduce(
+                                (acc, review) => acc + review.rating,
+                                0
+                              ) / restaurantReview.length
+                            ).toFixed(1)}
+                            <span className="text-xs ml-1">
+                              ({restaurantReview.length}件)
+                            </span>
+                          </span>
+                        </div>
+                      </Badge>
+                    )}
                   </div>
                   <h1 className="text-2xl font-bold">{restaurant?.name}</h1>
                   <div className="flex flex-col items-start gap-4 mt-2 text-white/90">
@@ -661,6 +722,51 @@ export default function RestaurantDetailPage(props: {
                     </div>
                   </CardContent>
                 </Card>
+
+                {restaurantReview && restaurantReview.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>シェフからのレビュー</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {restaurantReview.map((review) => (
+                          <div
+                            key={review.id}
+                            className="border rounded-lg p-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="flex">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`h-4 w-4 ${
+                                      i < review.rating
+                                        ? "text-yellow-400 fill-yellow-400"
+                                        : "text-gray-300"
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                              <span className="text-sm font-medium">
+                                {review.rating.toFixed(1)}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-700 mb-2">
+                              {review.comment}
+                            </p>
+                            <div className="text-xs text-gray-500">
+                              {format(
+                                new Date(review.created_at),
+                                "yyyy年MM月dd日",
+                                { locale: ja }
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
             </TabsContent>
 
@@ -739,8 +845,8 @@ export default function RestaurantDetailPage(props: {
                             i === 0
                               ? "text-red-500"
                               : i === 6
-                                ? "text-blue-500"
-                                : ""
+                              ? "text-blue-500"
+                              : ""
                           }`}>
                           {day}
                         </div>
@@ -778,17 +884,23 @@ export default function RestaurantDetailPage(props: {
                               isToday
                                 ? "bg-blue-50 border-blue-200"
                                 : !isCurrentMonth
-                                  ? "bg-gray-50 text-gray-400"
-                                  : ""
-                            } ${dayOfWeek === 0 ? "border-l-red-200" : dayOfWeek === 6 ? "border-l-blue-200" : ""}`}>
+                                ? "bg-gray-50 text-gray-400"
+                                : ""
+                            } ${
+                              dayOfWeek === 0
+                                ? "border-l-red-200"
+                                : dayOfWeek === 6
+                                ? "border-l-blue-200"
+                                : ""
+                            }`}>
                             <div className="flex justify-between items-center mb-1">
                               <div
                                 className={`text-sm font-medium ${
                                   dayOfWeek === 0
                                     ? "text-red-500"
                                     : dayOfWeek === 6
-                                      ? "text-blue-500"
-                                      : ""
+                                    ? "text-blue-500"
+                                    : ""
                                 } ${!isCurrentMonth ? "opacity-50" : ""}`}>
                                 {format(date, "d")}
                               </div>
@@ -819,8 +931,8 @@ export default function RestaurantDetailPage(props: {
                                       job.status === "PUBLISHED"
                                         ? "bg-green-100 border-green-300"
                                         : job.status === "DRAFT"
-                                          ? "bg-gray-100 border-gray-300"
-                                          : "bg-yellow-100 border-yellow-300"
+                                        ? "bg-gray-100 border-gray-300"
+                                        : "bg-yellow-100 border-yellow-300"
                                     } cursor-pointer hover:shadow-sm transition-all relative group`}
                                     onClick={() =>
                                       router.push(`/admin/job/${job.id}`)
@@ -901,7 +1013,12 @@ export default function RestaurantDetailPage(props: {
                                 <div className="flex-1">
                                   <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
                                     <div
-                                      className={`h-full ${job.workSessionCount >= job.number_of_spots ? "bg-primary" : "bg-blue-400"}`}
+                                      className={`h-full ${
+                                        job.workSessionCount >=
+                                        job.number_of_spots
+                                          ? "bg-primary"
+                                          : "bg-blue-400"
+                                      }`}
                                       style={{
                                         width: `${Math.min(
                                           (job.workSessionCount /
@@ -916,7 +1033,12 @@ export default function RestaurantDetailPage(props: {
                                 <div className="flex items-center gap-2">
                                   <div className="flex items-center gap-1">
                                     <span
-                                      className={`text-lg font-bold ${job.workSessionCount >= job.number_of_spots ? "text-primary" : ""}`}>
+                                      className={`text-lg font-bold ${
+                                        job.workSessionCount >=
+                                        job.number_of_spots
+                                          ? "text-primary"
+                                          : ""
+                                      }`}>
                                       {job.workSessionCount}
                                     </span>
                                     <span className="text-gray-500">/</span>
@@ -984,7 +1106,12 @@ export default function RestaurantDetailPage(props: {
                                 <div className="flex-1">
                                   <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
                                     <div
-                                      className={`h-full ${job.workSessionCount >= job.number_of_spots ? "bg-primary" : "bg-blue-400"}`}
+                                      className={`h-full ${
+                                        job.workSessionCount >=
+                                        job.number_of_spots
+                                          ? "bg-primary"
+                                          : "bg-blue-400"
+                                      }`}
                                       style={{
                                         width: `${Math.min(
                                           (job.workSessionCount /
@@ -999,7 +1126,12 @@ export default function RestaurantDetailPage(props: {
                                 <div className="flex items-center gap-2">
                                   <div className="flex items-center gap-1">
                                     <span
-                                      className={`text-lg font-bold ${job.workSessionCount >= job.number_of_spots ? "text-primary" : ""}`}>
+                                      className={`text-lg font-bold ${
+                                        job.workSessionCount >=
+                                        job.number_of_spots
+                                          ? "text-primary"
+                                          : ""
+                                      }`}>
                                       {job.workSessionCount}
                                     </span>
                                     <span className="text-gray-500">/</span>
@@ -1067,7 +1199,12 @@ export default function RestaurantDetailPage(props: {
                                 <div className="flex-1">
                                   <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
                                     <div
-                                      className={`h-full ${job.workSessionCount >= job.number_of_spots ? "bg-primary" : "bg-blue-400"}`}
+                                      className={`h-full ${
+                                        job.workSessionCount >=
+                                        job.number_of_spots
+                                          ? "bg-primary"
+                                          : "bg-blue-400"
+                                      }`}
                                       style={{
                                         width: `${Math.min(
                                           (job.workSessionCount /
@@ -1082,7 +1219,12 @@ export default function RestaurantDetailPage(props: {
                                 <div className="flex items-center gap-2">
                                   <div className="flex items-center gap-1">
                                     <span
-                                      className={`text-lg font-bold ${job.workSessionCount >= job.number_of_spots ? "text-primary" : ""}`}>
+                                      className={`text-lg font-bold ${
+                                        job.workSessionCount >=
+                                        job.number_of_spots
+                                          ? "text-primary"
+                                          : ""
+                                      }`}>
                                       {job.workSessionCount}
                                     </span>
                                     <span className="text-gray-500">/</span>
@@ -1153,7 +1295,12 @@ export default function RestaurantDetailPage(props: {
                                 <div className="flex-1">
                                   <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
                                     <div
-                                      className={`h-full ${job.workSessionCount >= job.number_of_spots ? "bg-primary" : "bg-blue-400"}`}
+                                      className={`h-full ${
+                                        job.workSessionCount >=
+                                        job.number_of_spots
+                                          ? "bg-primary"
+                                          : "bg-blue-400"
+                                      }`}
                                       style={{
                                         width: `${Math.min(
                                           (job.workSessionCount /
@@ -1168,7 +1315,12 @@ export default function RestaurantDetailPage(props: {
                                 <div className="flex items-center gap-2">
                                   <div className="flex items-center gap-1">
                                     <span
-                                      className={`text-lg font-bold ${job.workSessionCount >= job.number_of_spots ? "text-primary" : ""}`}>
+                                      className={`text-lg font-bold ${
+                                        job.workSessionCount >=
+                                        job.number_of_spots
+                                          ? "text-primary"
+                                          : ""
+                                      }`}>
                                       {job.workSessionCount}
                                     </span>
                                     <span className="text-gray-500">/</span>
@@ -1249,14 +1401,15 @@ export default function RestaurantDetailPage(props: {
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuItem
                                     className="text-red-600"
-                                    onClick={() => setDeleteTargetStaff({
-                                      id: staff.id,
-                                      companyuser: {
-                                        name: staff.name,
-                                        email: staff.email
-                                      }
-                                    })}
-                                  >
+                                    onClick={() =>
+                                      setDeleteTargetStaff({
+                                        id: staff.id,
+                                        companyuser: {
+                                          name: staff.name,
+                                          email: staff.email,
+                                        },
+                                      })
+                                    }>
                                     削除
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
@@ -1351,7 +1504,11 @@ export default function RestaurantDetailPage(props: {
         isOpen={!!deleteTargetStaff}
         onClose={() => setDeleteTargetStaff(null)}
         onConfirm={handleDeleteStaff}
-        staffName={deleteTargetStaff?.companyuser.name || deleteTargetStaff?.companyuser.email || ""}
+        staffName={
+          deleteTargetStaff?.companyuser.name ||
+          deleteTargetStaff?.companyuser.email ||
+          ""
+        }
         isLoading={isDeleting}
       />
 
@@ -1363,8 +1520,7 @@ export default function RestaurantDetailPage(props: {
           <DialogHeader>
             <DialogTitle>スタッフ権限の編集</DialogTitle>
             <DialogDescription>
-              {editTargetStaff?.name ||
-                editTargetStaff?.email}
+              {editTargetStaff?.name || editTargetStaff?.email}
               の権限を編集します。
             </DialogDescription>
           </DialogHeader>

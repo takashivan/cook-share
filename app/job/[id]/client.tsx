@@ -30,6 +30,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { GoogleMap } from "@/components/maps/GoogleMap";
+import { useGetRestaurantReviewByRestaurantId } from "@/hooks/api/companyuser/reviews/useGetRestaurantReviewByRestaurantId";
 import { cn } from "@/lib/utils";
 import {
   Accordion,
@@ -38,6 +39,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ja } from "date-fns/locale";
 
 interface Restaurant {
   id: string;
@@ -116,7 +118,10 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
   const [applicationId, setApplicationId] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const { toast } = useToast();
-
+  const { data: restaurantReview } = useGetRestaurantReviewByRestaurantId({
+    restaurantId: Number(jobDetail.restaurant.id),
+  });
+  console.log("restaurantReview", restaurantReview);
   const applyToJob = async () => {
     if (!user) {
       toast({
@@ -167,7 +172,11 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
       const eventData = {
         text: `${jobDetail.job.title} @ ${jobDetail.restaurant.name}`,
         dates: jobDetail.job.work_date,
-        details: `勤務時間: ${formatTime(jobDetail.job.start_time)} - ${formatTime(jobDetail.job.end_time)}\n場所: ${jobDetail.restaurant.address}`,
+        details: `勤務時間: ${formatTime(
+          jobDetail.job.start_time
+        )} - ${formatTime(jobDetail.job.end_time)}\n場所: ${
+          jobDetail.restaurant.address
+        }`,
       };
 
       setShowSuccessModal(true);
@@ -194,7 +203,9 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
       action: "TEMPLATE",
       text: event.text,
       details: event.details,
-      dates: `${startDate.toISOString().replace(/-|:|\.\d+/g, "")}/${endDate.toISOString().replace(/-|:|\.\d+/g, "")}`,
+      dates: `${startDate.toISOString().replace(/-|:|\.\d+/g, "")}/${endDate
+        .toISOString()
+        .replace(/-|:|\.\d+/g, "")}`,
     });
 
     return `https://calendar.google.com/calendar/render?${params.toString()}`;
@@ -325,12 +336,12 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                       {!user
                         ? "シェフとしてログインして応募する"
                         : !user.is_approved
-                          ? "シェフとしての審査が完了していません"
-                          : jobDetail.job.number_of_spots === 0
-                            ? "募集人数が上限に達しました"
-                            : new Date(jobDetail.job.expiry_date) <= new Date()
-                              ? "募集期間が終了しました"
-                              : "応募する"}
+                        ? "シェフとしての審査が完了していません"
+                        : jobDetail.job.number_of_spots === 0
+                        ? "募集人数が上限に達しました"
+                        : new Date(jobDetail.job.expiry_date) <= new Date()
+                        ? "募集期間が終了しました"
+                        : "応募する"}
                     </Button>
                   </div>
                 </motion.div>
@@ -413,6 +424,41 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                           <Building2 className="h-4 w-4" />
                           店舗情報
                         </h3>
+                        {restaurantReview && restaurantReview.length > 0 && (
+                          <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <div className="flex">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`h-5 w-5 ${
+                                      i <
+                                      Math.round(
+                                        restaurantReview.reduce(
+                                          (acc, review) => acc + review.rating,
+                                          0
+                                        ) / restaurantReview.length
+                                      )
+                                        ? "text-yellow-400 fill-yellow-400"
+                                        : "text-gray-300"
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                              <span className="text-lg font-bold">
+                                {(
+                                  restaurantReview.reduce(
+                                    (acc, review) => acc + review.rating,
+                                    0
+                                  ) / restaurantReview.length
+                                ).toFixed(1)}
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                ({restaurantReview.length}件のレビュー)
+                              </span>
+                            </div>
+                          </div>
+                        )}
                         <div className="space-y-4 text-sm text-gray-700">
                           <div>
                             <h4 className="font-medium mb-1">店舗名</h4>
@@ -427,6 +473,64 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                             <p>{jobDetail.restaurant.business_hours}</p>
                           </div>
                         </div>
+                      </div>
+
+                      {/* Reviews Section */}
+                      <div>
+                        <h3 className="text-base font-bold mb-3 flex items-center gap-2">
+                          <Star className="h-4 w-4" />
+                          シェフからのレビュー
+                        </h3>
+                        {restaurantReview && restaurantReview.length > 0 ? (
+                          <div className="space-y-4">
+                            {restaurantReview.map((review) => (
+                              <motion.div
+                                key={review.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="bg-gray-50 rounded-lg p-4 shadow-sm">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <div className="flex">
+                                    {[...Array(5)].map((_, i) => (
+                                      <Star
+                                        key={i}
+                                        className={`h-4 w-4 ${
+                                          i < review.rating
+                                            ? "text-yellow-400 fill-yellow-400"
+                                            : "text-gray-300"
+                                        }`}
+                                      />
+                                    ))}
+                                  </div>
+                                  <span className="text-sm text-gray-500">
+                                    {format(
+                                      new Date(review.created_at),
+                                      "yyyy/MM/dd",
+                                      { locale: ja }
+                                    )}
+                                  </span>
+                                </div>
+                                <p className="text-sm text-gray-700 leading-relaxed">
+                                  {review.comment}
+                                </p>
+                                <div className="mt-2 flex items-center gap-2">
+                                  <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
+                                    <span className="text-xs font-medium text-gray-600">
+                                      {review.user?.name?.[0] || "?"}
+                                    </span>
+                                  </div>
+                                  <span className="text-xs text-gray-500">
+                                    {review.user?.name || "匿名のシェフ"}
+                                  </span>
+                                </div>
+                              </motion.div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-8 text-gray-500">
+                            まだレビューがありません
+                          </div>
+                        )}
                       </div>
                     </TabsContent>
 
@@ -534,12 +638,12 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                   {!user
                     ? "シェフとしてログインして応募する"
                     : !user.is_approved
-                      ? "シェフとしての審査が完了していません"
-                      : jobDetail.job.number_of_spots === 0
-                        ? "募集人数が上限に達しました"
-                        : new Date(jobDetail.job.expiry_date) <= new Date()
-                          ? "募集期間が終了しました"
-                          : "応募する"}
+                    ? "シェフとしての審査が完了していません"
+                    : jobDetail.job.number_of_spots === 0
+                    ? "募集人数が上限に達しました"
+                    : new Date(jobDetail.job.expiry_date) <= new Date()
+                    ? "募集期間が終了しました"
+                    : "応募する"}
                 </Button>
               </div>
             </motion.div>
@@ -569,18 +673,23 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
             <Link href="/terms" className="hover:underline">
               利用規約
             </Link>
-            
-            
+
             <span>|</span>
-            <Link href="https://corp.cookbiz.co.jp/privacy-policy/" className="hover:underline">
+            <Link
+              href="https://corp.cookbiz.co.jp/privacy-policy/"
+              className="hover:underline">
               プライバシーポリシー
             </Link>
             <span>|</span>
-            <Link href="https://corp.cookbiz.co.jp/privacy-policy-treatment/" className="hover:underline">
+            <Link
+              href="https://corp.cookbiz.co.jp/privacy-policy-treatment/"
+              className="hover:underline">
               個人情報保護方針
             </Link>
             <span>|</span>
-            <Link href="https://corp.cookbiz.co.jp/privacy-policy-treatment/" className="hover:underline">
+            <Link
+              href="https://corp.cookbiz.co.jp/privacy-policy-treatment/"
+              className="hover:underline">
               個人情報の取扱いについて
             </Link>
             <span>|</span>
@@ -635,7 +744,11 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                 href={generateGoogleCalendarUrl({
                   text: `${jobDetail.job.title} @ ${jobDetail.restaurant.name}`,
                   dates: jobDetail.job.work_date,
-                  details: `勤務時間: ${formatTime(jobDetail.job.start_time)} - ${formatTime(jobDetail.job.end_time)}\n場所: ${jobDetail.restaurant.address}`,
+                  details: `勤務時間: ${formatTime(
+                    jobDetail.job.start_time
+                  )} - ${formatTime(jobDetail.job.end_time)}\n場所: ${
+                    jobDetail.restaurant.address
+                  }`,
                 })}
                 target="_blank"
                 rel="noopener noreferrer">
