@@ -73,6 +73,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useGetJob } from "@/hooks/api/jobs/useGetJob";
+import { useUserCancelWorksessionByRestaurant } from "@/hooks/api/worksessions/userCancelWorksessionByRestaurant";
 import { useGetWorksessionsByJobId } from "@/hooks/api/worksessions/useGetWorksessionsByJobId";
 import { JobsDetailData, JobsPartialUpdatePayload, WorksessionsRestaurantTodosListData } from "@/api/__generated__/base/data-contracts";
 import { useVerifyWorksession } from "@/hooks/api/worksessions/useVerifyWorksession";
@@ -85,7 +86,7 @@ import { useUpdateReadMessageByCompanyUser } from "@/hooks/api/messages/useUpdat
 import { useSubscriptionUnreadMessagesByRestaurantId } from "@/hooks/api/messages/useSubscriptionUnreadMessagesByRestaurantId";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
-import { differenceInDays } from "date-fns";
+import { differenceInDays, differenceInHours } from "date-fns";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -137,7 +138,10 @@ export default function JobDetail({ params }: PageParams) {
 
   const { trigger: updateJobTrigger } = useUpdateJob({ jobId: Number(jobId), companyId: restaurant?.companies_id ?? undefined, restaurantId: restaurant?.id ?? undefined});
   const { trigger: verifyWorksessionTrigger } = useVerifyWorksession({ worksessionId: selectedWorkSession?.id || 0, jobId: Number(jobId) });
-
+  const { trigger: cancelWorksessionTrigger } = useUserCancelWorksessionByRestaurant({
+    worksession_id: selectedWorkSession?.id || 0,
+    reason: cancelReason
+  });
   // メッセージの取得
   const { messagesData, sendMessage } = useSubscriptionMessagesByCompanyUserId({
     companyUserId: user?.id,
@@ -272,16 +276,35 @@ export default function JobDetail({ params }: PageParams) {
     if (!job) return null;
     
     const now = new Date();
+    console.log("job.work_date:", job.work_date);
+    console.log("job.start_time:", job.start_time);
+    
+    // work_dateをDateオブジェクトに変換
     const workDate = new Date(job.work_date);
-    const daysDifference = differenceInDays(workDate, now);
+    // start_timeをDateオブジェクトに変換
+    const startTime = new Date(job.start_time);
+    
+    // 仕事の開始日時を設定
+    workDate.setHours(startTime.getHours());
+    workDate.setMinutes(startTime.getMinutes());
+    
+    console.log("現在時刻:", now);
+    console.log("仕事開始時刻:", workDate);
+    console.log("workDate.getTime():", workDate.getTime());
+    
+    // 時間差を計算
+    const hoursDifference = differenceInHours(workDate, now);
+    console.log("時間差:", hoursDifference, "時間");
 
-    if (daysDifference >= 2) {
+    if (hoursDifference >= 24) {
+      console.log("24時間以上前のキャンセル");
       return {
         penalty: 0,
         message: "2日以上前のキャンセルは違約金なしで可能です。",
         status: "cancelled_by_restaurant"
       };
     } else {
+      console.log("24時間以内のキャンセル");
       return {
         penalty: job.fee,
         message: "1日前以降のキャンセルは報酬予定額の100%の違約金とキャンセル手数料が発生します。",
@@ -301,7 +324,7 @@ export default function JobDetail({ params }: PageParams) {
 
     try {
       // TODO: APIを呼び出してキャンセル処理を実行
-      // await cancelJob(job.id, cancellationPenalty.status, cancelReason);
+      await cancelWorksessionTrigger();
       toast({
         title: "キャンセル完了",
         description: "お仕事のキャンセルが完了しました。",

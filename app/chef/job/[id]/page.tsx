@@ -29,8 +29,9 @@ import {
   updateWorkSessionToCheckOut,
 } from "@/lib/api/workSession";
 import { messageApi } from "@/lib/api/message";
+import { useCancelWorksessionByChef } from "@/hooks/api/worksessions/useCancelWorksessionByChef";
 import { applicationApi } from "@/lib/api/application";
-import { format, differenceInDays, isBefore, isSameDay } from "date-fns";
+import { format, differenceInDays, isBefore, isSameDay, differenceInHours } from "date-fns";
 import { ja } from "date-fns/locale";
 import useSWR, { mutate } from "swr";
 import type { Job, WorkSession, Message, Application } from "@/types";
@@ -152,6 +153,11 @@ export default function JobDetail({ params }: PageProps) {
     workSessionId: workSession?.id,
     applicationId: application?.id.toString() || "",
   })
+
+  const { trigger: cancelWorksessionTrigger } = useCancelWorksessionByChef({
+    worksession_id: workSession?.id || 0,
+    reason: cancelReason
+  });
 
   // 未読メッセージのカウント
   const unreadCount =
@@ -394,26 +400,53 @@ export default function JobDetail({ params }: PageProps) {
     if (!job) return null;
     
     const now = new Date();
+    console.log("job.work_date:", job.work_date);
+    console.log("job.start_time:", job.start_time);
+    
+    // work_dateをDateオブジェクトに変換
     const workDate = new Date(job.work_date);
-    const daysDifference = differenceInDays(workDate, now);
+    // start_timeをDateオブジェクトに変換
+    const startTime = new Date(job.start_time);
+    
+    // 仕事の開始日時を設定
+    workDate.setHours(startTime.getHours());
+    workDate.setMinutes(startTime.getMinutes());
+    
+    console.log("現在時刻:", now);
+    console.log("仕事開始時刻:", workDate);
+    console.log("workDate.getTime():", workDate.getTime());
+    
+    // 当日かどうかを日付ベースで判定
+    const isSameDay = now.getDate() === workDate.getDate() &&
+                     now.getMonth() === workDate.getMonth() &&
+                     now.getFullYear() === workDate.getFullYear();
 
-    if (daysDifference >= 2) {
-      return {
-        penalty: 0,
-        message: "2日以上前のキャンセルは違約金なしで可能です。",
-        status: "cancelled_by_chef"
-      };
-    } else if (daysDifference >= 1) {
-      return {
-        penalty: job.fee * 0.8,
-        message: "2日前〜前日のキャンセルは報酬予定額の80%の違約金が発生します。",
-        status: "cancelled_by_chef_late"
-      };
-    } else {
+    if (isSameDay) {
+      console.log("当日のキャンセル");
       return {
         penalty: job.fee,
         message: "当日のキャンセルは報酬予定額の100%の違約金が発生します。",
         status: "cancelled_by_chef_same_day"
+      };
+    }
+
+    // 当日以外は時間ベースで判定
+    const hoursDifference = differenceInHours(workDate, now);
+    console.log("時間差:", hoursDifference, "時間");
+
+    if (hoursDifference >= 48) {
+      console.log("48時間以上前のキャンセル");
+      return {
+        penalty: 0,
+        message: "48時間以上前のキャンセルは違約金なしで可能です。",
+        status: "cancelled_by_chef"
+      };
+    } else {
+      console.log("48時間以内のキャンセル");
+      return {
+        penalty: job.fee * 0.8,
+        message: "48時間前〜前日のキャンセルは報酬予定額の80%の違約金が発生します。",
+        status: "cancelled_by_chef_late"
       };
     }
   };
@@ -429,6 +462,7 @@ export default function JobDetail({ params }: PageProps) {
 
     try {
       // TODO: APIを呼び出してキャンセル処理を実行
+      await cancelWorksessionTrigger();
       // await cancelJob(job.id, cancellationPenalty.status, cancelReason);
       toast({
         title: "キャンセル完了",
