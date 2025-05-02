@@ -8,6 +8,8 @@ import useSWRMutation from 'swr/mutation'
 export interface Params {
   companyId?: string;
   companyUserId?: string;
+  handleSuccess?: () => void;
+  handleError?: (error: any) => void;
 }
 
 export const useCreateRestaurant = (params: Params) => {
@@ -40,6 +42,17 @@ export const useCreateRestaurant = (params: Params) => {
         const restaurantsByCompanyUserIdKey = companyusers.restaurantsListQueryArgs(params.companyUserId)[0];
         mutate(restaurantsByCompanyUserIdKey);
       }
-    }
+
+      if (params.handleSuccess) {
+        params.handleSuccess();
+      }
+    },
+    onError: (error) => {
+      console.error('Error creating restaurant:', error);
+
+      if (params.handleError) {
+        params.handleError(error);
+      }
+    },
   })
 }
