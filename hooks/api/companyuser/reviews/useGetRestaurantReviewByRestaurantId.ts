@@ -1,5 +1,4 @@
 import useSWR from "swr";
-import { QueryConfigType } from "../../config-type";
 import { ChefReviews } from "@/api/__generated__/base/ChefReviews";
 import { getApi } from "@/api/api-factory";
 import { Restaurants } from "@/api/__generated__/base/Restaurants";
@@ -11,9 +10,7 @@ interface Params {
 
 export const useGetRestaurantReviewByRestaurantId = (
   params: Params,
-  config?: QueryConfigType
 ) => {
-  const { dedupingInterval } = config || {};
   const reviews = getApi(ChefReviews);
   const restaurants = getApi(Restaurants);
   return useSWR<ChefReviewsListData>(
@@ -27,8 +24,5 @@ export const useGetRestaurantReviewByRestaurantId = (
       });
       return response.data;
     },
-    {
-      dedupingInterval,
-    }
   );
 };

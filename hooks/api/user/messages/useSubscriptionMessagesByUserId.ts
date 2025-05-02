@@ -1,5 +1,4 @@
 import { getApi } from "@/api/api-factory";
-import { QueryConfigType } from "../../config-type";
 import useSWR from "swr";
 import useSWRSubscription from "swr/subscription";
 import { Messages } from "@/api/__generated__/base/Messages";
@@ -16,9 +15,7 @@ export interface Params {
 
 export const useSubscriptionMessagesByUserId = (
   params: Params,
-  config?: QueryConfigType
 ) => {
-  const { dedupingInterval } = config || {};
   const usersApi = getApi(Users);
   const messagesApi = getApi(Messages);
   const channelKey = `worksession/${params.workSessionId}`;
@@ -34,9 +31,7 @@ export const useSubscriptionMessagesByUserId = (
     params.userId != null && params.workSessionId != null
   );
 
-  const getRequest = useSWR(key, fetcher, {
-    dedupingInterval,
-  });
+  const getRequest = useSWR(key, fetcher,);
 
   useSWRSubscription(key, ([_key], { next }) => {
     if (!key) return;

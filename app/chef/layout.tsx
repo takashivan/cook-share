@@ -156,7 +156,7 @@ export default function ChefLayout({
             <Link
               href="/chef/dashboard"
               className={`flex flex-col items-center justify-center gap-1 ${
-                pathname === "/chef/dashboard" && currentTab === "upcoming"
+                pathname === "/chef/dashboard"
                   ? "text-orange-600"
                   : "text-gray-500"
               }`}>
@@ -174,9 +174,9 @@ export default function ChefLayout({
               <span className="text-xs">スケジュール</span>
             </Link>
             <Link
-              href="/chef/dashboard?tab=todo"
+              href="/chef/todos"
               className={`flex flex-col items-center justify-center gap-1 ${
-                pathname === "/chef/dashboard" && currentTab === "todo"
+                pathname === "/chef/todos"
                   ? "text-orange-600"
                   : "text-gray-500"
               }`}>
@@ -184,9 +184,9 @@ export default function ChefLayout({
               <span className="text-xs">やること</span>
             </Link>
             <Link
-              href="/chef/dashboard?tab=messages"
+              href="/chef/messages"
               className={`flex flex-col items-center justify-center gap-1 relative ${
-                pathname === "/chef/dashboard" && currentTab === "messages"
+                pathname === "/chef/messages"
                   ? "text-orange-600"
                   : "text-gray-500"
               }`}>

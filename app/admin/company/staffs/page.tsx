@@ -25,16 +25,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Edit,
-  ExternalLink,
   MoreHorizontal,
   Plus,
   Trash2,
   Users,
 } from "lucide-react";
-import Link from "next/link";
 import { AddCompanyStaffModal } from "@/components/modals/AddCompanyStaff";
-import { companyStaffInvite, deleteCompanyStaff } from "@/lib/api/company";
 import { toast } from "@/hooks/use-toast";
 import { useGetCompanyUsersByCompanyId } from "@/hooks/api/companyuser/companyUsers/useGetCompanyUsersByCompanyId";
 import {
@@ -47,9 +43,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { CompanyUser } from "@/lib/api/companyUser";
 import { useDeleteCompanyUserByCompanyId } from "@/hooks/api/companyuser/companyUsers/useDeleteCompanyUserByCompanyId";
 import { CompanyusersListData } from "@/api/__generated__/base/data-contracts";
+import { useCreateCompanyUserByCompanyId } from "@/hooks/api/companyuser/companyUsers/useCreateCompanyUserByCompanyId";
 
 export default function StaffPage() {
   const { user } = useCompanyAuth();
@@ -59,27 +55,56 @@ export default function StaffPage() {
 
   const { data: companyUsers, isLoading, error } = useGetCompanyUsersByCompanyId({ companyId: user?.companies_id?.toString() ?? "" });
   
-  const { trigger: deleteCompanyUserByCompanyIdTrigger } = useDeleteCompanyUserByCompanyId({
+  const { trigger: createCompanyUserByCompanyIdTrigger } = useCreateCompanyUserByCompanyId({
     companyId: user?.companies_id ?? undefined,
-    companyUserId: deleteTargetStaff?.id,
-  });
-
-  const handleAddStaff = async (email: string) => {
-    try {
-      if (!user?.companies_id) {
-        throw new Error("会社IDが取得できません");
-      }
-      await companyStaffInvite(email, user.companies_id);
+    handleSuccess: (data) => {
       toast({
         title: "招待を送信しました",
-        description: `${email}に招待メールを送信しました。`,
+        description: `${data.companyUser.email}に招待メールを送信しました。`,
       });
-    } catch (error) {
-      console.error("Failed to invite staff:", error);
+    },
+    handleError: (error) => {
       toast({
         title: "エラーが発生しました",
         description: "招待の送信に失敗しました。もう一度お試しください。",
         variant: "destructive",
+      });
+    },
+  })
+
+  const {
+    trigger: deleteCompanyUserByCompanyIdTrigger,
+  } = useDeleteCompanyUserByCompanyId({
+    companyId: user?.companies_id ?? undefined,
+    companyUserId: deleteTargetStaff?.id,
+    handleSuccess: (data) => {
+      toast({
+        title: "スタッフを削除しました",
+        description: `${data.companyUser.name || data.companyUser.email}を削除しました。`,
+      });
+    },
+    handleError: (error) => {
+      toast({
+        title: "エラーが発生しました",
+        description: "スタッフの削除に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
+    },
+    hadnleFinally: () => {
+      setDeleteTargetStaff(null);
+    }
+  });
+
+  const handleAddStaff = async (email: string) => {
+    if (!user?.companies_id) {
+      toast({
+        title: "エラーが発生しました",
+        description: "会社IDが取得できません。",
+        variant: "destructive",
+      });
+    } else {
+      await createCompanyUserByCompanyIdTrigger({
+        email,
       });
     }
   };
@@ -87,31 +112,15 @@ export default function StaffPage() {
   const handleDeleteStaff = async () => {
     if (!deleteTargetStaff) return;
 
-    try {
-      if (!user?.companies_id) {
-        throw new Error("会社IDが取得できません");
-      }
-      await deleteCompanyUserByCompanyIdTrigger();
-      // await deleteCompanyStaff(user.companies_id, deleteTargetStaff.id);
-
-      // Optimistically update the UI
-      // setCompanyUsers((prev) =>
-      //   prev.filter((staff) => staff.id !== deleteTargetStaff.id)
-      // );
-
-      toast({
-        title: "スタッフを削除しました",
-        description: `${deleteTargetStaff.name || deleteTargetStaff.email}を削除しました。`,
-      });
-    } catch (error) {
-      console.error("Failed to delete staff:", error);
+    if (!user?.companies_id) {
       toast({
         title: "エラーが発生しました",
-        description: "スタッフの削除に失敗しました。もう一度お試しください。",
+        description: "会社IDが取得できません。",
         variant: "destructive",
       });
-    } finally {
-      setDeleteTargetStaff(null);
+      return;
+    } else {
+      await deleteCompanyUserByCompanyIdTrigger();
     }
   };
 

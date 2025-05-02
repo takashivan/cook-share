@@ -1,6 +1,5 @@
 import { getApi } from "@/api/api-factory";
 import useSWR from "swr";
-import { QueryConfigType } from "@/hooks/api/config-type";
 import { Chat } from "@/api/__generated__/base/Chat";
 import { UnreadMessage } from "@/hooks/api/companyuser/messages/useSubscriptionUnreadMessagesByRestaurantId";
 import useSWRSubscription from "swr/subscription";
@@ -93,9 +92,7 @@ export interface Params {
 
 export const useSubscriptionUnreadMessagesByUser = (
   params: Params,
-  config?: QueryConfigType
 ) => {
-  const { dedupingInterval } = config || {};
   const chatApi = getApi(Chat);
   const channelKey = `user_chat/${params.userId}`;
 
@@ -108,9 +105,6 @@ export const useSubscriptionUnreadMessagesByUser = (
   const getRequest = useSWR(
     key,
     fetcher as unknown as () => Promise<UnreadMessageWithWorksession[]>,
-    {
-      dedupingInterval,
-    }
   );
 
   useSWRSubscription(key, ([_key], { next }) => {

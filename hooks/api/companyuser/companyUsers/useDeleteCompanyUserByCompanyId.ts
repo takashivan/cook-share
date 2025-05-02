@@ -1,5 +1,5 @@
 import { Companies } from "@/api/__generated__/base/Companies";
-import { CompanyusersListData, CompanyusersListOutput } from "@/api/__generated__/base/data-contracts";
+import { CompanyusersDeleteData, CompanyusersListData, CompanyusersListOutput } from "@/api/__generated__/base/data-contracts";
 import { Restaurants } from "@/api/__generated__/base/Restaurants";
 import { getApi } from "@/api/api-factory";
 import { useSWRConfig } from "swr";
@@ -9,6 +9,9 @@ export interface Params {
   companyId?: string;
   companyUserId?: string;
   restaurantId?: number;
+  handleSuccess?: (data: CompanyusersDeleteData) => void;
+  handleError?: (error: any) => void;
+  hadnleFinally?: () => void;
 }
 
 export const useDeleteCompanyUserByCompanyId = (params: Params) => {
@@ -56,6 +59,24 @@ export const useDeleteCompanyUserByCompanyId = (params: Params) => {
           return currentItems.filter((staff) => staff.id !== params.companyUserId);
         }, { revalidate: false });
       }
-    }
+
+      if (params.handleSuccess) {
+        params.handleSuccess(data);
+      }
+
+      if (params.hadnleFinally) {
+        params.hadnleFinally();
+      }
+    },
+    onError: (error) => {
+      console.error("Error deleting company user:", error);
+      if (params.handleError) {
+        params.handleError(error);
+      }
+
+      if (params.hadnleFinally) {
+        params.hadnleFinally();
+      }
+    },
   })
 }

@@ -214,6 +214,7 @@ export interface SignupCreateData {
     email_change_token: string;
     password_reset_token: string;
   };
+  sessionToken: string;
 }
 
 export interface VerifyEmailCreatePayload {
