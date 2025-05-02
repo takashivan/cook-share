@@ -1,20 +1,13 @@
-import Link from "next/link";
 import {
-  Building,
-  CreditCard,
-  DollarSign,
   MessageSquare,
   Store,
-  Users,
 } from "lucide-react";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 export default function AdminDashboard() {
   return (

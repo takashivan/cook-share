@@ -1,6 +1,5 @@
 import { getApi } from "@/api/api-factory";
 import useSWR from "swr";
-import { QueryConfigType } from "../../config-type";
 import { Jobs } from "@/api/__generated__/base/Jobs";
 
 export interface Params {
@@ -9,9 +8,7 @@ export interface Params {
 
 export const useGetWorksessionsByJobId = (
   params: Params,
-  config?: QueryConfigType
 ) => {
-  const { dedupingInterval } = config || {};
   const jobs = getApi(Jobs);
   return useSWR(
     ...jobs.worksessionsRestaurantTodosListQueryArgs(
@@ -23,8 +20,5 @@ export const useGetWorksessionsByJobId = (
       },
       params.jobId != null
     ),
-    {
-      dedupingInterval,
-    }
   );
 };

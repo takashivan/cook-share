@@ -1,6 +1,5 @@
 import { getApi } from "@/api/api-factory";
 import useSWR from "swr";
-import { QueryConfigType } from "../../config-type";
 import { Users } from "@/api/__generated__/base/Users";
 import { SessionHistoryCurrentListResult } from "@/api/__generated__/base/data-contracts";
 
@@ -10,9 +9,7 @@ interface Params {
 
 export const useGetWorksessionHistoryCurrentMonth = (
   params: Params,
-  config?: QueryConfigType
 ) => {
-  const { dedupingInterval } = config || {};
   const users = getApi(Users);
   return useSWR<SessionHistoryCurrentListResult>(
     params.userId ? ["sessionHistoryCurrentList", params.userId] : null,
@@ -25,8 +22,5 @@ export const useGetWorksessionHistoryCurrentMonth = (
       });
       return response.data;
     },
-    {
-      dedupingInterval,
-    }
   );
 };

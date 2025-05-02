@@ -16,7 +16,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <SWRConfig
         value={{
           // この期間内での同じキーのリクエストを重複として排除する
-          dedupingInterval: 10000,
+          dedupingInterval: 60 * 1000,
           // ウィンドウがフォーカスされたときに自動的に再検証するか否か
           revalidateOnFocus: false,
           // ブラウザがネットワーク接続を回復すると自動的に再検証するか否か

@@ -1,5 +1,4 @@
 import { getApi } from "@/api/api-factory";
-import { QueryConfigType } from "../../config-type";
 import useSWR from "swr";
 import useSWRSubscription from 'swr/subscription';
 import realTimeClient from "@/api/xano";
@@ -11,8 +10,7 @@ export interface Params {
   handleSuccessGetMessage?: (message: any) => void;
 }
 
-export const useSubscriptionChefNotificationsByUserId = (params: Params, config?: QueryConfigType) => {
-  const { dedupingInterval } = config || {};
+export const useSubscriptionChefNotificationsByUserId = (params: Params) => {
   const notificationsApi = getApi(ChefNotifications);
 
   const channelKey = `chef-notifications/${params.userId}`;
@@ -23,9 +21,7 @@ export const useSubscriptionChefNotificationsByUserId = (params: Params, config?
     }
   }, params.userId != null);
 
-  const getRequest = useSWR(key, fetcher, {
-    dedupingInterval
-  });
+  const getRequest = useSWR(key, fetcher);
 
   useSWRSubscription(key, ([_key], { next }) => {
     if (!key) return () => {};
