@@ -29,10 +29,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { RestaurantNotificationDropdown } from "@/components/notifications/restaurantNotificationDropdown/RestaurantNotificationDropdown";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/lib/store/store";
-import { fetchMyRestaurants } from "@/lib/store/restaurantSlice";
 import { useSubscriptionCompanyUserNotificationsByUserId } from "@/hooks/api/companyuser/companyUserNotifications/useSubscriptionCompanyUserNotificationsByUserId";
+import { useGetRestaurantsByCompanyUserId } from "@/hooks/api/companyuser/restaurants/useGetRestaurantsByCompanyUserId";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -58,13 +56,15 @@ interface NavigationGroup {
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const dispatch = useDispatch<AppDispatch>();
   const { user, isAuthenticated, logout } = useCompanyAuth();
-  const { restaurants } = useSelector((state: RootState) => state.restaurants);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isStoreListOpen, setIsStoreListOpen] = useState(false);
   const { toast } = useToast();
+
+  const {
+    data: restaurants,
+  } = useGetRestaurantsByCompanyUserId({ companyuserId: user?.id });
 
   const { notifications } = useSubscriptionCompanyUserNotificationsByUserId({
     userId: user?.id,
@@ -78,12 +78,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       });
     }
   });
-
-  useEffect(() => {
-    if (user?.companies_id) {
-      dispatch(fetchMyRestaurants(user.id));
-    }
-  }, [dispatch, user?.id]);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -195,7 +189,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           isOpen: isStoreListOpen,
         },
         ...(isStoreListOpen
-          ? restaurants.map((restaurant) => ({
+          ? (restaurants ?? []).map((restaurant) => ({
               title: restaurant.name,
               href: `/admin/stores/${restaurant.id}`,
               icon: Tag,
