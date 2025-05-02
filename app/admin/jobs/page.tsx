@@ -13,7 +13,6 @@ import {
   Edit,
   ExternalLink,
   MoreHorizontal,
-  Plus,
   Briefcase,
 } from "lucide-react";
 import Link from "next/link";

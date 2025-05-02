@@ -59,9 +59,27 @@ export default function StaffPage() {
 
   const { data: companyUsers, isLoading, error } = useGetCompanyUsersByCompanyId({ companyId: user?.companies_id?.toString() ?? "" });
   
-  const { trigger: deleteCompanyUserByCompanyIdTrigger } = useDeleteCompanyUserByCompanyId({
+  const {
+    trigger: deleteCompanyUserByCompanyIdTrigger,
+  } = useDeleteCompanyUserByCompanyId({
     companyId: user?.companies_id ?? undefined,
     companyUserId: deleteTargetStaff?.id,
+    handleSuccess: (data) => {
+      toast({
+        title: "スタッフを削除しました",
+        description: `${data.companyUser.name || data.companyUser.email}を削除しました。`,
+      });
+    },
+    handleError: (error) => {
+      toast({
+        title: "エラーが発生しました",
+        description: "スタッフの削除に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
+    },
+    hadnleFinally: () => {
+      setDeleteTargetStaff(null);
+    }
   });
 
   const handleAddStaff = async (email: string) => {
@@ -87,31 +105,15 @@ export default function StaffPage() {
   const handleDeleteStaff = async () => {
     if (!deleteTargetStaff) return;
 
-    try {
-      if (!user?.companies_id) {
-        throw new Error("会社IDが取得できません");
-      }
-      await deleteCompanyUserByCompanyIdTrigger();
-      // await deleteCompanyStaff(user.companies_id, deleteTargetStaff.id);
-
-      // Optimistically update the UI
-      // setCompanyUsers((prev) =>
-      //   prev.filter((staff) => staff.id !== deleteTargetStaff.id)
-      // );
-
-      toast({
-        title: "スタッフを削除しました",
-        description: `${deleteTargetStaff.name || deleteTargetStaff.email}を削除しました。`,
-      });
-    } catch (error) {
-      console.error("Failed to delete staff:", error);
+    if (!user?.companies_id) {
       toast({
         title: "エラーが発生しました",
-        description: "スタッフの削除に失敗しました。もう一度お試しください。",
+        description: "会社IDが取得できません。",
         variant: "destructive",
       });
-    } finally {
-      setDeleteTargetStaff(null);
+      return;
+    } else {
+      await deleteCompanyUserByCompanyIdTrigger();
     }
   };
 

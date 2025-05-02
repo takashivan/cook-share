@@ -3,48 +3,33 @@
 import { useState, useEffect, useRef } from "react";
 import { use } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { Job } from "@/types";
 import {
-  formatToJapanDate,
-  formatToJapanTime,
   formatJapanHHMM,
   formatWorkSessionJapaneseStatus,
   formatJobPostingJapaneseStatus,
 } from "@/lib/functions";
 import {
   ArrowLeft,
-  Calendar,
-  Clock,
   Edit,
   ExternalLink,
-  MapPin,
   MessageSquare,
-  Phone,
-  Send,
-  Store,
-  User,
   QrCode,
   CheckCircle,
   MoreHorizontal,
   AlertCircle,
-  CheckCircle2,
   XCircle,
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -57,21 +42,14 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import useSWR from "swr";
-import { jobApi } from "@/lib/api/job";
-import { applicationApi } from "@/lib/api/application";
-import { workSessionApi } from "@/lib/api/workSession";
-import { messageApi, CreateMessageParams } from "@/lib/api/message";
 import { QRCodeSVG } from "qrcode.react";
 import { RestaurantReviewModal } from "@/components/modals/RestaurantReviewModal";
-import { chefReviewApi } from "@/lib/api/chefReview";
 import { FaStar } from "react-icons/fa";
 import { EditJobModal } from "@/components/modals/EditJobModal";
 import { useUserCancelWorksessionByRestaurant } from "@/hooks/api/companyuser/worksessions/useCancelWorksessionByRestaurant";
 import { useNoShowWorksessionByRestaurant } from "@/hooks/api/companyuser/worksessions/useNoShowWorksessionByRestaurant";
 import { toast } from "@/hooks/use-toast";
 import { useGetReviewsByUserId } from "@/hooks/api/user/reviews/useGetReviewsByUserId";
-
 import {
   Tooltip,
   TooltipContent,
@@ -108,14 +86,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-interface Message {
-  id: number;
-  content: string;
-  sender_type: string;
-  created_at: string;
-}
-
 interface PageParams {
   params: Promise<{ id: string }>;
 }
