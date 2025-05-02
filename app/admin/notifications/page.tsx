@@ -8,10 +8,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import {
   CompanyUserNotificationType,
-  markCompanyUserNotificationAsRead,
-  markAllCompanyUserNotificationsAsRead,
 } from "@/lib/api/companyUserNotification";
-import { useGetCompanyUserNotificationsByUserId } from "@/hooks/api/companyuser/companyUserNotifications/useGetCompanyUserNotificationsByUserId";
+import { useSubscriptionCompanyUserNotificationsByUserId } from "@/hooks/api/companyuser/companyUserNotifications/useSubscriptionCompanyUserNotificationsByUserId";
+import { useToast } from "@/hooks/use-toast";
+import { Toaster } from "@/components/ui/toaster";
 
 export default function RestaurantNotificationsPage() {
   const { user } = useCompanyAuth();
@@ -19,16 +19,19 @@ export default function RestaurantNotificationsPage() {
   const [filter, setFilter] = useState<CompanyUserNotificationType | "all">(
     "all"
   );
+  const { toast } = useToast();
 
-  const { data: notifications, isLoading } = useGetCompanyUserNotificationsByUserId({ userId: user?.id });
-
-  const handleMarkAsRead = async (notificationId: string) => {
-    try {
-      await markCompanyUserNotificationAsRead(notificationId);
-    } catch (error) {
-      console.error("Failed to mark notification as read:", error);
+  const { notifications, isLoading } = useSubscriptionCompanyUserNotificationsByUserId({
+    userId: user?.id,
+    handleSuccessGetMessage: (message: any) => {
+      toast({
+        title: "新しい通知",
+        description: message.content || "新しい通知が届きました",
+        className: "bg-orange-500 text-white border-0",
+        duration: 5000,
+      });
     }
-  };
+  });
 
   // 通知をフィルタリングする
   const filteredNotifications = notifications?.filter((notification) => {
@@ -207,6 +210,7 @@ export default function RestaurantNotificationsPage() {
           </TabsContent>
         </Tabs>
       </div>
+      <Toaster />
     </div>
   );
 }

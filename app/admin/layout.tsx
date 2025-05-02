@@ -10,12 +10,10 @@ import {
   CreditCard,
   LogOut,
   Menu,
-  MessageSquare,
   Utensils,
   Settings,
   Tag,
   Store,
-  User,
   Users,
   Building,
   ChevronRight,
@@ -25,29 +23,16 @@ import {
   Mail,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { XanoClient } from "@xano/js-sdk/lib";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { RestaurantNotificationDropdown } from "@/components/notifications/RestaurantNotificationDropdown";
-import {
-  getCompanyUserNotificationsByCompanyUserId,
-  markCompanyUserNotificationAsRead,
-  markAllCompanyUserNotificationsAsRead,
-  CompanyUserNotification,
-} from "@/lib/api/companyUserNotification";
+import { RestaurantNotificationDropdown } from "@/components/notifications/restaurantNotificationDropdown/RestaurantNotificationDropdown";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/lib/store/store";
 import { fetchMyRestaurants } from "@/lib/store/restaurantSlice";
+import { useSubscriptionCompanyUserNotificationsByUserId } from "@/hooks/api/companyuser/companyUserNotifications/useSubscriptionCompanyUserNotificationsByUserId";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -78,22 +63,21 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const { restaurants } = useSelector((state: RootState) => state.restaurants);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [notifications, setNotifications] = useState<CompanyUserNotification[]>(
-    []
-  );
   const [isStoreListOpen, setIsStoreListOpen] = useState(false);
   const { toast } = useToast();
 
-  const mutateNotifications = async () => {
-    if (user?.id) {
-      try {
-        const data = await getCompanyUserNotificationsByCompanyUserId(user.id);
-        setNotifications(data);
-      } catch (error) {
-        console.error("Failed to fetch notifications:", error);
-      }
+  const { notifications } = useSubscriptionCompanyUserNotificationsByUserId({
+    userId: user?.id,
+    handleSuccessGetMessage: (message: any) => {
+      console.log("New notification received:", message);
+      toast({
+        title: "新しい通知",
+        description: message.content || "新しい通知が届きました",
+        className: "bg-orange-500 text-white border-0",
+        duration: 5000,
+      });
     }
-  };
+  });
 
   useEffect(() => {
     if (user?.companies_id) {
@@ -128,79 +112,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
     initAuth();
   }, [isAuthenticated, router, user?.is_admin, pathname]);
-
-  useEffect(() => {
-    if (!user?.id) return;
-
-    const xanoClient = new XanoClient({
-      instanceBaseUrl: process.env.NEXT_PUBLIC_XANO_BASE_URL || "",
-      realtimeConnectionHash: process.env.NEXT_PUBLIC_XANO_REALTIME_HASH || "",
-    });
-
-    let channel: any;
-
-    const setupChannel = async () => {
-      try {
-        channel = xanoClient.channel(`notifications/${user?.id}`);
-        console.log("Channel setup for notifications");
-
-        channel.on((message: any) => {
-          console.log("Admin received message:", message);
-          if (message.action === "connection_status") {
-            return;
-          } else {
-            toast({
-              title: "新しい通知",
-              description: message.content || "新しい通知が届きました",
-              className: "bg-orange-500 text-white border-0",
-              duration: 5000,
-            });
-            mutateNotifications();
-          }
-        });
-      } catch (error) {
-        console.error("Error setting up channel:", error);
-      }
-    };
-    setupChannel();
-  }, [user?.id, toast, mutateNotifications]);
-
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      if (user?.id) {
-        try {
-          const data = await getCompanyUserNotificationsByCompanyUserId(
-            user.id
-          );
-          setNotifications(data);
-        } catch (error) {
-          console.error("Failed to fetch notifications:", error);
-        }
-      }
-    };
-
-    fetchNotifications();
-  }, [user?.id]);
-
-  const handleMarkAsRead = async (notificationId: number) => {
-    try {
-      await markCompanyUserNotificationAsRead(notificationId.toString());
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === notificationId ? { ...n, is_read: true } : n))
-      );
-    } catch (error) {
-      console.error("Failed to mark notification as read:", error);
-    }
-  };
-
-  const handleMarkAllAsRead = async () => {
-    try {
-      await markAllCompanyUserNotificationsAsRead(user?.id?.toString() || "");
-      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
-    } catch (error) {
-      console.error("Failed to mark all notifications as read:", error);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -622,11 +533,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </div>
           <div className="flex items-center gap-4">
             <RestaurantNotificationDropdown
-              notifications={notifications}
-              onMarkAsRead={handleMarkAsRead}
-              onMarkAllAsRead={handleMarkAllAsRead}
+              notifications={notifications ?? []}
               userId={user?.id?.toString() || ""}
-              mutateNotifications={mutateNotifications}
               restaurantId={0}
             />
           </div>
