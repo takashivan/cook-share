@@ -1,6 +1,5 @@
 import { getApi } from "@/api/api-factory"
 import useSWR from "swr"
-import { QueryConfigType } from "../../config-type";
 import { Chat } from "@/api/__generated__/base/Chat";
 import useSWRSubscription from "swr/subscription";
 import { XanoRealtimeChannel } from "@xano/js-sdk/lib/models/realtime-channel";
@@ -31,8 +30,7 @@ export interface Params {
   restaurantId?: number;
 }
 
-export const useSubscriptionUnreadMessagesByRestaurantId = (params: Params, config?: QueryConfigType) => {
-  const { dedupingInterval } = config || {};
+export const useSubscriptionUnreadMessagesByRestaurantId = (params: Params) => {
   const chat = getApi(Chat);
   const channelKey = `restaurant_chat/${params.restaurantId}`;
 
@@ -45,9 +43,6 @@ export const useSubscriptionUnreadMessagesByRestaurantId = (params: Params, conf
   const getRequest = useSWR(
     key,
     fetcher as unknown as () => Promise<UnreadMessageSummary[]>,
-    {
-      dedupingInterval
-    }
   );
 
   useSWRSubscription(
