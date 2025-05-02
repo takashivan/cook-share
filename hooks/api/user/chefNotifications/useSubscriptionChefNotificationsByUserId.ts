@@ -15,7 +15,7 @@ export const useSubscriptionChefNotificationsByUserId = (params: Params, config?
   const { dedupingInterval } = config || {};
   const notificationsApi = getApi(ChefNotifications);
 
-  const channelKey = `notifications/${params.userId}`;
+  const channelKey = `chef-notifications/${params.userId}`;
 
   const [key, fetcher] = notificationsApi.byUserDetailQueryArgs(params.userId ?? '', {
     headers: {
