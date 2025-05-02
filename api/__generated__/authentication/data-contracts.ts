@@ -316,6 +316,7 @@ export interface SignupCreateData {
       used: boolean;
     } | null;
   };
+  sessionToken: string;
 }
 
 export interface VerifyEmailCreatePayload {

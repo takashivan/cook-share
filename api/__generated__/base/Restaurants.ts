@@ -343,7 +343,7 @@ export class Restaurants<
       path: `/restaurants/${restaurantId}`,
       method: "PATCH",
       body: data,
-      type: ContentType.Json,
+      type: ContentType.FormData,
       format: "json",
       ...params,
     });
