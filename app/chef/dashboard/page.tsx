@@ -8,43 +8,52 @@ import { ja } from "date-fns/locale";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChefNotificationDropdown } from "@/components/notifications/ChefNotificationDropdown";
-import { UnreadMessageWithWorksession, useSubscriptionUnreadMessagesByUser } from "@/hooks/api/user/messages/useSubscriptionUnreadMessagesByUser";
+import {
+  UnreadMessageWithWorksession,
+  useSubscriptionUnreadMessagesByUser,
+} from "@/hooks/api/user/messages/useSubscriptionUnreadMessagesByUser";
 import { ChatSheet } from "@/components/chat/ChatSheet";
 import { useSubscriptionMessagesByUserId } from "@/hooks/api/user/messages/useSubscriptionMessagesByUserId";
 import { Badge } from "@/components/ui/badge";
 import { useGetWorksessionsByUserIdByTodo } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserIdByTodo";
+import { useSearchParams } from "next/navigation";
 
 export default function ChefDashboard() {
   const { user } = useAuth();
-  const [selectedWorkSession, setSelectedWorkSession] = useState<UnreadMessageWithWorksession['worksession'] | null>(null);
+  const [selectedWorkSession, setSelectedWorkSession] = useState<
+    UnreadMessageWithWorksession["worksession"] | null
+  >(null);
+  const searchParams = useSearchParams();
+  const currentTab = searchParams.get("tab") || "upcoming";
 
   // ワークセッションの取得
   const { data: workSessionsData } = useGetWorksessionsByUserIdByTodo({
-    userId: user?.id?.toString()
+    userId: user?.id?.toString(),
   });
 
-  const upcomingJobs = workSessionsData?.filter(
-    (session) => session.status === "SCHEDULED"
-  ) ?? [];
+  const upcomingJobs =
+    workSessionsData?.filter((session) => session.status === "SCHEDULED") ?? [];
   console.log("upcomingJobs", upcomingJobs);
 
-  const inProgressJobs = workSessionsData?.filter(
-    (session) => session.status === "IN_PROGRESS"
-  ) ?? [];
+  const inProgressJobs =
+    workSessionsData?.filter((session) => session.status === "IN_PROGRESS") ??
+    [];
 
   // メッセージの取得
   const { messagesData, sendMessage } = useSubscriptionMessagesByUserId({
     userId: user?.id,
     workSessionId: selectedWorkSession?.id ?? undefined,
     applicationId: selectedWorkSession?.application_id ?? undefined,
-  })
+  });
 
   // 未読メッセージの取得
   const { unreadMessagesData } = useSubscriptionUnreadMessagesByUser({
     userId: user?.id,
   });
 
-  const openChat = (worksession: UnreadMessageWithWorksession['worksession']) => {
+  const openChat = (
+    worksession: UnreadMessageWithWorksession["worksession"]
+  ) => {
     setSelectedWorkSession(worksession);
   };
 
@@ -56,7 +65,7 @@ export default function ChefDashboard() {
     if (!message.trim() || !selectedWorkSession) return;
 
     try {
-      sendMessage(message)
+      sendMessage(message);
     } catch (error) {
       console.error("Failed to send message:", error);
     }
@@ -79,18 +88,16 @@ export default function ChefDashboard() {
   // );
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-md">
+    <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">
           ようこそ、{user?.name || "ゲスト"}さん
         </h1>
-        
       </div>
 
-      {/* 次のお仕事 */}
-      <section className="mb-10">
-        <h2 className="text-xl font-bold mb-4">次のお仕事</h2>
+      {currentTab === "upcoming" && (
         <div className="space-y-4">
+          <h2 className="text-xl font-bold mb-4">次のお仕事</h2>
           {upcomingJobs && upcomingJobs.length > 0 ? (
             upcomingJobs.map((session) => (
               <Link
@@ -130,21 +137,18 @@ export default function ChefDashboard() {
             </div>
           )}
         </div>
-      </section>
+      )}
 
-      {/* やること */}
-      <section className="mb-10">
-        <h2 className="text-xl font-bold mb-4">やること</h2>
+      {currentTab === "todo" && (
         <div className="space-y-4">
+          <h2 className="text-xl font-bold mb-4">やること</h2>
           {inProgressJobs.length > 0 ? (
             inProgressJobs.map((session) => (
               <Link
                 key={session.id}
                 href={`/chef/job/${session.job_id}`}
                 className="block">
-                <div
-                  key={session.id}
-                  className="bg-white rounded-lg shadow-md p-4">
+                <div className="bg-white rounded-lg shadow-md p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Edit className="h-5 w-5 text-gray-700" />
                     <div className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">
@@ -178,66 +182,78 @@ export default function ChefDashboard() {
             </div>
           )}
         </div>
-      </section>
+      )}
 
-      {/* 未読メッセージ */}
-      <section className="mb-10">
-        <h2 className="text-xl font-bold mb-4">未読メッセージ</h2>
+      {currentTab === "messages" && (
         <div className="space-y-4">
-          {unreadMessagesData && unreadMessagesData.length > 0 && unreadMessagesData.some((messageData) => messageData.unread_message_count > 0) ? (
-            unreadMessagesData.filter((unreadMessageData) => unreadMessageData.unread_message_count > 0).map((unreadMessageData) => {
-              // 最新のメッセージを取得（message_seqが最大のもの）
-              let latestMessage = null;
-              for (const message of unreadMessageData.unread_messages) {
-                if (!latestMessage || message.message_seq > latestMessage.message_seq) {
-                  latestMessage = message;
-                }
-              }
-
-              return (
-                <Link
-                  key={unreadMessageData.worksession.id}
-                  href=''
-                  className="block"
-                  onClick={() => {
-                    openChat(unreadMessageData.worksession)
-                  }}
-                >
-                  <div className="bg-white rounded-lg shadow-md p-4">
-                    <div className="flex items-center gap-3 mb-2 relative">
-                      <MessageSquare className="h-5 w-5 text-gray-700" />
-                      <div className="font-medium">{unreadMessageData.worksession.restaurant.name}</div>
-                      {unreadMessageData.unread_messages.length > 0 && (
-                        <Badge className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[1.25rem] h-5 flex items-center justify-center bg-red-500 text-white">
-                          {unreadMessageData.unread_messages.length}
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-gray-600 truncate">
-                      {latestMessage?.content ?? ''}
-                    </p>
-                  </div>
-                </Link>
+          <h2 className="text-xl font-bold mb-4">未読メッセージ</h2>
+          {unreadMessagesData &&
+          unreadMessagesData.length > 0 &&
+          unreadMessagesData.some(
+            (messageData) => messageData.unread_message_count > 0
+          ) ? (
+            unreadMessagesData
+              .filter(
+                (unreadMessageData) =>
+                  unreadMessageData.unread_message_count > 0
               )
-            })
+              .map((unreadMessageData) => {
+                let latestMessage = null;
+                for (const message of unreadMessageData.unread_messages) {
+                  if (
+                    !latestMessage ||
+                    message.message_seq > latestMessage.message_seq
+                  ) {
+                    latestMessage = message;
+                  }
+                }
+
+                return (
+                  <Link
+                    key={unreadMessageData.worksession.id}
+                    href=""
+                    className="block"
+                    onClick={() => {
+                      openChat(unreadMessageData.worksession);
+                    }}>
+                    <div className="bg-white rounded-lg shadow-md p-4">
+                      <div className="flex items-center gap-3 mb-2 relative">
+                        <MessageSquare className="h-5 w-5 text-gray-700" />
+                        <div className="font-medium">
+                          {unreadMessageData.worksession.restaurant.name}
+                        </div>
+                        {unreadMessageData.unread_messages.length > 0 && (
+                          <Badge className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[1.25rem] h-5 flex items-center justify-center bg-red-500 text-white">
+                            {unreadMessageData.unread_messages.length}
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-gray-600 truncate">
+                        {latestMessage?.content ?? ""}
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })
           ) : (
             <div className="bg-gray-50 rounded-lg p-8 text-center text-gray-500">
               未読メッセージはありません
             </div>
           )}
         </div>
-        <ChatSheet
-          isOpen={selectedWorkSession !== null}
-          onClose={closeChat}
-          worksessionId={selectedWorkSession?.id ?? undefined}
-          messagesData={messagesData}
-          onSendMessage={handleSendMessage}
-          restaurantName={selectedWorkSession?.restaurant?.name || ""}
-          restaurantImage={selectedWorkSession?.restaurant?.profile_image || ""}
-          workDate={selectedWorkSession?.job?.work_date || ""}
-          startTime={selectedWorkSession?.job?.start_time || 0}
-        />
-      </section>
+      )}
+
+      <ChatSheet
+        isOpen={selectedWorkSession !== null}
+        onClose={closeChat}
+        worksessionId={selectedWorkSession?.id ?? undefined}
+        messagesData={messagesData}
+        onSendMessage={handleSendMessage}
+        restaurantName={selectedWorkSession?.restaurant?.name || ""}
+        restaurantImage={selectedWorkSession?.restaurant?.profile_image || ""}
+        workDate={selectedWorkSession?.job?.work_date || ""}
+        startTime={selectedWorkSession?.job?.start_time || 0}
+      />
     </div>
   );
 }

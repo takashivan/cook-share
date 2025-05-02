@@ -126,7 +126,7 @@ export default function SchedulePage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-2xl">
+    <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">お仕事スケジュール</h1>
 
       <Tabs
