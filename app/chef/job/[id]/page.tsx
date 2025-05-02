@@ -132,9 +132,6 @@ export default function JobDetail({ params }: PageProps) {
       workSessionId: workSession?.id,
       applicationId: workSession?.application_id,
     },
-    {
-      dedupingInterval: 1000,
-    }
   );
 
   // 未読メッセージの取得
