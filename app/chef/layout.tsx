@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -9,13 +8,8 @@ import { useRouter, usePathname } from "next/navigation";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ChevronRight, Menu } from "lucide-react";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { ChefNotificationDropdown } from "@/components/notifications/ChefNotificationDropdown";
-import useSWR from "swr";
-import {
-  getChefNotificationsByChefId,
-  markChefNotificationAsRead,
-  markAllChefNotificationsAsRead,
-} from "@/lib/api/chefNotification";
+import { ChefNotificationDropdown } from "@/components/notifications/chefNotificationDropdown/ChefNotificationDropdown";
+import { useSubscriptionChefNotificationsByUserId } from "@/hooks/api/user/chefNotifications/useSubscriptionChefNotificationsByUserId";
 
 export default function ChefLayout({
   children,
@@ -35,28 +29,9 @@ export default function ChefLayout({
     router.replace("/login");
   };
 
-  const { data: notifications = [], mutate: mutateNotifications } = useSWR(
-    user?.id ? `chef-notifications-${user.id}` : null,
-    () => (user?.id ? getChefNotificationsByChefId(user.id.toString()) : [])
-  );
-
-  const handleMarkAsRead = async (notificationId: number) => {
-    try {
-      await markChefNotificationAsRead(notificationId);
-      mutateNotifications();
-    } catch (error) {
-      console.error("Failed to mark notification as read:", error);
-    }
-  };
-
-  const handleMarkAllAsRead = async () => {
-    try {
-      await markAllChefNotificationsAsRead(user?.id.toString() ?? "");
-      mutateNotifications();
-    } catch (error) {
-      console.error("Failed to mark all notifications as read:", error);
-    }
-  };
+  const { notifications } = useSubscriptionChefNotificationsByUserId({
+    userId: user?.id,
+  });
 
   useEffect(() => {
     // 初期ロード時は何もしない
@@ -97,9 +72,7 @@ export default function ChefLayout({
           </Link>
           <div className="flex items-center gap-2">
             <ChefNotificationDropdown
-              notifications={notifications}
-              onMarkAsRead={handleMarkAsRead}
-              onMarkAllAsRead={handleMarkAllAsRead}
+              notifications={notifications ?? []}
             />
             <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
               <SheetTrigger asChild>

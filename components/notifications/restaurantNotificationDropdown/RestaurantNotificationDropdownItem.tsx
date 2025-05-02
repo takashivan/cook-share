@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   Bell,
@@ -82,7 +84,6 @@ export function RestaurantNotificationDropdownItem({
 
   return(
     <DropdownMenuItem
-      key={notification.id}
       className={`p-3 cursor-pointer ${
         !notification.is_read ? "bg-muted/50" : ""
       }`}
