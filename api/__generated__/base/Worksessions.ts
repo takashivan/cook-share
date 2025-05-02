@@ -80,45 +80,6 @@ export class Worksessions<
    * @description [AUTH-CompanyUser]レストランのスタッフしかキャンセルできない <br /><br /> <b>Authentication:</b> not required
    *
    * @tags worksessions
-   * @name CancelByChefPartialUpdate
-   * @request PATCH:/worksessions/{worksession_id}/cancel-by-chef
-   */
-  cancelByChefPartialUpdate = (
-    worksessionId: number,
-    data: CancelByChefPartialUpdatePayload,
-    params: RequestParams = {},
-  ) =>
-    this.request<CancelByChefPartialUpdateData, void>({
-      path: `/worksessions/${worksessionId}/cancel-by-chef`,
-      method: "PATCH",
-      body: data,
-      type: ContentType.Json,
-      format: "json",
-      ...params,
-    });
-
-  cancelByChefPartialUpdateQueryArgs = (
-    worksessionId: number,
-    params: RequestParams = {},
-    enabled: boolean = true,
-  ) => {
-    const key = enabled
-      ? [`/worksessions/${worksessionId}/cancel-by-chef`]
-      : null;
-    const fetcher: (
-      url: string[],
-      { arg }: { arg: CancelByChefPartialUpdatePayload },
-    ) => Promise<CancelByChefPartialUpdateData> = (_, { arg }) =>
-      this.cancelByChefPartialUpdate(worksessionId, arg, params).then(
-        (res) => res.data,
-      );
-    return [key, fetcher] as const;
-  };
-
-  /**
-   * @description <br /><br /> <b>Authentication:</b> not required
-   *
-   * @tags worksessions
    * @name CancelByRestaurantPartialUpdate
    * @summary [AUTH-CompanyUser]レストランのスタッフしかキャンセルできない
    * @request PATCH:/worksessions/{worksession_id}/cancel-by-restaurant

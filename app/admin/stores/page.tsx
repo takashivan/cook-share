@@ -56,6 +56,7 @@ export default function StoresPage() {
 
   const { trigger: createRestaurantTrigger } = useCreateRestaurant({
     companyId: user?.companies_id ?? undefined,
+    companyUserId: user?.id ?? undefined,
   });
 
   useEffect(() => {

@@ -1,45 +1,34 @@
 import { getApi } from "@/api/api-factory";
 import { QueryConfigType } from "../../config-type";
 import useSWR from "swr";
-import useSWRSubscription from "swr/subscription";
-import { Messages } from "@/api/__generated__/base/Messages";
-import { MessagesCreatePayload } from "@/api/__generated__/base/data-contracts";
+import useSWRSubscription from 'swr/subscription';
 import realTimeClient from "@/api/xano";
-import { Users } from "@/api/__generated__/base/Users";
 import { XanoRealtimeChannel } from "@xano/js-sdk/lib/models/realtime-channel";
+import { ChefNotifications } from "@/api/__generated__/base/ChefNotifications";
 
 export interface Params {
   userId?: string;
-  workSessionId?: number;
-  applicationId?: string;
+  handleSuccessGetMessage?: (message: any) => void;
 }
 
-export const useSubscriptionMessagesByUserId = (
-  params: Params,
-  config?: QueryConfigType
-) => {
+export const useSubscriptionChefNotificationsByUserId = (params: Params, config?: QueryConfigType) => {
   const { dedupingInterval } = config || {};
-  const usersApi = getApi(Users);
-  const messagesApi = getApi(Messages);
-  const channelKey = `worksession/${params.workSessionId}`;
+  const notificationsApi = getApi(ChefNotifications);
 
-  const [key, fetcher] = usersApi.worksessionsMessagesListQueryArgs(
-    params.userId ?? "",
-    params.workSessionId ?? -1,
-    {
-      headers: {
-        "X-User-Type": "chef",
-      },
-    },
-    params.userId != null && params.workSessionId != null
-  );
+  const channelKey = `chef-notifications/${params.userId}`;
+
+  const [key, fetcher] = notificationsApi.byUserDetailQueryArgs(params.userId ?? '', {
+    headers: {
+      "X-User-Type": "chef"
+    }
+  }, params.userId != null);
 
   const getRequest = useSWR(key, fetcher, {
-    dedupingInterval,
+    dedupingInterval
   });
 
   useSWRSubscription(key, ([_key], { next }) => {
-    if (!key) return;
+    if (!key) return () => {};
 
     let channel: XanoRealtimeChannel | null = null;
     let cleanup = () => {};
@@ -60,8 +49,13 @@ export const useSubscriptionMessagesByUserId = (
                   console.log("Retrying channel setup...");
                   getRequest.mutate();
                 }, 5000);
+              } if (message.action === "connection_status") {
+                return;
               } else {
                 getRequest.mutate();
+                if (params.handleSuccessGetMessage) {
+                  params.handleSuccessGetMessage(message);
+                }
                 next();
               }
             });
@@ -95,41 +89,9 @@ export const useSubscriptionMessagesByUserId = (
     return cleanup;
   });
 
-  const sendMessage = async (message: string) => {
-    if (
-      !message.trim() ||
-      !key ||
-      !params.workSessionId ||
-      !params.applicationId
-    )
-      return;
-
-    try {
-      const messageParams: MessagesCreatePayload = {
-        content: message,
-        worksession_id: params.workSessionId,
-        application_id: params.applicationId,
-        sender_type: "chef",
-      };
-
-      await messagesApi.messagesCreate(messageParams, {
-        headers: {
-          "X-User-Type": "chef",
-        },
-      });
-
-      const channel = realTimeClient.channel(channelKey);
-      channel.message(messageParams);
-
-      getRequest.mutate();
-    } catch (error) {
-      console.error("Failed to send message:", error);
-    }
-  };
-
   return {
-    messagesData: getRequest.data,
-    mutateMessages: getRequest.mutate,
-    sendMessage,
+    notifications: getRequest.data,
+    isLoading: getRequest.isLoading,
+    mutateNotifications: getRequest.mutate,
   };
-};
+}

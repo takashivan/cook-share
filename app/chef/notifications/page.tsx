@@ -1,15 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import {
-  ChefNotification,
   ChefNotificationType,
-  getChefNotificationsByChefId,
-  markChefNotificationAsRead,
-  markAllChefNotificationsAsRead,
 } from "@/lib/api/chefNotification";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -28,55 +24,29 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
+import { useSubscriptionChefNotificationsByUserId } from "@/hooks/api/user/chefNotifications/useSubscriptionChefNotificationsByUserId";
+import { ChefMarkAsReadButton } from "@/components/notifications/chefMarkAsReadButton/ChefMarkAsReadButton";
+import { useMarkReadAllChefNotifications } from "@/hooks/api/user/chefNotifications/useMarkReadAllChefNotifications";
 
 export default function ChefNotificationsPage() {
   const { user } = useAuth();
-  const [notifications, setNotifications] = useState<ChefNotification[]>([]);
   const [activeTab, setActiveTab] = useState<"all" | "unread">("all");
   const [filter, setFilter] = useState<ChefNotificationType | "all">("all");
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      if (!user?.id) return;
-      try {
-        const data = await getChefNotificationsByChefId(user.id);
-        setNotifications(data);
-      } catch (error) {
-        console.error("Failed to fetch notifications:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const { notifications, isLoading } = useSubscriptionChefNotificationsByUserId({
+    userId: user?.id,
+  });
 
-    fetchNotifications();
-  }, [user?.id]);
-
-  const handleMarkAsRead = async (id: number) => {
-    try {
-      await markChefNotificationAsRead(id);
-      setNotifications((prev) =>
-        prev.map((notification) =>
-          notification.id === id
-            ? { ...notification, read: true }
-            : notification
-        )
-      );
-    } catch (error) {
-      console.error("Failed to mark notification as read:", error);
-    }
-  };
+  const { trigger: markReadAllTrigger } = useMarkReadAllChefNotifications({
+    userId: user?.id,
+  });
 
   const handleMarkAllAsRead = async () => {
     if (!user?.id) return;
-    try {
-      await markAllChefNotificationsAsRead(user.id.toString());
-      setNotifications((prev) =>
-        prev.map((notification) => ({ ...notification, read: true }))
-      );
-    } catch (error) {
-      console.error("Failed to mark all notifications as read:", error);
-    }
+   
+    await markReadAllTrigger({
+      user_id: user.id,
+    });
   };
 
   // 通知タイプに応じたアイコンを返す関数
@@ -143,14 +113,14 @@ export default function ChefNotificationsPage() {
     }
   };
 
-  const filteredNotifications = notifications.filter((notification) => {
+  const filteredNotifications = notifications?.filter((notification) => {
     const matchesTab = activeTab === "all" || !notification.is_read;
     const matchesFilter =
-      filter === "all" || notification.notification_type === filter;
+      filter === "all" || notification.type === filter;
     return matchesTab && matchesFilter;
-  });
+  }) ?? [];
 
-  if (loading) {
+  if (isLoading) {
     return <div>Loading...</div>;
   }
 
@@ -205,20 +175,17 @@ export default function ChefNotificationsPage() {
                 <div className="flex items-start gap-4">
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center ${getNotificationColor(
-                      notification.notification_type
+                      notification.type
                     )}`}>
-                    {getNotificationIcon(notification.notification_type)}
+                    {getNotificationIcon(notification.type)}
                   </div>
                   <div className="flex-1">
                     <div className="flex justify-between items-start">
                       <h3 className="font-medium">{notification.content}</h3>
                       {!notification.is_read && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleMarkAsRead(notification.id)}>
-                          既読にする
-                        </Button>
+                        <ChefMarkAsReadButton
+                          notificationId={notification.id}
+                        />
                       )}
                     </div>
                     <p className="text-sm text-gray-500 mt-1">

@@ -54,6 +54,8 @@ export interface ChangePasswordCreateData {
     password_reset_token: string;
     stripe_verified: boolean;
     stripe_requirements: object;
+    address: string;
+    phone: string;
     magic_link: {
       token: string;
       /**
@@ -181,6 +183,8 @@ export interface RequestPasswordResetCreateData {
   password_reset_token: string;
   stripe_verified: boolean;
   stripe_requirements: object;
+  address: string;
+  phone: string;
   magic_link: {
     token: string;
     /**
@@ -237,6 +241,8 @@ export interface ResetPasswordCreateData {
     password_reset_token: string;
     stripe_verified: boolean;
     stripe_requirements: object;
+    address: string;
+    phone: string;
     magic_link: {
       token: string;
       /**
@@ -298,6 +304,8 @@ export interface SignupCreateData {
     password_reset_token: string;
     stripe_verified: boolean;
     stripe_requirements: object;
+    address: string;
+    phone: string;
     magic_link: {
       token: string;
       /**
@@ -355,6 +363,8 @@ export interface VerifyEmailCreateData {
     password_reset_token: string;
     stripe_verified: boolean;
     stripe_requirements: object;
+    address: string;
+    phone: string;
     magic_link: {
       token: string;
       /**
