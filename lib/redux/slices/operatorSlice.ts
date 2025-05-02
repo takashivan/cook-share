@@ -158,6 +158,14 @@ export const fetchOperatorAlerts = createAsyncThunk(
   }
 );
 
+export const fetchOperatorDashboard = createAsyncThunk(
+  "operator/fetchDashboard",
+  async () => {
+    const response = await getApi().operator.getDashboard();
+    return response.data;
+  }
+);
+
 interface Alert {
   id: number;
   created_at: number;
@@ -212,6 +220,11 @@ interface OperatorState {
     loading: boolean;
     error: string | null;
   };
+  dashboard: {
+    data: any;
+    loading: boolean;
+    error: string | null;
+  };
 }
 
 const initialState: OperatorState = {
@@ -255,6 +268,11 @@ const initialState: OperatorState = {
   },
   alerts: {
     data: [],
+    loading: false,
+    error: null,
+  },
+  dashboard: {
+    data: null,
     loading: false,
     error: null,
   },
@@ -481,6 +499,21 @@ const operatorSlice = createSlice({
       .addCase(fetchOperatorAlerts.rejected, (state, action) => {
         state.alerts.loading = false;
         state.alerts.error = action.error.message || "Failed to fetch alerts";
+      });
+
+    // Fetch Dashboard
+    builder
+      .addCase(fetchOperatorDashboard.pending, (state) => {
+        state.dashboard.loading = true;
+        state.dashboard.error = null;
+      })
+      .addCase(fetchOperatorDashboard.fulfilled, (state, action) => {
+        state.dashboard.loading = false;
+        state.dashboard.data = action.payload;
+      })
+      .addCase(fetchOperatorDashboard.rejected, (state, action) => {
+        state.dashboard.loading = false;
+        state.dashboard.error = action.error.message;
       });
   },
 });
