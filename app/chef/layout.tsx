@@ -117,7 +117,9 @@ export default function ChefLayout({
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/chef/settings" className="flex items-center">
+                  <Link
+                    href="/chef/account-settings"
+                    className="flex items-center">
                     <Settings className="mr-2 h-4 w-4" />
                     <span>設定</span>
                   </Link>
