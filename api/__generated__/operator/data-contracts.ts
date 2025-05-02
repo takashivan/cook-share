@@ -731,6 +731,8 @@ export interface UserApprovePartialUpdateData {
   password_reset_token: string;
   stripe_verified: boolean;
   stripe_requirements: object;
+  address: string;
+  phone: string;
   magic_link: {
     token: string;
     /**
@@ -787,6 +789,8 @@ export interface UserBanPartialUpdateData {
     password_reset_token: string;
     stripe_verified: boolean;
     stripe_requirements: object;
+    address: string;
+    phone: string;
     magic_link: {
       token: string;
       /**
@@ -854,6 +858,8 @@ export interface UsersApprovePartialUpdateData {
   password_reset_token: string;
   stripe_verified: boolean;
   stripe_requirements: object;
+  address: string;
+  phone: string;
   magic_link: {
     token: string;
     /**
@@ -909,6 +915,8 @@ export interface UsersBanPartialUpdateData {
     password_reset_token: string;
     stripe_verified: boolean;
     stripe_requirements: object;
+    address: string;
+    phone: string;
     magic_link: {
       token: string;
       /**
