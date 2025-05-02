@@ -128,14 +128,8 @@ export default function AccountSettings() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-3xl">
+    <div className="container mx-auto px-4 py-8">
       <div className="flex items-center mb-6">
-        <Button variant="ghost" size="icon" asChild className="mr-2">
-          <Link href="/chef/profile">
-            <ArrowLeft className="h-5 w-5" />
-            <span className="sr-only">戻る</span>
-          </Link>
-        </Button>
         <h1 className="text-2xl font-bold">アカウント設定</h1>
       </div>
 

@@ -1,29 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { MessageSquare, Edit } from "lucide-react";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  UnreadMessageWithWorksession,
-  useSubscriptionUnreadMessagesByUser,
-} from "@/hooks/api/user/messages/useSubscriptionUnreadMessagesByUser";
-import { ChatSheet } from "@/components/chat/ChatSheet";
-import { useSubscriptionMessagesByUserId } from "@/hooks/api/user/messages/useSubscriptionMessagesByUserId";
-import { Badge } from "@/components/ui/badge";
 import { useGetWorksessionsByUserIdByTodo } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserIdByTodo";
-import { useSearchParams } from "next/navigation";
 
 export default function ChefDashboard() {
   const { user } = useAuth();
-  const [selectedWorkSession, setSelectedWorkSession] = useState<
-    UnreadMessageWithWorksession["worksession"] | null
-  >(null);
-  const searchParams = useSearchParams();
-  const currentTab = searchParams.get("tab") || "upcoming";
 
   // ワークセッションの取得
   const { data: workSessionsData } = useGetWorksessionsByUserIdByTodo({
@@ -34,41 +19,6 @@ export default function ChefDashboard() {
     workSessionsData?.filter((session) => session.status === "SCHEDULED") ?? [];
   console.log("upcomingJobs", upcomingJobs);
 
-  const inProgressJobs =
-    workSessionsData?.filter((session) => session.status === "IN_PROGRESS") ??
-    [];
-
-  // メッセージの取得
-  const { messagesData, sendMessage } = useSubscriptionMessagesByUserId({
-    userId: user?.id,
-    workSessionId: selectedWorkSession?.id ?? undefined,
-    applicationId: selectedWorkSession?.application_id ?? undefined,
-  });
-
-  // 未読メッセージの取得
-  const { unreadMessagesData } = useSubscriptionUnreadMessagesByUser({
-    userId: user?.id,
-  });
-
-  const openChat = (
-    worksession: UnreadMessageWithWorksession["worksession"]
-  ) => {
-    setSelectedWorkSession(worksession);
-  };
-
-  const closeChat = () => {
-    setSelectedWorkSession(null);
-  };
-
-  const handleSendMessage = async (message: string) => {
-    if (!message.trim() || !selectedWorkSession) return;
-
-    try {
-      sendMessage(message);
-    } catch (error) {
-      console.error("Failed to send message:", error);
-    }
-  };
 
   // const { data: applications } = useSWR<ApplicationWithJob[]>(
   //   user ? ["applications", user.id.toString()] : null,
@@ -94,165 +44,47 @@ export default function ChefDashboard() {
         </h1>
       </div>
 
-      {currentTab === "upcoming" && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold mb-4">次のお仕事</h2>
-          {upcomingJobs && upcomingJobs.length > 0 ? (
-            upcomingJobs.map((session) => (
-              <Link
-                key={session.id}
-                href={`/chef/job/${session.job_id}`}
-                className="block">
-                <div className="bg-white rounded-lg shadow-md p-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">
-                        {format(new Date(session.job.work_date), "MM/dd (E)", {
-                          locale: ja,
-                        })}
-                      </span>
-                      <span className="text-gray-500">|</span>
-                      <span className="text-gray-500">
-                        {format(new Date(session.job.start_time), "HH:mm")} 〜{" "}
-                        {format(new Date(session.job.end_time), "HH:mm")}
-                      </span>
-                    </div>
+      <div className="space-y-4">
+        <h2 className="text-xl font-bold mb-4">次のお仕事</h2>
+        {upcomingJobs && upcomingJobs.length > 0 ? (
+          upcomingJobs.map((session) => (
+            <Link
+              key={session.id}
+              href={`/chef/job/${session.job_id}`}
+              className="block">
+              <div className="bg-white rounded-lg shadow-md p-4">
+                <div className="flex justify-between items-center mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">
+                      {format(new Date(session.job.work_date), "MM/dd (E)", {
+                        locale: ja,
+                      })}
+                    </span>
+                    <span className="text-gray-500">|</span>
+                    <span className="text-gray-500">
+                      {format(new Date(session.job.start_time), "HH:mm")} 〜{" "}
+                      {format(new Date(session.job.end_time), "HH:mm")}
+                    </span>
                   </div>
-                  <div className="text-gray-500 mb-1">
-                    {session.job.restaurant.name}
-                  </div>
-                  <div className="font-medium">{session.job.title}</div>
                 </div>
-              </Link>
-            ))
-          ) : (
-            <div className="bg-gray-50 rounded-lg p-8 text-center space-y-4">
-              <p className="text-gray-500">次のお仕事は未定です</p>
-              <Link href="/">
-                <Button variant="outline" className="w-full">
-                  お仕事を探す
-                </Button>
-              </Link>
-            </div>
-          )}
-        </div>
-      )}
-
-      {currentTab === "todo" && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold mb-4">やること</h2>
-          {inProgressJobs.length > 0 ? (
-            inProgressJobs.map((session) => (
-              <Link
-                key={session.id}
-                href={`/chef/job/${session.job_id}`}
-                className="block">
-                <div className="bg-white rounded-lg shadow-md p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Edit className="h-5 w-5 text-gray-700" />
-                    <div className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">
-                      完了報告
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">
-                        {format(new Date(session.created_at), "MM/dd (E)", {
-                          locale: ja,
-                        })}
-                      </span>
-                      <span className="text-gray-500">|</span>
-                      <span className="text-gray-500">
-                        {format(new Date(session.check_in_time), "HH:mm")} 〜{" "}
-                        {format(new Date(session.check_out_time), "HH:mm")}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-gray-500 mb-1">
-                    {session.job.restaurant.name}
-                  </div>
-                  <div className="font-medium">{session.job.title}</div>
+                <div className="text-gray-500 mb-1">
+                  {session.job.restaurant.name}
                 </div>
-              </Link>
-            ))
-          ) : (
-            <div className="bg-gray-50 rounded-lg p-8 text-center text-gray-500">
-              お疲れ様です！今はやることはありません。ゆっくり休んでください。
-            </div>
-          )}
-        </div>
-      )}
-
-      {currentTab === "messages" && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold mb-4">未読メッセージ</h2>
-          {unreadMessagesData &&
-          unreadMessagesData.length > 0 &&
-          unreadMessagesData.some(
-            (messageData) => messageData.unread_message_count > 0
-          ) ? (
-            unreadMessagesData
-              .filter(
-                (unreadMessageData) =>
-                  unreadMessageData.unread_message_count > 0
-              )
-              .map((unreadMessageData) => {
-                let latestMessage = null;
-                for (const message of unreadMessageData.unread_messages) {
-                  if (
-                    !latestMessage ||
-                    message.message_seq > latestMessage.message_seq
-                  ) {
-                    latestMessage = message;
-                  }
-                }
-
-                return (
-                  <Link
-                    key={unreadMessageData.worksession.id}
-                    href=""
-                    className="block"
-                    onClick={() => {
-                      openChat(unreadMessageData.worksession);
-                    }}>
-                    <div className="bg-white rounded-lg shadow-md p-4">
-                      <div className="flex items-center gap-3 mb-2 relative">
-                        <MessageSquare className="h-5 w-5 text-gray-700" />
-                        <div className="font-medium">
-                          {unreadMessageData.worksession.restaurant.name}
-                        </div>
-                        {unreadMessageData.unread_messages.length > 0 && (
-                          <Badge className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[1.25rem] h-5 flex items-center justify-center bg-red-500 text-white">
-                            {unreadMessageData.unread_messages.length}
-                          </Badge>
-                        )}
-                      </div>
-                      <p className="text-gray-600 truncate">
-                        {latestMessage?.content ?? ""}
-                      </p>
-                    </div>
-                  </Link>
-                );
-              })
-          ) : (
-            <div className="bg-gray-50 rounded-lg p-8 text-center text-gray-500">
-              未読メッセージはありません
-            </div>
-          )}
-        </div>
-      )}
-
-      <ChatSheet
-        isOpen={selectedWorkSession !== null}
-        onClose={closeChat}
-        worksessionId={selectedWorkSession?.id ?? undefined}
-        messagesData={messagesData}
-        onSendMessage={handleSendMessage}
-        restaurantName={selectedWorkSession?.restaurant?.name || ""}
-        restaurantImage={selectedWorkSession?.restaurant?.profile_image || ""}
-        workDate={selectedWorkSession?.job?.work_date || ""}
-        startTime={selectedWorkSession?.job?.start_time || 0}
-      />
+                <div className="font-medium">{session.job.title}</div>
+              </div>
+            </Link>
+          ))
+        ) : (
+          <div className="bg-gray-50 rounded-lg p-8 text-center space-y-4">
+            <p className="text-gray-500">次のお仕事は未定です</p>
+            <Link href="/">
+              <Button variant="outline" className="w-full">
+                お仕事を探す
+              </Button>
+            </Link>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
