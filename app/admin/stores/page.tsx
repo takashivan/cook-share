@@ -2,11 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/lib/store/store";
-import { fetchMyRestaurants } from "@/lib/store/restaurantSlice";
 import { CreateRestaurantModal } from "@/components/modals/CreateRestaurantModal";
-import { createRestaurant } from "@/lib/api/restaurant";
 import { toast } from "@/hooks/use-toast";
 import {
   Card,
@@ -37,7 +33,6 @@ import {
   Store,
 } from "lucide-react";
 import Link from "next/link";
-import { useGetRestaurantsByCompanyId } from "@/hooks/api/companyuser/restaurants/useGetRestaurantsByCompanyId";
 import { useCreateRestaurant } from "@/hooks/api/companyuser/restaurants/useCreateRestaurant";
 import { RestaurantsCreatePayload } from "@/api/__generated__/base/data-contracts";
 import { useGetRestaurantsByCompanyUserId } from "@/hooks/api/companyuser/restaurants/useGetRestaurantsByCompanyUserId";
@@ -47,8 +42,7 @@ export default function StoresPage() {
   const {
     data: restaurants,
     isLoading,
-    error,
-    mutate,
+    error: getRestaurantsError,
   } = useGetRestaurantsByCompanyUserId({ companyuserId: user?.id });
   const [isCreateRestaurantModalOpen, setIsCreateRestaurantModalOpen] =
     useState(false);
@@ -56,6 +50,24 @@ export default function StoresPage() {
 
   const { trigger: createRestaurantTrigger } = useCreateRestaurant({
     companyId: user?.companies_id ?? undefined,
+    companyUserId: user?.id ?? undefined,
+    handleSuccess: () => {
+      toast({
+        title: "店舗を追加しました",
+        description: "新しい店舗の登録が完了しました。",
+      });
+      handleCloseRestaurantModal();
+    },
+    handleError: (error) => {
+      toast({
+        title: "エラーが発生しました",
+        description:
+          error instanceof Error
+            ? error.message
+            : "店舗の追加に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
+    },
   });
 
   useEffect(() => {
@@ -76,46 +88,9 @@ export default function StoresPage() {
     async (data: RestaurantsCreatePayload) => {
       if (!hasMounted || !user?.companies_id) return;
 
-      try {
-        const companyId = user.companies_id;
-        if (
-          !companyId.match(
-            /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-          )
-        ) {
-          throw new Error("会社IDの形式が正しくありません");
-        }
-
-        const result = await createRestaurantTrigger(data);
-        if (!result) {
-          throw new Error("店舗の作成に失敗しました");
-        }
-
-        // 店舗一覧を再取得
-        // const refreshResult = await dispatch(fetchMyRestaurants(user.id));
-        // if (refreshResult.type.endsWith("/rejected")) {
-        //   throw new Error("店舗一覧の更新に失敗しました");
-        // }
-
-        handleCloseRestaurantModal();
-        toast({
-          title: "店舗を追加しました",
-          description: "新しい店舗の登録が完了しました。",
-        });
-      } catch (error) {
-        console.error("Failed to create restaurant:", error);
-        toast({
-          title: "エラーが発生しました",
-          description:
-            error instanceof Error
-              ? error.message
-              : "店舗の追加に失敗しました。もう一度お試しください。",
-          variant: "destructive",
-        });
-        throw error;
-      }
+      await createRestaurantTrigger(data);
     },
-    [hasMounted, user?.companies_id, mutate, handleCloseRestaurantModal]
+    [hasMounted, user?.companies_id]
   );
 
   if (!hasMounted) {
@@ -138,11 +113,11 @@ export default function StoresPage() {
     );
   }
 
-  if (error) {
+  if (getRestaurantsError) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center text-red-600">
-          <p>{error}</p>
+          <p>{getRestaurantsError}</p>
         </div>
       </div>
     );

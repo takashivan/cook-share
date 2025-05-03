@@ -130,6 +130,8 @@ export type GetApplicationData = {
     password_reset_token: string;
     stripe_verified: boolean;
     stripe_requirements: object;
+    address: string;
+    phone: string;
     magic_link: {
       token: string;
       /**
@@ -1148,6 +1150,8 @@ export type ByRestaurantDetailData = {
     password_reset_token: string;
     stripe_verified: boolean;
     stripe_requirements: object;
+    address: string;
+    phone: string;
     magic_link: {
       token: string;
       /**
@@ -1291,6 +1295,8 @@ export interface BySessionDetailData {
     password_reset_token: string;
     stripe_verified: boolean;
     stripe_requirements: object;
+    address: string;
+    phone: string;
     magic_link: {
       token: string;
       /**
@@ -3049,6 +3055,8 @@ export type ApplicationsListResult = {
     password_reset_token: string;
     stripe_verified: boolean;
     stripe_requirements: object;
+    address: string;
+    phone: string;
     magic_link: {
       token: string;
       /**
@@ -3143,6 +3151,8 @@ export type WorksessionsRestaurantTodosListData = {
     password_reset_token: string;
     stripe_verified: boolean;
     stripe_requirements: object;
+    address: string;
+    phone: string;
     magic_link: {
       token: string;
       /**
@@ -4369,6 +4379,8 @@ export type ByRestaurantDetailResult = {
     password_reset_token: string;
     stripe_verified: boolean;
     stripe_requirements: object;
+    address: string;
+    phone: string;
     magic_link: {
       token: string;
       /**
@@ -4483,6 +4495,8 @@ export interface BySessionDetailResult {
     password_reset_token: string;
     stripe_verified: boolean;
     stripe_requirements: object;
+    address: string;
+    phone: string;
     magic_link: {
       token: string;
       /**
@@ -4967,6 +4981,8 @@ export type ChefReviewsListData = {
     password_reset_token: string;
     stripe_verified: boolean;
     stripe_requirements: object;
+    address: string;
+    phone: string;
     magic_link: {
       token: string;
       /**
@@ -5142,6 +5158,8 @@ export type RestaurantReviewsListResult = {
     password_reset_token: string;
     stripe_verified: boolean;
     stripe_requirements: object;
+    address: string;
+    phone: string;
     magic_link: {
       token: string;
       /**
@@ -5228,37 +5246,11 @@ export interface RestaurantsPartialUpdatePayload {
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
+  /** @format binary */
+  photo: File | null;
 }
 
-export interface RestaurantsPartialUpdateData {
-  /** @format int64 */
-  id: number;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  name: string;
-  address: string;
-  cuisine_type: string;
-  business_hours: string;
-  contact_info: string;
-  profile_image: string;
-  /** @format timestamptz */
-  updated_at: number;
-  /** Whether the restaurant is active. */
-  is_active: boolean;
-  /** @format uuid */
-  companies_id: string | null;
-  station: string;
-  access: string;
-  rating: number;
-  /** @default "1" */
-  is_approved: boolean;
-  restaurant_cuisine_id: number[];
-  description: string;
-  phone: string;
-}
+export type RestaurantsPartialUpdateData = object;
 
 export type RestaurantsListOutput = {
   "0": {
@@ -5428,6 +5420,8 @@ export interface EmailChangeCreateData {
   password_reset_token: string;
   stripe_verified: boolean;
   stripe_requirements: object;
+  address: string;
+  phone: string;
   magic_link: {
     token: string;
     /**
@@ -5482,6 +5476,8 @@ export interface EmailConfirmCreateData {
   password_reset_token: string;
   stripe_verified: boolean;
   stripe_requirements: object;
+  address: string;
+  phone: string;
   magic_link: {
     token: string;
     /**
@@ -5667,6 +5663,8 @@ export interface UserDetailData {
   password_reset_token: string;
   stripe_verified: boolean;
   stripe_requirements: object;
+  address: string;
+  phone: string;
   magic_link: {
     token: string;
     /**
@@ -5703,6 +5701,8 @@ export interface UserPartialUpdatePayload {
   password_reset_token: string;
   stripe_verified: boolean;
   stripe_requirements: object;
+  address: string;
+  phone: string;
   /** @format binary */
   photo: File | null;
   magic_link: {
@@ -6369,6 +6369,8 @@ export interface UsersDetailData {
   password_reset_token: string;
   stripe_verified: boolean;
   stripe_requirements: object;
+  address: string;
+  phone: string;
   magic_link: {
     token: string;
     /**
@@ -6405,6 +6407,8 @@ export interface UsersPartialUpdatePayload {
   password_reset_token: string;
   stripe_verified: boolean;
   stripe_requirements: object;
+  address: string;
+  phone: string;
   /** @format binary */
   photo: File | null;
   magic_link: {
@@ -6459,6 +6463,8 @@ export type UsersListData = {
   password_reset_token: string;
   stripe_verified: boolean;
   stripe_requirements: object;
+  address: string;
+  phone: string;
   magic_link: {
     token: string;
     /**
@@ -6500,6 +6506,8 @@ export interface UsersCreatePayload {
   password_reset_token: string;
   stripe_verified: boolean;
   stripe_requirements: object;
+  address: string;
+  phone: string;
   magic_link: {
     token: string;
     /**
@@ -6550,6 +6558,8 @@ export interface UsersCreateData {
   password_reset_token: string;
   stripe_verified: boolean;
   stripe_requirements: object;
+  address: string;
+  phone: string;
   magic_link: {
     token: string;
     /**
@@ -6600,6 +6610,8 @@ export type UserListData = {
   password_reset_token: string;
   stripe_verified: boolean;
   stripe_requirements: object;
+  address: string;
+  phone: string;
   magic_link: {
     token: string;
     /**
@@ -6641,6 +6653,8 @@ export interface UserCreatePayload {
   password_reset_token: string;
   stripe_verified: boolean;
   stripe_requirements: object;
+  address: string;
+  phone: string;
   magic_link: {
     token: string;
     /**
@@ -6691,6 +6705,8 @@ export interface UserCreateData {
   password_reset_token: string;
   stripe_verified: boolean;
   stripe_requirements: object;
+  address: string;
+  phone: string;
   magic_link: {
     token: string;
     /**
@@ -6865,6 +6881,8 @@ export type RestaurantTodoDetailData = {
     password_reset_token: string;
     stripe_verified: boolean;
     stripe_requirements: object;
+    address: string;
+    phone: string;
     magic_link: {
       token: string;
       /**
@@ -7813,6 +7831,8 @@ export interface ChefReviewListResult {
     password_reset_token: string;
     stripe_verified: boolean;
     stripe_requirements: object;
+    address: string;
+    phone: string;
     magic_link: {
       token: string;
       /**
@@ -8108,6 +8128,8 @@ export interface RestaurantReviewListResult {
     password_reset_token: string;
     stripe_verified: boolean;
     stripe_requirements: object;
+    address: string;
+    phone: string;
     magic_link: {
       token: string;
       /**

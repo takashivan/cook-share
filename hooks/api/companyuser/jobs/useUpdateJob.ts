@@ -25,14 +25,18 @@ export const useUpdateJob = (params: Params) => {
       const jobsKey = jobs.jobsListQueryArgs()[0];
       mutate(jobsKey);
 
-      // 更新した求人の会社が持つJobsリストのキャッシュを更新
+      // キャッシュを更新
+      if (params.jobId) {
+        const jobDetailKey = jobs.jobsDetailQueryArgs(params.jobId)[0];
+        mutate(jobDetailKey);
+      }
+
       if (params.companyId) {
         const companies = getApi(Companies);
         const jobsByCompanyIdKey = companies.jobsListQueryArgs(params.companyId)[0];
         mutate(jobsByCompanyIdKey);
       }
 
-      // 更新した求人のレストランが持つJobsリストのキャッシュを更新
       if (params.restaurantId) {
         const restaurant = getApi(Restaurants);
         const jobsByRestaurantIdKey = restaurant.jobsListQueryArgs(params.restaurantId)[0];

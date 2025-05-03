@@ -60,6 +60,8 @@ export interface ConnectLineAccountCreateData {
   password_reset_token: string;
   stripe_verified: boolean;
   stripe_requirements: object;
+  address: string;
+  phone: string;
   magic_link: {
     token: string;
     /**
@@ -126,6 +128,8 @@ export interface LinkLineIdCreateData {
   password_reset_token: string;
   stripe_verified: boolean;
   stripe_requirements: object;
+  address: string;
+  phone: string;
   magic_link: {
     token: string;
     /**

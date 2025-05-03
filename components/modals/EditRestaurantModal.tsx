@@ -6,10 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Store, Upload, X } from "lucide-react";
-import { Restaurant } from "@/lib/api/restaurant";
 import { toast } from "@/hooks/use-toast";
 import Image from "next/image";
-import { getCuisines } from "@/lib/api/cuisines";
+import { useGetRestaurantCuisines } from "@/hooks/api/all/restaurantCuisines/useGetRestaurantCuisines";
 
 interface EditRestaurantModalProps {
   isOpen: boolean;
@@ -43,40 +42,35 @@ export const EditRestaurantModal = ({
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [cuisines, setCuisines] = useState<{ id: string; category: string }[]>(
-    []
-  );
   const [selectedCuisines, setSelectedCuisines] = useState<number[]>([]);
 
-  useEffect(() => {
-    const fetchCuisines = async () => {
-      try {
-        const data = await getCuisines();
-        setCuisines(data);
-        // レストランの既存のジャンルを選択状態にする
-        if (restaurant.restaurant_cuisine_id) {
-          const cuisineIds = Array.isArray(restaurant.restaurant_cuisine_id)
-            ? restaurant.restaurant_cuisine_id
-            : [restaurant.restaurant_cuisine_id];
-          setSelectedCuisines(cuisineIds);
-        }
-      } catch (error) {
-        console.error("Failed to fetch cuisines:", error);
-        toast({
-          title: "エラーが発生しました",
-          description: "ジャンルの取得に失敗しました。",
-          variant: "destructive",
-        });
-      }
-    };
+  const { data: cuisines, error: errorGetCuisines } = useGetRestaurantCuisines();
 
-    fetchCuisines();
-  }, [restaurant.restaurant_cuisine_id]);
+  useEffect(() => {
+    // レストランの既存のジャンルを選択状態にする
+    if (restaurant.restaurant_cuisine_id) {
+      const cuisineIds = Array.isArray(restaurant.restaurant_cuisine_id)
+        ? restaurant.restaurant_cuisine_id
+        : [restaurant.restaurant_cuisine_id];
+      setSelectedCuisines(cuisineIds);
+    }
+  }, [restaurant.restaurant_cuisine_id, setSelectedCuisines]);
+
+  useEffect(() => {
+    if (errorGetCuisines) {
+      console.error("Failed to fetch cuisines:", errorGetCuisines);
+      toast({
+        title: "エラーが発生しました",
+        description: "ジャンルの取得に失敗しました。",
+        variant: "destructive",
+      });
+    }
+  }, [errorGetCuisines]);
+
   console.log(" edit modal restaurant", restaurant);
   console.log(" edit modal restaurant name", restaurant.name);
 
-  const handleCuisineChange = (value: string) => {
-    const id = parseInt(value);
+  const handleCuisineChange = (id: number) => {
     setSelectedCuisines((prev) => {
       if (prev.includes(id)) {
         return prev.filter((item) => item !== id);
@@ -266,12 +260,12 @@ export const EditRestaurantModal = ({
                     <div>
                       <Label>ジャンル *</Label>
                       <div className="flex flex-wrap gap-2 mt-2">
-                        {cuisines.map((cuisine) => (
+                        {cuisines?.map((cuisine) => (
                           <Button
                             key={cuisine.id}
                             type="button"
                             variant={
-                              selectedCuisines.includes(parseInt(cuisine.id))
+                              selectedCuisines.includes(cuisine.id)
                                 ? "default"
                                 : "outline"
                             }

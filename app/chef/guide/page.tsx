@@ -4,8 +4,8 @@ import { AlertTriangle } from "lucide-react";
 
 export default function GuideFlow() {
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="container mx-auto px-4 py-6 max-w-md">
+    <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-8">ご利用の流れ</h1>
 
         {/* STEP 01 */}

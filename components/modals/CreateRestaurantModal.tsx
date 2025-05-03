@@ -6,11 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Store, Upload, X } from "lucide-react";
-import { CreateRestaurantData } from "@/lib/api/restaurant";
 import { toast } from "@/hooks/use-toast";
 import Image from "next/image";
-import { getCuisines } from "@/lib/api/cuisines";
 import { RestaurantsCreatePayload } from "@/api/__generated__/base/data-contracts";
+import { useGetRestaurantCuisines } from "@/hooks/api/all/restaurantCuisines/useGetRestaurantCuisines";
 
 interface CreateRestaurantModalProps {
   isOpen: boolean;
@@ -28,31 +27,22 @@ export const CreateRestaurantModal = ({
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [cuisines, setCuisines] = useState<{ id: string; category: string }[]>(
-    []
-  );
   const [selectedCuisines, setSelectedCuisines] = useState<number[]>([]);
 
+  const { data: cuisines, error: errorGetCuisines } = useGetRestaurantCuisines();
+
   useEffect(() => {
-    const fetchCuisines = async () => {
-      try {
-        const data = await getCuisines();
-        setCuisines(data);
-      } catch (error) {
-        console.error("Failed to fetch cuisines:", error);
-        toast({
-          title: "エラーが発生しました",
-          description: "ジャンルの取得に失敗しました。",
-          variant: "destructive",
-        });
-      }
-    };
+    if (errorGetCuisines) {
+      console.error("Failed to fetch cuisines:", errorGetCuisines);
+      toast({
+        title: "エラーが発生しました",
+        description: "ジャンルの取得に失敗しました。",
+        variant: "destructive",
+      });
+    }
+  }, [errorGetCuisines]);
 
-    fetchCuisines();
-  }, []);
-
-  const handleCuisineChange = (value: string) => {
-    const id = parseInt(value);
+  const handleCuisineChange = (id: number) => {
     setSelectedCuisines((prev) => {
       if (prev.includes(id)) {
         return prev.filter((item) => item !== id);
@@ -102,27 +92,6 @@ export const CreateRestaurantModal = ({
 
   const onSubmitHandler = handleSubmit(async (data) => {
     try {
-      // const formData = new FormData();
-
-      // // 必須フィールドを追加
-      // formData.append("companies_id", companyId);
-      // formData.append("name", data.name);
-      // formData.append("address", data.address);
-      // // 配列として送信
-      // selectedCuisines.forEach((id) => {
-      //   formData.append("restaurant_cuisine_id[]", id.toString());
-      // });
-      // formData.append("is_active", String(data.is_active));
-
-      // // オプショナルフィールドを追加（値が存在する場合のみ）
-      // if (data.contact_info) formData.append("contact_info", data.contact_info);
-      // if (data.description) formData.append("description", data.description);
-
-      // // 画像を追加
-      // if (selectedFile) {
-      //   formData.append("photo", selectedFile);
-      // }
-
       const newData: RestaurantsCreatePayload = {
         ...data,
         restaurant_cuisine_id: selectedCuisines,
@@ -217,12 +186,12 @@ export const CreateRestaurantModal = ({
                     <div>
                       <Label>ジャンル *</Label>
                       <div className="flex flex-wrap gap-2 mt-2">
-                        {cuisines.map((cuisine) => (
+                        {cuisines?.map((cuisine) => (
                           <Button
                             key={cuisine.id}
                             type="button"
                             variant={
-                              selectedCuisines.includes(parseInt(cuisine.id))
+                              selectedCuisines.includes(cuisine.id)
                                 ? "default"
                                 : "outline"
                             }

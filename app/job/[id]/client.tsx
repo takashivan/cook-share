@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ja } from "date-fns/locale";
+import { useGetWorksessionsByUserId } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserId";
 
 interface Restaurant {
   id: string;
@@ -99,6 +100,10 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
   const router = useRouter();
   const { user: authUser } = useAuth();
   const [user, setUser] = useState(authUser);
+  const { data: workSessions } = useGetWorksessionsByUserId({
+    userId: user?.id,
+  });
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (authUser?.id) {
@@ -122,6 +127,83 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
     restaurantId: Number(jobDetail.restaurant.id),
   });
   console.log("restaurantReview", restaurantReview);
+
+  // 時間重複チェック
+  const hasTimeOverlap = workSessions?.some((session) => {
+    const targetDate = new Date(jobDetail.job.work_date);
+    const targetStartTime = new Date(targetDate);
+    targetStartTime.setHours(
+      new Date(jobDetail.job.start_time * 1000).getHours(),
+      new Date(jobDetail.job.start_time * 1000).getMinutes()
+    );
+    const targetEndTime = new Date(targetDate);
+    targetEndTime.setHours(
+      new Date(jobDetail.job.end_time * 1000).getHours(),
+      new Date(jobDetail.job.end_time * 1000).getMinutes()
+    );
+
+    const sessionDate = new Date(session.job.work_date);
+    const sessionStartTime = new Date(sessionDate);
+    sessionStartTime.setHours(
+      new Date(session.job.start_time * 1000).getHours(),
+      new Date(session.job.start_time * 1000).getMinutes()
+    );
+    const sessionEndTime = new Date(sessionDate);
+    sessionEndTime.setHours(
+      new Date(session.job.end_time * 1000).getHours(),
+      new Date(session.job.end_time * 1000).getMinutes()
+    );
+
+    if (targetDate.toDateString() !== sessionDate.toDateString()) {
+      return false;
+    }
+
+    return (
+      (targetStartTime >= sessionStartTime &&
+        targetStartTime < sessionEndTime) ||
+      (targetEndTime > sessionStartTime && targetEndTime <= sessionEndTime) ||
+      (targetStartTime <= sessionStartTime && targetEndTime >= sessionEndTime)
+    );
+  });
+
+  // 重複している仕事の情報を取得
+  const overlappingJob = workSessions?.find((session) => {
+    const targetDate = new Date(jobDetail.job.work_date);
+    const sessionDate = new Date(session.job.work_date);
+    if (targetDate.toDateString() !== sessionDate.toDateString()) {
+      return false;
+    }
+
+    const targetStartTime = new Date(targetDate);
+    targetStartTime.setHours(
+      new Date(jobDetail.job.start_time * 1000).getHours(),
+      new Date(jobDetail.job.start_time * 1000).getMinutes()
+    );
+    const targetEndTime = new Date(targetDate);
+    targetEndTime.setHours(
+      new Date(jobDetail.job.end_time * 1000).getHours(),
+      new Date(jobDetail.job.end_time * 1000).getMinutes()
+    );
+
+    const sessionStartTime = new Date(sessionDate);
+    sessionStartTime.setHours(
+      new Date(session.job.start_time * 1000).getHours(),
+      new Date(session.job.start_time * 1000).getMinutes()
+    );
+    const sessionEndTime = new Date(sessionDate);
+    sessionEndTime.setHours(
+      new Date(session.job.end_time * 1000).getHours(),
+      new Date(session.job.end_time * 1000).getMinutes()
+    );
+
+    return (
+      (targetStartTime >= sessionStartTime &&
+        targetStartTime < sessionEndTime) ||
+      (targetEndTime > sessionStartTime && targetEndTime <= sessionEndTime) ||
+      (targetStartTime <= sessionStartTime && targetEndTime >= sessionEndTime)
+    );
+  });
+
   const applyToJob = async () => {
     if (!user) {
       toast({
@@ -146,6 +228,26 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
       user_id: user.id.toString(),
       application_date: new Date().toISOString(),
     };
+
+    const workSession = workSessions?.find(
+      (session) => session.job_id === jobDetail.job.id
+    );
+
+    if (workSession) {
+      toast({
+        variant: "destructive",
+        description: "すでに応募済みです",
+      });
+      return;
+    }
+
+    if (hasTimeOverlap) {
+      toast({
+        variant: "destructive",
+        description: "この時間帯にはすでに他の仕事が入っています",
+      });
+      return;
+    }
 
     try {
       const response = await applicationApi.createApplication(applicationData);
@@ -324,12 +426,14 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                         !user ||
                         !user.is_approved ||
                         jobDetail.job.number_of_spots === 0 ||
-                        new Date(jobDetail.job.expiry_date) <= new Date()
+                        new Date(jobDetail.job.expiry_date) <= new Date() ||
+                        hasTimeOverlap
                       }
                       className={`w-full py-2 text-sm font-medium transition-all duration-300 transform hover:scale-[1.02] ${
                         user &&
                         jobDetail.job.number_of_spots > 0 &&
-                        new Date(jobDetail.job.expiry_date) > new Date()
+                        new Date(jobDetail.job.expiry_date) > new Date() &&
+                        !hasTimeOverlap
                           ? "bg-orange-600 hover:bg-orange-700 text-white"
                           : "bg-gray-300 text-gray-500 cursor-not-allowed"
                       }`}>
@@ -341,6 +445,8 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                         ? "募集人数が上限に達しました"
                         : new Date(jobDetail.job.expiry_date) <= new Date()
                         ? "募集期間が終了しました"
+                        : hasTimeOverlap
+                        ? `この時間帯には${overlappingJob?.job.restaurant.name}の仕事が入っています`
                         : "応募する"}
                     </Button>
                   </div>
@@ -626,12 +732,14 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                     !user ||
                     !user.is_approved ||
                     jobDetail.job.number_of_spots === 0 ||
-                    new Date(jobDetail.job.expiry_date) <= new Date()
+                    new Date(jobDetail.job.expiry_date) <= new Date() ||
+                    hasTimeOverlap
                   }
                   className={`w-full py-2 text-sm font-medium transition-all duration-300 transform hover:scale-[1.02] ${
                     user &&
                     jobDetail.job.number_of_spots > 0 &&
-                    new Date(jobDetail.job.expiry_date * 1000) > new Date()
+                    new Date(jobDetail.job.expiry_date) > new Date() &&
+                    !hasTimeOverlap
                       ? "bg-orange-600 hover:bg-orange-700 text-white"
                       : "bg-gray-300 text-gray-500 cursor-not-allowed"
                   }`}>
@@ -643,6 +751,8 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                     ? "募集人数が上限に達しました"
                     : new Date(jobDetail.job.expiry_date) <= new Date()
                     ? "募集期間が終了しました"
+                    : hasTimeOverlap
+                    ? `この時間帯には${overlappingJob?.job.restaurant.name}の仕事が入っています`
                     : "応募する"}
                 </Button>
               </div>

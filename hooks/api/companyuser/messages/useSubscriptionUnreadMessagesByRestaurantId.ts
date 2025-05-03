@@ -1,6 +1,5 @@
 import { getApi } from "@/api/api-factory"
 import useSWR from "swr"
-import { QueryConfigType } from "../../config-type";
 import { Chat } from "@/api/__generated__/base/Chat";
 import useSWRSubscription from "swr/subscription";
 import { XanoRealtimeChannel } from "@xano/js-sdk/lib/models/realtime-channel";
@@ -31,8 +30,7 @@ export interface Params {
   restaurantId?: number;
 }
 
-export const useSubscriptionUnreadMessagesByRestaurantId = (params: Params, config?: QueryConfigType) => {
-  const { dedupingInterval } = config || {};
+export const useSubscriptionUnreadMessagesByRestaurantId = (params: Params) => {
   const chat = getApi(Chat);
   const channelKey = `restaurant_chat/${params.restaurantId}`;
 
@@ -45,9 +43,6 @@ export const useSubscriptionUnreadMessagesByRestaurantId = (params: Params, conf
   const getRequest = useSWR(
     key,
     fetcher as unknown as () => Promise<UnreadMessageSummary[]>,
-    {
-      dedupingInterval
-    }
   );
 
   useSWRSubscription(
@@ -55,30 +50,58 @@ export const useSubscriptionUnreadMessagesByRestaurantId = (params: Params, conf
     ([_key], { next }) => {
       if (!key) return;
 
-      let channel: XanoRealtimeChannel;
-      try {
-        channel = realTimeClient.channel(channelKey);
-        console.log("Channel setup for key:", channelKey);
+      let channel: XanoRealtimeChannel | null = null;
+      let cleanup = () => {};
 
-        // メッセージの購読
-        channel.on((message: any) => {
-          console.log("Received message:", message);
-          getRequest.mutate();
-          next();
-        });
-      } catch (error) {
-        console.error("Error setting up channel:", error);
-      }
-
-      return () => {
+      const setupChannel = async () => {
         try {
-          if (channel) {
-            channel.destroy();
+          // 接続を待機
+          while (!channel) {
+            try {
+              channel = realTimeClient.channel(channelKey);
+              // チャンネルが作成されたら、メッセージの購読を開始
+              channel.on((message: any) => {
+                console.log("Received message:", message);
+                if (message.action === "error") {
+                  console.error("Channel error:", message.payload);
+                  // エラーが発生した場合、一定時間後に再試行
+                  setTimeout(() => {
+                    console.log("Retrying channel setup...");
+                    getRequest.mutate();
+                  }, 5000);
+                } else {
+                  getRequest.mutate();
+                  next();
+                }
+              });
+              break; // チャンネルが作成され、メッセージの購読が開始されたらループを抜ける
+            } catch (error) {
+              await new Promise((resolve) => setTimeout(resolve, 100));
+            }
           }
+
+          console.log("Channel setup for key:", channelKey);
+
+          // クリーンアップ関数を設定
+          cleanup = () => {
+            try {
+              if (channel) {
+                // チャンネルへの参照を解除
+                channel = null;
+              }
+            } catch (error) {
+              console.error("Error in cleanup:", error);
+            }
+          };
         } catch (error) {
-          console.error("Error destroying channel:", error);
+          console.error("Error setting up channel:", error);
         }
       };
+
+      setupChannel();
+
+      // 常にクリーンアップ関数を返す
+      return cleanup;
     },
   )
 

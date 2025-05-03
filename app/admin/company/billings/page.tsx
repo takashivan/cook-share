@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   CreditCard,
   Download,
@@ -25,37 +25,27 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Card, CardContent } from "@/components/ui/card";
-import { getBillingSummary } from "@/lib/api/company";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
-import type { BillingSummary } from "@/lib/api/company";
+import { useGetCurrentBillingSummaryByCompanyId } from "@/hooks/api/companyuser/billings/useGetCurrentBillingSummaryByCompanyId";
 
 export default function BillingList() {
   const { user } = useCompanyAuth();
-  const [billings, setBillings] = useState<BillingSummary[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: billings, isLoading, error } = useGetCurrentBillingSummaryByCompanyId({
+    companyId: user?.companies_id,
+  });
 
   useEffect(() => {
-    const fetchBillingData = async () => {
-      try {
-        if (!user?.companies_id) return;
-        const data = await getBillingSummary(user.companies_id);
-        setBillings(data);
-      } catch (error) {
-        console.error("Failed to fetch billing data:", error);
-        toast({
-          title: "エラーが発生しました",
-          description: "請求データの取得に失敗しました。",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchBillingData();
-  }, [user?.companies_id]);
+    if (error) {
+      console.error("Error fetching billing data:", error);
+      toast({
+        title: "エラーが発生しました",
+        description: "請求データの取得に失敗しました。",
+        variant: "destructive",
+      });
+    }
+  }, [error]);
 
   const formatAmount = (amount: number) => {
     return new Intl.NumberFormat("ja-JP", {
@@ -126,7 +116,7 @@ export default function BillingList() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {billings.map((billing) => (
+              {billings?.map((billing) => (
                 <TableRow key={billing.id}>
                   <TableCell className="font-medium">
                     {billing.invoice_number}
@@ -139,13 +129,13 @@ export default function BillingList() {
                   <TableCell>
                     <div
                       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        billing.status === "paid"
+                        billing.status === "PAID"
                           ? "bg-green-100 text-green-800"
-                          : billing.status === "pending"
+                          : billing.status === "PENDING"
                             ? "bg-yellow-100 text-yellow-800"
                             : "bg-red-100 text-red-800"
                       }`}>
-                      {billing.status === "paid" ? "支払済" : "未払い"}
+                      {billing.status === "PAID" ? "支払済" : "未払い"}
                     </div>
                   </TableCell>
                   <TableCell>
@@ -185,7 +175,7 @@ export default function BillingList() {
 
       {/* Mobile View */}
       <div className="grid gap-4 md:hidden">
-        {billings.map((billing) => (
+        {billings?.map((billing) => (
           <Card key={billing.id}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -235,13 +225,13 @@ export default function BillingList() {
                   <p className="text-muted-foreground">ステータス</p>
                   <div
                     className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      billing.status === "paid"
+                      billing.status === "PAID"
                         ? "bg-green-100 text-green-800"
-                        : billing.status === "pending"
+                        : billing.status === "PENDING"
                           ? "bg-yellow-100 text-yellow-800"
                           : "bg-red-100 text-red-800"
                     }`}>
-                    {billing.status === "paid" ? "支払済" : "未払い"}
+                    {billing.status === "PAID" ? "支払済" : "未払い"}
                   </div>
                 </div>
               </div>

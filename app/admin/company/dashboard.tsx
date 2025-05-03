@@ -12,25 +12,13 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/lib/store/store";
-// import { fetchRestaurantsByCompanyId } from "@/lib/store/restaurantSlice";
-// import { CreateRestaurantModal } from "@/components/modals/CreateRestaurantModal";
-// import { createRestaurant } from "@/lib/api/restaurant";
-// import { toast } from "@/hooks/use-toast";
-import { getCompanyUserByCompanyId } from "@/lib/api/companyUser";
-import { fetchJobsByCompanyId } from "@/lib/store/jobSlice";
-import { fetchMyRestaurants } from "@/lib/store/restaurantSlice";
 import { useGetCompany } from "@/hooks/api/companyuser/companies/useGetCompany";
-import { useGetRestaurantsByCompanyId } from "@/hooks/api/companyuser/restaurants/useGetRestaurantsByCompanyId";
 import { useGetJobsByCompanyId } from "@/hooks/api/companyuser/jobs/useGetJobsByCompanyId";
 import { useGetCompanyUsersByCompanyId } from "@/hooks/api/companyuser/companyUsers/useGetCompanyUsersByCompanyId";
 import { useGetRestaurantsByCompanyUserId } from "@/hooks/api/companyuser/restaurants/useGetRestaurantsByCompanyUserId";
 
 export function CompanyDashboard() {
-  // const dispatch = useDispatch<AppDispatch>();
   const { user } = useCompanyAuth();
-  const dispatch = useDispatch<AppDispatch>();
 
   const { data: company } = useGetCompany({ companyId: user?.companies_id ?? undefined });
   const {
@@ -48,42 +36,6 @@ export function CompanyDashboard() {
     isLoading: companyUsersLoading,
     error: companyUsersError,
   } = useGetCompanyUsersByCompanyId({ companyId: user?.companies_id ?? undefined });
-
-  useEffect(() => {
-    if (user?.companies_id) {
-      dispatch(fetchMyRestaurants(user.id));
-      dispatch(fetchJobsByCompanyId(user.companies_id));
-    }
-  }, [dispatch, user?.companies_id, user?.id]);
-
-  // useEffect(() => {
-  //   const fetchCompanyUsers = async () => {
-  //     if (user?.companies_id) {
-  //       try {
-  //         setIsLoadingUsers(true);
-  //         const response = await getCompanyUserByCompanyId(user.companies_id);
-  //         const validUsers = Array.isArray(response)
-  //           ? response.filter(
-  //               (user): user is CompanyUser =>
-  //                 user !== null && typeof user === "object"
-  //             )
-  //           : [];
-  //         setCompanyUsers(validUsers);
-  //       } catch (error) {
-  //         console.error("Failed to fetch company users:", error);
-  //         setError(
-  //           error instanceof Error
-  //             ? error.message
-  //             : "スタッフ情報の取得に失敗しました"
-  //         );
-  //       } finally {
-  //         setIsLoadingUsers(false);
-  //       }
-  //     }
-  //   };
-
-  //   fetchCompanyUsers();
-  // }, [user?.companies_id]);
 
   // データが更新されたときのログ
   useEffect(() => {
