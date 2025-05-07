@@ -26,6 +26,7 @@ import {
   OperatorListData,
   OperatorPartialUpdateData,
   OperatorPartialUpdatePayload,
+  QueryDashboardListData,
   RestaurantApprovePartialUpdateData,
   RestaurantApprovePartialUpdatePayload,
   RestaurantBanPartialUpdateData,
@@ -188,6 +189,31 @@ export class Operator<
       { arg }: { arg: JobsBanPartialUpdatePayload },
     ) => Promise<JobsBanPartialUpdateData> = (_, { arg }) =>
       this.jobsBanPartialUpdate(jobId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags operator
+   * @name QueryDashboardList
+   * @request GET:/operator/query/dashboard
+   */
+  queryDashboardList = (params: RequestParams = {}) =>
+    this.request<QueryDashboardListData, void>({
+      path: `/operator/query/dashboard`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  queryDashboardListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/operator/query/dashboard`] : null;
+    const fetcher = () =>
+      this.queryDashboardList(params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 

@@ -467,6 +467,30 @@ export interface JobsBanPartialUpdateData {
   };
 }
 
+export interface QueryDashboardListData {
+  /** @format int64 */
+  job_count: number;
+  /** @format int64 */
+  job_count_till_lastMonth: number;
+  /** @format int64 */
+  worksession_count: number;
+  /** @format int64 */
+  worksession_count_lastMonth: number;
+  /** @format int64 */
+  user_count: number;
+  /** @format int64 */
+  user_count_lastMonth: number;
+  /** @format int64 */
+  restaurant_count: number;
+  /** @format int64 */
+  restaurant_count_lastMonth: number;
+  /** @format int64 */
+  Companies_count: number;
+  /** @format int64 */
+  Companies_count_lastMonth: number;
+  job_total_amount: string;
+}
+
 export interface RestaurantApprovePartialUpdatePayload {
   restaurant_id: string;
   reason: string;

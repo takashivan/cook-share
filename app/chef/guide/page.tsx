@@ -62,9 +62,11 @@ export default function GuideFlow() {
           </div>
 
           <p className="text-sm mb-4">
-            ダミーコピー。プロフィールを充実させましょう！
+            プロフィールを充実させましょう！
             <br />
             詳しく記入することで、より魅力をアピールできます。
+            <br />
+            審査に通過したプロフィールは、お仕事を探すことができます。
             <br />
             (所要時間: 約3分)
           </p>
@@ -81,7 +83,7 @@ export default function GuideFlow() {
                 style={{ color: "#DB3F1C" }}
               />
               <p className="text-sm text-gray-700">
-                ダミーコピー。正式な登録には、プロフィールの項目をすべて登録することが必要です。
+                プロフィールを登録することで、より多くのお仕事を探すことができます。
               </p>
             </div>
           </div>
@@ -120,9 +122,11 @@ export default function GuideFlow() {
           </div>
 
           <p className="text-sm mb-6">
-            ダミーコピー。希望のお仕事が見つかったら、日付を選択して応募してみましょう。
+            希望のお仕事が見つかったら、日付を選択して応募してみましょう。
             <br />
-            条件や詳細などはお仕事詳細ページで確認しレストランとやりとり可能です。
+            応募すると即時にマッチングします。
+            <br />
+            その後、お仕事詳細ページで確認しレストランとやり取り可能です。
           </p>
 
           <Link href="/">
@@ -147,59 +151,12 @@ export default function GuideFlow() {
           </div>
 
           <p className="text-sm mb-6">
-            ダミーコピー。お仕事が終わったら、実際に勤務した時間など完了報告を送りましょう。
+            お仕事が終わったら、実際に勤務した時間とレビューを添えて完了報告を送りましょう。
             <br />
-            レストラン側で内容の確認が完了したら、レビューを投稿してください。
+            レストラン側で内容の確認が完了したら、お仕事完了となります。
           </p>
         </section>
       </div>
-
-      {/* Footer */}
-      <footer className="mt-auto bg-black text-white py-8">
-        <div className="container mx-auto px-4 flex flex-col items-center">
-          <div className="flex items-center gap-2 mb-8">
-            <Image
-              src="/placeholder.svg?height=40&width=40"
-              alt="CookChef Logo"
-              width={40}
-              height={40}
-              className="text-white"
-            />
-            <span className="font-bold">Cookchef</span>
-            <span className="text-xs text-gray-400">(仮)</span>
-          </div>
-
-          <div className="flex flex-col items-center gap-6 mb-6">
-            <Link href="#" className="text-white hover:underline">
-              運営会社
-            </Link>
-            <Link href="/terms" className="hover:underline">
-              利用規約
-            </Link>
-
-            <Link
-              href="https://corp.cookbiz.co.jp/privacy-policy/"
-              className="text-white hover:underline">
-              プライバシーポリシー
-            </Link>
-
-            <Link
-              href="https://corp.cookbiz.co.jp/privacy-policy-treatment/"
-              className="text-white hover:underline">
-              個人情報の取扱いについて
-            </Link>
-            <Link
-              href="https://corp.cookbiz.co.jp/privacy-policy-publication/"
-              className="text-white hover:underline">
-              個人情報に関する公表文
-            </Link>
-          </div>
-
-          <div className="text-center text-xs text-gray-400">
-            © cookbiz Co.,Ltd.
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
