@@ -11,6 +11,8 @@
  */
 
 import {
+  SummaryChefListData,
+  SummaryChefListParams,
   UnreadSummaryChefListData,
   UnreadSummaryRestaurantDetailData,
   UpdateReadChefPartialUpdateData,
@@ -23,6 +25,38 @@ import { ContentType, HttpClient, RequestParams } from "./http-client";
 export class Chat<
   SecurityDataType = unknown,
 > extends HttpClient<SecurityDataType> {
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags chat
+   * @name SummaryChefList
+   * @request GET:/chat/summary-chef
+   */
+  summaryChefList = (
+    query: SummaryChefListParams,
+    params: RequestParams = {},
+  ) =>
+    this.request<SummaryChefListData, void>({
+      path: `/chat/summary-chef`,
+      method: "GET",
+      query: query,
+      format: "json",
+      ...params,
+    });
+
+  summaryChefListQueryArgs = (
+    query: SummaryChefListParams,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled
+      ? [`/chat/summary-chef`, ...(query ? [query] : [])]
+      : null;
+    const fetcher = () =>
+      this.summaryChefList(query, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *

@@ -18,6 +18,7 @@ import {
   ChefReviewListResult,
   FinishPartialUpdateBody,
   FinishPartialUpdateResult,
+  JobChangeRequestListData,
   MessagesListResult,
   NoShowPartialUpdateData,
   RestaurantReviewListResult,
@@ -176,6 +177,34 @@ export class Worksessions<
       this.finishPartialUpdate(worksessionId, arg, params).then(
         (res) => res.data,
       );
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags worksessions
+   * @name JobChangeRequestList
+   * @request GET:/worksessions/{worksession_id}/job-change-request
+   */
+  jobChangeRequestList = (worksessionId: number, params: RequestParams = {}) =>
+    this.request<JobChangeRequestListData, void>({
+      path: `/worksessions/${worksessionId}/job-change-request`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  jobChangeRequestListQueryArgs = (
+    worksessionId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled
+      ? [`/worksessions/${worksessionId}/job-change-request`]
+      : null;
+    const fetcher = () =>
+      this.jobChangeRequestList(worksessionId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
