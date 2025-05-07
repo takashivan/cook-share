@@ -19,6 +19,7 @@ import {
   AlertCircle,
   XCircle,
   Users,
+  Pencil,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -86,6 +87,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useCreateJobChangeRequest } from "@/hooks/api/companyuser/jobChengeRequests/useCreateJobChangeRequest";
+import { useGetJobChangeRequestByWorksessionId } from "@/hooks/api/companyuser/jobChengeRequests/useGetJobChangeRequestByWorksessionId";
+import { useDeleteJobChangeRequest } from "@/hooks/api/companyuser/jobChengeRequests/useDeleteJobChangeRequest";
+
 interface PageParams {
   params: Promise<{ id: string }>;
 }
@@ -130,6 +137,16 @@ export default function JobDetail({ params }: PageParams) {
   const [cancelReason, setCancelReason] = useState("");
   const [isNoShowModalOpen, setIsNoShowModalOpen] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const [isChangeRequestModalOpen, setIsChangeRequestModalOpen] =
+    useState(false);
+  const [changeRequest, setChangeRequest] = useState({
+    work_date: "",
+    start_time: "",
+    end_time: "",
+    task: "",
+    fee: "",
+    reason: "",
+  });
 
   const { trigger: updateJobTrigger } = useUpdateJob({
     jobId: Number(jobId),
@@ -169,6 +186,34 @@ export default function JobDetail({ params }: PageParams) {
       workSessionId: selectedWorkSession?.id,
       restaurantId: restaurant?.id,
     });
+
+  const { trigger: createJobChangeRequest } = useCreateJobChangeRequest({
+    jobChangeRequestId: jobId,
+    job_id: Number(jobId),
+    user_id: selectedWorkSession?.user_id || "",
+    requested_by: selectedWorkSession?.restaurant_id || 0,
+    proposed_changes: JSON.stringify(changeRequest),
+    status: "PENDING",
+    reason: changeRequest.reason,
+    worksession_id: selectedWorkSession?.id || 0,
+  });
+
+  const { data: existingChangeRequest } = useGetJobChangeRequestByWorksessionId(
+    {
+      worksessionId: selectedWorkSession?.id,
+    }
+  );
+
+  const { trigger: deleteJobChangeRequest } = useDeleteJobChangeRequest({
+    jobChangeRequestId: existingChangeRequest?.[0]?.id?.toString() || "",
+    job_id: job?.id || 0,
+    user_id: selectedWorkSession?.user_id || "",
+    requested_by: user?.id ? Number(user.id) : 0,
+    proposed_changes: "",
+    status: "PENDING",
+    reason: "",
+    worksession_id: selectedWorkSession?.id || 0,
+  });
 
   // シェフが応募している場合は自動的に選択
   useEffect(() => {
@@ -386,6 +431,162 @@ export default function JobDetail({ params }: PageParams) {
     const now = new Date();
     const startTime = new Date(job.start_time);
     return now > startTime;
+  };
+
+  const handleOpenChangeRequestModal = (
+    workSession: WorksessionsRestaurantTodosListData[number]
+  ) => {
+    if (!job) return;
+
+    // 既存の変更リクエストがある場合は、削除オプション付きのモーダルを表示
+    if (existingChangeRequest && existingChangeRequest.length > 0) {
+      setSelectedWorkSession(workSession);
+      setIsChangeRequestModalOpen(true);
+      return;
+    }
+
+    // 現在のジョブデータを初期値として設定
+    setChangeRequest({
+      work_date: job.work_date || "",
+      start_time: job.start_time
+        ? format(new Date(job.start_time), "HH:mm")
+        : "",
+      end_time: job.end_time ? format(new Date(job.end_time), "HH:mm") : "",
+      task: job.task || "",
+      fee: job.fee?.toString() || "",
+      reason: "",
+    });
+    setSelectedWorkSession(workSession);
+    setIsChangeRequestModalOpen(true);
+  };
+
+  const handleChangeRequestSubmit = async () => {
+    if (!selectedWorkSession || !job) return;
+
+    // 既存の変更リクエストがある場合は、処理を中止
+    if (existingChangeRequest && existingChangeRequest.length > 0) {
+      toast({
+        title: "変更リクエストが既に存在します",
+        description:
+          "既存の変更リクエストが承認または拒否されるまで、新しいリクエストを作成できません。",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // 変更リクエストのデータ構造を作成
+      const changeRequestData = {
+        job_id: job.id,
+        user_id: selectedWorkSession.user_id,
+        requested_by: selectedWorkSession.restaurant_id,
+        proposed_changes: {
+          work_date: changeRequest.work_date,
+          start_time: new Date(
+            changeRequest.work_date + "T" + changeRequest.start_time
+          ).getTime(),
+          end_time: new Date(
+            changeRequest.work_date + "T" + changeRequest.end_time
+          ).getTime(),
+          task: changeRequest.task,
+          fee: parseInt(changeRequest.fee, 10),
+        },
+        status: "PENDING" as const,
+        reason: changeRequest.reason,
+        worksession_id: selectedWorkSession.id,
+        as_is: {
+          work_date: job.work_date,
+          start_time: job.start_time,
+          end_time: job.end_time,
+          task: job.task,
+          fee: job.fee,
+        },
+        updated_at: new Date().getTime(),
+      };
+
+      // 変更リクエストを作成
+      await createJobChangeRequest(changeRequestData);
+
+      // メッセージとして変更リクエストを送信
+      const message = `【業務内容変更リクエスト】
+日付: ${changeRequest.work_date}
+時間: ${changeRequest.start_time}〜${changeRequest.end_time}
+業務内容: ${changeRequest.task}
+報酬: ¥${changeRequest.fee}
+
+変更理由:
+${changeRequest.reason}
+
+※この変更はシェフの承認が必要です。`;
+
+      await sendMessage(message);
+
+      toast({
+        title: "変更リクエストを送信しました",
+        description: "シェフの承認をお待ちください。",
+      });
+
+      setIsChangeRequestModalOpen(false);
+      setChangeRequest({
+        work_date: "",
+        start_time: "",
+        end_time: "",
+        task: "",
+        fee: "",
+        reason: "",
+      });
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "変更リクエストの送信に失敗しました。",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteChangeRequest = async () => {
+    try {
+      await deleteJobChangeRequest();
+
+      // 変更リクエストの詳細を取得
+      if (!existingChangeRequest?.[0]?.proposed_changes) {
+        throw new Error("変更リクエストの詳細が見つかりません");
+      }
+
+      const changes = existingChangeRequest[0].proposed_changes as {
+        work_date: string;
+        start_time: number;
+        end_time: number;
+        task: string;
+        fee: number;
+      };
+
+      // メッセージとして変更リクエストのキャンセルを送信
+      const message = `【変更リクエストのキャンセル】
+以下の変更リクエストをキャンセルしました：
+
+日付: ${changes.work_date}
+時間: ${format(new Date(changes.start_time), "HH:mm")}〜${format(
+        new Date(changes.end_time),
+        "HH:mm"
+      )}
+業務内容: ${changes.task}
+報酬: ¥${changes.fee}`;
+
+      await sendMessage(message);
+
+      toast({
+        title: "変更リクエストを削除しました",
+        description: "新しい変更リクエストを作成できます。",
+      });
+      setIsChangeRequestModalOpen(false);
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "変更リクエストの削除に失敗しました。",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -677,6 +878,18 @@ export default function JobDetail({ params }: PageParams) {
                             className="text-red-600 focus:text-red-600 focus:bg-red-50">
                             <XCircle className="h-4 w-4 mr-2" />
                             キャンセル
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              if (selectedWorkSession) {
+                                handleOpenChangeRequestModal(
+                                  selectedWorkSession
+                                );
+                              }
+                            }}
+                            className="text-black-600 focus:text-black-600 focus:bg-black-50">
+                            <Pencil className="h-4 w-4 mr-2" />
+                            シェフに業務内容の変更を依頼する
                           </DropdownMenuItem>
                           {shouldShowNoShowOption(selectedWorkSession) && (
                             <DropdownMenuItem
@@ -1038,6 +1251,173 @@ export default function JobDetail({ params }: PageParams) {
           </div>
         </AlertDialogContent>
       </AlertDialog>
+      {/* 変更リクエストモーダル */}
+      <Dialog
+        open={isChangeRequestModalOpen}
+        onOpenChange={setIsChangeRequestModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>
+              {existingChangeRequest && existingChangeRequest.length > 0
+                ? "変更リクエストの管理"
+                : "業務内容変更リクエスト"}
+            </DialogTitle>
+            <DialogDescription>
+              {existingChangeRequest && existingChangeRequest.length > 0
+                ? "既存の変更リクエストが存在します。新しいリクエストを作成するには、既存のリクエストを削除してください。"
+                : "シェフに業務内容の変更をリクエストします。変更はシェフの承認が必要です。"}
+            </DialogDescription>
+          </DialogHeader>
+          {existingChangeRequest && existingChangeRequest.length > 0 ? (
+            <div className="space-y-4">
+              <div className="bg-muted p-4 rounded-lg">
+                <h4 className="font-medium mb-2">現在の変更リクエスト</h4>
+                <div className="space-y-2 text-sm">
+                  {(() => {
+                    const changes = existingChangeRequest[0]
+                      .proposed_changes as {
+                      work_date: string;
+                      start_time: number;
+                      end_time: number;
+                      task: string;
+                      fee: number;
+                    };
+                    return (
+                      <>
+                        <p>日付: {changes.work_date}</p>
+                        <p>
+                          時間: {format(new Date(changes.start_time), "HH:mm")}
+                          〜{format(new Date(changes.end_time), "HH:mm")}
+                        </p>
+                        <p>業務内容: {changes.task}</p>
+                        <p>報酬: ¥{changes.fee}</p>
+                        <p>ステータス: {existingChangeRequest[0].status}</p>
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsChangeRequestModalOpen(false)}>
+                  閉じる
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleDeleteChangeRequest}
+                  disabled={existingChangeRequest[0].status !== "PENDING"}>
+                  変更リクエストを削除
+                </Button>
+              </DialogFooter>
+            </div>
+          ) : (
+            <>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="work_date">作業日</Label>
+                    <Input
+                      id="work_date"
+                      type="date"
+                      value={changeRequest.work_date}
+                      onChange={(e) =>
+                        setChangeRequest({
+                          ...changeRequest,
+                          work_date: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fee">報酬</Label>
+                    <Input
+                      id="fee"
+                      type="number"
+                      placeholder="例: 12000"
+                      value={changeRequest.fee}
+                      onChange={(e) =>
+                        setChangeRequest({
+                          ...changeRequest,
+                          fee: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="start_time">開始時間</Label>
+                    <Input
+                      id="start_time"
+                      type="time"
+                      value={changeRequest.start_time}
+                      onChange={(e) =>
+                        setChangeRequest({
+                          ...changeRequest,
+                          start_time: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="end_time">終了時間</Label>
+                    <Input
+                      id="end_time"
+                      type="time"
+                      value={changeRequest.end_time}
+                      onChange={(e) =>
+                        setChangeRequest({
+                          ...changeRequest,
+                          end_time: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="task">業務内容</Label>
+                  <Textarea
+                    id="task"
+                    placeholder="変更後の業務内容を入力してください"
+                    value={changeRequest.task}
+                    onChange={(e) =>
+                      setChangeRequest({
+                        ...changeRequest,
+                        task: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="reason">変更理由</Label>
+                  <Textarea
+                    id="reason"
+                    placeholder="変更理由を入力してください"
+                    value={changeRequest.reason}
+                    onChange={(e) =>
+                      setChangeRequest({
+                        ...changeRequest,
+                        reason: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsChangeRequestModalOpen(false)}>
+                  キャンセル
+                </Button>
+                <Button onClick={handleChangeRequestSubmit}>
+                  リクエストを送信
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

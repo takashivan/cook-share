@@ -732,6 +732,14 @@ export type CancelByrestaurantLogsListData = {
   worksession_id: number;
 }[];
 
+export interface SummaryChefListParams {
+  user_id: string;
+}
+
+export interface SummaryChefListData {
+  message_summaries: string;
+}
+
 export type UnreadSummaryChefListData = object;
 
 export type UnreadSummaryRestaurantDetailData = object;
@@ -2493,6 +2501,138 @@ export interface ContactCreatePayload {
 }
 
 export type ContactCreateData = object;
+
+export type JobChangeRequestsDeleteData = object;
+
+export interface JobChangeRequestsDetailData {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format int64 */
+  job_id: number;
+  /** @format uuid */
+  user_id: string | null;
+  /** @format int64 */
+  requested_by: number;
+  proposed_changes: object;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  /** @format timestamptz */
+  updated_at: number | null;
+  reason: string;
+  /** @format int64 */
+  worksession_id: number;
+  as_is: object;
+}
+
+export interface JobChangeRequestsPartialUpdatePayload {
+  /** @format int64 */
+  job_id: number;
+  /** @format uuid */
+  user_id: string | null;
+  /** @format int64 */
+  requested_by: number;
+  proposed_changes: object;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  /** @format timestamptz */
+  updated_at: number | null;
+  reason: string;
+  /** @format int64 */
+  worksession_id: number;
+  as_is: object;
+}
+
+export interface JobChangeRequestsPartialUpdateData {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format int64 */
+  job_id: number;
+  /** @format uuid */
+  user_id: string | null;
+  /** @format int64 */
+  requested_by: number;
+  proposed_changes: object;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  /** @format timestamptz */
+  updated_at: number | null;
+  reason: string;
+  /** @format int64 */
+  worksession_id: number;
+  as_is: object;
+}
+
+export type JobChangeRequestsListData = {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format int64 */
+  job_id: number;
+  /** @format uuid */
+  user_id: string | null;
+  /** @format int64 */
+  requested_by: number;
+  proposed_changes: object;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  /** @format timestamptz */
+  updated_at: number | null;
+  reason: string;
+  /** @format int64 */
+  worksession_id: number;
+  as_is: object;
+}[];
+
+export interface JobChangeRequestsCreatePayload {
+  /** @format int64 */
+  job_id: number;
+  /** @format uuid */
+  user_id: string | null;
+  /** @format int64 */
+  requested_by: number;
+  proposed_changes: object;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  /** @format timestamptz */
+  updated_at: number | null;
+  reason: string;
+  /** @format int64 */
+  worksession_id: number;
+  as_is: object;
+}
+
+export interface JobChangeRequestsCreateData {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format int64 */
+  job_id: number;
+  /** @format uuid */
+  user_id: string | null;
+  /** @format int64 */
+  requested_by: number;
+  proposed_changes: object;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  /** @format timestamptz */
+  updated_at: number | null;
+  reason: string;
+  /** @format int64 */
+  worksession_id: number;
+  as_is: object;
+}
 
 export interface CompanyDetailResult {
   result1: {
@@ -7920,6 +8060,30 @@ export interface FinishPartialUpdateResult {
     /** @format int64 */
     reviewee_id: number;
   };
+}
+
+export interface JobChangeRequestListData {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format int64 */
+  job_id: number;
+  /** @format uuid */
+  user_id: string | null;
+  /** @format int64 */
+  requested_by: number;
+  proposed_changes: object;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  /** @format timestamptz */
+  updated_at: number | null;
+  reason: string;
+  /** @format int64 */
+  worksession_id: number;
+  as_is: object;
 }
 
 export type MessagesListResult = {

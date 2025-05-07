@@ -79,9 +79,7 @@ export function Header() {
                 <DropdownMenuItem className="text-sm text-muted-foreground">
                   {user.email}
                 </DropdownMenuItem>
-                <DropdownMenuItem className="text-sm text-muted-foreground">
-                  {userType === "company" ? user.name : "シェフ"}
-                </DropdownMenuItem>
+
                 <DropdownMenuItem
                   className="text-sm text-muted-foreground"
                   asChild>
