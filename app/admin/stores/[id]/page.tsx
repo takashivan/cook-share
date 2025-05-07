@@ -2,18 +2,15 @@
 
 import { useState, use } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
-  BarChart3,
   Edit,
-  MessageSquare,
   MoreHorizontal,
   Plus,
   Users,
   MapPin,
   Phone,
   Clock,
-  Copy,
   ChevronLeft,
   ChevronRight,
   List,
@@ -26,7 +23,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import {
   Table,
@@ -45,52 +41,27 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/lib/store/store";
-import { fetchMyRestaurants } from "@/lib/store/restaurantSlice";
-import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
-import { getRestaurant } from "@/lib/api/restaurant";
-import type { Restaurant } from "@/lib/api/restaurant";
-import { updateRestaurant } from "@/lib/api/restaurant";
-import { formatToJapanDateTime, formatToJapanTime } from "@/lib/functions";
-import { getRestaurantById } from "@/lib/api/restaurant";
-import { getRestaurantStaff } from "@/lib/api/company";
-import { jobApi } from "@/lib/api/job";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import type { Job } from "@/lib/api/job";
-import useSWR from "swr";
 import { CreateJobModal } from "@/components/modals/CreateJobModal";
 import { toast } from "@/hooks/use-toast";
 import { AddRestaurantStaffModal } from "@/components/modals/AddRestaurantStaff";
-import { restaurantStaffInvite } from "@/lib/api/restaurant";
 import { EditRestaurantModal } from "@/components/modals/EditRestaurantModal";
 import { useGetRestaurant } from "@/hooks/api/companyuser/restaurants/useGetRestaurant";
 import { useGetJobsByRestaurantId } from "@/hooks/api/companyuser/jobs/useGetJobsByRestaurantId";
 import { useGetMultipleWorksessionsByJobId } from "@/hooks/api/companyuser/worksessions/useGetMultipleWorksessionsByJobId";
 import {
   CompanyusersCreateInput,
-  CompanyusersListData,
   CompanyusersListOutput,
   JobsCreatePayload,
   JobsListOutput,
+  RestaurantsPartialUpdatePayload,
 } from "@/api/__generated__/base/data-contracts";
 import { useGetCompanyUsersByRestaurantId } from "@/hooks/api/companyuser/companyUsers/useGetCompanyUsersByRestaurantId";
 import { useCreateJob } from "@/hooks/api/companyuser/jobs/useCreateJob";
-import { workSessionApi } from "@/lib/api/workSession";
-import type { WorkSessionWithJob } from "@/types";
 import Image from "next/image";
 import { useCreateCompanyUserByRestaurantId } from "@/hooks/api/companyuser/companyUsers/useCreateCompanyUserByRestaurantId";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import {
   Dialog,
   DialogContent,
@@ -101,21 +72,11 @@ import {
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Staff } from "@/types/staff";
 import { DeleteRestaurantStaffModal } from "@/components/modals/DeleteRestaurantStaffModal";
 import { deleteRestaurantStaff } from "@/lib/api/restaurant";
 import { useGetRestaurantReviewByRestaurantId } from "@/hooks/api/companyuser/reviews/useGetRestaurantReviewByRestaurantId";
-
-interface StaffData {
-  id: string;
-  companyuser_id: string | null;
-  companyuser: {
-    name: string;
-    email: string;
-    is_active: boolean;
-    is_admin: boolean;
-  };
-}
+import { useUpdateRestaurant } from "@/hooks/api/companyuser/restaurants/useUpdateRestaurant";
+import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 
 interface JobWithWorkSessions
   extends Omit<JobsListOutput[number], "workSessionCount"> {
@@ -134,6 +95,7 @@ const weekDays = ["日", "月", "火", "水", "木", "金", "土"];
 export default function RestaurantDetailPage(props: {
   params: Promise<{ id: string }>;
 }) {
+  const { user } = useCompanyAuth();
   const router = useRouter();
   const params = use(props.params);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -177,7 +139,44 @@ export default function RestaurantDetailPage(props: {
   const { trigger: createJobTrigger } = useCreateJob({
     companyId: restaurant?.companies_id ?? undefined,
     restaurantId: restaurant?.id,
+    handleSuccess: () => {
+      setIsCreateJobModalOpen(false);
+      setCopiedJob(null);
+      toast({
+        title: "求人を追加しました",
+        description: "新しい求人の登録が完了しました。",
+      });
+    },
+    handleError: (error) => {
+      console.error("Failed to create job:", error);
+      toast({
+        title: "エラーが発生しました",
+        description: "求人の追加に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
+    }
   });
+
+  const { trigger: updateRestaurantTrriger } = useUpdateRestaurant({
+    restaurantId: Number(params.id),
+    companyId: restaurant?.companies_id ?? undefined,
+    companyuserId: user?.id,
+    handleSuccess: () => {
+      setIsEditModalOpen(false);
+      toast({
+        title: "更新成功",
+        description: "レストラン情報が更新されました",
+      });
+    },
+    handleError: () => {
+      console.error("更新エラー:", error);
+      toast({
+        title: "更新エラー",
+        description: "レストラン情報の更新に失敗しました",
+        variant: "destructive",
+      });
+    }
+  })
 
   const { trigger: createCompanyUserTrigger } =
     useCreateCompanyUserByRestaurantId({
@@ -190,21 +189,6 @@ export default function RestaurantDetailPage(props: {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
-
-  // const [formDataState, setFormDataState] = useState({
-  //   name: "",
-  //   email: "",
-  //   contact_info: "",
-  //   address: "",
-  //   business_hours: "",
-  //   station: "",
-  //   access: "",
-  //   is_active: false,
-  //   description: "",
-  //   cuisine_type: "",
-  //   restaurant_cuisine_id: [] as (number | undefined)[],
-  //   photo: null as File | null,
-  // });
 
   const [deleteTargetStaff, setDeleteTargetStaff] = useState<{
     id: string;
@@ -219,80 +203,9 @@ export default function RestaurantDetailPage(props: {
   });
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // useEffect(() => {
-  //   const fetchRestaurant = async () => {
-  //     try {
-  //       const data = await getRestaurant(params.id);
-  //       setFormDataState({
-  //         name: data.name,
-  //         email: data.email,
-  //         contact_info: data.contact_info || "",
-  //         address: data.address,
-  //         business_hours: data.business_hours || "",
-  //         station: data.station || "",
-  //         access: data.access || "",
-  //         is_active: data.is_active,
-  //         description: data.description || "",
-  //         cuisine_type: data.cuisine_type || "",
-  //         restaurant_cuisine_id: Array.isArray(data.restaurant_cuisine_id)
-  //           ? data.restaurant_cuisine_id
-  //           : [data.restaurant_cuisine_id].filter(
-  //               (id): id is number => id !== undefined
-  //             ),
-  //         photo: null,
-  //       });
-  //     } catch (error) {
-  //       console.error("Error fetching restaurant:", error);
-  //       toast({
-  //         title: "エラー",
-  //         description: "レストラン情報の取得に失敗しました",
-  //         variant: "destructive",
-  //       });
-  //     }
-  //   };
-
-  //   fetchRestaurant();
-  // }, [params.id, toast]);
-
-  const handleSubmit = async (data: FormData) => {
-    try {
-      await updateRestaurant(params.id, data);
-      setIsEditModalOpen(false);
-      await mutateRestaurant();
-      toast({
-        title: "更新成功",
-        description: "レストラン情報が更新されました",
-      });
-    } catch (error) {
-      console.error("更新エラー:", error);
-      toast({
-        title: "更新エラー",
-        description: "レストラン情報の更新に失敗しました",
-        variant: "destructive",
-      });
-    }
+  const handleSubmit = async (data: RestaurantsPartialUpdatePayload) => {
+    await updateRestaurantTrriger(data);
   };
-
-  // const { data: staffs, mutate: mutateStaffs } = useSWR<StaffData[]>(
-  //   [`restaurant-staff`, params.id],
-  //   async ([_, id]: [string, string]) => {
-  //     const response = await getRestaurantStaff(parseInt(id));
-  //     return response.admin.map((staff) => ({
-  //       id: staff.id,
-  //       companyuser_id: staff.companies_id,
-  //       companyuser: {
-  //         name: staff.name,
-  //         email: staff.email,
-  //         is_active: true, // APIレスポンスにis_activeが含まれていないため、デフォルトでtrueとする
-  //       },
-  //     }));
-  //   },
-  //   {
-  //     revalidateOnFocus: false,
-  //     revalidateOnReconnect: false,
-  //     dedupingInterval: 10000,
-  //   }
-  // );
 
   console.log("Restaurant data:", restaurant);
   console.log("Raw jobs response:", jobs);
@@ -306,24 +219,7 @@ export default function RestaurantDetailPage(props: {
   const [copiedJob, setCopiedJob] = useState<Partial<Job> | null>(null);
 
   const handleCreateJob = async (data: JobsCreatePayload) => {
-    try {
-      await createJobTrigger(data);
-      // 求人リストを更新
-      // TODO: 求人リストの更新処理を追加
-      setIsCreateJobModalOpen(false);
-      setCopiedJob(null);
-      toast({
-        title: "求人を追加しました",
-        description: "新しい求人の登録が完了しました。",
-      });
-    } catch (error) {
-      console.error("Failed to create job:", error);
-      toast({
-        title: "エラーが発生しました",
-        description: "求人の追加に失敗しました。もう一度お試しください。",
-        variant: "destructive",
-      });
-    }
+    await createJobTrigger(data);
   };
 
   const handleAddStaff = async (
