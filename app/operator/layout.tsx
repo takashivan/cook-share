@@ -19,6 +19,7 @@ import {
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Separator } from "@/components/ui/separator";
 
 function OperatorLayout({ children }: { children: React.ReactNode }) {
   const { operator, loading, logout } = useOperatorAuth();
@@ -60,97 +61,116 @@ function OperatorLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex">
       {/* Sidebar */}
-      <div className="w-64 bg-gray-900 text-white">
-        <div className="p-4">
-          <h1 className="text-xl font-bold">運営管理画面</h1>
+      <div className="w-64 bg-white border-r fixed h-screen overflow-y-auto">
+        <div className="p-6">
+          <h1 className="text-xl font-bold text-gray-900">運営管理画面</h1>
         </div>
-        <nav className="mt-4">
+        <Separator className="mb-4" />
+        <nav className="px-4 space-y-1">
           <Link
             href="/operator/dashboard"
             className={cn(
-              "flex items-center px-4 py-2 text-gray-300 hover:bg-gray-800",
-              pathname === "/operator/dashboard" && "bg-gray-800"
+              "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
+              pathname === "/operator/dashboard"
+                ? "bg-orange-50 text-orange-600"
+                : "text-gray-600 hover:bg-gray-50"
             )}>
-            <LayoutDashboard className="w-5 h-5 mr-2" />
+            <LayoutDashboard className="w-5 h-5 mr-3" />
             ダッシュボード
           </Link>
           <Link
             href="/operator/companies"
             className={cn(
-              "flex items-center px-4 py-2 text-gray-300 hover:bg-gray-800",
-              pathname === "/operator/companies" && "bg-gray-800"
+              "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
+              pathname === "/operator/companies"
+                ? "bg-orange-50 text-orange-600"
+                : "text-gray-600 hover:bg-gray-50"
             )}>
-            <Building2 className="w-5 h-5 mr-2" />
+            <Building2 className="w-5 h-5 mr-3" />
             会社管理
           </Link>
           <Link
             href="/operator/restaurants"
             className={cn(
-              "flex items-center px-4 py-2 text-gray-300 hover:bg-gray-800",
-              pathname === "/operator/restaurants" && "bg-gray-800"
+              "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
+              pathname === "/operator/restaurants"
+                ? "bg-orange-50 text-orange-600"
+                : "text-gray-600 hover:bg-gray-50"
             )}>
-            <ChefHat className="w-5 h-5 mr-2" />
+            <ChefHat className="w-5 h-5 mr-3" />
             店舗管理
           </Link>
           <Link
             href="/operator/chefs"
             className={cn(
-              "flex items-center px-4 py-2 text-gray-300 hover:bg-gray-800",
-              pathname === "/operator/chefs" && "bg-gray-800"
+              "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
+              pathname === "/operator/chefs"
+                ? "bg-orange-50 text-orange-600"
+                : "text-gray-600 hover:bg-gray-50"
             )}>
-            <ChefHat className="w-5 h-5 mr-2" />
+            <ChefHat className="w-5 h-5 mr-3" />
             シェフ管理
           </Link>
           <Link
             href="/operator/jobs"
             className={cn(
-              "flex items-center px-4 py-2 text-gray-300 hover:bg-gray-800",
-              pathname === "/operator/jobs" && "bg-gray-800"
+              "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
+              pathname === "/operator/jobs"
+                ? "bg-orange-50 text-orange-600"
+                : "text-gray-600 hover:bg-gray-50"
             )}>
-            <Briefcase className="w-5 h-5 mr-2" />
+            <Briefcase className="w-5 h-5 mr-3" />
             求人管理
           </Link>
           <Link
             href="/operator/billing"
             className={cn(
-              "flex items-center px-4 py-2 text-gray-300 hover:bg-gray-800",
-              pathname === "/operator/billing" && "bg-gray-800"
+              "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
+              pathname === "/operator/billing"
+                ? "bg-orange-50 text-orange-600"
+                : "text-gray-600 hover:bg-gray-50"
             )}>
-            <CreditCard className="w-5 h-5 mr-2" />
+            <CreditCard className="w-5 h-5 mr-3" />
             請求管理
           </Link>
           <Link
             href="/operator/staff"
             className={cn(
-              "flex items-center px-4 py-2 text-gray-300 hover:bg-gray-800",
-              pathname === "/operator/staff" && "bg-gray-800"
+              "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
+              pathname === "/operator/staff"
+                ? "bg-orange-50 text-orange-600"
+                : "text-gray-600 hover:bg-gray-50"
             )}>
-            <Users className="w-5 h-5 mr-2" />
+            <Users className="w-5 h-5 mr-3" />
             スタッフ管理
           </Link>
           <Link
             href="/operator/categories"
             className={cn(
-              "flex items-center px-4 py-2 text-gray-300 hover:bg-gray-800",
-              pathname === "/operator/categories" && "bg-gray-800"
+              "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
+              pathname === "/operator/categories"
+                ? "bg-orange-50 text-orange-50 text-orange-600"
+                : "text-gray-600 hover:bg-gray-50"
             )}>
-            <Utensils className="w-5 h-5 mr-2" />
+            <Utensils className="w-5 h-5 mr-3" />
             カテゴリ管理
           </Link>
           <Link
             href="/operator/skills"
             className={cn(
-              "flex items-center px-4 py-2 text-gray-300 hover:bg-gray-800",
-              pathname === "/operator/skills" && "bg-gray-800"
+              "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
+              pathname === "/operator/skills"
+                ? "bg-orange-50 text-orange-600"
+                : "text-gray-600 hover:bg-gray-50"
             )}>
-            <Award className="w-5 h-5 mr-2" />
+            <Award className="w-5 h-5 mr-3" />
             スキル管理
           </Link>
         </nav>
-        <div className="absolute bottom-0 w-64 p-4">
+        <div className="sticky bottom-0 bg-white p-4 border-t">
           <Button
             variant="ghost"
-            className="w-full text-gray-300 hover:text-white hover:bg-gray-800"
+            className="w-full text-gray-600 hover:text-orange-600 hover:bg-orange-50"
             onClick={logout}>
             <LogOut className="w-5 h-5 mr-2" />
             ログアウト
@@ -159,8 +179,8 @@ function OperatorLayout({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 bg-gray-100">
-        <div className="p-8">{children}</div>
+      <div className="flex-1 bg-gray-50 pl-64">
+        <div className="container mx-auto p-8">{children}</div>
       </div>
     </div>
   );
