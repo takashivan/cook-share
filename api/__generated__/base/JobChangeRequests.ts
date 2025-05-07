@@ -11,13 +11,12 @@
  */
 
 import {
+  AcceptPartialUpdateOutput,
   JobChangeRequestsCreateData,
   JobChangeRequestsCreatePayload,
   JobChangeRequestsDeleteData,
-  JobChangeRequestsDetailData,
   JobChangeRequestsListData,
-  JobChangeRequestsPartialUpdateData,
-  JobChangeRequestsPartialUpdatePayload,
+  RejectPartialUpdateResult,
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
@@ -25,11 +24,83 @@ export class JobChangeRequests<
   SecurityDataType = unknown,
 > extends HttpClient<SecurityDataType> {
   /**
-   * @description Delete job_change_request record. <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH-CHEF]受け取ったユーザーのみがaccept <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags job-change-requests
+   * @name AcceptPartialUpdate
+   * @summary [AUTH-CHEF]受け取ったユーザーのみがaccept
+   * @request PATCH:/job-change-requests/{job_change_request_id}/accept
+   */
+  acceptPartialUpdate = (
+    jobChangeRequestId: string,
+    params: RequestParams = {},
+  ) =>
+    this.request<AcceptPartialUpdateOutput, void>({
+      path: `/job-change-requests/${jobChangeRequestId}/accept`,
+      method: "PATCH",
+      format: "json",
+      ...params,
+    });
+
+  acceptPartialUpdateQueryArgs = (
+    jobChangeRequestId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled
+      ? [`/job-change-requests/${jobChangeRequestId}/accept`]
+      : null;
+    const fetcher: (url: string[]) => Promise<AcceptPartialUpdateOutput> = (
+      _,
+    ) =>
+      this.acceptPartialUpdate(jobChangeRequestId, params).then(
+        (res) => res.data,
+      );
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description [AUTH-CHEF]受け取ったユーザーのみがreject <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags job-change-requests
+   * @name RejectPartialUpdate
+   * @summary [AUTH-CHEF]受け取ったユーザーのみがreject
+   * @request PATCH:/job-change-requests/{job_change_request_id}/reject
+   */
+  rejectPartialUpdate = (
+    jobChangeRequestId: string,
+    params: RequestParams = {},
+  ) =>
+    this.request<RejectPartialUpdateResult, void>({
+      path: `/job-change-requests/${jobChangeRequestId}/reject`,
+      method: "PATCH",
+      format: "json",
+      ...params,
+    });
+
+  rejectPartialUpdateQueryArgs = (
+    jobChangeRequestId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled
+      ? [`/job-change-requests/${jobChangeRequestId}/reject`]
+      : null;
+    const fetcher: (url: string[]) => Promise<RejectPartialUpdateResult> = (
+      _,
+    ) =>
+      this.rejectPartialUpdate(jobChangeRequestId, params).then(
+        (res) => res.data,
+      );
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description [AUTH-CompanyUser]レストランの権限持ってる人だけ <br /><br /> <b>Authentication:</b> not required
    *
    * @tags job-change-requests
    * @name JobChangeRequestsDelete
-   * @summary Delete job_change_request record.
+   * @summary [AUTH-CompanyUser]レストランの権限持ってる人だけ
    * @request DELETE:/job-change-requests/{job_change_request_id}
    */
   jobChangeRequestsDelete = (
@@ -51,76 +122,6 @@ export class JobChangeRequests<
     const key = enabled ? [`/job-change-requests/${jobChangeRequestId}`] : null;
     const fetcher = () =>
       this.jobChangeRequestsDelete(jobChangeRequestId, params).then(
-        (res) => res.data,
-      );
-    return [key, fetcher] as const;
-  };
-
-  /**
-   * @description Get job_change_request record <br /><br /> <b>Authentication:</b> not required
-   *
-   * @tags job-change-requests
-   * @name JobChangeRequestsDetail
-   * @summary Get job_change_request record
-   * @request GET:/job-change-requests/{job_change_request_id}
-   */
-  jobChangeRequestsDetail = (
-    jobChangeRequestId: string,
-    params: RequestParams = {},
-  ) =>
-    this.request<JobChangeRequestsDetailData, void>({
-      path: `/job-change-requests/${jobChangeRequestId}`,
-      method: "GET",
-      format: "json",
-      ...params,
-    });
-
-  jobChangeRequestsDetailQueryArgs = (
-    jobChangeRequestId: string,
-    params: RequestParams = {},
-    enabled: boolean = true,
-  ) => {
-    const key = enabled ? [`/job-change-requests/${jobChangeRequestId}`] : null;
-    const fetcher = () =>
-      this.jobChangeRequestsDetail(jobChangeRequestId, params).then(
-        (res) => res.data,
-      );
-    return [key, fetcher] as const;
-  };
-
-  /**
-   * @description Edit job_change_request record <br /><br /> <b>Authentication:</b> not required
-   *
-   * @tags job-change-requests
-   * @name JobChangeRequestsPartialUpdate
-   * @summary Edit job_change_request record
-   * @request PATCH:/job-change-requests/{job_change_request_id}
-   */
-  jobChangeRequestsPartialUpdate = (
-    jobChangeRequestId: string,
-    data: JobChangeRequestsPartialUpdatePayload,
-    params: RequestParams = {},
-  ) =>
-    this.request<JobChangeRequestsPartialUpdateData, void>({
-      path: `/job-change-requests/${jobChangeRequestId}`,
-      method: "PATCH",
-      body: data,
-      type: ContentType.Json,
-      format: "json",
-      ...params,
-    });
-
-  jobChangeRequestsPartialUpdateQueryArgs = (
-    jobChangeRequestId: string,
-    params: RequestParams = {},
-    enabled: boolean = true,
-  ) => {
-    const key = enabled ? [`/job-change-requests/${jobChangeRequestId}`] : null;
-    const fetcher: (
-      url: string[],
-      { arg }: { arg: JobChangeRequestsPartialUpdatePayload },
-    ) => Promise<JobChangeRequestsPartialUpdateData> = (_, { arg }) =>
-      this.jobChangeRequestsPartialUpdate(jobChangeRequestId, arg, params).then(
         (res) => res.data,
       );
     return [key, fetcher] as const;
@@ -153,11 +154,11 @@ export class JobChangeRequests<
   };
 
   /**
-   * @description Add job_change_request record <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH-CompanyUser]レストランの権限持ってる人だけ <br /><br /> <b>Authentication:</b> not required
    *
    * @tags job-change-requests
    * @name JobChangeRequestsCreate
-   * @summary Add job_change_request record
+   * @summary [AUTH-CompanyUser]レストランの権限持ってる人だけ
    * @request POST:/job-change-requests
    */
   jobChangeRequestsCreate = (

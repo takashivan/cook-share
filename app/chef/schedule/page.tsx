@@ -12,11 +12,28 @@ import { WorksessionsListResult } from "@/api/__generated__/base/data-contracts"
 import { useSubscriptionMessagesByUserId } from "@/hooks/api/user/messages/useSubscriptionMessagesByUserId";
 import { useSubscriptionUnreadMessagesByUser } from "@/hooks/api/user/messages/useSubscriptionUnreadMessagesByUser";
 import { Badge } from "@/components/ui/badge";
+import { useGetJobChangeRequestByWorksessionId } from "@/hooks/api/user/jobChangeRequests/useGetJobChangeRequestByWorksessionId";
+import { useAcceptJobChangeRequest } from "@/hooks/api/user/jobChangeRequests/useAcceptJobChangeRequest";
+import { useRejectJobChangeRequest } from "@/hooks/api/user/jobChangeRequests/useRejectJobChangeRequest";
+import { AlertCircle, CheckCircle, XCircle } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
 
 export default function SchedulePage() {
   const { user } = useAuth();
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState("upcoming");
+  const [isChangeRequestModalOpen, setIsChangeRequestModalOpen] =
+    useState(false);
+  const [selectedChangeRequest, setSelectedChangeRequest] = useState<any>(null);
 
   // ワークセッション一覧の取得
   const { data: workSessions } = useGetWorksessionsByUserId({
@@ -39,6 +56,11 @@ export default function SchedulePage() {
   // 未読メッセージの取得
   const { unreadMessagesData } = useSubscriptionUnreadMessagesByUser({
     userId: user?.id,
+  });
+
+  // 変更リクエストの取得
+  const { data: changeRequests } = useGetJobChangeRequestByWorksessionId({
+    worksessionId: selectedWorkSession?.id,
   });
 
   const handleSendMessage = async (message: string) => {
@@ -171,6 +193,7 @@ export default function SchedulePage() {
         }
         workDate={selectedWorkSession?.job?.work_date || ""}
         startTime={selectedWorkSession?.job?.start_time || 0}
+        endTime={selectedWorkSession?.job?.end_time || 0}
       />
     </div>
   );

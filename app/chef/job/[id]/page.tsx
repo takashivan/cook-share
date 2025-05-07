@@ -11,6 +11,8 @@ import {
   MessageSquare,
   QrCode,
   AlertCircle,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { ja } from "date-fns/locale";
@@ -34,6 +36,17 @@ import { useGetJob } from "@/hooks/api/companyuser/jobs/useGetJob";
 import { useCancelWorksessionByChef } from "@/hooks/api/user/worksessions/useCancelWorksessionByChef";
 import { useGetWorksessionsByUserId } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserId";
 import { useSubscriptionUnreadMessagesByUser } from "@/hooks/api/user/messages/useSubscriptionUnreadMessagesByUser";
+import { useGetJobChangeRequestByWorksessionId } from "@/hooks/api/user/jobChangeRequests/useGetJobChangeRequestByWorksessionId";
+import { useAcceptJobChangeRequest } from "@/hooks/api/user/jobChangeRequests/useAcceptJobChangeRequest";
+import { useRejectJobChangeRequest } from "@/hooks/api/user/jobChangeRequests/useRejectJobChangeRequest";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 interface JobDetail {
   job: {
@@ -94,6 +107,9 @@ export default function JobDetail({ params }: PageProps) {
   } | null>(null);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+  const [isChangeRequestModalOpen, setIsChangeRequestModalOpen] =
+    useState(false);
+  const [selectedChangeRequest, setSelectedChangeRequest] = useState<any>(null);
 
   // ジョブ詳細の取得
   const { data: jobDetail } = useGetJob({ jobId: Number(id) });
@@ -126,13 +142,11 @@ export default function JobDetail({ params }: PageProps) {
   });
 
   // メッセージの取得
-  const { messagesData, sendMessage } = useSubscriptionMessagesByUserId(
-    {
-      userId: user?.id,
-      workSessionId: workSession?.id,
-      applicationId: workSession?.application_id,
-    },
-  );
+  const { messagesData, sendMessage } = useSubscriptionMessagesByUserId({
+    userId: user?.id,
+    workSessionId: workSession?.id,
+    applicationId: workSession?.application_id,
+  });
 
   // 未読メッセージの取得
   const { unreadMessagesData } = useSubscriptionUnreadMessagesByUser({
@@ -144,6 +158,19 @@ export default function JobDetail({ params }: PageProps) {
     unreadMessagesData?.find(
       (messageData) => messageData.worksession.id === workSession?.id
     )?.unread_message_count || 0;
+
+  // 変更リクエストの取得
+  const { data: changeRequests } = useGetJobChangeRequestByWorksessionId({
+    worksessionId: workSession?.id,
+  });
+
+  const { trigger: acceptJobChangeRequest } = useAcceptJobChangeRequest({
+    jobChangeRequestId: selectedChangeRequest?.id?.toString() || "",
+  });
+
+  const { trigger: rejectJobChangeRequest } = useRejectJobChangeRequest({
+    jobChangeRequestId: selectedChangeRequest?.id?.toString() || "",
+  });
 
   const handleOpenDialog = () => {
     setIsDialogOpen(true);
@@ -417,6 +444,58 @@ export default function JobDetail({ params }: PageProps) {
     }
   };
 
+  const handleChangeRequestResponse = async (
+    status: "APPROVED" | "REJECTED"
+  ) => {
+    if (!selectedChangeRequest || !workSession) return;
+
+    try {
+      if (status === "APPROVED") {
+        await acceptJobChangeRequest();
+      } else {
+        await rejectJobChangeRequest();
+      }
+
+      // メッセージとして変更リクエストの承認/拒否を送信
+      const message = `【変更リクエストの${
+        status === "APPROVED" ? "承認" : "拒否"
+      }】
+以下の変更リクエストを${status === "APPROVED" ? "承認" : "拒否"}しました：
+
+日付: ${selectedChangeRequest.proposed_changes.work_date}
+時間: ${format(
+        new Date(selectedChangeRequest.proposed_changes.start_time),
+        "HH:mm"
+      )}〜${format(
+        new Date(selectedChangeRequest.proposed_changes.end_time),
+        "HH:mm"
+      )}
+業務内容: ${selectedChangeRequest.proposed_changes.task}
+報酬: ¥${selectedChangeRequest.proposed_changes.fee}`;
+
+      await sendMessage(message);
+
+      toast({
+        title: `変更リクエストを${
+          status === "APPROVED" ? "承認" : "拒否"
+        }しました`,
+        description:
+          status === "APPROVED"
+            ? "変更内容が適用されました。"
+            : "変更は適用されませんでした。",
+      });
+
+      setIsChangeRequestModalOpen(false);
+      setSelectedChangeRequest(null);
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "変更リクエストの処理に失敗しました。",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (!job) {
     return (
       <div className="container mx-auto px-4 py-6 max-w-md">
@@ -515,6 +594,23 @@ export default function JobDetail({ params }: PageProps) {
 
         <h2 className="text-lg font-bold mb-4">{restaurant?.name}</h2>
 
+        {changeRequests &&
+          changeRequests.length > 0 &&
+          changeRequests[0].status === "PENDING" && (
+            <div className="mb-6">
+              <Button
+                variant="outline"
+                className="w-full bg-red-50 text-red-800 border-red-200 hover:bg-red-100"
+                onClick={() => {
+                  setSelectedChangeRequest(changeRequests[0]);
+                  setIsChangeRequestModalOpen(true);
+                }}>
+                <AlertCircle className="h-4 w-4 mr-2" />
+                変更リクエストが届いています
+              </Button>
+            </div>
+          )}
+
         {job.image && (
           <Image
             src={job.image}
@@ -524,6 +620,36 @@ export default function JobDetail({ params }: PageProps) {
             className="w-full h-auto rounded-md mb-4"
           />
         )}
+
+        <div className="space-y-4">
+          <div className="flex items-start gap-3">
+            <Calendar className="h-5 w-5 text-red-500 mt-0.5" />
+            <div>
+              <h4 className="font-medium">勤務日</h4>
+              <p className="text-sm">{workDate}</p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <Clock className="h-5 w-5 text-red-500 mt-0.5" />
+            <div>
+              <h4 className="font-medium">勤務時間</h4>
+              <p className="text-sm">
+                {startTime} 〜 {endTime}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <MapPin className="h-5 w-5 text-red-500 mt-0.5" />
+            <div>
+              <h4 className="font-medium">勤務場所</h4>
+              <p className="text-sm">{restaurant?.address}</p>
+              <p className="text-sm">{job.transportation}</p>
+            </div>
+          </div>
+        </div>
+
         <div className="px-2 py-4 border-r">{renderWorkStatusButton()}</div>
 
         <h3 className="text-lg font-bold mb-2">{job.title}</h3>
@@ -660,6 +786,7 @@ export default function JobDetail({ params }: PageProps) {
           restaurantImage={restaurant?.profile_image}
           workDate={job?.work_date || ""}
           startTime={job?.start_time || 0}
+          endTime={job?.end_time || 0}
         />
       )}
 
@@ -740,6 +867,72 @@ export default function JobDetail({ params }: PageProps) {
           </div>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* 変更リクエストモーダル */}
+      <Dialog
+        open={isChangeRequestModalOpen}
+        onOpenChange={setIsChangeRequestModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>変更リクエストの確認</DialogTitle>
+            <DialogDescription>
+              以下の変更リクエストを承認または拒否してください。
+            </DialogDescription>
+          </DialogHeader>
+          {selectedChangeRequest && (
+            <div className="space-y-4">
+              <div className="bg-muted p-4 rounded-lg">
+                <h4 className="font-medium mb-2">変更内容</h4>
+                <div className="space-y-2 text-sm">
+                  <p>
+                    日付: {selectedChangeRequest.proposed_changes.work_date}
+                  </p>
+                  <p>
+                    時間:{" "}
+                    {format(
+                      new Date(
+                        selectedChangeRequest.proposed_changes.start_time
+                      ),
+                      "HH:mm"
+                    )}
+                    〜
+                    {format(
+                      new Date(selectedChangeRequest.proposed_changes.end_time),
+                      "HH:mm"
+                    )}
+                  </p>
+                  <p>業務内容: {selectedChangeRequest.proposed_changes.task}</p>
+                  <p>報酬: ¥{selectedChangeRequest.proposed_changes.fee}</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h4 className="font-medium">変更理由</h4>
+                <p className="text-sm">{selectedChangeRequest.reason}</p>
+              </div>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsChangeRequestModalOpen(false)}>
+                  閉じる
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => handleChangeRequestResponse("REJECTED")}
+                  className="bg-red-600 hover:bg-red-700">
+                  <XCircle className="h-4 w-4 mr-2" />
+                  拒否
+                </Button>
+                <Button
+                  onClick={() => handleChangeRequestResponse("APPROVED")}
+                  className="bg-green-600 hover:bg-green-700">
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  承認
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
