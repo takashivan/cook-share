@@ -1,25 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { MessageSquare } from "lucide-react";
+import { format } from "date-fns";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import {
-  UnreadMessageWithWorksession,
-  useSubscriptionUnreadMessagesByUser,
-} from "@/hooks/api/user/messages/useSubscriptionUnreadMessagesByUser";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { ChatSheet } from "@/components/chat/ChatSheet";
 import { useSubscriptionMessagesByUserId } from "@/hooks/api/user/messages/useSubscriptionMessagesByUserId";
+import { MessageSummary, useSubscriptionMessageSummaryByUser } from "@/hooks/api/user/messages/useSubscriptionMessageSummaryByUser";
 
 export default function MessagesPage() {
   const { user } = useAuth();
   const [selectedWorkSession, setSelectedWorkSession] = useState<
-    UnreadMessageWithWorksession["worksession"] | null
+  MessageSummary["worksession"] | null
   >(null);
 
-  // 未読メッセージの取得
-  const { unreadMessagesData } = useSubscriptionUnreadMessagesByUser({
+  // メッセージの取得
+  const { messageSummaryData } = useSubscriptionMessageSummaryByUser({
     userId: user?.id,
   });
 
@@ -31,7 +28,7 @@ export default function MessagesPage() {
   });
 
   const openChat = (
-    worksession: UnreadMessageWithWorksession["worksession"]
+    worksession: MessageSummary["worksession"]
   ) => {
     setSelectedWorkSession(worksession);
   };
@@ -51,52 +48,39 @@ export default function MessagesPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 space-y-4">
       <h1 className="text-2xl font-bold mb-6">メッセージ</h1>
-      {unreadMessagesData &&
-      unreadMessagesData.length > 0 &&
-      unreadMessagesData.some(
-        (messageData) => messageData.unread_message_count > 0
-      ) ? (
+      {messageSummaryData &&
+      messageSummaryData.message_summaries.length > 0 ? (
         <>
-          {unreadMessagesData
-            .filter(
-              (unreadMessageData) =>
-                unreadMessageData.unread_message_count > 0
-            )
-            .map((unreadMessageData) => {
-              let latestMessage = null;
-              for (const message of unreadMessageData.unread_messages) {
-                if (
-                  !latestMessage ||
-                  message.message_seq > latestMessage.message_seq
-                ) {
-                  latestMessage = message;
-                }
-              }
-
+          {messageSummaryData.message_summaries
+            .map((messageSummary) => {
               return (
                 <Link
-                  key={unreadMessageData.worksession.id}
+                  key={messageSummary.worksession.id}
                   href=""
                   className="block"
                   onClick={() => {
-                    openChat(unreadMessageData.worksession);
+                    openChat(messageSummary.worksession);
                   }}>
                   <div className="bg-white rounded-lg shadow-md p-4">
                     <div className="flex items-center gap-3 mb-2 relative">
-                      <MessageSquare className="h-5 w-5 text-gray-700" />
-                      <div className="font-medium">
-                        {unreadMessageData.worksession.restaurant.name}
+                      <Badge variant="outline" className="text-sm bg-white">
+                        {messageSummary.worksession.job.work_date
+                          ? format(new Date(messageSummary.worksession.job.work_date), "MM/dd")
+                          : "未定"}
+                      </Badge>
+                      <div className="font-medium truncate">
+                        {`${messageSummary.worksession.restaurant.name}(${messageSummary.worksession.job.title})`}
                       </div>
-                      {unreadMessageData.unread_messages.length > 0 && (
+                      {messageSummary.unread_count > 0 && (
                         <Badge className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[1.25rem] h-5 flex items-center justify-center bg-red-500 text-white">
-                          {unreadMessageData.unread_messages.length}
+                          {messageSummary.unread_count}
                         </Badge>
                       )}
                     </div>
                     <p className="text-gray-600 truncate">
-                      {latestMessage?.content ?? ""}
+                      {messageSummary.first_message?.content ?? "メッセージはありません"}
                     </p>
                   </div>
                 </Link>
