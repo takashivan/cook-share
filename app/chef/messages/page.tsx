@@ -102,6 +102,8 @@ export default function MessagesPage() {
             workDate={selectedWorkSession?.job?.work_date || ""}
             startTime={selectedWorkSession?.job?.start_time || 0}
             endTime={selectedWorkSession?.job?.end_time || 0}
+            jobId={selectedWorkSession?.job?.id || 0}
+            jobTitle={selectedWorkSession?.job?.title || ""}
           />
         </>
       ) : (

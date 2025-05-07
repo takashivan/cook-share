@@ -97,6 +97,12 @@ interface PageParams {
   params: Promise<{ id: string }>;
 }
 
+// モバイル判定関数
+function isMobile() {
+  if (typeof window === "undefined") return false;
+  return /iPhone|Android.+Mobile|iPad|iPod/.test(navigator.userAgent);
+}
+
 export default function JobDetail({ params }: PageParams) {
   const { id: jobId } = use(params);
   const { user } = useCompanyAuth();
@@ -1046,16 +1052,23 @@ ${changeRequest.reason}
                         onKeyDown={(
                           e: React.KeyboardEvent<HTMLTextAreaElement>
                         ) => {
+                          // PC: Enterで送信、Shift+Enterで改行
                           if (
                             e.key === "Enter" &&
                             !e.shiftKey &&
-                            !e.nativeEvent.isComposing
+                            !e.nativeEvent.isComposing &&
+                            !isMobile()
                           ) {
                             e.preventDefault();
                             const form = (e.target as HTMLTextAreaElement).form;
                             if (form) form.requestSubmit();
                           }
+                          // Shift+Enterで改行
                           if (e.key === "Enter" && e.shiftKey) {
+                            setMessageInput((prev) => prev + "\n");
+                          }
+                          // モバイル: Enterは常に改行
+                          if (e.key === "Enter" && isMobile()) {
                             setMessageInput((prev) => prev + "\n");
                           }
                         }}
