@@ -15,10 +15,9 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import type { WorkSessionWithJob } from "@/types";
-import { getWorkSessionsByUserId } from "@/lib/api/workSession";
-import useSWR from "swr";
 import { useSubscriptionMessagesByUserId } from "@/hooks/api/user/messages/useSubscriptionMessagesByUserId";
+import { useGetWorksessionsByUserId } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserId";
+import { WorksessionsListResult } from "@/api/__generated__/base/data-contracts";
 
 interface AnimatedSectionProps {
   children: React.ReactNode;
@@ -54,17 +53,9 @@ function SchedulePage({ profile }: { profile: any }) {
   const [messageInput, setMessageInput] = useState("");
 
   // ワークセッション一覧の取得
-  const { data: workSessions } = useSWR<WorkSessionWithJob[]>(
-    user?.id ? `workSessions-${user.id}` : null,
-    async () => {
-      const result = await getWorkSessionsByUserId(user?.id || "");
-      return result as WorkSessionWithJob[];
-    },
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    }
-  );
+  const { data: workSessions } = useGetWorksessionsByUserId({
+    userId: user?.id,
+  });
 
   // 選択されたワークセッション
   const selectedWorkSession = workSessions?.find(
@@ -106,7 +97,7 @@ function SchedulePage({ profile }: { profile: any }) {
       ) || [],
   };
 
-  const renderWorkSessionCard = (workSession: WorkSessionWithJob) => {
+  const renderWorkSessionCard = (workSession: WorksessionsListResult[number]) => {
     if (!workSession.job) return null;
 
     const workDate = format(
