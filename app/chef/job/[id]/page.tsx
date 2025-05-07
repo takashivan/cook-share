@@ -606,7 +606,7 @@ export default function JobDetail({ params }: PageProps) {
                   setIsChangeRequestModalOpen(true);
                 }}>
                 <AlertCircle className="h-4 w-4 mr-2" />
-                変更リクエストが届いています
+                変更リクエスト
               </Button>
             </div>
           )}
@@ -787,6 +787,8 @@ export default function JobDetail({ params }: PageProps) {
           workDate={job?.work_date || ""}
           startTime={job?.start_time || 0}
           endTime={job?.end_time || 0}
+          jobId={job?.id || 0}
+          jobTitle={job?.title || ""}
         />
       )}
 

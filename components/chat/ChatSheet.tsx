@@ -34,6 +34,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { formatJapanHHMM, formatToJapanDate } from "@/lib/functions";
+import { useRouter } from "next/navigation";
 
 interface ChatSheetProps {
   isOpen: boolean;
@@ -46,6 +47,14 @@ interface ChatSheetProps {
   workDate: string | Date;
   startTime: number;
   endTime: number;
+  jobId: number;
+  jobTitle: string;
+}
+
+// モバイル判定関数
+function isMobile() {
+  if (typeof window === "undefined") return false;
+  return /iPhone|Android.+Mobile|iPad|iPod/.test(navigator.userAgent);
 }
 
 export function ChatSheet({
@@ -59,8 +68,11 @@ export function ChatSheet({
   workDate,
   startTime,
   endTime,
+  jobId,
+  jobTitle,
 }: ChatSheetProps) {
   const { user } = useAuth();
+  const router = useRouter();
 
   const [messageInput, setMessageInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -197,14 +209,23 @@ export function ChatSheet({
                   />
                   <AvatarFallback>{restaurantName.charAt(0)}</AvatarFallback>
                 </Avatar>
-                <div>
+                <div
+                  className="cursor-pointer hover:underline"
+                  onClick={() => router.push(`/chef/job/${jobId}`)}
+                  title="ジョブ詳細へ">
                   <h3 className="font-medium">{restaurantName}</h3>
-                  <p className="text-xs text-gray-500">
-                    {workDate ? new Date(workDate).toLocaleDateString() : ""}
-                    &nbsp;
-                    {startTime ? formatJapanHHMM(startTime) : ""}-
-                    {endTime ? formatJapanHHMM(endTime) : ""}
-                  </p>
+                  <div className="text-xs text-gray-500">
+                    {jobTitle && (
+                      <div className="font-semibold text-xs text-black mb-0.5">
+                        {jobTitle}
+                      </div>
+                    )}
+                    <span>
+                      {workDate ? new Date(workDate).toLocaleDateString() : ""}
+                      &nbsp;
+                      {startTime ? formatJapanHHMM(startTime) : ""}
+                    </span>
+                  </div>
                 </div>
               </div>
               {/* 変更リクエスト通知ボタン */}
@@ -299,9 +320,8 @@ export function ChatSheet({
                       `集合時間・場所の確認をさせていただきます。\n\n${format(
                         new Date(workDate),
                         "MM月dd日"
-                      )} ${format(
-                        new Date(startTime * 1000),
-                        "HH:mm"
+                      )} ${formatJapanHHMM(
+                        startTime
                       )}に${restaurantName}に伺えばよろしいでしょうか？`
                     )
                   }>
@@ -327,10 +347,12 @@ export function ChatSheet({
                 value={messageInput}
                 onChange={(e) => setMessageInput(e.target.value)}
                 onKeyDown={(e) => {
+                  // PC: Enterで送信、Shift+Enterで改行
                   if (
                     e.key === "Enter" &&
                     !e.shiftKey &&
-                    !e.nativeEvent.isComposing
+                    !e.nativeEvent.isComposing &&
+                    !isMobile()
                   ) {
                     e.preventDefault();
                     handleSendMessage();
@@ -339,8 +361,13 @@ export function ChatSheet({
                   if (e.key === "Enter" && e.shiftKey) {
                     setMessageInput((prev) => prev + "\n");
                   }
+                  // モバイル: Enterは常に改行
+                  if (e.key === "Enter" && isMobile()) {
+                    setMessageInput((prev) => prev + "\n");
+                  }
                 }}
                 className="flex-1 resize-none px-3 py-2 border rounded-md text-sm bg-white focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
+                enterKeyHint="enter"
               />
               <Button
                 size="icon"
