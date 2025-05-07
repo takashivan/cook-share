@@ -40,7 +40,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
+import TextareaAutosize from "react-textarea-autosize";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { QRCodeSVG } from "qrcode.react";
@@ -1036,23 +1036,29 @@ ${changeRequest.reason}
                     <form
                       onSubmit={handleSendMessage}
                       className="flex w-full gap-2">
-                      <Textarea
+                      <TextareaAutosize
                         value={messageInput}
                         onChange={(e) => setMessageInput(e.target.value)}
                         placeholder="メッセージを入力..."
-                        className="flex-1 resize-none"
-                        onKeyDown={(e) => {
+                        minRows={1}
+                        maxRows={6}
+                        className="flex-1 resize-none bg-white px-3 py-2 border rounded-md text-sm focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
+                        onKeyDown={(
+                          e: React.KeyboardEvent<HTMLTextAreaElement>
+                        ) => {
                           if (
                             e.key === "Enter" &&
                             !e.shiftKey &&
                             !e.nativeEvent.isComposing
                           ) {
                             e.preventDefault();
-                            const form = e.currentTarget.form;
+                            const form = (e.target as HTMLTextAreaElement).form;
                             if (form) form.requestSubmit();
                           }
+                          if (e.key === "Enter" && e.shiftKey) {
+                            setMessageInput((prev) => prev + "\n");
+                          }
                         }}
-                        rows={1}
                       />
                       <Button type="submit" disabled={!messageInput.trim()}>
                         送信
@@ -1193,9 +1199,9 @@ ${changeRequest.reason}
                   id="cancel-reason"
                   value={cancelReason}
                   onChange={(e) => setCancelReason(e.target.value)}
-                  className="w-full h-24 p-2 border rounded-md text-sm bg-white"
                   placeholder="キャンセルの理由を具体的にご記入ください"
                   required
+                  className="w-full h-24 p-2 border rounded-md text-sm bg-white focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
                 />
               </div>
 
@@ -1264,7 +1270,11 @@ ${changeRequest.reason}
             </DialogTitle>
             <DialogDescription>
               {existingChangeRequest && existingChangeRequest.length > 0
-                ? "既存の変更リクエストが存在します。新しいリクエストを作成するには、既存のリクエストを削除してください。"
+                ? existingChangeRequest[0].status === "REJECTED"
+                  ? "変更リクエストが拒否されました。新しいリクエストを作成するには、既存のリクエストを削除してください。"
+                  : existingChangeRequest[0].status === "APPROVED"
+                  ? "変更リクエストが承認されています。新しいリクエストを作成するには、既存のリクエストを削除してください。"
+                  : "既存の変更リクエストが存在します。新しいリクエストを作成するには、既存のリクエストを削除してください。"
                 : "シェフに業務内容の変更をリクエストします。変更はシェフの承認が必要です。"}
             </DialogDescription>
           </DialogHeader>
@@ -1291,7 +1301,14 @@ ${changeRequest.reason}
                         </p>
                         <p>業務内容: {changes.task}</p>
                         <p>報酬: ¥{changes.fee}</p>
-                        <p>ステータス: {existingChangeRequest[0].status}</p>
+                        <p>
+                          ステータス:{" "}
+                          {existingChangeRequest[0].status === "PENDING"
+                            ? "承認待ち"
+                            : existingChangeRequest[0].status === "APPROVED"
+                            ? "承認済み"
+                            : "拒否済み"}
+                        </p>
                       </>
                     );
                   })()}
@@ -1306,8 +1323,10 @@ ${changeRequest.reason}
                 <Button
                   variant="destructive"
                   onClick={handleDeleteChangeRequest}
-                  disabled={existingChangeRequest[0].status !== "PENDING"}>
-                  変更リクエストを削除
+                  disabled={existingChangeRequest[0].status === "PENDING"}>
+                  {existingChangeRequest[0].status === "PENDING"
+                    ? "変更リクエストを削除"
+                    : "既存のリクエストを削除して新規作成"}
                 </Button>
               </DialogFooter>
             </div>
@@ -1377,7 +1396,7 @@ ${changeRequest.reason}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="task">業務内容</Label>
-                  <Textarea
+                  <TextareaAutosize
                     id="task"
                     placeholder="変更後の業務内容を入力してください"
                     value={changeRequest.task}
@@ -1387,11 +1406,13 @@ ${changeRequest.reason}
                         task: e.target.value,
                       })
                     }
+                    minRows={2}
+                    className="w-full px-3 py-2 border rounded-md text-sm bg-white resize-none focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="reason">変更理由</Label>
-                  <Textarea
+                  <TextareaAutosize
                     id="reason"
                     placeholder="変更理由を入力してください"
                     value={changeRequest.reason}
@@ -1401,6 +1422,8 @@ ${changeRequest.reason}
                         reason: e.target.value,
                       })
                     }
+                    minRows={2}
+                    className="w-full px-3 py-2 border rounded-md text-sm bg-white resize-none focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
                   />
                 </div>
               </div>

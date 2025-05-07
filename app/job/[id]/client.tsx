@@ -41,7 +41,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ja } from "date-fns/locale";
 import { useGetWorksessionsByUserId } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserId";
-
+import { formatJapanHHMM } from "@/lib/functions";
 interface Restaurant {
   id: string;
   name: string;
@@ -86,7 +86,7 @@ interface CreateApplicationParams {
 
 // 時間のフォーマット関数を追加
 const formatTime = (timestamp: number) => {
-  return format(new Date(timestamp * 1000), "HH:mm");
+  return formatJapanHHMM(timestamp);
 };
 
 export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
