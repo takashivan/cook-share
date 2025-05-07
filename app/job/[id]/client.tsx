@@ -5,15 +5,13 @@ import Link from "next/link";
 import {
   ChevronRight,
   Clock,
-  MapPin,
   Calendar,
   ArrowRight,
-  PartyPopper,
-  ChevronDown,
   Building2,
   Train,
   ScrollText,
   Star,
+  PartyPopper,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getUserProfile } from "@/lib/api/user";
@@ -26,56 +24,15 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/layout/header";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { GoogleMap } from "@/components/maps/GoogleMap";
 import { useGetRestaurantReviewByRestaurantId } from "@/hooks/api/companyuser/reviews/useGetRestaurantReviewByRestaurantId";
-import { cn } from "@/lib/utils";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ja } from "date-fns/locale";
 import { useGetWorksessionsByUserId } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserId";
-
-interface Restaurant {
-  id: string;
-  name: string;
-  address: string;
-  business_hours: string;
-  contact_info: string;
-  profile_image: string;
-  station: string;
-  access: string;
-}
-
-interface JobDetail {
-  job: {
-    id: number;
-    title: string;
-    description: string;
-    work_date: string;
-    start_time: number;
-    end_time: number;
-    hourly_rate: number;
-    status: string;
-    image: string;
-    task: string;
-    skill: string;
-    whattotake: string;
-    note: string;
-    point: string;
-    transportation: string;
-    number_of_spots: number;
-    fee: number;
-    expiry_date: number;
-  };
-  restaurant: Restaurant;
-}
+import { JobsDetailData } from "@/api/__generated__/base/data-contracts";
 
 interface CreateApplicationParams {
   job_id: number;
@@ -89,7 +46,7 @@ const formatTime = (timestamp: number) => {
   return format(new Date(timestamp * 1000), "HH:mm");
 };
 
-export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
+export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
   const [activeTab, setActiveTab] = useState<"details" | "store" | "access">(
     "details"
   );
@@ -393,11 +350,13 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                       variant="secondary"
                       className={`text-sm ${
                         jobDetail.job.number_of_spots > 0 &&
+                        jobDetail.job.expiry_date &&
                         new Date(jobDetail.job.expiry_date) > new Date()
                           ? "bg-black text-white"
                           : "bg-gray-500 text-white"
                       }`}>
                       {jobDetail.job.number_of_spots > 0 &&
+                      jobDetail.job.expiry_date &&
                       new Date(jobDetail.job.expiry_date) > new Date()
                         ? `募集中`
                         : "締め切りました"}
@@ -426,13 +385,13 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                         !user ||
                         !user.is_approved ||
                         jobDetail.job.number_of_spots === 0 ||
-                        new Date(jobDetail.job.expiry_date) <= new Date() ||
+                        (jobDetail.job.expiry_date != null && new Date(jobDetail.job.expiry_date) <= new Date()) ||
                         hasTimeOverlap
                       }
                       className={`w-full py-2 text-sm font-medium transition-all duration-300 transform hover:scale-[1.02] ${
                         user &&
                         jobDetail.job.number_of_spots > 0 &&
-                        new Date(jobDetail.job.expiry_date) > new Date() &&
+                        (jobDetail.job.expiry_date != null && new Date(jobDetail.job.expiry_date) > new Date()) &&
                         !hasTimeOverlap
                           ? "bg-orange-600 hover:bg-orange-700 text-white"
                           : "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -443,7 +402,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                         ? "シェフとしての審査が完了していません"
                         : jobDetail.job.number_of_spots === 0
                         ? "募集人数が上限に達しました"
-                        : new Date(jobDetail.job.expiry_date) <= new Date()
+                        : (jobDetail.job.expiry_date != null && new Date(jobDetail.job.expiry_date) <= new Date())
                         ? "募集期間が終了しました"
                         : hasTimeOverlap
                         ? `この時間帯には${overlappingJob?.job.restaurant.name}の仕事が入っています`
@@ -684,11 +643,13 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                       variant="secondary"
                       className={`${
                         jobDetail.job.number_of_spots > 0 &&
+                        jobDetail.job.expiry_date &&
                         new Date(jobDetail.job.expiry_date) > new Date()
                           ? "bg-black text-white"
                           : "bg-gray-500 text-white"
                       }`}>
                       {jobDetail.job.number_of_spots > 0 &&
+                      jobDetail.job.expiry_date &&
                       new Date(jobDetail.job.expiry_date) > new Date()
                         ? `募集中`
                         : "締め切り"}
@@ -732,12 +693,14 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                     !user ||
                     !user.is_approved ||
                     jobDetail.job.number_of_spots === 0 ||
-                    new Date(jobDetail.job.expiry_date) <= new Date() ||
+                    (jobDetail.job.expiry_date != null &&
+                      new Date(jobDetail.job.expiry_date) <= new Date()) ||
                     hasTimeOverlap
                   }
                   className={`w-full py-2 text-sm font-medium transition-all duration-300 transform hover:scale-[1.02] ${
                     user &&
                     jobDetail.job.number_of_spots > 0 &&
+                    jobDetail.job.expiry_date &&
                     new Date(jobDetail.job.expiry_date) > new Date() &&
                     !hasTimeOverlap
                       ? "bg-orange-600 hover:bg-orange-700 text-white"
@@ -749,7 +712,8 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobDetail }) {
                     ? "シェフとしての審査が完了していません"
                     : jobDetail.job.number_of_spots === 0
                     ? "募集人数が上限に達しました"
-                    : new Date(jobDetail.job.expiry_date) <= new Date()
+                    : jobDetail.job.expiry_date != null &&
+                      new Date(jobDetail.job.expiry_date) <= new Date()
                     ? "募集期間が終了しました"
                     : hasTimeOverlap
                     ? `この時間帯には${overlappingJob?.job.restaurant.name}の仕事が入っています`
