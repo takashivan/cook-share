@@ -15,6 +15,8 @@ import {
   CompanyuserNotificationsCreateData,
   CompanyusersCreateInput,
   CompanyusersCreateOutput,
+  CompanyusersDeleteInput,
+  CompanyusersDeleteOutput,
   CompanyusersListOutput,
   JobsListOutput,
   RestaurantReviewsListResult,
@@ -124,6 +126,45 @@ export class Restaurants<
       url: string[],
     ) => Promise<CompanyuserNotificationsCreateData> = (_) =>
       this.companyuserNotificationsCreate(restaurantId, params).then(
+        (res) => res.data,
+      );
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags restaurants
+   * @name CompanyusersDelete
+   * @request DELETE:/restaurants/{restaurant_id}/companyusers/{companyUser_Id}
+   */
+  companyusersDelete = (
+    restaurantId: number,
+    companyUserId: string,
+    data: CompanyusersDeleteInput,
+    params: RequestParams = {},
+  ) =>
+    this.request<CompanyusersDeleteOutput, void>({
+      path: `/restaurants/${restaurantId}/companyusers/${companyUserId}`,
+      method: "DELETE",
+      body: data,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+
+  companyusersDeleteQueryArgs = (
+    restaurantId: number,
+    companyUserId: string,
+    data: CompanyusersDeleteInput,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled
+      ? [`/restaurants/${restaurantId}/companyusers/${companyUserId}`]
+      : null;
+    const fetcher = () =>
+      this.companyusersDelete(restaurantId, companyUserId, data, params).then(
         (res) => res.data,
       );
     return [key, fetcher] as const;
