@@ -18,11 +18,8 @@ import { Input } from "@/components/ui/input";
 import { Upload, Building2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
-import { createCompany } from "@/lib/api/company";
-import { updateCompanyUser } from "@/lib/api/companyUser";
 import {
   initializeCompany,
-  initializeCompanyResponse,
 } from "@/lib/api/company";
 import { getAuthToken } from "@/lib/api/config";
 import { toast } from "@/hooks/use-toast";

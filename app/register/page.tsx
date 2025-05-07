@@ -17,8 +17,6 @@ import Image from "next/image";
 import { register } from "@/lib/api/user";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import API from "@/lib/api";
-import { UserProfile } from "@/lib/api/user";
 import { toast } from "@/hooks/use-toast";
 
 export default function RegisterPage() {

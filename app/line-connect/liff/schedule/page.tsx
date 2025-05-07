@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
-import { Calendar } from "../components/Calendar";
 import { CheckLineUser } from "@/lib/api/line";
 import { LinkAccountScreen } from "../components/LinkAccountScreen";
 import { ChevronLeft, LogOut } from "lucide-react";
@@ -16,9 +15,8 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import type { Message, WorkSessionWithJob } from "@/types";
+import type { WorkSessionWithJob } from "@/types";
 import { getWorkSessionsByUserId } from "@/lib/api/workSession";
-import { messageApi, CreateMessageParams } from "@/lib/api/message";
 import useSWR from "swr";
 import { useSubscriptionMessagesByUserId } from "@/hooks/api/user/messages/useSubscriptionMessagesByUserId";
 

@@ -1,16 +1,13 @@
 "use client";
 
 import type React from "react";
-
 import { useState } from "react";
-import Link from "next/link";
-import { ArrowLeft, Save, AlertTriangle } from "lucide-react";
+import { Save, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { changeEmail, changePassword, confirmEmail } from "@/lib/api/user";
+import { changeEmail } from "@/lib/api/user";
 import { ChefEmailChangeModal } from "@/components/modals/ChefEmailChangeModal";
 import {
   Card,

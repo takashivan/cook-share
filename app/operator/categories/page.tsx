@@ -4,9 +4,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/lib/redux/store";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { UserProfile } from "@/lib/api/user";
 import { fetchCuisines } from "@/lib/redux/slices/operatorSlice";
 import { Cuisine } from "@/lib/api/cuisines";
 

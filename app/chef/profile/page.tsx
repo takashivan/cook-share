@@ -1,19 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
-import Link from "next/link";
 import {
-  ChevronRight,
-  Calendar,
-  Phone,
-  Mail,
-  MapPin,
-  Award,
   Edit,
   CreditCard,
 } from "lucide-react";
-import { updateUserProfile } from "@/lib/api/user";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,8 +14,6 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { ChefProfileEditModal } from "@/components/modals/ChefProfileEditModal";
 import { useGetReviewsByUserId } from "@/hooks/api/user/reviews/useGetReviewsByUserId";
 import {
-  changeEmail,
-  confirmEmail,
   getUserProfile,
   UserProfile,
 } from "@/lib/api/user";
