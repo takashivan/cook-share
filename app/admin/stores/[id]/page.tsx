@@ -73,10 +73,10 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { DeleteRestaurantStaffModal } from "@/components/modals/DeleteRestaurantStaffModal";
-import { deleteRestaurantStaff } from "@/lib/api/restaurant";
 import { useGetRestaurantReviewByRestaurantId } from "@/hooks/api/companyuser/reviews/useGetRestaurantReviewByRestaurantId";
 import { useUpdateRestaurant } from "@/hooks/api/companyuser/restaurants/useUpdateRestaurant";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
+import { useDeleteCompanyUserByRestaurantId } from "@/hooks/api/companyuser/companyUsers/useDeleteCompanyUserByRestaurantId";
 
 interface JobWithWorkSessions
   extends Omit<JobsListOutput[number], "workSessionCount"> {
@@ -99,10 +99,31 @@ export default function RestaurantDetailPage(props: {
   const router = useRouter();
   const params = use(props.params);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
+
+  const [deleteTargetStaff, setDeleteTargetStaff] = useState<{
+    id: string;
+    companyuser: { name: string; email: string };
+  } | null>(null);
+  const [editTargetStaff, setEditTargetStaff] = useState<
+    CompanyusersListOutput["admin"][number] | null
+  >(null);
+  const [editPermissions, setEditPermissions] = useState<EditStaffPermissions>({
+    canEdit: false,
+    canManageJobs: false,
+  });
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
+  const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
+  const [copiedJob, setCopiedJob] = useState<Partial<Job> | null>(null);
+
+  // レストラン情報の取得
   const {
     data: restaurant,
     error: restaurantError,
-    mutate: mutateRestaurant,
   } = useGetRestaurant({ restaurantId: Number(params.id) });
   const { data: jobs, error: jobsError } = useGetJobsByRestaurantId({
     restaurantId: Number(params.id),
@@ -117,6 +138,7 @@ export default function RestaurantDetailPage(props: {
     restaurantId: Number(params.id),
   });
 
+  // 求人の取得
   const jobWithWorkSessions: JobWithWorkSessions[] | undefined =
     jobs?.map((job) => {
       const workSessionCount =
@@ -136,6 +158,7 @@ export default function RestaurantDetailPage(props: {
       };
     }) ?? [];
 
+  // 求人の追加
   const { trigger: createJobTrigger } = useCreateJob({
     companyId: restaurant?.companies_id ?? undefined,
     restaurantId: restaurant?.id,
@@ -157,6 +180,7 @@ export default function RestaurantDetailPage(props: {
     }
   });
 
+  // レストランの更新
   const { trigger: updateRestaurantTrriger } = useUpdateRestaurant({
     restaurantId: Number(params.id),
     companyId: restaurant?.companies_id ?? undefined,
@@ -178,30 +202,42 @@ export default function RestaurantDetailPage(props: {
     }
   })
 
+  // スタッフの招待
   const { trigger: createCompanyUserTrigger } =
     useCreateCompanyUserByRestaurantId({
       restaurantId: restaurant?.id,
       companyId: restaurant?.companies_id ?? undefined,
     });
 
-  console.log("restaurant", restaurant);
-
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
-
-  const [deleteTargetStaff, setDeleteTargetStaff] = useState<{
-    id: string;
-    companyuser: { name: string; email: string };
-  } | null>(null);
-  const [editTargetStaff, setEditTargetStaff] = useState<
-    CompanyusersListOutput["admin"][number] | null
-  >(null);
-  const [editPermissions, setEditPermissions] = useState<EditStaffPermissions>({
-    canEdit: false,
-    canManageJobs: false,
+  // スタッフの削除
+  const { trigger: deleteRestaurantStaffTrigger } = useDeleteCompanyUserByRestaurantId({
+    restaurantId: restaurant?.id,
+    companyId: restaurant?.companies_id ?? undefined,
+    companyUserId: deleteTargetStaff?.id,
+    handleSuccess: () => {
+      toast({
+        title: "スタッフを削除しました",
+        description: `${
+          deleteTargetStaff?.companyuser.name ||
+          deleteTargetStaff?.companyuser.email
+        }をスタッフから削除しました。`,
+      });
+    },
+    handleError: (error) => {
+      console.error("Failed to delete staff:", error);
+      toast({
+        title: "エラーが発生しました",
+        description: "スタッフの削除に失敗しました。",
+        variant: "destructive",
+      });
+    },
+    hadnleFinally: () => {
+      setIsDeleting(false);
+      setDeleteTargetStaff(null);
+    }
   });
-  const [isDeleting, setIsDeleting] = useState(false);
+
+  console.log("restaurant", restaurant);
 
   const handleSubmit = async (data: RestaurantsPartialUpdatePayload) => {
     await updateRestaurantTrriger(data);
@@ -213,10 +249,6 @@ export default function RestaurantDetailPage(props: {
 
   const error = restaurantError || jobsError;
   const isLoading = !restaurant && !error;
-
-  const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
-  const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
-  const [copiedJob, setCopiedJob] = useState<Partial<Job> | null>(null);
 
   const handleCreateJob = async (data: JobsCreatePayload) => {
     await createJobTrigger(data);
@@ -342,28 +374,7 @@ export default function RestaurantDetailPage(props: {
     if (!deleteTargetStaff) return;
 
     setIsDeleting(true);
-    try {
-      await deleteRestaurantStaff(Number(params.id), deleteTargetStaff.id);
-      toast({
-        title: "スタッフを削除しました",
-        description: `${
-          deleteTargetStaff.companyuser.name ||
-          deleteTargetStaff.companyuser.email
-        }をスタッフから削除しました。`,
-      });
-      // スタッフ一覧を再取得
-      mutateRestaurant();
-    } catch (error) {
-      console.error("Failed to delete staff:", error);
-      toast({
-        title: "エラーが発生しました",
-        description: "スタッフの削除に失敗しました。",
-        variant: "destructive",
-      });
-    } finally {
-      setIsDeleting(false);
-      setDeleteTargetStaff(null);
-    }
+    deleteRestaurantStaffTrigger();
   };
 
   const handleEditStaff = async () => {
