@@ -924,7 +924,10 @@ export default function RestaurantDetailPage(props: {
                                     )}
                                 </div>
                                 <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
+                                  <DropdownMenuTrigger
+                                    asChild
+                                    onClick={(e) => e.stopPropagation()}
+                                    onMouseDown={(e) => e.stopPropagation()}>
                                     <Button variant="ghost" size="icon">
                                       <MoreHorizontal className="h-4 w-4" />
                                     </Button>
@@ -999,7 +1002,10 @@ export default function RestaurantDetailPage(props: {
                                   )}
                                 </div>
                                 <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
+                                  <DropdownMenuTrigger
+                                    asChild
+                                    onClick={(e) => e.stopPropagation()}
+                                    onMouseDown={(e) => e.stopPropagation()}>
                                     <Button variant="ghost" size="icon">
                                       <MoreHorizontal className="h-4 w-4" />
                                     </Button>
@@ -1074,7 +1080,10 @@ export default function RestaurantDetailPage(props: {
                                   )}
                                 </div>
                                 <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
+                                  <DropdownMenuTrigger
+                                    asChild
+                                    onClick={(e) => e.stopPropagation()}
+                                    onMouseDown={(e) => e.stopPropagation()}>
                                     <Button variant="ghost" size="icon">
                                       <MoreHorizontal className="h-4 w-4" />
                                     </Button>
@@ -1158,7 +1167,10 @@ export default function RestaurantDetailPage(props: {
                                     )}
                                 </div>
                                 <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
+                                  <DropdownMenuTrigger
+                                    asChild
+                                    onClick={(e) => e.stopPropagation()}
+                                    onMouseDown={(e) => e.stopPropagation()}>
                                     <Button variant="ghost" size="icon">
                                       <MoreHorizontal className="h-4 w-4" />
                                     </Button>
@@ -1250,7 +1262,10 @@ export default function RestaurantDetailPage(props: {
                             <TableCell>{staff.email}</TableCell>
                             <TableCell>
                               <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
+                                <DropdownMenuTrigger
+                                  asChild
+                                  onClick={(e) => e.stopPropagation()}
+                                  onMouseDown={(e) => e.stopPropagation()}>
                                   <Button variant="ghost" size="icon">
                                     <MoreHorizontal className="h-4 w-4" />
                                   </Button>

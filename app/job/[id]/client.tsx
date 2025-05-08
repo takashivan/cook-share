@@ -33,6 +33,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ja } from "date-fns/locale";
 import { useGetWorksessionsByUserId } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserId";
 import { JobsDetailData } from "@/api/__generated__/base/data-contracts";
+import { formatJapanHHMM } from "@/lib/functions";
 
 interface CreateApplicationParams {
   job_id: number;
@@ -43,7 +44,7 @@ interface CreateApplicationParams {
 
 // 時間のフォーマット関数を追加
 const formatTime = (timestamp: number) => {
-  return format(new Date(timestamp * 1000), "HH:mm");
+  return formatJapanHHMM(timestamp);
 };
 
 export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {

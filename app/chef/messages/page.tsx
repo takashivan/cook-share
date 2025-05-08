@@ -7,12 +7,15 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { ChatSheet } from "@/components/chat/ChatSheet";
 import { useSubscriptionMessagesByUserId } from "@/hooks/api/user/messages/useSubscriptionMessagesByUserId";
-import { MessageSummary, useSubscriptionMessageSummaryByUser } from "@/hooks/api/user/messages/useSubscriptionMessageSummaryByUser";
+import {
+  MessageSummary,
+  useSubscriptionMessageSummaryByUser,
+} from "@/hooks/api/user/messages/useSubscriptionMessageSummaryByUser";
 
 export default function MessagesPage() {
   const { user } = useAuth();
   const [selectedWorkSession, setSelectedWorkSession] = useState<
-  MessageSummary["worksession"] | null
+    MessageSummary["worksession"] | null
   >(null);
 
   // メッセージの取得
@@ -27,9 +30,7 @@ export default function MessagesPage() {
     applicationId: selectedWorkSession?.application_id ?? undefined,
   });
 
-  const openChat = (
-    worksession: MessageSummary["worksession"]
-  ) => {
+  const openChat = (worksession: MessageSummary["worksession"]) => {
     setSelectedWorkSession(worksession);
   };
 
@@ -50,43 +51,44 @@ export default function MessagesPage() {
   return (
     <div className="container mx-auto px-4 py-8 space-y-4">
       <h1 className="text-2xl font-bold mb-6">メッセージ</h1>
-      {messageSummaryData &&
-      messageSummaryData.message_summaries.length > 0 ? (
+      {messageSummaryData && messageSummaryData.message_summaries.length > 0 ? (
         <>
-          {messageSummaryData.message_summaries
-            .map((messageSummary) => {
-              return (
-                <Link
-                  key={messageSummary.worksession.id}
-                  href=""
-                  className="block"
-                  onClick={() => {
-                    openChat(messageSummary.worksession);
-                  }}>
-                  <div className="bg-white rounded-lg shadow-md p-4">
-                    <div className="flex items-center gap-3 mb-2 relative">
-                      <Badge variant="outline" className="text-sm bg-white">
-                        {messageSummary.worksession.job.work_date
-                          ? format(new Date(messageSummary.worksession.job.work_date), "MM/dd")
-                          : "未定"}
-                      </Badge>
-                      <div className="font-medium truncate">
-                        {`${messageSummary.worksession.restaurant.name}(${messageSummary.worksession.job.title})`}
-                      </div>
-                      {messageSummary.unread_count > 0 && (
-                        <Badge className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[1.25rem] h-5 flex items-center justify-center bg-red-500 text-white">
-                          {messageSummary.unread_count}
-                        </Badge>
-                      )}
+          {messageSummaryData.message_summaries.map((messageSummary) => {
+            return (
+              <Link
+                key={messageSummary.worksession.id}
+                href=""
+                className="block"
+                onClick={() => {
+                  openChat(messageSummary.worksession);
+                }}>
+                <div className="bg-white rounded-lg shadow-md p-4">
+                  <div className="flex items-center gap-3 mb-2 relative">
+                    <Badge variant="outline" className="text-sm bg-white">
+                      {messageSummary.worksession.job.work_date
+                        ? format(
+                            new Date(messageSummary.worksession.job.work_date),
+                            "MM/dd"
+                          )
+                        : "未定"}
+                    </Badge>
+                    <div className="font-medium truncate">
+                      {`${messageSummary.worksession.restaurant.name}(${messageSummary.worksession.job.title})`}
                     </div>
-                    <p className="text-gray-600 truncate">
-                      {messageSummary.first_message?.content ?? "メッセージはありません"}
-                    </p>
+                    {messageSummary.unread_count > 0 && (
+                      <Badge className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[1.25rem] h-5 flex items-center justify-center bg-red-500 text-white">
+                        {messageSummary.unread_count}
+                      </Badge>
+                    )}
                   </div>
-                </Link>
-              );
-            }
-          )}
+                  <p className="text-gray-600 truncate">
+                    {messageSummary.first_message?.content ??
+                      "メッセージはありません"}
+                  </p>
+                </div>
+              </Link>
+            );
+          })}
           <ChatSheet
             isOpen={selectedWorkSession !== null}
             onClose={closeChat}
@@ -94,9 +96,14 @@ export default function MessagesPage() {
             messagesData={messagesData}
             onSendMessage={handleSendMessage}
             restaurantName={selectedWorkSession?.restaurant?.name || ""}
-            restaurantImage={selectedWorkSession?.restaurant?.profile_image || ""}
+            restaurantImage={
+              selectedWorkSession?.restaurant?.profile_image || ""
+            }
             workDate={selectedWorkSession?.job?.work_date || ""}
             startTime={selectedWorkSession?.job?.start_time || 0}
+            endTime={selectedWorkSession?.job?.end_time || 0}
+            jobId={selectedWorkSession?.job?.id || 0}
+            jobTitle={selectedWorkSession?.job?.title || ""}
           />
         </>
       ) : (
@@ -105,5 +112,5 @@ export default function MessagesPage() {
         </div>
       )}
     </div>
-  )
+  );
 }
