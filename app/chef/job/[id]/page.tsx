@@ -47,6 +47,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { QrCodeReader } from "@/components/qr/qrCodeReader/QrCodeReader";
 
 interface JobDetail {
   job: {
@@ -190,133 +191,151 @@ export default function JobDetail({ params }: PageProps) {
     setIsDialogOpen(true);
   };
 
-  useEffect(() => {
-    let currentScanner: Html5QrcodeScanner | null = null;
+  // useEffect(() => {
+  //   let currentScanner: Html5QrcodeScanner | null = null;
 
-    if (isDialogOpen && !isQrScanned) {
-      // ダイアログが開いてから少し待ってから初期化する
-      const timer = setTimeout(() => {
-        const qrReaderElement = document.getElementById("qr-reader");
-        if (!qrReaderElement) {
-          console.error("QR reader element not found");
-          return;
-        }
+  //   if (isDialogOpen && !isQrScanned) {
+  //     // ダイアログが開いてから少し待ってから初期化する
+  //     const timer = setTimeout(() => {
+  //       const qrReaderElement = document.getElementById("qr-reader");
+  //       if (!qrReaderElement) {
+  //         console.error("QR reader element not found");
+  //         return;
+  //       }
 
-        currentScanner = new Html5QrcodeScanner(
-          "qr-reader",
-          {
-            fps: 10,
-            qrbox: { width: 250, height: 250 },
-            aspectRatio: 1.0,
-            showTorchButtonIfSupported: false,
-            showZoomSliderIfSupported: false,
-            defaultZoomValueIfSupported: 1,
-            useBarCodeDetectorIfSupported: false,
-            rememberLastUsedCamera: true,
-            html5qrcode: {
-              formatsToSupport: ["QR_CODE"],
-            },
-          } as any,
-          false
-        );
+  //       currentScanner = new Html5QrcodeScanner(
+  //         "qr-reader",
+  //         {
+  //           fps: 10,
+  //           qrbox: { width: 250, height: 250 },
+  //           aspectRatio: 1.0,
+  //           showTorchButtonIfSupported: false,
+  //           showZoomSliderIfSupported: false,
+  //           defaultZoomValueIfSupported: 1,
+  //           useBarCodeDetectorIfSupported: false,
+  //           rememberLastUsedCamera: true,
+  //           html5qrcode: {
+  //             formatsToSupport: ["QR_CODE"],
+  //           },
+  //         } as any,
+  //         false
+  //       );
 
-        // カスタムUIを追加
-        const scannerElement = document.getElementById("qr-reader");
-        if (scannerElement) {
-          // スキャナーのデフォルトUIを非表示
-          const header = scannerElement.querySelector(
-            "div[style*='border-top']"
-          );
-          if (header) {
-            header.remove();
-          }
+  //       // カスタムUIを追加
+  //       const scannerElement = document.getElementById("qr-reader");
+  //       if (scannerElement) {
+  //         // スキャナーのデフォルトUIを非表示
+  //         const header = scannerElement.querySelector(
+  //           "div[style*='border-top']"
+  //         );
+  //         if (header) {
+  //           header.remove();
+  //         }
 
-          // ファイルスキャンのリンクを非表示
-          const links = scannerElement.getElementsByTagName("a");
-          for (const link of links) {
-            if (link.textContent?.includes("Scan an Image File")) {
-              link.style.display = "none";
-            }
-          }
+  //         // ファイルスキャンのリンクを非表示
+  //         const links = scannerElement.getElementsByTagName("a");
+  //         for (const link of links) {
+  //           if (link.textContent?.includes("Scan an Image File")) {
+  //             link.style.display = "none";
+  //           }
+  //         }
 
-          // Start/Stopボタンのテキストを変更
-          const buttons = scannerElement.getElementsByTagName("button");
-          for (const button of buttons) {
-            if (button.textContent?.includes("Start Scanning")) {
-              button.textContent = "スキャンを開始";
-            } else if (button.textContent?.includes("Stop Scanning")) {
-              button.textContent = "スキャンを停止";
-            }
-          }
+  //         // Start/Stopボタンのテキストを変更
+  //         const buttons = scannerElement.getElementsByTagName("button");
+  //         for (const button of buttons) {
+  //           if (button.textContent?.includes("Start Scanning")) {
+  //             button.textContent = "スキャンを開始";
+  //           } else if (button.textContent?.includes("Stop Scanning")) {
+  //             button.textContent = "スキャンを停止";
+  //           }
+  //         }
 
-          // MutationObserverを設定して動的に追加される要素も監視
-          const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-              if (mutation.type === "childList") {
-                mutation.addedNodes.forEach((node) => {
-                  if (node instanceof HTMLElement) {
-                    // ボタンのテキストを変更
-                    const buttons = node.getElementsByTagName("button");
-                    for (const button of buttons) {
-                      if (button.textContent?.includes("Start Scanning")) {
-                        button.textContent = "スキャンを開始";
-                      } else if (
-                        button.textContent?.includes("Stop Scanning")
-                      ) {
-                        button.textContent = "スキャンを停止";
-                      }
-                    }
+  //         // MutationObserverを設定して動的に追加される要素も監視
+  //         const observer = new MutationObserver((mutations) => {
+  //           mutations.forEach((mutation) => {
+  //             if (mutation.type === "childList") {
+  //               mutation.addedNodes.forEach((node) => {
+  //                 if (node instanceof HTMLElement) {
+  //                   // ボタンのテキストを変更
+  //                   const buttons = node.getElementsByTagName("button");
+  //                   for (const button of buttons) {
+  //                     if (button.textContent?.includes("Start Scanning")) {
+  //                       button.textContent = "スキャンを開始";
+  //                     } else if (
+  //                       button.textContent?.includes("Stop Scanning")
+  //                     ) {
+  //                       button.textContent = "スキャンを停止";
+  //                     }
+  //                   }
 
-                    // リンクを非表示
-                    const links = node.getElementsByTagName("a");
-                    for (const link of links) {
-                      if (link.textContent?.includes("Scan an Image File")) {
-                        link.style.display = "none";
-                      }
-                    }
-                  }
-                });
-              }
-            });
-          });
+  //                   // リンクを非表示
+  //                   const links = node.getElementsByTagName("a");
+  //                   for (const link of links) {
+  //                     if (link.textContent?.includes("Scan an Image File")) {
+  //                       link.style.display = "none";
+  //                     }
+  //                   }
+  //                 }
+  //               });
+  //             }
+  //           });
+  //         });
 
-          observer.observe(scannerElement, {
-            childList: true,
-            subtree: true,
-          });
-        }
+  //         observer.observe(scannerElement, {
+  //           childList: true,
+  //           subtree: true,
+  //         });
+  //       }
 
-        currentScanner.render(
-          (decodedText: string) => {
-            if (workSession?.application_id === decodedText) {
-              setIsQrScanned(true);
-              setScannedData(decodedText);
-              currentScanner?.clear();
-            } else {
-              toast({
-                title: "エラー",
-                description:
-                  "無効なQRコードです。正しいQRコードをスキャンしてください。",
-                variant: "destructive",
-              });
-            }
-          },
-          (errorMessage: string) => {
-            console.log("QRスキャンエラー:", errorMessage);
-          }
-        );
+  //       currentScanner.render(
+  //         (decodedText: string) => {
+  //           if (workSession?.application_id === decodedText) {
+  //             setIsQrScanned(true);
+  //             setScannedData(decodedText);
+  //             currentScanner?.clear();
+  //           } else {
+  //             toast({
+  //               title: "エラー",
+  //               description:
+  //                 "無効なQRコードです。正しいQRコードをスキャンしてください。",
+  //               variant: "destructive",
+  //             });
+  //           }
+  //         },
+  //         (errorMessage: string) => {
+  //           console.log("QRスキャンエラー:", errorMessage);
+  //         }
+  //       );
 
-        setScanner(currentScanner);
-      }, 100); // 100ms待機
+  //       setScanner(currentScanner);
+  //     }, 100); // 100ms待機
 
-      return () => {
-        clearTimeout(timer);
-        if (currentScanner) {
-          currentScanner.clear();
-        }
-      };
+  //     return () => {
+  //       clearTimeout(timer);
+  //       if (currentScanner) {
+  //         currentScanner.clear();
+  //       }
+  //     };
+  //   }
+  // }, [isDialogOpen, isQrScanned, workSession]);
+
+  const handleDecode = (decodedText: string) => {
+    if (workSession?.application_id === decodedText) {
+      setIsQrScanned(true);
+      setScannedData(decodedText);
+    } else {
+      toast({
+        title: "エラー",
+        description:
+          "無効なQRコードです。正しいQRコードをスキャンしてください。",
+        variant: "destructive",
+      });
     }
-  }, [isDialogOpen, isQrScanned, workSession]);
+  }
+
+  const handleError = (errorMessage: string) => {
+    console.log("QRスキャンエラー:", errorMessage);
+  };
 
   const handleSuccessfulScan = async () => {
     if (!workSession) return;
@@ -719,9 +738,12 @@ export default function JobDetail({ params }: PageProps) {
                   "カメラをQRコードに向けてください"
                 )}
               </p>
-              <div className="flex justify-center items-center bg-gray-100 rounded-lg overflow-hidden">
+              <div className="flex justify-center items-center rounded-lg overflow-hidden">
                 {!isQrScanned ? (
-                  <div id="qr-reader" className="w-full" />
+                  <QrCodeReader
+                    handleDecodeAction={handleDecode}
+                    handleErrorAction={handleError}
+                  />
                 ) : (
                   <div className="flex flex-col items-center justify-center p-8">
                     <QrCode className="h-12 w-12 text-green-500 mb-2" />
