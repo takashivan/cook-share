@@ -18,9 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Upload, Building2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
-import {
-  initializeCompany,
-} from "@/lib/api/company";
+import { initializeCompany } from "@/lib/api/company";
 import { getAuthToken } from "@/lib/api/config";
 import { toast } from "@/hooks/use-toast";
 
@@ -253,12 +251,6 @@ export default function CompanyProfilePage() {
           </CardContent>
         </Card>
       </main>
-
-      <footer className="border-t py-6">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© cookchef Co.,Ltd.</p>
-        </div>
-      </footer>
     </div>
   );
 }

@@ -54,11 +54,11 @@ export const login = async (
   credentials: Credentials
 ): Promise<{ sessionToken: string; authToken: string; user: CompanyUser }> => {
   try {
-    const response = await apiRequest<{ sessionToken: string; authToken: string; user: CompanyUser }>(
-      `${AUTH_URL}/login`,
-      "POST",
-      credentials
-    );
+    const response = await apiRequest<{
+      sessionToken: string;
+      authToken: string;
+      user: CompanyUser;
+    }>(`${AUTH_URL}/login`, "POST", credentials);
     if (response.sessionToken) {
       setAuthToken(response.sessionToken, "company");
     }
@@ -144,6 +144,27 @@ export const getCurrentUser = async (): Promise<CompanyUser> => {
     is_active: true,
     is_verified: true,
   };
+};
+
+export const getUserProfile = async (): Promise<CompanyUser> => {
+  return apiRequest(`${BASE_URL}/me`, "GET");
+};
+
+export const updateEmail = async (
+  user_id: string,
+  email: string
+): Promise<void> => {
+  return apiRequest(`${AUTH_URL}/update-email`, "POST", {
+    user_id,
+    email,
+  });
+};
+export const resendVerificationEmail = async (
+  user_id: string
+): Promise<void> => {
+  return apiRequest(`${AUTH_URL}/resend-verification`, "POST", {
+    user_id,
+  });
 };
 
 export const logout = (): Promise<{ success: boolean }> => {

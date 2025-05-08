@@ -351,12 +351,14 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                       variant="secondary"
                       className={`text-sm ${
                         jobDetail.job.number_of_spots > 0 &&
+                        !workSessions?.some((session) => session.job_id === jobDetail.job.id) &&
                         jobDetail.job.expiry_date &&
                         new Date(jobDetail.job.expiry_date) > new Date()
                           ? "bg-black text-white"
                           : "bg-gray-500 text-white"
                       }`}>
                       {jobDetail.job.number_of_spots > 0 &&
+                      !workSessions?.some((session) => session.job_id === jobDetail.job.id) &&
                       jobDetail.job.expiry_date &&
                       new Date(jobDetail.job.expiry_date) > new Date()
                         ? `募集中`
@@ -386,12 +388,14 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                         !user ||
                         !user.is_approved ||
                         jobDetail.job.number_of_spots === 0 ||
+                        workSessions?.some((session) => session.job_id === jobDetail.job.id) ||
                         (jobDetail.job.expiry_date != null && new Date(jobDetail.job.expiry_date) <= new Date()) ||
                         hasTimeOverlap
                       }
                       className={`w-full py-2 text-sm font-medium transition-all duration-300 transform hover:scale-[1.02] ${
                         user &&
                         jobDetail.job.number_of_spots > 0 &&
+                        !workSessions?.some((session) => session.job_id === jobDetail.job.id) &&
                         (jobDetail.job.expiry_date != null && new Date(jobDetail.job.expiry_date) > new Date()) &&
                         !hasTimeOverlap
                           ? "bg-orange-600 hover:bg-orange-700 text-white"
@@ -401,6 +405,8 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                         ? "シェフとしてログインして応募する"
                         : !user.is_approved
                         ? "シェフとしての審査が完了していません"
+                        : workSessions?.some((session) => session.job_id === jobDetail.job.id)
+                        ? "応募済み"
                         : jobDetail.job.number_of_spots === 0
                         ? "募集人数が上限に達しました"
                         : (jobDetail.job.expiry_date != null && new Date(jobDetail.job.expiry_date) <= new Date())
@@ -644,12 +650,14 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                       variant="secondary"
                       className={`${
                         jobDetail.job.number_of_spots > 0 &&
+                        !workSessions?.some((session) => session.job_id === jobDetail.job.id) &&
                         jobDetail.job.expiry_date &&
                         new Date(jobDetail.job.expiry_date) > new Date()
                           ? "bg-black text-white"
                           : "bg-gray-500 text-white"
                       }`}>
                       {jobDetail.job.number_of_spots > 0 &&
+                      !workSessions?.some((session) => session.job_id === jobDetail.job.id) &&
                       jobDetail.job.expiry_date &&
                       new Date(jobDetail.job.expiry_date) > new Date()
                         ? `募集中`
@@ -694,6 +702,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                     !user ||
                     !user.is_approved ||
                     jobDetail.job.number_of_spots === 0 ||
+                    workSessions?.some((session) => session.job_id === jobDetail.job.id) ||
                     (jobDetail.job.expiry_date != null &&
                       new Date(jobDetail.job.expiry_date) <= new Date()) ||
                     hasTimeOverlap
@@ -701,6 +710,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                   className={`w-full py-2 text-sm font-medium transition-all duration-300 transform hover:scale-[1.02] ${
                     user &&
                     jobDetail.job.number_of_spots > 0 &&
+                    !workSessions?.some((session) => session.job_id === jobDetail.job.id) &&
                     jobDetail.job.expiry_date &&
                     new Date(jobDetail.job.expiry_date) > new Date() &&
                     !hasTimeOverlap
@@ -711,6 +721,8 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                     ? "シェフとしてログインして応募する"
                     : !user.is_approved
                     ? "シェフとしての審査が完了していません"
+                    : workSessions?.some((session) => session.job_id === jobDetail.job.id)
+                    ? "応募済み"
                     : jobDetail.job.number_of_spots === 0
                     ? "募集人数が上限に達しました"
                     : jobDetail.job.expiry_date != null &&

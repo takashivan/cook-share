@@ -64,7 +64,7 @@ export function AddCompanyStaffModal({
               <Input
                 id="email"
                 type="email"
-                placeholder="example@cookchef.jp"
+                placeholder="example@chefdom.jp"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

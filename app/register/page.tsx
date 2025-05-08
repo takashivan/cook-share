@@ -14,14 +14,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Image from "next/image";
-import { register } from "@/lib/api/user";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { register } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -35,15 +34,14 @@ export default function RegisterPage() {
         name: formData.get("name") as string,
       };
 
-      const response = await register(data);
-      await login(response.sessionToken, response.user.id);
+      await register(data);
 
       toast({
-        title: "登録が完了しました",
-        description: "プロフィールの登録に進みましょう。",
+        title: "認証メールを送信しました",
+        description: "メールを確認してください",
       });
 
-      router.push("/register/chef-profile");
+      router.push("/register/chef-verify-email");
     } catch (error) {
       console.error("Registration failed:", error);
       toast({
@@ -97,7 +95,7 @@ export default function RegisterPage() {
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="example@cookchef.jp"
+                  placeholder="example@chefdom.jp"
                   required
                 />
               </div>
@@ -132,12 +130,6 @@ export default function RegisterPage() {
           </CardContent>
         </Card>
       </main>
-
-      <footer className="border-t py-6">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© cookchef Co.,Ltd.</p>
-        </div>
-      </footer>
     </div>
   );
 }

@@ -141,11 +141,7 @@ export default function CompanyLoginPage() {
         onClose={() => setIsForgotPasswordModalOpen(false)}
       />
 
-      <footer className="border-t py-6">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© cookchef Co.,Ltd.</p>
-        </div>
-      </footer>
+      <footer className="border-t py-6"></footer>
     </div>
   );
 }
