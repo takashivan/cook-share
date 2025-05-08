@@ -17,7 +17,7 @@ interface Credentials {
   password: string;
 }
 
-interface UserData {
+export interface UserData {
   email: string;
   password: string;
   name: string;
