@@ -19,7 +19,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useMobile } from "@/hooks/use-mobile";
 import { ApplyJobModal } from "@/components/modals/ApplyJobModal";
-import { applicationApi } from "@/lib/api/application";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/layout/header";
@@ -32,8 +31,9 @@ import { useGetRestaurantReviewByRestaurantId } from "@/hooks/api/companyuser/re
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ja } from "date-fns/locale";
 import { useGetWorksessionsByUserId } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserId";
-import { JobsDetailData } from "@/api/__generated__/base/data-contracts";
+import { ApplyCreatePayload, JobsDetailData } from "@/api/__generated__/base/data-contracts";
 import { formatJapanHHMM } from "@/lib/functions";
+import { useApplyJob } from "@/hooks/api/user/jobs/useApplyJob";
 
 interface CreateApplicationParams {
   job_id: number;
@@ -78,13 +78,30 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
   }, [authUser?.id]);
 
   console.log("user", user);
-  const [applicationId, setApplicationId] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const { toast } = useToast();
+
   const { data: restaurantReview } = useGetRestaurantReviewByRestaurantId({
     restaurantId: Number(jobDetail.restaurant.id),
   });
   console.log("restaurantReview", restaurantReview);
+
+  const { trigger: applyJobTrigger } = useApplyJob({
+    jobId: jobDetail.job.id,
+    userId: user?.id,
+    handleSuccess: () => {
+      setIsApplyModalOpen(false);
+      toast({
+        description: "応募が完了しました",
+      });
+    },
+    handleError: () => {
+      toast({
+        variant: "destructive",
+        description: "応募に失敗しました",
+      });
+    }
+  })
 
   // 時間重複チェック
   const hasTimeOverlap = workSessions?.some((session) => {
@@ -180,13 +197,6 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
       return;
     }
 
-    const applicationData: CreateApplicationParams = {
-      job_id: jobDetail.job.id,
-      status: "ACCEPTED",
-      user_id: user.id.toString(),
-      application_date: new Date().toISOString(),
-    };
-
     const workSession = workSessions?.find(
       (session) => session.job_id === jobDetail.job.id
     );
@@ -207,21 +217,11 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
       return;
     }
 
-    try {
-      const response = await applicationApi.createApplication(applicationData);
-      console.log("response", response);
-      setApplicationId(response.id.toString());
-      setIsApplyModalOpen(false);
-      toast({
-        description: "応募が完了しました",
-      });
-    } catch (error) {
-      console.error("Error applying to job:", error);
-      toast({
-        variant: "destructive",
-        description: "応募に失敗しました",
-      });
-    }
+    const applicationData: ApplyCreatePayload = {
+      user_id: user.id.toString(),
+    };
+
+    await applyJobTrigger(applicationData);
   };
 
   const handleApply = async () => {
