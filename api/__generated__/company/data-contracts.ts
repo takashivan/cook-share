@@ -473,6 +473,14 @@ export type WorksessionsThismonthListData = {
     stripe_requirements: object;
     address: string;
     phone: string;
+    last_name: string;
+    given_name: string;
+    last_name_kana: string;
+    given_name_kana: string;
+    categories: number[];
+    postal_code: string;
+    prefecture: string;
+    address2: string;
     magic_link: {
       token: string;
       /**
@@ -550,6 +558,7 @@ export type WorksessionsThismonthListData = {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
+    status: "BANNED" | "PENDING" | "DELETED";
   };
 }[];
 

@@ -217,6 +217,186 @@ export interface SignupCreateData {
   };
 }
 
+export type DailyMetricsDeleteData = object;
+
+export interface DailyMetricsDetailData {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format date */
+  date: string | null;
+  /** @format int64 */
+  total_matches: number;
+  /** @format int64 */
+  chef_cancelled_matches: number;
+  /** @format int64 */
+  restaurant_cancelled_matches: number;
+  /** @format int64 */
+  total_paid: number;
+  /** @format int64 */
+  new_chefs: number;
+  /** @format int64 */
+  new_restaurants: number;
+  /** @format int64 */
+  new_jobs: number;
+  /** @format int64 */
+  total_chefs: number;
+  /** @format int64 */
+  total_restaurants: number;
+  /** @format int64 */
+  total_jobs: number;
+}
+
+export interface DailyMetricsPartialUpdatePayload {
+  /** @format date */
+  date: string | null;
+  /** @format int64 */
+  total_matches: number;
+  /** @format int64 */
+  chef_cancelled_matches: number;
+  /** @format int64 */
+  restaurant_cancelled_matches: number;
+  /** @format int64 */
+  total_paid: number;
+  /** @format int64 */
+  new_chefs: number;
+  /** @format int64 */
+  new_restaurants: number;
+  /** @format int64 */
+  new_jobs: number;
+  /** @format int64 */
+  total_chefs: number;
+  /** @format int64 */
+  total_restaurants: number;
+  /** @format int64 */
+  total_jobs: number;
+}
+
+export interface DailyMetricsPartialUpdateData {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format date */
+  date: string | null;
+  /** @format int64 */
+  total_matches: number;
+  /** @format int64 */
+  chef_cancelled_matches: number;
+  /** @format int64 */
+  restaurant_cancelled_matches: number;
+  /** @format int64 */
+  total_paid: number;
+  /** @format int64 */
+  new_chefs: number;
+  /** @format int64 */
+  new_restaurants: number;
+  /** @format int64 */
+  new_jobs: number;
+  /** @format int64 */
+  total_chefs: number;
+  /** @format int64 */
+  total_restaurants: number;
+  /** @format int64 */
+  total_jobs: number;
+}
+
+export type DailyMetricsListData = {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format date */
+  date: string | null;
+  /** @format int64 */
+  total_matches: number;
+  /** @format int64 */
+  chef_cancelled_matches: number;
+  /** @format int64 */
+  restaurant_cancelled_matches: number;
+  /** @format int64 */
+  total_paid: number;
+  /** @format int64 */
+  new_chefs: number;
+  /** @format int64 */
+  new_restaurants: number;
+  /** @format int64 */
+  new_jobs: number;
+  /** @format int64 */
+  total_chefs: number;
+  /** @format int64 */
+  total_restaurants: number;
+  /** @format int64 */
+  total_jobs: number;
+}[];
+
+export interface DailyMetricsCreatePayload {
+  /** @format date */
+  date: string | null;
+  /** @format int64 */
+  total_matches: number;
+  /** @format int64 */
+  chef_cancelled_matches: number;
+  /** @format int64 */
+  restaurant_cancelled_matches: number;
+  /** @format int64 */
+  total_paid: number;
+  /** @format int64 */
+  new_chefs: number;
+  /** @format int64 */
+  new_restaurants: number;
+  /** @format int64 */
+  new_jobs: number;
+  /** @format int64 */
+  total_chefs: number;
+  /** @format int64 */
+  total_restaurants: number;
+  /** @format int64 */
+  total_jobs: number;
+}
+
+export interface DailyMetricsCreateData {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format date */
+  date: string | null;
+  /** @format int64 */
+  total_matches: number;
+  /** @format int64 */
+  chef_cancelled_matches: number;
+  /** @format int64 */
+  restaurant_cancelled_matches: number;
+  /** @format int64 */
+  total_paid: number;
+  /** @format int64 */
+  new_chefs: number;
+  /** @format int64 */
+  new_restaurants: number;
+  /** @format int64 */
+  new_jobs: number;
+  /** @format int64 */
+  total_chefs: number;
+  /** @format int64 */
+  total_restaurants: number;
+  /** @format int64 */
+  total_jobs: number;
+}
+
 export interface JobApprovePartialUpdatePayload {
   job_id: string;
   reason: string;
@@ -525,6 +705,7 @@ export interface RestaurantApprovePartialUpdateData {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
+    status: "BANNED" | "PENDING" | "DELETED";
   };
   adminlog: {
     /** @format int64 */
@@ -578,6 +759,7 @@ export interface RestaurantBanPartialUpdateData {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
+    status: "BANNED" | "PENDING" | "DELETED";
   };
   adminlog: {
     /** @format int64 */
@@ -693,6 +875,7 @@ export interface RestaurantsBanPartialUpdateData {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
+    status: "BANNED" | "PENDING" | "DELETED";
   };
   adminlog: {
     /** @format int64 */
@@ -757,6 +940,14 @@ export interface UserApprovePartialUpdateData {
   stripe_requirements: object;
   address: string;
   phone: string;
+  last_name: string;
+  given_name: string;
+  last_name_kana: string;
+  given_name_kana: string;
+  categories: number[];
+  postal_code: string;
+  prefecture: string;
+  address2: string;
   magic_link: {
     token: string;
     /**
@@ -815,6 +1006,14 @@ export interface UserBanPartialUpdateData {
     stripe_requirements: object;
     address: string;
     phone: string;
+    last_name: string;
+    given_name: string;
+    last_name_kana: string;
+    given_name_kana: string;
+    categories: number[];
+    postal_code: string;
+    prefecture: string;
+    address2: string;
     magic_link: {
       token: string;
       /**
@@ -884,6 +1083,14 @@ export interface UsersApprovePartialUpdateData {
   stripe_requirements: object;
   address: string;
   phone: string;
+  last_name: string;
+  given_name: string;
+  last_name_kana: string;
+  given_name_kana: string;
+  categories: number[];
+  postal_code: string;
+  prefecture: string;
+  address2: string;
   magic_link: {
     token: string;
     /**
@@ -941,6 +1148,14 @@ export interface UsersBanPartialUpdateData {
     stripe_requirements: object;
     address: string;
     phone: string;
+    last_name: string;
+    given_name: string;
+    last_name_kana: string;
+    given_name_kana: string;
+    categories: number[];
+    postal_code: string;
+    prefecture: string;
+    address2: string;
     magic_link: {
       token: string;
       /**

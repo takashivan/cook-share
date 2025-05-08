@@ -132,6 +132,14 @@ export type GetApplicationData = {
     stripe_requirements: object;
     address: string;
     phone: string;
+    last_name: string;
+    given_name: string;
+    last_name_kana: string;
+    given_name_kana: string;
+    categories: number[];
+    postal_code: string;
+    prefecture: string;
+    address2: string;
     magic_link: {
       token: string;
       /**
@@ -256,6 +264,7 @@ export type GetApplication2Data = {
       restaurant_cuisine_id: number[];
       description: string;
       phone: string;
+      status: "BANNED" | "PENDING" | "DELETED";
     };
   };
 }[];
@@ -1160,6 +1169,14 @@ export type ByRestaurantDetailData = {
     stripe_requirements: object;
     address: string;
     phone: string;
+    last_name: string;
+    given_name: string;
+    last_name_kana: string;
+    given_name_kana: string;
+    categories: number[];
+    postal_code: string;
+    prefecture: string;
+    address2: string;
     magic_link: {
       token: string;
       /**
@@ -1265,6 +1282,7 @@ export interface BySessionDetailData {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
+    status: "BANNED" | "PENDING" | "DELETED";
   };
   user: {
     /** @format uuid */
@@ -1305,6 +1323,14 @@ export interface BySessionDetailData {
     stripe_requirements: object;
     address: string;
     phone: string;
+    last_name: string;
+    given_name: string;
+    last_name_kana: string;
+    given_name_kana: string;
+    categories: number[];
+    postal_code: string;
+    prefecture: string;
+    address2: string;
     magic_link: {
       token: string;
       /**
@@ -1364,6 +1390,7 @@ export type ByUserDetailResult = {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
+    status: "BANNED" | "PENDING" | "DELETED";
   };
 }[];
 
@@ -1848,6 +1875,7 @@ export type RestaurantsListData = {
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
+  status: "BANNED" | "PENDING" | "DELETED";
 }[];
 
 export interface StripeCustomersCreatePayload {
@@ -2211,6 +2239,7 @@ export type RestaurantsListResult = {
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
+  status: "BANNED" | "PENDING" | "DELETED";
 }[];
 
 export interface WorksessionsMessagesListData {
@@ -2802,6 +2831,7 @@ export interface QueryUpcomingjobsListData {
       }[];
       description: string;
       phone: string;
+      status: "BANNED" | "PENDING" | "DELETED";
     };
   }[];
 }
@@ -2886,6 +2916,7 @@ export interface QueryUpcomingListData {
       }[];
       description: string;
       phone: string;
+      status: "BANNED" | "PENDING" | "DELETED";
     };
   }[];
 }
@@ -3000,6 +3031,7 @@ export interface GetJobData {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
+    status: "BANNED" | "PENDING" | "DELETED";
   };
 }
 
@@ -3156,6 +3188,7 @@ export interface QueryUpcomingListResult {
       }[];
       description: string;
       phone: string;
+      status: "BANNED" | "PENDING" | "DELETED";
     };
   }[];
 }
@@ -3221,6 +3254,14 @@ export type ApplicationsListResult = {
     stripe_requirements: object;
     address: string;
     phone: string;
+    last_name: string;
+    given_name: string;
+    last_name_kana: string;
+    given_name_kana: string;
+    categories: number[];
+    postal_code: string;
+    prefecture: string;
+    address2: string;
     magic_link: {
       token: string;
       /**
@@ -3323,6 +3364,14 @@ export type WorksessionsRestaurantTodosListData = {
     stripe_requirements: object;
     address: string;
     phone: string;
+    last_name: string;
+    given_name: string;
+    last_name_kana: string;
+    given_name_kana: string;
+    categories: number[];
+    postal_code: string;
+    prefecture: string;
+    address2: string;
     magic_link: {
       token: string;
       /**
@@ -3444,6 +3493,7 @@ export interface JobsDetailData {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
+    status: "BANNED" | "PENDING" | "DELETED";
   };
 }
 
@@ -3580,6 +3630,7 @@ export interface JobsListResult {
       restaurant_cuisine_id: number[];
       description: string;
       phone: string;
+      status: "BANNED" | "PENDING" | "DELETED";
       cuisine_category: {
         "0": {
           /** @format int64 */
@@ -3733,6 +3784,7 @@ export interface GetJob2Data {
       restaurant_cuisine_id: number[];
       description: string;
       phone: string;
+      status: "BANNED" | "PENDING" | "DELETED";
       cuisine_category: {
         "0": {
           /** @format int64 */
@@ -4265,6 +4317,7 @@ export type CompanyDetailOutput = {
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
+  status: "BANNED" | "PENDING" | "DELETED";
 }[];
 
 export type CompanyusersClone0ListData = object;
@@ -4414,6 +4467,7 @@ export interface RestaurantDetailResult {
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
+  status: "BANNED" | "PENDING" | "DELETED";
 }
 
 export interface RestaurantPartialUpdatePayload {
@@ -4437,6 +4491,7 @@ export interface RestaurantPartialUpdatePayload {
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
+  status: "BANNED" | "PENDING" | "DELETED";
   /** @format binary */
   photo: File | null;
 }
@@ -4490,6 +4545,7 @@ export type ByChefDetailData = {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
+    status: "BANNED" | "PENDING" | "DELETED";
   };
 }[];
 
@@ -4551,6 +4607,14 @@ export type ByRestaurantDetailResult = {
     stripe_requirements: object;
     address: string;
     phone: string;
+    last_name: string;
+    given_name: string;
+    last_name_kana: string;
+    given_name_kana: string;
+    categories: number[];
+    postal_code: string;
+    prefecture: string;
+    address2: string;
     magic_link: {
       token: string;
       /**
@@ -4667,6 +4731,14 @@ export interface BySessionDetailResult {
     stripe_requirements: object;
     address: string;
     phone: string;
+    last_name: string;
+    given_name: string;
+    last_name_kana: string;
+    given_name_kana: string;
+    categories: number[];
+    postal_code: string;
+    prefecture: string;
+    address2: string;
     magic_link: {
       token: string;
       /**
@@ -4705,6 +4777,7 @@ export interface BySessionDetailResult {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
+    status: "BANNED" | "PENDING" | "DELETED";
   };
 }
 
@@ -5153,6 +5226,14 @@ export type ChefReviewsListData = {
     stripe_requirements: object;
     address: string;
     phone: string;
+    last_name: string;
+    given_name: string;
+    last_name_kana: string;
+    given_name_kana: string;
+    categories: number[];
+    postal_code: string;
+    prefecture: string;
+    address2: string;
     magic_link: {
       token: string;
       /**
@@ -5352,6 +5433,14 @@ export type RestaurantReviewsListResult = {
     stripe_requirements: object;
     address: string;
     phone: string;
+    last_name: string;
+    given_name: string;
+    last_name_kana: string;
+    given_name_kana: string;
+    categories: number[];
+    postal_code: string;
+    prefecture: string;
+    address2: string;
     magic_link: {
       token: string;
       /**
@@ -5415,6 +5504,7 @@ export interface RestaurantsDetailData {
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
+  status: "BANNED" | "PENDING" | "DELETED";
 }
 
 export interface RestaurantsPartialUpdatePayload {
@@ -5438,6 +5528,7 @@ export interface RestaurantsPartialUpdatePayload {
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
+  status: "BANNED" | "PENDING" | "DELETED";
   /** @format binary */
   photo: File | null;
 }
@@ -5466,6 +5557,7 @@ export type RestaurantsListOutput = {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
+    status: "BANNED" | "PENDING" | "DELETED";
     /** @format int64 */
     id: number;
     /**
@@ -5500,6 +5592,7 @@ export interface RestaurantsCreatePayload {
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
+  status: "BANNED" | "PENDING" | "DELETED";
   /** @format binary */
   photo: File | null;
 }
@@ -5528,6 +5621,7 @@ export type RestaurantListData = {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
+    status: "BANNED" | "PENDING" | "DELETED";
     /** @format int64 */
     id: number;
     /**
@@ -5562,6 +5656,7 @@ export interface RestaurantCreatePayload {
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
+  status: "BANNED" | "PENDING" | "DELETED";
   /** @format binary */
   photo: File | null;
 }
@@ -5614,6 +5709,14 @@ export interface EmailChangeCreateData {
   stripe_requirements: object;
   address: string;
   phone: string;
+  last_name: string;
+  given_name: string;
+  last_name_kana: string;
+  given_name_kana: string;
+  categories: number[];
+  postal_code: string;
+  prefecture: string;
+  address2: string;
   magic_link: {
     token: string;
     /**
@@ -5670,6 +5773,14 @@ export interface EmailConfirmCreateData {
   stripe_requirements: object;
   address: string;
   phone: string;
+  last_name: string;
+  given_name: string;
+  last_name_kana: string;
+  given_name_kana: string;
+  categories: number[];
+  postal_code: string;
+  prefecture: string;
+  address2: string;
   magic_link: {
     token: string;
     /**
@@ -5772,6 +5883,7 @@ export type SessionHistoryCurrentListData = {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
+    status: "BANNED" | "PENDING" | "DELETED";
   };
   job: {
     /** @format int64 */
@@ -5857,6 +5969,14 @@ export interface UserDetailData {
   stripe_requirements: object;
   address: string;
   phone: string;
+  last_name: string;
+  given_name: string;
+  last_name_kana: string;
+  given_name_kana: string;
+  categories: number[];
+  postal_code: string;
+  prefecture: string;
+  address2: string;
   magic_link: {
     token: string;
     /**
@@ -5895,6 +6015,14 @@ export interface UserPartialUpdatePayload {
   stripe_requirements: object;
   address: string;
   phone: string;
+  last_name: string;
+  given_name: string;
+  last_name_kana: string;
+  given_name_kana: string;
+  categories: number[];
+  postal_code: string;
+  prefecture: string;
+  address2: string;
   /** @format binary */
   photo: File | null;
   magic_link: {
@@ -6011,6 +6139,7 @@ export type ChefReviewsListResult = {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
+    status: "BANNED" | "PENDING" | "DELETED";
   };
 }[];
 
@@ -6080,6 +6209,7 @@ export type RestaurantReviewsListOutput = {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
+    status: "BANNED" | "PENDING" | "DELETED";
   };
 }[];
 
@@ -6130,6 +6260,7 @@ export type ReviewsListResult = {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
+    status: "BANNED" | "PENDING" | "DELETED";
   };
 }[];
 
@@ -6206,6 +6337,7 @@ export type SessionHistoryCurrentListResult = {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
+    status: "BANNED" | "PENDING" | "DELETED";
   };
   job: {
     /** @format int64 */
@@ -6363,6 +6495,7 @@ export type WorksessionsUserTodosListData = {
       restaurant_cuisine_id: number[];
       description: string;
       phone: string;
+      status: "BANNED" | "PENDING" | "DELETED";
     };
   };
 }[];
@@ -6516,6 +6649,7 @@ export type WorksessionsListResult = {
       restaurant_cuisine_id: number[];
       description: string;
       phone: string;
+      status: "BANNED" | "PENDING" | "DELETED";
     };
   };
 }[];
@@ -6563,6 +6697,14 @@ export interface UsersDetailData {
   stripe_requirements: object;
   address: string;
   phone: string;
+  last_name: string;
+  given_name: string;
+  last_name_kana: string;
+  given_name_kana: string;
+  categories: number[];
+  postal_code: string;
+  prefecture: string;
+  address2: string;
   magic_link: {
     token: string;
     /**
@@ -6601,6 +6743,14 @@ export interface UsersPartialUpdatePayload {
   stripe_requirements: object;
   address: string;
   phone: string;
+  last_name: string;
+  given_name: string;
+  last_name_kana: string;
+  given_name_kana: string;
+  categories: number[];
+  postal_code: string;
+  prefecture: string;
+  address2: string;
   /** @format binary */
   photo: File | null;
   magic_link: {
@@ -6657,6 +6807,14 @@ export type UsersListData = {
   stripe_requirements: object;
   address: string;
   phone: string;
+  last_name: string;
+  given_name: string;
+  last_name_kana: string;
+  given_name_kana: string;
+  categories: number[];
+  postal_code: string;
+  prefecture: string;
+  address2: string;
   magic_link: {
     token: string;
     /**
@@ -6700,6 +6858,14 @@ export interface UsersCreatePayload {
   stripe_requirements: object;
   address: string;
   phone: string;
+  last_name: string;
+  given_name: string;
+  last_name_kana: string;
+  given_name_kana: string;
+  categories: number[];
+  postal_code: string;
+  prefecture: string;
+  address2: string;
   magic_link: {
     token: string;
     /**
@@ -6752,6 +6918,14 @@ export interface UsersCreateData {
   stripe_requirements: object;
   address: string;
   phone: string;
+  last_name: string;
+  given_name: string;
+  last_name_kana: string;
+  given_name_kana: string;
+  categories: number[];
+  postal_code: string;
+  prefecture: string;
+  address2: string;
   magic_link: {
     token: string;
     /**
@@ -6804,6 +6978,14 @@ export type UserListData = {
   stripe_requirements: object;
   address: string;
   phone: string;
+  last_name: string;
+  given_name: string;
+  last_name_kana: string;
+  given_name_kana: string;
+  categories: number[];
+  postal_code: string;
+  prefecture: string;
+  address2: string;
   magic_link: {
     token: string;
     /**
@@ -6847,6 +7029,14 @@ export interface UserCreatePayload {
   stripe_requirements: object;
   address: string;
   phone: string;
+  last_name: string;
+  given_name: string;
+  last_name_kana: string;
+  given_name_kana: string;
+  categories: number[];
+  postal_code: string;
+  prefecture: string;
+  address2: string;
   magic_link: {
     token: string;
     /**
@@ -6899,6 +7089,14 @@ export interface UserCreateData {
   stripe_requirements: object;
   address: string;
   phone: string;
+  last_name: string;
+  given_name: string;
+  last_name_kana: string;
+  given_name_kana: string;
+  categories: number[];
+  postal_code: string;
+  prefecture: string;
+  address2: string;
   magic_link: {
     token: string;
     /**
@@ -7075,6 +7273,14 @@ export type RestaurantTodoDetailData = {
     stripe_requirements: object;
     address: string;
     phone: string;
+    last_name: string;
+    given_name: string;
+    last_name_kana: string;
+    given_name_kana: string;
+    categories: number[];
+    postal_code: string;
+    prefecture: string;
+    address2: string;
     magic_link: {
       token: string;
       /**
@@ -7237,6 +7443,7 @@ export type UserDetailResult = {
       restaurant_cuisine_id: number[];
       description: string;
       phone: string;
+      status: "BANNED" | "PENDING" | "DELETED";
     };
   };
 }[];
@@ -7352,6 +7559,7 @@ export type UserTodoDetailData = {
       restaurant_cuisine_id: number[];
       description: string;
       phone: string;
+      status: "BANNED" | "PENDING" | "DELETED";
     };
   };
 }[];
@@ -7985,6 +8193,7 @@ export interface ChefReviewListResult {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
+    status: "BANNED" | "PENDING" | "DELETED";
   };
   user: {
     /** @format uuid */
@@ -8025,6 +8234,14 @@ export interface ChefReviewListResult {
     stripe_requirements: object;
     address: string;
     phone: string;
+    last_name: string;
+    given_name: string;
+    last_name_kana: string;
+    given_name_kana: string;
+    categories: number[];
+    postal_code: string;
+    prefecture: string;
+    address2: string;
     magic_link: {
       token: string;
       /**
@@ -8346,6 +8563,14 @@ export interface RestaurantReviewListResult {
     stripe_requirements: object;
     address: string;
     phone: string;
+    last_name: string;
+    given_name: string;
+    last_name_kana: string;
+    given_name_kana: string;
+    categories: number[];
+    postal_code: string;
+    prefecture: string;
+    address2: string;
     magic_link: {
       token: string;
       /**
@@ -8384,6 +8609,7 @@ export interface RestaurantReviewListResult {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
+    status: "BANNED" | "PENDING" | "DELETED";
   };
 }
 
