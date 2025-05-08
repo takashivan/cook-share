@@ -66,8 +66,10 @@ export default function VerifyEmailPage() {
               <p className="text-green-600">
                 メールアドレスの認証が完了しました
               </p>
-              <Button onClick={() => router.push("/login")} className="w-full">
-                ログインページへ
+              <Button
+                onClick={() => router.push("/register/chef-profile")}
+                className="w-full">
+                プロフィールの登録
               </Button>
             </div>
           )}

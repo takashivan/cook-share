@@ -5,13 +5,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import {
-  Home,
-  Calendar,
-  Wallet,
-  MessageSquare,
-  ListTodo,
-} from "lucide-react";
+import { Home, Calendar, Wallet, MessageSquare, ListTodo } from "lucide-react";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { ChefNotificationDropdown } from "@/components/notifications/chefNotificationDropdown/ChefNotificationDropdown";
 import { useSubscriptionChefNotificationsByUserId } from "@/hooks/api/user/chefNotifications/useSubscriptionChefNotificationsByUserId";
@@ -68,11 +62,26 @@ export default function ChefLayout({
       return;
     }
 
-    // 初期ロード後、未認証の場合のみリダイレクト
+    // 初期ロード後、未認証の場合はログインページへ
     if (!isAuthenticated && pathname.startsWith("/chef")) {
       router.replace("/login");
+      return;
     }
-  }, [isAuthenticated, router, pathname, isInitialLoad]);
+
+    // 認証済みの場合、メール認証とプロフィール完了状態をチェック
+    if (isAuthenticated && user) {
+      // @ts-ignore - TODO: Fix type definition
+      if (!user.is_verified) {
+        router.replace("/register/chef-verify-email");
+        return;
+      }
+      // @ts-ignore - TODO: Fix type definition
+      if (!user.profile_completed) {
+        router.replace("/register/chef-profile");
+        return;
+      }
+    }
+  }, [isAuthenticated, router, pathname, isInitialLoad, user]);
 
   // 初期ロード時は表示を維持
   if (isInitialLoad) {
@@ -82,6 +91,14 @@ export default function ChefLayout({
   // 初期ロード後、未認証の場合は何も表示しない
   if (!isAuthenticated && pathname.startsWith("/chef")) {
     return null;
+  }
+
+  // 認証済みだが、メール認証またはプロフィール完了していない場合も表示しない
+  if (isAuthenticated && user) {
+    // @ts-ignore - TODO: Fix type definition
+    if (!user.is_verified || !user.profile_completed) {
+      return null;
+    }
   }
 
   return (
@@ -99,9 +116,7 @@ export default function ChefLayout({
             />
           </Link>
           <div className="flex items-center gap-4">
-            <ChefNotificationDropdown
-              notifications={notifications ?? []}
-            />
+            <ChefNotificationDropdown notifications={notifications ?? []} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Avatar className="cursor-pointer">
@@ -178,9 +193,7 @@ export default function ChefLayout({
             <Link
               href="/chef/todos"
               className={`flex flex-col items-center justify-center gap-1 ${
-                pathname === "/chef/todos"
-                  ? "text-orange-600"
-                  : "text-gray-500"
+                pathname === "/chef/todos" ? "text-orange-600" : "text-gray-500"
               }`}>
               <ListTodo className="h-5 w-5" />
               <span className="text-xs">やること</span>

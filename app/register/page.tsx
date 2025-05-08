@@ -37,11 +37,11 @@ export default function RegisterPage() {
       await register(data);
 
       toast({
-        title: "登録が完了しました",
-        description: "プロフィールの登録に進みましょう。",
+        title: "認証メールを送信しました",
+        description: "メールを確認してください",
       });
 
-      router.push("/register/chef-profile");
+      router.push("/register/chef-verify-email");
     } catch (error) {
       console.error("Registration failed:", error);
       toast({
@@ -95,7 +95,7 @@ export default function RegisterPage() {
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="example@cookchef.jp"
+                  placeholder="example@chefdom.jp"
                   required
                 />
               </div>
@@ -130,12 +130,6 @@ export default function RegisterPage() {
           </CardContent>
         </Card>
       </main>
-
-      <footer className="border-t py-6">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© cookchef Co.,Ltd.</p>
-        </div>
-      </footer>
     </div>
   );
 }

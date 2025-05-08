@@ -25,6 +25,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   register: (data: UserData) => Promise<void>;
+  setUser: (user: UserProfile | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -34,6 +35,7 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => {},
   logout: () => {},
   register: async () => {},
+  setUser: () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -79,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("user", JSON.stringify(userData));
     setIsAuthenticated(true);
     router.push("/chef/dashboard");
-  }
+  };
 
   const handleLogin = async (email: string, password: string) => {
     try {
@@ -111,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error("Login error:", error);
       throw error;
     }
-  }
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -126,6 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login: handleLogin,
         logout: handleLogout,
         register: handleRegister,
+        setUser,
       }}>
       {children}
     </AuthContext.Provider>

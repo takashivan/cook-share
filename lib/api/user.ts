@@ -8,6 +8,7 @@ import {
   clearCurrentUser,
   setCurrentUser,
 } from "./config";
+import { User } from "@/types";
 
 const AUTH_URL = API_CONFIG.baseURLs.auth;
 const USER_URL = API_CONFIG.baseURLs.user;
@@ -53,12 +54,24 @@ export interface UserProfile {
   is_verified?: boolean;
   experience?: string;
   profileImage?: string;
-  stripe_account_id?: string;
   stripe_verified?: boolean;
   stripe_requirements?: {
     currentlyDue?: string[];
     eventuallyDue?: string[];
   };
+  last_name?: string;
+  given_name?: string;
+  last_name_kana?: string;
+  given_name_kana?: string;
+  postal_code?: string;
+  prefecture?: string;
+  address1?: string;
+  city?: string;
+  town?: string;
+  street?: string;
+  address2?: string;
+  categories?: number[];
+  profile_completed?: boolean;
 }
 
 // 共通の型定義
@@ -143,6 +156,15 @@ export const register = async (
       certifications?: string[];
       dateofbirth?: string;
       status?: string;
+      last_name?: string;
+      given_name?: string;
+      last_name_kana?: string;
+      given_name_kana?: string;
+      postal_code?: string;
+      prefecture?: string;
+      address?: string;
+      address2?: string;
+      categories?: number[];
     };
   }>(`${AUTH_URL}/signup`, "POST", userData);
 
@@ -213,6 +235,17 @@ export const updateUserProfile = (
   profileData: ProfileData
 ): Promise<UserProfile> => {
   return apiRequest<UserProfile>(`${USER_URL}/${userId}`, "PATCH", profileData);
+};
+
+export const createUserProfile = (
+  userId: UserId,
+  profileData: ProfileData
+): Promise<UserProfile> => {
+  return apiRequest<UserProfile>(
+    `${USER_URL}/${userId}/profile`,
+    "PATCH",
+    profileData
+  );
 };
 
 export const updateAvatar = async (
@@ -431,4 +464,24 @@ export const resetPassword = (
 
 export const getWorksessionHistories = (user_id: UserId): Promise<any> => {
   return apiRequest(`${USER_URL}/${user_id}/sessionHistory/current`, "GET");
+};
+
+export const getMe = async (): Promise<UserProfile> => {
+  return apiRequest<UserProfile>(`${AUTH_URL}/me`, "GET");
+};
+
+export const resendVerificationEmail = async (
+  user_id: string
+): Promise<void> => {
+  return apiRequest(`${AUTH_URL}/resend-verification`, "POST", { user_id });
+};
+
+export const updateEmail = async (
+  user_id: string,
+  newEmail: string
+): Promise<void> => {
+  return apiRequest(`${AUTH_URL}/update-email`, "POST", {
+    user_id,
+    email: newEmail,
+  });
 };
