@@ -15,7 +15,6 @@ import {
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { login } from "@/lib/api/user";
 import { toast } from "@/hooks/use-toast";
 import { ForgotPasswordModal } from "@/components/modals/ForgotPasswordModal";
 

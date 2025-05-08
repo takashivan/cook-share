@@ -8,6 +8,8 @@ import useSWRMutation from 'swr/mutation'
 export interface Params {
   companyId?: string;
   restaurantId?: number;
+  handleSuccess?: (data: any) => void;
+  handleError?: (error: any) => void;
 }
 
 export const useCreateJob = (params: Params) => {
@@ -39,6 +41,17 @@ export const useCreateJob = (params: Params) => {
         const jobsByRestaurantIdKey = restaurant.jobsListQueryArgs(params.restaurantId)[0];
         mutate(jobsByRestaurantIdKey);
       }
-    }
+
+      // 成功時のコールバック
+      if (params.handleSuccess) {
+        params.handleSuccess(data);
+      }
+    },
+    onError: (error) => {
+      // エラー時のコールバック
+      if (params.handleError) {
+        params.handleError(error);
+      }
+    },
   })
 }

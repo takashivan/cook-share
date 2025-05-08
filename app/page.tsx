@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, Clock, MapPin, Search } from "lucide-react";
+import { ChevronRight, Clock, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { Header } from "@/components/layout/header";
 import { Card } from "@/components/ui/card";
@@ -12,37 +11,62 @@ import { LoadingScreen } from "@/components/LoadingScreen";
 import { Badge } from "@/components/ui/badge";
 import { useGetJobsByUpcoming } from "@/hooks/api/all/jobs/useGetJobsByUpcoming";
 import { motion } from "framer-motion";
+import { SearchFields, SearchId } from "@/components/jobs/SearchFields";
+import { QueryUpcomingListResult } from "@/api/__generated__/base/data-contracts";
+import { DateSelector } from "@/components/jobs/DateSelector";
 
 export default function Home() {
-  const [selectedDate, setSelectedDate] = useState<string>(
-    new Date().toLocaleDateString("ja-JP", { month: "2-digit", day: "2-digit" })
-  );
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedArea, setSelectedArea] = useState<SearchId>('all');
+  const [selectedCuisines, setSelectedCuisines] = useState<SearchId[]>(['all']);
+  const [keyword, setKeyword] = useState<string>("");
+  const [filteredJobs, setFilteredJobs] = useState<QueryUpcomingListResult['jobs']>([]);
 
   const { data: jobsData, error, isLoading } = useGetJobsByUpcoming();
 
-  // 次の7日分の日付を生成
-  const dates = Array.from({ length: 7 }, (_, i) => {
-    const date = new Date();
-    date.setDate(date.getDate() + i);
-    return {
-      date: date.toLocaleDateString("ja-JP", {
-        month: "2-digit",
-        day: "2-digit",
-      }),
-      day: date.toLocaleDateString("ja-JP", { weekday: "short" }),
-    };
-  });
-
-  // データ取得
+  // jobsData が取得されたら初期表示として全件セット
   useEffect(() => {
-    // セッションの存在をチェック
-    const checkSession = () => {
-      const hasSession = !!localStorage.getItem("auth_token");
-      setIsLoggedIn(hasSession);
-    };
-    checkSession();
-  }, [isLoading]);
+    if (jobsData) {
+      setFilteredJobs(jobsData.jobs);
+    }
+  }, [jobsData]);
+
+  // 検索
+  const handleSearch = (date: Date | null) => {
+    if (!jobsData) return;
+
+    const result = jobsData.jobs.filter(job => {
+      const matchArea = selectedArea === 'all' ? true : 
+        selectedArea === 1 ? 
+          ["茨城県", "栃木県", "群馬県", "埼玉県", "千葉県", "東京都", "神奈川県"].some(prefecture => 
+            job.restaurant.address?.includes(prefecture)
+          ) :
+        selectedArea === 2 ?
+          ["京都府", "大阪府", "兵庫県", "奈良県", "滋賀県", "和歌山県"].some(prefecture => 
+            job.restaurant.address?.includes(prefecture)
+          ) :
+        true;
+      const matchCuisine = selectedCuisines.includes('all') ? true :
+        job.restaurant.restaurant_cuisine_id?.some(cuisine =>
+          selectedCuisines.includes(cuisine[0].id)
+        ) ?? true;
+      const matchKeyword = keyword
+        ? job.title.includes(keyword) || job.restaurant.name.includes(keyword)
+        : true;
+
+      // 日付のフィルタリング
+      const workDate = new Date(job.work_date);
+      const isSameDate = date
+        ? workDate.getFullYear() === date.getFullYear() &&
+          workDate.getMonth() === date.getMonth() &&
+          workDate.getDate() === date.getDate()
+        : true;
+
+      return matchArea && matchCuisine && matchKeyword && isSameDate;
+    });
+
+    setFilteredJobs(result);
+  };
 
   if (isLoading) {
     return (
@@ -100,82 +124,31 @@ export default function Home() {
         </section>
 
         {/* Search Section */}
-        <section className="bg-gray-50 py-4 border-b">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1 flex flex-col md:flex-row gap-2">
-                <div className="relative flex items-center border rounded-md bg-white px-3 py-2 flex-1">
-                  <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                  <span className="text-sm">すべてのエリア</span>
-                  <ChevronRight className="h-4 w-4 text-gray-400 ml-auto" />
-                </div>
-
-                <div className="relative flex items-center border rounded-md bg-white px-3 py-2 flex-1">
-                  <span className="text-sm">すべてのジャンル</span>
-                  <ChevronRight className="h-4 w-4 text-gray-400 ml-auto" />
-                </div>
-
-                <div className="relative flex items-center border rounded-md bg-white px-3 py-2 flex-1">
-                  <Input
-                    type="text"
-                    placeholder="キーワードを入力"
-                    className="border-0 p-0 h-auto focus-visible:ring-0 text-sm"
-                  />
-                  <Search className="h-4 w-4 text-gray-400 ml-auto" />
-                </div>
-              </div>
-
-              <Button className="bg-black text-white hover:bg-black/90">
-                検索
-              </Button>
-            </div>
-          </div>
-        </section>
+        <SearchFields
+          selectedAreaId={selectedArea}
+          selectedCuisineIds={selectedCuisines}
+          keyword={keyword}
+          onAreaChangeAction={setSelectedArea}
+          onCuisineChangeAction={setSelectedCuisines}
+          onKeywordChangeAction={setKeyword}
+          onSearchAction={() => handleSearch(selectedDate)}
+        />
 
         {/* 日付選択 */}
-        <section className="bg-white py-4">
-          <div className="container mx-auto px-4">
-            <div className="mb-2 font-medium">日付で絞り込む</div>
-            <div className="flex items-center">
-              <div className="mr-4 text-sm">今日</div>
-              <div className="flex items-center overflow-x-auto whitespace-nowrap">
-                <button className="p-2">
-                  <ChevronLeft size={20} />
-                </button>
-
-                {dates.map((item) => (
-                  <button
-                    key={item.date}
-                    className={`flex flex-col items-center mx-2 ${
-                      selectedDate === item.date ? "font-bold" : ""
-                    }`}
-                    onClick={() => setSelectedDate(item.date)}>
-                    <div className="text-sm">{item.date}</div>
-                    <div
-                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs mt-1 ${
-                        selectedDate === item.date
-                          ? "bg-black text-white"
-                          : "text-black"
-                      }`}>
-                      {item.day}
-                    </div>
-                  </button>
-                ))}
-
-                <button className="p-2">
-                  <ChevronRight size={20} />
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
+        <DateSelector
+          selectedDate={selectedDate}
+          onDateChangeAction={(date) => {
+            setSelectedDate(date);
+            handleSearch(date);
+          }}
+        />
 
         {/* Job Listings */}
         <section className="py-6">
           <div className="container mx-auto px-4">
             <h1 className="text-2xl font-bold mb-6">新着求人</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {jobsData?.jobs.map((job, index: number) => (
+              {filteredJobs.map((job, index: number) => (
                 <motion.div
                   key={job.id}
                   initial={{ opacity: 0, y: 20 }}

@@ -2,13 +2,9 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
-import { verifyEmail } from "@/lib/api/user";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import { useAuth } from "@/lib/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
-import { changeEmail } from "@/lib/api/companyUser";
 import { confirmEmail } from "@/lib/api/companyUser";
 
 export default function ChefVerifyChangeEmailPage() {
