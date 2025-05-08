@@ -1048,7 +1048,7 @@ ${changeRequest.reason}
                         placeholder="メッセージを入力..."
                         minRows={1}
                         maxRows={6}
-                        className="flex-1 resize-none bg-white px-3 py-2 border rounded-md text-sm focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
+                        className="flex-1 resize-none bg-white px-3 py-2 border rounded-md text-base focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
                         onKeyDown={(
                           e: React.KeyboardEvent<HTMLTextAreaElement>
                         ) => {
