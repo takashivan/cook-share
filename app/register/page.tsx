@@ -14,14 +14,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Image from "next/image";
-import { register } from "@/lib/api/user";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { register } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -35,8 +34,7 @@ export default function RegisterPage() {
         name: formData.get("name") as string,
       };
 
-      const response = await register(data);
-      await login(response.sessionToken, response.user.id);
+      await register(data);
 
       toast({
         title: "登録が完了しました",

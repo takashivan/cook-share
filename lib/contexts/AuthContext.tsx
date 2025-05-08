@@ -14,9 +14,9 @@ import {
   clearAuthToken,
   getAuthToken,
 } from "@/lib/api/config";
-import type { UserProfile } from "@/lib/api/user";
+import type { UserData, UserProfile } from "@/lib/api/user";
 import { useRouter } from "next/navigation";
-import { login, logout, getUserProfile } from "@/lib/api/user";
+import { login, logout, getUserProfile, register } from "@/lib/api/user";
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -24,6 +24,7 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  register: (data: UserData) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -32,6 +33,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   login: async () => {},
   logout: () => {},
+  register: async () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -70,19 +72,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initAuth();
   }, []);
 
+  const setAuth = (token: string, userData: UserProfile) => {
+    setAuthToken(token, "chef");
+    setUser(userData);
+    setCurrentUser(userData, "chef");
+    localStorage.setItem("user", JSON.stringify(userData));
+    setIsAuthenticated(true);
+    router.push("/chef/dashboard");
+  }
+
   const handleLogin = async (email: string, password: string) => {
     try {
       const { sessionToken, user } = await login({
         email,
         password,
       });
-      setAuthToken(sessionToken, "chef");
-      const fullProfile = await getUserProfile(user.id);
-      setUser(fullProfile);
-      setCurrentUser(fullProfile, "chef");
-      localStorage.setItem("user", JSON.stringify(fullProfile));
-      setIsAuthenticated(true);
-      router.push("/chef/dashboard");
+      setAuth(sessionToken, user);
     } catch (error) {
       console.error("Login error:", error);
       throw error;
@@ -98,6 +103,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push("/login");
   };
 
+  const handleRegister = async (data: UserData) => {
+    try {
+      const response = await register(data);
+      setAuth(response.sessionToken, response.user);
+    } catch (error) {
+      console.error("Login error:", error);
+      throw error;
+    }
+  }
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -110,6 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         login: handleLogin,
         logout: handleLogout,
+        register: handleRegister,
       }}>
       {children}
     </AuthContext.Provider>

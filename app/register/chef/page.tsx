@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { register } from "@/lib/api/user";
 import { toast } from "@/hooks/use-toast";
 import Link from "next/link";
 import Image from "next/image";
@@ -20,7 +19,7 @@ import {
 
 export default function ChefRegisterPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { register } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,11 +48,7 @@ export default function ChefRegisterPage() {
 
     try {
       // まず登録を試みる
-      const response = await register({ email, password, name });
-      console.log("Registration response:", response);
-
-      // 登録成功後、自動的にログイン
-      await login(email, password);
+      await register({ email, password, name });
 
       toast({
         title: "登録が完了しました",
