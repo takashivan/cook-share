@@ -8,16 +8,10 @@ import {
   ReactNode,
 } from "react";
 import {
-  login as companyLogin,
-  logout as companyLogout,
-  getCompanyProfile,
-} from "@/lib/api/companyUser";
-import {
   setAuthToken,
   clearAuthToken,
   getCurrentUser,
   setCurrentUser,
-  getAuthToken,
   clearCurrentUser,
 } from "@/lib/api/config";
 import type { CompanyUser } from "@/lib/api/companyUser";

@@ -7,7 +7,6 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import API from "@/lib/api";
 import {
   getCurrentUser,
   setCurrentUser,

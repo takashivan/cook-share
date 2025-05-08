@@ -13,12 +13,10 @@ import { useInView } from "react-intersection-observer";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import type { Message, WorkSessionWithJob } from "@/types";
-import { getWorkSessionsByUserId } from "@/lib/api/workSession";
-import { messageApi, CreateMessageParams } from "@/lib/api/message";
-import useSWR from "swr";
 import { LinkAccountScreen } from "../components/LinkAccountScreen";
 import { useSubscriptionMessagesByUserId } from "@/hooks/api/user/messages/useSubscriptionMessagesByUserId";
+import { useGetWorksessionsByUserId } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserId";
+import { WorksessionsListResult } from "@/api/__generated__/base/data-contracts";
 
 interface AnimatedSectionProps {
   children: React.ReactNode;
@@ -53,17 +51,9 @@ function MessagesPage({ profile }: { profile: any }) {
   const [messageInput, setMessageInput] = useState("");
 
   // ワークセッション一覧の取得
-  const { data: workSessions } = useSWR<WorkSessionWithJob[]>(
-    user?.id ? `workSessions-${user.id}` : null,
-    async () => {
-      const result = await getWorkSessionsByUserId(user?.id || "");
-      return result as WorkSessionWithJob[];
-    },
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    }
-  );
+  const { data: workSessions } = useGetWorksessionsByUserId({
+    userId: user?.id,
+  });
 
   // 選択されたワークセッション
   const selectedWorkSession = workSessions?.find(
@@ -74,7 +64,7 @@ function MessagesPage({ profile }: { profile: any }) {
   const { messagesData, sendMessage } = useSubscriptionMessagesByUserId({
     userId: user?.id,
     workSessionId: selectedWorkSession?.id,
-    applicationId: selectedWorkSession?.application_id,
+    applicationId: selectedWorkSession?.application_id ?? undefined,
   })
 
   const handleSendMessage = async () => {
@@ -96,7 +86,7 @@ function MessagesPage({ profile }: { profile: any }) {
     }
   };
 
-  const renderMessageCard = (workSession: WorkSessionWithJob) => {
+  const renderMessageCard = (workSession: WorksessionsListResult[number]) => {
     if (!workSession.job) return null;
 
     const workDate = format(

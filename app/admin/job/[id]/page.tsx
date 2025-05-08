@@ -178,7 +178,7 @@ export default function JobDetail({ params }: PageParams) {
   const { messagesData, sendMessage } = useSubscriptionMessagesByCompanyUserId({
     companyUserId: user?.id,
     workSessionId: selectedWorkSession?.id,
-    applicationId: selectedWorkSession?.application_id,
+    applicationId: selectedWorkSession?.application_id ?? undefined,
   });
 
   // 未読メッセージの取得
@@ -856,7 +856,7 @@ ${changeRequest.reason}
                           <div className="flex flex-col items-center justify-center p-4">
                             <div className="bg-white p-4 rounded-lg shadow-md">
                               <QRCodeSVG
-                                value={selectedWorkSession.application_id}
+                                value={selectedWorkSession.application_id ?? ""}
                                 size={200}
                                 level="H"
                                 includeMargin={true}
@@ -1048,7 +1048,7 @@ ${changeRequest.reason}
                         placeholder="メッセージを入力..."
                         minRows={1}
                         maxRows={6}
-                        className="flex-1 resize-none bg-white px-3 py-2 border rounded-md text-sm focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
+                        className="flex-1 resize-none bg-white px-3 py-2 border rounded-md text-base focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
                         onKeyDown={(
                           e: React.KeyboardEvent<HTMLTextAreaElement>
                         ) => {

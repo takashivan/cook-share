@@ -12,6 +12,8 @@
 
 import {
   ApplicationsListResult,
+  ApplyCreateData,
+  ApplyCreatePayload,
   JobsCreateData,
   JobsCreatePayload,
   JobsDeleteData,
@@ -76,6 +78,41 @@ export class Jobs<
     const key = enabled ? [`/jobs/${jobId}/applications`] : null;
     const fetcher = () =>
       this.applicationsList(jobId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags jobs
+   * @name ApplyCreate
+   * @request POST:/jobs/{job_id}/apply
+   */
+  applyCreate = (
+    jobId: number,
+    data: ApplyCreatePayload,
+    params: RequestParams = {},
+  ) =>
+    this.request<ApplyCreateData, void>({
+      path: `/jobs/${jobId}/apply`,
+      method: "POST",
+      body: data,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+
+  applyCreateQueryArgs = (
+    jobId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/jobs/${jobId}/apply`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: ApplyCreatePayload },
+    ) => Promise<ApplyCreateData> = (_, { arg }) =>
+      this.applyCreate(jobId, arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 

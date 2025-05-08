@@ -417,7 +417,7 @@ export type WorksessionsThismonthListData = {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   user_id: string | null;
   /** @format int64 */
@@ -672,7 +672,7 @@ export interface SessionHistoryCurrentListData {
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
-    application_id: string;
+    application_id: string | null;
     /** @format uuid */
     user_id: string | null;
     /** @format int64 */

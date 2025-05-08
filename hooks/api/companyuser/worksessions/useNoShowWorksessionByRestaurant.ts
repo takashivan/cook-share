@@ -13,17 +13,14 @@ export const useNoShowWorksessionByRestaurant = (params: Params) => {
   const worksessions = getApi(Worksessions);
 
   return useSWRMutation(
-    `cancel-worksession-${params.worksession_id}`,
-    () =>
-      worksessions.noShowPartialUpdate(
-        params.worksession_id,
-
-        {
-          headers: {
-            "X-User-Type": "company",
-          },
-        }
-      ),
+    ...worksessions.noShowPartialUpdateQueryArgs(
+      params.worksession_id,
+      {
+        headers: {
+          "X-User-Type": "company",
+        },
+      }
+    ),
     {
       onSuccess: () => {
         // キャッシュを更新

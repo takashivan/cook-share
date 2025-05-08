@@ -18,7 +18,6 @@ import { useRouter } from "next/navigation";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { register } from "@/lib/api/companyUser";
 import { toast } from "@/hooks/use-toast";
-import API from "@/lib/api";
 
 export default function CompanyRegisterPage() {
   const router = useRouter();

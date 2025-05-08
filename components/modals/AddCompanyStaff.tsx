@@ -15,7 +15,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { companyStaffInvite } from "@/lib/api/company";
 
 interface AddCompanyStaffModalProps {
   isOpen: boolean;

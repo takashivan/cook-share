@@ -13,16 +13,9 @@ export const useGetReviewsByUserId = (
 ) => {
   const reviews = getApi(RestaurantReviews);
   const users = getApi(Users);
-  return useSWR<ReviewsListResult>(
-    params.userId ? ["reviews", params.userId] : null,
-    async () => {
-      if (!params.userId) return [];
-      const response = await users.reviewsList(params.userId, {
-        headers: {
-          "X-User-Type": "chef",
-        },
-      });
-      return response.data;
-    },
-  );
+  return useSWR(...users.reviewsListQueryArgs(params.userId ?? '', {
+    headers: {
+      "X-User-Type": "chef"
+    }
+  }, params.userId != null));
 };

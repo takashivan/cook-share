@@ -366,7 +366,7 @@ export function ChatSheet({
                     setMessageInput((prev) => prev + "\n");
                   }
                 }}
-                className="flex-1 resize-none px-3 py-2 border rounded-md text-sm bg-white focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
+                className="flex-1 resize-none px-3 py-2 border rounded-md text-base bg-white focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
                 enterKeyHint="enter"
               />
               <Button

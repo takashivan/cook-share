@@ -1,18 +1,14 @@
 "use client";
 import Link from "next/link";
-import { ChevronRight, Download, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { ChevronRight, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { motion } from "framer-motion";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { getWorksessionHistories } from "@/lib/api/user";
-import { WorksessionDetailResult } from "@/api/__generated__/chef-connect/data-contracts";
 import { useGetPayoutLogsByUserId } from "@/hooks/api/user/payout-logs/useGetPayoutLogsByUserId";
 import { useGetWorksessionHistoryCurrentMonth } from "@/hooks/api/user/worksessions/useGetWorksessionHistoryCurrentMonth";
 import { useGetWorksessionsByUserId } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserId";
-import { WorksessionsListResult } from "@/api/__generated__/base/data-contracts";
 import { SessionHistoryCurrentListResult } from "@/api/__generated__/base/data-contracts";
 
 export default function ChefSalary() {

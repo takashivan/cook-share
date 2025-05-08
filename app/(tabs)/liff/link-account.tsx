@@ -1,5 +1,4 @@
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { UserProfile } from "@/lib/api/user";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";

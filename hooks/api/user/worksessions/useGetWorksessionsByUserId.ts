@@ -10,16 +10,9 @@ export const useGetWorksessionsByUserId = (
   params: Params,
 ) => {
   const users = getApi(Users);
-  return useSWR(
-    params.userId ? ["worksessionsList", params.userId] : null,
-    async () => {
-      if (!params.userId) return [];
-      const response = await users.worksessionsList(params.userId, {
-        headers: {
-          "X-User-Type": "chef",
-        },
-      });
-      return response.data;
-    },
-  );
+  return useSWR(...users.worksessionsListQueryArgs(params.userId ?? '', {
+    headers: {
+      "X-User-Type": "chef"
+    }
+  }, params.userId != null));
 };

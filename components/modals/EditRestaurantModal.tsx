@@ -9,11 +9,12 @@ import { Store, Upload, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { useGetRestaurantCuisines } from "@/hooks/api/all/restaurantCuisines/useGetRestaurantCuisines";
+import { RestaurantsPartialUpdatePayload } from "@/api/__generated__/base/data-contracts";
 
 interface EditRestaurantModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: FormData) => void;
+  onSubmit: (data: RestaurantsPartialUpdatePayload) => void;
   restaurant: {
     id: number;
     name: string;
@@ -85,7 +86,7 @@ export const EditRestaurantModal = ({
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm({
+  } = useForm<RestaurantsPartialUpdatePayload>({
     defaultValues: {
       name: restaurant.name,
       description: restaurant.description || "",
@@ -144,37 +145,13 @@ export const EditRestaurantModal = ({
 
   const onSubmitHandler = handleSubmit(async (data) => {
     try {
-      const formData = new FormData();
-
-      // 必須フィールドを追加
-      formData.append("id", restaurant.id.toString());
-      formData.append("name", data.name);
-      formData.append("address", data.address);
-      formData.append("cuisine_type", data.cuisine_type);
-      formData.append("is_active", String(data.is_active));
-      formData.append("business_hours", data.business_hours);
-      formData.append("station", data.station);
-      formData.append("access", data.access);
-
-      // オプショナルフィールドを追加（値が存在する場合のみ）
-      if (data.contact_info) formData.append("contact_info", data.contact_info);
-      if (data.description) formData.append("description", data.description);
-
-      // 画像を追加（新しい画像が選択された場合はphotoとして送信、そうでない場合は既存のprofile_imageを送信）
-      if (selectedFile) {
-        formData.append("photo", selectedFile);
-      } else if (restaurant.profile_image) {
-        formData.append("profile_image", restaurant.profile_image);
-      } else {
-        throw new Error("店舗画像は必須です");
+      const newData: RestaurantsPartialUpdatePayload = {
+        ...data,
+        restaurant_cuisine_id: selectedCuisines,
+        photo: selectedFile,
       }
 
-      // ジャンルIDを追加
-      selectedCuisines.forEach((id) => {
-        formData.append("restaurant_cuisine_id[]", id.toString());
-      });
-
-      await onSubmit(formData);
+      onSubmit(newData);
       onClose();
       toast({
         title: "店舗情報を更新しました",

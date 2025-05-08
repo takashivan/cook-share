@@ -436,7 +436,7 @@ export interface WorksessionsListData {
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
-    application_id: string;
+    application_id: string | null;
     /** @format uuid */
     user_id: string | null;
     /** @format int64 */
@@ -1219,7 +1219,7 @@ export interface BySessionDetailData {
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
-    application_id: string;
+    application_id: string | null;
     /** @format uuid */
     user_id: string | null;
     /** @format int64 */
@@ -3233,6 +3233,12 @@ export type ApplicationsListResult = {
   };
 }[];
 
+export interface ApplyCreatePayload {
+  user_id: string;
+}
+
+export type ApplyCreateData = object;
+
 export type WorksessionsRestaurantTodosListData = {
   /** @format int64 */
   id: number;
@@ -3261,7 +3267,7 @@ export type WorksessionsRestaurantTodosListData = {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   user_id: string | null;
   /** @format int64 */
@@ -4292,7 +4298,7 @@ export interface CompanyusersDetailData {
 export interface StaffDeleteDeletePayload {
   /** @format int64 */
   restaurant_id: number;
-  user_id: string;
+  companyUser_id: string;
 }
 
 export interface StaffDeleteDeleteData {
@@ -4604,7 +4610,7 @@ export interface BySessionDetailResult {
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
-    application_id: string;
+    application_id: string | null;
     /** @format uuid */
     user_id: string | null;
     /** @format int64 */
@@ -5161,6 +5167,28 @@ export type ChefReviewsListData = {
 
 export type CompanyuserNotificationsCreateData = object;
 
+export interface CompanyusersDeleteInput {
+  companyUser_id: string;
+}
+
+export interface CompanyusersDeleteOutput {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format uuid */
+  companyuser_id: string | null;
+  /** @format int64 */
+  restaurant_id: number;
+  /** @default "1" */
+  can_edit: boolean;
+  /** @default "1" */
+  can_manage_jobs: boolean;
+}
+
 export interface CompanyusersListOutput {
   company: {
     /** @format uuid */
@@ -5699,7 +5727,7 @@ export type SessionHistoryCurrentListData = {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   user_id: string | null;
   /** @format int64 */
@@ -6133,7 +6161,7 @@ export type SessionHistoryCurrentListResult = {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   user_id: string | null;
   /** @format int64 */
@@ -6252,7 +6280,7 @@ export type WorksessionsUserTodosListData = {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   user_id: string | null;
   /** @format int64 */
@@ -6405,7 +6433,7 @@ export type WorksessionsListResult = {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   user_id: string | null;
   /** @format int64 */
@@ -6916,7 +6944,7 @@ export interface ApplicationDetailResult {
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
-    application_id: string;
+    application_id: string | null;
     /** @format uuid */
     user_id: string | null;
     /** @format int64 */
@@ -6991,7 +7019,7 @@ export type RestaurantTodoDetailData = {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   user_id: string | null;
   /** @format int64 */
@@ -7126,7 +7154,7 @@ export type UserDetailResult = {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   user_id: string | null;
   /** @format int64 */
@@ -7241,7 +7269,7 @@ export type UserTodoDetailData = {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   user_id: string | null;
   /** @format int64 */
@@ -7365,7 +7393,7 @@ export interface FinishPartialUpdateData {
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
-    application_id: string;
+    application_id: string | null;
     /** @format uuid */
     user_id: string | null;
     /** @format int64 */
@@ -7438,7 +7466,7 @@ export interface StartPartialUpdateData {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   user_id: string | null;
   /** @format int64 */
@@ -7492,7 +7520,7 @@ export interface VerifyPartialUpdateData {
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
-    application_id: string;
+    application_id: string | null;
     /** @format uuid */
     user_id: string | null;
     /** @format int64 */
@@ -7562,7 +7590,7 @@ export interface WorksessionDetailResult {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   user_id: string | null;
   /** @format int64 */
@@ -7602,7 +7630,7 @@ export interface WorksessionPartialUpdatePayload {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   user_id: string | null;
   /** @format int64 */
@@ -7649,7 +7677,7 @@ export interface WorksessionPartialUpdateData {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   user_id: string | null;
   /** @format int64 */
@@ -7701,7 +7729,7 @@ export interface CancelByChefPartialUpdateData {
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
-    application_id: string;
+    application_id: string | null;
     /** @format uuid */
     user_id: string | null;
     /** @format int64 */
@@ -7821,7 +7849,7 @@ export interface CancelByRestaurantPartialUpdateData {
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
-    application_id: string;
+    application_id: string | null;
     /** @format uuid */
     user_id: string | null;
     /** @format int64 */
@@ -7911,7 +7939,7 @@ export interface ChefReviewListResult {
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
-    application_id: string;
+    application_id: string | null;
     /** @format uuid */
     user_id: string | null;
     /** @format int64 */
@@ -8046,7 +8074,7 @@ export interface FinishPartialUpdateResult {
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
-    application_id: string;
+    application_id: string | null;
     /** @format uuid */
     user_id: string | null;
     /** @format int64 */
@@ -8167,7 +8195,7 @@ export interface NoShowPartialUpdateData {
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
-    application_id: string;
+    application_id: string | null;
     /** @format uuid */
     user_id: string | null;
     /** @format int64 */
@@ -8261,7 +8289,7 @@ export interface RestaurantReviewListResult {
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
-    application_id: string;
+    application_id: string | null;
     /** @format uuid */
     user_id: string | null;
     /** @format int64 */
@@ -8392,7 +8420,7 @@ export interface StartPartialUpdateResult {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   user_id: string | null;
   /** @format int64 */
@@ -8446,7 +8474,7 @@ export interface VerifyPartialUpdateResult {
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
-    application_id: string;
+    application_id: string | null;
     /** @format uuid */
     user_id: string | null;
     /** @format int64 */
@@ -8516,7 +8544,7 @@ export interface WorksessionsDetailData {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   user_id: string | null;
   /** @format int64 */
@@ -8556,7 +8584,7 @@ export interface WorksessionsPartialUpdatePayload {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   user_id: string | null;
   /** @format int64 */
@@ -8603,7 +8631,7 @@ export interface WorksessionsPartialUpdateData {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   user_id: string | null;
   /** @format int64 */
@@ -8650,7 +8678,7 @@ export type WorksessionsListOutput = {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   user_id: string | null;
   /** @format int64 */
@@ -8697,7 +8725,7 @@ export type WorksessionListData = {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   user_id: string | null;
   /** @format int64 */
@@ -8737,7 +8765,7 @@ export interface WorksessionCreatePayload {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   user_id: string | null;
   /** @format int64 */
@@ -8784,7 +8812,7 @@ export interface WorksessionCreateData {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   user_id: string | null;
   /** @format int64 */
