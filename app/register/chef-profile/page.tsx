@@ -21,10 +21,29 @@ import { Input } from "@/components/ui/input";
 import { Upload, User, ChevronRight, ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { updateUserProfile } from "@/lib/api/user";
 import { toast } from "@/hooks/use-toast";
 import { useGetRestaurantCuisines } from "@/hooks/api/all/restaurantCuisines/useGetRestaurantCuisines";
 import axios from "axios";
+import { UserProfile, getUserProfile } from "@/lib/api/user";
+import { getCurrentUser } from "@/lib/api/config";
+import { createUserProfile } from "@/lib/api/user";
+import { format } from "date-fns";
+import { ja } from "date-fns/locale";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { CalendarIcon } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const STEPS = [
   { id: 1, title: "基本情報", shortTitle: "基本" },
@@ -35,7 +54,7 @@ const STEPS = [
 
 export default function ChefProfilePage() {
   const router = useRouter();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, setUser } = useAuth();
   const { data: cuisinesData } = useGetRestaurantCuisines();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
@@ -54,6 +73,10 @@ export default function ChefProfilePage() {
   const [postalCode, setPostalCode] = useState("");
   const [address1, setAddress1] = useState("");
   const [address2, setAddress2] = useState("");
+  const [prefecture, setPrefecture] = useState("");
+  const [city, setCity] = useState("");
+  const [town, setTown] = useState("");
+  const [street, setStreet] = useState("");
   const [phone, setPhone] = useState("");
   const [genreError, setGenreError] = useState("");
   const [nameError, setNameError] = useState("");
@@ -61,6 +84,9 @@ export default function ChefProfilePage() {
   const [addressError, setAddressError] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [postalCodeError, setPostalCodeError] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(undefined);
 
   const skills = [
     { id: "fish-cutting", label: "魚が捌ける" },
@@ -80,8 +106,11 @@ export default function ChefProfilePage() {
   ];
 
   const handleSkillChange = (skill: string) => {
+    const skillLabel = skills.find((s) => s.id === skill)?.label || skill;
     setSelectedSkills((prev) =>
-      prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
+      prev.includes(skillLabel)
+        ? prev.filter((s) => s !== skillLabel)
+        : [...prev, skillLabel]
     );
   };
 
@@ -94,10 +123,12 @@ export default function ChefProfilePage() {
         setSelectedCertificates((prev) => [...prev, "other"]);
       }
     } else {
+      const certLabel =
+        certificates.find((c) => c.id === certificate)?.label || certificate;
       setSelectedCertificates((prev) =>
-        prev.includes(certificate)
-          ? prev.filter((c) => c !== certificate)
-          : [...prev, certificate]
+        prev.includes(certLabel)
+          ? prev.filter((c) => c !== certLabel)
+          : [...prev, certLabel]
       );
     }
   };
@@ -113,20 +144,70 @@ export default function ChefProfilePage() {
     }
   };
 
-  const handlePostalCodeBlur = async () => {
-    if (postalCode.length === 7) {
-      try {
-        const res = await axios.get(
-          `https://zipcloud.ibsnet.co.jp/api/search?zipcode=${postalCode}`
-        );
-        if (res.data && res.data.results && res.data.results[0]) {
-          const result = res.data.results[0];
-          setAddress1(`${result.address1}${result.address2}${result.address3}`);
-          setAddress2("");
-        }
-      } catch (e) {
-        // 住所自動補完失敗時は何もしない
+  // 年の配列を生成（1900年から現在の年まで）
+  const currentYear = new Date().getFullYear();
+  const years = Array.from(
+    { length: currentYear - 1899 },
+    (_, i) => currentYear - i
+  );
+  const months = Array.from({ length: 12 }, (_, i) => i + 1);
+  const days = Array.from({ length: 31 }, (_, i) => i + 1);
+
+  const handleDateChange = (type: "year" | "month" | "day", value: string) => {
+    let newDate: Date;
+
+    if (!dateOfBirth) {
+      // 日付が未設定の場合、現在の日付を基準にする
+      newDate = new Date();
+      newDate.setFullYear(parseInt(value));
+      newDate.setMonth(parseInt(value) - 1);
+      newDate.setDate(parseInt(value));
+    } else {
+      // 既存の日付がある場合、その値を保持しながら更新
+      newDate = new Date(dateOfBirth);
+      if (type === "year") {
+        newDate.setFullYear(parseInt(value));
+      } else if (type === "month") {
+        newDate.setMonth(parseInt(value) - 1);
+      } else if (type === "day") {
+        newDate.setDate(parseInt(value));
       }
+    }
+
+    setDateOfBirth(newDate);
+  };
+
+  const handlePostalCodeChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = e.target.value.replace(/-/g, "");
+    setPostalCode(value);
+    setPostalCodeError("");
+
+    if (value.length === 7) {
+      try {
+        const response = await axios.get(
+          `https://zipcloud.ibsnet.co.jp/api/search?zipcode=${value}`
+        );
+        const data = response.data;
+
+        if (data.status === 200 && data.results) {
+          const result = data.results[0];
+          setPrefecture(result.address1);
+          setCity(result.address2);
+          setTown(result.address3);
+          setShowAddressForm(true);
+        } else {
+          setPostalCodeError("住所が見つかりませんでした");
+          setShowAddressForm(false);
+        }
+      } catch (error) {
+        console.error("Error fetching address:", error);
+        setPostalCodeError("住所の取得に失敗しました");
+        setShowAddressForm(false);
+      }
+    } else {
+      setShowAddressForm(false);
     }
   };
 
@@ -160,15 +241,33 @@ export default function ChefProfilePage() {
         name: user.name,
         email: user.email,
         skills: selectedSkills,
-        certifications: selectedCertificates,
+        certifications: selectedCertificates
+          .map((cert) => (cert === "other" ? otherCertificate : cert))
+          .filter(Boolean),
         bio: formData.get("bio") as string,
         experience_level: formData.get("experience_level") as string,
         photo: profileImage || null,
+        last_name: lastName,
+        given_name: firstName,
+        dateofbirth: dateOfBirth ? format(dateOfBirth, "yyyy-MM-dd") : "",
+        last_name_kana: lastNameKana,
+        given_name_kana: firstNameKana,
+        phone: phone,
+        postal_code: postalCode,
+        prefecture: prefecture,
+        city: city,
+        town: town,
+        street: street,
+        address2: address2,
       };
       console.log("profileData", profileData);
 
-      await updateUserProfile(user.id, profileData);
-
+      await createUserProfile(user.id, profileData);
+      const userData = await getCurrentUser();
+      if (userData) {
+        const fullProfile = await getUserProfile(userData.id);
+        setUser(fullProfile);
+      }
       toast({
         title: "プロフィールを更新しました",
         description: "シェフプロフィールの更新が完了しました。",
@@ -303,47 +402,147 @@ export default function ChefProfilePage() {
       case 2:
         return (
           <div className="space-y-8">
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="postalCode" className="text-gray-700">
-                  郵便番号
-                </Label>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="date_of_birth">生年月日</Label>
+                <div className="grid grid-cols-3 gap-4">
+                  <Select
+                    value={
+                      dateOfBirth ? dateOfBirth.getFullYear().toString() : ""
+                    }
+                    onValueChange={(value) => handleDateChange("year", value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="年" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {years.map((year) => (
+                        <SelectItem key={year} value={year.toString()}>
+                          {year}年
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Select
+                    value={
+                      dateOfBirth
+                        ? (dateOfBirth.getMonth() + 1)
+                            .toString()
+                            .padStart(2, "0")
+                        : ""
+                    }
+                    onValueChange={(value) => handleDateChange("month", value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="月" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {months.map((month) => (
+                        <SelectItem
+                          key={month}
+                          value={month.toString().padStart(2, "0")}>
+                          {month}月
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Select
+                    value={
+                      dateOfBirth
+                        ? dateOfBirth.getDate().toString().padStart(2, "0")
+                        : ""
+                    }
+                    onValueChange={(value) => handleDateChange("day", value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="日" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {days.map((day) => (
+                        <SelectItem
+                          key={day}
+                          value={day.toString().padStart(2, "0")}>
+                          {day}日
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* 郵便番号 */}
+              <div className="space-y-2">
+                <Label htmlFor="postal_code">郵便番号</Label>
                 <Input
-                  id="postalCode"
+                  id="postal_code"
                   value={postalCode}
-                  onChange={(e) =>
-                    setPostalCode(e.target.value.replace(/[^0-9]/g, ""))
-                  }
+                  onChange={handlePostalCodeChange}
+                  placeholder="1234567"
                   maxLength={7}
-                  onBlur={handlePostalCodeBlur}
-                  required
-                  className="border-gray-200 focus:border-[#DB3F1C] focus:ring-[#DB3F1C]/20"
                 />
+                {postalCodeError && (
+                  <p className="text-sm text-red-500">{postalCodeError}</p>
+                )}
               </div>
-              <div className="col-span-2">
-                <Label htmlFor="address1" className="text-gray-700">
-                  住所（都道府県・市区町村）
-                </Label>
-                <Input
-                  id="address1"
-                  value={address1}
-                  onChange={(e) => setAddress1(e.target.value)}
-                  required
-                  className="border-gray-200 focus:border-[#DB3F1C] focus:ring-[#DB3F1C]/20"
-                />
-              </div>
-              <div className="col-span-3">
-                <Label htmlFor="address2" className="text-gray-700">
-                  住所（それ以降の住所・番地・建物名など）
-                </Label>
-                <Input
-                  id="address2"
-                  value={address2}
-                  onChange={(e) => setAddress2(e.target.value)}
-                  required
-                  className="border-gray-200 focus:border-[#DB3F1C] focus:ring-[#DB3F1C]/20"
-                />
-              </div>
+
+              {showAddressForm && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="prefecture">都道府県</Label>
+                    <Input
+                      id="prefecture"
+                      name="prefecture"
+                      value={prefecture}
+                      readOnly
+                      className="bg-gray-50"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="city">市区町村</Label>
+                    <Input
+                      id="city"
+                      name="city"
+                      value={city}
+                      readOnly
+                      className="bg-gray-50"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="town">町名</Label>
+                    <Input
+                      id="town"
+                      name="town"
+                      value={town}
+                      readOnly
+                      className="bg-gray-50"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="street">番地</Label>
+                    <Input
+                      id="street"
+                      name="street"
+                      value={street}
+                      onChange={(e) => setStreet(e.target.value)}
+                      placeholder="例: 1-2-3"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="address2">建物名・部屋番号</Label>
+                    <Input
+                      id="address2"
+                      name="address2"
+                      value={address2}
+                      onChange={(e) => setAddress2(e.target.value)}
+                      placeholder="例: 〇〇マンション101"
+                    />
+                  </div>
+                </>
+              )}
             </div>
           </div>
         );
@@ -359,7 +558,7 @@ export default function ChefProfilePage() {
                   <div key={skill.id} className="flex items-center space-x-2">
                     <Checkbox
                       id={skill.id}
-                      checked={selectedSkills.includes(skill.id)}
+                      checked={selectedSkills.includes(skill.label)}
                       onCheckedChange={() => handleSkillChange(skill.id)}
                       className="border-gray-300 data-[state=checked]:bg-[#DB3F1C] data-[state=checked]:border-[#DB3F1C]"
                     />
@@ -427,6 +626,30 @@ export default function ChefProfilePage() {
                       1年以上3年未満
                     </Label>
                   </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem
+                      value="0-1"
+                      id="exp-0-1"
+                      className="border-gray-300 text-[#DB3F1C]"
+                    />
+                    <Label
+                      htmlFor="exp-0-1"
+                      className="text-sm font-normal text-gray-600">
+                      1年未満
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem
+                      value="inexperienced"
+                      id="exp-inexperienced"
+                      className="border-gray-300 text-[#DB3F1C]"
+                    />
+                    <Label
+                      htmlFor="exp-inexperienced"
+                      className="text-sm font-normal text-gray-600">
+                      未経験
+                    </Label>
+                  </div>
                 </div>
               </RadioGroup>
             </div>
@@ -440,7 +663,7 @@ export default function ChefProfilePage() {
                   <div key={cert.id} className="flex items-center space-x-2">
                     <Checkbox
                       id={cert.id}
-                      checked={selectedCertificates.includes(cert.id)}
+                      checked={selectedCertificates.includes(cert.label)}
                       onCheckedChange={() => handleCertificateChange(cert.id)}
                       className="border-gray-300 data-[state=checked]:bg-[#DB3F1C] data-[state=checked]:border-[#DB3F1C]"
                     />
@@ -673,12 +896,6 @@ export default function ChefProfilePage() {
           </CardContent>
         </Card>
       </main>
-
-      <footer className="border-t bg-white py-6">
-        <div className="container mx-auto px-4 text-center text-sm text-gray-500">
-          <p>© cookchef Co.,Ltd.</p>
-        </div>
-      </footer>
     </div>
   );
 }

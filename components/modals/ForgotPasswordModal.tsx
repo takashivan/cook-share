@@ -75,7 +75,7 @@ export function ForgotPasswordModal({
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="example@cookchef.jp"
+                placeholder="example@chefdom.jp"
                 required
               />
             </div>

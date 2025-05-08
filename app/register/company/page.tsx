@@ -46,7 +46,7 @@ export default function CompanyRegisterPage() {
         description: "会社プロフィールの登録に進みましょう。",
       });
 
-      router.push("/register/company-profile");
+      router.push("/register/company-verify-email");
     } catch (error) {
       console.error("Registration failed:", error);
       toast({
@@ -152,12 +152,6 @@ export default function CompanyRegisterPage() {
           </Link>
         </div>
       </main>
-
-      <footer className="border-t py-6">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© cookchef Co.,Ltd.</p>
-        </div>
-      </footer>
     </div>
   );
 }

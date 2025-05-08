@@ -22,6 +22,7 @@ export interface CompanyAuthContextType {
   isAuthenticated: boolean;
   login: (token: string, user: CompanyUser) => Promise<void>;
   logout: () => Promise<void>;
+  setUser: (user: CompanyUser | null) => void;
 }
 
 const CompanyAuthContext = createContext<CompanyAuthContextType | undefined>(
@@ -39,6 +40,7 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
       setUser(currentUser);
       setIsAuthenticated(true);
     }
+    setIsLoading(false);
   }, []);
 
   const login = async (token: string, userData: CompanyUser) => {
@@ -74,6 +76,7 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
         login,
         logout,
         isLoading,
+        setUser,
       }}>
       {children}
     </CompanyAuthContext.Provider>

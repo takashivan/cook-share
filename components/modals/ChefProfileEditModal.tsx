@@ -17,6 +17,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { UserProfile, updateUserProfile } from "@/lib/api/user";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { format } from "date-fns";
 
 interface ChefProfileEditModalProps {
   isOpen: boolean;
@@ -24,6 +32,37 @@ interface ChefProfileEditModalProps {
   onSave: (data: any) => void;
   user: UserProfile;
 }
+
+// スキルと経験年数の選択肢
+const SKILLS = [
+  "和食",
+  "洋食",
+  "中華",
+  "イタリアン",
+  "フレンチ",
+  "エスニック",
+  "デザート",
+  "パン",
+  "その他",
+] as const;
+
+const EXPERIENCE_LEVELS = [
+  { value: "未経験", label: "未経験" },
+  { value: "1年未満", label: "1年未満" },
+  { value: "1-3年", label: "1-3年" },
+  { value: "3-5年", label: "3-5年" },
+  { value: "5-10年", label: "5-10年" },
+  { value: "10年以上", label: "10年以上" },
+] as const;
+
+const CERTIFICATIONS = [
+  { id: "fugu", label: "ふぐ調理師免許" },
+  { id: "sushi", label: "寿司職人" },
+  { id: "ramen", label: "ラーメン職人" },
+  { id: "pastry", label: "製菓衛生師" },
+  { id: "wine", label: "ソムリエ" },
+  { id: "other", label: "その他" },
+] as const;
 
 export function ChefProfileEditModal({
   isOpen,
@@ -36,19 +75,23 @@ export function ChefProfileEditModal({
     gender: user.gender || "",
     phone: user.phone || "",
     email: user.email,
+    postal_code: user.postal_code || "",
     address: user.address || "",
     skills: user.skills || [],
-    experience: user.experience || "",
+    experience: user.experience_level || "",
     certifications: user.certifications || [],
     bio: user.bio || "",
     profile_image: user.profile_image || "",
     dateofbirth: user.dateofbirth || "",
   });
-  const [newSkill, setNewSkill] = useState("");
-  const [newCertification, setNewCertification] = useState("");
+  const [otherCertificate, setOtherCertificate] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(
+    user.dateofbirth ? new Date(user.dateofbirth) : undefined
+  );
+  const [showAddressFields, setShowAddressFields] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -60,40 +103,98 @@ export function ChefProfileEditModal({
     }));
   };
 
-  const handleAddSkill = () => {
-    if (newSkill && !formData.skills.includes(newSkill)) {
-      setFormData((prev) => ({
-        ...prev,
-        skills: [...prev.skills, newSkill],
-      }));
-      setNewSkill("");
-    }
-  };
-
-  const handleRemoveSkill = (skill: string) => {
+  const handleSkillChange = (skill: string) => {
     setFormData((prev) => ({
       ...prev,
-      skills: prev.skills.filter((s) => s !== skill),
+      skills: prev.skills.includes(skill)
+        ? prev.skills.filter((s) => s !== skill)
+        : [...prev.skills, skill],
     }));
   };
 
-  const handleAddCertification = () => {
-    if (
-      newCertification &&
-      !formData.certifications.includes(newCertification)
-    ) {
-      setFormData((prev) => ({
-        ...prev,
-        certifications: [...prev.certifications, newCertification],
-      }));
-      setNewCertification("");
+  const handlePostalCodeChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const postalCode = e.target.value.replace(/-/g, "");
+    setFormData((prev) => ({
+      ...prev,
+      postal_code: postalCode,
+    }));
+
+    if (postalCode.length === 7) {
+      try {
+        const response = await fetch(
+          `https://zipcloud.ibsnet.co.jp/api/search?zipcode=${postalCode}`
+        );
+        const data = await response.json();
+
+        if (data.results) {
+          const address = data.results[0];
+          setFormData((prev) => ({
+            ...prev,
+            address: `${address.address1}${address.address2}${address.address3}`,
+          }));
+          setShowAddressFields(true);
+        }
+      } catch (error) {
+        console.error("郵便番号検索エラー:", error);
+      }
     }
   };
 
-  const handleRemoveCertification = (cert: string) => {
+  const handleExperienceChange = (value: string) => {
     setFormData((prev) => ({
       ...prev,
-      certifications: prev.certifications.filter((c) => c !== cert),
+      experience: value,
+    }));
+  };
+
+  const handleCertificateChange = (certId: string) => {
+    const cert = CERTIFICATIONS.find((c) => c.id === certId);
+    if (!cert) return;
+
+    setFormData((prev) => {
+      const newCertifications = prev.certifications.includes(cert.label)
+        ? prev.certifications.filter((c) => c !== cert.label)
+        : [...prev.certifications, cert.label];
+
+      // その他が選択された場合、他の資格をクリア
+      if (certId === "other") {
+        return {
+          ...prev,
+          certifications: newCertifications,
+        };
+      }
+
+      // その他以外が選択された場合、その他の資格をクリア
+      if (prev.certifications.includes("その他")) {
+        return {
+          ...prev,
+          certifications: newCertifications.filter((c) => c !== "その他"),
+        };
+      }
+
+      return {
+        ...prev,
+        certifications: newCertifications,
+      };
+    });
+
+    if (certId === "other") {
+      setOtherCertificate("");
+    }
+  };
+
+  const handleOtherCertificateChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = e.target.value;
+    setOtherCertificate(value);
+    setFormData((prev) => ({
+      ...prev,
+      certifications: prev.certifications.includes("その他")
+        ? [...prev.certifications.filter((c) => c !== "その他"), value]
+        : prev.certifications,
     }));
   };
 
@@ -242,14 +343,28 @@ export function ChefProfileEditModal({
             </div>
 
             <div>
-              <Label htmlFor="address">住所</Label>
+              <Label htmlFor="postal_code">郵便番号</Label>
               <Input
-                id="address"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
+                id="postal_code"
+                name="postal_code"
+                value={formData.postal_code}
+                onChange={handlePostalCodeChange}
+                placeholder="例: 1234567"
+                maxLength={7}
               />
             </div>
+
+            {showAddressFields && (
+              <div>
+                <Label htmlFor="address">住所</Label>
+                <Input
+                  id="address"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                />
+              </div>
+            )}
 
             <div>
               <Label htmlFor="dateofbirth">生年月日</Label>
@@ -274,67 +389,66 @@ export function ChefProfileEditModal({
             </div>
 
             <div>
-              <Label htmlFor="experience">経験</Label>
-              <Input
-                id="experience"
-                name="experience"
+              <Label htmlFor="experience">経験年数</Label>
+              <Select
                 value={formData.experience}
-                onChange={handleChange}
-              />
+                onValueChange={handleExperienceChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="経験年数を選択" />
+                </SelectTrigger>
+                <SelectContent>
+                  {EXPERIENCE_LEVELS.map((level) => (
+                    <SelectItem key={level.value} value={level.value}>
+                      {level.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
               <Label>スキル</Label>
-              <div className="flex gap-2 mb-2">
-                <Input
-                  value={newSkill}
-                  onChange={(e) => setNewSkill(e.target.value)}
-                  placeholder="新しいスキルを追加"
-                />
-                <Button type="button" onClick={handleAddSkill}>
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {formData.skills.map((skill, index) => (
-                  <Badge key={index} variant="secondary">
-                    {skill}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveSkill(skill)}
-                      className="ml-1">
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
+              <div className="grid grid-cols-2 gap-2">
+                {SKILLS.map((skill) => (
+                  <div key={skill} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id={`skill-${skill}`}
+                      checked={formData.skills.includes(skill)}
+                      onChange={() => handleSkillChange(skill)}
+                      className="h-4 w-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500"
+                    />
+                    <label htmlFor={`skill-${skill}`}>{skill}</label>
+                  </div>
                 ))}
               </div>
             </div>
 
             <div>
               <Label>資格</Label>
-              <div className="flex gap-2 mb-2">
-                <Input
-                  value={newCertification}
-                  onChange={(e) => setNewCertification(e.target.value)}
-                  placeholder="新しい資格を追加"
-                />
-                <Button type="button" onClick={handleAddCertification}>
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {formData.certifications.map((cert, index) => (
-                  <Badge key={index} variant="outline">
-                    {cert}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveCertification(cert)}
-                      className="ml-1">
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
+              <div className="grid grid-cols-2 gap-2 mb-4">
+                {CERTIFICATIONS.map((cert) => (
+                  <div key={cert.id} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id={`cert-${cert.id}`}
+                      checked={formData.certifications.includes(cert.label)}
+                      onChange={() => handleCertificateChange(cert.id)}
+                      className="h-4 w-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500"
+                    />
+                    <label htmlFor={`cert-${cert.id}`}>{cert.label}</label>
+                  </div>
                 ))}
               </div>
+              {formData.certifications.includes("その他") && (
+                <div className="mt-2">
+                  <Input
+                    value={otherCertificate}
+                    onChange={handleOtherCertificateChange}
+                    placeholder="その他の資格を入力"
+                  />
+                </div>
+              )}
             </div>
           </div>
 
