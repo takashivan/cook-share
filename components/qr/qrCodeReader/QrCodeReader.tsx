@@ -94,9 +94,7 @@ export function QrCodeReader({
   };
 
   useEffect(() => {
-    if (hasPermission) {
-      initCamera();
-    }
+    initCamera();
 
     return () => {
       html5QrCodeRef.current?.stop().catch(() => {});
@@ -118,9 +116,7 @@ export function QrCodeReader({
           カメラアクセスを許可する
         </Button>
       )}
-      {hasPermission &&
-        <div id="qr-reader" ref={scannerRef} style={{ width: '300px', height: '300px' }} />
-      }
+      <div id="qr-reader" ref={scannerRef} style={{ width: '300px', height: '300px' }} />
     </div>
   );
 }
