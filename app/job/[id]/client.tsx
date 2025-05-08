@@ -401,6 +401,8 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                         ? "シェフとしてログインして応募する"
                         : !user.is_approved
                         ? "シェフとしての審査が完了していません"
+                        : workSessions?.some((session) => session.job_id === jobDetail.job.id)
+                        ? "応募済み"
                         : jobDetail.job.number_of_spots === 0
                         ? "募集人数が上限に達しました"
                         : (jobDetail.job.expiry_date != null && new Date(jobDetail.job.expiry_date) <= new Date())
@@ -711,6 +713,8 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                     ? "シェフとしてログインして応募する"
                     : !user.is_approved
                     ? "シェフとしての審査が完了していません"
+                    : workSessions?.some((session) => session.job_id === jobDetail.job.id)
+                    ? "応募済み"
                     : jobDetail.job.number_of_spots === 0
                     ? "募集人数が上限に達しました"
                     : jobDetail.job.expiry_date != null &&
