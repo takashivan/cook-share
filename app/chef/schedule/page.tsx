@@ -51,7 +51,7 @@ export default function SchedulePage() {
   const { messagesData, sendMessage } = useSubscriptionMessagesByUserId({
     userId: user?.id,
     workSessionId: selectedWorkSession?.id,
-    applicationId: selectedWorkSession?.application_id,
+    applicationId: selectedWorkSession?.application_id ?? undefined,
   });
 
   // 未読メッセージの取得

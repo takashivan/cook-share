@@ -145,7 +145,7 @@ export default function JobDetail({ params }: PageProps) {
   const { messagesData, sendMessage } = useSubscriptionMessagesByUserId({
     userId: user?.id,
     workSessionId: workSession?.id,
-    applicationId: workSession?.application_id,
+    applicationId: workSession?.application_id ?? undefined,
   });
 
   // 未読メッセージの取得

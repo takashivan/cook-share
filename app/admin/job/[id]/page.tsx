@@ -178,7 +178,7 @@ export default function JobDetail({ params }: PageParams) {
   const { messagesData, sendMessage } = useSubscriptionMessagesByCompanyUserId({
     companyUserId: user?.id,
     workSessionId: selectedWorkSession?.id,
-    applicationId: selectedWorkSession?.application_id,
+    applicationId: selectedWorkSession?.application_id ?? undefined,
   });
 
   // 未読メッセージの取得
@@ -856,7 +856,7 @@ ${changeRequest.reason}
                           <div className="flex flex-col items-center justify-center p-4">
                             <div className="bg-white p-4 rounded-lg shadow-md">
                               <QRCodeSVG
-                                value={selectedWorkSession.application_id}
+                                value={selectedWorkSession.application_id ?? ""}
                                 size={200}
                                 level="H"
                                 includeMargin={true}
