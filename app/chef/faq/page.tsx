@@ -86,7 +86,7 @@ export default function FAQPage() {
       {
         question: "源泉徴収は行われますか？",
         answer:
-          "CookChefでは業務委託契約となるため、源泉徴収は行われません。確定申告は各自で行っていただく必要があります。",
+          "CHEFDOMでは業務委託契約となるため、源泉徴収は行われません。確定申告は各自で行っていただく必要があります。",
       },
     ],
     trouble: [

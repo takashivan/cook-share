@@ -27,6 +27,25 @@ export const fetchChefs = createAsyncThunk(
   }
 );
 
+export const fetchDashboardQuery = createAsyncThunk(
+  "operator/fetchDashboardQuery",
+  async () => {
+    const response = await operatorApi.getDashboardQuery();
+    return response;
+  }
+);
+
+export const fetchChefsToBeReviewed = createAsyncThunk(
+  "operator/fetchChefsToBeReviewed",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await operatorApi.getChefsToBeReviewed();
+      return response;
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
 export const fetchCuisines = createAsyncThunk(
   "operator/fetchCuisines",
   async () => {
@@ -168,10 +187,35 @@ interface Alert {
   status: string;
 }
 
+interface DashboardQuery {
+  total_users_count: number;
+  verified_users_count: number;
+  profile_completed_users_count: number;
+  active_user_count: number;
+  total_fee: number;
+  filled_jobs: number;
+  total_restaurants: number;
+  new_restaurants: number;
+  total_chefs: number;
+  new_chefs: number;
+  total_jobs: number;
+  new_jobs: number;
+}
+
 interface OperatorState {
   companies: any[];
   chefs: {
     data: UserProfile[];
+    loading: boolean;
+    error: string | null;
+  };
+  chefsToBeReviewed: {
+    data: UserProfile[];
+    loading: boolean;
+    error: string | null;
+  };
+  dashboardQuery: {
+    data: DashboardQuery | null;
     loading: boolean;
     error: string | null;
   };
@@ -221,6 +265,11 @@ const initialState: OperatorState = {
     loading: false,
     error: null,
   },
+  chefsToBeReviewed: {
+    data: [],
+    loading: false,
+    error: null,
+  },
   jobs: {
     data: [],
     loading: false,
@@ -255,6 +304,11 @@ const initialState: OperatorState = {
   },
   alerts: {
     data: [],
+    loading: false,
+    error: null,
+  },
+  dashboardQuery: {
+    data: null,
     loading: false,
     error: null,
   },
@@ -481,6 +535,37 @@ const operatorSlice = createSlice({
       .addCase(fetchOperatorAlerts.rejected, (state, action) => {
         state.alerts.loading = false;
         state.alerts.error = action.error.message || "Failed to fetch alerts";
+      });
+
+    // Chefs to be reviewed
+    builder
+      .addCase(fetchChefsToBeReviewed.pending, (state) => {
+        state.chefsToBeReviewed.loading = true;
+        state.chefsToBeReviewed.error = null;
+      })
+      .addCase(fetchChefsToBeReviewed.fulfilled, (state, action) => {
+        state.chefsToBeReviewed.loading = false;
+        state.chefsToBeReviewed.data = action.payload;
+      })
+      .addCase(fetchChefsToBeReviewed.rejected, (state, action) => {
+        state.chefsToBeReviewed.loading = false;
+        state.chefsToBeReviewed.error = action.payload as string;
+      });
+
+    // Dashboard Query
+    builder
+      .addCase(fetchDashboardQuery.pending, (state) => {
+        state.dashboardQuery.loading = true;
+        state.dashboardQuery.error = null;
+      })
+      .addCase(fetchDashboardQuery.fulfilled, (state, action) => {
+        state.dashboardQuery.loading = false;
+        state.dashboardQuery.data = action.payload;
+      })
+      .addCase(fetchDashboardQuery.rejected, (state, action) => {
+        state.dashboardQuery.loading = false;
+        state.dashboardQuery.error =
+          action.error.message || "Failed to fetch dashboard query";
       });
   },
 });

@@ -31,7 +31,10 @@ import { useGetRestaurantReviewByRestaurantId } from "@/hooks/api/companyuser/re
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ja } from "date-fns/locale";
 import { useGetWorksessionsByUserId } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserId";
-import { ApplyCreatePayload, JobsDetailData } from "@/api/__generated__/base/data-contracts";
+import {
+  ApplyCreatePayload,
+  JobsDetailData,
+} from "@/api/__generated__/base/data-contracts";
 import { formatJapanHHMM } from "@/lib/functions";
 import { useApplyJob } from "@/hooks/api/user/jobs/useApplyJob";
 
@@ -100,8 +103,8 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
         variant: "destructive",
         description: "応募に失敗しました",
       });
-    }
-  })
+    },
+  });
 
   // 時間重複チェック
   const hasTimeOverlap = workSessions?.some((session) => {
@@ -254,18 +257,25 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
     text: string;
     dates: string;
     details: string;
+    startTime: number;
+    endTime: number;
   }) => {
-    const startDate = new Date(event.dates);
-    const endDate = new Date(startDate);
-    endDate.setHours(endDate.getHours() + 8); // 仮で8時間の勤務時間を設定
+    // Create dates directly from timestamps and add 7 hours for JST
+    const startDate = new Date(event.startTime);
+    startDate.setTime(startDate.getTime() + 7 * 60 * 60 * 1000);
+    const endDate = new Date(event.endTime);
+    endDate.setTime(endDate.getTime() + 7 * 60 * 60 * 1000);
+
+    // Format dates for Google Calendar
+    const formatDate = (date: Date) => {
+      return date.toISOString().replace(/-|:|\.\d+/g, "");
+    };
 
     const params = new URLSearchParams({
       action: "TEMPLATE",
       text: event.text,
       details: event.details,
-      dates: `${startDate.toISOString().replace(/-|:|\.\d+/g, "")}/${endDate
-        .toISOString()
-        .replace(/-|:|\.\d+/g, "")}`,
+      dates: `${formatDate(startDate)}/${formatDate(endDate)}`,
     });
 
     return `https://calendar.google.com/calendar/render?${params.toString()}`;
@@ -351,14 +361,18 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                       variant="secondary"
                       className={`text-sm ${
                         jobDetail.job.number_of_spots > 0 &&
-                        !workSessions?.some((session) => session.job_id === jobDetail.job.id) &&
+                        !workSessions?.some(
+                          (session) => session.job_id === jobDetail.job.id
+                        ) &&
                         jobDetail.job.expiry_date &&
                         new Date(jobDetail.job.expiry_date) > new Date()
                           ? "bg-black text-white"
                           : "bg-gray-500 text-white"
                       }`}>
                       {jobDetail.job.number_of_spots > 0 &&
-                      !workSessions?.some((session) => session.job_id === jobDetail.job.id) &&
+                      !workSessions?.some(
+                        (session) => session.job_id === jobDetail.job.id
+                      ) &&
                       jobDetail.job.expiry_date &&
                       new Date(jobDetail.job.expiry_date) > new Date()
                         ? `募集中`
@@ -388,15 +402,21 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                         !user ||
                         !user.is_approved ||
                         jobDetail.job.number_of_spots === 0 ||
-                        workSessions?.some((session) => session.job_id === jobDetail.job.id) ||
-                        (jobDetail.job.expiry_date != null && new Date(jobDetail.job.expiry_date) <= new Date()) ||
+                        workSessions?.some(
+                          (session) => session.job_id === jobDetail.job.id
+                        ) ||
+                        (jobDetail.job.expiry_date != null &&
+                          new Date(jobDetail.job.expiry_date) <= new Date()) ||
                         hasTimeOverlap
                       }
                       className={`w-full py-2 text-sm font-medium transition-all duration-300 transform hover:scale-[1.02] ${
                         user &&
                         jobDetail.job.number_of_spots > 0 &&
-                        !workSessions?.some((session) => session.job_id === jobDetail.job.id) &&
-                        (jobDetail.job.expiry_date != null && new Date(jobDetail.job.expiry_date) > new Date()) &&
+                        !workSessions?.some(
+                          (session) => session.job_id === jobDetail.job.id
+                        ) &&
+                        jobDetail.job.expiry_date != null &&
+                        new Date(jobDetail.job.expiry_date) > new Date() &&
                         !hasTimeOverlap
                           ? "bg-orange-600 hover:bg-orange-700 text-white"
                           : "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -405,11 +425,14 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                         ? "シェフとしてログインして応募する"
                         : !user.is_approved
                         ? "シェフとしての審査が完了していません"
-                        : workSessions?.some((session) => session.job_id === jobDetail.job.id)
+                        : workSessions?.some(
+                            (session) => session.job_id === jobDetail.job.id
+                          )
                         ? "応募済み"
                         : jobDetail.job.number_of_spots === 0
                         ? "募集人数が上限に達しました"
-                        : (jobDetail.job.expiry_date != null && new Date(jobDetail.job.expiry_date) <= new Date())
+                        : jobDetail.job.expiry_date != null &&
+                          new Date(jobDetail.job.expiry_date) <= new Date()
                         ? "募集期間が終了しました"
                         : hasTimeOverlap
                         ? `この時間帯には${overlappingJob?.job.restaurant.name}の仕事が入っています`
@@ -650,14 +673,18 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                       variant="secondary"
                       className={`${
                         jobDetail.job.number_of_spots > 0 &&
-                        !workSessions?.some((session) => session.job_id === jobDetail.job.id) &&
+                        !workSessions?.some(
+                          (session) => session.job_id === jobDetail.job.id
+                        ) &&
                         jobDetail.job.expiry_date &&
                         new Date(jobDetail.job.expiry_date) > new Date()
                           ? "bg-black text-white"
                           : "bg-gray-500 text-white"
                       }`}>
                       {jobDetail.job.number_of_spots > 0 &&
-                      !workSessions?.some((session) => session.job_id === jobDetail.job.id) &&
+                      !workSessions?.some(
+                        (session) => session.job_id === jobDetail.job.id
+                      ) &&
                       jobDetail.job.expiry_date &&
                       new Date(jobDetail.job.expiry_date) > new Date()
                         ? `募集中`
@@ -702,7 +729,9 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                     !user ||
                     !user.is_approved ||
                     jobDetail.job.number_of_spots === 0 ||
-                    workSessions?.some((session) => session.job_id === jobDetail.job.id) ||
+                    workSessions?.some(
+                      (session) => session.job_id === jobDetail.job.id
+                    ) ||
                     (jobDetail.job.expiry_date != null &&
                       new Date(jobDetail.job.expiry_date) <= new Date()) ||
                     hasTimeOverlap
@@ -710,7 +739,9 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                   className={`w-full py-2 text-sm font-medium transition-all duration-300 transform hover:scale-[1.02] ${
                     user &&
                     jobDetail.job.number_of_spots > 0 &&
-                    !workSessions?.some((session) => session.job_id === jobDetail.job.id) &&
+                    !workSessions?.some(
+                      (session) => session.job_id === jobDetail.job.id
+                    ) &&
                     jobDetail.job.expiry_date &&
                     new Date(jobDetail.job.expiry_date) > new Date() &&
                     !hasTimeOverlap
@@ -721,7 +752,9 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                     ? "シェフとしてログインして応募する"
                     : !user.is_approved
                     ? "シェフとしての審査が完了していません"
-                    : workSessions?.some((session) => session.job_id === jobDetail.job.id)
+                    : workSessions?.some(
+                        (session) => session.job_id === jobDetail.job.id
+                      )
                     ? "応募済み"
                     : jobDetail.job.number_of_spots === 0
                     ? "募集人数が上限に達しました"
@@ -744,7 +777,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
             <div className="flex items-center gap-2">
               <Image
                 src="/chef_illust/chef_logo.png"
-                alt="CookChef Logo"
+                alt="CHEFDOM Logo"
                 width={120}
                 height={30}
                 className="text-white"
@@ -786,7 +819,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
           </div>
 
           <div className="text-center text-xs text-gray-400">
-            © cookchef Co.,Ltd.
+            © CHEFDOM Co.,Ltd.
           </div>
         </div>
       </footer>
@@ -836,6 +869,8 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                   )} - ${formatTime(jobDetail.job.end_time)}\n場所: ${
                     jobDetail.restaurant.address
                   }`,
+                  startTime: jobDetail.job.start_time,
+                  endTime: jobDetail.job.end_time,
                 })}
                 target="_blank"
                 rel="noopener noreferrer">

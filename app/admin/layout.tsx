@@ -62,9 +62,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [isStoreListOpen, setIsStoreListOpen] = useState(false);
   const { toast } = useToast();
 
-  const {
-    data: restaurants,
-  } = useGetRestaurantsByCompanyUserId({ companyuserId: user?.id });
+  const { data: restaurants } = useGetRestaurantsByCompanyUserId({
+    companyuserId: user?.id,
+  });
 
   const { notifications } = useSubscriptionCompanyUserNotificationsByUserId({
     userId: user?.id,
@@ -76,7 +76,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         className: "bg-orange-500 text-white border-0",
         duration: 5000,
       });
-    }
+    },
   });
 
   useEffect(() => {
@@ -94,6 +94,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
         if (!user?.is_admin && pathname.startsWith("/admin/company")) {
           router.push("/admin");
+          return;
+        }
+
+        if (!user?.companies_id) {
+          router.push("/register/company-profile");
+          return;
+        }
+
+        if (!user?.is_verified) {
+          router.push("/register/company-verify-email");
           return;
         }
 
@@ -252,7 +262,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <div className="flex items-center gap-2">
                 <Image
                   src="/chef_illust/chef_logo.png?height=200&width=400"
-                  alt="CookChef Logo"
+                  alt="CHEFDOM Logo"
                   width={120}
                   height={30}
                 />
@@ -343,7 +353,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <div className="flex items-center gap-2">
               <Image
                 src="/chef_illust/chef_logo.png?height=200&width=400"
-                alt="CookChef Logo"
+                alt="CHEFDOM Logo"
                 width={120}
                 height={30}
               />

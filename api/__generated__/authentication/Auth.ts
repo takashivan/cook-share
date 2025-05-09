@@ -18,10 +18,14 @@ import {
   LoginCreatePayload,
   RequestPasswordResetCreateData,
   RequestPasswordResetCreatePayload,
+  ResendVerificationCreateData,
+  ResendVerificationCreatePayload,
   ResetPasswordCreateData,
   ResetPasswordCreatePayload,
   SignupCreateData,
   SignupCreatePayload,
+  UpdateEmailCreateData,
+  UpdateEmailCreatePayload,
   VerifyEmailCreateData,
   VerifyEmailCreatePayload,
 } from "./data-contracts";
@@ -152,6 +156,40 @@ export class Auth<
   };
 
   /**
+   * @description Signup and retrieve an authentication token <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags auth
+   * @name ResendVerificationCreate
+   * @summary Signup and retrieve an authentication token
+   * @request POST:/auth/resend-verification
+   */
+  resendVerificationCreate = (
+    data: ResendVerificationCreatePayload,
+    params: RequestParams = {},
+  ) =>
+    this.request<ResendVerificationCreateData, void>({
+      path: `/auth/resend-verification`,
+      method: "POST",
+      body: data,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+
+  resendVerificationCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/auth/resend-verification`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: ResendVerificationCreatePayload },
+    ) => Promise<ResendVerificationCreateData> = (_, { arg }) =>
+      this.resendVerificationCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
    * @description <br /><br /> <b>Authentication:</b> not required
    *
    * @tags auth
@@ -212,6 +250,39 @@ export class Auth<
       { arg }: { arg: SignupCreatePayload },
     ) => Promise<SignupCreateData> = (_, { arg }) =>
       this.signupCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags auth
+   * @name UpdateEmailCreate
+   * @request POST:/auth/update-email
+   */
+  updateEmailCreate = (
+    data: UpdateEmailCreatePayload,
+    params: RequestParams = {},
+  ) =>
+    this.request<UpdateEmailCreateData, void>({
+      path: `/auth/update-email`,
+      method: "POST",
+      body: data,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+
+  updateEmailCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/auth/update-email`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: UpdateEmailCreatePayload },
+    ) => Promise<UpdateEmailCreateData> = (_, { arg }) =>
+      this.updateEmailCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 

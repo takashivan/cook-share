@@ -63,7 +63,7 @@ export default function LoginPage() {
           <Link href="/" className="flex items-center gap-2">
             <Image
               src="/chef_illust/chef_logo.png?height=200&width=400"
-              alt="CookChef Logo"
+              alt="CHEFDOM Logo"
               width={120}
               height={30}
               className="text-orange-500"
@@ -93,7 +93,7 @@ export default function LoginPage() {
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="example@cookchef.jp"
+                  placeholder="example@chefdom.jp"
                   required
                 />
               </div>
@@ -138,11 +138,7 @@ export default function LoginPage() {
         onClose={() => setIsForgotPasswordModalOpen(false)}
       />
 
-      <footer className="border-t py-6">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© cookchef Co.,Ltd.</p>
-        </div>
-      </footer>
+      <footer className="border-t py-6"></footer>
     </div>
   );
 }

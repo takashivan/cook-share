@@ -61,7 +61,7 @@ export default function RegisterPage() {
           <Link href="/" className="flex items-center gap-2">
             <Image
               src="/placeholder.svg?height=30&width=30"
-              alt="CookChef Logo"
+              alt="CHEFDOM Logo"
               width={30}
               height={30}
               className="text-orange-500"

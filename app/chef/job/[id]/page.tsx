@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, use, useState } from "react";
+import { useEffect, use, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   ChevronLeft,
@@ -17,7 +17,7 @@ import {
 import { format, differenceInDays } from "date-fns";
 import { ja } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
-import { Html5QrcodeScanner } from "html5-qrcode";
+import { CameraDevice, Html5Qrcode } from "html5-qrcode";
 import { ChefReviewModal } from "@/components/modals/ChefReviewModal";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -47,7 +47,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { QrCodeReader } from "@/components/qr/qrCodeReader/QrCodeReader";
 
 interface JobDetail {
   job: {
@@ -96,7 +95,8 @@ export default function JobDetail({ params }: PageProps) {
 
   const [isQrScanned, setIsQrScanned] = useState(false);
   const [scannedData, setScannedData] = useState<string | null>(null);
-  const [scanner, setScanner] = useState<Html5QrcodeScanner | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
+  const scannerRef = useRef<Html5Qrcode>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -181,9 +181,6 @@ export default function JobDetail({ params }: PageProps) {
     setIsDialogOpen(false);
     setIsQrScanned(false);
     setScannedData(null);
-    if (scanner) {
-      scanner.clear();
-    }
   };
 
   const handleStartWork = () => {
@@ -191,151 +188,110 @@ export default function JobDetail({ params }: PageProps) {
     setIsDialogOpen(true);
   };
 
-  // useEffect(() => {
-  //   let currentScanner: Html5QrcodeScanner | null = null;
+  const LOCAL_STORAGE_KEY = 'qr-camera-config';
 
-  //   if (isDialogOpen && !isQrScanned) {
-  //     // ダイアログが開いてから少し待ってから初期化する
-  //     const timer = setTimeout(() => {
-  //       const qrReaderElement = document.getElementById("qr-reader");
-  //       if (!qrReaderElement) {
-  //         console.error("QR reader element not found");
-  //         return;
-  //       }
-
-  //       currentScanner = new Html5QrcodeScanner(
-  //         "qr-reader",
-  //         {
-  //           fps: 10,
-  //           qrbox: { width: 250, height: 250 },
-  //           aspectRatio: 1.0,
-  //           showTorchButtonIfSupported: false,
-  //           showZoomSliderIfSupported: false,
-  //           defaultZoomValueIfSupported: 1,
-  //           useBarCodeDetectorIfSupported: false,
-  //           rememberLastUsedCamera: true,
-  //           html5qrcode: {
-  //             formatsToSupport: ["QR_CODE"],
-  //           },
-  //         } as any,
-  //         false
-  //       );
-
-  //       // カスタムUIを追加
-  //       const scannerElement = document.getElementById("qr-reader");
-  //       if (scannerElement) {
-  //         // スキャナーのデフォルトUIを非表示
-  //         const header = scannerElement.querySelector(
-  //           "div[style*='border-top']"
-  //         );
-  //         if (header) {
-  //           header.remove();
-  //         }
-
-  //         // ファイルスキャンのリンクを非表示
-  //         const links = scannerElement.getElementsByTagName("a");
-  //         for (const link of links) {
-  //           if (link.textContent?.includes("Scan an Image File")) {
-  //             link.style.display = "none";
-  //           }
-  //         }
-
-  //         // Start/Stopボタンのテキストを変更
-  //         const buttons = scannerElement.getElementsByTagName("button");
-  //         for (const button of buttons) {
-  //           if (button.textContent?.includes("Start Scanning")) {
-  //             button.textContent = "スキャンを開始";
-  //           } else if (button.textContent?.includes("Stop Scanning")) {
-  //             button.textContent = "スキャンを停止";
-  //           }
-  //         }
-
-  //         // MutationObserverを設定して動的に追加される要素も監視
-  //         const observer = new MutationObserver((mutations) => {
-  //           mutations.forEach((mutation) => {
-  //             if (mutation.type === "childList") {
-  //               mutation.addedNodes.forEach((node) => {
-  //                 if (node instanceof HTMLElement) {
-  //                   // ボタンのテキストを変更
-  //                   const buttons = node.getElementsByTagName("button");
-  //                   for (const button of buttons) {
-  //                     if (button.textContent?.includes("Start Scanning")) {
-  //                       button.textContent = "スキャンを開始";
-  //                     } else if (
-  //                       button.textContent?.includes("Stop Scanning")
-  //                     ) {
-  //                       button.textContent = "スキャンを停止";
-  //                     }
-  //                   }
-
-  //                   // リンクを非表示
-  //                   const links = node.getElementsByTagName("a");
-  //                   for (const link of links) {
-  //                     if (link.textContent?.includes("Scan an Image File")) {
-  //                       link.style.display = "none";
-  //                     }
-  //                   }
-  //                 }
-  //               });
-  //             }
-  //           });
-  //         });
-
-  //         observer.observe(scannerElement, {
-  //           childList: true,
-  //           subtree: true,
-  //         });
-  //       }
-
-  //       currentScanner.render(
-  //         (decodedText: string) => {
-  //           if (workSession?.application_id === decodedText) {
-  //             setIsQrScanned(true);
-  //             setScannedData(decodedText);
-  //             currentScanner?.clear();
-  //           } else {
-  //             toast({
-  //               title: "エラー",
-  //               description:
-  //                 "無効なQRコードです。正しいQRコードをスキャンしてください。",
-  //               variant: "destructive",
-  //             });
-  //           }
-  //         },
-  //         (errorMessage: string) => {
-  //           console.log("QRスキャンエラー:", errorMessage);
-  //         }
-  //       );
-
-  //       setScanner(currentScanner);
-  //     }, 100); // 100ms待機
-
-  //     return () => {
-  //       clearTimeout(timer);
-  //       if (currentScanner) {
-  //         currentScanner.clear();
-  //       }
-  //     };
-  //   }
-  // }, [isDialogOpen, isQrScanned, workSession]);
-
-  const handleDecode = (decodedText: string) => {
-    if (workSession?.application_id === decodedText) {
-      setIsQrScanned(true);
-      setScannedData(decodedText);
-    } else {
-      toast({
-        title: "エラー",
-        description:
-          "無効なQRコードです。正しいQRコードをスキャンしてください。",
-        variant: "destructive",
-      });
-    }
-  }
-
-  const handleError = (errorMessage: string) => {
-    console.log("QRスキャンエラー:", errorMessage);
+  type CameraConfig = {
+    hasPermission: boolean;
+    lastUsedCameraId?: string;
   };
+  
+  const getStoredCameraConfig = (): CameraConfig => {
+    const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (!raw) return { hasPermission: false };
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return { hasPermission: false };
+    }
+  };
+  
+  const saveCameraConfig = (config: CameraConfig) => {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(config));
+  };
+
+  const [error, setError] = useState<string | null>(null);
+  const [hasPermission, setHasPermission] = useState<boolean>(
+    getStoredCameraConfig().hasPermission
+  );
+
+  const initCamera = async () => {
+    setError(null);
+    try {
+      const devices = await Html5Qrcode.getCameras();
+      if (!devices.length) {
+        setError('カメラデバイスが見つかりません');
+        return;
+      }
+
+      const storedConfig = getStoredCameraConfig();
+      let selectedCamera: CameraDevice | null = null;
+
+      if (storedConfig.lastUsedCameraId) {
+        const matched = devices.find(d => d.id === storedConfig.lastUsedCameraId);
+        if (matched) selectedCamera = matched;
+      }
+
+      if (!ref.current) {
+        console.error("QRコードリーダーの要素が見つかりません");
+        return;
+      }
+
+      scannerRef.current = new Html5Qrcode(ref.current?.id);
+
+      await scannerRef.current.start(
+        // 一度承認したカメラがあればそれを、なければ背面カメラを使用
+        selectedCamera?.id ?? {
+          facingMode: 'environment',
+        },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.0,
+        },
+        (decodedText) => {
+          if (workSession?.application_id === decodedText) {
+            setIsQrScanned(true);
+            setScannedData(decodedText);
+            scannerRef.current?.stop().then(() => scannerRef.current?.clear());
+          } else {
+            toast({
+              title: "エラー",
+              description:
+                "無効なQRコードです。正しいQRコードをスキャンしてください。",
+              variant: "destructive",
+            });
+          }
+        },
+        (errorMessage) => {
+          console.log("QRスキャンエラー:", errorMessage);
+        }
+      );
+
+      const newCameraId = scannerRef.current.getRunningTrackSettings().deviceId;
+      saveCameraConfig({ hasPermission: true, lastUsedCameraId: newCameraId });
+      setHasPermission(true);
+    } catch (err) {
+      console.error('カメラアクセスに失敗しました', err);
+      setError('カメラアクセスが拒否されました。許可してください。');
+      setHasPermission(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isDialogOpen && !isQrScanned) {
+      // ダイアログが開いてから少し待ってから初期化する
+      const timer = setTimeout(async () => {
+        initCamera()
+      }, 100); // 100ms待機
+
+      return () => {
+        clearTimeout(timer);
+        if (scannerRef.current) {
+          scannerRef.current.stop().then(() => scannerRef.current?.clear());
+        }
+      };
+    }
+  }, [isDialogOpen, isQrScanned, workSession, initCamera]);
 
   const handleSuccessfulScan = async () => {
     if (!workSession) return;
@@ -563,15 +519,6 @@ export default function JobDetail({ params }: PageProps) {
     }
   };
 
-  const handleQrCodeScan = (decodedText: string) => {
-    setScannedData(decodedText);
-    setIsQrScanned(true);
-    setIsDialogOpen(true);
-    if (scanner) {
-      scanner.clear();
-    }
-  };
-
   return (
     <div className="container mx-auto px-4 py-6 max-w-md">
       <div className="flex items-center mb-6">
@@ -740,10 +687,22 @@ export default function JobDetail({ params }: PageProps) {
               </p>
               <div className="flex justify-center items-center rounded-lg overflow-hidden">
                 {!isQrScanned ? (
-                  <QrCodeReader
-                    handleDecodeAction={handleDecode}
-                    handleErrorAction={handleError}
-                  />
+                  <div className="flex flex-col items-center justify-center gap-3" style={{ width: '300px', height: '300px' }}>
+                    {error && (
+                      <div className="text-red-600 border border-red-300 bg-red-50 p-3 rounded w-full max-w-sm text-center">
+                        {error}
+                      </div>
+                    )}
+                    {!hasPermission && (
+                      <Button
+                        variant="outline"
+                        onClick={initCamera}
+                      >
+                        カメラアクセスを許可してスキャンする
+                      </Button>
+                    )}
+                    <div id="qr-reader" ref={ref} style={{ width: '300px', height: '300px' }} />
+                  </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center p-8">
                     <QrCode className="h-12 w-12 text-green-500 mb-2" />
@@ -758,7 +717,7 @@ export default function JobDetail({ params }: PageProps) {
             <Button variant="outline" onClick={handleCloseDialog}>
               キャンセル
             </Button>
-            {!isQrScanned ? (
+            {/* {!isQrScanned ? (
               <Button
                 onClick={() => {
                   const qrReaderElement = document.getElementById("qr-reader");
@@ -776,6 +735,11 @@ export default function JobDetail({ params }: PageProps) {
                 スキャンを開始
               </Button>
             ) : (
+              <Button onClick={handleCheckIn} disabled={!isQrScanned}>
+                勤務開始
+              </Button>
+            )} */}
+            {isQrScanned && (
               <Button onClick={handleCheckIn} disabled={!isQrScanned}>
                 勤務開始
               </Button>

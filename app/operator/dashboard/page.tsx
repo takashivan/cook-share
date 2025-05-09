@@ -1,5 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/lib/redux/store";
+import { fetchDashboardQuery } from "@/lib/redux/slices/operatorSlice";
 import Link from "next/link";
 import {
   Card,
@@ -9,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Building,
   CreditCard,
@@ -20,6 +25,14 @@ import {
   TrendingUp,
   Activity,
   DollarSign,
+  ArrowUpRight,
+  ArrowDownRight,
+  CheckCircle2,
+  UserCheck,
+  UserCog,
+  UserRound,
+  Wallet,
+  PiggyBank,
 } from "lucide-react";
 import {
   LineChart,
@@ -29,17 +42,55 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
 } from "recharts";
 
 export default function OperatorDashboard() {
-  const chartData = [
-    { name: "1月", value: 120 },
-    { name: "2月", value: 150 },
-    { name: "3月", value: 180 },
-    { name: "4月", value: 200 },
-    { name: "5月", value: 250 },
-    { name: "6月", value: 300 },
-  ];
+  const dispatch = useDispatch<AppDispatch>();
+  const {
+    data: dashboardData,
+    loading,
+    error,
+  } = useSelector((state: RootState) => state.operator.dashboardQuery);
+
+  useEffect(() => {
+    dispatch(fetchDashboardQuery());
+  }, [dispatch]);
+
+  if (loading) {
+    return <div className="p-4">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="p-4 text-red-500">{error}</div>;
+  }
+
+  if (!dashboardData) {
+    return <div className="p-4">No data available</div>;
+  }
+
+  const fillRate = (dashboardData.filled_jobs / dashboardData.total_jobs) * 100;
+  const verifiedRate =
+    (dashboardData.verified_users_count / dashboardData.total_users_count) *
+    100;
+  const profileCompletedRate =
+    (dashboardData.profile_completed_users_count /
+      dashboardData.total_users_count) *
+    100;
+  const activeRate =
+    (dashboardData.active_user_count / dashboardData.total_users_count) * 100;
+
+  // ステータス間の遷移率を計算
+  const verifiedToProfileRate =
+    (dashboardData.profile_completed_users_count /
+      dashboardData.verified_users_count) *
+    100;
+  const profileToActiveRate =
+    (dashboardData.active_user_count /
+      dashboardData.profile_completed_users_count) *
+    100;
 
   return (
     <div className="space-y-6">
@@ -49,174 +100,204 @@ export default function OperatorDashboard() {
             運営ダッシュボード
           </h2>
           <p className="text-muted-foreground">
-            CookChefプラットフォームの管理画面へようこそ
+            CHEFDOMプラットフォームの管理画面へようこそ
           </p>
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">総売上</CardTitle>
-            <DollarSign className="h-5 w-5 text-gray-500" />
+      {/* ユーザーコンバージョンと主要指標 */}
+      <div className="grid gap-4 md:grid-cols-10">
+        {/* ユーザーコンバージョン - 2列分 */}
+        <Card className="hover:shadow-lg transition-shadow md:col-span-4">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <Users className="h-4 w-4 text-gray-500" />
+              ユーザーコンバージョン
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">¥4,550,000</div>
-            <p className="text-xs text-muted-foreground">先月比 +12.5%</p>
+            <div className="space-y-6">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
+                  <UserRound className="h-4 w-4 text-purple-600" />
+                </div>
+                <div>
+                  <p className="text-xs font-medium">登録ユーザー</p>
+                  <p className="text-lg font-bold">
+                    {dashboardData.total_users_count}
+                  </p>
+                  <div className="flex items-center text-xs text-muted-foreground">
+                    {dashboardData.new_chefs > 0 ? (
+                      <ArrowUpRight className="h-3 w-3 text-green-500 mr-1" />
+                    ) : (
+                      <ArrowDownRight className="h-3 w-3 text-red-500 mr-1" />
+                    )}
+                    前日比 +{dashboardData.new_chefs}人
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                  <UserCheck className="h-4 w-4 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-xs font-medium">認証済み</p>
+                  <p className="text-lg font-bold">
+                    {dashboardData.verified_users_count}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {verifiedRate.toFixed(1)}%
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center">
+                  <UserCog className="h-4 w-4 text-yellow-600" />
+                </div>
+                <div>
+                  <p className="text-xs font-medium">プロフィール完了</p>
+                  <p className="text-lg font-bold">
+                    {dashboardData.profile_completed_users_count}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {profileCompletedRate.toFixed(1)}% (認証済みから{" "}
+                    {verifiedToProfileRate.toFixed(1)}%)
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
+                  <Activity className="h-4 w-4 text-orange-600" />
+                </div>
+                <div>
+                  <p className="text-xs font-medium">アクティブユーザー</p>
+                  <p className="text-lg font-bold">
+                    {dashboardData.active_user_count}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {activeRate.toFixed(1)}% (プロフィール完了から{" "}
+                    {profileToActiveRate.toFixed(1)}%)
+                  </p>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">登録会社数</CardTitle>
-            <Building className="h-5 w-5 text-gray-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">42</div>
-            <p className="text-xs text-muted-foreground">先月比 +3社</p>
-          </CardContent>
-        </Card>
+        {/* 主要指標 - 6カードを2x3グリッドで */}
+        <div className="md:col-span-6 grid gap-4 grid-cols-2 md:grid-cols-3">
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">総売上</CardTitle>
+              <PiggyBank className="h-5 w-5 text-gray-500" />
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">
+                ¥{dashboardData.total_fee.toLocaleString()}
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">手数料総額</CardTitle>
+              <Wallet className="h-5 w-5 text-gray-500" />
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">
+                ¥{(dashboardData.total_fee * 0.3).toLocaleString()}
+              </div>
+            </CardContent>
+          </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">登録シェフ数</CardTitle>
-            <User className="h-5 w-5 text-gray-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">358</div>
-            <p className="text-xs text-muted-foreground">先月比 +24人</p>
-          </CardContent>
-        </Card>
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">登録店舗数</CardTitle>
+              <Building className="h-5 w-5 text-gray-500" />
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">
+                {dashboardData.total_restaurants}
+              </div>
+              <div className="flex items-center text-xs text-muted-foreground">
+                {dashboardData.new_restaurants > 0 ? (
+                  <ArrowUpRight className="h-3 w-3 text-green-500 mr-1" />
+                ) : (
+                  <ArrowDownRight className="h-3 w-3 text-red-500 mr-1" />
+                )}
+                前日比 +{dashboardData.new_restaurants}社
+              </div>
+            </CardContent>
+          </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">掲載求人数</CardTitle>
-            <FileText className="h-5 w-5 text-gray-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">127</div>
-            <p className="text-xs text-muted-foreground">先月比 +15件</p>
-          </CardContent>
-        </Card>
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">掲載求人数</CardTitle>
+              <FileText className="h-5 w-5 text-gray-500" />
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">
+                {dashboardData.total_jobs}
+              </div>
+              <div className="flex items-center text-xs text-muted-foreground">
+                {dashboardData.new_jobs > 0 ? (
+                  <ArrowUpRight className="h-3 w-3 text-green-500 mr-1" />
+                ) : (
+                  <ArrowDownRight className="h-3 w-3 text-red-500 mr-1" />
+                )}
+                前日比 +{dashboardData.new_jobs}件
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
+      {/* 求人成約率 */}
       <div className="grid gap-6 md:grid-cols-2">
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-gray-500" />
-              注意が必要な項目
+              <CheckCircle2 className="h-5 w-5 text-gray-500" />
+              求人成約率
             </CardTitle>
-            <CardDescription>対応が必要な項目</CardDescription>
+            <CardDescription>求人の成約状況</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                  <AlertTriangle className="h-5 w-5 text-gray-500" />
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">成約率</p>
+                  <p className="text-3xl font-bold">{fillRate.toFixed(1)}%</p>
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-sm font-medium">
-                    未承認の会社が3社あります
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    2024/03/30に登録
+                <div className="text-right">
+                  <p className="text-sm font-medium">成約済み</p>
+                  <p className="text-2xl font-bold">
+                    {dashboardData.filled_jobs}
                   </p>
-                </div>
-                <Button variant="outline" size="sm">
-                  確認
-                </Button>
-              </div>
-              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                  <AlertTriangle className="h-5 w-5 text-gray-500" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-sm font-medium">
-                    報告された求人が2件あります
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    2024/03/31に報告
-                  </p>
-                </div>
-                <Button variant="outline" size="sm">
-                  確認
-                </Button>
-              </div>
-              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                  <AlertTriangle className="h-5 w-5 text-gray-500" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-sm font-medium">
-                    支払い期限切れの会社が1社あります
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    2024/03/25期限
-                  </p>
-                </div>
-                <Button variant="outline" size="sm">
-                  確認
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-gray-500" />
-              プラットフォーム統計
-            </CardTitle>
-            <CardDescription>過去30日間の統計</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="value" stroke="#8884d8" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="space-y-4 mt-4">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                  <TrendingUp className="h-5 w-5 text-gray-500" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-sm font-medium">新規シェフ登録</h3>
-                  <p className="text-sm">
-                    24人{" "}
-                    <span className="text-muted-foreground text-xs">+15%</span>
+                  <p className="text-sm text-muted-foreground">
+                    / {dashboardData.total_jobs}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                  <Activity className="h-5 w-5 text-gray-500" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-sm font-medium">求人応募数</h3>
-                  <p className="text-sm">
-                    156件{" "}
-                    <span className="text-muted-foreground text-xs">+22%</span>
+              <div className="w-full bg-gray-200 rounded-full h-4">
+                <div
+                  className="bg-blue-600 h-4 rounded-full transition-all duration-500"
+                  style={{ width: `${fillRate}%` }}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4 mt-4">
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <p className="text-sm font-medium text-blue-600">成約済み</p>
+                  <p className="text-2xl font-bold">
+                    {dashboardData.filled_jobs}
                   </p>
                 </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                  <DollarSign className="h-5 w-5 text-gray-500" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-sm font-medium">月間売上</h3>
-                  <p className="text-sm">
-                    ¥1,250,000{" "}
-                    <span className="text-muted-foreground text-xs">+8%</span>
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <p className="text-sm font-medium text-gray-600">未成約</p>
+                  <p className="text-2xl font-bold">
+                    {dashboardData.total_jobs - dashboardData.filled_jobs}
                   </p>
                 </div>
               </div>

@@ -30,7 +30,7 @@ export function Header() {
         <Link href="/" className="flex items-center gap-2">
           <Image
             src="/chef_illust/chef_logo.png?height=40&width=40"
-            alt="CookChef Logo"
+            alt="CHEFDOM Logo"
             width={120}
             height={30}
             className="text-orange-500"

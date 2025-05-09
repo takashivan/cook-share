@@ -14,11 +14,9 @@ const apiCache = new WeakMap<Constructor<any>, any>();
 * @returns - 指定された API クラスのインスタンス
 */
 export function getApi<T>(ApiClass: Constructor<T>): T {
-  console.log('getApi', ApiClass);
   if (!apiCache.has(ApiClass)) {
     // axios のインスタンスを渡して API クラスを初期化
     apiCache.set(ApiClass, new ApiClass({ axiosInstance: axiosInstance }));
-    console.log('apiCache', apiCache);
   }
   return apiCache.get(ApiClass);
 }
