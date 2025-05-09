@@ -17,7 +17,7 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { checkStripeAccount } from "@/lib/api/user";
 
 export default function OnboardingCompletePage() {
-  const { user } = useAuth();
+  const { user, reloadUser } = useAuth();
   const [status, setStatus] = useState<
     "loading" | "verified" | "pending" | "error"
   >("loading");
@@ -35,6 +35,7 @@ export default function OnboardingCompletePage() {
         const res = await checkStripeAccount(user.id);
 
         if (res.user.stripe_verified) {
+          reloadUser();
           setStatus("verified");
           setMessage(
             "おめでとうございます！Stripeアカウントの設定が完了しました。"

@@ -24,7 +24,7 @@ import { toast } from "@/hooks/use-toast";
 
 export default function CompanyProfilePage() {
   const router = useRouter();
-  const { user, login } = useCompanyAuth();
+  const { user, login, reloadUser } = useCompanyAuth();
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -84,8 +84,8 @@ export default function CompanyProfilePage() {
       if (!token) {
         throw new Error("認証トークンが見つかりません");
       }
-      // 修正後
-      await login(token, initializedCompany.companyUser);
+      // 修正後、Contextなどに保持するユーザー情報を更新
+      await reloadUser();
 
       toast({
         title: "会社情報を登録しました",

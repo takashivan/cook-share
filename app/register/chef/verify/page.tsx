@@ -6,8 +6,10 @@ import { verifyEmail } from "@/lib/api/user";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 export default function VerifyEmailPage() {
+  const { reloadUser } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -27,6 +29,7 @@ export default function VerifyEmailPage() {
 
       try {
         await verifyEmail(token, user_id);
+        await reloadUser();
         setStatus("success");
       } catch (error) {
         console.error("Email verification failed:", error);

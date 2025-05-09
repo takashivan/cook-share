@@ -30,7 +30,7 @@ export default function AccountSettings() {
     phone: "090-1234-5678",
     language: "ja",
   });
-  const { user } = useAuth();
+  const { user, reloadUser } = useAuth();
 
   // パスワード変更のステート
   const [passwordInfo, setPasswordInfo] = useState({
@@ -39,8 +39,9 @@ export default function AccountSettings() {
     confirmPassword: "",
   });
 
-  const handleEmailChange = (email: string) => {
-    changeEmail(email);
+  const handleEmailChange = async (email: string) => {
+    await changeEmail(email);
+    await reloadUser();
     console.log(email);
   };
 
