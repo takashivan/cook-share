@@ -15,6 +15,8 @@ import {
   EmailChangeCreatePayload,
   EmailConfirmCreateData,
   EmailConfirmCreatePayload,
+  ProfilePartialUpdateData,
+  ProfilePartialUpdatePayload,
   SessionHistoryCurrentListData,
   StripeAccountCheckCreateData,
   StripeAccountCheckCreatePayload,
@@ -201,6 +203,42 @@ export class User<
       { arg }: { arg: StripeCreateAccountCreatePayload },
     ) => Promise<StripeCreateAccountCreateData> = (_, { arg }) =>
       this.stripeCreateAccountCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description Edit user record <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags user
+   * @name ProfilePartialUpdate
+   * @summary Edit user record
+   * @request PATCH:/user/{user_id}/profile
+   */
+  profilePartialUpdate = (
+    userId: string,
+    data: ProfilePartialUpdatePayload,
+    params: RequestParams = {},
+  ) =>
+    this.request<ProfilePartialUpdateData, void>({
+      path: `/user/${userId}/profile`,
+      method: "PATCH",
+      body: data,
+      type: ContentType.FormData,
+      format: "json",
+      ...params,
+    });
+
+  profilePartialUpdateQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/user/${userId}/profile`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: ProfilePartialUpdatePayload },
+    ) => Promise<ProfilePartialUpdateData> = (_, { arg }) =>
+      this.profilePartialUpdate(userId, arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 

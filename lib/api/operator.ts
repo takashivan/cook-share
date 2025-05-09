@@ -173,6 +173,24 @@ export const operatorApi = {
     );
   },
 
+  getDashboardQuery: async (): Promise<any> => {
+    return apiRequest(
+      `${API_CONFIG.baseURLs.operatorGetUser}/dashboard-query`,
+      "GET",
+      undefined,
+      "operator"
+    );
+  },
+
+  getChefsToBeReviewed: async (): Promise<any> => {
+    return apiRequest(
+      `${API_CONFIG.baseURLs.operatorGetUser}/to-be-reviewed`,
+      "GET",
+      undefined,
+      "operator"
+    );
+  },
+
   // 請求管理
   getBilling: async (): Promise<any> => {
     return apiRequest(

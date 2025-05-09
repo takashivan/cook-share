@@ -669,6 +669,7 @@ export interface QueryDashboardListData {
   /** @format int64 */
   Companies_count_lastMonth: number;
   job_total_amount: string;
+  job_total_amount_lastMonth: string;
 }
 
 export interface RestaurantApprovePartialUpdatePayload {
@@ -948,6 +949,10 @@ export interface UserApprovePartialUpdateData {
   postal_code: string;
   prefecture: string;
   address2: string;
+  city: string;
+  town: string;
+  street: string;
+  profile_completed: boolean;
   magic_link: {
     token: string;
     /**
@@ -1014,6 +1019,10 @@ export interface UserBanPartialUpdateData {
     postal_code: string;
     prefecture: string;
     address2: string;
+    city: string;
+    town: string;
+    street: string;
+    profile_completed: boolean;
     magic_link: {
       token: string;
       /**
@@ -1091,6 +1100,10 @@ export interface UsersApprovePartialUpdateData {
   postal_code: string;
   prefecture: string;
   address2: string;
+  city: string;
+  town: string;
+  street: string;
+  profile_completed: boolean;
   magic_link: {
     token: string;
     /**
@@ -1156,6 +1169,10 @@ export interface UsersBanPartialUpdateData {
     postal_code: string;
     prefecture: string;
     address2: string;
+    city: string;
+    town: string;
+    street: string;
+    profile_completed: boolean;
     magic_link: {
       token: string;
       /**
@@ -1416,3 +1433,91 @@ export interface RestaurantCuisineCreateData {
   is_primary: boolean;
   category: string;
 }
+
+export interface DashboardQueryListData {
+  /** @format int64 */
+  total_users_count: number;
+  /** @format int64 */
+  verified_users_count: number;
+  /** @format int64 */
+  profile_completed_users_count: number;
+  active_user_count: string;
+  total_fee: string;
+  filled_jobs: string;
+  /** @format int64 */
+  total_restaurants: number;
+  /** @format int64 */
+  new_restaurants: number;
+  /** @format int64 */
+  total_chefs: number;
+  /** @format int64 */
+  new_chefs: number;
+  /** @format int64 */
+  total_jobs: number;
+  /** @format int64 */
+  new_jobs: number;
+}
+
+export type ToBeReviewedListData = {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  name: string;
+  /** @format email */
+  email: string;
+  /** @format password */
+  password: string;
+  user_type: string;
+  status: string;
+  /** @format date */
+  last_login_at: string | null;
+  /** @format date */
+  updated_at: string | null;
+  skills: string[];
+  experience_level: string;
+  bio: string;
+  certifications: string[];
+  /** @format date */
+  dateofbirth: string | null;
+  profile_image: string;
+  is_approved: boolean;
+  line_user_id: string;
+  line_display_name: string;
+  line_notification_enabled: boolean;
+  is_verified: boolean;
+  verify_token: string;
+  stripe_account_id: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
+  password_reset_token: string;
+  stripe_verified: boolean;
+  stripe_requirements: object;
+  address: string;
+  phone: string;
+  last_name: string;
+  given_name: string;
+  last_name_kana: string;
+  given_name_kana: string;
+  categories: number[];
+  postal_code: string;
+  prefecture: string;
+  address2: string;
+  city: string;
+  town: string;
+  street: string;
+  profile_completed: boolean;
+  magic_link: {
+    token: string;
+    /**
+     * Time the token expires
+     * @format timestamptz
+     */
+    expiration: number;
+    used: boolean;
+  } | null;
+}[];

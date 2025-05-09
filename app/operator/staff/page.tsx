@@ -42,7 +42,7 @@ export default function StaffList() {
     {
       id: 1,
       name: "管理者 太郎",
-      email: "admin1@cookchef.jp",
+      email: "admin1@CHEFDOM.jp",
       role: "システム管理者",
       lastLogin: "2024/03/31 10:30",
       status: "アクティブ",
@@ -50,7 +50,7 @@ export default function StaffList() {
     {
       id: 2,
       name: "運営 花子",
-      email: "operator1@cookchef.jp",
+      email: "operator1@CHEFDOM.jp",
       role: "運営担当",
       lastLogin: "2024/03/30 15:45",
       status: "アクティブ",
@@ -58,7 +58,7 @@ export default function StaffList() {
     {
       id: 3,
       name: "サポート 一郎",
-      email: "support1@cookchef.jp",
+      email: "support1@CHEFDOM.jp",
       role: "カスタマーサポート",
       lastLogin: "2024/03/29 09:15",
       status: "アクティブ",
@@ -66,7 +66,7 @@ export default function StaffList() {
     {
       id: 4,
       name: "経理 次郎",
-      email: "finance1@cookchef.jp",
+      email: "finance1@CHEFDOM.jp",
       role: "経理担当",
       lastLogin: "2024/03/28 14:20",
       status: "アクティブ",
@@ -74,7 +74,7 @@ export default function StaffList() {
     {
       id: 5,
       name: "マーケ 三郎",
-      email: "marketing1@cookchef.jp",
+      email: "marketing1@CHEFDOM.jp",
       role: "マーケティング担当",
       lastLogin: "2024/03/25 11:10",
       status: "停止中",

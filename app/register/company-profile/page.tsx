@@ -112,7 +112,7 @@ export default function CompanyProfilePage() {
           <Link href="/" className="flex items-center gap-2">
             <Image
               src="/chef_illust/chef_logo.png?height=200&width=400"
-              alt="CookChef Logo"
+              alt="CHEFDOM Logo"
               width={120}
               height={30}
               className="text-orange-500"
