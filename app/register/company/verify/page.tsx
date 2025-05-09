@@ -32,9 +32,9 @@ export default function VerifyEmailPage() {
         const response = await verifyEmail(token, user_id);
         if (response) {
           setStatus("success");
-          const user = await reloadUser();
           // 成功時に少し待ってからリダイレクト
-          setTimeout(() => {
+          setTimeout(async () => {
+            const user = await reloadUser();
             if (user?.companies_id == null) {
               router.push("/register/company-profile");
             } else {

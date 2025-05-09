@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,7 @@ export default function CompanyProfilePage() {
   const { user, login, reloadUser } = useCompanyAuth();
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [checking, setChecking] = useState(true)
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -104,6 +105,18 @@ export default function CompanyProfilePage() {
       setIsSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    if (user && user.companies_id != null) {
+      router.replace("/admin");
+    }
+
+    setChecking(false)
+  }, [user, router]);
+
+  if (checking) {
+    return null;
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
