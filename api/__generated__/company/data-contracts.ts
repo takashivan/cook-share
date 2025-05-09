@@ -137,6 +137,42 @@ export interface RequestPasswordResetCreateData {
   password_reset_token: string;
 }
 
+export interface ResendVerificationCreatePayload {
+  user_id: string;
+}
+
+export interface ResendVerificationCreateData {
+  user: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format uuid */
+    companies_id: string | null;
+    name: string;
+    /** @format email */
+    email: string;
+    phone: string | null;
+    /** @format password */
+    password: string;
+    is_admin: boolean;
+    /** @default "1" */
+    is_active: boolean;
+    is_verified: boolean;
+    /** @format timestamptz */
+    updated_at: number | null;
+    magic_link: object;
+    verify_token: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
+    password_reset_token: string;
+  };
+}
+
 export interface ResetPasswordCreatePayload {
   token: string;
   new_password: string;
@@ -215,6 +251,42 @@ export interface SignupCreateData {
     password_reset_token: string;
   };
   sessionToken: string;
+}
+
+export interface UpdateEmailCreatePayload {
+  /** @format email */
+  email: string;
+  user_id: string;
+}
+
+export interface UpdateEmailCreateData {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format uuid */
+  companies_id: string | null;
+  name: string;
+  /** @format email */
+  email: string;
+  phone: string | null;
+  /** @format password */
+  password: string;
+  is_admin: boolean;
+  /** @default "1" */
+  is_active: boolean;
+  is_verified: boolean;
+  /** @format timestamptz */
+  updated_at: number | null;
+  magic_link: object;
+  verify_token: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
+  password_reset_token: string;
 }
 
 export interface VerifyEmailCreatePayload {
@@ -481,6 +553,10 @@ export type WorksessionsThismonthListData = {
     postal_code: string;
     prefecture: string;
     address2: string;
+    city: string;
+    town: string;
+    street: string;
+    profile_completed: boolean;
     magic_link: {
       token: string;
       /**

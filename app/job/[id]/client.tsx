@@ -777,7 +777,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
             <div className="flex items-center gap-2">
               <Image
                 src="/chef_illust/chef_logo.png"
-                alt="CookChef Logo"
+                alt="CHEFDOM Logo"
                 width={120}
                 height={30}
                 className="text-white"
@@ -819,7 +819,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
           </div>
 
           <div className="text-center text-xs text-gray-400">
-            © cookchef Co.,Ltd.
+            © CHEFDOM Co.,Ltd.
           </div>
         </div>
       </footer>

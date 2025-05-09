@@ -22,6 +22,7 @@ export const API_CONFIG = {
     chefReview: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/chef_review",
     message: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/message",
     operator: "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/operator",
+    operatorGetUser: "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/users",
     cuisines:
       "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/restaurant_cuisine",
 

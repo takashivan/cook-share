@@ -140,6 +140,10 @@ export type GetApplicationData = {
     postal_code: string;
     prefecture: string;
     address2: string;
+    city: string;
+    town: string;
+    street: string;
+    profile_completed: boolean;
     magic_link: {
       token: string;
       /**
@@ -1177,6 +1181,10 @@ export type ByRestaurantDetailData = {
     postal_code: string;
     prefecture: string;
     address2: string;
+    city: string;
+    town: string;
+    street: string;
+    profile_completed: boolean;
     magic_link: {
       token: string;
       /**
@@ -1331,6 +1339,10 @@ export interface BySessionDetailData {
     postal_code: string;
     prefecture: string;
     address2: string;
+    city: string;
+    town: string;
+    street: string;
+    profile_completed: boolean;
     magic_link: {
       token: string;
       /**
@@ -3262,6 +3274,10 @@ export type ApplicationsListResult = {
     postal_code: string;
     prefecture: string;
     address2: string;
+    city: string;
+    town: string;
+    street: string;
+    profile_completed: boolean;
     magic_link: {
       token: string;
       /**
@@ -3372,6 +3388,10 @@ export type WorksessionsRestaurantTodosListData = {
     postal_code: string;
     prefecture: string;
     address2: string;
+    city: string;
+    town: string;
+    street: string;
+    profile_completed: boolean;
     magic_link: {
       token: string;
       /**
@@ -4615,6 +4635,10 @@ export type ByRestaurantDetailResult = {
     postal_code: string;
     prefecture: string;
     address2: string;
+    city: string;
+    town: string;
+    street: string;
+    profile_completed: boolean;
     magic_link: {
       token: string;
       /**
@@ -4739,6 +4763,10 @@ export interface BySessionDetailResult {
     postal_code: string;
     prefecture: string;
     address2: string;
+    city: string;
+    town: string;
+    street: string;
+    profile_completed: boolean;
     magic_link: {
       token: string;
       /**
@@ -5234,6 +5262,10 @@ export type ChefReviewsListData = {
     postal_code: string;
     prefecture: string;
     address2: string;
+    city: string;
+    town: string;
+    street: string;
+    profile_completed: boolean;
     magic_link: {
       token: string;
       /**
@@ -5441,6 +5473,10 @@ export type RestaurantReviewsListResult = {
     postal_code: string;
     prefecture: string;
     address2: string;
+    city: string;
+    town: string;
+    street: string;
+    profile_completed: boolean;
     magic_link: {
       token: string;
       /**
@@ -5717,6 +5753,10 @@ export interface EmailChangeCreateData {
   postal_code: string;
   prefecture: string;
   address2: string;
+  city: string;
+  town: string;
+  street: string;
+  profile_completed: boolean;
   magic_link: {
     token: string;
     /**
@@ -5781,6 +5821,10 @@ export interface EmailConfirmCreateData {
   postal_code: string;
   prefecture: string;
   address2: string;
+  city: string;
+  town: string;
+  street: string;
+  profile_completed: boolean;
   magic_link: {
     token: string;
     /**
@@ -5809,6 +5853,59 @@ export interface StripeCreateAccountCreatePayload {
 }
 
 export type StripeCreateAccountCreateData = object;
+
+export interface ProfilePartialUpdatePayload {
+  name: string;
+  /** @format email */
+  email: string;
+  user_type: string;
+  status: string;
+  /** @format date */
+  last_login_at: string | null;
+  /** @format date */
+  updated_at: string | null;
+  skills: string[];
+  experience_level: string;
+  bio: string;
+  certifications: string[];
+  /** @format date */
+  dateofbirth: string | null;
+  profile_image: string;
+  is_approved: boolean;
+  is_verified: boolean;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
+  password_reset_token: string;
+  stripe_verified: boolean;
+  stripe_requirements: object;
+  address: string;
+  phone: string;
+  last_name: string;
+  given_name: string;
+  last_name_kana: string;
+  given_name_kana: string;
+  categories: number[];
+  postal_code: string;
+  prefecture: string;
+  address2: string;
+  city: string;
+  town: string;
+  street: string;
+  /** @format binary */
+  photo: File | null;
+  magic_link: {
+    token: string;
+    /**
+     * Time the token expires
+     * @format timestamptz
+     */
+    expiration: number;
+    used: boolean;
+  } | null;
+}
+
+export type ProfilePartialUpdateData = object;
 
 export type SessionHistoryCurrentListData = {
   /** @format int64 */
@@ -5977,6 +6074,10 @@ export interface UserDetailData {
   postal_code: string;
   prefecture: string;
   address2: string;
+  city: string;
+  town: string;
+  street: string;
+  profile_completed: boolean;
   magic_link: {
     token: string;
     /**
@@ -6023,6 +6124,10 @@ export interface UserPartialUpdatePayload {
   postal_code: string;
   prefecture: string;
   address2: string;
+  city: string;
+  town: string;
+  street: string;
+  profile_completed: boolean;
   /** @format binary */
   photo: File | null;
   magic_link: {
@@ -6705,6 +6810,10 @@ export interface UsersDetailData {
   postal_code: string;
   prefecture: string;
   address2: string;
+  city: string;
+  town: string;
+  street: string;
+  profile_completed: boolean;
   magic_link: {
     token: string;
     /**
@@ -6751,6 +6860,10 @@ export interface UsersPartialUpdatePayload {
   postal_code: string;
   prefecture: string;
   address2: string;
+  city: string;
+  town: string;
+  street: string;
+  profile_completed: boolean;
   /** @format binary */
   photo: File | null;
   magic_link: {
@@ -6764,7 +6877,10 @@ export interface UsersPartialUpdatePayload {
   } | null;
 }
 
-export type UsersPartialUpdateData = object;
+export interface UsersPartialUpdateData {
+  result1: string;
+  name: string;
+}
 
 export type UsersListData = {
   /** @format uuid */
@@ -6815,6 +6931,10 @@ export type UsersListData = {
   postal_code: string;
   prefecture: string;
   address2: string;
+  city: string;
+  town: string;
+  street: string;
+  profile_completed: boolean;
   magic_link: {
     token: string;
     /**
@@ -6866,6 +6986,10 @@ export interface UsersCreatePayload {
   postal_code: string;
   prefecture: string;
   address2: string;
+  city: string;
+  town: string;
+  street: string;
+  profile_completed: boolean;
   magic_link: {
     token: string;
     /**
@@ -6926,6 +7050,10 @@ export interface UsersCreateData {
   postal_code: string;
   prefecture: string;
   address2: string;
+  city: string;
+  town: string;
+  street: string;
+  profile_completed: boolean;
   magic_link: {
     token: string;
     /**
@@ -6986,6 +7114,10 @@ export type UserListData = {
   postal_code: string;
   prefecture: string;
   address2: string;
+  city: string;
+  town: string;
+  street: string;
+  profile_completed: boolean;
   magic_link: {
     token: string;
     /**
@@ -7037,6 +7169,10 @@ export interface UserCreatePayload {
   postal_code: string;
   prefecture: string;
   address2: string;
+  city: string;
+  town: string;
+  street: string;
+  profile_completed: boolean;
   magic_link: {
     token: string;
     /**
@@ -7097,6 +7233,10 @@ export interface UserCreateData {
   postal_code: string;
   prefecture: string;
   address2: string;
+  city: string;
+  town: string;
+  street: string;
+  profile_completed: boolean;
   magic_link: {
     token: string;
     /**
@@ -7281,6 +7421,10 @@ export type RestaurantTodoDetailData = {
     postal_code: string;
     prefecture: string;
     address2: string;
+    city: string;
+    town: string;
+    street: string;
+    profile_completed: boolean;
     magic_link: {
       token: string;
       /**
@@ -8242,6 +8386,10 @@ export interface ChefReviewListResult {
     postal_code: string;
     prefecture: string;
     address2: string;
+    city: string;
+    town: string;
+    street: string;
+    profile_completed: boolean;
     magic_link: {
       token: string;
       /**
@@ -8571,6 +8719,10 @@ export interface RestaurantReviewListResult {
     postal_code: string;
     prefecture: string;
     address2: string;
+    city: string;
+    town: string;
+    street: string;
+    profile_completed: boolean;
     magic_link: {
       token: string;
       /**
