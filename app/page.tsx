@@ -17,10 +17,12 @@ import { DateSelector } from "@/components/jobs/DateSelector";
 
 export default function Home() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedArea, setSelectedArea] = useState<SearchId>('all');
-  const [selectedCuisines, setSelectedCuisines] = useState<SearchId[]>(['all']);
+  const [selectedArea, setSelectedArea] = useState<SearchId>("all");
+  const [selectedCuisines, setSelectedCuisines] = useState<SearchId[]>(["all"]);
   const [keyword, setKeyword] = useState<string>("");
-  const [filteredJobs, setFilteredJobs] = useState<QueryUpcomingListResult['jobs']>([]);
+  const [filteredJobs, setFilteredJobs] = useState<
+    QueryUpcomingListResult["jobs"]
+  >([]);
 
   const { data: jobsData, error, isLoading } = useGetJobsByUpcoming();
 
@@ -35,21 +37,30 @@ export default function Home() {
   const handleSearch = (date: Date | null) => {
     if (!jobsData) return;
 
-    const result = jobsData.jobs.filter(job => {
-      const matchArea = selectedArea === 'all' ? true : 
-        selectedArea === 1 ? 
-          ["茨城県", "栃木県", "群馬県", "埼玉県", "千葉県", "東京都", "神奈川県"].some(prefecture => 
-            job.restaurant.address?.includes(prefecture)
-          ) :
-        selectedArea === 2 ?
-          ["京都府", "大阪府", "兵庫県", "奈良県", "滋賀県", "和歌山県"].some(prefecture => 
-            job.restaurant.address?.includes(prefecture)
-          ) :
-        true;
-      const matchCuisine = selectedCuisines.includes('all') ? true :
-        job.restaurant.restaurant_cuisine_id?.some(cuisine =>
-          selectedCuisines.includes(cuisine[0].id)
-        ) ?? true;
+    const result = jobsData.jobs.filter((job) => {
+      const matchArea =
+        selectedArea === "all"
+          ? true
+          : selectedArea === 1
+          ? [
+              "茨城県",
+              "栃木県",
+              "群馬県",
+              "埼玉県",
+              "千葉県",
+              "東京都",
+              "神奈川県",
+            ].some((prefecture) => job.restaurant.address?.includes(prefecture))
+          : selectedArea === 2
+          ? ["京都府", "大阪府", "兵庫県", "奈良県", "滋賀県", "和歌山県"].some(
+              (prefecture) => job.restaurant.address?.includes(prefecture)
+            )
+          : true;
+      const matchCuisine = selectedCuisines.includes("all")
+        ? true
+        : job.restaurant.restaurant_cuisine_id?.some((cuisine) =>
+            selectedCuisines.includes(cuisine[0].id)
+          ) ?? true;
       const matchKeyword = keyword
         ? job.title.includes(keyword) || job.restaurant.name.includes(keyword)
         : true;
@@ -96,9 +107,9 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
               <div className="col-span-1 md:col-span-3 py-8">
                 <h1 className="text-xl font-bold mb-2">
-                  料理人が自由に輝き、
+                  料理人のキャリアに、
                   <br className="md:hidden" />
-                  創造性あふれる食の世界を創る
+                  もう一つの選択肢を
                 </h1>
                 <div className="flex gap-2 mt-4">
                   <Button variant="outline" size="sm" className="rounded-full">
@@ -364,10 +375,6 @@ export default function Home() {
             <Link href="/contact" className="hover:underline">
               お問い合わせ
             </Link>
-          </div>
-
-          <div className="text-center text-xs text-gray-400">
-            © cookchef Co.,Ltd.
           </div>
         </div>
       </footer>
