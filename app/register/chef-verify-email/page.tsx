@@ -20,14 +20,12 @@ import { Mail, RefreshCw, ArrowRight, CheckCircle2 } from "lucide-react";
 import {
   resendVerificationEmail,
   updateEmail,
-  getCurrentUser,
-  getUserProfile,
 } from "@/lib/api/user";
 import { motion } from "framer-motion";
 
 export default function VerifyEmailPage() {
   const router = useRouter();
-  const { user, loading, setUser } = useAuth();
+  const { user, loading, reloadUser } = useAuth();
   const [isResending, setIsResending] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [newEmail, setNewEmail] = useState("");
@@ -91,11 +89,7 @@ export default function VerifyEmailPage() {
         throw new Error("User not found");
       }
       await updateEmail(user.id, newEmail);
-      const userData = await getCurrentUser();
-      if (userData) {
-        const fullProfile = await getUserProfile(userData.id);
-        setUser(fullProfile);
-      }
+      await reloadUser();
       setShowSuccess(true);
       toast({
         title: "メールアドレスを更新しました",

@@ -27,7 +27,7 @@ import { motion } from "framer-motion";
 
 export default function CompanyVerifyEmailPage() {
   const router = useRouter();
-  const { user, isLoading, setUser } = useCompanyAuth();
+  const { user, isLoading, reloadUser } = useCompanyAuth();
   const [isResending, setIsResending] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [newEmail, setNewEmail] = useState("");
@@ -91,7 +91,7 @@ export default function CompanyVerifyEmailPage() {
         throw new Error("User not found");
       }
       await updateEmail(user.id, newEmail);
-
+      await reloadUser();
       setShowSuccess(true);
       toast({
         title: "メールアドレスを更新しました",

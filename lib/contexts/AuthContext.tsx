@@ -17,6 +17,8 @@ import {
 import type { UserData, UserProfile } from "@/lib/api/user";
 import { useRouter } from "next/navigation";
 import { login, logout, getUserProfile, register } from "@/lib/api/user";
+import { getApi } from "@/api/api-factory";
+import { Users } from "@/api/__generated__/base/Users";
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -26,6 +28,7 @@ interface AuthContextType {
   logout: () => void;
   register: (data: UserData) => Promise<void>;
   setUser: (user: UserProfile | null) => void;
+  reloadUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -36,6 +39,7 @@ const AuthContext = createContext<AuthContextType>({
   logout: () => {},
   register: async () => {},
   setUser: () => {},
+  reloadUser: async () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -43,6 +47,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+
+  const userApi = getApi(Users);
 
   const initAuth = async () => {
     try {
@@ -74,11 +80,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initAuth();
   }, []);
 
-  const setAuth = (token: string, userData: UserProfile) => {
-    setAuthToken(token, "chef");
+  const updateUser = (userData: UserProfile | null) => {
     setUser(userData);
     setCurrentUser(userData, "chef");
-    localStorage.setItem("user", JSON.stringify(userData));
+    if (userData) {
+      localStorage.setItem("user", JSON.stringify(userData));
+    } else {
+      localStorage.removeItem("user");
+    }
+  };
+
+  const reloadUser = async () => {
+    try {
+      const userId = user?.id;
+      if (!userId) {
+        throw new Error("User ID not found");
+      }
+      const userData = await userApi.usersDetail(userId);
+      if (!userData) {
+        throw new Error("User not found");
+      }
+      updateUser(userData.data as unknown as UserProfile);
+    } catch (error) {
+      console.error("Error reloading user:", error);
+      setUser(null);
+      setCurrentUser(null, "chef");
+    }
+  };
+
+  const setAuth = (token: string, userData: UserProfile) => {
+    console.log("Setting auth token:", token);
+    console.log("Setting user data:", userData);
+    setAuthToken(token, "chef");
+    updateUser(userData);
     setIsAuthenticated(true);
     router.push("/chef/dashboard");
   };
@@ -128,7 +162,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login: handleLogin,
         logout: handleLogout,
         register: handleRegister,
-        setUser,
+        setUser: updateUser,
+        reloadUser
       }}>
       {children}
     </AuthContext.Provider>
