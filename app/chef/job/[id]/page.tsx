@@ -249,7 +249,7 @@ export default function JobDetail({ params }: PageProps) {
           aspectRatio: 1.0,
         },
         (decodedText) => {
-          if (workSession?.application_id === decodedText) {
+          if (workSession?.id.toString() === decodedText) {
             setIsQrScanned(true);
             setScannedData(decodedText);
             scannerRef.current?.stop().then(() => scannerRef.current?.clear());
