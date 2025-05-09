@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { confirmEmail } from "@/lib/api/companyUser";
+import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 
 export default function ChefVerifyChangeEmailPage() {
+  const { reloadUser } = useCompanyAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -27,6 +29,7 @@ export default function ChefVerifyChangeEmailPage() {
 
       try {
         await confirmEmail(token);
+        await reloadUser();
         setStatus("success");
       } catch (error) {
         console.error("Email verification failed:", error);

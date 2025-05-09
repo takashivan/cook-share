@@ -88,23 +88,23 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           return;
         }
 
-        if (isAuthenticated === undefined) {
-          return;
-        }
-
-        if (!user?.is_admin && pathname.startsWith("/admin/company")) {
-          router.push("/admin");
-          return;
-        }
-
-        if (!user?.companies_id) {
-          router.push("/register/company-profile");
-          return;
-        }
-
-        if (!user?.is_verified) {
-          router.push("/register/company-verify-email");
-          return;
+        // 認証済みの場合
+        if (isAuthenticated && user) {
+          if (!user.is_admin && pathname.startsWith("/admin/company")) {
+            router.push("/admin");
+            return;
+          }
+  
+          if (!user.is_verified) {
+            console.log("User is not verified", user);
+            router.push("/register/company-verify-email");
+            return;
+          }
+  
+          if (!user.companies_id) {
+            router.push("/register/company-profile");
+            return;
+          }
         }
 
         setIsLoading(false);

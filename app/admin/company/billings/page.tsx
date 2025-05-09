@@ -32,8 +32,12 @@ import { useGetCurrentBillingSummaryByCompanyId } from "@/hooks/api/companyuser/
 
 export default function BillingList() {
   const { user } = useCompanyAuth();
-  const { data: billings, isLoading, error } = useGetCurrentBillingSummaryByCompanyId({
-    companyId: user?.companies_id,
+  const {
+    data: billings,
+    isLoading,
+    error,
+  } = useGetCurrentBillingSummaryByCompanyId({
+    companyId: user?.companies_id ?? "",
   });
 
   useEffect(() => {
@@ -132,8 +136,8 @@ export default function BillingList() {
                         billing.status === "PAID"
                           ? "bg-green-100 text-green-800"
                           : billing.status === "PENDING"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-red-100 text-red-800"
                       }`}>
                       {billing.status === "PAID" ? "支払済" : "未払い"}
                     </div>
@@ -228,8 +232,8 @@ export default function BillingList() {
                       billing.status === "PAID"
                         ? "bg-green-100 text-green-800"
                         : billing.status === "PENDING"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-red-100 text-red-800"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : "bg-red-100 text-red-800"
                     }`}>
                     {billing.status === "PAID" ? "支払済" : "未払い"}
                   </div>

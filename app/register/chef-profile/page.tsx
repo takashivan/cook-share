@@ -54,7 +54,7 @@ const STEPS = [
 
 export default function ChefProfilePage() {
   const router = useRouter();
-  const { isAuthenticated, user, setUser } = useAuth();
+  const { user, reloadUser } = useAuth();
   const { data: cuisinesData } = useGetRestaurantCuisines();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
@@ -263,11 +263,7 @@ export default function ChefProfilePage() {
       console.log("profileData", profileData);
 
       await createUserProfile(user.id, profileData);
-      const userData = await getCurrentUser();
-      if (userData) {
-        const fullProfile = await getUserProfile(userData.id);
-        setUser(fullProfile);
-      }
+      await reloadUser();
       toast({
         title: "プロフィールを更新しました",
         description: "シェフプロフィールの更新が完了しました。",

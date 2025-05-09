@@ -17,6 +17,7 @@ import {
   CompanySettings,
 } from "./company";
 import { Restaurant } from "./restaurant";
+import { SignupCreateData } from "@/api/__generated__/company/data-contracts";
 const BASE_URL = API_CONFIG.baseURLs.companyUser;
 const AUTH_URL = API_CONFIG.baseURLs.companyAuth;
 
@@ -35,7 +36,7 @@ interface CompanyUserData {
 
 export interface CompanyUser {
   id: string;
-  companies_id: string;
+  companies_id: string | null;
   name: string;
   email: string;
   phone?: string;
@@ -77,39 +78,21 @@ export const getMyRestaurants = async (
 export const register = async (
   userData: CompanyUserData
 ): Promise<{ sessionToken: string; authToken: string; user: CompanyUser }> => {
-  const response = await apiRequest<{
-    sessionToken: string;
-    authToken: string;
-    user: {
-      id: string;
-      name: string;
-      email: string;
-      company_id: string;
-      role: string;
-    };
-  }>(`${AUTH_URL}/signup`, "POST", userData);
+  const response = await apiRequest<SignupCreateData>(`${AUTH_URL}/signup`, "POST", userData);
 
   if (response.sessionToken) {
     setAuthToken(response.sessionToken, "company");
   }
 
-  // Transform the response to match CompanyUser interface
-  const transformedUser: CompanyUser = {
-    id: response.user.id,
-    name: response.user.name,
-    email: response.user.email,
-    companies_id: response.user.company_id,
-    is_admin: response.user.role === "admin",
-    is_active: true,
-    is_verified: true,
-  };
-
-  setCurrentUser(transformedUser, "company");
-
   return {
     sessionToken: response.sessionToken,
     authToken: response.authToken,
-    user: transformedUser,
+    user: {
+      ...response.user,
+      phone: response.user.phone || undefined,
+      created_at: undefined,
+      updated_at: undefined,
+    },
   };
 };
 

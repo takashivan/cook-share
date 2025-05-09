@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 
 export default function VerifyEmailPage() {
+  const { reloadUser } = useCompanyAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -30,9 +32,14 @@ export default function VerifyEmailPage() {
         const response = await verifyEmail(token, user_id);
         if (response) {
           setStatus("success");
+          const user = await reloadUser();
           // 成功時に少し待ってからリダイレクト
           setTimeout(() => {
-            router.push("/register/company-profile");
+            if (user?.companies_id == null) {
+              router.push("/register/company-profile");
+            } else {
+              router.push("/");
+            }
           }, 2000);
         } else {
           throw new Error("認証に失敗しました");
