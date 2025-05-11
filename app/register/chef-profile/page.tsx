@@ -285,9 +285,19 @@ export default function ChefProfilePage() {
   };
 
   useEffect(() => {
-    if (user && user.profile_completed) {
-      router.replace("/chef/dashboard");
-      return;
+    // 初回レンダリング時のみチェック
+    if (checking) {
+      if (!user) {
+        // ユーザーがnullの場合（未ログイン）、ログインページにリダイレクト
+        router.replace("/login");
+        return;
+      }
+    
+      if (user.profile_completed) {
+        // プロフィールが既に完了している場合は、ダッシュボードにリダイレクト
+        router.replace("/chef/dashboard");
+        return;
+      }
     }
 
     setChecking(false)

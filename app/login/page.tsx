@@ -20,7 +20,7 @@ import { ForgotPasswordModal } from "@/components/modals/ForgotPasswordModal";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login: setUser } = useAuth();
+  const { user, login: setUser } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] =
     useState(false);
@@ -43,7 +43,11 @@ export default function LoginPage() {
         description: "ダッシュボードに移動します。",
       });
 
-      router.push("/");
+      if (!user?.profile_completed) {
+        router.push("/register/chef-profile");
+      } else {
+        router.push("/");
+      }
     } catch (error) {
       console.error("Login failed:", error);
       toast({
