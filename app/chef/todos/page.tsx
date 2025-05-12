@@ -125,7 +125,7 @@ export default function TodosPage() {
                 <div className="text-gray-700 mb-2">
                   LINEを連携すると、お仕事の通知がLINEで届くようになりとても便利です。ぜひ連携しましょう！
                 </div>
-                <Link href="/chef/line-connect">
+                <Link href="/chef/line-connect/liff">
                   <button className="bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded transition">
                     LINE連携ページへ
                   </button>

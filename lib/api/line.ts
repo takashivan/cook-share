@@ -8,18 +8,18 @@ export const CheckLineUser = async (line_user_id: string) => {
 };
 
 export const LinkLineId = async (
+  user_id: string,
   line_user_id: string,
   name: string,
-  picture: string,
-  token: string
+  picture: string
 ) => {
   const res = await fetch(`${baseURL}/link-line-id`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      // Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ line_user_id, name, picture }),
+    body: JSON.stringify({ user_id, line_user_id, name, picture }),
   });
   return res.json();
 };
