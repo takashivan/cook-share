@@ -22,26 +22,11 @@ export default function LineConnectPage() {
         withLoginOnExternalBrowser: true,
       });
       if (!liff.isLoggedIn()) {
-        liff.login();
-        return;
-      }
-      const profile = await liff.getProfile();
-
-      // ここでAPIに連携リクエスト
-      const res = await fetch("/api/connect-line-account", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: user?.id,
-          line_user_id: profile.userId,
-          line_display_name: profile.displayName,
-          user_type: "chef",
-        }),
-      });
-      if (res.ok) {
-        router.push("/chef/profile");
+        liff.login({
+          redirectUri: `${window.location.origin}/chef/line-connect/link`,
+        });
       } else {
-        setError("連携に失敗しました");
+        router.push("/chef/line-connect/link");
       }
     } catch (e) {
       setError("エラーが発生しました");
