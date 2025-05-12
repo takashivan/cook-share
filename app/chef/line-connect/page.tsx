@@ -1,51 +1,66 @@
 "use client";
 
-import { useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MessageCircle } from "lucide-react";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 export default function LineConnectPage() {
   const router = useRouter();
   const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!user) {
-      router.replace("/login");
+  const handleLineConnect = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const liff = (await import("@line/liff")).default;
+      await liff.init({
+        liffId: "2007239287-yqkpjQBl",
+        withLoginOnExternalBrowser: true,
+      });
+      if (!liff.isLoggedIn()) {
+        liff.login();
+        return;
+      }
+      const profile = await liff.getProfile();
+
+      // ここでAPIに連携リクエスト
+      const res = await fetch("/api/connect-line-account", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: user?.id,
+          line_user_id: profile.userId,
+          line_display_name: profile.displayName,
+          user_type: "chef",
+        }),
+      });
+      if (res.ok) {
+        router.push("/chef/profile");
+      } else {
+        setError("連携に失敗しました");
+      }
+    } catch (e) {
+      setError("エラーが発生しました");
+    } finally {
+      setIsLoading(false);
     }
-  }, [user, router]);
-
-  const handleLineConnect = () => {
-    // LINE連携のURLを生成
-    const lineConnectUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/line/connect?userId=${user?.id}`;
-    window.location.href = lineConnectUrl;
   };
 
   return (
     <div className="container mx-auto px-4 py-8">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MessageCircle className="w-6 h-6" />
-            LINEと連携
-          </CardTitle>
+          <CardTitle>LINE連携</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground">
-            LINEと連携することで、以下の機能が利用できるようになります：
-          </p>
-          <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-            <li>お仕事の通知を受け取る</li>
-            <li>メッセージのやり取り</li>
-            <li>予定の管理</li>
-          </ul>
-          <div className="pt-4">
-            <Button onClick={handleLineConnect} className="w-full">
-              LINEと連携する
-            </Button>
-          </div>
+        <CardContent>
+          <Button onClick={handleLineConnect} disabled={isLoading}>
+            {isLoading ? "連携中..." : "LINEと連携する"}
+          </Button>
+          {error && <div className="text-red-500 mt-2">{error}</div>}
         </CardContent>
       </Card>
     </div>
