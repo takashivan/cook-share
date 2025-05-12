@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Edit, CreditCard } from "lucide-react";
+import { Edit, CreditCard, MessageCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -173,22 +173,39 @@ export default function ChefProfile() {
           {/* 支払い情報 */}
           <Card>
             <CardHeader>
-              <CardTitle>支払い情報</CardTitle>
+              <CardTitle>連携設定</CardTitle>
             </CardHeader>
-            <CardContent>
-              <Button
-                variant="outline"
-                onClick={() => handleStripeAccountLink()}>
-                Stripeアカウントを設定
-              </Button>
-              {user.stripe_verified && (
-                <div className="flex items-center mt-4">
-                  <CreditCard className="w-5 h-5 text-gray-500 mr-3" />
-                  <span className="text-gray-800">
-                    Stripeアカウントが登録されています。
-                  </span>
-                </div>
-              )}
+            <CardContent className="space-y-4">
+              <div>
+                <Button
+                  variant="outline"
+                  onClick={() => handleStripeAccountLink()}>
+                  <CreditCard className="w-4 h-4 mr-2" />
+                  Stripeアカウントを設定
+                </Button>
+                {user.stripe_verified && (
+                  <div className="flex items-center mt-2">
+                    <CreditCard className="w-5 h-5 text-gray-500 mr-3" />
+                    <span className="text-gray-800">
+                      Stripeアカウントが登録されています。
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div>
+                <Button
+                  variant="outline"
+                  onClick={() => router.push("/chef/line-connect")}>
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  LINEと連携
+                </Button>
+                {user.line_user_id && (
+                  <div className="flex items-center mt-2">
+                    <MessageCircle className="w-5 h-5 text-gray-500 mr-3" />
+                    <span className="text-gray-800">LINEと連携済みです。</span>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

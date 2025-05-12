@@ -78,9 +78,7 @@ export default function ChefVerifyChangeEmailPage() {
           {status === "error" && (
             <div className="flex flex-col items-center gap-4">
               <p className="text-red-600">{errorMessage}</p>
-              <Button
-                onClick={() => router.push("/chef/login")}
-                className="w-full">
+              <Button onClick={() => router.push("/login")} className="w-full">
                 ログインページへ
               </Button>
             </div>
