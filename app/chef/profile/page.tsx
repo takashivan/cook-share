@@ -195,7 +195,7 @@ export default function ChefProfile() {
               <div>
                 <Button
                   variant="outline"
-                  onClick={() => router.push("/chef/line-connect")}>
+                  onClick={() => router.push("/line-connect/liff")}>
                   <MessageCircle className="w-4 h-4 mr-2" />
                   LINEと連携
                 </Button>
