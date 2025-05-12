@@ -1207,6 +1207,13 @@ export default function ChefLandingPage() {
                     個人情報に関する公表文
                   </a>
                 </li>
+                <li>
+                  <a
+                    href="https://corp.cookbiz.co.jp/tokushoho"
+                    className="text-gray-400 hover:text-white transition-colors">
+                    特定商取引法に基づく表記
+                  </a>
+                </li>
               </ul>
             </div>
           </div>

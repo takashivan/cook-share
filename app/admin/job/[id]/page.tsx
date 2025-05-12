@@ -856,7 +856,7 @@ ${changeRequest.reason}
                           <div className="flex flex-col items-center justify-center p-4">
                             <div className="bg-white p-4 rounded-lg shadow-md">
                               <QRCodeSVG
-                                value={selectedWorkSession.application_id ?? ""}
+                                value={selectedWorkSession.id.toString()}
                                 size={200}
                                 level="H"
                                 includeMargin={true}

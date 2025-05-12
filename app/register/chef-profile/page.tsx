@@ -87,6 +87,7 @@ export default function ChefProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(undefined);
+  const [checking, setChecking] = useState(true);
 
   const skills = [
     { id: "fish-cutting", label: "魚が捌ける" },
@@ -157,11 +158,15 @@ export default function ChefProfilePage() {
     let newDate: Date;
 
     if (!dateOfBirth) {
-      // 日付が未設定の場合、現在の日付を基準にする
-      newDate = new Date();
-      newDate.setFullYear(parseInt(value));
-      newDate.setMonth(parseInt(value) - 1);
-      newDate.setDate(parseInt(value));
+      // 日付が未設定の場合、選択された値のみを設定し、他は1月1日をデフォルトとする
+      newDate = new Date(1990, 0, 1); // デフォルト値を1990年1月1日に設定
+      if (type === "year") {
+        newDate.setFullYear(parseInt(value));
+      } else if (type === "month") {
+        newDate.setMonth(parseInt(value) - 1);
+      } else if (type === "day") {
+        newDate.setDate(parseInt(value));
+      }
     } else {
       // 既存の日付がある場合、その値を保持しながら更新
       newDate = new Date(dateOfBirth);
@@ -282,6 +287,25 @@ export default function ChefProfilePage() {
       setIsSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    // 初回レンダリング時のみチェック
+    if (checking) {
+      if (!user) {
+        // ユーザーがnullの場合（未ログイン）、ログインページにリダイレクト
+        router.replace("/login");
+        return;
+      }
+
+      if (user.profile_completed) {
+        // プロフィールが既に完了している場合は、ダッシュボードにリダイレクト
+        router.replace("/chef/dashboard");
+        return;
+      }
+    }
+
+    setChecking(false);
+  }, [user, router]);
 
   // カタカナバリデーション関数
   const validateKana = (value: string) => {
@@ -781,6 +805,10 @@ export default function ChefProfilePage() {
         return null;
     }
   };
+
+  if (checking) {
+    return null;
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
