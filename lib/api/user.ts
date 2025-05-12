@@ -72,6 +72,10 @@ export interface UserProfile {
   address2?: string;
   categories?: number[];
   profile_completed?: boolean;
+  line_user_id?: string;
+  line_display_name?: string;
+  line_notification_enabled?: boolean;
+  line_connected?: boolean;
 }
 
 // 共通の型定義
@@ -467,7 +471,17 @@ export const getWorksessionHistories = (user_id: UserId): Promise<any> => {
 };
 
 export const getMe = async (): Promise<UserProfile> => {
-  return apiRequest<UserProfile>(`${AUTH_URL}/me`, "GET");
+  const response = await fetch("/api/me");
+  if (!response.ok) {
+    throw new Error("Failed to fetch user data");
+  }
+  const data = await response.json();
+  return {
+    ...data,
+    dateofbirth: data.dateofbirth
+      ? new Date(data.dateofbirth).toISOString()
+      : undefined,
+  };
 };
 
 export const resendVerificationEmail = async (
