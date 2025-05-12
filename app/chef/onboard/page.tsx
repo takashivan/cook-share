@@ -37,23 +37,8 @@ export default function OnboardPage() {
       const res = await createStripeAccountLink(user_id);
 
       if (res.response.result.url) {
-        // 新しいウィンドウでStripeの連携ページを開く
-        const stripeWindow = window.open(res.response.result.url, "_blank");
-
-        if (!stripeWindow) {
-          throw new Error(
-            "ポップアップがブロックされました。ブラウザの設定を確認してください。"
-          );
-        }
-
-        // ウィンドウが閉じられたかどうかを監視
-        const checkWindow = setInterval(() => {
-          if (stripeWindow.closed) {
-            clearInterval(checkWindow);
-            // ウィンドウが閉じられたら、完了ページにリダイレクト
-            window.location.href = "/chef/onboarding-complete";
-          }
-        }, 1000);
+        // 直接Stripeのページに遷移
+        window.location.href = res.response.result.url;
       } else {
         throw new Error("リンク取得に失敗しました");
       }

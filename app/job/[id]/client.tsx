@@ -813,6 +813,12 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
               個人情報の取扱いについて
             </Link>
             <span>|</span>
+            <Link
+              href="https://corp.cookbiz.co.jp/tokushoho"
+              className="hover:underline">
+              特定商取引法に基づく表記
+            </Link>
+            <span>|</span>
             <Link href="/contact" className="hover:underline">
               お問い合わせ
             </Link>
