@@ -57,7 +57,7 @@ export const LinkAccountScreen = ({
                   新規アカウント作成
                 </Button>
                 <Button
-                  onClick={() => router.push("/chef/login")}
+                  onClick={() => router.push("/login")}
                   variant="outline"
                   className="w-full">
                   既存アカウントとリンク

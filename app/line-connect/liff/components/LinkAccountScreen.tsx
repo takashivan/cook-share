@@ -51,7 +51,7 @@ export function LinkAccountScreen({
                   <Button
                     variant="outline"
                     className="w-full"
-                    onClick={() => router.push("/chef/login")}>
+                    onClick={() => router.push("/login")}>
                     既存アカウントと連携
                   </Button>
                 </div>
