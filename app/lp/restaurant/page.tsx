@@ -745,6 +745,13 @@ export default function RestaurantLandingPage() {
                     利用規約
                   </Link>
                 </li>
+                <li>
+                  <Link
+                    href="https://corp.cookbiz.co.jp/tokushoho"
+                    className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                    特定商取引法に基づく表記
+                  </Link>
+                </li>
               </ul>
             </motion.div>
 

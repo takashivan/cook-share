@@ -335,7 +335,7 @@ export default function Home() {
             <div className="flex items-center gap-2">
               <Image
                 src="/chef_illust/chef_logo.png?height=200&width=400"
-                alt="CookChef Logo"
+                alt="CHEFDOM Logo"
                 width={120}
                 height={30}
                 className="text-white"
@@ -370,6 +370,12 @@ export default function Home() {
               href="https://corp.cookbiz.co.jp/privacy-policy-publication/"
               className="hover:underline">
               個人情報に関する公表文
+            </Link>
+            <span>|</span>
+            <Link
+              href="https://corp.cookbiz.co.jp/tokushoho"
+              className="hover:underline">
+              特定商取引法に基づく表記
             </Link>
             <span>|</span>
             <Link href="/contact" className="hover:underline">

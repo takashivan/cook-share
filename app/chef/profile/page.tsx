@@ -1,10 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  Edit,
-  CreditCard,
-} from "lucide-react";
+import { Edit, CreditCard } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,10 +10,7 @@ import { ja } from "date-fns/locale";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { ChefProfileEditModal } from "@/components/modals/ChefProfileEditModal";
 import { useGetReviewsByUserId } from "@/hooks/api/user/reviews/useGetReviewsByUserId";
-import {
-  getUserProfile,
-  UserProfile,
-} from "@/lib/api/user";
+import { getUserProfile, UserProfile } from "@/lib/api/user";
 import { createStripeAccountLink } from "@/lib/api/user";
 import {
   Card,
@@ -77,14 +71,13 @@ export default function ChefProfile() {
 
   const handleStripeAccountLink = async () => {
     if (user.id) {
-      const res = await createStripeAccountLink(user.id);
-      if (res.response.result.url) {
-        const stripeWindow = window.open(res.response.result.url, "_blank");
-        if (!stripeWindow) {
-          throw new Error(
-            "ポップアップがブロックされました。ブラウザの設定を確認してください。"
-          );
+      try {
+        const res = await createStripeAccountLink(user.id);
+        if (res.response.result.url) {
+          window.location.href = res.response.result.url;
         }
+      } catch (error) {
+        console.error("Error creating Stripe account link:", error);
       }
     }
   };
