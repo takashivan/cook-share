@@ -6,6 +6,8 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { useGetWorksessionsByUserIdByTodo } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserIdByTodo";
+import { motion } from "framer-motion";
+import Image from "next/image";
 
 export default function TodosPage() {
   const { user } = useAuth();
@@ -69,69 +71,60 @@ export default function TodosPage() {
         <div className="container mx-auto px-4 pb-8 space-y-4">
           {/* Stripe未連携カード */}
           {user.stripe_verified === false && (
-            <div className="bg-gradient-to-r from-purple-100 to-indigo-100 border-l-4 border-indigo-400 rounded-lg shadow-md p-6 flex items-center gap-4 mb-4">
-              <div className="flex-shrink-0 bg-indigo-500 text-white rounded-full p-3">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+            <motion.div
+              whileHover={{
+                y: -4,
+                boxShadow: "0 8px 32px rgba(80,80,200,0.10)",
+              }}
+              className="flex items-center bg-white rounded-lg shadow p-4 mb-4 transition">
+              <div className="flex-shrink-0 mr-4">
+                <Image
+                  src="/stripe-logo.svg"
+                  alt="Stripe"
+                  width={40}
+                  height={40}
+                />
               </div>
               <div className="flex-1">
-                <div className="font-bold text-indigo-700 text-lg mb-1">
+                <div className="font-semibold text-gray-900 mb-1">
                   Stripe連携が必要です
                 </div>
-                <div className="text-gray-700 mb-2">
-                  Stripe連携を完了しないと審査が進みません。下記ボタンから連携をお願いします。
+                <div className="text-gray-500 text-sm mb-2">
+                  報酬受取にはStripe連携が必須です。
                 </div>
                 <Link href="/chef/profile">
-                  <button className="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded transition">
-                    Stripe連携ページへ
+                  <button className="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700 transition">
+                    連携する
                   </button>
                 </Link>
               </div>
-            </div>
+            </motion.div>
           )}
           {/* LINE未連携カード */}
           {!user.line_user_id && (
-            <div className="bg-gradient-to-r from-green-100 to-teal-100 border-l-4 border-teal-400 rounded-lg shadow-md p-6 flex items-center gap-4 mb-4">
-              <div className="flex-shrink-0 bg-teal-500 text-white rounded-full p-3">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 8h2a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2v-8a2 2 0 012-2h2M12 15v-6m0 0l-3 3m3-3l3 3"
-                  />
-                </svg>
+            <motion.div
+              whileHover={{
+                y: -4,
+                boxShadow: "0 8px 32px rgba(0,200,100,0.10)",
+              }}
+              className="flex items-center bg-white rounded-lg shadow p-4 mb-4 transition">
+              <div className="flex-shrink-0 mr-4">
+                <Image src="/line-logo.svg" alt="LINE" width={40} height={40} />
               </div>
               <div className="flex-1">
-                <div className="font-bold text-teal-700 text-lg mb-1">
-                  LINE連携で便利に！
+                <div className="font-semibold text-gray-900 mb-1">
+                  LINE連携で通知を受け取ろう
                 </div>
-                <div className="text-gray-700 mb-2">
-                  LINEを連携すると、お仕事の通知がLINEで届くようになりとても便利です。ぜひ連携しましょう！
+                <div className="text-gray-500 text-sm mb-2">
+                  LINE連携でお仕事の通知が届きます。
                 </div>
-                <Link href="/chef/line-connect/liff">
-                  <button className="bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded transition">
-                    LINE連携ページへ
+                <Link href="/chef/line-connect">
+                  <button className="px-4 py-2 rounded bg-green-500 text-white hover:bg-green-600 transition">
+                    連携する
                   </button>
                 </Link>
               </div>
-            </div>
+            </motion.div>
           )}
         </div>
       )}
