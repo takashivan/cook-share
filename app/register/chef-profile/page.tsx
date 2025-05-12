@@ -87,6 +87,7 @@ export default function ChefProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(undefined);
+  const [checking, setChecking] = useState(true)
 
   const skills = [
     { id: "fish-cutting", label: "魚が捌ける" },
@@ -282,6 +283,25 @@ export default function ChefProfilePage() {
       setIsSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    // 初回レンダリング時のみチェック
+    if (checking) {
+      if (!user) {
+        // ユーザーがnullの場合（未ログイン）、ログインページにリダイレクト
+        router.replace("/login");
+        return;
+      }
+    
+      if (user.profile_completed) {
+        // プロフィールが既に完了している場合は、ダッシュボードにリダイレクト
+        router.replace("/chef/dashboard");
+        return;
+      }
+    }
+
+    setChecking(false)
+  }, [user, router]);
 
   // カタカナバリデーション関数
   const validateKana = (value: string) => {
@@ -781,6 +801,10 @@ export default function ChefProfilePage() {
         return null;
     }
   };
+
+  if (checking) {
+    return null;
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
