@@ -37,7 +37,7 @@ export default function BillingList() {
     isLoading,
     error,
   } = useGetCurrentBillingSummaryByCompanyId({
-    companyId: user?.companies_id ?? "",
+    companyId: user?.companies_id ?? undefined,
   });
 
   useEffect(() => {

@@ -71,7 +71,6 @@ import { Worksessions } from "@/api/__generated__/base/Worksessions";
 import { useSubscriptionMessagesByCompanyUserId } from "@/hooks/api/companyuser/messages/useSubscriptionMessagesByCompanyUserId";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { useUpdateReadMessageByCompanyUser } from "@/hooks/api/companyuser/messages/useUpdateReadMessageByCompanyUser";
-import { useSubscriptionUnreadMessagesByRestaurantId } from "@/hooks/api/companyuser/messages/useSubscriptionUnreadMessagesByRestaurantId";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -90,7 +89,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCreateJobChangeRequest } from "@/hooks/api/companyuser/jobChengeRequests/useCreateJobChangeRequest";
-import { useGetJobChangeRequestByWorksessionId } from "@/hooks/api/companyuser/jobChengeRequests/useGetJobChangeRequestByWorksessionId";
+import { useGetJobChangeRequests } from "@/hooks/api/companyuser/jobChengeRequests/useGetJobChangeRequests";
 import { useDeleteJobChangeRequest } from "@/hooks/api/companyuser/jobChengeRequests/useDeleteJobChangeRequest";
 
 interface PageParams {
@@ -127,7 +126,7 @@ export default function JobDetail({ params }: PageParams) {
     WorksessionsRestaurantTodosListData[number] | null
   >(null);
   const { data: reviewsData } = useGetReviewsByUserId({
-    userId: selectedWorkSession?.user_id || "",
+    userId: selectedWorkSession?.user_id ?? undefined,
   });
   console.log("reviewsData", reviewsData);
   const [isChefReviewModalOpen, setIsChefReviewModalOpen] = useState(false);
@@ -160,30 +159,25 @@ export default function JobDetail({ params }: PageParams) {
     restaurantId: restaurant?.id ?? undefined,
   });
   const { trigger: verifyWorksessionTrigger } = useVerifyWorksession({
-    worksessionId: selectedWorkSession?.id || 0,
+    worksessionId: selectedWorkSession?.id,
     jobId: Number(jobId),
   });
 
   const { trigger: cancelWorksessionTrigger } =
     useUserCancelWorksessionByRestaurant({
-      worksession_id: selectedWorkSession?.id || 0,
-      reason: cancelReason,
+      worksession_id: selectedWorkSession?.id,
+      jobId: Number(jobId),
     });
   const { trigger: noShowWorksessionTrigger } =
     useNoShowWorksessionByRestaurant({
-      worksession_id: selectedWorkSession?.id || 0,
+      worksession_id: selectedWorkSession?.id,
+      jobId: Number(jobId),
     });
 
   // メッセージの取得
   const { messagesData, sendMessage } = useSubscriptionMessagesByCompanyUserId({
     companyUserId: user?.id,
     workSessionId: selectedWorkSession?.id,
-    applicationId: selectedWorkSession?.application_id ?? undefined,
-  });
-
-  // 未読メッセージの取得
-  const { unreadMessagesData } = useSubscriptionUnreadMessagesByRestaurantId({
-    restaurantId: restaurant?.id,
   });
 
   const { trigger: updateReadMessageTrigger } =
@@ -193,32 +187,15 @@ export default function JobDetail({ params }: PageParams) {
       restaurantId: restaurant?.id,
     });
 
-  const { trigger: createJobChangeRequest } = useCreateJobChangeRequest({
-    jobChangeRequestId: jobId,
-    job_id: Number(jobId),
-    user_id: selectedWorkSession?.user_id || "",
-    requested_by: selectedWorkSession?.restaurant_id || 0,
-    proposed_changes: JSON.stringify(changeRequest),
-    status: "PENDING",
-    reason: changeRequest.reason,
-    worksession_id: selectedWorkSession?.id || 0,
-  });
+  const { trigger: createJobChangeRequest } = useCreateJobChangeRequest();
 
-  const { data: existingChangeRequest } = useGetJobChangeRequestByWorksessionId(
-    {
-      worksessionId: selectedWorkSession?.id,
-    }
+  const { data: existingChangeRequest } = useGetJobChangeRequests();
+  const pendingRequest = existingChangeRequest?.find(
+    (req) => req.worksession_id === selectedWorkSession?.id && req.status === "PENDING"
   );
 
   const { trigger: deleteJobChangeRequest } = useDeleteJobChangeRequest({
-    jobChangeRequestId: existingChangeRequest?.[0]?.id?.toString() || "",
-    job_id: job?.id || 0,
-    user_id: selectedWorkSession?.user_id || "",
-    requested_by: user?.id ? Number(user.id) : 0,
-    proposed_changes: "",
-    status: "PENDING",
-    reason: "",
-    worksession_id: selectedWorkSession?.id || 0,
+    jobChangeRequestId: pendingRequest?.id,
   });
 
   // シェフが応募している場合は自動的に選択
@@ -226,6 +203,9 @@ export default function JobDetail({ params }: PageParams) {
     if (workSessions && workSessions.length > 0) {
       setSelectedWorkSession(workSessions[0]);
       setSelectedApplicant(workSessions[0].id);
+    } else {
+      setSelectedWorkSession(null);
+      setSelectedApplicant(null);
     }
   }, [workSessions]);
 
@@ -390,8 +370,9 @@ export default function JobDetail({ params }: PageParams) {
     if (!cancellationPenalty || !job || !isConfirmed || !cancelReason) return;
 
     try {
-      // TODO: APIを呼び出してキャンセル処理を実行
-      await cancelWorksessionTrigger();
+      await cancelWorksessionTrigger({
+        reason: cancelReason,
+      });
       // await cancelJob(job.id, cancellationPenalty.status, cancelReason);
       toast({
         title: "キャンセル完了",
@@ -445,7 +426,7 @@ export default function JobDetail({ params }: PageParams) {
     if (!job) return;
 
     // 既存の変更リクエストがある場合は、削除オプション付きのモーダルを表示
-    if (existingChangeRequest && existingChangeRequest.length > 0) {
+    if (pendingRequest) {
       setSelectedWorkSession(workSession);
       setIsChangeRequestModalOpen(true);
       return;
@@ -470,7 +451,7 @@ export default function JobDetail({ params }: PageParams) {
     if (!selectedWorkSession || !job) return;
 
     // 既存の変更リクエストがある場合は、処理を中止
-    if (existingChangeRequest && existingChangeRequest.length > 0) {
+    if (pendingRequest) {
       toast({
         title: "変更リクエストが既に存在します",
         description:
@@ -555,11 +536,11 @@ ${changeRequest.reason}
       await deleteJobChangeRequest();
 
       // 変更リクエストの詳細を取得
-      if (!existingChangeRequest?.[0]?.proposed_changes) {
+      if (!pendingRequest?.proposed_changes) {
         throw new Error("変更リクエストの詳細が見つかりません");
       }
 
-      const changes = existingChangeRequest[0].proposed_changes as {
+      const changes = pendingRequest.proposed_changes as {
         work_date: string;
         start_time: number;
         end_time: number;
@@ -1277,27 +1258,27 @@ ${changeRequest.reason}
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
-              {existingChangeRequest && existingChangeRequest.length > 0
+              {pendingRequest
                 ? "変更リクエストの管理"
                 : "業務内容変更リクエスト"}
             </DialogTitle>
             <DialogDescription>
-              {existingChangeRequest && existingChangeRequest.length > 0
-                ? existingChangeRequest[0].status === "REJECTED"
+              {pendingRequest
+                ? pendingRequest.status === "REJECTED"
                   ? "変更リクエストが拒否されました。新しいリクエストを作成するには、既存のリクエストを削除してください。"
-                  : existingChangeRequest[0].status === "APPROVED"
+                  : pendingRequest.status === "APPROVED"
                   ? "変更リクエストが承認されています。新しいリクエストを作成するには、既存のリクエストを削除してください。"
                   : "既存の変更リクエストが存在します。新しいリクエストを作成するには、既存のリクエストを削除してください。"
                 : "シェフに業務内容の変更をリクエストします。変更はシェフの承認が必要です。"}
             </DialogDescription>
           </DialogHeader>
-          {existingChangeRequest && existingChangeRequest.length > 0 ? (
+          {pendingRequest ? (
             <div className="space-y-4">
               <div className="bg-muted p-4 rounded-lg">
                 <h4 className="font-medium mb-2">現在の変更リクエスト</h4>
                 <div className="space-y-2 text-sm">
                   {(() => {
-                    const changes = existingChangeRequest[0]
+                    const changes = pendingRequest
                       .proposed_changes as {
                       work_date: string;
                       start_time: number;
@@ -1316,9 +1297,9 @@ ${changeRequest.reason}
                         <p>報酬: ¥{changes.fee}</p>
                         <p>
                           ステータス:{" "}
-                          {existingChangeRequest[0].status === "PENDING"
+                          {pendingRequest.status === "PENDING"
                             ? "承認待ち"
-                            : existingChangeRequest[0].status === "APPROVED"
+                            : pendingRequest.status === "APPROVED"
                             ? "承認済み"
                             : "拒否済み"}
                         </p>
@@ -1336,8 +1317,9 @@ ${changeRequest.reason}
                 <Button
                   variant="destructive"
                   onClick={handleDeleteChangeRequest}
-                  disabled={existingChangeRequest[0].status === "PENDING"}>
-                  {existingChangeRequest[0].status === "PENDING"
+                  // disabled={pendingRequest.status === "PENDING"}
+                >
+                  {pendingRequest.status === "PENDING"
                     ? "変更リクエストを削除"
                     : "既存のリクエストを削除して新規作成"}
                 </Button>

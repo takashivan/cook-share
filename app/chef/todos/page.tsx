@@ -14,7 +14,7 @@ export default function TodosPage() {
 
   // ワークセッションの取得
   const { data: workSessionsData } = useGetWorksessionsByUserIdByTodo({
-    userId: user?.id?.toString(),
+    userId: user?.id,
   });
 
   const inProgressJobs =

@@ -23,7 +23,8 @@ export const useUpdateRestaurant = (params: Params) => {
       headers: {
         "X-User-Type": "company"
       }
-    }
+    },
+    params.restaurantId != null
   ), {
     onSuccess: (data) => {
       console.log('Restaurant created successfully:', data);

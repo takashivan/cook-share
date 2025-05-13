@@ -64,7 +64,6 @@ function MessagesPage({ profile }: { profile: any }) {
   const { messagesData, sendMessage } = useSubscriptionMessagesByUserId({
     userId: user?.id,
     workSessionId: selectedWorkSession?.id,
-    applicationId: selectedWorkSession?.application_id ?? undefined,
   })
 
   const handleSendMessage = async () => {
