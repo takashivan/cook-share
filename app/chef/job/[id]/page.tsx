@@ -252,7 +252,6 @@ export default function JobDetail({ params }: PageProps) {
           if (workSession?.id.toString() === decodedText) {
             setIsQrScanned(true);
             setScannedData(decodedText);
-            // scannerRef.current?.stop().then(() => scannerRef.current?.clear());
             console.log("QRコードがスキャンされました:", decodedText);
           } else {
             toast({
