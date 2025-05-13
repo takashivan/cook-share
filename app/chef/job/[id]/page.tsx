@@ -35,7 +35,7 @@ import { useFinishWorksession } from "@/hooks/api/user/worksessions/useFinishWor
 import { useGetJob } from "@/hooks/api/companyuser/jobs/useGetJob";
 import { useGetWorksessionsByUserId } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserId";
 import { useSubscriptionUnreadMessagesByUser } from "@/hooks/api/user/messages/useSubscriptionUnreadMessagesByUser";
-import { useGetJobChangeRequestByWorksessionId } from "@/hooks/api/user/jobChangeRequests/useGetJobChangeRequestByWorksessionId";
+import { useGetJobChangeRequests } from "@/hooks/api/user/jobChangeRequests/useGetJobChangeRequests";
 import { useAcceptJobChangeRequest } from "@/hooks/api/user/jobChangeRequests/useAcceptJobChangeRequest";
 import { useRejectJobChangeRequest } from "@/hooks/api/user/jobChangeRequests/useRejectJobChangeRequest";
 import {
@@ -140,7 +140,6 @@ export default function JobDetail({ params }: PageProps) {
   const { messagesData, sendMessage } = useSubscriptionMessagesByUserId({
     userId: user?.id,
     workSessionId: workSession?.id,
-    applicationId: workSession?.application_id ?? undefined,
   });
 
   // 未読メッセージの取得
@@ -155,7 +154,7 @@ export default function JobDetail({ params }: PageProps) {
     )?.unread_message_count || 0;
 
   // 変更リクエストの取得
-  const { data: changeRequests } = useGetJobChangeRequestByWorksessionId();
+  const { data: changeRequests } = useGetJobChangeRequests();
 
   const { trigger: acceptJobChangeRequest } = useAcceptJobChangeRequest({
     jobChangeRequestId: selectedChangeRequest?.id,

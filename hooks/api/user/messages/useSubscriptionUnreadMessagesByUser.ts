@@ -1,10 +1,11 @@
 import { getApi } from "@/api/api-factory";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import { Chat } from "@/api/__generated__/base/Chat";
 import { UnreadMessage } from "@/hooks/api/companyuser/messages/useSubscriptionUnreadMessagesByRestaurantId";
 import useSWRSubscription from "swr/subscription";
 import realTimeClient from "@/api/xano";
 import { XanoRealtimeChannel } from "@xano/js-sdk/lib/models/realtime-channel";
+import { JobChangeRequests } from "@/api/__generated__/base/JobChangeRequests";
 
 // XANOから生成されるSwaggerの定義が不完全なため、レスポンスの型を手動で定義する
 // レストランの型定義
@@ -93,6 +94,8 @@ export interface Params {
 export const useSubscriptionUnreadMessagesByUser = (
   params: Params,
 ) => {
+  const { mutate } = useSWRConfig();
+
   const chatApi = getApi(Chat);
   const channelKey = `user_chat/${params.userId}`;
 
@@ -131,6 +134,12 @@ export const useSubscriptionUnreadMessagesByUser = (
                 }, 5000);
               } else {
                 getRequest.mutate();
+
+                // jobの変更リクエストの再取得
+                const jobChangeRequestsApi = getApi(JobChangeRequests);
+                const jobChangeRequestsKey = jobChangeRequestsApi.jobChangeRequestsListQueryArgs()[0];
+                mutate(jobChangeRequestsKey)
+
                 next();
               }
             });

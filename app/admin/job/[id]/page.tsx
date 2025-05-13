@@ -71,7 +71,6 @@ import { Worksessions } from "@/api/__generated__/base/Worksessions";
 import { useSubscriptionMessagesByCompanyUserId } from "@/hooks/api/companyuser/messages/useSubscriptionMessagesByCompanyUserId";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { useUpdateReadMessageByCompanyUser } from "@/hooks/api/companyuser/messages/useUpdateReadMessageByCompanyUser";
-import { useSubscriptionUnreadMessagesByRestaurantId } from "@/hooks/api/companyuser/messages/useSubscriptionUnreadMessagesByRestaurantId";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -179,12 +178,6 @@ export default function JobDetail({ params }: PageParams) {
   const { messagesData, sendMessage } = useSubscriptionMessagesByCompanyUserId({
     companyUserId: user?.id,
     workSessionId: selectedWorkSession?.id,
-    applicationId: selectedWorkSession?.application_id ?? undefined,
-  });
-
-  // 未読メッセージの取得
-  const { unreadMessagesData } = useSubscriptionUnreadMessagesByRestaurantId({
-    restaurantId: restaurant?.id,
   });
 
   const { trigger: updateReadMessageTrigger } =

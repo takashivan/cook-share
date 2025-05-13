@@ -10,7 +10,6 @@ import { XanoRealtimeChannel } from "@xano/js-sdk/lib/models/realtime-channel";
 export interface Params {
   userId?: string;
   workSessionId?: number;
-  applicationId?: string;
 }
 
 export const useSubscriptionMessagesByUserId = (
@@ -94,8 +93,7 @@ export const useSubscriptionMessagesByUserId = (
     if (
       !message.trim() ||
       !key ||
-      !params.workSessionId ||
-      !params.applicationId
+      !params.workSessionId
     )
       return;
 
@@ -103,7 +101,6 @@ export const useSubscriptionMessagesByUserId = (
       const messageParams: MessagesCreatePayload = {
         content: message,
         worksession_id: params.workSessionId,
-        application_id: params.applicationId,
         sender_type: "chef",
       };
 

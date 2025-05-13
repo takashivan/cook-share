@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { WorksessionsMessagesListResult } from "@/api/__generated__/base/data-contracts";
 import { useUpdateReadMessageByUser } from "@/hooks/api/user/messages/useUpdateReadMessageByUser";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { useGetJobChangeRequestByWorksessionId } from "@/hooks/api/user/jobChangeRequests/useGetJobChangeRequestByWorksessionId";
+import { useGetJobChangeRequests } from "@/hooks/api/user/jobChangeRequests/useGetJobChangeRequests";
 import { useAcceptJobChangeRequest } from "@/hooks/api/user/jobChangeRequests/useAcceptJobChangeRequest";
 import { useRejectJobChangeRequest } from "@/hooks/api/user/jobChangeRequests/useRejectJobChangeRequest";
 import {
@@ -81,7 +81,7 @@ export function ChatSheet({
   });
 
   // 変更リクエスト取得
-  const { data: changeRequests } = useGetJobChangeRequestByWorksessionId();
+  const { data: changeRequests } = useGetJobChangeRequests();
   const pendingRequest = changeRequests?.find(
     (req) => req.status === "PENDING"
   );
