@@ -25,7 +25,7 @@ export const useDeleteJobChangeRequest = (params: Params) => {
       onSuccess: (data) => {
         console.log("Job change request deleted successfully:", data);
 
-        // Jobsリストのキャッシュを更新
+        // Job変更リクエストのリストのキャッシュを更新
         const jobChangeRequestsKey =
           jobChangeRequests.jobChangeRequestsListQueryArgs()[0];
         mutate(jobChangeRequestsKey);
