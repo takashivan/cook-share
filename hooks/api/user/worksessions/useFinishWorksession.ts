@@ -5,7 +5,7 @@ import { useSWRConfig } from 'swr';
 import useSWRMutation from 'swr/mutation'
 
 export interface Params {
-  worksessionId: number;
+  worksessionId?: number;
   userId?: string;
 }
 
@@ -13,11 +13,11 @@ export const useFinishWorksession = (params: Params) => {
   const { mutate } = useSWRConfig();
 
   const worksessions = getApi(Worksessions);
-  return useSWRMutation(...worksessions.finishPartialUpdateQueryArgs(params.worksessionId, {
+  return useSWRMutation(...worksessions.finishPartialUpdateQueryArgs(params.worksessionId ?? -1, {
     headers: {
       "X-User-Type": "chef"
     }
-  }), {
+  }, params.worksessionId != null), {
     onSuccess: () => {
       if (params.userId) {
       const users = getApi(Users);

@@ -33,7 +33,6 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { useStartWorksession } from "@/hooks/api/user/worksessions/useStartWorksession";
 import { useFinishWorksession } from "@/hooks/api/user/worksessions/useFinishWorksession";
 import { useGetJob } from "@/hooks/api/companyuser/jobs/useGetJob";
-import { useCancelWorksessionByChef } from "@/hooks/api/user/worksessions/useCancelWorksessionByChef";
 import { useGetWorksessionsByUserId } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserId";
 import { useSubscriptionUnreadMessagesByUser } from "@/hooks/api/user/messages/useSubscriptionUnreadMessagesByUser";
 import { useGetJobChangeRequestByWorksessionId } from "@/hooks/api/user/jobChangeRequests/useGetJobChangeRequestByWorksessionId";
@@ -128,18 +127,13 @@ export default function JobDetail({ params }: PageProps) {
   );
 
   const { trigger: startWorksessionTrigger } = useStartWorksession({
-    worksessionId: workSession?.id || 0,
+    worksessionId: workSession?.id ?? undefined,
     userId: user?.id,
   });
 
   const { trigger: finishWorksessionTrigger } = useFinishWorksession({
-    worksessionId: workSession?.id || 0,
+    worksessionId: workSession?.id ?? undefined,
     userId: user?.id,
-  });
-
-  const { trigger: cancelWorksessionTrigger } = useCancelWorksessionByChef({
-    worksession_id: workSession?.id || 0,
-    reason: cancelReason,
   });
 
   // メッセージの取得
@@ -161,16 +155,14 @@ export default function JobDetail({ params }: PageProps) {
     )?.unread_message_count || 0;
 
   // 変更リクエストの取得
-  const { data: changeRequests } = useGetJobChangeRequestByWorksessionId({
-    worksessionId: workSession?.id,
-  });
+  const { data: changeRequests } = useGetJobChangeRequestByWorksessionId();
 
   const { trigger: acceptJobChangeRequest } = useAcceptJobChangeRequest({
-    jobChangeRequestId: selectedChangeRequest?.id?.toString() || "",
+    jobChangeRequestId: selectedChangeRequest?.id,
   });
 
   const { trigger: rejectJobChangeRequest } = useRejectJobChangeRequest({
-    jobChangeRequestId: selectedChangeRequest?.id?.toString() || "",
+    jobChangeRequestId: selectedChangeRequest?.id,
   });
 
   const handleOpenDialog = () => {

@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  ChevronDown,
   Send,
   AlertCircle,
   CheckCircle,
@@ -13,7 +12,6 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
 import TextareaAutosize from "react-textarea-autosize";
 import { Button } from "@/components/ui/button";
 import { WorksessionsMessagesListResult } from "@/api/__generated__/base/data-contracts";
@@ -83,9 +81,7 @@ export function ChatSheet({
   });
 
   // 変更リクエスト取得
-  const { data: changeRequests } = useGetJobChangeRequestByWorksessionId({
-    worksessionId,
-  });
+  const { data: changeRequests } = useGetJobChangeRequestByWorksessionId();
   const pendingRequest = changeRequests?.find(
     (req) => req.status === "PENDING"
   );
@@ -93,10 +89,10 @@ export function ChatSheet({
     useState(false);
   const [selectedChangeRequest, setSelectedChangeRequest] = useState<any>(null);
   const { trigger: acceptJobChangeRequest } = useAcceptJobChangeRequest({
-    jobChangeRequestId: selectedChangeRequest?.id?.toString() || "",
+    jobChangeRequestId: selectedChangeRequest?.id,
   });
   const { trigger: rejectJobChangeRequest } = useRejectJobChangeRequest({
-    jobChangeRequestId: selectedChangeRequest?.id?.toString() || "",
+    jobChangeRequestId: selectedChangeRequest?.id,
   });
 
   const scrollToBottom = () => {

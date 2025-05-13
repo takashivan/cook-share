@@ -11,5 +11,5 @@ export const useGetCompanyUsersByRestaurantId = (params: Params) => {
     headers: {
       "X-User-Type": "company"
     }
-  }));
+  }, params.restaurantId != null));
 }

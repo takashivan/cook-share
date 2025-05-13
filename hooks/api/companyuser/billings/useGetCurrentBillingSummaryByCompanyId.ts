@@ -11,5 +11,5 @@ export const useGetCurrentBillingSummaryByCompanyId = (params: Params) => {
     headers: {
       "X-User-Type": "company"
     }
-  }));
+  }, params.companyId != null ));
 }

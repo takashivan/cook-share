@@ -12,5 +12,5 @@ export const useGetCompany = (params: Params) => {
     headers: {
       "X-User-Type": "company"
     }
-  }));
+  }, params.companyId != null));
 }

@@ -32,7 +32,7 @@ export default function ChefProfile() {
   const router = useRouter();
 
   const { data: reviewsData } = useGetReviewsByUserId({
-    userId: authUser?.id || "",
+    userId: authUser?.id ?? undefined,
   });
   console.log("reviewsData", reviewsData);
   useEffect(() => {

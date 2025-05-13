@@ -5,7 +5,8 @@ import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 
 interface Params {
-  worksession_id: number;
+  worksession_id?: number;
+  jobId?: number;
 }
 
 export const useNoShowWorksessionByRestaurant = (params: Params) => {
@@ -14,22 +15,25 @@ export const useNoShowWorksessionByRestaurant = (params: Params) => {
 
   return useSWRMutation(
     ...worksessions.noShowPartialUpdateQueryArgs(
-      params.worksession_id,
+      params.worksession_id ?? -1,
       {
         headers: {
           "X-User-Type": "company",
         },
-      }
+      },
+      params.worksession_id != null
     ),
     {
       onSuccess: () => {
         // キャッシュを更新
-        const jobs = getApi(Jobs);
-        const worksessionsByJobIdKey =
-          jobs.worksessionsRestaurantTodosListQueryArgs(
-            params.worksession_id
-          )[0];
-        mutate(worksessionsByJobIdKey);
+        if (params.jobId) {
+          const jobs = getApi(Jobs);
+          const worksessionsByJobIdKey =
+            jobs.worksessionsRestaurantTodosListQueryArgs(
+              params.jobId
+            )[0];
+          mutate(worksessionsByJobIdKey);
+        }
       },
     }
   );

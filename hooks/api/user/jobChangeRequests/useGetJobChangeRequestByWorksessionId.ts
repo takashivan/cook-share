@@ -1,11 +1,8 @@
 import { getApi } from "@/api/api-factory";
 import useSWR from "swr";
 import { JobChangeRequests } from "@/api/__generated__/base/JobChangeRequests";
-export interface Params {
-  worksessionId?: number;
-}
 
-export const useGetJobChangeRequestByWorksessionId = (params: Params) => {
+export const useGetJobChangeRequestByWorksessionId = () => {
   const jobChangeRequests = getApi(JobChangeRequests);
   return useSWR(
     ...jobChangeRequests.jobChangeRequestsListQueryArgs(
@@ -14,7 +11,6 @@ export const useGetJobChangeRequestByWorksessionId = (params: Params) => {
           "X-User-Type": "company",
         },
       },
-      params.worksessionId != null
     )
   );
 };

@@ -90,7 +90,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCreateJobChangeRequest } from "@/hooks/api/companyuser/jobChengeRequests/useCreateJobChangeRequest";
-import { useGetJobChangeRequestByWorksessionId } from "@/hooks/api/companyuser/jobChengeRequests/useGetJobChangeRequestByWorksessionId";
+import { useGetJobChangeRequests } from "@/hooks/api/companyuser/jobChengeRequests/useGetJobChangeRequests";
 import { useDeleteJobChangeRequest } from "@/hooks/api/companyuser/jobChengeRequests/useDeleteJobChangeRequest";
 
 interface PageParams {
@@ -127,7 +127,7 @@ export default function JobDetail({ params }: PageParams) {
     WorksessionsRestaurantTodosListData[number] | null
   >(null);
   const { data: reviewsData } = useGetReviewsByUserId({
-    userId: selectedWorkSession?.user_id || "",
+    userId: selectedWorkSession?.user_id ?? undefined,
   });
   console.log("reviewsData", reviewsData);
   const [isChefReviewModalOpen, setIsChefReviewModalOpen] = useState(false);
@@ -160,18 +160,19 @@ export default function JobDetail({ params }: PageParams) {
     restaurantId: restaurant?.id ?? undefined,
   });
   const { trigger: verifyWorksessionTrigger } = useVerifyWorksession({
-    worksessionId: selectedWorkSession?.id || 0,
+    worksessionId: selectedWorkSession?.id,
     jobId: Number(jobId),
   });
 
   const { trigger: cancelWorksessionTrigger } =
     useUserCancelWorksessionByRestaurant({
-      worksession_id: selectedWorkSession?.id || 0,
-      reason: cancelReason,
+      worksession_id: selectedWorkSession?.id,
+      jobId: Number(jobId),
     });
   const { trigger: noShowWorksessionTrigger } =
     useNoShowWorksessionByRestaurant({
-      worksession_id: selectedWorkSession?.id || 0,
+      worksession_id: selectedWorkSession?.id,
+      jobId: Number(jobId),
     });
 
   // メッセージの取得
@@ -193,32 +194,12 @@ export default function JobDetail({ params }: PageParams) {
       restaurantId: restaurant?.id,
     });
 
-  const { trigger: createJobChangeRequest } = useCreateJobChangeRequest({
-    jobChangeRequestId: jobId,
-    job_id: Number(jobId),
-    user_id: selectedWorkSession?.user_id || "",
-    requested_by: selectedWorkSession?.restaurant_id || 0,
-    proposed_changes: JSON.stringify(changeRequest),
-    status: "PENDING",
-    reason: changeRequest.reason,
-    worksession_id: selectedWorkSession?.id || 0,
-  });
+  const { trigger: createJobChangeRequest } = useCreateJobChangeRequest();
 
-  const { data: existingChangeRequest } = useGetJobChangeRequestByWorksessionId(
-    {
-      worksessionId: selectedWorkSession?.id,
-    }
-  );
+  const { data: existingChangeRequest } = useGetJobChangeRequests();
 
   const { trigger: deleteJobChangeRequest } = useDeleteJobChangeRequest({
-    jobChangeRequestId: existingChangeRequest?.[0]?.id?.toString() || "",
-    job_id: job?.id || 0,
-    user_id: selectedWorkSession?.user_id || "",
-    requested_by: user?.id ? Number(user.id) : 0,
-    proposed_changes: "",
-    status: "PENDING",
-    reason: "",
-    worksession_id: selectedWorkSession?.id || 0,
+    jobChangeRequestId: existingChangeRequest?.[0]?.id,
   });
 
   // シェフが応募している場合は自動的に選択
@@ -226,6 +207,9 @@ export default function JobDetail({ params }: PageParams) {
     if (workSessions && workSessions.length > 0) {
       setSelectedWorkSession(workSessions[0]);
       setSelectedApplicant(workSessions[0].id);
+    } else {
+      setSelectedWorkSession(null);
+      setSelectedApplicant(null);
     }
   }, [workSessions]);
 
@@ -390,8 +374,9 @@ export default function JobDetail({ params }: PageParams) {
     if (!cancellationPenalty || !job || !isConfirmed || !cancelReason) return;
 
     try {
-      // TODO: APIを呼び出してキャンセル処理を実行
-      await cancelWorksessionTrigger();
+      await cancelWorksessionTrigger({
+        reason: cancelReason,
+      });
       // await cancelJob(job.id, cancellationPenalty.status, cancelReason);
       toast({
         title: "キャンセル完了",
