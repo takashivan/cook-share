@@ -1456,6 +1456,7 @@ export interface DashboardQueryListData {
   total_jobs: number;
   /** @format int64 */
   new_jobs: number;
+  job_posted_restaurants: string;
 }
 
 export type ToBeReviewedListData = {
