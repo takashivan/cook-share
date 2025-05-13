@@ -46,7 +46,11 @@ export default function CompanyLoginPage() {
         description: "ダッシュボードに移動します。",
       });
 
-      router.push("/admin");
+      if (response.user?.companies_id == null) {
+        router.push("/register/company-profile");
+      } else {
+        router.push("/admin");
+      }
     } catch (error) {
       console.error("Login failed:", error);
       toast({
