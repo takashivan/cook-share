@@ -6,6 +6,8 @@ import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { useGetWorksessionsByUserIdByTodo } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserIdByTodo";
+import { motion } from "framer-motion";
+import Image from "next/image";
 
 export default function ChefDashboard() {
   const { user } = useAuth();
@@ -18,7 +20,6 @@ export default function ChefDashboard() {
   const upcomingJobs =
     workSessionsData?.filter((session) => session.status === "SCHEDULED") ?? [];
   console.log("upcomingJobs", upcomingJobs);
-
 
   // const { data: applications } = useSWR<ApplicationWithJob[]>(
   //   user ? ["applications", user.id.toString()] : null,
@@ -76,12 +77,88 @@ export default function ChefDashboard() {
           ))
         ) : (
           <div className="bg-gray-50 rounded-lg p-8 text-center space-y-4">
-            <p className="text-gray-500">次のお仕事は未定です</p>
+            <motion.div className="flex justify-center">
+              <Image
+                src="/chef_illust/chef_search_image.png"
+                alt="No jobs"
+                width={80}
+                height={80}
+              />
+            </motion.div>
+            <p className="text-gray-500 text-sm">次のお仕事は未定です</p>
+
             <Link href="/">
-              <Button variant="outline" className="w-full">
+              <Button className="w-full py-3 text-base font-bold bg-[#DB3F1C] hover:bg-[#B83214] text-white rounded-lg transition shadow-md">
                 お仕事を探す
               </Button>
             </Link>
+          </div>
+        )}
+        {/* 追加: 連携促進カード */}
+        {user && (
+          <div className="container mx-auto px-4 pb-8 space-y-4">
+            {/* Stripe未連携カード */}
+            {user.stripe_verified === false && (
+              <motion.div
+                whileHover={{
+                  y: -4,
+                  boxShadow: "0 8px 32px rgba(80,80,200,0.10)",
+                }}
+                className="flex items-center bg-white rounded-lg shadow p-4 mb-4 transition">
+                <div className="flex-shrink-0 mr-4">
+                  <Image
+                    src="/logos/Stripe.png"
+                    alt="Stripe"
+                    width={40}
+                    height={40}
+                  />
+                </div>
+                <div className="flex-1">
+                  <div className="font-semibold text-gray-900 mb-1">
+                    Stripe連携が必要です
+                  </div>
+                  <div className="text-gray-500 text-sm mb-2">
+                    報酬受取にはStripe連携が必須です。
+                  </div>
+                  <Link href="/chef/profile">
+                    <button className="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700 transition">
+                      連携する
+                    </button>
+                  </Link>
+                </div>
+              </motion.div>
+            )}
+            {/* LINE未連携カード */}
+            {!user.line_user_id && (
+              <motion.div
+                whileHover={{
+                  y: -4,
+                  boxShadow: "0 8px 32px rgba(0,200,100,0.10)",
+                }}
+                className="flex items-center bg-white rounded-lg shadow p-4 mb-4 transition">
+                <div className="flex-shrink-0 mr-4">
+                  <Image
+                    src="/logos/LINE.png"
+                    alt="LINE"
+                    width={40}
+                    height={40}
+                  />
+                </div>
+                <div className="flex-1">
+                  <div className="font-semibold text-gray-900 mb-1">
+                    LINE連携で通知を受け取ろう
+                  </div>
+                  <div className="text-gray-500 text-sm mb-2">
+                    LINE連携でお仕事の通知が届きます。
+                  </div>
+                  <Link href="/chef/line-connect/liff">
+                    <button className="px-4 py-2 rounded bg-green-500 text-white hover:bg-green-600 transition">
+                      連携する
+                    </button>
+                  </Link>
+                </div>
+              </motion.div>
+            )}
           </div>
         )}
       </div>

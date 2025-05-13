@@ -22,6 +22,8 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Star } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { motion } from "framer-motion";
+import Image from "next/image";
 
 export default function ChefProfile() {
   const { user: authUser, logout } = useAuth();
@@ -176,36 +178,72 @@ export default function ChefProfile() {
               <CardTitle>連携設定</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <Button
-                  variant="outline"
-                  onClick={() => handleStripeAccountLink()}>
-                  <CreditCard className="w-4 h-4 mr-2" />
-                  Stripeアカウントを設定
-                </Button>
-                {user.stripe_verified && (
-                  <div className="flex items-center mt-2">
-                    <CreditCard className="w-5 h-5 text-gray-500 mr-3" />
-                    <span className="text-gray-800">
-                      Stripeアカウントが登録されています。
-                    </span>
+              {/* Stripe連携カード */}
+              <motion.div
+                whileHover={{
+                  y: -4,
+                  boxShadow: "0 8px 32px rgba(80,80,200,0.10)",
+                }}
+                className="flex items-center bg-white rounded-lg shadow p-4 mb-2 transition">
+                <div className="flex-shrink-0 mr-4">
+                  <Image
+                    src="/logos/Stripe.png"
+                    alt="Stripe"
+                    width={40}
+                    height={40}
+                  />
+                </div>
+                <div className="flex-1">
+                  <div className="font-semibold text-gray-900 mb-1">
+                    Stripe連携
                   </div>
-                )}
-              </div>
-              <div>
-                <Button
-                  variant="outline"
-                  onClick={() => router.push("/line-connect/liff")}>
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  LINEと連携
-                </Button>
-                {user.line_user_id && (
-                  <div className="flex items-center mt-2">
-                    <MessageCircle className="w-5 h-5 text-gray-500 mr-3" />
-                    <span className="text-gray-800">LINEと連携済みです。</span>
+                  <div className="text-gray-500 text-sm mb-2">
+                    {user.stripe_verified
+                      ? "Stripeアカウントが登録されています。"
+                      : "報酬受取にはStripe連携が必須です。"}
                   </div>
-                )}
-              </div>
+                  <Button
+                    variant="outline"
+                    className="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700 transition"
+                    onClick={handleStripeAccountLink}>
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    {user.stripe_verified ? "連携済み" : "連携する"}
+                  </Button>
+                </div>
+              </motion.div>
+              {/* LINE連携カード */}
+              <motion.div
+                whileHover={{
+                  y: -4,
+                  boxShadow: "0 8px 32px rgba(0,200,100,0.10)",
+                }}
+                className="flex items-center bg-white rounded-lg shadow p-4 mb-2 transition">
+                <div className="flex-shrink-0 mr-4">
+                  <Image
+                    src="/logos/LINE.png"
+                    alt="LINE"
+                    width={40}
+                    height={40}
+                  />
+                </div>
+                <div className="flex-1">
+                  <div className="font-semibold text-gray-900 mb-1">
+                    LINE連携
+                  </div>
+                  <div className="text-gray-500 text-sm mb-2">
+                    {user.line_user_id
+                      ? "LINEと連携済みです。"
+                      : "LINE連携でお仕事の通知が届きます。"}
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="px-4 py-2 rounded bg-green-500 text-white hover:bg-green-600 transition"
+                    onClick={() => router.push("/chef/line-connect/liff")}>
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    {user.line_user_id ? "連携済み" : "連携する"}
+                  </Button>
+                </div>
+              </motion.div>
             </CardContent>
           </Card>
         </TabsContent>
