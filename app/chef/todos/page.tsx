@@ -79,7 +79,7 @@ export default function TodosPage() {
               className="flex items-center bg-white rounded-lg shadow p-4 mb-4 transition">
               <div className="flex-shrink-0 mr-4">
                 <Image
-                  src="/stripe-logo.svg"
+                  src="/logos/Stripe.png"
                   alt="Stripe"
                   width={40}
                   height={40}
@@ -109,7 +109,12 @@ export default function TodosPage() {
               }}
               className="flex items-center bg-white rounded-lg shadow p-4 mb-4 transition">
               <div className="flex-shrink-0 mr-4">
-                <Image src="/line-logo.svg" alt="LINE" width={40} height={40} />
+                <Image
+                  src="/logos/LINE.png"
+                  alt="LINE"
+                  width={40}
+                  height={40}
+                />
               </div>
               <div className="flex-1">
                 <div className="font-semibold text-gray-900 mb-1">
@@ -118,7 +123,7 @@ export default function TodosPage() {
                 <div className="text-gray-500 text-sm mb-2">
                   LINE連携でお仕事の通知が届きます。
                 </div>
-                <Link href="/chef/line-connect">
+                <Link href="/chef/line-connect/liff">
                   <button className="px-4 py-2 rounded bg-green-500 text-white hover:bg-green-600 transition">
                     連携する
                   </button>
