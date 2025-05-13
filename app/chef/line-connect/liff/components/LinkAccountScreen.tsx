@@ -40,19 +40,13 @@ export function LinkAccountScreen({
                 </div>
                 <h2 className="text-xl font-bold text-gray-900">{name}</h2>
                 <p className="text-center text-gray-600">
-                  CookShareのアカウントと連携して、シェフとしての活動を始めましょう。
+                  LINEとCHEFDOMのアカウントと連携して、シェフとしての活動を始めましょう。
                 </p>
                 <div className="w-full space-y-2">
                   <Button
                     className="w-full"
-                    onClick={() => router.push("/chef/signup")}>
-                    新規アカウントを作成
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => router.push("/login")}>
-                    既存アカウントと連携
+                    onClick={() => router.push("/chef/line-connect/link")}>
+                    連携する
                   </Button>
                 </div>
               </div>
