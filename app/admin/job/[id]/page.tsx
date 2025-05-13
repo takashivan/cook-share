@@ -190,9 +190,12 @@ export default function JobDetail({ params }: PageParams) {
   const { trigger: createJobChangeRequest } = useCreateJobChangeRequest();
 
   const { data: existingChangeRequest } = useGetJobChangeRequests();
+  const pendingRequest = existingChangeRequest?.find(
+    (req) => req.worksession_id === selectedWorkSession?.id && req.status === "PENDING"
+  );
 
   const { trigger: deleteJobChangeRequest } = useDeleteJobChangeRequest({
-    jobChangeRequestId: existingChangeRequest?.[0]?.id,
+    jobChangeRequestId: pendingRequest?.id,
   });
 
   // シェフが応募している場合は自動的に選択
@@ -423,7 +426,7 @@ export default function JobDetail({ params }: PageParams) {
     if (!job) return;
 
     // 既存の変更リクエストがある場合は、削除オプション付きのモーダルを表示
-    if (existingChangeRequest && existingChangeRequest.length > 0) {
+    if (pendingRequest) {
       setSelectedWorkSession(workSession);
       setIsChangeRequestModalOpen(true);
       return;
@@ -448,7 +451,7 @@ export default function JobDetail({ params }: PageParams) {
     if (!selectedWorkSession || !job) return;
 
     // 既存の変更リクエストがある場合は、処理を中止
-    if (existingChangeRequest && existingChangeRequest.length > 0) {
+    if (pendingRequest) {
       toast({
         title: "変更リクエストが既に存在します",
         description:
@@ -533,11 +536,11 @@ ${changeRequest.reason}
       await deleteJobChangeRequest();
 
       // 変更リクエストの詳細を取得
-      if (!existingChangeRequest?.[0]?.proposed_changes) {
+      if (!pendingRequest?.proposed_changes) {
         throw new Error("変更リクエストの詳細が見つかりません");
       }
 
-      const changes = existingChangeRequest[0].proposed_changes as {
+      const changes = pendingRequest.proposed_changes as {
         work_date: string;
         start_time: number;
         end_time: number;
@@ -1255,27 +1258,27 @@ ${changeRequest.reason}
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
-              {existingChangeRequest && existingChangeRequest.length > 0
+              {pendingRequest
                 ? "変更リクエストの管理"
                 : "業務内容変更リクエスト"}
             </DialogTitle>
             <DialogDescription>
-              {existingChangeRequest && existingChangeRequest.length > 0
-                ? existingChangeRequest[0].status === "REJECTED"
+              {pendingRequest
+                ? pendingRequest.status === "REJECTED"
                   ? "変更リクエストが拒否されました。新しいリクエストを作成するには、既存のリクエストを削除してください。"
-                  : existingChangeRequest[0].status === "APPROVED"
+                  : pendingRequest.status === "APPROVED"
                   ? "変更リクエストが承認されています。新しいリクエストを作成するには、既存のリクエストを削除してください。"
                   : "既存の変更リクエストが存在します。新しいリクエストを作成するには、既存のリクエストを削除してください。"
                 : "シェフに業務内容の変更をリクエストします。変更はシェフの承認が必要です。"}
             </DialogDescription>
           </DialogHeader>
-          {existingChangeRequest && existingChangeRequest.length > 0 ? (
+          {pendingRequest ? (
             <div className="space-y-4">
               <div className="bg-muted p-4 rounded-lg">
                 <h4 className="font-medium mb-2">現在の変更リクエスト</h4>
                 <div className="space-y-2 text-sm">
                   {(() => {
-                    const changes = existingChangeRequest[0]
+                    const changes = pendingRequest
                       .proposed_changes as {
                       work_date: string;
                       start_time: number;
@@ -1294,9 +1297,9 @@ ${changeRequest.reason}
                         <p>報酬: ¥{changes.fee}</p>
                         <p>
                           ステータス:{" "}
-                          {existingChangeRequest[0].status === "PENDING"
+                          {pendingRequest.status === "PENDING"
                             ? "承認待ち"
-                            : existingChangeRequest[0].status === "APPROVED"
+                            : pendingRequest.status === "APPROVED"
                             ? "承認済み"
                             : "拒否済み"}
                         </p>
@@ -1314,8 +1317,9 @@ ${changeRequest.reason}
                 <Button
                   variant="destructive"
                   onClick={handleDeleteChangeRequest}
-                  disabled={existingChangeRequest[0].status === "PENDING"}>
-                  {existingChangeRequest[0].status === "PENDING"
+                  // disabled={pendingRequest.status === "PENDING"}
+                >
+                  {pendingRequest.status === "PENDING"
                     ? "変更リクエストを削除"
                     : "既存のリクエストを削除して新規作成"}
                 </Button>

@@ -83,7 +83,7 @@ export function ChatSheet({
   // 変更リクエスト取得
   const { data: changeRequests } = useGetJobChangeRequests();
   const pendingRequest = changeRequests?.find(
-    (req) => req.status === "PENDING"
+    (req) => req.worksession_id === worksessionId && req.status === "PENDING"
   );
   const [isChangeRequestModalOpen, setIsChangeRequestModalOpen] =
     useState(false);
@@ -161,8 +161,18 @@ export function ChatSheet({
         status === "APPROVED" ? "承認" : "拒否"
       }しました：\n\n日付: ${
         selectedChangeRequest.proposed_changes.work_date
-      }\n時間: ${selectedChangeRequest.proposed_changes.start_time}\n〜${
-        selectedChangeRequest.proposed_changes.end_time
+      }\n時間: ${format(
+        new Date(
+          selectedChangeRequest.proposed_changes.start_time
+        ),
+        "HH:mm"
+      )}〜${
+        format(
+          new Date(
+            selectedChangeRequest.proposed_changes.end_time
+          ),
+          "HH:mm"
+        )
       }\n業務内容: ${selectedChangeRequest.proposed_changes.task}\n報酬: ¥${
         selectedChangeRequest.proposed_changes.fee
       }`;

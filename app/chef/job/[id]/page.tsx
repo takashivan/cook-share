@@ -155,6 +155,9 @@ export default function JobDetail({ params }: PageProps) {
 
   // 変更リクエストの取得
   const { data: changeRequests } = useGetJobChangeRequests();
+  const pendingRequest = changeRequests?.find(
+    (req) => req.worksession_id === workSession?.id && req.status === "PENDING"
+  );
 
   const { trigger: acceptJobChangeRequest } = useAcceptJobChangeRequest({
     jobChangeRequestId: selectedChangeRequest?.id,
@@ -551,22 +554,20 @@ export default function JobDetail({ params }: PageProps) {
 
         <h2 className="text-lg font-bold mb-4">{restaurant?.name}</h2>
 
-        {changeRequests &&
-          changeRequests.length > 0 &&
-          changeRequests[0].status === "PENDING" && (
-            <div className="mb-6">
-              <Button
-                variant="outline"
-                className="w-full bg-red-50 text-red-800 border-red-200 hover:bg-red-100"
-                onClick={() => {
-                  setSelectedChangeRequest(changeRequests[0]);
-                  setIsChangeRequestModalOpen(true);
-                }}>
-                <AlertCircle className="h-4 w-4 mr-2" />
-                変更リクエスト
-              </Button>
-            </div>
-          )}
+        {pendingRequest && (
+          <div className="mb-6">
+            <Button
+              variant="outline"
+              className="w-full bg-red-50 text-red-800 border-red-200 hover:bg-red-100"
+              onClick={() => {
+                setSelectedChangeRequest(pendingRequest);
+                setIsChangeRequestModalOpen(true);
+              }}>
+              <AlertCircle className="h-4 w-4 mr-2" />
+              変更リクエスト
+            </Button>
+          </div>
+        )}
 
         {job.image && (
           <Image
