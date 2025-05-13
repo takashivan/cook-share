@@ -163,7 +163,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout: handleLogout,
         register: handleRegister,
         setUser: updateUser,
-        reloadUser
+        reloadUser,
       }}>
       {children}
     </AuthContext.Provider>

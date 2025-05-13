@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  ChevronDown,
   Send,
   AlertCircle,
   CheckCircle,
@@ -13,13 +12,12 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
 import TextareaAutosize from "react-textarea-autosize";
 import { Button } from "@/components/ui/button";
 import { WorksessionsMessagesListResult } from "@/api/__generated__/base/data-contracts";
 import { useUpdateReadMessageByUser } from "@/hooks/api/user/messages/useUpdateReadMessageByUser";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { useGetJobChangeRequestByWorksessionId } from "@/hooks/api/user/jobChangeRequests/useGetJobChangeRequestByWorksessionId";
+import { useGetJobChangeRequests } from "@/hooks/api/user/jobChangeRequests/useGetJobChangeRequests";
 import { useAcceptJobChangeRequest } from "@/hooks/api/user/jobChangeRequests/useAcceptJobChangeRequest";
 import { useRejectJobChangeRequest } from "@/hooks/api/user/jobChangeRequests/useRejectJobChangeRequest";
 import {
@@ -83,20 +81,18 @@ export function ChatSheet({
   });
 
   // 変更リクエスト取得
-  const { data: changeRequests } = useGetJobChangeRequestByWorksessionId({
-    worksessionId,
-  });
+  const { data: changeRequests } = useGetJobChangeRequests();
   const pendingRequest = changeRequests?.find(
-    (req) => req.status === "PENDING"
+    (req) => req.worksession_id === worksessionId && req.status === "PENDING"
   );
   const [isChangeRequestModalOpen, setIsChangeRequestModalOpen] =
     useState(false);
   const [selectedChangeRequest, setSelectedChangeRequest] = useState<any>(null);
   const { trigger: acceptJobChangeRequest } = useAcceptJobChangeRequest({
-    jobChangeRequestId: selectedChangeRequest?.id?.toString() || "",
+    jobChangeRequestId: selectedChangeRequest?.id,
   });
   const { trigger: rejectJobChangeRequest } = useRejectJobChangeRequest({
-    jobChangeRequestId: selectedChangeRequest?.id?.toString() || "",
+    jobChangeRequestId: selectedChangeRequest?.id,
   });
 
   const scrollToBottom = () => {
@@ -165,8 +161,18 @@ export function ChatSheet({
         status === "APPROVED" ? "承認" : "拒否"
       }しました：\n\n日付: ${
         selectedChangeRequest.proposed_changes.work_date
-      }\n時間: ${selectedChangeRequest.proposed_changes.start_time}\n〜${
-        selectedChangeRequest.proposed_changes.end_time
+      }\n時間: ${format(
+        new Date(
+          selectedChangeRequest.proposed_changes.start_time
+        ),
+        "HH:mm"
+      )}〜${
+        format(
+          new Date(
+            selectedChangeRequest.proposed_changes.end_time
+          ),
+          "HH:mm"
+        )
       }\n業務内容: ${selectedChangeRequest.proposed_changes.task}\n報酬: ¥${
         selectedChangeRequest.proposed_changes.fee
       }`;

@@ -111,14 +111,14 @@ export default function Home() {
                   <br className="md:hidden" />
                   もう一つの選択肢を
                 </h1>
-                <div className="flex gap-2 mt-4">
+                {/* <div className="flex gap-2 mt-4">
                   <Button variant="outline" size="sm" className="rounded-full">
                     求人から探す
                   </Button>
                   <Button variant="outline" size="sm" className="rounded-full">
                     店舗から探す
                   </Button>
-                </div>
+                </div> */}
               </div>
 
               <div>
@@ -157,7 +157,7 @@ export default function Home() {
         {/* Job Listings */}
         <section className="py-6">
           <div className="container mx-auto px-4">
-            <h1 className="text-2xl font-bold mb-6">新着求人</h1>
+            {/* <h1 className="text-2xl font-bold mb-6">新着求人</h1> */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredJobs.map((job, index: number) => (
                 <motion.div

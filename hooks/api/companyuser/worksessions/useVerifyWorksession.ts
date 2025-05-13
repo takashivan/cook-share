@@ -5,7 +5,7 @@ import { useSWRConfig } from 'swr';
 import useSWRMutation from 'swr/mutation'
 
 export interface Params {
-  worksessionId: number;
+  worksessionId?: number;
   jobId?: number;
 }
 
@@ -13,11 +13,11 @@ export const useVerifyWorksession = (params: Params) => {
   const { mutate } = useSWRConfig();
 
   const worksessions = getApi(Worksessions);
-  return useSWRMutation(...worksessions.verifyPartialUpdateQueryArgs(params.worksessionId, {
+  return useSWRMutation(...worksessions.verifyPartialUpdateQueryArgs(params.worksessionId ?? -1, {
     headers: {
       "X-User-Type": "company"
     }
-  }), {
+  }, params.worksessionId != null), {
     onSuccess: () => {
       // 更新したWorksessionが属する求人のWorksessionリストのキャッシュを更新
       if (params.jobId) {

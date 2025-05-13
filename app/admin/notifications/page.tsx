@@ -12,6 +12,8 @@ import {
 import { useSubscriptionCompanyUserNotificationsByUserId } from "@/hooks/api/companyuser/companyUserNotifications/useSubscriptionCompanyUserNotificationsByUserId";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
+import { Button } from "@/components/ui/button";
+import { useMarkReadAllCompanyUserNotifications } from "@/hooks/api/companyuser/companyUserNotifications/useMarkReadAllCompanyUserNotifications";
 
 export default function RestaurantNotificationsPage() {
   const { user } = useCompanyAuth();
@@ -39,6 +41,18 @@ export default function RestaurantNotificationsPage() {
     if (filter !== "all" && notification.type !== filter) return false;
     return true;
   }) ?? [];
+
+  const { trigger: markReadAllTrigger } = useMarkReadAllCompanyUserNotifications({
+    userId: user?.id,
+  });
+
+  const handleMarkAllAsRead = async () => {
+    if (!user?.id) return;
+   
+    await markReadAllTrigger({
+      user_id: user.id,
+    });
+  };
 
   // 通知タイプに応じたアイコンを返す関数
   const getNotificationIcon = (type: CompanyUserNotificationType) => {
@@ -88,11 +102,10 @@ export default function RestaurantNotificationsPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">通知</h2>
-          <p className="text-muted-foreground">店舗に関する通知の一覧です</p>
-        </div>
+        <h1 className="text-2xl font-bold">通知</h1>
+        <Button onClick={handleMarkAllAsRead}>すべて既読にする</Button>
       </div>
+      <span className="text-muted-foreground">店舗に関する通知の一覧です</span>
 
       <div className="flex items-center justify-between mb-4">
         <Tabs

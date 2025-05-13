@@ -1,0 +1,16 @@
+<!-- public/empty-calendar.svg で保存してご利用ください -->
+<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- カレンダー本体 -->
+  <rect x="12" y="20" width="56" height="44" rx="8" fill="#FFF7F0"/>
+  <rect x="20" y="32" width="40" height="24" rx="4" fill="#FFE5CC"/>
+  <rect x="28" y="40" width="8" height="8" rx="2" fill="#DB3F1C"/>
+  <rect x="44" y="40" width="8" height="8" rx="2" fill="#DB3F1C"/>
+  <rect x="36" y="48" width="8" height="8" rx="2" fill="#FF6B4A"/>
+  <!-- カレンダーのリング -->
+  <rect x="24" y="12" width="8" height="16" rx="4" fill="#DB3F1C"/>
+  <rect x="48" y="12" width="8" height="16" rx="4" fill="#DB3F1C"/>
+  <!-- コーヒーカップ -->
+  <ellipse cx="60" cy="62" rx="8" ry="4" fill="#FFE5CC"/>
+  <rect x="54" y="56" width="12" height="8" rx="4" fill="#FFF7F0"/>
+  <rect x="58" y="58" width="4" height="4" rx="2" fill="#DB3F1C"/>
+</svg>

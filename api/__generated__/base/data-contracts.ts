@@ -954,10 +954,14 @@ export interface ChefSkillsDetailData {
    * @default "now"
    */
   created_at: number;
+  categories: string;
+  group: string;
   skill: string;
 }
 
 export interface ChefSkillsPartialUpdatePayload {
+  categories: string;
+  group: string;
   skill: string;
 }
 
@@ -969,10 +973,14 @@ export interface ChefSkillsPartialUpdateData {
    * @default "now"
    */
   created_at: number;
+  categories: string;
+  group: string;
   skill: string;
 }
 
 export interface ChefSkillsUpdatePayload {
+  categories: string;
+  group: string;
   skill: string;
 }
 
@@ -984,6 +992,8 @@ export interface ChefSkillsUpdateData {
    * @default "now"
    */
   created_at: number;
+  categories: string;
+  group: string;
   skill: string;
 }
 
@@ -995,10 +1005,14 @@ export type ChefSkillsListData = {
    * @default "now"
    */
   created_at: number;
+  categories: string;
+  group: string;
   skill: string;
 }[];
 
 export interface ChefSkillsCreatePayload {
+  categories: string;
+  group: string;
   skill: string;
 }
 
@@ -1010,6 +1024,8 @@ export interface ChefSkillsCreateData {
    * @default "now"
    */
   created_at: number;
+  categories: string;
+  group: string;
   skill: string;
 }
 
@@ -1530,10 +1546,14 @@ export interface ChefSkillDetailData {
    * @default "now"
    */
   created_at: number;
+  categories: string;
+  group: string;
   skill: string;
 }
 
 export interface ChefSkillPartialUpdatePayload {
+  categories: string;
+  group: string;
   skill: string;
 }
 
@@ -1545,10 +1565,14 @@ export interface ChefSkillPartialUpdateData {
    * @default "now"
    */
   created_at: number;
+  categories: string;
+  group: string;
   skill: string;
 }
 
 export interface ChefSkillUpdatePayload {
+  categories: string;
+  group: string;
   skill: string;
 }
 
@@ -1560,6 +1584,8 @@ export interface ChefSkillUpdateData {
    * @default "now"
    */
   created_at: number;
+  categories: string;
+  group: string;
   skill: string;
 }
 
@@ -1571,10 +1597,14 @@ export type ChefSkillListData = {
    * @default "now"
    */
   created_at: number;
+  categories: string;
+  group: string;
   skill: string;
 }[];
 
 export interface ChefSkillCreatePayload {
+  categories: string;
+  group: string;
   skill: string;
 }
 
@@ -1586,6 +1616,8 @@ export interface ChefSkillCreateData {
    * @default "now"
    */
   created_at: number;
+  categories: string;
+  group: string;
   skill: string;
 }
 
@@ -4122,8 +4154,6 @@ export type MessagesListData = {
 
 export interface MessagesCreatePayload {
   content: string;
-  /** @format uuid */
-  application_id: string;
   sender_type: "chef" | "restaurant";
   /** @format int64 */
   worksession_id: number;

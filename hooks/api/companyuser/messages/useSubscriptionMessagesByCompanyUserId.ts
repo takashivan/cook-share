@@ -1,19 +1,21 @@
 import { getApi } from "@/api/api-factory";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import useSWRSubscription from 'swr/subscription';
 import { Messages } from "@/api/__generated__/base/Messages";
 import { MessagesCreatePayload } from "@/api/__generated__/base/data-contracts";
 import realTimeClient from "@/api/xano";
 import { Companyusers } from "@/api/__generated__/base/Companyusers";
 import { XanoRealtimeChannel } from "@xano/js-sdk/lib/models/realtime-channel";
+import { JobChangeRequests } from "@/api/__generated__/base/JobChangeRequests";
 
 export interface Params {
   companyUserId?: string;
   workSessionId?: number;
-  applicationId?: string;
 }
 
 export const useSubscriptionMessagesByCompanyUserId = (params: Params) => {
+  const { mutate } = useSWRConfig();
+
   const companyusersApi = getApi(Companyusers);
   const messagesApi = getApi(Messages);
   const channelKey = `worksession/${params.workSessionId}`;
@@ -52,6 +54,12 @@ export const useSubscriptionMessagesByCompanyUserId = (params: Params) => {
                   }, 5000);
                 } else {
                   getRequest.mutate();
+
+                  // jobの変更リクエストの再取得
+                  const jobChangeRequestsApi = getApi(JobChangeRequests);
+                  const jobChangeRequestsKey = jobChangeRequestsApi.jobChangeRequestsListQueryArgs()[0];
+                  mutate(jobChangeRequestsKey)
+
                   next();
                 }
               });
@@ -87,13 +95,12 @@ export const useSubscriptionMessagesByCompanyUserId = (params: Params) => {
   )
 
   const sendMessage = async (message: string) => {
-    if (!message.trim() || !key || !params.workSessionId || !params.applicationId) return;
+    if (!message.trim() || !key || !params.workSessionId) return;
 
     try {
       const messageParams: MessagesCreatePayload = {
         content: message,
         worksession_id: params.workSessionId,
-        application_id: params.applicationId,
         sender_type: "restaurant",
       };
 

@@ -38,13 +38,6 @@ import {
 import { formatJapanHHMM } from "@/lib/functions";
 import { useApplyJob } from "@/hooks/api/user/jobs/useApplyJob";
 
-interface CreateApplicationParams {
-  job_id: number;
-  status: string;
-  user_id: string;
-  application_date: string;
-}
-
 // 時間のフォーマット関数を追加
 const formatTime = (timestamp: number) => {
   return formatJapanHHMM(timestamp);
@@ -262,9 +255,9 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
   }) => {
     // Create dates directly from timestamps and add 7 hours for JST
     const startDate = new Date(event.startTime);
-    startDate.setTime(startDate.getTime() + 7 * 60 * 60 * 1000);
+    startDate.setTime(startDate.getTime());
     const endDate = new Date(event.endTime);
-    endDate.setTime(endDate.getTime() + 7 * 60 * 60 * 1000);
+    endDate.setTime(endDate.getTime());
 
     // Format dates for Google Calendar
     const formatDate = (date: Date) => {
