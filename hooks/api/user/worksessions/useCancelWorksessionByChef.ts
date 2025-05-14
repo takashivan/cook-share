@@ -7,7 +7,6 @@ import useSWRMutation from "swr/mutation";
 interface Params {
   worksessionId?: number;
   jobId?: number;
-  reason: string;
 }
 
 export const useCancelWorksessionByChef = (params: Params) => {

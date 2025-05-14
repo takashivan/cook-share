@@ -47,6 +47,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { JobChangeRequest } from "@/hooks/api/companyuser/jobChangeRequests/useGetJobChangeRequests";
 
 interface JobDetail {
   job: {
@@ -110,7 +111,7 @@ export default function JobDetail({ params }: PageProps) {
   const [cancelReason, setCancelReason] = useState("");
   const [isChangeRequestModalOpen, setIsChangeRequestModalOpen] =
     useState(false);
-  const [selectedChangeRequest, setSelectedChangeRequest] = useState<any>(null);
+  const [selectedChangeRequest, setSelectedChangeRequest] = useState<JobChangeRequest | null>(null);
 
   // ジョブ詳細の取得
   const { data: jobDetail } = useGetJob({ jobId: Number(id) });
@@ -128,18 +129,17 @@ export default function JobDetail({ params }: PageProps) {
   );
 
   const { trigger: startWorksessionTrigger } = useStartWorksession({
-    worksessionId: workSession?.id || 0,
+    worksessionId: workSession?.id,
     userId: user?.id,
   });
 
   const { trigger: finishWorksessionTrigger } = useFinishWorksession({
-    worksessionId: workSession?.id || 0,
+    worksessionId: workSession?.id,
     userId: user?.id,
   });
 
   const { trigger: cancelWorksessionTrigger } = useCancelWorksessionByChef({
-    worksessionId: workSession?.id || 0,
-    reason: cancelReason,
+    worksessionId: workSession?.id,
   });
 
   // メッセージの取得
@@ -161,13 +161,17 @@ export default function JobDetail({ params }: PageProps) {
 
   // 変更リクエストの取得
   const { data: changeRequests } = useGetJobChangeRequests();
+  const pendingRequest = changeRequests?.find(
+    (req) =>
+      req.worksession_id === workSession?.id && req.status === "PENDING"
+  );
 
   const { trigger: acceptJobChangeRequest } = useAcceptJobChangeRequest({
-    jobChangeRequestId: selectedChangeRequest?.id?.toString() || "",
+    jobChangeRequestId: selectedChangeRequest?.id,
   });
 
   const { trigger: rejectJobChangeRequest } = useRejectJobChangeRequest({
-    jobChangeRequestId: selectedChangeRequest?.id?.toString() || "",
+    jobChangeRequestId: selectedChangeRequest?.id,
   });
 
   const handleOpenDialog = () => {
@@ -251,7 +255,6 @@ export default function JobDetail({ params }: PageProps) {
           if (workSession?.id.toString() === decodedText) {
             setIsQrScanned(true);
             setScannedData(decodedText);
-            scannerRef.current?.stop().then(() => scannerRef.current?.clear());
           } else {
             toast({
               title: "エラー",
@@ -560,22 +563,20 @@ export default function JobDetail({ params }: PageProps) {
 
         <h2 className="text-lg font-bold mb-4">{restaurant?.name}</h2>
 
-        {changeRequests &&
-          changeRequests.length > 0 &&
-          changeRequests[0].status === "PENDING" && (
-            <div className="mb-6">
-              <Button
-                variant="outline"
-                className="w-full bg-red-50 text-red-800 border-red-200 hover:bg-red-100"
-                onClick={() => {
-                  setSelectedChangeRequest(changeRequests[0]);
-                  setIsChangeRequestModalOpen(true);
-                }}>
-                <AlertCircle className="h-4 w-4 mr-2" />
-                変更リクエスト
-              </Button>
-            </div>
-          )}
+        {pendingRequest && (
+          <div className="mb-6">
+            <Button
+              variant="outline"
+              className="w-full bg-red-50 text-red-800 border-red-200 hover:bg-red-100"
+              onClick={() => {
+                setSelectedChangeRequest(pendingRequest);
+                setIsChangeRequestModalOpen(true);
+              }}>
+              <AlertCircle className="h-4 w-4 mr-2" />
+              変更リクエスト
+            </Button>
+          </div>
+        )}
 
         {job.image && (
           <Image
