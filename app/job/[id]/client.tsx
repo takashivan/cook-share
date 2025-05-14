@@ -38,13 +38,6 @@ import {
 import { formatJapanHHMM } from "@/lib/functions";
 import { useApplyJob } from "@/hooks/api/user/jobs/useApplyJob";
 
-interface CreateApplicationParams {
-  job_id: number;
-  status: string;
-  user_id: string;
-  application_date: string;
-}
-
 // 時間のフォーマット関数を追加
 const formatTime = (timestamp: number) => {
   return formatJapanHHMM(timestamp);

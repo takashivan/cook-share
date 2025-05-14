@@ -27,7 +27,6 @@ export default function MessagesPage() {
   const { messagesData, sendMessage } = useSubscriptionMessagesByUserId({
     userId: user?.id,
     workSessionId: selectedWorkSession?.id ?? undefined,
-    applicationId: selectedWorkSession?.application_id ?? undefined,
   });
 
   const openChat = (worksession: MessageSummary["worksession"]) => {

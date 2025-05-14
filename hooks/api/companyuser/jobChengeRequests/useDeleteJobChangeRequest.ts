@@ -4,14 +4,7 @@ import { getApi } from "@/api/api-factory";
 import { useSWRConfig } from "swr";
 
 export interface Params {
-  jobChangeRequestId: string;
-  job_id: number;
-  user_id: string;
-  requested_by: number;
-  proposed_changes: string;
-  status: string;
-  reason: string;
-  worksession_id: number;
+  jobChangeRequestId?: string;
 }
 
 export const useDeleteJobChangeRequest = (params: Params) => {
@@ -20,12 +13,13 @@ export const useDeleteJobChangeRequest = (params: Params) => {
   const jobChangeRequests = getApi(JobChangeRequests);
   return useSWRMutation(
     ...jobChangeRequests.jobChangeRequestsDeleteQueryArgs(
-      params.jobChangeRequestId,
+      params.jobChangeRequestId ?? "",
       {
         headers: {
           "X-User-Type": "company",
         },
-      }
+      },
+      params.jobChangeRequestId != null
     ),
     {
       onSuccess: (data) => {

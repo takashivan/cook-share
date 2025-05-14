@@ -1,8 +1,6 @@
 import useSWR from "swr";
-import { ChefReviews } from "@/api/__generated__/base/ChefReviews";
 import { getApi } from "@/api/api-factory";
 import { Restaurants } from "@/api/__generated__/base/Restaurants";
-import { ChefReviewsListData } from "@/api/__generated__/base/data-contracts";
 
 interface Params {
   restaurantId?: number;
@@ -11,18 +9,16 @@ interface Params {
 export const useGetRestaurantReviewByRestaurantId = (
   params: Params,
 ) => {
-  const reviews = getApi(ChefReviews);
   const restaurants = getApi(Restaurants);
-  return useSWR<ChefReviewsListData>(
-    params.restaurantId ? ["reviews", params.restaurantId] : null,
-    async () => {
-      if (!params.restaurantId) return [];
-      const response = await restaurants.chefReviewsList(params.restaurantId, {
+  return useSWR(
+    ...restaurants.chefReviewsListQueryArgs(
+      params.restaurantId ?? -1,
+      {
         headers: {
           "X-User-Type": "company",
         },
-      });
-      return response.data;
-    },
+      },
+      params.restaurantId != null,
+    ),
   );
 };

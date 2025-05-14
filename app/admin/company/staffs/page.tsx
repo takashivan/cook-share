@@ -53,7 +53,7 @@ export default function StaffPage() {
   const [deleteTargetStaff, setDeleteTargetStaff] =
     useState<CompanyusersListData[number] | null>(null);
 
-  const { data: companyUsers, isLoading, error } = useGetCompanyUsersByCompanyId({ companyId: user?.companies_id?.toString() ?? "" });
+  const { data: companyUsers, isLoading, error } = useGetCompanyUsersByCompanyId({ companyId: user?.companies_id ?? undefined });
   
   const { trigger: createCompanyUserByCompanyIdTrigger } = useCreateCompanyUserByCompanyId({
     companyId: user?.companies_id ?? undefined,

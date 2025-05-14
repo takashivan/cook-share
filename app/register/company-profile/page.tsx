@@ -24,7 +24,7 @@ import { toast } from "@/hooks/use-toast";
 
 export default function CompanyProfilePage() {
   const router = useRouter();
-  const { user, login, reloadUser } = useCompanyAuth();
+  const { user, login, reloadUser, isLoading } = useCompanyAuth();
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [checking, setChecking] = useState(true)
@@ -107,12 +107,28 @@ export default function CompanyProfilePage() {
   };
 
   useEffect(() => {
-    if (user && user.companies_id != null) {
-      router.replace("/admin");
+    // ユーザー情報ロード中は何もしない
+    if (isLoading) {
+      return;
+    }
+
+    // 初回レンダリング時のみチェック
+    if (checking) {
+      // ユーザーがnullの場合（未ログイン）、ログインページにリダイレクト
+      if (!user) {
+        router.replace("/login/company");
+        return;
+      }
+
+      // プロフィールが既に完了している場合は、ダッシュボードにリダイレクト
+      if (user.companies_id != null) {
+        router.replace("/admin");
+        return;
+      }
     }
 
     setChecking(false)
-  }, [user, router]);
+  }, [user, router, isLoading, checking]);
 
   if (checking) {
     return null;

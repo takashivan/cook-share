@@ -5,8 +5,8 @@ import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 
 interface Params {
-  worksession_id: number;
-  reason: string;
+  worksessionId?: number;
+  jobId?: number;
 }
 
 export const useCancelWorksessionByChef = (params: Params) => {
@@ -14,28 +14,26 @@ export const useCancelWorksessionByChef = (params: Params) => {
   const worksessions = getApi(Worksessions);
 
   return useSWRMutation(
-    `cancel-worksession-${params.worksession_id}`,
-    () =>
-      worksessions.cancelByChefPartialUpdate(
-        params.worksession_id,
-        {
-          reason: params.reason,
+    ...worksessions.cancelByChefPartialUpdateQueryArgs(
+      params.worksessionId ?? -1,
+      {
+        headers: {
+          "X-User-Type": "chef",
         },
-        {
-          headers: {
-            "X-User-Type": "chef",
-          },
-        }
-      ),
+      },
+      params.worksessionId != null
+    ),
     {
       onSuccess: () => {
         // キャッシュを更新
-        const jobs = getApi(Jobs);
-        const worksessionsByJobIdKey =
-          jobs.worksessionsRestaurantTodosListQueryArgs(
-            params.worksession_id
-          )[0];
-        mutate(worksessionsByJobIdKey);
+        if (params.jobId) {
+          const jobs = getApi(Jobs);
+          const worksessionsByJobIdKey =
+            jobs.worksessionsRestaurantTodosListQueryArgs(
+              params.jobId
+            )[0];
+          mutate(worksessionsByJobIdKey);
+        }
       },
     }
   );

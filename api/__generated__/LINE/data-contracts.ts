@@ -62,6 +62,18 @@ export interface ConnectLineAccountCreateData {
   stripe_requirements: object;
   address: string;
   phone: string;
+  last_name: string;
+  given_name: string;
+  last_name_kana: string;
+  given_name_kana: string;
+  categories: number[];
+  postal_code: string;
+  prefecture: string;
+  address2: string;
+  city: string;
+  town: string;
+  street: string;
+  profile_completed: boolean;
   magic_link: {
     token: string;
     /**
@@ -87,6 +99,7 @@ export interface LinkLineIdCreatePayload {
   line_user_id: string;
   name: string;
   picture: string;
+  user_id: string;
 }
 
 export interface LinkLineIdCreateData {
@@ -130,6 +143,18 @@ export interface LinkLineIdCreateData {
   stripe_requirements: object;
   address: string;
   phone: string;
+  last_name: string;
+  given_name: string;
+  last_name_kana: string;
+  given_name_kana: string;
+  categories: number[];
+  postal_code: string;
+  prefecture: string;
+  address2: string;
+  city: string;
+  town: string;
+  street: string;
+  profile_completed: boolean;
   magic_link: {
     token: string;
     /**
