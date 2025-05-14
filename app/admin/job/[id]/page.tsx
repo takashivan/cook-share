@@ -91,6 +91,7 @@ import { Label } from "@/components/ui/label";
 import { useCreateJobChangeRequest } from "@/hooks/api/companyuser/jobChangeRequests/useCreateJobChangeRequest";
 import { useGetJobChangeRequests } from "@/hooks/api/companyuser/jobChangeRequests/useGetJobChangeRequests";
 import { useDeleteJobChangeRequest } from "@/hooks/api/companyuser/jobChangeRequests/useDeleteJobChangeRequest";
+import { useGetRestaurantReviewByWorksessionId } from "@/hooks/api/companyuser/reviews/useGetRestaurantReviewByWorksessionId";
 
 interface PageParams {
   params: Promise<{ id: string }>;
@@ -125,10 +126,6 @@ export default function JobDetail({ params }: PageParams) {
   const [selectedWorkSession, setSelectedWorkSession] = useState<
     WorksessionsRestaurantTodosListData[number] | null
   >(null);
-  const { data: reviewsData } = useGetReviewsByUserId({
-    userId: selectedWorkSession?.user_id ?? undefined,
-  });
-  console.log("reviewsData", reviewsData);
   const [isChefReviewModalOpen, setIsChefReviewModalOpen] = useState(false);
   const [chefReview, setChefReview] = useState<any>(null);
   const [isEditJobModalOpen, setIsEditJobModalOpen] = useState(false);
@@ -153,11 +150,22 @@ export default function JobDetail({ params }: PageParams) {
     reason: "",
   });
 
+  // シェフのこれまでのレビュー一覧を取得
+  const { data: reviewsData } = useGetReviewsByUserId({
+    userId: selectedWorkSession?.user_id ?? undefined,
+  });
+  
+  // この求人に対する、シェフからのレビューを取得
+  const { data: restaurantReview } = useGetRestaurantReviewByWorksessionId({
+    worksessionId: selectedWorkSession?.id,
+  })
+
   const { trigger: updateJobTrigger } = useUpdateJob({
     jobId: Number(jobId),
     companyId: restaurant?.companies_id ?? undefined,
     restaurantId: restaurant?.id ?? undefined,
   });
+
   const { trigger: verifyWorksessionTrigger } = useVerifyWorksession({
     worksessionId: selectedWorkSession?.id,
     jobId: Number(jobId),
@@ -168,6 +176,7 @@ export default function JobDetail({ params }: PageParams) {
       worksession_id: selectedWorkSession?.id,
       jobId: Number(jobId),
     });
+
   const { trigger: noShowWorksessionTrigger } =
     useNoShowWorksessionByRestaurant({
       worksession_id: selectedWorkSession?.id,
@@ -623,31 +632,69 @@ ${changeRequest.reason}
           </div>
         </nav>
 
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold line-clamp-2">
-            {job?.title}
-          </h1>
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+          <div className="md:w-1/2 w-full">
+            <h1 className="text-xl sm:text-2xl font-bold truncate">
+              {job?.title}
+            </h1>
 
-          <div className="flex flex-wrap items-center gap-2 mt-2">
-            <Badge className="bg-green-100 text-sm text-green-800 hover:bg-green-100">
-              {formatJobPostingJapaneseStatus(job?.status || "")}
-            </Badge>
-            <Badge variant="outline" className="text-sm bg-white">
-              {job?.work_date
-                ? format(new Date(job.work_date), "MM/dd")
-                : "未定"}
-              &nbsp;&nbsp;
-              {job?.start_time && job?.end_time ? (
-                <>
-                  {formatJapanHHMM(job.start_time)}〜
-                  {formatJapanHHMM(job.end_time)}
-                </>
-              ) : (
-                "未定"
-              )}
-            </Badge>
+            <div className="flex flex-wrap items-center gap-2 mt-2">
+              <Badge className="bg-green-100 text-sm text-green-800 hover:bg-green-100">
+                {formatJobPostingJapaneseStatus(job?.status || "")}
+              </Badge>
+              <Badge variant="outline" className="text-sm bg-white">
+                {job?.work_date
+                  ? format(new Date(job.work_date), "MM/dd")
+                  : "未定"}
+                &nbsp;&nbsp;
+                {job?.start_time && job?.end_time ? (
+                  <>
+                    {formatJapanHHMM(job.start_time)}〜
+                    {formatJapanHHMM(job.end_time)}
+                  </>
+                ) : (
+                  "未定"
+                )}
+              </Badge>
+            </div>
           </div>
+
+          {restaurantReview && (
+            <div className="md:w-1/2 w-full border rounded-lg py-2 px-3 bg-white">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-sm font-semibold">シェフからのレビュー</span>
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    <FaStar
+                      key={i}
+                      className={`h-3 w-3 ${
+                        i < restaurantReview.rating
+                          ? "text-yellow-400 fill-yellow-400"
+                          : "text-gray-300"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="text-sm font-medium">
+                  {restaurantReview.rating.toFixed(1)}
+                </span>
+                <div className="text-xs text-gray-500 ml-auto">
+                  {format(
+                    new Date(restaurantReview.created_at),
+                    "yyyy年MM月dd日",
+                    { locale: ja }
+                  )}
+                </div>
+              </div>
+              <p
+                className="text-sm text-gray-700 mb-1 truncate"
+                title={restaurantReview.comment}>
+                {restaurantReview.comment}
+              </p>
+            </div>
+          )}
         </div>
+
       </div>
       {/* メインコンテンツ */}{" "}
       <div className="grid grid-cols-1 gap-6">
