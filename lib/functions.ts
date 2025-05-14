@@ -60,6 +60,10 @@ export function formatWorkSessionJapaneseStatus(status: string): string {
       return "一時停止";
     case "RESCHEDULED":
       return "再予定";
+    case "CANCELED_BY_CHEF":
+      return "シェフのキャンセル";
+    case "CANCELED_BY_RESTAURANT":
+      return "キャンセル";
     default:
       return status;
   }

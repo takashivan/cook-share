@@ -36,7 +36,6 @@ export default function ChefRegisterPage() {
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-    const name = formData.get("name") as string;
 
     console.log("Submitting form with:", { email, name });
 
@@ -48,7 +47,7 @@ export default function ChefRegisterPage() {
 
     try {
       // まず登録を試みる
-      await register({ email, password, name });
+      await register({ email, password });
 
       toast({
         title: "認証メールを送信しました",
@@ -102,7 +101,7 @@ export default function ChefRegisterPage() {
               </div>
             )}
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="name">お名前</Label>
                 <Input
                   id="name"
@@ -111,7 +110,7 @@ export default function ChefRegisterPage() {
                   required
                   placeholder="山田 太郎"
                 />
-              </div>
+              </div> */}
 
               <div className="space-y-2">
                 <Label htmlFor="email">メールアドレス</Label>

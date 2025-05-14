@@ -31,7 +31,6 @@ export default function RegisterPage() {
       const data = {
         email: formData.get("email") as string,
         password: formData.get("password") as string,
-        name: formData.get("name") as string,
       };
 
       await register(data);
@@ -85,10 +84,10 @@ export default function RegisterPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="name">名前</Label>
                 <Input id="name" name="name" placeholder="山田 太郎" required />
-              </div>
+              </div> */}
               <div className="space-y-2">
                 <Label htmlFor="email">メールアドレス</Label>
                 <Input
