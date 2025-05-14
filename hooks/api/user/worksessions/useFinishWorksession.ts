@@ -24,7 +24,7 @@ export const useFinishWorksession = (params: Params) => {
       const worksessionsByUserIdKey = users.worksessionsListQueryArgs(params.userId)[0];
       mutate(worksessionsByUserIdKey);
 
-      const worksessionsByUserIdTodoKey = users.worksessionsListQueryArgs(params.userId)[0];
+      const worksessionsByUserIdTodoKey = users.worksessionsUserTodosListQueryArgs(params.userId)[0];
       mutate(worksessionsByUserIdTodoKey);
       }
     }

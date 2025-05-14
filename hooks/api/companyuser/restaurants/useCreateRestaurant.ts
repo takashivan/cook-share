@@ -26,10 +26,6 @@ export const useCreateRestaurant = (params: Params) => {
     onSuccess: (data) => {
       console.log('Restaurant created successfully:', data);
 
-      // Restaurantsリストのキャッシュを更新
-      const restaurantsKey = restaurants.restaurantsListQueryArgs()[0];
-      mutate(restaurantsKey);
-
       // キャッシュを更新
       if (params.companyId) {
         const companies = getApi(Companies);

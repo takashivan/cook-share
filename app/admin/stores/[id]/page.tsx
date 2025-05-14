@@ -72,6 +72,7 @@ import { useGetRestaurantReviewByRestaurantId } from "@/hooks/api/companyuser/re
 import { useUpdateRestaurant } from "@/hooks/api/companyuser/restaurants/useUpdateRestaurant";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { useDeleteCompanyUserByRestaurantId } from "@/hooks/api/companyuser/companyUsers/useDeleteCompanyUserByRestaurantId";
+import { formatDateToLocalISOStringForDatetimeLocal } from "@/lib/functions";
 
 interface JobWithWorkSessions
   extends Omit<JobsListOutput[number], "workSessionCount"> {
@@ -307,7 +308,7 @@ export default function RestaurantDetailPage(props: {
         minute: "2-digit",
         hour12: false,
       }),
-      expiry_date: new Date(job.expiry_date).toISOString().split("T")[0],
+      expiry_date: formatDateToLocalISOStringForDatetimeLocal(new Date(job.expiry_date)),
     };
     setCopiedJob(jobData);
     setIsCreateJobModalOpen(true);
@@ -934,7 +935,10 @@ export default function RestaurantDetailPage(props: {
                                       </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
-                                      onClick={() => handleCopyJob(job)}>
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleCopyJob(job)
+                                      }}>
                                       コピーして新規作成
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
@@ -1012,7 +1016,10 @@ export default function RestaurantDetailPage(props: {
                                       </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
-                                      onClick={() => handleCopyJob(job)}>
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleCopyJob(job);
+                                      }}>
                                       コピーして新規作成
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
@@ -1090,7 +1097,10 @@ export default function RestaurantDetailPage(props: {
                                       </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
-                                      onClick={() => handleCopyJob(job)}>
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleCopyJob(job);
+                                      }}>
                                       コピーして新規作成
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
@@ -1333,12 +1343,13 @@ export default function RestaurantDetailPage(props: {
         }}
         onSubmit={handleCreateJob}
         restaurantId={parseInt(params.id)}
-        initialData={{
+        initialData={copiedJob || selectedDate ? {
           ...copiedJob,
-          work_date: selectedDate
+          work_date: copiedJob
+            ? copiedJob.work_date : selectedDate
             ? format(selectedDate, "yyyy-MM-dd")
             : undefined,
-        }}
+        } : undefined}
       />
       <EditRestaurantModal
         isOpen={isEditModalOpen && !!restaurant}

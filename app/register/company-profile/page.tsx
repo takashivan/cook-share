@@ -21,28 +21,31 @@ import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { initializeCompany } from "@/lib/api/company";
 import { getAuthToken } from "@/lib/api/config";
 import { toast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
+
+type CompanyFormData = {
+  name: string;
+  description: string;
+  address: string;
+  phone: string;
+  website?: string;
+  business_registration_number?: string;
+};
 
 export default function CompanyProfilePage() {
   const router = useRouter();
-  const { user, login, reloadUser, isLoading } = useCompanyAuth();
+  const { user, reloadUser, isLoading } = useCompanyAuth();
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [checking, setChecking] = useState(true)
+  const [checking, setChecking] = useState(true);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setProfileImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CompanyFormData>();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
+  const onSubmit = async (data: CompanyFormData) => {
     if (!user?.id) {
       toast({
         title: "エラーが発生しました",
@@ -55,37 +58,22 @@ export default function CompanyProfilePage() {
     setIsSubmitting(true);
 
     try {
-      const formData = new FormData(e.currentTarget);
       const companyData = {
-        name: formData.get("company_name") as string,
-        description: formData.get("description") as string,
-        address: formData.get("address") as string,
-        phone: formData.get("phone") as string,
-        website: formData.get("website") as string,
+        ...data,
         logo_url: profileImage || "",
         created_by: user.id,
         status: "approved",
-        business_registration_number:
-          (formData.get("business_registration_number") as string) || "",
       };
-      console.log("Creating company with data:", companyData);
 
-      // 会社を作成
-      // const createdCompany = await createCompany(companyData);
-      // console.log("Created company:", createdCompany);
       const initializedCompany = await initializeCompany(
         user.id,
         profileImage || "",
         companyData
       );
-      console.log("Initialized company:", initializedCompany);
 
-      // ユーザー情報を更新して再ログイン
       const token = getAuthToken("company");
-      if (!token) {
-        throw new Error("認証トークンが見つかりません");
-      }
-      // 修正後、Contextなどに保持するユーザー情報を更新
+      if (!token) throw new Error("認証トークンが見つかりません");
+
       await reloadUser();
 
       toast({
@@ -106,11 +94,20 @@ export default function CompanyProfilePage() {
     }
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setProfileImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   useEffect(() => {
     // ユーザー情報ロード中は何もしない
-    if (isLoading) {
-      return;
-    }
+    if (isLoading) return;
 
     // 初回レンダリング時のみチェック
     if (checking) {
@@ -127,12 +124,10 @@ export default function CompanyProfilePage() {
       }
     }
 
-    setChecking(false)
+    setChecking(false);
   }, [user, router, isLoading, checking]);
 
-  if (checking) {
-    return null;
-  }
+  if (checking) return null;
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -161,70 +156,85 @@ export default function CompanyProfilePage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* 社名 */}
               <div className="space-y-3">
-                <Label htmlFor="address" className="text-base">
-                  社名
-                </Label>
+                <Label htmlFor="name" className="text-base">社名 *</Label>
                 <Input
-                  id="company_name"
-                  name="company_name"
+                  id="name"
                   placeholder="株式会社CHEFDOM"
-                  required
+                  {...register("name", {
+                    required: "社名は必須です",
+                  })}
                 />
+                {errors.name && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.name.message}
+                  </p>
+                )}
               </div>
+
               {/* 会社概要 */}
               <div className="space-y-3">
-                <Label htmlFor="description" className="text-base">
-                  会社概要
-                </Label>
+                <Label htmlFor="description" className="text-base">会社概要 *</Label>
                 <Textarea
                   id="description"
-                  name="description"
                   placeholder="会社の概要や特徴を入力してください"
                   className="min-h-[120px]"
-                  required
+                  {...register("description", {
+                    required: "会社概要は必須です", 
+                  })}
                 />
+                {errors.description && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.description.message}
+                  </p>
+                )}
               </div>
 
               {/* 所在地 */}
               <div className="space-y-3">
-                <Label htmlFor="address" className="text-base">
-                  所在地
-                </Label>
+                <Label htmlFor="address" className="text-base">所在地 *</Label>
                 <Input
                   id="address"
-                  name="address"
                   placeholder="東京都渋谷区..."
-                  required
+                  {...register("address", {
+                    required: "所在地は必須です", 
+                  })}
                 />
+                {errors.address && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.address.message}
+                  </p>
+                )}
               </div>
 
               {/* 電話番号 */}
               <div className="space-y-3">
-                <Label htmlFor="phone" className="text-base">
-                  電話番号
-                </Label>
+                <Label htmlFor="phone" className="text-base">電話番号 *</Label>
                 <Input
                   id="phone"
-                  name="phone"
                   type="tel"
                   placeholder="03-xxxx-xxxx"
-                  required
+                  {...register("phone", {
+                    required: "電話番号は必須です", 
+                  })}
                 />
+                {errors.phone && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.phone.message}
+                  </p>
+                )}
               </div>
 
               {/* ウェブサイト */}
               <div className="space-y-3">
-                <Label htmlFor="website" className="text-base">
-                  ウェブサイト
-                </Label>
+                <Label htmlFor="website" className="text-base">ウェブサイト</Label>
                 <Input
                   id="website"
-                  name="website"
                   type="url"
                   placeholder="https://..."
+                  {...register("website")}
                 />
               </div>
 
@@ -269,10 +279,7 @@ export default function CompanyProfilePage() {
                 <Button variant="outline" type="button" asChild>
                   <Link href="/register/company">戻る</Link>
                 </Button>
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={isSubmitting}>
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
                   {isSubmitting ? "登録中..." : "会社情報を登録"}
                 </Button>
               </div>
