@@ -46,6 +46,7 @@ export default function SchedulePage() {
   const selectedWorkSession = workSessions?.find(
     (ws) => ws?.job?.id === selectedJobId
   );
+  console.log(selectedWorkSession);
 
   // メッセージの取得
   const { messagesData, sendMessage } = useSubscriptionMessagesByUserId({
@@ -63,6 +64,7 @@ export default function SchedulePage() {
   const { data: changeRequests } = useGetJobChangeRequestByWorksessionId({
     worksessionId: selectedWorkSession?.id,
   });
+  console.log(changeRequests);
 
   const handleSendMessage = async (message: string) => {
     if (!message.trim() || !selectedWorkSession) return;
@@ -89,6 +91,11 @@ export default function SchedulePage() {
       workSessions?.filter((ws) =>
         ["COMPLETED", "VERIFIED"].includes(ws.status)
       ) || [],
+    cancelledByUser:
+      workSessions?.filter((ws) => ws.status === "CANCELED_BY_CHEF") || [],
+    cancelledByRestaurant:
+      workSessions?.filter((ws) => ws.status === "CANCELED_BY_RESTAURANT") ||
+      [],
   };
 
   const renderWorkSessionCard = (
@@ -117,7 +124,10 @@ export default function SchedulePage() {
       <Card
         key={workSession.id}
         className="mb-4 hover:bg-gray-50 transition-colors"
-        onClick={() => openChat(workSession.job.id)}>
+        onClick={() => {
+          openChat(workSession.job.id);
+          console.log("Card clicked");
+        }}>
         <CardContent className="p-4">
           <div className="flex justify-between items-start mb-2 relative">
             <div className="flex items-center gap-2">
@@ -153,9 +163,10 @@ export default function SchedulePage() {
         defaultValue="upcoming"
         value={activeTab}
         onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-2 w-full">
+        <TabsList className="grid grid-cols-3 w-full">
           <TabsTrigger value="upcoming">次のお仕事</TabsTrigger>
           <TabsTrigger value="completed">完了</TabsTrigger>
+          <TabsTrigger value="others">その他</TabsTrigger>
         </TabsList>
 
         <TabsContent value="upcoming" className="mt-6">
@@ -176,6 +187,39 @@ export default function SchedulePage() {
               完了したお仕事はありません
             </p>
           )}
+        </TabsContent>
+
+        <TabsContent value="others" className="mt-6">
+          <Tabs defaultValue="cancelledByUser" className="w-full">
+            <TabsList className="grid grid-cols-2 w-full mb-4">
+              <TabsTrigger value="cancelledByUser">
+                キャンセルしたお仕事
+              </TabsTrigger>
+              <TabsTrigger value="cancelledByRestaurant">
+                キャンセルされたお仕事
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="cancelledByUser">
+              {filteredWorkSessions.cancelledByUser.length > 0 ? (
+                filteredWorkSessions.cancelledByUser.map(renderWorkSessionCard)
+              ) : (
+                <p className="text-center text-gray-500 py-8">
+                  キャンセルしたお仕事はありません
+                </p>
+              )}
+            </TabsContent>
+            <TabsContent value="cancelledByRestaurant">
+              {filteredWorkSessions.cancelledByRestaurant.length > 0 ? (
+                filteredWorkSessions.cancelledByRestaurant.map(
+                  renderWorkSessionCard
+                )
+              ) : (
+                <p className="text-center text-gray-500 py-8">
+                  キャンセルされたお仕事はありません
+                </p>
+              )}
+            </TabsContent>
+          </Tabs>
         </TabsContent>
       </Tabs>
 

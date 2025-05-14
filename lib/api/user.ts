@@ -21,7 +21,6 @@ interface Credentials {
 export interface UserData {
   email: string;
   password: string;
-  name: string;
   [key: string]: any;
 }
 
