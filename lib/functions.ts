@@ -1,3 +1,5 @@
+import { JobsDeleteData, JobsListOutput } from "@/api/__generated__/base/data-contracts";
+
 export function formatToJapanTime(ms: number): string {
   const date = new Date(ms);
   return date.toLocaleString("ja-JP", {
@@ -81,18 +83,20 @@ export function formatWorkSessionJapaneseStatus(status: string): string {
   }
 }
 
-export function formatJobPostingJapaneseStatus(status: string): string {
+export function formatJobPostingJapaneseStatus(status: JobsListOutput[number]['status'] | ''): string {
   switch (status) {
     case "PUBLISHED":
       return "公開中";
     case "DRAFT":
       return "下書き";
     case "EXPIRED":
-      return "終了";
-    case "CANCELED":
-      return "キャンセル";
+      return "募集終了";
     case "PENDING":
       return "一時停止中";
+    case "FILLED":
+      return "応募あり";
+    case "DELETED":
+      return "キャンセル";
     default:
       return status;
   }

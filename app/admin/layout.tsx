@@ -31,6 +31,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { useSubscriptionCompanyUserNotificationsByUserId } from "@/hooks/api/companyuser/companyUserNotifications/useSubscriptionCompanyUserNotificationsByUserId";
 import { useGetRestaurantsByCompanyUserId } from "@/hooks/api/companyuser/restaurants/useGetRestaurantsByCompanyUserId";
+import { Badge } from "@/components/ui/badge";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -199,14 +200,26 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           isOpen: isStoreListOpen,
         },
         ...(isStoreListOpen
-          ? (restaurants ?? []).map((restaurant) => ({
+          ? (restaurants ?? []).map((restaurant) => {
+            const notificationCount = notifications?.filter(
+              (notification) =>
+                notification.restaurant_id === restaurant.id && !notification.is_read
+            ).length ?? 0;
+
+            return {
               title: restaurant.name,
               href: `/admin/stores/${restaurant.id}`,
               icon: Tag,
               active: pathname === `/admin/stores/${restaurant.id}`,
               show: true,
               className: "ml-4",
-            }))
+              notification: notificationCount > 0 ? (
+                <Badge className="h-5 flex items-center justify-center bg-red-500 text-white px-1.5 py-0.5 ml-auto">
+                  {notificationCount > 9 ? "9+" : notificationCount}
+                </Badge>
+              ) : null,
+            };
+          })
           : []),
       ],
     },
