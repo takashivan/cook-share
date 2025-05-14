@@ -409,10 +409,10 @@ export interface ResetPasswordCreateData {
 }
 
 export interface SignupCreatePayload {
-  name: string;
   /** @format email */
   email: string;
   password: string;
+  name: string;
 }
 
 export interface SignupCreateData {

@@ -220,7 +220,13 @@ export type GetApplication2Data = {
     end_time: number;
     hourly_rate: number;
     required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    status:
+      | "DRAFT"
+      | "PUBLISHED"
+      | "EXPIRED"
+      | "PENDING"
+      | "DELETED"
+      | "FILLED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -466,6 +472,8 @@ export interface WorksessionsListData {
     restaurant_rating: number;
     /** @format timestamptz */
     start_time: number | null;
+    /** @format int64 */
+    check_in_code: number | null;
   };
   messages: {
     /** @format int64 */
@@ -480,7 +488,7 @@ export interface WorksessionsListData {
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
-    application_id: string;
+    application_id: string | null;
     /** @format uuid */
     chef_id: string;
     sender_type: "chef" | "restaurant";
@@ -1277,6 +1285,8 @@ export interface BySessionDetailData {
     restaurant_rating: number;
     /** @format timestamptz */
     start_time: number | null;
+    /** @format int64 */
+    check_in_code: number | null;
   };
   restaurant: {
     /** @format int64 */
@@ -1868,7 +1878,13 @@ export interface JobsListData {
     end_time: number;
     hourly_rate: number;
     required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    status:
+      | "DRAFT"
+      | "PUBLISHED"
+      | "EXPIRED"
+      | "PENDING"
+      | "DELETED"
+      | "FILLED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -2300,7 +2316,7 @@ export interface WorksessionsMessagesListData {
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
-    application_id: string;
+    application_id: string | null;
     /** @format uuid */
     chef_id: string;
     sender_type: "chef" | "restaurant";
@@ -2617,7 +2633,13 @@ export interface AcceptPartialUpdateOutput {
     end_time: number;
     hourly_rate: number;
     required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    status:
+      | "DRAFT"
+      | "PUBLISHED"
+      | "EXPIRED"
+      | "PENDING"
+      | "DELETED"
+      | "FILLED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -2772,7 +2794,13 @@ export interface CompanyDetailResult {
     end_time: number;
     hourly_rate: number;
     required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    status:
+      | "DRAFT"
+      | "PUBLISHED"
+      | "EXPIRED"
+      | "PENDING"
+      | "DELETED"
+      | "FILLED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -2814,7 +2842,13 @@ export interface QueryUpcomingjobsListData {
     end_time: number;
     hourly_rate: number;
     required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    status:
+      | "DRAFT"
+      | "PUBLISHED"
+      | "EXPIRED"
+      | "PENDING"
+      | "DELETED"
+      | "FILLED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -2899,7 +2933,13 @@ export interface QueryUpcomingListData {
     end_time: number;
     hourly_rate: number;
     required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    status:
+      | "DRAFT"
+      | "PUBLISHED"
+      | "EXPIRED"
+      | "PENDING"
+      | "DELETED"
+      | "FILLED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -2983,7 +3023,7 @@ export type RestaurantDetailData = {
   end_time: number;
   hourly_rate: number;
   required_skills: string[];
-  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED" | "FILLED";
   /** @format timestamptz */
   updated_at: number;
   /** @format int64 */
@@ -3026,7 +3066,13 @@ export interface GetJobData {
     end_time: number;
     hourly_rate: number;
     required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    status:
+      | "DRAFT"
+      | "PUBLISHED"
+      | "EXPIRED"
+      | "PENDING"
+      | "DELETED"
+      | "FILLED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -3090,7 +3136,7 @@ export interface PatchJobPayload {
   end_time: number;
   hourly_rate: number;
   required_skills: string[];
-  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED" | "FILLED";
   /** @format timestamptz */
   updated_at: number;
   /** @format int64 */
@@ -3130,7 +3176,7 @@ export interface PatchJobData {
   end_time: number;
   hourly_rate: number;
   required_skills: string[];
-  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED" | "FILLED";
   /** @format timestamptz */
   updated_at: number;
   /** @format int64 */
@@ -3171,7 +3217,13 @@ export interface QueryUpcomingListResult {
     end_time: number;
     hourly_rate: number;
     required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    status:
+      | "DRAFT"
+      | "PUBLISHED"
+      | "EXPIRED"
+      | "PENDING"
+      | "DELETED"
+      | "FILLED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -3373,6 +3425,8 @@ export type WorksessionsRestaurantTodosListData = {
   restaurant_rating: number;
   /** @format timestamptz */
   start_time: number | null;
+  /** @format int64 */
+  check_in_code: number | null;
   user: {
     /** @format uuid */
     id: string;
@@ -3452,7 +3506,13 @@ export type WorksessionsRestaurantTodosListData = {
     end_time: number;
     hourly_rate: number;
     required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    status:
+      | "DRAFT"
+      | "PUBLISHED"
+      | "EXPIRED"
+      | "PENDING"
+      | "DELETED"
+      | "FILLED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -3475,7 +3535,45 @@ export type WorksessionsRestaurantTodosListData = {
   };
 }[];
 
-export type JobsDeleteData = object;
+export interface JobsDeleteData {
+  /** @format int64 */
+  id: number;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  title: string;
+  description: string;
+  /** @format date */
+  work_date: string;
+  /** @format timestamptz */
+  start_time: number;
+  /** @format timestamptz */
+  end_time: number;
+  hourly_rate: number;
+  required_skills: string[];
+  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED" | "FILLED";
+  /** @format timestamptz */
+  updated_at: number;
+  /** @format int64 */
+  restaurant_id: number;
+  image: string;
+  task: string;
+  skill: string;
+  whattotake: string;
+  note: string;
+  point: string;
+  transportation: string;
+  /** @default "1" */
+  is_approved: boolean;
+  /** @format int64 */
+  number_of_spots: number;
+  /** @format int64 */
+  fee: number;
+  /** @format timestamptz */
+  expiry_date: number | null;
+}
 
 export interface JobsDetailData {
   job: {
@@ -3496,7 +3594,13 @@ export interface JobsDetailData {
     end_time: number;
     hourly_rate: number;
     required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    status:
+      | "DRAFT"
+      | "PUBLISHED"
+      | "EXPIRED"
+      | "PENDING"
+      | "DELETED"
+      | "FILLED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -3560,7 +3664,7 @@ export interface JobsPartialUpdatePayload {
   end_time: number;
   hourly_rate: number;
   required_skills: string[];
-  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED" | "FILLED";
   task: string;
   skill: string;
   whattotake: string;
@@ -3593,7 +3697,7 @@ export interface JobsPartialUpdateData {
   end_time: number;
   hourly_rate: number;
   required_skills: string[];
-  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED" | "FILLED";
   /** @format timestamptz */
   updated_at: number;
   /** @format int64 */
@@ -3634,7 +3738,13 @@ export interface JobsListResult {
     end_time: number;
     hourly_rate: number;
     required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    status:
+      | "DRAFT"
+      | "PUBLISHED"
+      | "EXPIRED"
+      | "PENDING"
+      | "DELETED"
+      | "FILLED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -3712,7 +3822,7 @@ export interface JobsCreatePayload {
   end_time: number;
   hourly_rate: number;
   required_skills: string[];
-  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED" | "FILLED";
   /** @format int64 */
   restaurant_id: number;
   task: string;
@@ -3747,7 +3857,7 @@ export interface JobsCreateData {
   end_time: number;
   hourly_rate: number;
   required_skills: string[];
-  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED" | "FILLED";
   /** @format timestamptz */
   updated_at: number;
   /** @format int64 */
@@ -3788,7 +3898,13 @@ export interface GetJob2Data {
     end_time: number;
     hourly_rate: number;
     required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    status:
+      | "DRAFT"
+      | "PUBLISHED"
+      | "EXPIRED"
+      | "PENDING"
+      | "DELETED"
+      | "FILLED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -3866,7 +3982,7 @@ export interface PostJobPayload {
   end_time: number;
   hourly_rate: number;
   required_skills: string[];
-  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED" | "FILLED";
   /** @format timestamptz */
   updated_at: number;
   /** @format int64 */
@@ -3906,7 +4022,7 @@ export interface PostJobData {
   end_time: number;
   hourly_rate: number;
   required_skills: string[];
-  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED" | "FILLED";
   /** @format timestamptz */
   updated_at: number;
   /** @format int64 */
@@ -3942,7 +4058,7 @@ export interface WorksessionDetailData {
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
-    application_id: string;
+    application_id: string | null;
     /** @format uuid */
     chef_id: string;
     sender_type: "chef" | "restaurant";
@@ -3981,7 +4097,7 @@ export interface MessageDetailData {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   chef_id: string;
   sender_type: "chef" | "restaurant";
@@ -4002,7 +4118,7 @@ export interface MessagePartialUpdatePayload {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   chef_id: string;
   sender_type: "chef" | "restaurant";
@@ -4030,7 +4146,7 @@ export interface MessagePartialUpdateData {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   chef_id: string;
   sender_type: "chef" | "restaurant";
@@ -4060,7 +4176,7 @@ export interface MessagesDetailData {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   chef_id: string;
   sender_type: "chef" | "restaurant";
@@ -4081,7 +4197,7 @@ export interface MessagesPartialUpdatePayload {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   chef_id: string;
   sender_type: "chef" | "restaurant";
@@ -4109,7 +4225,7 @@ export interface MessagesPartialUpdateData {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   chef_id: string;
   sender_type: "chef" | "restaurant";
@@ -4137,7 +4253,7 @@ export type MessagesListData = {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   chef_id: string;
   sender_type: "chef" | "restaurant";
@@ -4172,7 +4288,7 @@ export interface MessagesCreateData {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   chef_id: string;
   sender_type: "chef" | "restaurant";
@@ -4200,7 +4316,7 @@ export type MessageListData = {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   chef_id: string;
   sender_type: "chef" | "restaurant";
@@ -4221,7 +4337,7 @@ export interface MessageCreatePayload {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   sender_type: "chef" | "restaurant";
   /** @format int64 */
   restaurant_id: number | null;
@@ -4247,7 +4363,7 @@ export interface MessageCreateData {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   chef_id: string;
   sender_type: "chef" | "restaurant";
@@ -4745,6 +4861,8 @@ export interface BySessionDetailResult {
     restaurant_rating: number;
     /** @format timestamptz */
     start_time: number | null;
+    /** @format int64 */
+    check_in_code: number | null;
   };
   user: {
     /** @format uuid */
@@ -5415,7 +5533,7 @@ export type JobsListOutput = {
   end_time: number;
   hourly_rate: number;
   required_skills: string[];
-  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED" | "FILLED";
   /** @format timestamptz */
   updated_at: number;
   /** @format int64 */
@@ -5540,7 +5658,36 @@ export type ReviewsListData = {
   reviewee_id: number;
 }[];
 
-export type RestaurantsDeleteData = object;
+export interface RestaurantsDeleteData {
+  /** @format int64 */
+  id: number;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  name: string;
+  address: string;
+  cuisine_type: string;
+  business_hours: string;
+  contact_info: string;
+  profile_image: string;
+  /** @format timestamptz */
+  updated_at: number;
+  /** Whether the restaurant is active. */
+  is_active: boolean;
+  /** @format uuid */
+  companies_id: string | null;
+  station: string;
+  access: string;
+  rating: number;
+  /** @default "1" */
+  is_approved: boolean;
+  restaurant_cuisine_id: number[];
+  description: string;
+  phone: string;
+  status: "BANNED" | "PENDING" | "DELETED";
+}
 
 export interface RestaurantsDetailData {
   /** @format int64 */
@@ -5982,6 +6129,8 @@ export type SessionHistoryCurrentListData = {
   restaurant_rating: number;
   /** @format timestamptz */
   start_time: number | null;
+  /** @format int64 */
+  check_in_code: number | null;
   restaurant: {
     /** @format int64 */
     id: number;
@@ -6030,7 +6179,13 @@ export type SessionHistoryCurrentListData = {
     end_time: number;
     hourly_rate: number;
     required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    status:
+      | "DRAFT"
+      | "PUBLISHED"
+      | "EXPIRED"
+      | "PENDING"
+      | "DELETED"
+      | "FILLED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -6444,6 +6599,8 @@ export type SessionHistoryCurrentListResult = {
   restaurant_rating: number;
   /** @format timestamptz */
   start_time: number | null;
+  /** @format int64 */
+  check_in_code: number | null;
   restaurant: {
     /** @format int64 */
     id: number;
@@ -6492,7 +6649,13 @@ export type SessionHistoryCurrentListResult = {
     end_time: number;
     hourly_rate: number;
     required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    status:
+      | "DRAFT"
+      | "PUBLISHED"
+      | "EXPIRED"
+      | "PENDING"
+      | "DELETED"
+      | "FILLED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -6564,6 +6727,8 @@ export type WorksessionsUserTodosListData = {
   restaurant_rating: number;
   /** @format timestamptz */
   start_time: number | null;
+  /** @format int64 */
+  check_in_code: number | null;
   job: {
     /** @format int64 */
     id: number;
@@ -6582,7 +6747,13 @@ export type WorksessionsUserTodosListData = {
     end_time: number;
     hourly_rate: number;
     required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    status:
+      | "DRAFT"
+      | "PUBLISHED"
+      | "EXPIRED"
+      | "PENDING"
+      | "DELETED"
+      | "FILLED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -6649,7 +6820,7 @@ export interface WorksessionsMessagesListResult {
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
-    application_id: string;
+    application_id: string | null;
     /** @format uuid */
     chef_id: string;
     sender_type: "chef" | "restaurant";
@@ -6718,6 +6889,8 @@ export type WorksessionsListResult = {
   restaurant_rating: number;
   /** @format timestamptz */
   start_time: number | null;
+  /** @format int64 */
+  check_in_code: number | null;
   job: {
     /** @format int64 */
     id: number;
@@ -6736,7 +6909,13 @@ export type WorksessionsListResult = {
     end_time: number;
     hourly_rate: number;
     required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    status:
+      | "DRAFT"
+      | "PUBLISHED"
+      | "EXPIRED"
+      | "PENDING"
+      | "DELETED"
+      | "FILLED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -7329,6 +7508,8 @@ export interface ApplicationDetailResult {
     restaurant_rating: number;
     /** @format timestamptz */
     start_time: number | null;
+    /** @format int64 */
+    check_in_code: number | null;
   };
   messages: {
     /** @format int64 */
@@ -7343,7 +7524,7 @@ export interface ApplicationDetailResult {
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
-    application_id: string;
+    application_id: string | null;
     /** @format uuid */
     chef_id: string;
     sender_type: "chef" | "restaurant";
@@ -7404,6 +7585,8 @@ export type RestaurantTodoDetailData = {
   restaurant_rating: number;
   /** @format timestamptz */
   start_time: number | null;
+  /** @format int64 */
+  check_in_code: number | null;
   user: {
     /** @format uuid */
     id: string;
@@ -7483,7 +7666,13 @@ export type RestaurantTodoDetailData = {
     end_time: number;
     hourly_rate: number;
     required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    status:
+      | "DRAFT"
+      | "PUBLISHED"
+      | "EXPIRED"
+      | "PENDING"
+      | "DELETED"
+      | "FILLED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -7551,6 +7740,8 @@ export type UserDetailResult = {
   restaurant_rating: number;
   /** @format timestamptz */
   start_time: number | null;
+  /** @format int64 */
+  check_in_code: number | null;
   job: {
     /** @format int64 */
     id: number;
@@ -7569,7 +7760,13 @@ export type UserDetailResult = {
     end_time: number;
     hourly_rate: number;
     required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    status:
+      | "DRAFT"
+      | "PUBLISHED"
+      | "EXPIRED"
+      | "PENDING"
+      | "DELETED"
+      | "FILLED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -7667,6 +7864,8 @@ export type UserTodoDetailData = {
   restaurant_rating: number;
   /** @format timestamptz */
   start_time: number | null;
+  /** @format int64 */
+  check_in_code: number | null;
   job: {
     /** @format int64 */
     id: number;
@@ -7685,7 +7884,13 @@ export type UserTodoDetailData = {
     end_time: number;
     hourly_rate: number;
     required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    status:
+      | "DRAFT"
+      | "PUBLISHED"
+      | "EXPIRED"
+      | "PENDING"
+      | "DELETED"
+      | "FILLED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -7792,6 +7997,8 @@ export interface FinishPartialUpdateData {
     restaurant_rating: number;
     /** @format timestamptz */
     start_time: number | null;
+    /** @format int64 */
+    check_in_code: number | null;
   };
   review: {
     /** @format int64 */
@@ -7865,6 +8072,8 @@ export interface StartPartialUpdateData {
   restaurant_rating: number;
   /** @format timestamptz */
   start_time: number | null;
+  /** @format int64 */
+  check_in_code: number | null;
 }
 
 export interface VerifyPartialUpdatePayload {
@@ -7919,6 +8128,8 @@ export interface VerifyPartialUpdateData {
     restaurant_rating: number;
     /** @format timestamptz */
     start_time: number | null;
+    /** @format int64 */
+    check_in_code: number | null;
   };
   review: {
     /** @format int64 */
@@ -7989,6 +8200,8 @@ export interface WorksessionDetailResult {
   restaurant_rating: number;
   /** @format timestamptz */
   start_time: number | null;
+  /** @format int64 */
+  check_in_code: number | null;
 }
 
 export interface WorksessionPartialUpdatePayload {
@@ -8029,6 +8242,8 @@ export interface WorksessionPartialUpdatePayload {
   restaurant_rating: number;
   /** @format timestamptz */
   start_time: number | null;
+  /** @format int64 */
+  check_in_code: number | null;
 }
 
 export interface WorksessionPartialUpdateData {
@@ -8076,6 +8291,8 @@ export interface WorksessionPartialUpdateData {
   restaurant_rating: number;
   /** @format timestamptz */
   start_time: number | null;
+  /** @format int64 */
+  check_in_code: number | null;
 }
 
 export interface CancelByChefPartialUpdatePayload {
@@ -8128,6 +8345,8 @@ export interface CancelByChefPartialUpdateData {
     restaurant_rating: number;
     /** @format timestamptz */
     start_time: number | null;
+    /** @format int64 */
+    check_in_code: number | null;
   };
   cancel_log: {
     /** @format uuid */
@@ -8174,7 +8393,13 @@ export interface CancelByChefPartialUpdateData {
     end_time: number;
     hourly_rate: number;
     required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    status:
+      | "DRAFT"
+      | "PUBLISHED"
+      | "EXPIRED"
+      | "PENDING"
+      | "DELETED"
+      | "FILLED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -8248,6 +8473,8 @@ export interface CancelByRestaurantPartialUpdateData {
     restaurant_rating: number;
     /** @format timestamptz */
     start_time: number | null;
+    /** @format int64 */
+    check_in_code: number | null;
   };
   cancel_log: {
     /** @format uuid */
@@ -8338,6 +8565,8 @@ export interface ChefReviewListResult {
     restaurant_rating: number;
     /** @format timestamptz */
     start_time: number | null;
+    /** @format int64 */
+    check_in_code: number | null;
   };
   restaurant: {
     /** @format int64 */
@@ -8486,6 +8715,8 @@ export interface FinishPartialUpdateResult {
     restaurant_rating: number;
     /** @format timestamptz */
     start_time: number | null;
+    /** @format int64 */
+    check_in_code: number | null;
   };
   review: {
     /** @format int64 */
@@ -8546,7 +8777,7 @@ export type MessagesListResult = {
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
-  application_id: string;
+  application_id: string | null;
   /** @format uuid */
   chef_id: string;
   sender_type: "chef" | "restaurant";
@@ -8607,6 +8838,8 @@ export interface NoShowPartialUpdateData {
     restaurant_rating: number;
     /** @format timestamptz */
     start_time: number | null;
+    /** @format int64 */
+    check_in_code: number | null;
   };
   cancel_log: {
     /** @format uuid */
@@ -8701,6 +8934,8 @@ export interface RestaurantReviewListResult {
     restaurant_rating: number;
     /** @format timestamptz */
     start_time: number | null;
+    /** @format int64 */
+    check_in_code: number | null;
   };
   user: {
     /** @format uuid */
@@ -8845,6 +9080,8 @@ export interface StartPartialUpdateResult {
   restaurant_rating: number;
   /** @format timestamptz */
   start_time: number | null;
+  /** @format int64 */
+  check_in_code: number | null;
 }
 
 export interface VerifyPartialUpdateBody {
@@ -8899,6 +9136,8 @@ export interface VerifyPartialUpdateResult {
     restaurant_rating: number;
     /** @format timestamptz */
     start_time: number | null;
+    /** @format int64 */
+    check_in_code: number | null;
   };
   review: {
     /** @format int64 */
@@ -8969,6 +9208,8 @@ export interface WorksessionsDetailData {
   restaurant_rating: number;
   /** @format timestamptz */
   start_time: number | null;
+  /** @format int64 */
+  check_in_code: number | null;
 }
 
 export interface WorksessionsPartialUpdatePayload {
@@ -9009,6 +9250,8 @@ export interface WorksessionsPartialUpdatePayload {
   restaurant_rating: number;
   /** @format timestamptz */
   start_time: number | null;
+  /** @format int64 */
+  check_in_code: number | null;
 }
 
 export interface WorksessionsPartialUpdateData {
@@ -9056,6 +9299,8 @@ export interface WorksessionsPartialUpdateData {
   restaurant_rating: number;
   /** @format timestamptz */
   start_time: number | null;
+  /** @format int64 */
+  check_in_code: number | null;
 }
 
 export type WorksessionsListOutput = {
@@ -9103,6 +9348,8 @@ export type WorksessionsListOutput = {
   restaurant_rating: number;
   /** @format timestamptz */
   start_time: number | null;
+  /** @format int64 */
+  check_in_code: number | null;
 }[];
 
 export type WorksessionListData = {
@@ -9150,6 +9397,8 @@ export type WorksessionListData = {
   restaurant_rating: number;
   /** @format timestamptz */
   start_time: number | null;
+  /** @format int64 */
+  check_in_code: number | null;
 }[];
 
 export interface WorksessionCreatePayload {
@@ -9190,6 +9439,8 @@ export interface WorksessionCreatePayload {
   restaurant_rating: number;
   /** @format timestamptz */
   start_time: number | null;
+  /** @format int64 */
+  check_in_code: number | null;
 }
 
 export interface WorksessionCreateData {
@@ -9237,4 +9488,6 @@ export interface WorksessionCreateData {
   restaurant_rating: number;
   /** @format timestamptz */
   start_time: number | null;
+  /** @format int64 */
+  check_in_code: number | null;
 }
