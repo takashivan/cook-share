@@ -182,13 +182,13 @@ export default function JobDetail({ params }: PageProps) {
     setIsDialogOpen(true);
   };
 
-  const LOCAL_STORAGE_KEY = 'qr-camera-config';
+  const LOCAL_STORAGE_KEY = "qr-camera-config";
 
   type CameraConfig = {
     hasPermission: boolean;
     lastUsedCameraId?: string;
   };
-  
+
   const getStoredCameraConfig = (): CameraConfig => {
     const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (!raw) return { hasPermission: false };
@@ -198,7 +198,7 @@ export default function JobDetail({ params }: PageProps) {
       return { hasPermission: false };
     }
   };
-  
+
   const saveCameraConfig = (config: CameraConfig) => {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(config));
   };
@@ -213,7 +213,7 @@ export default function JobDetail({ params }: PageProps) {
     try {
       const devices = await Html5Qrcode.getCameras();
       if (!devices.length) {
-        setError('カメラデバイスが見つかりません');
+        setError("カメラデバイスが見つかりません");
         return;
       }
 
@@ -221,7 +221,9 @@ export default function JobDetail({ params }: PageProps) {
       let selectedCamera: CameraDevice | null = null;
 
       if (storedConfig.lastUsedCameraId) {
-        const matched = devices.find(d => d.id === storedConfig.lastUsedCameraId);
+        const matched = devices.find(
+          (d) => d.id === storedConfig.lastUsedCameraId
+        );
         if (matched) selectedCamera = matched;
       }
 
@@ -235,7 +237,7 @@ export default function JobDetail({ params }: PageProps) {
       await scannerRef.current.start(
         // 一度承認したカメラがあればそれを、なければ背面カメラを使用
         selectedCamera?.id ?? {
-          facingMode: 'environment',
+          facingMode: "environment",
         },
         {
           fps: 10,
@@ -265,8 +267,8 @@ export default function JobDetail({ params }: PageProps) {
       saveCameraConfig({ hasPermission: true, lastUsedCameraId: newCameraId });
       setHasPermission(true);
     } catch (err) {
-      console.error('カメラアクセスに失敗しました', err);
-      setError('カメラアクセスが拒否されました。許可してください。');
+      console.error("カメラアクセスに失敗しました", err);
+      setError("カメラアクセスが拒否されました。許可してください。");
       setHasPermission(false);
     }
   };
@@ -275,7 +277,7 @@ export default function JobDetail({ params }: PageProps) {
     if (isDialogOpen && !isQrScanned) {
       // ダイアログが開いてから少し待ってから初期化する
       const timer = setTimeout(async () => {
-        initCamera()
+        initCamera();
       }, 100); // 100ms待機
 
       return () => {
@@ -396,8 +398,7 @@ export default function JobDetail({ params }: PageProps) {
     if (!cancellationPenalty || !job || !isConfirmed || !cancelReason) return;
 
     try {
-      // TODO: APIを呼び出してキャンセル処理を実行
-      // await cancelJob(job.id, cancellationPenalty.status, cancelReason);
+      await cancelWorksessionTrigger();
       toast({
         title: "キャンセル完了",
         description: "お仕事のキャンセルが完了しました。",
@@ -679,21 +680,24 @@ export default function JobDetail({ params }: PageProps) {
               </p>
               <div className="flex justify-center items-center rounded-lg overflow-hidden">
                 {!isQrScanned ? (
-                  <div className="flex flex-col items-center justify-center gap-3" style={{ width: '300px', height: '300px' }}>
+                  <div
+                    className="flex flex-col items-center justify-center gap-3"
+                    style={{ width: "300px", height: "300px" }}>
                     {error && (
                       <div className="text-red-600 border border-red-300 bg-red-50 p-3 rounded w-full max-w-sm text-center">
                         {error}
                       </div>
                     )}
                     {!hasPermission && (
-                      <Button
-                        variant="outline"
-                        onClick={initCamera}
-                      >
+                      <Button variant="outline" onClick={initCamera}>
                         カメラアクセスを許可してスキャンする
                       </Button>
                     )}
-                    <div id="qr-reader" ref={ref} style={{ width: '300px', height: '300px' }} />
+                    <div
+                      id="qr-reader"
+                      ref={ref}
+                      style={{ width: "300px", height: "300px" }}
+                    />
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center p-8">

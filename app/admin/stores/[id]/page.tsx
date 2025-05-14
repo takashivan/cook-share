@@ -18,12 +18,7 @@ import {
   Calendar,
   Star,
 } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -121,10 +116,9 @@ export default function RestaurantDetailPage(props: {
   const [copiedJob, setCopiedJob] = useState<Partial<Job> | null>(null);
 
   // レストラン情報の取得
-  const {
-    data: restaurant,
-    error: restaurantError,
-  } = useGetRestaurant({ restaurantId: Number(params.id) });
+  const { data: restaurant, error: restaurantError } = useGetRestaurant({
+    restaurantId: Number(params.id),
+  });
   const { data: jobs, error: jobsError } = useGetJobsByRestaurantId({
     restaurantId: Number(params.id),
   });
@@ -177,7 +171,7 @@ export default function RestaurantDetailPage(props: {
         description: "求人の追加に失敗しました。もう一度お試しください。",
         variant: "destructive",
       });
-    }
+    },
   });
 
   // レストランの更新
@@ -199,8 +193,8 @@ export default function RestaurantDetailPage(props: {
         description: "レストラン情報の更新に失敗しました",
         variant: "destructive",
       });
-    }
-  })
+    },
+  });
 
   // スタッフの招待
   const { trigger: createCompanyUserTrigger } =
@@ -210,32 +204,33 @@ export default function RestaurantDetailPage(props: {
     });
 
   // スタッフの削除
-  const { trigger: deleteRestaurantStaffTrigger } = useDeleteCompanyUserByRestaurantId({
-    restaurantId: restaurant?.id,
-    companyId: restaurant?.companies_id ?? undefined,
-    companyUserId: deleteTargetStaff?.id,
-    handleSuccess: () => {
-      toast({
-        title: "スタッフを削除しました",
-        description: `${
-          deleteTargetStaff?.companyuser.name ||
-          deleteTargetStaff?.companyuser.email
-        }をスタッフから削除しました。`,
-      });
-    },
-    handleError: (error) => {
-      console.error("Failed to delete staff:", error);
-      toast({
-        title: "エラーが発生しました",
-        description: "スタッフの削除に失敗しました。",
-        variant: "destructive",
-      });
-    },
-    hadnleFinally: () => {
-      setIsDeleting(false);
-      setDeleteTargetStaff(null);
-    }
-  });
+  const { trigger: deleteRestaurantStaffTrigger } =
+    useDeleteCompanyUserByRestaurantId({
+      restaurantId: restaurant?.id,
+      companyId: restaurant?.companies_id ?? undefined,
+      companyUserId: deleteTargetStaff?.id,
+      handleSuccess: () => {
+        toast({
+          title: "スタッフを削除しました",
+          description: `${
+            deleteTargetStaff?.companyuser.name ||
+            deleteTargetStaff?.companyuser.email
+          }をスタッフから削除しました。`,
+        });
+      },
+      handleError: (error) => {
+        console.error("Failed to delete staff:", error);
+        toast({
+          title: "エラーが発生しました",
+          description: "スタッフの削除に失敗しました。",
+          variant: "destructive",
+        });
+      },
+      hadnleFinally: () => {
+        setIsDeleting(false);
+        setDeleteTargetStaff(null);
+      },
+    });
 
   console.log("restaurant", restaurant);
 
@@ -1182,7 +1177,10 @@ export default function RestaurantDetailPage(props: {
                                       </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
-                                      onClick={() => handleCopyJob(job)}>
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleCopyJob(job);
+                                      }}>
                                       コピーして新規作成
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
