@@ -11,6 +11,7 @@ import { useGetWorksessionsByUserId } from "@/hooks/api/user/worksessions/useGet
 import { WorksessionsListResult } from "@/api/__generated__/base/data-contracts";
 import { useSubscriptionMessagesByUserId } from "@/hooks/api/user/messages/useSubscriptionMessagesByUserId";
 import { useSubscriptionUnreadMessagesByUser } from "@/hooks/api/user/messages/useSubscriptionUnreadMessagesByUser";
+import { useGetJobChangeRequests } from "@/hooks/api/user/jobChangeRequests/useGetJobChangeRequests";
 import { Badge } from "@/components/ui/badge";
 import { formatJapanHHMM } from "@/lib/functions";
 
@@ -42,13 +43,9 @@ export default function SchedulePage() {
     userId: user?.id,
   });
 
-
   // 変更リクエストの取得
-  const { data: changeRequests } = useGetJobChangeRequestByWorksessionId({
-    worksessionId: selectedWorkSession?.id,
-  });
+  const { data: changeRequests } = useGetJobChangeRequests();
   console.log(changeRequests);
-
 
   const handleSendMessage = async (message: string) => {
     if (!message.trim() || !selectedWorkSession) return;

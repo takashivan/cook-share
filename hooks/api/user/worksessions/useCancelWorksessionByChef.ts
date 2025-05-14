@@ -7,6 +7,7 @@ import useSWRMutation from "swr/mutation";
 interface Params {
   worksessionId?: number;
   jobId?: number;
+  reason: string;
 }
 
 export const useCancelWorksessionByChef = (params: Params) => {
@@ -29,9 +30,7 @@ export const useCancelWorksessionByChef = (params: Params) => {
         if (params.jobId) {
           const jobs = getApi(Jobs);
           const worksessionsByJobIdKey =
-            jobs.worksessionsRestaurantTodosListQueryArgs(
-              params.jobId
-            )[0];
+            jobs.worksessionsRestaurantTodosListQueryArgs(params.jobId)[0];
           mutate(worksessionsByJobIdKey);
         }
       },

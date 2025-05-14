@@ -88,9 +88,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useCreateJobChangeRequest } from "@/hooks/api/companyuser/jobChengeRequests/useCreateJobChangeRequest";
-import { useGetJobChangeRequests } from "@/hooks/api/companyuser/jobChengeRequests/useGetJobChangeRequests";
-import { useDeleteJobChangeRequest } from "@/hooks/api/companyuser/jobChengeRequests/useDeleteJobChangeRequest";
+import { useCreateJobChangeRequest } from "@/hooks/api/companyuser/jobChangeRequests/useCreateJobChangeRequest";
+import { useGetJobChangeRequests } from "@/hooks/api/companyuser/jobChangeRequests/useGetJobChangeRequests";
+import { useDeleteJobChangeRequest } from "@/hooks/api/companyuser/jobChangeRequests/useDeleteJobChangeRequest";
 
 interface PageParams {
   params: Promise<{ id: string }>;
@@ -191,7 +191,8 @@ export default function JobDetail({ params }: PageParams) {
 
   const { data: existingChangeRequest } = useGetJobChangeRequests();
   const pendingRequest = existingChangeRequest?.find(
-    (req) => req.worksession_id === selectedWorkSession?.id && req.status === "PENDING"
+    (req) =>
+      req.worksession_id === selectedWorkSession?.id && req.status === "PENDING"
   );
 
   const { trigger: deleteJobChangeRequest } = useDeleteJobChangeRequest({
@@ -1307,8 +1308,7 @@ ${changeRequest.reason}
                 <h4 className="font-medium mb-2">現在の変更リクエスト</h4>
                 <div className="space-y-2 text-sm">
                   {(() => {
-                    const changes = pendingRequest
-                      .proposed_changes as {
+                    const changes = pendingRequest.proposed_changes as {
                       work_date: string;
                       start_time: number;
                       end_time: number;
