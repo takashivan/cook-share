@@ -17,16 +17,23 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
+import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 
 export default function RegisterPage() {
   const router = useRouter();
   const { register } = useAuth();
+  const { user: companyUser, logout: companyUserLogout } = useCompanyAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
+      // 企業ユーザーがログインしている場合はログアウトする
+      if (companyUser) {
+        companyUserLogout();
+      }
+
       const formData = new FormData(e.currentTarget);
       const data = {
         email: formData.get("email") as string,

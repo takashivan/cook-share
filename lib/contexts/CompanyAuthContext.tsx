@@ -14,7 +14,8 @@ import {
   setCurrentUser,
   clearCurrentUser,
 } from "@/lib/api/config";
-import type { CompanyUser } from "@/lib/api/companyUser";
+import type { CompanyUser, CompanyUserData } from "@/lib/api/companyUser";
+import { login, register } from "@/lib/api/companyUser";
 import { getApi } from "@/api/api-factory";
 import { Companyuser } from "@/api/__generated__/base/Companyuser";
 
@@ -22,8 +23,9 @@ export interface CompanyAuthContextType {
   user: CompanyUser | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (token: string, user: CompanyUser) => Promise<void>;
-  logout: () => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => void;
+  register: (data: CompanyUserData) => Promise<void>;
   setUser: (user: CompanyUser | null) => void;
   reloadUser: () => Promise<CompanyUser | undefined>;
 }
@@ -73,38 +75,52 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const login = async (token: string, userData: CompanyUser) => {
-    console.log("Company login called with user:", userData);
+  const setAuth = (token: string,  userData: CompanyUser) => {
     setAuthToken(token, "company");
     updateUser(userData);
     setIsAuthenticated(true);
-    console.log("Company user state after login:", userData);
   };
 
-  const logout = async () => {
+  const handleLogin = async (email: string, password: string) => {
+    try {
+      const { sessionToken, user } = await login({
+        email,
+        password,
+      });
+      setAuth(sessionToken, user);
+    } catch (error) {
+      console.error("Login error:", error);
+      throw error;
+    }
+  };
+
+  const handleLogout = () => {
+    clearAuthToken("company");
+    clearCurrentUser("company");
     setUser(null);
     setIsAuthenticated(false);
     setIsLoading(false);
-    clearAuthToken("company");
-    clearCurrentUser("company");
   };
 
-  const value = {
-    user,
-    isLoading,
-    isAuthenticated,
-    login,
-    logout,
+  const handleRegister = async (data: CompanyUserData) => {
+    try {
+      const response = await register(data);
+      setAuth(response.sessionToken, response.user);
+    } catch (error) {
+      console.error("Login error:", error);
+      throw error;
+    }
   };
 
   return (
     <CompanyAuthContext.Provider
       value={{
-        isAuthenticated,
         user,
-        login,
-        logout,
+        isAuthenticated,
         isLoading,
+        login: handleLogin,
+        logout: handleLogout,
+        register: handleRegister,
         setUser,
         reloadUser,
       }}>

@@ -16,12 +16,13 @@ import {
 } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
-import { register } from "@/lib/api/companyUser";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 export default function CompanyRegisterPage() {
   const router = useRouter();
-  const { login } = useCompanyAuth();
+  const { register } = useCompanyAuth();
+  const { user: chefUser, logout: chefUserLogout } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -29,6 +30,11 @@ export default function CompanyRegisterPage() {
     setIsSubmitting(true);
 
     try {
+      // シェフユーザーがログインしている場合はログアウトする
+      if (chefUser) {
+        chefUserLogout();
+      }
+
       const formData = new FormData(e.currentTarget);
       const data = {
         name: formData.get("name") as string,
@@ -39,7 +45,6 @@ export default function CompanyRegisterPage() {
 
       const response = await register(data);
       console.log("Registration response:", response);
-      await login(response.sessionToken, response.user);
 
       toast({
         title: "登録が完了しました",
