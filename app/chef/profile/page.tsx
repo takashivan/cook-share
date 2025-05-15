@@ -52,7 +52,6 @@ export default function ChefProfile() {
 
   const handleLogout = () => {
     logout();
-    router.replace("/login");
   };
 
   if (!user) {

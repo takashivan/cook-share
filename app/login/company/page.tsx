@@ -15,13 +15,14 @@ import {
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
-import { login } from "@/lib/api/companyUser";
 import { toast } from "@/hooks/use-toast";
 import { CompanyForgotPasswordModal } from "@/components/modals/CompanyForgotPasswordModal";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 export default function CompanyLoginPage() {
   const router = useRouter();
-  const { login: authLogin } = useCompanyAuth();
+  const { user, login } = useCompanyAuth();
+  const { user: chefUser, logout: chefUserLogout } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] =
     useState(false);
@@ -31,22 +32,25 @@ export default function CompanyLoginPage() {
     setIsSubmitting(true);
 
     try {
+      // シェフユーザーがログインしている場合はログアウトする
+      if (chefUser) {
+        chefUserLogout();
+      }
+
       const formData = new FormData(e.currentTarget);
       const data = {
         email: formData.get("email") as string,
         password: formData.get("password") as string,
       };
 
-      const response = await login(data);
-      console.log("Login response:", response);
-      await authLogin(response.sessionToken, response.user);
+      await login(data.email, data.password);
 
       toast({
         title: "ログインしました",
         description: "ダッシュボードに移動します。",
       });
 
-      if (response.user?.companies_id == null) {
+      if (user?.companies_id == null) {
         router.push("/register/company-profile");
       } else {
         router.push("/admin");

@@ -73,6 +73,7 @@ import { useUpdateRestaurant } from "@/hooks/api/companyuser/restaurants/useUpda
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { useDeleteCompanyUserByRestaurantId } from "@/hooks/api/companyuser/companyUsers/useDeleteCompanyUserByRestaurantId";
 import { formatDateToLocalISOStringForDatetimeLocal } from "@/lib/functions";
+import { useGetCompanyUserNotificationsByUserId } from "@/hooks/api/companyuser/companyUserNotifications/useGetCompanyUserNotificationsByUserId";
 
 interface JobWithWorkSessions
   extends Omit<JobsListOutput[number], "workSessionCount"> {
@@ -131,6 +132,11 @@ export default function RestaurantDetailPage(props: {
   });
   const { data: restaurantReview } = useGetRestaurantReviewByRestaurantId({
     restaurantId: Number(params.id),
+  });
+
+  // 通知の取得
+  const { data: notifications } = useGetCompanyUserNotificationsByUserId({
+    userId: user?.id,
   });
 
   // 求人の取得
@@ -422,101 +428,110 @@ export default function RestaurantDetailPage(props: {
       <TabsContent value={selectedTab}>
         <div className="grid gap-4">
           {filteredJobs
-            .map((job) => (
-              <div
-                key={job.id}
-                className="items-center justify-between p-3 border rounded-lg bg-white/50 hover:bg-white/80 transition-colors cursor-pointer"
-                onClick={() => router.push(`/admin/job/${job.id}`)}>
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {job.status === "PUBLISHED" && (
-                        <Badge className="bg-green-500 hover:bg-green-600">
-                          公開中
-                        </Badge>
-                      )}
-                      {job.status === "FILLED" && (
-                        <Badge className="bg-blue-500 hover:bg-blue-600">
-                          応募あり
-                        </Badge>
-                      )}
-                      {job.status === "DRAFT" && (
-                        <Badge className="bg-gray-500 hover:bg-gray-600">
-                          下書き
-                        </Badge>
-                      )}
-                      {job.status === "PENDING" && (
-                        <Badge className="bg-yellow-500 hover:bg-yellow-600">
-                          一時停止中
-                        </Badge>
-                      )}
-                      {job.expiry_date &&
-                        job.expiry_date <= Date.now() && (
-                          <Badge className="bg-red-500 hover:bg-red-600">
-                            募集終了
+            .map((job) => {
+              const notificationCount = notifications?.filter(notification => notification.job_id === job.id && !notification.is_read).length || 0;
+              return (
+                <div
+                  key={job.id}
+                  className="items-center justify-between p-3 border rounded-lg bg-white/50 hover:bg-white/80 transition-colors cursor-pointer"
+                  onClick={() => router.push(`/admin/job/${job.id}`)}>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {job.status === "PUBLISHED" && (!job.expiry_date || job.expiry_date > Date.now()) && (
+                          <Badge className="bg-green-500 hover:bg-green-600">
+                            公開中
                           </Badge>
                         )}
+                        {job.status === "FILLED" && (
+                          <Badge className="bg-blue-500 hover:bg-blue-600">
+                            応募あり
+                          </Badge>
+                        )}
+                        {job.status === "DRAFT" && (
+                          <Badge className="bg-gray-500 hover:bg-gray-600">
+                            下書き
+                          </Badge>
+                        )}
+                        {job.status === "PENDING" && (
+                          <Badge className="bg-yellow-500 hover:bg-yellow-600">
+                            一時停止中
+                          </Badge>
+                        )}
+                        {job.expiry_date &&
+                          job.expiry_date <= Date.now() && (
+                            <Badge className="bg-red-500 hover:bg-red-600">
+                              募集終了
+                            </Badge>
+                          )}
+                      </div>
+                      {notificationCount > 0 && (
+                        <Badge className="h-5 flex items-center justify-center bg-red-500 text-white px-1.5 py-0.5 ml-auto">
+                          {notificationCount > 9 ? "9+" : notificationCount}
+                        </Badge>
+                      )}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          asChild
+                          onClick={(e) => e.stopPropagation()}
+                          onMouseDown={(e) => e.stopPropagation()}>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem asChild>
+                            <Link href={`/admin/job/${job.id}`}>
+                              詳細を見る
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCopyJob(job)
+                            }}>
+                            コピーして新規作成
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger
-                        asChild
-                        onClick={(e) => e.stopPropagation()}
-                        onMouseDown={(e) => e.stopPropagation()}>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
-                          <Link href={`/admin/job/${job.id}`}>
-                            詳細を見る
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleCopyJob(job)
-                          }}>
-                          コピーして新規作成
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
 
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-medium text-sm">
-                      {job.title}
-                    </h3>
-                  </div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-medium text-sm">
+                        {job.title}
+                      </h3>
+                    </div>
 
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs">
-                      {job.formattedWorkDate}
-                    </Badge>
-                    <span className="text-xs text-gray-500">
-                      {job.formattedTime}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {job.fee}円
-                    </span>
-                  </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-xs">
+                        {job.formattedWorkDate}
+                      </Badge>
+                      <span className="text-xs text-gray-500">
+                        {job.formattedTime}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {job.fee}円
+                      </span>
+                    </div>
 
-                  <div className="flex items-center gap-2">
-                    {job.workSessionCount > 0 ? (
-                      <div className="flex items-center gap-1 text-muted-foreground">
-                        <Users className="h-4 w-4" />
-                        <span className="text-sm">応募あり</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1 text-muted-foreground">
-                        <Users className="h-4 w-4" />
-                        <span className="text-sm">応募なし</span>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {job.workSessionCount > 0 ? (
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          <Users className="h-4 w-4" />
+                          <span className="text-sm">応募あり</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          <Users className="h-4 w-4" />
+                          <span className="text-sm">応募なし</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })
+          }
         </div>
       </TabsContent>
     )

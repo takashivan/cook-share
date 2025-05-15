@@ -15,7 +15,6 @@ import {
   getAuthToken,
 } from "@/lib/api/config";
 import type { UserData, UserProfile } from "@/lib/api/user";
-import { useRouter } from "next/navigation";
 import { login, logout, getUserProfile, register } from "@/lib/api/user";
 import { getApi } from "@/api/api-factory";
 import { Users } from "@/api/__generated__/base/Users";
@@ -46,7 +45,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   const userApi = getApi(Users);
 
@@ -109,12 +107,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const setAuth = (token: string, userData: UserProfile) => {
-    console.log("Setting auth token:", token);
-    console.log("Setting user data:", userData);
     setAuthToken(token, "chef");
     updateUser(userData);
     setIsAuthenticated(true);
-    router.push("/chef/dashboard");
   };
 
   const handleLogin = async (email: string, password: string) => {
@@ -136,7 +131,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsAuthenticated(false);
     clearAuthToken();
     localStorage.removeItem("user");
-    router.push("/login");
   };
 
   const handleRegister = async (data: UserData) => {

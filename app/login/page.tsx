@@ -17,10 +17,12 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import { ForgotPasswordModal } from "@/components/modals/ForgotPasswordModal";
+import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { user, login: setUser } = useAuth();
+  const { user, login } = useAuth();
+  const { user: companyUser, logout: companyUserLogout } = useCompanyAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] =
     useState(false);
@@ -30,13 +32,18 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
+      // 企業ユーザーがログインしている場合はログアウトする
+      if (companyUser) {
+        companyUserLogout();
+      }
+
       const formData = new FormData(e.currentTarget);
       const data = {
         email: formData.get("email") as string,
         password: formData.get("password") as string,
       };
 
-      await setUser(data.email, data.password);
+      await login(data.email, data.password);
 
       toast({
         title: "ログインしました",

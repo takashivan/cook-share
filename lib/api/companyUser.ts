@@ -26,7 +26,7 @@ interface Credentials {
   password: string;
 }
 
-interface CompanyUserData {
+export interface CompanyUserData {
   email: string;
   password: string;
   name: string;

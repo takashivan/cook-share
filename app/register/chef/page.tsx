@@ -16,10 +16,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 
 export default function ChefRegisterPage() {
   const router = useRouter();
   const { register } = useAuth();
+  const { user: companyUser, logout: companyUserLogout } = useCompanyAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,7 +48,11 @@ export default function ChefRegisterPage() {
     }
 
     try {
-      // まず登録を試みる
+      // 企業ユーザーがログインしている場合はログアウトする
+      if (companyUser) {
+        companyUserLogout();
+      }
+
       await register({ email, password });
 
       toast({
