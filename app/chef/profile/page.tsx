@@ -73,12 +73,18 @@ export default function ChefProfile() {
 
   const handleStripeAccountLink = async () => {
     if (user.id) {
+      // クリック直後に空ウィンドウを開く（Safari対策）
+      const win = window.open("about:blank");
       try {
         const res = await createStripeAccountLink(user.id);
-        if (res.response.result.url) {
+        if (res.response.result.url && win) {
+          win.location.href = res.response.result.url;
+        } else if (res.response.result.url) {
+          // window.openが失敗した場合は従来通り
           window.location.href = res.response.result.url;
         }
       } catch (error) {
+        if (win) win.close();
         console.error("Error creating Stripe account link:", error);
       }
     }

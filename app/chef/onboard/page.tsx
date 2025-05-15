@@ -28,6 +28,8 @@ export default function OnboardPage() {
   const { user } = useAuth();
   const handleOnboard = async () => {
     setLoading(true);
+    // クリック直後に空ウィンドウを開く（Safari対策）
+    const win = window.open("about:blank");
     try {
       const user_id = user?.id;
       console.log(user_id);
@@ -36,13 +38,15 @@ export default function OnboardPage() {
       }
       const res = await createStripeAccountLink(user_id);
 
-      if (res.response.result.url) {
-        // 直接Stripeのページに遷移
+      if (res.response.result.url && win) {
+        win.location.href = res.response.result.url;
+      } else if (res.response.result.url) {
         window.location.href = res.response.result.url;
       } else {
         throw new Error("リンク取得に失敗しました");
       }
     } catch (error) {
+      if (win) win.close();
       console.error("Error:", error);
       alert(
         error instanceof Error
