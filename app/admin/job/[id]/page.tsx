@@ -92,6 +92,8 @@ import { useCreateJobChangeRequest } from "@/hooks/api/companyuser/jobChangeRequ
 import { useGetJobChangeRequests } from "@/hooks/api/companyuser/jobChangeRequests/useGetJobChangeRequests";
 import { useDeleteJobChangeRequest } from "@/hooks/api/companyuser/jobChangeRequests/useDeleteJobChangeRequest";
 import { useGetRestaurantReviewByWorksessionId } from "@/hooks/api/companyuser/reviews/useGetRestaurantReviewByWorksessionId";
+import { useMarkReadMultipleCompanyUserNotifications } from "@/hooks/api/companyuser/companyUserNotifications/useMarkReadMultipleCompanyUserNotifications";
+import { useGetCompanyUserNotificationsByUserId } from "@/hooks/api/companyuser/companyUserNotifications/useGetCompanyUserNotificationsByUserId";
 
 interface PageParams {
   params: Promise<{ id: string }>;
@@ -208,6 +210,18 @@ export default function JobDetail({ params }: PageParams) {
     jobChangeRequestId: pendingRequest?.id,
   });
 
+  // 既読対象の通知を取得
+  const { data: notifications } = useGetCompanyUserNotificationsByUserId({
+    userId: user?.id,
+  });
+  const targetNotificationIds = notifications?.filter(notification => notification.job_id === job?.id && !notification.is_read).map(notification => notification.id) ?? [];
+
+  // 通知の既読処理
+  const { trigger: markReadMultipleCompanyUserNotificationsTrigger } = useMarkReadMultipleCompanyUserNotifications({
+    companyUserNotificationIds: targetNotificationIds,
+    userId: user?.id,
+  })
+
   // シェフが応募している場合は自動的に選択
   useEffect(() => {
     if (workSessions && workSessions.length > 0) {
@@ -218,6 +232,13 @@ export default function JobDetail({ params }: PageParams) {
       setSelectedApplicant(null);
     }
   }, [workSessions]);
+
+  useEffect(() => {
+    // このJobに関する通知を既読にする
+    if (targetNotificationIds && targetNotificationIds.length > 0) {
+      markReadMultipleCompanyUserNotificationsTrigger();
+    }
+  }, [targetNotificationIds, markReadMultipleCompanyUserNotificationsTrigger]);
 
   useEffect(() => {
     if (messagesData?.messages && messagesContainerRef.current) {
