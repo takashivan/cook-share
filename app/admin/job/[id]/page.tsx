@@ -900,17 +900,20 @@ ${changeRequest.reason}
                           <DialogHeader>
                             <DialogTitle>チェックインQRコード</DialogTitle>
                             <DialogDescription>
-                              シェフにこのQRコードを提示してください
+                              シェフにこのQRコード、もしくは6桁のチェックインコードを提示してください
                             </DialogDescription>
                           </DialogHeader>
                           <div className="flex flex-col items-center justify-center p-4">
-                            <div className="bg-white p-4 rounded-lg shadow-md">
+                            <div className="flex flex-col items-center justify-center bg-white p-4 rounded-lg shadow-md">
                               <QRCodeSVG
                                 value={selectedWorkSession.id.toString()}
                                 size={200}
                                 level="H"
                                 includeMargin={true}
                               />
+                              <span className="text-lg font-bold text-center">
+                                {selectedWorkSession.check_in_code}
+                              </span>
                             </div>
                           </div>
                         </DialogContent>
