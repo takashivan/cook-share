@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,93 +8,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Switch } from "@/components/ui/switch";
-import { CompanyEmailChangeModal } from "@/components/modals/CompanyEmailChangeModal";
-import { changePassword } from "@/lib/api/companyUser";
-import { Separator } from "@/components/ui/separator";
 import ProfileForm from "./components/ProfileForm";
+import { EmailChangeForm } from "./components/EmailChangeForm";
+import { PasswordChangeForm } from "./components/PasswordChangeForm";
 
 export default function AdminSettingsPage() {
-  const [user, setUser] = useState({
-    name: "山田 太郎",
-    email: "yamada@example.com",
-    phone: "090-1234-5678",
-    position: "マネージャー",
-    department: "経営企画部",
-  });
-
-  const [notifications, setNotifications] = useState({
-    email: true,
-    app: true,
-    jobApplications: true,
-    systemUpdates: false,
-    marketing: false,
-  });
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-
-  const handleEmailChange = (email: string) => {
-    // 実際のアプリでは、ここでAPIを呼び出してメールアドレスを更新します
-    setUser((prev) => ({ ...prev, email: email }));
-  };
-
-  const handlePasswordChange = async () => {
-    setError(null);
-    setIsSubmitting(true);
-
-    if (newPassword !== confirmPassword) {
-      setError("新しいパスワードと確認用パスワードが一致しません。");
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (newPassword.length < 8) {
-      setError("新しいパスワードは8文字以上で入力してください。");
-      setIsSubmitting(false);
-      return;
-    }
-
-    try {
-      await changePassword(newPassword);
-      setIsSuccess(true);
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-    } catch (err) {
-      setError("パスワードの変更に失敗しました。");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleProfileSubmit = () => {
-    setError(null);
-    setIsSubmitting(true);
-
-    // API呼び出しをシミュレート
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSuccess(true);
-
-      // 成功メッセージを一定時間後に非表示
-      setTimeout(() => {
-        setIsSuccess(false);
-      }, 3000);
-    }, 1000);
-  };
-
-  const handleNotificationChange = (key: string, value: boolean) => {
-    setNotifications((prev) => ({ ...prev, [key]: value }));
-  };
-
   return (
     <div className="space-y-6">
       <div>
@@ -117,65 +35,11 @@ export default function AdminSettingsPage() {
         </TabsContent>
 
         <TabsContent value="security" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>メールアドレス</CardTitle>
-              <CardDescription>
-                アカウントのメールアドレスを管理します
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Label htmlFor="email">現在のメールアドレス</Label>
-              <Input
-                id="email"
-                value={user.email}
-                disabled
-                className="bg-muted mb-4"
-              />
-              <CompanyEmailChangeModal
-                currentEmail={user.email}
-                onSubmit={handleEmailChange}
-              />
-            </CardContent>
-          </Card>
+          <EmailChangeForm />
 
-          <Card>
-            <CardHeader>
-              <CardTitle>パスワード</CardTitle>
-              <CardDescription>
-                アカウントのパスワードを管理します
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="new-password">新しいパスワード</Label>
-                <Input
-                  id="new-password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirm-password">
-                  新しいパスワード（確認）
-                </Label>
-                <Input
-                  id="confirm-password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Button onClick={handlePasswordChange}>パスワードを変更</Button>
-              </div>
-            </CardContent>
-          </Card>
+          <PasswordChangeForm />
 
-          <Card>
+          {/* <Card>
             <CardHeader>
               <CardTitle>二要素認証</CardTitle>
               <CardDescription>
@@ -203,7 +67,7 @@ export default function AdminSettingsPage() {
                 <Switch id="login-notification" defaultChecked />
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
 
           <Card>
             <CardHeader>

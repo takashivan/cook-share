@@ -46,8 +46,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const userApi = getApi(Users);
-
   const initAuth = async () => {
     try {
       const token = getAuthToken();
@@ -94,10 +92,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!userId) {
         throw new Error("User ID not found");
       }
-      const userData = await userApi.usersDetail(userId);
+
+      const userApi = getApi(Users);
+      const userData = await userApi.usersDetail(userId, {
+        headers: {
+          "X-User-Type": "chef",
+        }
+      });
       if (!userData) {
         throw new Error("User not found");
       }
+
       updateUser(userData.data as unknown as UserProfile);
     } catch (error) {
       console.error("Error reloading user:", error);

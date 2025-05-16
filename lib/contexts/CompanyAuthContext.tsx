@@ -20,6 +20,7 @@ import { getApi } from "@/api/api-factory";
 import { Companyuser } from "@/api/__generated__/base/Companyuser";
 import { CompanyusersPartialUpdatePayload } from "@/api/__generated__/base/data-contracts";
 import { Companyusers } from "@/api/__generated__/base/Companyusers";
+import { Auth } from "@/api/__generated__/company/Auth";
 
 export interface CompanyAuthContextType {
   user: CompanyUser | null;
@@ -29,6 +30,8 @@ export interface CompanyAuthContextType {
   logout: () => void;
   register: (data: CompanyUserData) => Promise<void>;
   update: (data: Partial<CompanyusersPartialUpdatePayload>) => Promise<void>;
+  changeEmail: (email: string, currentEmail: string, password: string) => Promise<void>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   setUser: (user: CompanyUser | null) => void;
   reloadUser: () => Promise<CompanyUser | undefined>;
 }
@@ -41,9 +44,6 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<CompanyUser | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
-  const companyUserApi = getApi(Companyuser);
-  const companyUsersApi = getApi(Companyusers);
 
   useEffect(() => {
     const currentUser = getCurrentUser("company");
@@ -65,10 +65,17 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
       if (!userId) {
         throw new Error("User ID not found");
       }
-      const userData = await companyUserApi.companyuserDetail(userId);
+
+      const companyUserApi = getApi(Companyuser);
+      const userData = await companyUserApi.companyuserDetail(userId, {
+        headers: {
+          "X-User-Type": "company"
+        }
+      });
       if (!userData) {
         throw new Error("User not found");
       }
+
       saveUser(userData.data as unknown as CompanyUser);
 
       return userData.data as unknown as CompanyUser;
@@ -122,12 +129,92 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
       if (!userId) {
         throw new Error("User ID not found");
       }
-      const response = await companyUsersApi.companyusersPartialUpdate(userId, data as CompanyusersPartialUpdatePayload);
+
+      const companyUsersApi = getApi(Companyusers);
+      const response = await companyUsersApi.companyusersPartialUpdate(userId, data as CompanyusersPartialUpdatePayload, {
+        headers: {
+          "X-User-Type": "company"
+        }
+      });
       if (response) {
         saveUser(response.data as unknown as CompanyUser);
       }
     } catch (error) {
       console.error("Update error:", error);
+      throw error;
+    }
+  };
+
+  const handleChangeEmail = async (email: string, currentEmail: string, password: string) => {
+    try {
+      // 現在のメアドとPWでログインできるか確認
+      const { sessionToken, user: currentUser } = await login({
+        email: currentEmail,
+        password,
+      });
+
+      const userId = currentUser?.id;
+      if (!userId) {
+        throw new Error("User ID not found");
+      }
+
+      setAuth(sessionToken, currentUser);
+
+      const authApi = getApi(Auth);
+      const response = await authApi.updateEmailCreate({
+        email,
+        user_id: userId,
+      }, {
+        headers: {
+          "X-User-Type": "company"
+        }
+      });
+
+      if (response) {
+        saveUser(response.data as unknown as CompanyUser);
+      }
+    }
+    catch (error: any) {
+      if (error?.response?.status === 401) {
+        // 認証エラー（ログイン失敗）
+        throw new Error("現在のメールアドレスまたはパスワードが間違っています");
+      }
+
+      console.error("Change email error:", error);
+      throw error;
+    }
+  };
+
+  const handleChangePassword = async (currentPassword: string, newPassword: string) => {
+    try {
+      // 現在のパスワードでログインできるか確認
+      const { sessionToken, user: currentUser } = await login({
+        email: user?.email || "",
+        password: currentPassword,
+      });
+      if (!currentUser) {
+        throw new Error("現在のパスワードが間違っています");
+      }
+
+      setAuth(sessionToken, currentUser);
+
+      const userId = currentUser?.id;
+      if (!userId) {
+        throw new Error("User ID not found");
+      }
+
+      const authApi = getApi(Auth);
+      const response = await authApi.changePasswordCreate({ new_password: newPassword }, {
+        headers: {
+          "X-User-Type": "company"
+        }
+      });
+
+      if (response) {
+        saveUser(response.data as unknown as CompanyUser);
+      }
+    } catch (error) {
+      console.error("Change password error:", error);
       throw error;
     }
   };
@@ -142,6 +229,8 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
         logout: handleLogout,
         register: handleRegister,
         update: handleUpdate,
+        changeEmail: handleChangeEmail,
+        changePassword: handleChangePassword,
         setUser,
         reloadUser,
       }}>
