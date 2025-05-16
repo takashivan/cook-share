@@ -1,17 +1,14 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProfileForm from "./components/ProfileForm";
 import { EmailChangeForm } from "./components/EmailChangeForm";
 import { PasswordChangeForm } from "./components/PasswordChangeForm";
+import { DeleteAccountForm } from "./components/DeleteAccountForm";
+
+interface DeleteAccountForm {
+  password: string;
+}
 
 export default function AdminSettingsPage() {
   return (
@@ -27,7 +24,7 @@ export default function AdminSettingsPage() {
         <TabsList>
           <TabsTrigger value="profile">プロフィール</TabsTrigger>
           <TabsTrigger value="security">セキュリティ</TabsTrigger>
-          <TabsTrigger value="notifications">通知設定</TabsTrigger>
+          {/* <TabsTrigger value="notifications">通知設定</TabsTrigger> */}
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">
@@ -69,17 +66,7 @@ export default function AdminSettingsPage() {
             </CardContent>
           </Card> */}
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-red-600">アカウント削除</CardTitle>
-              <CardDescription>
-                アカウントを完全に削除します。この操作は元に戻せません。
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="destructive">アカウントを削除</Button>
-            </CardContent>
-          </Card>
+          <DeleteAccountForm />
         </TabsContent>
 
         {/* <TabsContent value="notifications" className="space-y-6">

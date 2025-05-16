@@ -32,6 +32,7 @@ export interface CompanyAuthContextType {
   update: (data: Partial<CompanyusersPartialUpdatePayload>) => Promise<void>;
   changeEmail: (email: string, currentEmail: string, password: string) => Promise<void>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  deleteAccount: (password: string) => Promise<void>;
   setUser: (user: CompanyUser | null) => void;
   reloadUser: () => Promise<CompanyUser | undefined>;
 }
@@ -219,6 +220,34 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const handleDeleteAccount = async (password: string) => {
+    try {
+      // 現在のパスワードでログインできるか確認
+      const { user: currentUser } = await login({
+        email: user?.email || "",
+        password,
+      });
+      if (!currentUser) {
+        throw new Error("現在のパスワードが間違っています");
+      }
+
+      const userId = user?.id;
+      if (!userId) {
+        throw new Error("User ID not found");
+      }
+      const companyUsersApi = getApi(Companyusers);
+      await companyUsersApi.companyusersDelete(userId, {
+        headers: {
+          "X-User-Type": "company"
+        }
+      });
+      handleLogout();
+    } catch (error) {
+      console.error("Delete account error:", error);
+      throw error;
+    }
+  };
+
   return (
     <CompanyAuthContext.Provider
       value={{
@@ -231,6 +260,7 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
         update: handleUpdate,
         changeEmail: handleChangeEmail,
         changePassword: handleChangePassword,
+        deleteAccount: handleDeleteAccount,
         setUser,
         reloadUser,
       }}>
