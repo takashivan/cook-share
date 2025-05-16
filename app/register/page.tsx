@@ -17,21 +17,27 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
+import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 
 export default function RegisterPage() {
   const router = useRouter();
   const { register } = useAuth();
+  const { user: companyUser, logout: companyUserLogout } = useCompanyAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
+      // 企業ユーザーがログインしている場合はログアウトする
+      if (companyUser) {
+        companyUserLogout();
+      }
+
       const formData = new FormData(e.currentTarget);
       const data = {
         email: formData.get("email") as string,
         password: formData.get("password") as string,
-        name: formData.get("name") as string,
       };
 
       await register(data);
@@ -85,10 +91,10 @@ export default function RegisterPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="name">名前</Label>
                 <Input id="name" name="name" placeholder="山田 太郎" required />
-              </div>
+              </div> */}
               <div className="space-y-2">
                 <Label htmlFor="email">メールアドレス</Label>
                 <Input

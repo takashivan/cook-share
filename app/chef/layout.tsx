@@ -25,19 +25,17 @@ export default function ChefLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentTab = searchParams.get("tab") || "upcoming";
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const { logout } = useAuth();
 
   const handleLogout = () => {
     logout();
     setIsMenuOpen(false);
-    router.replace("/login");
   };
 
   const { notifications } = useSubscriptionChefNotificationsByUserId({

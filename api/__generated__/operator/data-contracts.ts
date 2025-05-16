@@ -421,7 +421,14 @@ export interface JobApprovePartialUpdateData {
     end_time: number;
     hourly_rate: number;
     required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    status:
+      | "DRAFT"
+      | "PUBLISHED"
+      | "EXPIRED"
+      | "PENDING"
+      | "DELETED"
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -484,7 +491,14 @@ export interface JobBanPartialUpdateData {
     end_time: number;
     hourly_rate: number;
     required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    status:
+      | "DRAFT"
+      | "PUBLISHED"
+      | "EXPIRED"
+      | "PENDING"
+      | "DELETED"
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -546,7 +560,14 @@ export interface JobsApprovePartialUpdateData {
     end_time: number;
     hourly_rate: number;
     required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    status:
+      | "DRAFT"
+      | "PUBLISHED"
+      | "EXPIRED"
+      | "PENDING"
+      | "DELETED"
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -608,7 +629,14 @@ export interface JobsBanPartialUpdateData {
     end_time: number;
     hourly_rate: number;
     required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    status:
+      | "DRAFT"
+      | "PUBLISHED"
+      | "EXPIRED"
+      | "PENDING"
+      | "DELETED"
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -804,7 +832,14 @@ export interface RestaurantsApprovePartialUpdateData {
     end_time: number;
     hourly_rate: number;
     required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    status:
+      | "DRAFT"
+      | "PUBLISHED"
+      | "EXPIRED"
+      | "PENDING"
+      | "DELETED"
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */

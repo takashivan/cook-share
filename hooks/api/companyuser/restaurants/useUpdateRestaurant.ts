@@ -30,9 +30,6 @@ export const useUpdateRestaurant = (params: Params) => {
       console.log('Restaurant created successfully:', data);
 
       // キャッシュを更新
-      const restaurantsKey = restaurants.restaurantsListQueryArgs()[0];
-      mutate(restaurantsKey);
-
       if (params.restaurantId) {
         const restaurantKey = restaurants.restaurantsDetailQueryArgs(params.restaurantId)[0];
         mutate(restaurantKey);

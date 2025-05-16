@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, use, useState, useRef } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   ChevronLeft,
   Calendar,
@@ -33,6 +33,7 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { useStartWorksession } from "@/hooks/api/user/worksessions/useStartWorksession";
 import { useFinishWorksession } from "@/hooks/api/user/worksessions/useFinishWorksession";
 import { useGetJob } from "@/hooks/api/companyuser/jobs/useGetJob";
+import { useCancelWorksessionByChef } from "@/hooks/api/user/worksessions/useCancelWorksessionByChef";
 import { useGetWorksessionsByUserId } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserId";
 import { useSubscriptionUnreadMessagesByUser } from "@/hooks/api/user/messages/useSubscriptionUnreadMessagesByUser";
 import { useGetJobChangeRequests } from "@/hooks/api/user/jobChangeRequests/useGetJobChangeRequests";
@@ -46,6 +47,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { JobChangeRequest } from "@/hooks/api/companyuser/jobChangeRequests/useGetJobChangeRequests";
+import { Input } from "@/components/ui/input";
 
 interface JobDetail {
   job: {
@@ -86,16 +89,16 @@ type PageProps = {
 
 export default function JobDetail({ params }: PageProps) {
   const { id } = use(params);
-  const searchParams = useSearchParams();
   const router = useRouter();
-  const from = searchParams.get("from") || "schedule";
 
   const { user } = useAuth();
 
   const [isQrScanned, setIsQrScanned] = useState(false);
-  const [scannedData, setScannedData] = useState<string | null>(null);
+  const [checkInCode, setCheckInCode] = useState<string | null>(null);
+
   const ref = useRef<HTMLDivElement>(null);
   const scannerRef = useRef<Html5Qrcode>(null);
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -109,7 +112,7 @@ export default function JobDetail({ params }: PageProps) {
   const [cancelReason, setCancelReason] = useState("");
   const [isChangeRequestModalOpen, setIsChangeRequestModalOpen] =
     useState(false);
-  const [selectedChangeRequest, setSelectedChangeRequest] = useState<any>(null);
+  const [selectedChangeRequest, setSelectedChangeRequest] = useState<JobChangeRequest | null>(null);
 
   // ジョブ詳細の取得
   const { data: jobDetail } = useGetJob({ jobId: Number(id) });
@@ -127,13 +130,17 @@ export default function JobDetail({ params }: PageProps) {
   );
 
   const { trigger: startWorksessionTrigger } = useStartWorksession({
-    worksessionId: workSession?.id ?? undefined,
+    worksessionId: workSession?.id,
     userId: user?.id,
   });
 
   const { trigger: finishWorksessionTrigger } = useFinishWorksession({
-    worksessionId: workSession?.id ?? undefined,
+    worksessionId: workSession?.id,
     userId: user?.id,
+  });
+
+  const { trigger: cancelWorksessionTrigger } = useCancelWorksessionByChef({
+    worksessionId: workSession?.id,
   });
 
   // メッセージの取得
@@ -156,7 +163,8 @@ export default function JobDetail({ params }: PageProps) {
   // 変更リクエストの取得
   const { data: changeRequests } = useGetJobChangeRequests();
   const pendingRequest = changeRequests?.find(
-    (req) => req.worksession_id === workSession?.id && req.status === "PENDING"
+    (req) =>
+      req.worksession_id === workSession?.id && req.status === "PENDING"
   );
 
   const { trigger: acceptJobChangeRequest } = useAcceptJobChangeRequest({
@@ -174,7 +182,7 @@ export default function JobDetail({ params }: PageProps) {
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setIsQrScanned(false);
-    setScannedData(null);
+    setCheckInCode(null);
   };
 
   const handleStartWork = () => {
@@ -182,46 +190,45 @@ export default function JobDetail({ params }: PageProps) {
     setIsDialogOpen(true);
   };
 
-  const LOCAL_STORAGE_KEY = 'qr-camera-config';
+  const LOCAL_STORAGE_KEY = "qr-camera-config";
 
   type CameraConfig = {
-    hasPermission: boolean;
     lastUsedCameraId?: string;
   };
-  
-  const getStoredCameraConfig = (): CameraConfig => {
+
+  const getStoredCameraConfig = (): CameraConfig | null => {
     const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (!raw) return { hasPermission: false };
+    if (!raw) return null;
     try {
       return JSON.parse(raw);
     } catch {
-      return { hasPermission: false };
+      return null;
     }
   };
-  
+
   const saveCameraConfig = (config: CameraConfig) => {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(config));
   };
 
   const [error, setError] = useState<string | null>(null);
-  const [hasPermission, setHasPermission] = useState<boolean>(
-    getStoredCameraConfig().hasPermission
-  );
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
 
   const initCamera = async () => {
     setError(null);
     try {
       const devices = await Html5Qrcode.getCameras();
-      if (!devices.length) {
-        setError('カメラデバイスが見つかりません');
-        return;
+
+      if (!devices?.length) {
+        throw new Error ("カメラデバイスが見つかりません");
       }
 
       const storedConfig = getStoredCameraConfig();
       let selectedCamera: CameraDevice | null = null;
 
-      if (storedConfig.lastUsedCameraId) {
-        const matched = devices.find(d => d.id === storedConfig.lastUsedCameraId);
+      if (storedConfig?.lastUsedCameraId) {
+        const matched = devices.find(
+          (d) => d.id === storedConfig.lastUsedCameraId
+        );
         if (matched) selectedCamera = matched;
       }
 
@@ -235,18 +242,16 @@ export default function JobDetail({ params }: PageProps) {
       await scannerRef.current.start(
         // 一度承認したカメラがあればそれを、なければ背面カメラを使用
         selectedCamera?.id ?? {
-          facingMode: 'environment',
+          facingMode: "environment",
         },
         {
-          fps: 10,
+          fps: 5,
           qrbox: { width: 250, height: 250 },
           aspectRatio: 1.0,
         },
         (decodedText) => {
           if (workSession?.id.toString() === decodedText) {
             setIsQrScanned(true);
-            setScannedData(decodedText);
-            console.log("QRコードがスキャンされました:", decodedText);
           } else {
             toast({
               title: "エラー",
@@ -262,20 +267,20 @@ export default function JobDetail({ params }: PageProps) {
       );
 
       const newCameraId = scannerRef.current.getRunningTrackSettings().deviceId;
-      saveCameraConfig({ hasPermission: true, lastUsedCameraId: newCameraId });
+      saveCameraConfig({ lastUsedCameraId: newCameraId });
       setHasPermission(true);
     } catch (err) {
-      console.error('カメラアクセスに失敗しました', err);
-      setError('カメラアクセスが拒否されました。許可してください。');
+      console.error("カメラアクセスに失敗しました", err);
+      setError("カメラアクセスが拒否されました。許可してください。");
       setHasPermission(false);
     }
   };
 
   useEffect(() => {
-    if (isDialogOpen && !isQrScanned) {
+    if (isDialogOpen && !isQrScanned && hasPermission !== false) {
       // ダイアログが開いてから少し待ってから初期化する
       const timer = setTimeout(async () => {
-        initCamera()
+        initCamera();
       }, 100); // 100ms待機
 
       return () => {
@@ -285,7 +290,24 @@ export default function JobDetail({ params }: PageProps) {
         }
       };
     }
-  }, [isDialogOpen, isQrScanned, workSession, initCamera]);
+  }, [isDialogOpen, isQrScanned, workSession, initCamera, hasPermission]);
+
+  const handleCheckInCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setCheckInCode(value);
+    if (value.length === 6) {
+      if (workSession?.check_in_code && workSession.check_in_code.toString() === value) {
+        setIsQrScanned(true);
+      } else {
+        toast({
+          title: "エラー",
+          description:
+            "無効なチェックインコードです。正しいチェックインコードを入力してください。",
+          variant: "destructive",
+        });
+      }
+    }
+  }
 
   const handleSuccessfulScan = async () => {
     if (!workSession) return;
@@ -301,6 +323,7 @@ export default function JobDetail({ params }: PageProps) {
       console.error("チェックイン処理に失敗しました:", error);
       alert("チェックイン処理に失敗しました。もう一度お試しください。");
       setIsQrScanned(false);
+      setCheckInCode(null);
     }
   };
 
@@ -396,8 +419,9 @@ export default function JobDetail({ params }: PageProps) {
     if (!cancellationPenalty || !job || !isConfirmed || !cancelReason) return;
 
     try {
-      // TODO: APIを呼び出してキャンセル処理を実行
-      // await cancelJob(job.id, cancellationPenalty.status, cancelReason);
+      await cancelWorksessionTrigger({
+        reason: cancelReason,
+      });
       toast({
         title: "キャンセル完了",
         description: "お仕事のキャンセルが完了しました。",
@@ -662,43 +686,50 @@ export default function JobDetail({ params }: PageProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>勤務開始確認</AlertDialogTitle>
             <AlertDialogDescription>
-              お店のQRコードをスキャンしてください
+              お店のQRコードをスキャンするか、チェックインコードを入力してください
             </AlertDialogDescription>
           </AlertDialogHeader>
 
           <div className="space-y-4">
             <div className="border p-4 rounded-lg text-center">
               <p className="text-sm text-gray-500 mb-4">
-                {isQrScanned ? (
-                  <span className="text-green-600">
-                    QRコードの検証が完了しました
-                  </span>
-                ) : (
+                {!isQrScanned && (
                   "カメラをQRコードに向けてください"
                 )}
               </p>
               <div className="flex justify-center items-center rounded-lg overflow-hidden">
                 {!isQrScanned ? (
-                  <div className="flex flex-col items-center justify-center gap-3" style={{ width: '300px', height: '300px' }}>
+                  <div className="flex flex-col items-center justify-center gap-3">
                     {error && (
                       <div className="text-red-600 border border-red-300 bg-red-50 p-3 rounded w-full max-w-sm text-center">
                         {error}
                       </div>
                     )}
                     {!hasPermission && (
-                      <Button
-                        variant="outline"
-                        onClick={initCamera}
-                      >
+                      <Button variant="outline" onClick={initCamera}>
                         カメラアクセスを許可してスキャンする
                       </Button>
                     )}
-                    <div id="qr-reader" ref={ref} style={{ width: '300px', height: '300px' }} />
+                    <div
+                      id="qr-reader"
+                      ref={ref}
+                      style={hasPermission ? { width: "300px", height: "300px" } : undefined}
+                    />
+                    <Input
+                      type="text"
+                      placeholder="または、コードを入力してください"
+                      value={checkInCode || ""}
+                      onChange={handleCheckInCodeChange}
+                      className="w-full mt-4"
+                      maxLength={6}
+                    />
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center p-8">
                     <QrCode className="h-12 w-12 text-green-500 mb-2" />
-                    <span className="text-sm text-gray-600">スキャン完了</span>
+                    <span className="text-green-600">
+                      コードの検証が完了しました
+                    </span>
                   </div>
                 )}
               </div>
@@ -709,28 +740,6 @@ export default function JobDetail({ params }: PageProps) {
             <Button variant="outline" onClick={handleCloseDialog}>
               キャンセル
             </Button>
-            {/* {!isQrScanned ? (
-              <Button
-                onClick={() => {
-                  const qrReaderElement = document.getElementById("qr-reader");
-                  if (qrReaderElement) {
-                    const buttons =
-                      qrReaderElement.getElementsByTagName("button");
-                    for (let i = 0; i < buttons.length; i++) {
-                      if (buttons[i].textContent?.includes("Start")) {
-                        buttons[i].click();
-                        break;
-                      }
-                    }
-                  }
-                }}>
-                スキャンを開始
-              </Button>
-            ) : (
-              <Button onClick={handleCheckIn} disabled={!isQrScanned}>
-                勤務開始
-              </Button>
-            )} */}
             {isQrScanned && (
               <Button onClick={handleCheckIn} disabled={!isQrScanned}>
                 勤務開始

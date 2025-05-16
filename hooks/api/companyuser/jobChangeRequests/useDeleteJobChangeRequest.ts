@@ -3,21 +3,29 @@ import { JobChangeRequests } from "@/api/__generated__/base/JobChangeRequests";
 import { getApi } from "@/api/api-factory";
 import { useSWRConfig } from "swr";
 
-export const useCreateJobChangeRequest = () => {
+export interface Params {
+  jobChangeRequestId?: string;
+}
+
+export const useDeleteJobChangeRequest = (params: Params) => {
   const { mutate } = useSWRConfig();
 
   const jobChangeRequests = getApi(JobChangeRequests);
   return useSWRMutation(
-    ...jobChangeRequests.jobChangeRequestsCreateQueryArgs({
-      headers: {
-        "X-User-Type": "company",
+    ...jobChangeRequests.jobChangeRequestsDeleteQueryArgs(
+      params.jobChangeRequestId ?? "",
+      {
+        headers: {
+          "X-User-Type": "company",
+        },
       },
-    }),
+      params.jobChangeRequestId != null
+    ),
     {
       onSuccess: (data) => {
-        console.log("Job change request created successfully:", data);
+        console.log("Job change request deleted successfully:", data);
 
-        // Jobsリストのキャッシュを更新
+        // Job変更リクエストのリストのキャッシュを更新
         const jobChangeRequestsKey =
           jobChangeRequests.jobChangeRequestsListQueryArgs()[0];
         mutate(jobChangeRequestsKey);

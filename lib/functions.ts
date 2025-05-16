@@ -1,3 +1,5 @@
+import { JobsDeleteData, JobsListOutput } from "@/api/__generated__/base/data-contracts";
+
 export function formatToJapanTime(ms: number): string {
   const date = new Date(ms);
   return date.toLocaleString("ja-JP", {
@@ -36,6 +38,18 @@ export function formatJapanHHMM(ms: number): string {
   });
 }
 
+export function formatDateToLocalISOStringForDatetimeLocal(date: Date): string {
+  const pad = (n: number) => n.toString().padStart(2, '0');
+
+  const year = date.getFullYear();
+  const month = pad(date.getMonth() + 1); // 月は0始まり
+  const day = pad(date.getDate());
+  const hours = pad(date.getHours());
+  const minutes = pad(date.getMinutes());
+
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
 export function formatWorkSessionJapaneseStatus(status: string): string {
   switch (status) {
     case "VERIFIED":
@@ -60,23 +74,29 @@ export function formatWorkSessionJapaneseStatus(status: string): string {
       return "一時停止";
     case "RESCHEDULED":
       return "再予定";
+    case "CANCELED_BY_CHEF":
+      return "シェフのキャンセル";
+    case "CANCELED_BY_RESTAURANT":
+      return "キャンセル";
     default:
       return status;
   }
 }
 
-export function formatJobPostingJapaneseStatus(status: string): string {
+export function formatJobPostingJapaneseStatus(status: JobsListOutput[number]['status'] | ''): string {
   switch (status) {
     case "PUBLISHED":
       return "公開中";
     case "DRAFT":
       return "下書き";
     case "EXPIRED":
-      return "終了";
-    case "CANCELED":
-      return "キャンセル";
+      return "募集終了";
     case "PENDING":
       return "一時停止中";
+    case "FILLED":
+      return "応募あり";
+    case "DELETED":
+      return "キャンセル";
     default:
       return status;
   }

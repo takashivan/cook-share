@@ -5,15 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import Image from "next/image";
-import { Job } from "@/types";
 import { format } from "date-fns";
 import {
   JobsDetailData,
   JobsPartialUpdatePayload,
 } from "@/api/__generated__/base/data-contracts";
+import { formatDateToLocalISOStringForDatetimeLocal } from "@/lib/functions";
 
 interface UpdateJob
   extends Omit<
@@ -87,6 +85,7 @@ export const EditJobModal = ({
     watch,
     formState: { errors, isSubmitting },
     reset,
+    setValue,
   } = useForm<UpdateJob>({
     defaultValues: {
       title: job?.title || "",
@@ -160,10 +159,11 @@ export const EditJobModal = ({
     }
   };
 
-  const onSubmitHandler = handleSubmit(async (data) => {
-    try {
-      // const formData = new FormData();
+  const submit = handleSubmit(async (data) => {
+    // 今回初めて公開する場合
+    const isPublished = job.status !== data.status && data.status === "PUBLISHED";
 
+    try {
       // 日付文字列を作成（YYYY-MM-DDThh:mm:ss）
       const startDateTimeStr = `${data.work_date}T${data.start_time}:00`;
       const endDateTimeStr = `${data.work_date}T${data.end_time}:00`;
@@ -174,35 +174,11 @@ export const EditJobModal = ({
       const endTimestamp = Date.parse(endDateTimeStr);
       const expiryDateTimestamp = Date.parse(expiryTimestamp);
 
-      // FormDataにデータを追加
-      // Object.entries(data).forEach(([key, value]) => {
-      //   if (key === "start_time") {
-      //     formData.append(key, startTimestamp.toString());
-      //   } else if (key === "end_time") {
-      //     formData.append(key, endTimestamp.toString());
-      //   } else if (Array.isArray(value)) {
-      //     value.forEach((item) => formData.append(key + "[]", item.toString()));
-      //   } else {
-      //     formData.append(key, value.toString());
-      //   }
-      // });
-
-      // 既存のステータスを維持
-      // if (job?.status) {
-      //   formData.append("status", job.status);
-      // }
-
-      // if (selectedFile) {
-      //   formData.append("image", selectedFile);
-      // }
-
       const newData: JobsPartialUpdatePayload = {
         ...data,
         start_time: startTimestamp,
         end_time: endTimestamp,
         expiry_date: expiryDateTimestamp,
-        // 既存のステータスを維持
-        status: job.status,
       };
 
       console.log("確認", data, newData);
@@ -213,19 +189,19 @@ export const EditJobModal = ({
       setSelectedFile(null);
       onClose();
       toast({
-        title: "求人を更新しました",
-        description: "求人の情報が更新されました。",
+        title: isPublished ? "求人を公開しました" : "求人を更新しました",
+        description: isPublished ? "求人が公開されました。" : "求人の情報が更新されました。",
       });
     } catch (error) {
       toast({
         title: "エラーが発生しました",
-        description: "求人の更新に失敗しました。もう一度お試しください。",
+        description: isPublished ? "求人の公開に失敗しました。もう一度お試しください。" : "求人の更新に失敗しました。もう一度お試しください。",
         variant: "destructive",
       });
     }
   });
 
-  const handlePublish = handleSubmit(async (data) => {
+  const handlePublish = () => {
     if (!job) {
       toast({
         title: "エラーが発生しました",
@@ -235,65 +211,10 @@ export const EditJobModal = ({
       return;
     }
 
-    try {
-      // const formData = new FormData();
-
-      // 日付文字列を作成（YYYY-MM-DDThh:mm:ss）
-      const startDateTimeStr = `${data.work_date}T${data.start_time}:00`;
-      const endDateTimeStr = `${data.work_date}T${data.end_time}:00`;
-      const expiryTimestamp = `${data.expiry_date}T00:00:00`;
-
-      // Unix タイムスタンプを計算（ミリ秒単位）
-      const startTimestamp = Date.parse(startDateTimeStr);
-      const endTimestamp = Date.parse(endDateTimeStr);
-      const expiryDateTimestamp = Date.parse(expiryTimestamp);
-
-      // FormDataにデータを追加
-      // Object.entries(data).forEach(([key, value]) => {
-      //   if (key === "start_time") {
-      //     formData.append(key, startTimestamp.toString());
-      //   } else if (key === "end_time") {
-      //     formData.append(key, endTimestamp.toString());
-      //   } else if (Array.isArray(value)) {
-      //     value.forEach((item) => formData.append(key + "[]", item.toString()));
-      //   } else {
-      //     formData.append(key, value.toString());
-      //   }
-      // });
-
-      // ステータスをPUBLISHEDに設定
-      // formData.append("status", "PUBLISHED");
-
-      // if (selectedFile) {
-      //   formData.append("image", selectedFile);
-      // }
-
-      const newData: JobsPartialUpdatePayload = {
-        ...data,
-        start_time: startTimestamp,
-        end_time: endTimestamp,
-        expiry_date: expiryDateTimestamp,
-        // ステータスをPUBLISHEDに設定
-        status: "PUBLISHED",
-      };
-
-      await onSubmit(newData);
-      reset();
-      setPreviewImage(null);
-      setSelectedFile(null);
-      onClose();
-      toast({
-        title: "求人を公開しました",
-        description: "求人が公開されました。",
-      });
-    } catch (error) {
-      toast({
-        title: "エラーが発生しました",
-        description: "求人の公開に失敗しました。もう一度お試しください。",
-        variant: "destructive",
-      });
-    }
-  });
+    setValue("status", "PUBLISHED");
+    console.log("wacth", watch("status"));
+    submit();
+  };
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -326,7 +247,7 @@ export const EditJobModal = ({
                   求人を編集
                 </Dialog.Title>
 
-                <form className="space-y-6">
+                <form onSubmit={submit} className="space-y-6">
                   <div className="space-y-4">
                     <div>
                       <Label htmlFor="title">求人タイトル *</Label>
@@ -539,9 +460,32 @@ export const EditJobModal = ({
                         {...register("expiry_date", {
                           required: "締め切りは必須です",
                           min: {
-                            value: new Date().toISOString().split("T")[0],
+                            value: formatDateToLocalISOStringForDatetimeLocal(new Date()),
                             message:
                               "締め切りは今日以降の日付で設定してください",
+                          },
+                          validate: (value) => {
+                            const formValues = watch();
+                            if (
+                              formValues.work_date &&
+                              formValues.start_time &&
+                              formValues.end_time &&
+                              value != null
+                            ) {
+                              const expiryDate = new Date(
+                                `${value}:00`
+                              );
+                              const startTime = new Date(
+                                `${formValues.work_date}T${formValues.start_time}:00`
+                              );
+
+                              if (expiryDate > startTime) {
+                                return "締め切りは勤務日より前の日付で設定してください";
+                              }
+
+                              return true;
+                            }
+                            return false;
                           },
                         })}
                         className="mt-1"
@@ -563,10 +507,9 @@ export const EditJobModal = ({
                       キャンセル
                     </Button>
                     <Button
-                      type="button"
-                      onClick={onSubmitHandler}
+                      type="submit"
                       disabled={isSubmitting}>
-                      {isSubmitting ? "更新中..." : "更新する"}
+                      {(isSubmitting && job.status === watch('status')) ? "更新中..." : "更新する"}
                     </Button>
                     {job?.status === "DRAFT" && (
                       <Button
@@ -574,7 +517,7 @@ export const EditJobModal = ({
                         variant="default"
                         onClick={handlePublish}
                         disabled={isSubmitting}>
-                        {isSubmitting ? "公開中..." : "公開する"}
+                        {(isSubmitting && watch('status') === 'PUBLISHED') ? "公開中..." : "公開する"}
                       </Button>
                     )}
                   </div>

@@ -29,9 +29,7 @@ export const useCancelWorksessionByChef = (params: Params) => {
         if (params.jobId) {
           const jobs = getApi(Jobs);
           const worksessionsByJobIdKey =
-            jobs.worksessionsRestaurantTodosListQueryArgs(
-              params.jobId
-            )[0];
+            jobs.worksessionsRestaurantTodosListQueryArgs(params.jobId)[0];
           mutate(worksessionsByJobIdKey);
         }
       },

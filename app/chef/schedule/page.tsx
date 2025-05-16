@@ -13,6 +13,8 @@ import { useSubscriptionMessagesByUserId } from "@/hooks/api/user/messages/useSu
 import { useSubscriptionUnreadMessagesByUser } from "@/hooks/api/user/messages/useSubscriptionUnreadMessagesByUser";
 import { Badge } from "@/components/ui/badge";
 import { formatJapanHHMM } from "@/lib/functions";
+import { Star } from "lucide-react";
+import { useGetReviewsByUserId } from "@/hooks/api/user/reviews/useGetReviewsByUserId";
 
 export default function SchedulePage() {
   const { user } = useAuth();
@@ -29,6 +31,12 @@ export default function SchedulePage() {
   const selectedWorkSession = workSessions?.find(
     (ws) => ws?.job?.id === selectedJobId
   );
+  console.log(selectedWorkSession);
+
+  // レビューの取得
+  const { data: reviews } = useGetReviewsByUserId({
+    userId: user?.id,
+  });
 
   // メッセージの取得
   const { messagesData, sendMessage } = useSubscriptionMessagesByUserId({
@@ -66,6 +74,11 @@ export default function SchedulePage() {
       workSessions?.filter((ws) =>
         ["COMPLETED", "VERIFIED"].includes(ws.status)
       ) || [],
+    cancelledByUser:
+      workSessions?.filter((ws) => ws.status === "CANCELED_BY_CHEF") || [],
+    cancelledByRestaurant:
+      workSessions?.filter((ws) => ws.status === "CANCELED_BY_RESTAURANT") ||
+      [],
   };
 
   const renderWorkSessionCard = (
@@ -90,11 +103,22 @@ export default function SchedulePage() {
       ? unreadMessageData.unread_messages.length
       : 0;
 
+    const review = reviews?.find(
+      (review) =>
+        review.session_id === workSession.id 
+    );
+
     return (
       <Card
         key={workSession.id}
         className="mb-4 hover:bg-gray-50 transition-colors"
-        onClick={() => openChat(workSession.job.id)}>
+        onClick={() => {
+          if (workSession.status === "CANCELED_BY_CHEF" || workSession.status === "CANCELED_BY_RESTAURANT") {
+            return;
+          }
+          openChat(workSession.job.id);
+          console.log("Card clicked");
+        }}>
         <CardContent className="p-4">
           <div className="flex justify-between items-start mb-2 relative">
             <div className="flex items-center gap-2">
@@ -117,6 +141,41 @@ export default function SchedulePage() {
             {workSession.job.restaurant.address}
           </div>
           <div className="font-medium">{workSession.job.title}</div>
+          {review &&
+            <div
+              className="border rounded-lg p-4 hover:bg-gray-50 transition-colors mt-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-sm font-semibold">レストランからのレビュー</span>
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`h-4 w-4 ${
+                        i < review.rating
+                          ? "text-yellow-400 fill-yellow-400"
+                          : "text-gray-300"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="text-sm font-medium">
+                  {review.rating.toFixed(1)}
+                </span>
+              </div>
+              <p className="text-sm text-gray-700 mb-2">
+                {review.comment}
+              </p>
+              <div className="flex items-center justify-between text-xs text-gray-500">
+                <span>
+                  {format(
+                    new Date(review.created_at),
+                    "yyyy年MM月dd日",
+                    { locale: ja }
+                  )}
+                </span>
+              </div>
+            </div>
+          }
         </CardContent>
       </Card>
     );
@@ -130,9 +189,10 @@ export default function SchedulePage() {
         defaultValue="upcoming"
         value={activeTab}
         onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-2 w-full">
+        <TabsList className="grid grid-cols-3 w-full">
           <TabsTrigger value="upcoming">次のお仕事</TabsTrigger>
           <TabsTrigger value="completed">完了</TabsTrigger>
+          <TabsTrigger value="others">その他</TabsTrigger>
         </TabsList>
 
         <TabsContent value="upcoming" className="mt-6">
@@ -153,6 +213,39 @@ export default function SchedulePage() {
               完了したお仕事はありません
             </p>
           )}
+        </TabsContent>
+
+        <TabsContent value="others" className="mt-6">
+          <Tabs defaultValue="cancelledByUser" className="w-full">
+            <TabsList className="grid grid-cols-2 w-full mb-4">
+              <TabsTrigger value="cancelledByUser">
+                キャンセルしたお仕事
+              </TabsTrigger>
+              <TabsTrigger value="cancelledByRestaurant">
+                キャンセルされたお仕事
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="cancelledByUser">
+              {filteredWorkSessions.cancelledByUser.length > 0 ? (
+                filteredWorkSessions.cancelledByUser.map(renderWorkSessionCard)
+              ) : (
+                <p className="text-center text-gray-500 py-8">
+                  キャンセルしたお仕事はありません
+                </p>
+              )}
+            </TabsContent>
+            <TabsContent value="cancelledByRestaurant">
+              {filteredWorkSessions.cancelledByRestaurant.length > 0 ? (
+                filteredWorkSessions.cancelledByRestaurant.map(
+                  renderWorkSessionCard
+                )
+              ) : (
+                <p className="text-center text-gray-500 py-8">
+                  キャンセルされたお仕事はありません
+                </p>
+              )}
+            </TabsContent>
+          </Tabs>
         </TabsContent>
       </Tabs>
 

@@ -88,9 +88,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useCreateJobChangeRequest } from "@/hooks/api/companyuser/jobChengeRequests/useCreateJobChangeRequest";
-import { useGetJobChangeRequests } from "@/hooks/api/companyuser/jobChengeRequests/useGetJobChangeRequests";
-import { useDeleteJobChangeRequest } from "@/hooks/api/companyuser/jobChengeRequests/useDeleteJobChangeRequest";
+import { useCreateJobChangeRequest } from "@/hooks/api/companyuser/jobChangeRequests/useCreateJobChangeRequest";
+import { useGetJobChangeRequests } from "@/hooks/api/companyuser/jobChangeRequests/useGetJobChangeRequests";
+import { useDeleteJobChangeRequest } from "@/hooks/api/companyuser/jobChangeRequests/useDeleteJobChangeRequest";
+import { useGetRestaurantReviewByWorksessionId } from "@/hooks/api/companyuser/reviews/useGetRestaurantReviewByWorksessionId";
+import { useMarkReadMultipleCompanyUserNotifications } from "@/hooks/api/companyuser/companyUserNotifications/useMarkReadMultipleCompanyUserNotifications";
+import { useGetCompanyUserNotificationsByUserId } from "@/hooks/api/companyuser/companyUserNotifications/useGetCompanyUserNotificationsByUserId";
 
 interface PageParams {
   params: Promise<{ id: string }>;
@@ -125,10 +128,6 @@ export default function JobDetail({ params }: PageParams) {
   const [selectedWorkSession, setSelectedWorkSession] = useState<
     WorksessionsRestaurantTodosListData[number] | null
   >(null);
-  const { data: reviewsData } = useGetReviewsByUserId({
-    userId: selectedWorkSession?.user_id ?? undefined,
-  });
-  console.log("reviewsData", reviewsData);
   const [isChefReviewModalOpen, setIsChefReviewModalOpen] = useState(false);
   const [chefReview, setChefReview] = useState<any>(null);
   const [isEditJobModalOpen, setIsEditJobModalOpen] = useState(false);
@@ -153,11 +152,22 @@ export default function JobDetail({ params }: PageParams) {
     reason: "",
   });
 
+  // シェフのこれまでのレビュー一覧を取得
+  const { data: reviewsData } = useGetReviewsByUserId({
+    userId: selectedWorkSession?.user_id ?? undefined,
+  });
+  
+  // この求人に対する、シェフからのレビューを取得
+  const { data: restaurantReview } = useGetRestaurantReviewByWorksessionId({
+    worksessionId: selectedWorkSession?.id,
+  })
+
   const { trigger: updateJobTrigger } = useUpdateJob({
     jobId: Number(jobId),
     companyId: restaurant?.companies_id ?? undefined,
     restaurantId: restaurant?.id ?? undefined,
   });
+
   const { trigger: verifyWorksessionTrigger } = useVerifyWorksession({
     worksessionId: selectedWorkSession?.id,
     jobId: Number(jobId),
@@ -168,6 +178,7 @@ export default function JobDetail({ params }: PageParams) {
       worksession_id: selectedWorkSession?.id,
       jobId: Number(jobId),
     });
+
   const { trigger: noShowWorksessionTrigger } =
     useNoShowWorksessionByRestaurant({
       worksession_id: selectedWorkSession?.id,
@@ -191,12 +202,25 @@ export default function JobDetail({ params }: PageParams) {
 
   const { data: existingChangeRequest } = useGetJobChangeRequests();
   const pendingRequest = existingChangeRequest?.find(
-    (req) => req.worksession_id === selectedWorkSession?.id && req.status === "PENDING"
+    (req) =>
+      req.worksession_id === selectedWorkSession?.id && req.status === "PENDING"
   );
 
   const { trigger: deleteJobChangeRequest } = useDeleteJobChangeRequest({
     jobChangeRequestId: pendingRequest?.id,
   });
+
+  // 既読対象の通知を取得
+  const { data: notifications } = useGetCompanyUserNotificationsByUserId({
+    userId: user?.id,
+  });
+  const targetNotificationIds = notifications?.filter(notification => notification.job_id === job?.id && !notification.is_read).map(notification => notification.id) ?? [];
+
+  // 通知の既読処理
+  const { trigger: markReadMultipleCompanyUserNotificationsTrigger } = useMarkReadMultipleCompanyUserNotifications({
+    companyUserNotificationIds: targetNotificationIds,
+    userId: user?.id,
+  })
 
   // シェフが応募している場合は自動的に選択
   useEffect(() => {
@@ -208,6 +232,13 @@ export default function JobDetail({ params }: PageParams) {
       setSelectedApplicant(null);
     }
   }, [workSessions]);
+
+  useEffect(() => {
+    // このJobに関する通知を既読にする
+    if (targetNotificationIds && targetNotificationIds.length > 0) {
+      markReadMultipleCompanyUserNotificationsTrigger();
+    }
+  }, [targetNotificationIds, markReadMultipleCompanyUserNotificationsTrigger]);
 
   useEffect(() => {
     if (messagesData?.messages && messagesContainerRef.current) {
@@ -622,31 +653,69 @@ ${changeRequest.reason}
           </div>
         </nav>
 
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold line-clamp-2">
-            {job?.title}
-          </h1>
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+          <div className="md:w-1/2 w-full">
+            <h1 className="text-xl sm:text-2xl font-bold truncate">
+              {job?.title}
+            </h1>
 
-          <div className="flex flex-wrap items-center gap-2 mt-2">
-            <Badge className="bg-green-100 text-sm text-green-800 hover:bg-green-100">
-              {formatJobPostingJapaneseStatus(job?.status || "")}
-            </Badge>
-            <Badge variant="outline" className="text-sm bg-white">
-              {job?.work_date
-                ? format(new Date(job.work_date), "MM/dd")
-                : "未定"}
-              &nbsp;&nbsp;
-              {job?.start_time && job?.end_time ? (
-                <>
-                  {formatJapanHHMM(job.start_time)}〜
-                  {formatJapanHHMM(job.end_time)}
-                </>
-              ) : (
-                "未定"
-              )}
-            </Badge>
+            <div className="flex flex-wrap items-center gap-2 mt-2">
+              <Badge className="bg-green-100 text-sm text-green-800 hover:bg-green-100">
+                {formatJobPostingJapaneseStatus(job?.status || "")}
+              </Badge>
+              <Badge variant="outline" className="text-sm bg-white">
+                {job?.work_date
+                  ? format(new Date(job.work_date), "MM/dd")
+                  : "未定"}
+                &nbsp;&nbsp;
+                {job?.start_time && job?.end_time ? (
+                  <>
+                    {formatJapanHHMM(job.start_time)}〜
+                    {formatJapanHHMM(job.end_time)}
+                  </>
+                ) : (
+                  "未定"
+                )}
+              </Badge>
+            </div>
           </div>
+
+          {restaurantReview && (
+            <div className="md:w-1/2 w-full border rounded-lg py-2 px-3 bg-white">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-sm font-semibold">シェフからのレビュー</span>
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    <FaStar
+                      key={i}
+                      className={`h-3 w-3 ${
+                        i < restaurantReview.rating
+                          ? "text-yellow-400 fill-yellow-400"
+                          : "text-gray-300"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="text-sm font-medium">
+                  {restaurantReview.rating.toFixed(1)}
+                </span>
+                <div className="text-xs text-gray-500 ml-auto">
+                  {format(
+                    new Date(restaurantReview.created_at),
+                    "yyyy年MM月dd日",
+                    { locale: ja }
+                  )}
+                </div>
+              </div>
+              <p
+                className="text-sm text-gray-700 mb-1 truncate"
+                title={restaurantReview.comment}>
+                {restaurantReview.comment}
+              </p>
+            </div>
+          )}
         </div>
+
       </div>
       {/* メインコンテンツ */}{" "}
       <div className="grid grid-cols-1 gap-6">
@@ -831,17 +900,20 @@ ${changeRequest.reason}
                           <DialogHeader>
                             <DialogTitle>チェックインQRコード</DialogTitle>
                             <DialogDescription>
-                              シェフにこのQRコードを提示してください
+                              シェフにこのQRコード、もしくは6桁のチェックインコードを提示してください
                             </DialogDescription>
                           </DialogHeader>
                           <div className="flex flex-col items-center justify-center p-4">
-                            <div className="bg-white p-4 rounded-lg shadow-md">
+                            <div className="flex flex-col items-center justify-center bg-white p-4 rounded-lg shadow-md">
                               <QRCodeSVG
                                 value={selectedWorkSession.id.toString()}
                                 size={200}
                                 level="H"
                                 includeMargin={true}
                               />
+                              <span className="text-lg font-bold text-center">
+                                {selectedWorkSession.check_in_code}
+                              </span>
                             </div>
                           </div>
                         </DialogContent>
@@ -916,150 +988,179 @@ ${changeRequest.reason}
                   ref={messagesContainerRef}
                   className="flex-1 overflow-y-auto p-4 scroll-smooth">
                   <div className="space-y-4">
-                    {!messagesData?.messages?.length ? (
+                    {selectedWorkSession.status === "CANCELED_BY_CHEF" ? (
                       <div className="flex flex-col items-center justify-center h-full text-center space-y-6">
-                        <div className="space-y-2">
-                          <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto" />
-                          <h3 className="text-lg font-medium">
-                            まだメッセージがありません
-                          </h3>
-                          <p className="text-sm text-muted-foreground">
-                            シェフとのチャットを始めましょう
-                          </p>
-                        </div>
+                        <XCircle className="h-12 w-12 text-red-400 mx-auto" />
+                        <h3 className="text-lg font-medium text-red-600">
+                          シェフからキャンセルされました
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          このお仕事のチャットはできません
+                        </p>
+                      </div>
+                    ) : selectedWorkSession.status ===
+                      "CANCELED_BY_RESTAURANT" ? (
+                      <div className="flex flex-col items-center justify-center h-full text-center space-y-6">
+                        <XCircle className="h-12 w-12 text-red-400 mx-auto" />
+                        <h3 className="text-lg font-medium text-red-600">
+                          キャンセルしました
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          このお仕事のチャットはできません
+                        </p>
                       </div>
                     ) : (
                       <div>
-                        {messagesData.messages.map((message) => (
-                          <div
-                            key={message.id}
-                            className={`flex ${
-                              message.sender_type === "restaurant"
-                                ? "justify-end"
-                                : "justify-start"
-                            } mb-4`}>
-                            <div
-                              className={`max-w-[80%] rounded-lg p-3 ${
-                                message.sender_type === "restaurant"
-                                  ? "bg-primary text-primary-foreground"
-                                  : "bg-muted"
-                              }`}>
-                              <p className="text-sm whitespace-pre-wrap">
-                                {message.content}
-                              </p>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                {format(
-                                  new Date(message.created_at),
-                                  "yyyy/MM/dd HH:mm"
-                                )}
+                        {messagesData?.messages?.length ? (
+                          <div>
+                            {messagesData.messages.map((message) => (
+                              <div
+                                key={message.id}
+                                className={`flex ${
+                                  message.sender_type === "restaurant"
+                                    ? "justify-end"
+                                    : "justify-start"
+                                } mb-4`}>
+                                <div
+                                  className={`max-w-[80%] rounded-lg p-3 ${
+                                    message.sender_type === "restaurant"
+                                      ? "bg-primary text-primary-foreground"
+                                      : "bg-muted"
+                                  }`}>
+                                  <p className="text-sm whitespace-pre-wrap">
+                                    {message.content}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    {format(
+                                      new Date(message.created_at),
+                                      "yyyy/MM/dd HH:mm"
+                                    )}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center h-full text-center space-y-6">
+                            <div className="space-y-2">
+                              <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto" />
+                              <h3 className="text-lg font-medium">
+                                まだメッセージがありません
+                              </h3>
+                              <p className="text-sm text-muted-foreground">
+                                シェフとのチャットを始めましょう
                               </p>
                             </div>
                           </div>
-                        ))}
+                        )}
                       </div>
                     )}
                   </div>
                 </CardContent>
-                <div className="border-t bg-background">
-                  <div className="px-4 py-3 border-b">
-                    <p className="text-sm text-muted-foreground mb-2">
-                      クイックメッセージ
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          setMessageInput(
-                            "はじめまして！ご応募ありがとうございます。"
-                          )
-                        }>
-                        👋 はじめまして
-                      </Button>
-                      {job?.whattotake && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            setMessageInput(
-                              `当日の持ち物について確認させていただきます。\n\n以下の持ち物をご準備ください：\n${job.whattotake}`
-                            )
-                          }>
-                          📋 持ち物の確認
-                        </Button>
-                      )}
-                      {job?.work_date && job?.start_time && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            setMessageInput(
-                              `当日の集合時間と場所の確認をさせていただきます。\n\n日時：${format(
-                                new Date(job.work_date),
-                                "MM月dd日"
-                              )} ${formatJapanHHMM(job.start_time)}\n場所：${
-                                restaurant?.address || ""
-                              }`
-                            )
-                          }>
-                          🕒 集合時間の確認
-                        </Button>
-                      )}
-                      {job?.note && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            setMessageInput(
-                              `その他の注意事項について確認させていただきます。\n\n${job.note}`
-                            )
-                          }>
-                          ℹ️ 注意事項の確認
-                        </Button>
-                      )}
+                {selectedWorkSession.status !== "CANCELED_BY_CHEF" &&
+                  selectedWorkSession.status !== "CANCELED_BY_RESTAURANT" && (
+                    <div className="border-t bg-background">
+                      <div className="px-4 py-3 border-b">
+                        <p className="text-sm text-muted-foreground mb-2">
+                          クイックメッセージ
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              setMessageInput(
+                                "はじめまして！ご応募ありがとうございます。"
+                              )
+                            }>
+                            👋 はじめまして
+                          </Button>
+                          {job?.whattotake && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                setMessageInput(
+                                  `当日の持ち物について確認させていただきます。\n\n以下の持ち物をご準備ください：\n${job.whattotake}`
+                                )
+                              }>
+                              📋 持ち物の確認
+                            </Button>
+                          )}
+                          {job?.work_date && job?.start_time && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                setMessageInput(
+                                  `当日の集合時間と場所の確認をさせていただきます。\n\n日時：${format(
+                                    new Date(job.work_date),
+                                    "MM月dd日"
+                                  )} ${formatJapanHHMM(
+                                    job.start_time
+                                  )}\n場所：${restaurant?.address || ""}`
+                                )
+                              }>
+                              🕒 集合時間の確認
+                            </Button>
+                          )}
+                          {job?.note && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                setMessageInput(
+                                  `その他の注意事項について確認させていただきます。\n\n${job.note}`
+                                )
+                              }>
+                              ℹ️ 注意事項の確認
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                      <CardFooter className="p-4">
+                        <form
+                          onSubmit={handleSendMessage}
+                          className="flex w-full gap-2">
+                          <TextareaAutosize
+                            value={messageInput}
+                            onChange={(e) => setMessageInput(e.target.value)}
+                            placeholder="メッセージを入力..."
+                            minRows={1}
+                            maxRows={6}
+                            className="flex-1 resize-none bg-white px-3 py-2 border rounded-md text-base focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
+                            onKeyDown={(
+                              e: React.KeyboardEvent<HTMLTextAreaElement>
+                            ) => {
+                              // PC: Enterで送信、Shift+Enterで改行
+                              if (
+                                e.key === "Enter" &&
+                                !e.shiftKey &&
+                                !e.nativeEvent.isComposing &&
+                                !isMobile()
+                              ) {
+                                e.preventDefault();
+                                const form = (e.target as HTMLTextAreaElement)
+                                  .form;
+                                if (form) form.requestSubmit();
+                              }
+                              // Shift+Enterで改行
+                              if (e.key === "Enter" && e.shiftKey) {
+                                setMessageInput((prev) => prev + "\n");
+                              }
+                              // モバイル: Enterは常に改行
+                              if (e.key === "Enter" && isMobile()) {
+                                setMessageInput((prev) => prev + "\n");
+                              }
+                            }}
+                          />
+                          <Button type="submit" disabled={!messageInput.trim()}>
+                            送信
+                          </Button>
+                        </form>
+                      </CardFooter>
                     </div>
-                  </div>
-                  <CardFooter className="p-4">
-                    <form
-                      onSubmit={handleSendMessage}
-                      className="flex w-full gap-2">
-                      <TextareaAutosize
-                        value={messageInput}
-                        onChange={(e) => setMessageInput(e.target.value)}
-                        placeholder="メッセージを入力..."
-                        minRows={1}
-                        maxRows={6}
-                        className="flex-1 resize-none bg-white px-3 py-2 border rounded-md text-base focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
-                        onKeyDown={(
-                          e: React.KeyboardEvent<HTMLTextAreaElement>
-                        ) => {
-                          // PC: Enterで送信、Shift+Enterで改行
-                          if (
-                            e.key === "Enter" &&
-                            !e.shiftKey &&
-                            !e.nativeEvent.isComposing &&
-                            !isMobile()
-                          ) {
-                            e.preventDefault();
-                            const form = (e.target as HTMLTextAreaElement).form;
-                            if (form) form.requestSubmit();
-                          }
-                          // Shift+Enterで改行
-                          if (e.key === "Enter" && e.shiftKey) {
-                            setMessageInput((prev) => prev + "\n");
-                          }
-                          // モバイル: Enterは常に改行
-                          if (e.key === "Enter" && isMobile()) {
-                            setMessageInput((prev) => prev + "\n");
-                          }
-                        }}
-                      />
-                      <Button type="submit" disabled={!messageInput.trim()}>
-                        送信
-                      </Button>
-                    </form>
-                  </CardFooter>
-                </div>
+                  )}
               </div>
             </>
           ) : (
@@ -1278,8 +1379,7 @@ ${changeRequest.reason}
                 <h4 className="font-medium mb-2">現在の変更リクエスト</h4>
                 <div className="space-y-2 text-sm">
                   {(() => {
-                    const changes = pendingRequest
-                      .proposed_changes as {
+                    const changes = pendingRequest.proposed_changes as {
                       work_date: string;
                       start_time: number;
                       end_time: number;

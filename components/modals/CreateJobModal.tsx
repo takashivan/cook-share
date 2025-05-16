@@ -7,6 +7,17 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { JobsCreatePayload } from "@/api/__generated__/base/data-contracts";
+import { formatDateToLocalISOStringForDatetimeLocal } from "@/lib/functions";
+
+type BaseCreateForm = Omit<
+  JobsCreatePayload,
+  "start_time" | "end_time" | "expiry_date"
+>;
+interface CreateJobForm extends BaseCreateForm {
+  start_time: string;
+  end_time: string;
+  expiry_date: string;
+}
 
 interface CreateJobModalProps {
   isOpen: boolean;
@@ -34,11 +45,16 @@ export const CreateJobModal = ({
     reset,
     watch,
     setValue,
-  } = useForm<JobsCreatePayload>({
+  } = useForm<CreateJobForm>({
     defaultValues: {
       restaurant_id: restaurantId,
       status: "DRAFT",
       required_skills: [],
+      work_date: new Date().toISOString().split("T")[0],
+      start_time: "10:00",
+      end_time: "18:00",
+      expiry_date: formatDateToLocalISOStringForDatetimeLocal(new Date(new Date().setHours(10, 0, 0, 0))),
+      fee: 12000,
     },
   });
 
@@ -71,49 +87,27 @@ export const CreateJobModal = ({
     }
   };
 
-  const onSubmitHandler = handleSubmit(async (data) => {
-    try {
-      // const formData = new FormData();
+  const handleClose = () => {
+    reset();
+    setPreviewImage(null);
+    setSelectedFile(null);
+    onClose();
+  }
 
+
+  const submit = handleSubmit(async (data) => {
+    const status = data.status;
+
+    try {
       // 日付文字列を作成（YYYY-MM-DDThh:mm:ss）
       const startDateTimeStr = `${data.work_date}T${data.start_time}:00`;
       const endDateTimeStr = `${data.work_date}T${data.end_time}:00`;
-      const expiryTimestamp = `${data.expiry_date}T00:00:00`;
+      const expiryTimestamp = `${data.expiry_date}:00`;
 
       // Unix タイムスタンプを計算（ミリ秒単位）
       const startTimestamp = Date.parse(startDateTimeStr);
       const endTimestamp = Date.parse(endDateTimeStr);
       const expiryDateTimestamp = Date.parse(expiryTimestamp);
-
-      console.log("Debug timestamps:", {
-        startDateTimeStr,
-        endDateTimeStr,
-        startTimestamp,
-        endTimestamp,
-        startDate: new Date(startTimestamp).toISOString(),
-        endDate: new Date(endTimestamp).toISOString(),
-      });
-
-      // FormDataにデータを追加
-      // Object.entries(data).forEach(([key, value]) => {
-      //   if (key === "start_time") {
-      //     formData.append(key, startTimestamp.toString());
-      //   } else if (key === "end_time") {
-      //     formData.append(key, endTimestamp.toString());
-      //   } else if (key === "expiry_date") {
-      //     // expiry_dateをUnixタイムスタンプに変換
-      //     const expiryTimestamp = Date.parse(`${value}T00:00:00`);
-      //     formData.append(key, expiryTimestamp.toString());
-      //   } else if (Array.isArray(value)) {
-      //     value.forEach((item) => formData.append(key + "[]", item.toString()));
-      //   } else {
-      //     formData.append(key, value.toString());
-      //   }
-      // });
-
-      // if (selectedFile) {
-      //   formData.append("image", selectedFile);
-      // }
 
       const newData: JobsCreatePayload = {
         ...data,
@@ -124,153 +118,28 @@ export const CreateJobModal = ({
       };
 
       await onSubmit(newData);
-      reset();
-      setPreviewImage(null);
-      setSelectedFile(null);
-      onClose();
+      handleClose();
       toast({
-        title: "求人を追加しました",
-        description: "新しい求人の登録が完了しました。",
+        title: status === "PUBLISHED" ? "求人を公開しました" : "下書きを保存しました",
+        description: status === "PUBLISHED" ? "求人が公開されました。" : "求人の下書きが保存されました。",
       });
     } catch (error) {
-      console.error("Error creating job:", error);
       toast({
         title: "エラーが発生しました",
-        description: "求人の追加に失敗しました。もう一度お試しください。",
+        description: status === "PUBLISHED" ? "求人の公開に失敗しました。もう一度お試しください。" : "下書きの保存に失敗しました。もう一度お試しください。",
         variant: "destructive",
       });
     }
   });
 
-  const handleDraft = handleSubmit(async (data) => {
-    try {
-      // const formData = new FormData();
-
-      // 日付文字列を作成（YYYY-MM-DDThh:mm:ss）
-      const startDateTimeStr = `${data.work_date}T${data.start_time}:00`;
-      const endDateTimeStr = `${data.work_date}T${data.end_time}:00`;
-      const expiryTimestamp = `${data.expiry_date}T00:00:00`;
-
-      // Unix タイムスタンプを計算（ミリ秒単位）
-      const startTimestamp = Date.parse(startDateTimeStr);
-      const endTimestamp = Date.parse(endDateTimeStr);
-      const expiryDateTimestamp = Date.parse(expiryTimestamp);
-
-      // FormDataにデータを追加
-      // Object.entries(data).forEach(([key, value]) => {
-      //   if (key === "start_time") {
-      //     formData.append(key, startTimestamp.toString());
-      //   } else if (key === "end_time") {
-      //     formData.append(key, endTimestamp.toString());
-      //   } else if (Array.isArray(value)) {
-      //     value.forEach((item) => formData.append(key + "[]", item.toString()));
-      //   } else {
-      //     formData.append(key, value.toString());
-      //   }
-      // });
-
-      // // ステータスをDRAFTに設定
-      // formData.append("status", "DRAFT");
-
-      // if (selectedFile) {
-      //   formData.append("image", selectedFile);
-      // }
-
-      const newData: JobsCreatePayload = {
-        ...data,
-        restaurant_id: restaurantId,
-        start_time: startTimestamp,
-        end_time: endTimestamp,
-        expiry_date: expiryDateTimestamp,
-        // ステータスをDRAFTに設定
-        status: "DRAFT",
-      };
-
-      console.log("Create Job", data, newData);
-
-      await onSubmit(newData);
-      reset();
-      setPreviewImage(null);
-      setSelectedFile(null);
-      onClose();
-      toast({
-        title: "下書きを保存しました",
-        description: "求人の下書きが保存されました。",
-      });
-    } catch (error) {
-      toast({
-        title: "エラーが発生しました",
-        description: "下書きの保存に失敗しました。もう一度お試しください。",
-        variant: "destructive",
-      });
-    }
-  });
-
-  const handlePublish = handleSubmit(async (data) => {
-    try {
-      // const formData = new FormData();
-
-      // 日付文字列を作成（YYYY-MM-DDThh:mm:ss）
-      const startDateTimeStr = `${data.work_date}T${data.start_time}:00`;
-      const endDateTimeStr = `${data.work_date}T${data.end_time}:00`;
-      const expiryTimestamp = `${data.expiry_date}T00:00:00`;
-
-      // Unix タイムスタンプを計算（ミリ秒単位）
-      const startTimestamp = Date.parse(startDateTimeStr);
-      const endTimestamp = Date.parse(endDateTimeStr);
-      const expiryDateTimestamp = Date.parse(expiryTimestamp);
-
-      // FormDataにデータを追加
-      // Object.entries(data).forEach(([key, value]) => {
-      //   if (key === "start_time") {
-      //     formData.append(key, startTimestamp.toString());
-      //   } else if (key === "end_time") {
-      //     formData.append(key, endTimestamp.toString());
-      //   } else if (Array.isArray(value)) {
-      //     value.forEach((item) => formData.append(key + "[]", item.toString()));
-      //   } else {
-      //     formData.append(key, value.toString());
-      //   }
-      // });
-
-      // // ステータスをPUBLISHEDに設定
-      // formData.append("status", "PUBLISHED");
-
-      // if (selectedFile) {
-      //   formData.append("image", selectedFile);
-      // }
-
-      const newData: JobsCreatePayload = {
-        ...data,
-        restaurant_id: restaurantId,
-        start_time: startTimestamp,
-        end_time: endTimestamp,
-        expiry_date: expiryDateTimestamp,
-        // ステータスをPUBLISHEDに設定
-        status: "PUBLISHED",
-      };
-
-      await onSubmit(newData);
-      reset();
-      setPreviewImage(null);
-      setSelectedFile(null);
-      onClose();
-      toast({
-        title: "求人を公開しました",
-        description: "求人が公開されました。",
-      });
-    } catch (error) {
-      toast({
-        title: "エラーが発生しました",
-        description: "求人の公開に失敗しました。もう一度お試しください。",
-        variant: "destructive",
-      });
-    }
-  });
+  const handlePublishClick = () => {
+    setValue("status", "PUBLISHED");
+    submit();
+  }
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
+      <Dialog as="div" className="relative z-50" onClose={handleClose}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -299,7 +168,7 @@ export const CreateJobModal = ({
                   新しい求人を追加
                 </Dialog.Title>
 
-                <form onSubmit={onSubmitHandler} className="space-y-6">
+                <form onSubmit={submit} className="space-y-6">
                   <div className="space-y-4">
                     <div>
                       <Label htmlFor="title">求人タイトル *</Label>
@@ -342,7 +211,6 @@ export const CreateJobModal = ({
                         <Input
                           id="work_date"
                           type="date"
-                          defaultValue={new Date().toISOString().split("T")[0]}
                           {...register("work_date", {
                             required: "勤務日は必須です",
                             min: {
@@ -350,6 +218,19 @@ export const CreateJobModal = ({
                               message:
                                 "勤務日は今日以降の日付で設定してください",
                             },
+                            onChange: (e) => {
+                              // 締め切り日を勤務日＋開始時間と同じにする
+                              const selectedDate = e.target.value;
+                              const startTime = watch("start_time");
+                              if (startTime) {
+                                const newExpiryDate = `${selectedDate}T${startTime}`
+                                setValue(
+                                  "expiry_date",
+                                  newExpiryDate
+                                );
+                              }
+                              setValue("work_date", e.target.value);
+                            }
                           })}
                           className="mt-1"
                         />
@@ -365,9 +246,21 @@ export const CreateJobModal = ({
                           <Input
                             id="start_time"
                             type="time"
-                            defaultValue="10:00"
                             {...register("start_time", {
                               required: "開始時間は必須です",
+                              onChange: (e) => {
+                                // 締め切り日を勤務日＋開始時間と同じにする
+                                const selectedTime = e.target.value;
+                                const workDate = watch("work_date");
+                                if (workDate) {
+                                  const newExpiryDate = `${workDate}T${selectedTime}`
+                                  setValue(
+                                    "expiry_date",
+                                    newExpiryDate
+                                  );
+                                }
+                                setValue("start_time", e.target.value);
+                              }
                             })}
                             className="mt-1"
                           />
@@ -383,7 +276,6 @@ export const CreateJobModal = ({
                           <Input
                             id="end_time"
                             type="time"
-                            defaultValue="18:00"
                             {...register("end_time", {
                               required: "終了時間は必須です",
                               validate: (value) => {
@@ -450,7 +342,6 @@ export const CreateJobModal = ({
                               return true;
                             },
                           })}
-                          defaultValue={12000}
                           className="mt-1"
                           placeholder="例：12000"
                         />
@@ -462,14 +353,14 @@ export const CreateJobModal = ({
                       </div>
 
                       <div>
-                        <Label htmlFor="expiry_date">締め切り</Label>
+                        <Label htmlFor="expiry_date">締め切り *</Label>
                         <Input
                           id="expiry_date"
-                          type="date"
+                          type="datetime-local"
                           {...register("expiry_date", {
                             required: "締め切りは必須です",
                             min: {
-                              value: new Date().toISOString().split("T")[0],
+                              value: formatDateToLocalISOStringForDatetimeLocal(new Date()),
                               message:
                                 "締め切りは今日以降の日付で設定してください",
                             },
@@ -482,13 +373,11 @@ export const CreateJobModal = ({
                                 formValues.end_time &&
                                 value != null
                               ) {
-                                const workDate = new Date(formValues.work_date);
-                                const expiryDate = new Date(value);
+                                const expiryDate = new Date(
+                                  `${value}:00`
+                                );
                                 const startTime = new Date(
                                   `${formValues.work_date}T${formValues.start_time}:00`
-                                );
-                                const endTime = new Date(
-                                  `${formValues.work_date}T${formValues.end_time}:00`
                                 );
 
                                 if (expiryDate > startTime) {
@@ -624,22 +513,21 @@ export const CreateJobModal = ({
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={onClose}
+                      onClick={handleClose}
                       disabled={isSubmitting}>
                       キャンセル
                     </Button>
                     <Button
-                      type="button"
+                      type="submit"
                       variant="secondary"
-                      onClick={handleDraft}
                       disabled={isSubmitting}>
-                      {isSubmitting ? "保存中..." : "下書きとして保存"}
+                      {(isSubmitting && watch('status') === 'DRAFT') ? "保存中..." : "下書きとして保存"}
                     </Button>
                     <Button
                       type="button"
-                      onClick={handlePublish}
+                      onClick={handlePublishClick}
                       disabled={isSubmitting}>
-                      {isSubmitting ? "公開中..." : "公開する"}
+                      {(isSubmitting && watch('status') === 'PUBLISHED') ? "公開中..." : "公開する"}
                     </Button>
                   </div>
                 </form>

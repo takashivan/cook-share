@@ -506,6 +506,8 @@ export type WorksessionsThismonthListData = {
   restaurant_rating: number;
   /** @format timestamptz */
   start_time: number | null;
+  /** @format int64 */
+  check_in_code: number | null;
   user: {
     /** @format uuid */
     id: string;
@@ -585,7 +587,14 @@ export type WorksessionsThismonthListData = {
     end_time: number;
     hourly_rate: number;
     required_skills: string[];
-    status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED";
+    status:
+      | "DRAFT"
+      | "PUBLISHED"
+      | "EXPIRED"
+      | "PENDING"
+      | "DELETED"
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -774,6 +783,8 @@ export interface SessionHistoryCurrentListData {
     restaurant_rating: number;
     /** @format timestamptz */
     start_time: number | null;
+    /** @format int64 */
+    check_in_code: number | null;
   }[];
   star: string;
   end: string;
