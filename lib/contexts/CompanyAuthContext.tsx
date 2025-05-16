@@ -18,6 +18,8 @@ import type { CompanyUser, CompanyUserData } from "@/lib/api/companyUser";
 import { login, register } from "@/lib/api/companyUser";
 import { getApi } from "@/api/api-factory";
 import { Companyuser } from "@/api/__generated__/base/Companyuser";
+import { CompanyusersPartialUpdatePayload } from "@/api/__generated__/base/data-contracts";
+import { Companyusers } from "@/api/__generated__/base/Companyusers";
 
 export interface CompanyAuthContextType {
   user: CompanyUser | null;
@@ -26,6 +28,7 @@ export interface CompanyAuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   register: (data: CompanyUserData) => Promise<void>;
+  update: (data: Partial<CompanyusersPartialUpdatePayload>) => Promise<void>;
   setUser: (user: CompanyUser | null) => void;
   reloadUser: () => Promise<CompanyUser | undefined>;
 }
@@ -40,6 +43,7 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const companyUserApi = getApi(Companyuser);
+  const companyUsersApi = getApi(Companyusers);
 
   useEffect(() => {
     const currentUser = getCurrentUser("company");
@@ -50,7 +54,7 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  const updateUser = (userData: CompanyUser | null) => {
+  const saveUser = (userData: CompanyUser | null) => {
     setUser(userData);
     setCurrentUser(userData, "company");
   };
@@ -65,7 +69,7 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
       if (!userData) {
         throw new Error("User not found");
       }
-      updateUser(userData.data as unknown as CompanyUser);
+      saveUser(userData.data as unknown as CompanyUser);
 
       return userData.data as unknown as CompanyUser;
     } catch (error) {
@@ -77,7 +81,7 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
 
   const setAuth = (token: string,  userData: CompanyUser) => {
     setAuthToken(token, "company");
-    updateUser(userData);
+    saveUser(userData);
     setIsAuthenticated(true);
   };
 
@@ -112,6 +116,22 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const handleUpdate = async (data: Partial<CompanyusersPartialUpdatePayload>) => {
+    try {
+      const userId = user?.id;
+      if (!userId) {
+        throw new Error("User ID not found");
+      }
+      const response = await companyUsersApi.companyusersPartialUpdate(userId, data as CompanyusersPartialUpdatePayload);
+      if (response) {
+        saveUser(response.data as unknown as CompanyUser);
+      }
+    } catch (error) {
+      console.error("Update error:", error);
+      throw error;
+    }
+  };
+
   return (
     <CompanyAuthContext.Provider
       value={{
@@ -121,6 +141,7 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
         login: handleLogin,
         logout: handleLogout,
         register: handleRegister,
+        update: handleUpdate,
         setUser,
         reloadUser,
       }}>
