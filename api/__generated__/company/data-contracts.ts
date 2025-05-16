@@ -593,7 +593,8 @@ export type WorksessionsThismonthListData = {
       | "EXPIRED"
       | "PENDING"
       | "DELETED"
-      | "FILLED";
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */

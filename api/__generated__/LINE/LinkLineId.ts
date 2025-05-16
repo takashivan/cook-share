@@ -20,12 +20,11 @@ export class LinkLineId<
   SecurityDataType = unknown,
 > extends HttpClient<SecurityDataType> {
   /**
-   * @description <br /><br /> <b>Authentication:</b> required
+   * @description <br /><br /> <b>Authentication:</b> not required
    *
    * @tags link-line-id
    * @name LinkLineIdCreate
    * @request POST:/link-line-id
-   * @secure
    */
   linkLineIdCreate = (
     data: LinkLineIdCreatePayload,
@@ -35,7 +34,6 @@ export class LinkLineId<
       path: `/link-line-id`,
       method: "POST",
       body: data,
-      secure: true,
       type: ContentType.Json,
       format: "json",
       ...params,
