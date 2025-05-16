@@ -427,7 +427,8 @@ export interface JobApprovePartialUpdateData {
       | "EXPIRED"
       | "PENDING"
       | "DELETED"
-      | "FILLED";
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -496,7 +497,8 @@ export interface JobBanPartialUpdateData {
       | "EXPIRED"
       | "PENDING"
       | "DELETED"
-      | "FILLED";
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -564,7 +566,8 @@ export interface JobsApprovePartialUpdateData {
       | "EXPIRED"
       | "PENDING"
       | "DELETED"
-      | "FILLED";
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -632,7 +635,8 @@ export interface JobsBanPartialUpdateData {
       | "EXPIRED"
       | "PENDING"
       | "DELETED"
-      | "FILLED";
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -834,7 +838,8 @@ export interface RestaurantsApprovePartialUpdateData {
       | "EXPIRED"
       | "PENDING"
       | "DELETED"
-      | "FILLED";
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */

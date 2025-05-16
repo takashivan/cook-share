@@ -226,7 +226,8 @@ export type GetApplication2Data = {
       | "EXPIRED"
       | "PENDING"
       | "DELETED"
-      | "FILLED";
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -1884,7 +1885,8 @@ export interface JobsListData {
       | "EXPIRED"
       | "PENDING"
       | "DELETED"
-      | "FILLED";
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -2343,24 +2345,8 @@ export interface WorksessionsMessagesListData {
 export type CompanyusersDeleteResult = object;
 
 export interface CompanyusersPartialUpdatePayload {
-  /** @format uuid */
-  companies_id: string | null;
   name: string;
-  /** @format email */
-  email: string;
   phone: string | null;
-  is_admin: boolean;
-  /** @default "1" */
-  is_active: boolean;
-  is_verified: boolean;
-  /** @format timestamptz */
-  updated_at: number | null;
-  magic_link: object;
-  verify_token: string;
-  /** @format email */
-  pending_email: string;
-  email_change_token: string;
-  password_reset_token: string;
 }
 
 export interface CompanyusersPartialUpdateData {
@@ -2639,7 +2625,8 @@ export interface AcceptPartialUpdateOutput {
       | "EXPIRED"
       | "PENDING"
       | "DELETED"
-      | "FILLED";
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -2800,7 +2787,8 @@ export interface CompanyDetailResult {
       | "EXPIRED"
       | "PENDING"
       | "DELETED"
-      | "FILLED";
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -2848,7 +2836,8 @@ export interface QueryUpcomingjobsListData {
       | "EXPIRED"
       | "PENDING"
       | "DELETED"
-      | "FILLED";
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -2939,7 +2928,8 @@ export interface QueryUpcomingListData {
       | "EXPIRED"
       | "PENDING"
       | "DELETED"
-      | "FILLED";
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -3023,7 +3013,14 @@ export type RestaurantDetailData = {
   end_time: number;
   hourly_rate: number;
   required_skills: string[];
-  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED" | "FILLED";
+  status:
+    | "DRAFT"
+    | "PUBLISHED"
+    | "EXPIRED"
+    | "PENDING"
+    | "DELETED"
+    | "FILLED"
+    | "COMPLETED";
   /** @format timestamptz */
   updated_at: number;
   /** @format int64 */
@@ -3072,7 +3069,8 @@ export interface GetJobData {
       | "EXPIRED"
       | "PENDING"
       | "DELETED"
-      | "FILLED";
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -3136,7 +3134,14 @@ export interface PatchJobPayload {
   end_time: number;
   hourly_rate: number;
   required_skills: string[];
-  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED" | "FILLED";
+  status:
+    | "DRAFT"
+    | "PUBLISHED"
+    | "EXPIRED"
+    | "PENDING"
+    | "DELETED"
+    | "FILLED"
+    | "COMPLETED";
   /** @format timestamptz */
   updated_at: number;
   /** @format int64 */
@@ -3176,7 +3181,14 @@ export interface PatchJobData {
   end_time: number;
   hourly_rate: number;
   required_skills: string[];
-  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED" | "FILLED";
+  status:
+    | "DRAFT"
+    | "PUBLISHED"
+    | "EXPIRED"
+    | "PENDING"
+    | "DELETED"
+    | "FILLED"
+    | "COMPLETED";
   /** @format timestamptz */
   updated_at: number;
   /** @format int64 */
@@ -3223,7 +3235,8 @@ export interface QueryUpcomingListResult {
       | "EXPIRED"
       | "PENDING"
       | "DELETED"
-      | "FILLED";
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -3512,7 +3525,8 @@ export type WorksessionsRestaurantTodosListData = {
       | "EXPIRED"
       | "PENDING"
       | "DELETED"
-      | "FILLED";
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -3553,7 +3567,14 @@ export interface JobsDeleteData {
   end_time: number;
   hourly_rate: number;
   required_skills: string[];
-  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED" | "FILLED";
+  status:
+    | "DRAFT"
+    | "PUBLISHED"
+    | "EXPIRED"
+    | "PENDING"
+    | "DELETED"
+    | "FILLED"
+    | "COMPLETED";
   /** @format timestamptz */
   updated_at: number;
   /** @format int64 */
@@ -3600,7 +3621,8 @@ export interface JobsDetailData {
       | "EXPIRED"
       | "PENDING"
       | "DELETED"
-      | "FILLED";
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -3664,7 +3686,14 @@ export interface JobsPartialUpdatePayload {
   end_time: number;
   hourly_rate: number;
   required_skills: string[];
-  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED" | "FILLED";
+  status:
+    | "DRAFT"
+    | "PUBLISHED"
+    | "EXPIRED"
+    | "PENDING"
+    | "DELETED"
+    | "FILLED"
+    | "COMPLETED";
   task: string;
   skill: string;
   whattotake: string;
@@ -3697,7 +3726,14 @@ export interface JobsPartialUpdateData {
   end_time: number;
   hourly_rate: number;
   required_skills: string[];
-  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED" | "FILLED";
+  status:
+    | "DRAFT"
+    | "PUBLISHED"
+    | "EXPIRED"
+    | "PENDING"
+    | "DELETED"
+    | "FILLED"
+    | "COMPLETED";
   /** @format timestamptz */
   updated_at: number;
   /** @format int64 */
@@ -3744,7 +3780,8 @@ export interface JobsListResult {
       | "EXPIRED"
       | "PENDING"
       | "DELETED"
-      | "FILLED";
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -3822,7 +3859,14 @@ export interface JobsCreatePayload {
   end_time: number;
   hourly_rate: number;
   required_skills: string[];
-  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED" | "FILLED";
+  status:
+    | "DRAFT"
+    | "PUBLISHED"
+    | "EXPIRED"
+    | "PENDING"
+    | "DELETED"
+    | "FILLED"
+    | "COMPLETED";
   /** @format int64 */
   restaurant_id: number;
   task: string;
@@ -3857,7 +3901,14 @@ export interface JobsCreateData {
   end_time: number;
   hourly_rate: number;
   required_skills: string[];
-  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED" | "FILLED";
+  status:
+    | "DRAFT"
+    | "PUBLISHED"
+    | "EXPIRED"
+    | "PENDING"
+    | "DELETED"
+    | "FILLED"
+    | "COMPLETED";
   /** @format timestamptz */
   updated_at: number;
   /** @format int64 */
@@ -3904,7 +3955,8 @@ export interface GetJob2Data {
       | "EXPIRED"
       | "PENDING"
       | "DELETED"
-      | "FILLED";
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -3982,7 +4034,14 @@ export interface PostJobPayload {
   end_time: number;
   hourly_rate: number;
   required_skills: string[];
-  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED" | "FILLED";
+  status:
+    | "DRAFT"
+    | "PUBLISHED"
+    | "EXPIRED"
+    | "PENDING"
+    | "DELETED"
+    | "FILLED"
+    | "COMPLETED";
   /** @format timestamptz */
   updated_at: number;
   /** @format int64 */
@@ -4022,7 +4081,14 @@ export interface PostJobData {
   end_time: number;
   hourly_rate: number;
   required_skills: string[];
-  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED" | "FILLED";
+  status:
+    | "DRAFT"
+    | "PUBLISHED"
+    | "EXPIRED"
+    | "PENDING"
+    | "DELETED"
+    | "FILLED"
+    | "COMPLETED";
   /** @format timestamptz */
   updated_at: number;
   /** @format int64 */
@@ -5533,7 +5599,14 @@ export type JobsListOutput = {
   end_time: number;
   hourly_rate: number;
   required_skills: string[];
-  status: "DRAFT" | "PUBLISHED" | "EXPIRED" | "PENDING" | "DELETED" | "FILLED";
+  status:
+    | "DRAFT"
+    | "PUBLISHED"
+    | "EXPIRED"
+    | "PENDING"
+    | "DELETED"
+    | "FILLED"
+    | "COMPLETED";
   /** @format timestamptz */
   updated_at: number;
   /** @format int64 */
@@ -6185,7 +6258,8 @@ export type SessionHistoryCurrentListData = {
       | "EXPIRED"
       | "PENDING"
       | "DELETED"
-      | "FILLED";
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -6655,7 +6729,8 @@ export type SessionHistoryCurrentListResult = {
       | "EXPIRED"
       | "PENDING"
       | "DELETED"
-      | "FILLED";
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -6753,7 +6828,8 @@ export type WorksessionsUserTodosListData = {
       | "EXPIRED"
       | "PENDING"
       | "DELETED"
-      | "FILLED";
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -6915,7 +6991,8 @@ export type WorksessionsListResult = {
       | "EXPIRED"
       | "PENDING"
       | "DELETED"
-      | "FILLED";
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -7035,15 +7112,6 @@ export interface UsersDetailData {
 }
 
 export interface UsersPartialUpdatePayload {
-  name: string;
-  /** @format email */
-  email: string;
-  user_type: string;
-  status: string;
-  /** @format date */
-  last_login_at: string | null;
-  /** @format date */
-  updated_at: string | null;
   skills: string[];
   experience_level: string;
   bio: string;
@@ -7051,39 +7119,19 @@ export interface UsersPartialUpdatePayload {
   /** @format date */
   dateofbirth: string | null;
   profile_image: string;
-  is_approved: boolean;
-  is_verified: boolean;
-  /** @format email */
-  pending_email: string;
-  email_change_token: string;
-  password_reset_token: string;
-  stripe_verified: boolean;
-  stripe_requirements: object;
-  address: string;
   phone: string;
   last_name: string;
   given_name: string;
   last_name_kana: string;
   given_name_kana: string;
-  categories: number[];
   postal_code: string;
   prefecture: string;
   address2: string;
   city: string;
   town: string;
   street: string;
-  profile_completed: boolean;
   /** @format binary */
   photo: File | null;
-  magic_link: {
-    token: string;
-    /**
-     * Time the token expires
-     * @format timestamptz
-     */
-    expiration: number;
-    used: boolean;
-  } | null;
 }
 
 export interface UsersPartialUpdateData {
@@ -7672,7 +7720,8 @@ export type RestaurantTodoDetailData = {
       | "EXPIRED"
       | "PENDING"
       | "DELETED"
-      | "FILLED";
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -7766,7 +7815,8 @@ export type UserDetailResult = {
       | "EXPIRED"
       | "PENDING"
       | "DELETED"
-      | "FILLED";
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -7890,7 +7940,8 @@ export type UserTodoDetailData = {
       | "EXPIRED"
       | "PENDING"
       | "DELETED"
-      | "FILLED";
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */
@@ -8399,7 +8450,8 @@ export interface CancelByChefPartialUpdateData {
       | "EXPIRED"
       | "PENDING"
       | "DELETED"
-      | "FILLED";
+      | "FILLED"
+      | "COMPLETED";
     /** @format timestamptz */
     updated_at: number;
     /** @format int64 */

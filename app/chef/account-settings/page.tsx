@@ -2,24 +2,12 @@
 
 import type React from "react";
 import { useState } from "react";
-import { Save, AlertTriangle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { changeEmail } from "@/lib/api/user";
-import { ChefEmailChangeModal } from "@/components/modals/ChefEmailChangeModal";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { EmailChangeForm } from "@/components/settings/EmailChangeForm";
+import { PasswordChangeForm } from "@/components/settings/PasswordChangeForm";
+import { DeleteAccountForm } from "@/components/settings/DeleteAccountForm";
+import { ConnectSettings } from "./components/ConnectSettings";
 
 export default function AccountSettings() {
   const [activeTab, setActiveTab] = useState("account");
@@ -131,168 +119,19 @@ export default function AccountSettings() {
         <h1 className="text-2xl font-bold">アカウント設定</h1>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="account">アカウント情報</TabsTrigger>
-          <TabsTrigger value="password">パスワード</TabsTrigger>
-          {/* <TabsTrigger value="notifications">通知設定</TabsTrigger> */}
-        </TabsList>
+      <div className="space-y-6">
+        <EmailChangeForm userType="chef" />
 
-        <TabsContent value="account" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>アカウント情報</CardTitle>
-              <CardDescription>
-                アカウントの基本情報を変更できます
-              </CardDescription>
-            </CardHeader>
-            <form onSubmit={handleSaveAccount}>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">メールアドレス</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={accountInfo.email}
-                    onChange={handleAccountChange}
-                    required
-                  />
-                </div>
+        <PasswordChangeForm userType="chef" />
 
-                <div className="space-y-2">
-                  <Label htmlFor="phone">電話番号</Label>
-                  <Input
-                    id="phone"
-                    name="phone"
-                    value={accountInfo.phone}
-                    onChange={handleAccountChange}
-                    required
-                  />
-                </div>
+        <ConnectSettings />
 
-                <div className="space-y-2">
-                  <Label htmlFor="language">言語設定</Label>
-                  <select
-                    id="language"
-                    name="language"
-                    className="w-full rounded-md border border-input bg-background px-3 py-2"
-                    value={accountInfo.language}
-                    onChange={handleAccountChange}>
-                    <option value="ja">日本語</option>
-                    <option value="en">English</option>
-                  </select>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button type="submit" className="ml-auto">
-                  <Save className="h-4 w-4 mr-2" />
-                  保存する
-                </Button>
-              </CardFooter>
-            </form>
-          </Card>
-
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle className="text-red-600">アカウント削除</CardTitle>
-              <CardDescription>
-                アカウントを削除すると、すべてのデータが完全に削除されます。この操作は元に戻せません。
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>警告</AlertTitle>
-                <AlertDescription>
-                  アカウントを削除すると、すべてのプロフィール情報、応募履歴、メッセージなどが完全に削除されます。
-                </AlertDescription>
-              </Alert>
-            </CardContent>
-            <CardFooter>
-              <Button variant="destructive" className="ml-auto">
-                アカウントを削除する
-              </Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="password" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>パスワード変更</CardTitle>
-              <CardDescription>
-                アカウントのパスワードを変更できます
-              </CardDescription>
-            </CardHeader>
-            <form onSubmit={handleChangePassword}>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="currentPassword">現在のパスワード</Label>
-                  <Input
-                    id="currentPassword"
-                    name="currentPassword"
-                    type="password"
-                    value={passwordInfo.currentPassword}
-                    onChange={handlePasswordChange}
-                    required
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="space-y-2">
-                  <Label htmlFor="newPassword">新しいパスワード</Label>
-                  <Input
-                    id="newPassword"
-                    name="newPassword"
-                    type="password"
-                    value={passwordInfo.newPassword}
-                    onChange={handlePasswordChange}
-                    required
-                  />
-                  <p className="text-xs text-gray-500">
-                    パスワードは8文字以上で、英字、数字、記号を含める必要があります
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">
-                    新しいパスワード（確認）
-                  </Label>
-                  <Input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type="password"
-                    value={passwordInfo.confirmPassword}
-                    onChange={handlePasswordChange}
-                    required
-                  />
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button type="submit" className="ml-auto">
-                  パスワードを変更する
-                </Button>
-              </CardFooter>
-            </form>
-          </Card>
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle>メールアドレス変更</CardTitle>
-              <CardDescription>メールアドレスを変更できます</CardDescription>
-            </CardHeader>
-            <CardFooter>
-              <ChefEmailChangeModal
-                currentEmail={user?.email || ""}
-                trigger={
-                  <Button className="ml-auto">メールアドレスを変更する</Button>
-                }
-                onSubmit={handleEmailChange}
-              />
-            </CardFooter>
-          </Card>
-        </TabsContent>
+        <DeleteAccountForm
+          userType="chef"
+          description="アカウントを削除すると、すべてのプロフィール情報、応募履歴、メッセージなどが完全に削除されます。"
+        />
+      </div>
+      
 
         {/* <TabsContent value="notifications" className="mt-6">
           <Card>
@@ -557,7 +396,6 @@ export default function AccountSettings() {
             </form>
           </Card>
         </TabsContent> */}
-      </Tabs>
     </div>
   );
 }
