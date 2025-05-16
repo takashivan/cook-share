@@ -2,9 +2,9 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProfileForm from "./components/ProfileForm";
-import { EmailChangeForm } from "./components/EmailChangeForm";
-import { PasswordChangeForm } from "./components/PasswordChangeForm";
-import { DeleteAccountForm } from "./components/DeleteAccountForm";
+import { EmailChangeForm } from "@/components/settings/EmailChangeForm";
+import { PasswordChangeForm } from "@/components/settings/PasswordChangeForm";
+import { DeleteAccountForm } from "@/components/settings/DeleteAccountForm";
 
 interface DeleteAccountForm {
   password: string;
@@ -32,9 +32,9 @@ export default function AdminSettingsPage() {
         </TabsContent>
 
         <TabsContent value="security" className="space-y-6">
-          <EmailChangeForm />
+          <EmailChangeForm userType="company" />
 
-          <PasswordChangeForm />
+          <PasswordChangeForm userType="company" />
 
           {/* <Card>
             <CardHeader>
@@ -66,7 +66,10 @@ export default function AdminSettingsPage() {
             </CardContent>
           </Card> */}
 
-          <DeleteAccountForm />
+          <DeleteAccountForm
+            userType="company"
+            description="アカウントを削除すると、このアカウントのすべてのプロフィール情報などが完全に削除されます。"
+          />
         </TabsContent>
 
         {/* <TabsContent value="notifications" className="space-y-6">

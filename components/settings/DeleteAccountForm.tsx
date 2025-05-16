@@ -18,36 +18,47 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Trash2 } from "lucide-react";
+import { AlertTriangle, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
-interface DeleteAccountForm {
+import { useAuth } from "@/lib/contexts/AuthContext";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+interface DeleteForm {
   password: string;
 }
 
-export function DeleteAccountForm() {
-  const [isAlertOpen, setIsAlertOpen] = useState(false);
+interface DeleteAccountFormProps {
+  userType: "company" | "chef";
+  description: string
+}
 
+export function DeleteAccountForm({
+  userType,
+  description
+}: DeleteAccountFormProps) {
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
   const router = useRouter();
-  const { deleteAccount } = useCompanyAuth();
+
+  const { deleteAccount: companyDelete } = useCompanyAuth();
+  const { deleteAccount: chefDelete } = useAuth();
+  const deleteAccount = userType === "company" ? companyDelete : chefDelete;
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting, isDirty },
     reset,
-  } = useForm({
+  } = useForm<DeleteForm>({
     defaultValues: {
       password: "",
     },
   });
 
-  const onSubmit = async (data: DeleteAccountForm) => {
+  const onSubmit = async (data: DeleteForm) => {
     try {
       await deleteAccount(data.password);
       toast({
@@ -69,10 +80,17 @@ export function DeleteAccountForm() {
         <CardHeader>
           <CardTitle className="text-red-600">アカウント削除</CardTitle>
           <CardDescription>
-            アカウントを完全に削除します。この操作は元に戻せません。
+            アカウントを完全に削除します
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>警告</AlertTitle>
+            <AlertDescription>
+              {description}
+            </AlertDescription>
+          </Alert>
           <Button
             type="button"
             variant="destructive"
@@ -95,7 +113,7 @@ export function DeleteAccountForm() {
           <AlertDialogHeader>
             <AlertDialogTitle>アカウントを削除しますか？</AlertDialogTitle>
             <AlertDialogDescription>
-              アカウントを削除すると、このアカウントのすべてのデータが完全に削除されます。<br />
+              {description}<br />
               この操作は元に戻せません。<br />
               本当に削除する場合、アカウントのパスワードを入力してください。
             </AlertDialogDescription>

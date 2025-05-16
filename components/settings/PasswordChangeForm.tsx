@@ -14,22 +14,33 @@ import { toast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
-interface CompanyEmailChangeForm {
+interface ChangeForm {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
 }
 
-export function PasswordChangeForm() {
-  const { user, changePassword } = useCompanyAuth();
+interface PasswordChangeFormProps {
+  userType: "company" | "chef";
+}
+
+export function PasswordChangeForm({
+  userType,
+}: PasswordChangeFormProps) {
+  const { user: companyUser, changePassword: companyChangePassword } = useCompanyAuth();
+  const { user: chefUser, changePassword: chefChangePassword } = useAuth();
+  const user = userType === "company" ? companyUser : chefUser;
+  const changePassword = userType === "company" ? companyChangePassword : chefChangePassword;
+
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
     watch,
     reset,
-  } = useForm<CompanyEmailChangeForm>({
+  } = useForm<ChangeForm>({
     defaultValues: {
       currentPassword: "",
       newPassword: "",
@@ -37,7 +48,7 @@ export function PasswordChangeForm() {
     },
   });
 
-  const submit = async (data: CompanyEmailChangeForm) => {
+  const submit = async (data: ChangeForm) => {
     if (!user?.email) {
       toast({
         title: "エラー",

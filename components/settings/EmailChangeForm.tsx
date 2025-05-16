@@ -14,15 +14,25 @@ import { Label } from "@/components/ui/label";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { useForm } from "react-hook-form";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
-interface CompanyEmailChangeForm {
+interface ChangeForm {
   newEmail: string;
   confirmEmail: string;
   password: string;
 }
 
-export function EmailChangeForm() {
-  const { user, changeEmail } = useCompanyAuth();
+interface EmailChangeFormProps {
+  userType: "company" | "chef";
+}
+
+export function EmailChangeForm({
+  userType,
+}: EmailChangeFormProps) {
+  const { user: companyUser, changeEmail: companyChangeEmail } = useCompanyAuth();
+  const { user: chefUser, changeEmail: chefChangeEmail } = useAuth();
+  const user = userType === "company" ? companyUser : chefUser;
+  const changeEmail = userType === "company" ? companyChangeEmail : chefChangeEmail;
   
   const {
     register,
@@ -30,7 +40,7 @@ export function EmailChangeForm() {
     formState: { errors, isSubmitting },
     watch,
     reset,
-  } = useForm<CompanyEmailChangeForm>({
+  } = useForm<ChangeForm>({
     defaultValues: {
       newEmail: "",
       confirmEmail: "",
@@ -38,7 +48,7 @@ export function EmailChangeForm() {
     },
   });
 
-  const submit = async (data: CompanyEmailChangeForm) => {
+  const submit = async (data: ChangeForm) => {
     if (!user?.email) {
       toast({
         title: "エラー",

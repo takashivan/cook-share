@@ -18,6 +18,8 @@ import type { UserData, UserProfile } from "@/lib/api/user";
 import { login, logout, getUserProfile, register } from "@/lib/api/user";
 import { getApi } from "@/api/api-factory";
 import { Users } from "@/api/__generated__/base/Users";
+import { Auth } from "@/api/__generated__/authentication/Auth";
+import { UsersPartialUpdatePayload } from "@/api/__generated__/base/data-contracts";
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -26,6 +28,10 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   register: (data: UserData) => Promise<void>;
+  update: (data: Partial<UsersPartialUpdatePayload>) => Promise<void>;
+  changeEmail: (email: string, currentEmail: string, password: string) => Promise<void>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  deleteAccount: (password: string) => Promise<void>;
   setUser: (user: UserProfile | null) => void;
   reloadUser: () => Promise<void>;
 }
@@ -37,6 +43,10 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => {},
   logout: () => {},
   register: async () => {},
+  update: async () => {},
+  changeEmail: async () => {},
+  changePassword: async () => {},
+  deleteAccount: async () => {},
   setUser: () => {},
   reloadUser: async () => {},
 });
@@ -76,7 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initAuth();
   }, []);
 
-  const updateUser = (userData: UserProfile | null) => {
+  const saveUser = (userData: UserProfile | null) => {
     setUser(userData);
     setCurrentUser(userData, "chef");
     if (userData) {
@@ -103,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error("User not found");
       }
 
-      updateUser(userData.data as unknown as UserProfile);
+      saveUser(userData.data as unknown as UserProfile);
     } catch (error) {
       console.error("Error reloading user:", error);
       setUser(null);
@@ -113,7 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const setAuth = (token: string, userData: UserProfile) => {
     setAuthToken(token, "chef");
-    updateUser(userData);
+    saveUser(userData);
     setIsAuthenticated(true);
   };
 
@@ -148,6 +158,131 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const handleUpdate = async (data: Partial<UsersPartialUpdatePayload>) => {
+    try {
+      const userId = user?.id;
+      if (!userId) {
+        throw new Error("User ID not found");
+      }
+
+      const usersApi = getApi(Users);
+      const response = await usersApi.usersPartialUpdate(userId, data as UsersPartialUpdatePayload, {
+        headers: {
+          "X-User-Type": "chef"
+        }
+      });
+
+      if (response) {
+        saveUser(response.data as unknown as UserProfile);
+      }
+    } catch (error) {
+      console.error("Update error:", error);
+      throw error;
+    }
+  };
+
+  const handleChangeEmail = async (email: string, currentEmail: string, password: string) => {
+    try {
+      // 現在のメアドとPWでログインできるか確認
+      const { sessionToken, user: currentUser } = await login({
+        email: currentEmail,
+        password,
+      });
+
+      const userId = currentUser?.id;
+      if (!userId) {
+        throw new Error("User ID not found");
+      }
+
+      setAuth(sessionToken, currentUser);
+
+      const authApi = getApi(Auth);
+      const response = await authApi.updateEmailCreate({
+        email,
+        user_id: userId,
+      }, {
+        headers: {
+          "X-User-Type": "chef"
+        }
+      });
+
+      if (response) {
+        saveUser(response.data as unknown as UserProfile);
+      }
+    }
+    catch (error: any) {
+      if (error?.response?.status === 401) {
+        // 認証エラー（ログイン失敗）
+        throw new Error("現在のメールアドレスまたはパスワードが間違っています");
+      }
+
+      console.error("Change email error:", error);
+      throw error;
+    }
+  };
+
+  const handleChangePassword = async (currentPassword: string, newPassword: string) => {
+    try {
+      // 現在のパスワードでログインできるか確認
+      const { sessionToken, user: currentUser } = await login({
+        email: user?.email || "",
+        password: currentPassword,
+      });
+      if (!currentUser) {
+        throw new Error("現在のパスワードが間違っています");
+      }
+
+      setAuth(sessionToken, currentUser);
+
+      const userId = currentUser?.id;
+      if (!userId) {
+        throw new Error("User ID not found");
+      }
+
+      const authApi = getApi(Auth);
+      const response = await authApi.changePasswordCreate({ new_password: newPassword }, {
+        headers: {
+          "X-User-Type": "chef"
+        }
+      });
+
+      if (response) {
+        saveUser(response.data as unknown as UserProfile);
+      }
+    } catch (error) {
+      console.error("Change password error:", error);
+      throw error;
+    }
+  };
+
+  const handleDeleteAccount = async (password: string) => {
+    try {
+      // 現在のパスワードでログインできるか確認
+      const { user: currentUser } = await login({
+        email: user?.email || "",
+        password,
+      });
+      if (!currentUser) {
+        throw new Error("現在のパスワードが間違っています");
+      }
+
+      const userId = user?.id;
+      if (!userId) {
+        throw new Error("User ID not found");
+      }
+      const usersApi = getApi(Users);
+      await usersApi.usersDelete(userId, {
+        headers: {
+          "X-User-Type": "chef"
+        }
+      });
+      handleLogout();
+    } catch (error) {
+      console.error("Delete account error:", error);
+      throw error;
+    }
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -161,7 +296,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login: handleLogin,
         logout: handleLogout,
         register: handleRegister,
-        setUser: updateUser,
+        update: handleUpdate,
+        setUser: saveUser,
+        changeEmail: handleChangeEmail,
+        changePassword: handleChangePassword,
+        deleteAccount: handleDeleteAccount,
         reloadUser,
       }}>
       {children}
