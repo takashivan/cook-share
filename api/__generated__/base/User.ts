@@ -11,10 +11,10 @@
  */
 
 import {
-  EmailChangeCreateData,
-  EmailChangeCreatePayload,
-  EmailConfirmCreateData,
-  EmailConfirmCreatePayload,
+  EmailChangeCreateBody,
+  EmailChangeCreateResult,
+  EmailConfirmCreateBody,
+  EmailConfirmCreateResult,
   ProfilePartialUpdateData,
   ProfilePartialUpdatePayload,
   SessionHistoryCurrentListData,
@@ -46,10 +46,10 @@ export class User<
    * @secure
    */
   emailChangeCreate = (
-    data: EmailChangeCreatePayload,
+    data: EmailChangeCreateBody,
     params: RequestParams = {},
   ) =>
-    this.request<EmailChangeCreateData, void>({
+    this.request<EmailChangeCreateResult, void>({
       path: `/user/email/change`,
       method: "POST",
       body: data,
@@ -66,8 +66,8 @@ export class User<
     const key = enabled ? [`/user/email/change`] : null;
     const fetcher: (
       url: string[],
-      { arg }: { arg: EmailChangeCreatePayload },
-    ) => Promise<EmailChangeCreateData> = (_, { arg }) =>
+      { arg }: { arg: EmailChangeCreateBody },
+    ) => Promise<EmailChangeCreateResult> = (_, { arg }) =>
       this.emailChangeCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
@@ -81,10 +81,10 @@ export class User<
    * @secure
    */
   emailConfirmCreate = (
-    data: EmailConfirmCreatePayload,
+    data: EmailConfirmCreateBody,
     params: RequestParams = {},
   ) =>
-    this.request<EmailConfirmCreateData, void>({
+    this.request<EmailConfirmCreateResult, void>({
       path: `/user/email/confirm`,
       method: "POST",
       body: data,
@@ -101,8 +101,8 @@ export class User<
     const key = enabled ? [`/user/email/confirm`] : null;
     const fetcher: (
       url: string[],
-      { arg }: { arg: EmailConfirmCreatePayload },
-    ) => Promise<EmailConfirmCreateData> = (_, { arg }) =>
+      { arg }: { arg: EmailConfirmCreateBody },
+    ) => Promise<EmailConfirmCreateResult> = (_, { arg }) =>
       this.emailConfirmCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
