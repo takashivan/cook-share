@@ -523,13 +523,14 @@ export default function ChefProfilePage() {
                       id="town"
                       name="town"
                       value={town}
-                      readOnly
-                      className="bg-gray-50"
+                      onChange={(e) => setTown(e.target.value)}
+                      placeholder="例: 渋谷"
+                      required
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="street">番地</Label>
+                    <Label htmlFor="street">丁目・番地・号</Label>
                     <Input
                       id="street"
                       name="street"
@@ -547,7 +548,7 @@ export default function ChefProfilePage() {
                       name="address2"
                       value={address2}
                       onChange={(e) => setAddress2(e.target.value)}
-                      placeholder="例: 〇〇マンション101"
+                      placeholder="例: サンハイツ101"
                     />
                   </div>
                 </>
