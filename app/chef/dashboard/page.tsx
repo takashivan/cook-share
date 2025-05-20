@@ -120,7 +120,7 @@ export default function ChefDashboard() {
                   <div className="text-gray-500 text-sm mb-2">
                     報酬受取にはStripe連携が必須です。
                   </div>
-                  <Link href="/chef/profile">
+                  <Link href="/chef/account-settings">
                     <button className="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700 transition">
                       連携する
                     </button>

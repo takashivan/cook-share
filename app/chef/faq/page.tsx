@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useState } from "react";
 import {
   Accordion,
@@ -9,7 +10,7 @@ import {
 } from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export default function FAQPage() {
+export default function ChefFaqPage() {
   const [activeTab, setActiveTab] = useState("general");
 
   const faqCategories = [
@@ -110,71 +111,122 @@ export default function FAQPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-8">よくある質問</h1>
-
-      <Tabs
-        defaultValue="general"
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="mb-6">
-        <TabsList className="grid grid-cols-2 md:grid-cols-5 h-auto">
-          {faqCategories.map((category) => (
-            <TabsTrigger
-              key={category.id}
-              value={category.id}
-              className="data-[state=active]:text-white py-2"
-              style={{
-                backgroundColor:
-                  activeTab === category.id ? "#DB3F1C" : "transparent",
-                color: activeTab === category.id ? "white" : "inherit",
-              }}>
-              {category.name}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        {faqCategories.map((category) => (
-          <TabsContent key={category.id} value={category.id} className="mt-6">
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2
-                className="text-lg font-bold mb-4"
-                style={{ color: "#DB3F1C" }}>
-                {category.name}
-              </h2>
-
-              <Accordion type="single" collapsible className="w-full">
-                {faqItems[category.id as keyof typeof faqItems].map(
-                  (item, index) => (
-                    <AccordionItem key={index} value={`item-${index}`}>
-                      <AccordionTrigger className="text-left font-medium">
-                        {item.question}
-                      </AccordionTrigger>
-                      <AccordionContent className="text-sm text-gray-700">
-                        {item.answer}
-                      </AccordionContent>
-                    </AccordionItem>
-                  )
-                )}
-              </Accordion>
-            </div>
-          </TabsContent>
-        ))}
-      </Tabs>
-
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-lg font-bold mb-4">解決しない場合は</h2>
-        <p className="text-sm mb-4">
-          お探しの質問が見つからない場合や、さらに詳しい情報が必要な場合は、
-          お問い合わせフォームからご連絡ください。
-        </p>
-        <a href="/chef/contact">
-          <button
-            className="w-full py-3 rounded-md text-white font-medium"
-            style={{ backgroundColor: "#DB3F1C" }}>
-            お問い合わせフォームへ
-          </button>
-        </a>
+    <div className="max-w-2xl mx-auto py-8 px-4">
+      <h1 className="text-3xl font-bold mb-6 text-center">
+        CHEFDOM（シェフダム）よくあるご質問
+      </h1>
+      <h2 className="text-xl font-semibold mb-4">シェフ向け</h2>
+      <div className="space-y-6">
+        <div>
+          <p className="font-semibold">Q: どのようなお仕事を受託できますか？</p>
+          <p className="mt-1">
+            A:
+            飲食店調理場でのスポット（短時間）業務を扱っております。多種多様なお仕事を経験いただくことで、調理人としての経験を積んでいただけます。
+            <br />
+            また、ご利用前にCHEFDOM利用規約を必ずお読みください。
+            <br />
+            ※現在、東京都・大阪府の案件を主に扱っております。
+          </p>
+        </div>
+        <div>
+          <p className="font-semibold">Q: 会員登録する上で資格は必要ですか？</p>
+          <p className="mt-1">
+            A:
+            18歳以上の方であればどなたでもご利用いただけますが、CHEFDOMは飲食店での実務経験があるシェフの方向けのサービスですので、実務経験のある方を推奨しています。
+          </p>
+        </div>
+        <div>
+          <p className="font-semibold">Q: どのように仕事を探せば良いですか？</p>
+          <p className="mt-1">
+            A:
+            勤務エリア、ジャンル、キーワード検索など、様々な条件で案件を検索できます。また、気になる発注者をフォローすることも可能です。
+          </p>
+        </div>
+        <div>
+          <p className="font-semibold">Q: 利用の流れを教えてください</p>
+          <p className="mt-1">
+            A:
+            まずは会員登録（無料）いただきます。プロフィール、スキル、実務経験などを登録していただき、その後、外部サービスの決済代行業者であるStripeに登録をいただきます。CHEFDOMでは、本人確認を含めたセキュリティの関係上、報酬のお支払いはStripeを通じて行います。Stripe経由で銀行口座に入金が行われるためには、
+            本人確認書類の提出及び、
+            銀行名・口座番号・名義の登録が必要です。会員登録とStripeでの登録審査完了後、求人案件への応募が可能になります。
+            <br />
+            尚、報酬のお支払いはCHEFDOM利用規約第14条第1項に記載の通り、業務委託を発注した飲食店からではなく、当社からシェフへのお支払いとなります。
+          </p>
+        </div>
+        <div>
+          <p className="font-semibold">
+            Q: お仕事日当日、どのように稼働時間を報告すればいいですか？
+          </p>
+          <p className="mt-1">
+            A:お仕事ごとに異なるQRコードが店舗にて表示されていますので、チェックイン時にQRコードをシェフが読み取ることで自動的に稼働が記録されます。チェックアウトは完了報告ボタンを押下いただくことで自動的に記録されます。
+          </p>
+        </div>
+        <div>
+          <p className="font-semibold">Q: 報酬はどのように受け取れますか？</p>
+          <p className="mt-1">
+            A:
+            お仕事完了後、勤務先の店舗を評価いただくことで完了報告となります。稼働月を当月とし、当月末〆翌月末日にStripe経由で報酬を受け取っていただけます。尚、報酬は当社からのお支払いとなります。
+          </p>
+        </div>
+        <div>
+          <p className="font-semibold">Q: 手数料はかかりますか？</p>
+          <p className="mt-1">
+            A:
+            CHEFDOM利用料含め、シェフは一切無償です。求人原稿に記載された報酬額を満額受け取っていただけます。
+          </p>
+        </div>
+        <div>
+          <p className="font-semibold">
+            Q: お仕事マッチング後にキャンセルしたい
+          </p>
+          <p className="mt-1">
+            A:
+            原則として、マッチング後のキャンセルは推奨しておりません。マッチング後は店舗担当者とメッセージが可能ですのでやむを得ない場合は必ず飲食店への連絡の上、プラットフォームを通じてキャンセル手続きを行ってください。尚、CHEFDOM利用規約第13条にてキャンセル料を定めておりますので必ずご確認ください。下記抜粋したものを掲載いたします。
+          </p>
+          <div className="bg-gray-50 rounded p-3 my-2 text-xs">
+            〈抜粋〉
+            <br />
+            (１)キャンセル料
+            <br />
+            ①業務委託開始日から起算して２日前以降の以降のキャンセル
+            <br />
+            ：会員間取引における報酬予定額の80％
+            <br />
+            （例）業務委託開始日が５月10日の場合→５月８日以降のキャンセルは、キャンセル料が発生
+            <br />
+            ②業務委託開始当日のキャンセルおよびクライアントへの連絡を⾏わない無断キャンセル
+            <br />
+            ：会員間取引における報酬予定額の100％
+            <br />
+          </div>
+          <p className="mt-1">
+            また、シェフからのキャンセルが申込件数全体の4割を超過した場合、CHEFDOM会員資格を停止または取消になりますのでご注意ください。
+          </p>
+        </div>
+        <div>
+          <p className="font-semibold">
+            Q: 同一日時の複数案件に応募可能ですか？
+          </p>
+          <p className="mt-1">
+            A:CHEFDOMは応募後即時マッチングのため、同一日時の複数案件にはご応募いただけません。
+          </p>
+        </div>
+        <div>
+          <p className="font-semibold">Q: 確定申告は必要ですか？</p>
+          <p className="mt-1">
+            A: 確定申告が必要になるか否かはシェフご自身でご確認ください。
+            <br />
+            ※確定申告が必要な場合には、ご自身で申告をお願いいたします。
+            <br />
+            ※ご不明点は、税務署や税理士などにご相談ください。
+          </p>
+        </div>
+        <div>
+          <p className="font-semibold">Q: 源泉徴収は必要ですか？</p>
+          <p className="mt-1">
+            A:CHEFDOMは雇用契約ではなく業務委託契約です。このため報酬に対して源泉徴収は発生しません。
+          </p>
+        </div>
       </div>
     </div>
   );
