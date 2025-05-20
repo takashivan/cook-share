@@ -46,6 +46,8 @@ export interface CompanyUser {
   is_verified: boolean;
   created_at?: string;
   updated_at?: string;
+  pending_email?: string;
+  email_change_token?: string;
 }
 
 type QueryParams = Record<string, string>;
