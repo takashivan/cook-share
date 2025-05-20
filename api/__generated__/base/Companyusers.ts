@@ -18,6 +18,7 @@ import {
   CompanyusersListResult,
   CompanyusersPartialUpdateData,
   CompanyusersPartialUpdatePayload,
+  DashboardListData,
   EmailChangeCreateData,
   EmailChangeCreatePayload,
   EmailConfirmCreateData,
@@ -97,6 +98,100 @@ export class Companyusers<
       { arg }: { arg: EmailConfirmCreatePayload },
     ) => Promise<EmailConfirmCreateData> = (_, { arg }) =>
       this.emailConfirmCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags companyusers
+   * @name EmailChangeCreate
+   * @request POST:/companyusers/email/change
+   */
+  emailChangeCreate = (
+    data: EmailChangeCreatePayload,
+    params: RequestParams = {},
+  ) =>
+    this.request<EmailChangeCreateData, void>({
+      path: `/companyusers/email/change`,
+      method: "POST",
+      body: data,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+
+  emailChangeCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/companyusers/email/change`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: EmailChangeCreatePayload },
+    ) => Promise<EmailChangeCreateData> = (_, { arg }) =>
+      this.emailChangeCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> required
+   *
+   * @tags companyusers
+   * @name EmailConfirmCreate
+   * @request POST:/companyusers/email/confirm
+   * @secure
+   */
+  emailConfirmCreate = (
+    data: EmailConfirmCreatePayload,
+    params: RequestParams = {},
+  ) =>
+    this.request<EmailConfirmCreateData, void>({
+      path: `/companyusers/email/confirm`,
+      method: "POST",
+      body: data,
+      secure: true,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+
+  emailConfirmCreateQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/companyusers/email/confirm`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: EmailConfirmCreatePayload },
+    ) => Promise<EmailConfirmCreateData> = (_, { arg }) =>
+      this.emailConfirmCreate(arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags companyusers
+   * @name DashboardList
+   * @request GET:/companyusers/{companyuser_id}/dashboard
+   */
+  dashboardList = (companyuserId: string, params: RequestParams = {}) =>
+    this.request<DashboardListData, void>({
+      path: `/companyusers/${companyuserId}/dashboard`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  dashboardListQueryArgs = (
+    companyuserId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/companyusers/${companyuserId}/dashboard`] : null;
+    const fetcher = () =>
+      this.dashboardList(companyuserId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 

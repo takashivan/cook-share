@@ -24,6 +24,17 @@ export const LinkLineId = async (
   return res.json();
 };
 
+export const UnlinkLineId = async (user_id: string) => {
+  const res = await fetch(`${baseURL}/line-disconnect`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ user_id }),
+  });
+  return res.json();
+};
+
 export const LinkLineUser = async (data: {
   line_user_id: string;
   email: string;

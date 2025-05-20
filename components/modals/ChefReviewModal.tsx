@@ -48,6 +48,9 @@ export function ChefReviewModal({
           <DialogTitle className="text-center text-xl">
             完了報告・レビュー
           </DialogTitle>
+          <p className="text-sm text-gray-500">
+            72時間以内に完了報告を行なってください。
+          </p>
         </DialogHeader>
         <div className="py-4">
           <div className="mb-4">
