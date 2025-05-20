@@ -762,6 +762,15 @@ export interface SummaryChefListData {
   message_summaries: string;
 }
 
+export interface SummaryRestaurantListParams {
+  /** @format int64 */
+  restaurant_id: number;
+}
+
+export interface SummaryRestaurantListData {
+  message_summaries: string;
+}
+
 export type UnreadSummaryChefListData = object;
 
 export type UnreadSummaryRestaurantDetailData = object;
@@ -2271,6 +2280,183 @@ export interface CompanyuserPartialUpdateData {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+}
+
+export interface EmailChangeCreatePayload {
+  /** @format email */
+  email: string;
+}
+
+export interface EmailChangeCreateData {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format uuid */
+  companies_id: string | null;
+  name: string;
+  /** @format email */
+  email: string;
+  phone: string | null;
+  /** @format password */
+  password: string;
+  is_admin: boolean;
+  /** @default "1" */
+  is_active: boolean;
+  is_verified: boolean;
+  /** @format timestamptz */
+  updated_at: number | null;
+  magic_link: object;
+  verify_token: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
+  password_reset_token: string;
+}
+
+export interface EmailConfirmCreatePayload {
+  token: string;
+}
+
+export interface EmailConfirmCreateData {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format uuid */
+  companies_id: string | null;
+  name: string;
+  /** @format email */
+  email: string;
+  phone: string | null;
+  /** @format password */
+  password: string;
+  is_admin: boolean;
+  /** @default "1" */
+  is_active: boolean;
+  is_verified: boolean;
+  /** @format timestamptz */
+  updated_at: number | null;
+  magic_link: object;
+  verify_token: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
+  password_reset_token: string;
+}
+
+export interface DashboardListData {
+  restaurant_count: string;
+  /** @format int64 */
+  job_all_publised: number;
+  /** @format int64 */
+  job_filled: number;
+  /** @format int64 */
+  job_now_published: number;
+  to_be_verified_reviews: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format int64 */
+    rating: number;
+    comment: string;
+    /** @format timestamptz */
+    updated_at: number;
+    /** @format int64 */
+    session_id: number;
+    /** @format uuid */
+    reviewer_id: string;
+    /** @format int64 */
+    reviewee_id: number;
+    worksession: {
+      /** @format timestamptz */
+      check_in_time: number;
+      /** @format timestamptz */
+      check_out_time: number;
+      status:
+        | "SCHEDULED"
+        | "IN_PROGRESS"
+        | "CANCELED_BY_CHEF"
+        | "CANCELED_BY_RESTAURANT"
+        | "COMPLETED"
+        | "VERIFIED"
+        | "DISPUTE"
+        | "ESCALATED"
+        | "PAID"
+        | "CANCELED";
+      job: {
+        title: string;
+        /** @format date */
+        work_date: string;
+        /** @format timestamptz */
+        start_time: number;
+        /** @format timestamptz */
+        end_time: number;
+      } | null;
+      user: {
+        name: string;
+        profile_image: string;
+      } | null;
+    };
+    restaurant: {
+      name: string;
+    } | null;
+  }[];
+  worksessions_today: {
+    /** @format int64 */
+    id: number;
+    /** @format timestamptz */
+    check_in_time: number;
+    status:
+      | "SCHEDULED"
+      | "IN_PROGRESS"
+      | "CANCELED_BY_CHEF"
+      | "CANCELED_BY_RESTAURANT"
+      | "COMPLETED"
+      | "VERIFIED"
+      | "DISPUTE"
+      | "ESCALATED"
+      | "PAID"
+      | "CANCELED";
+    /** @format uuid */
+    user_id: string | null;
+    /** @format int64 */
+    restaurant_id: number;
+    /** @format int64 */
+    job_id: number;
+    /** @format int64 */
+    check_in_code: number | null;
+    job: {
+      title: string;
+      /** @format date */
+      work_date: string;
+      /** @format timestamptz */
+      start_time: number;
+      /** @format timestamptz */
+      end_time: number;
+    } | null;
+    restaurant: {
+      name: string;
+    } | null;
+    user: {
+      name: string;
+      profile_image: string;
+      phone: string;
+    } | null;
+  }[];
+  chef_review: {
+    chef_review_rating: number;
+  };
 }
 
 export type RestaurantsListResult = {
@@ -5949,12 +6135,12 @@ export interface RestaurantCreatePayload {
 
 export type RestaurantCreateData = object;
 
-export interface EmailChangeCreatePayload {
+export interface EmailChangeCreateBody {
   /** @format email */
   email: string;
 }
 
-export interface EmailChangeCreateData {
+export interface EmailChangeCreateResult {
   /** @format uuid */
   id: string;
   /**
@@ -6018,11 +6204,11 @@ export interface EmailChangeCreateData {
   } | null;
 }
 
-export interface EmailConfirmCreatePayload {
+export interface EmailConfirmCreateBody {
   token: string;
 }
 
-export interface EmailConfirmCreateData {
+export interface EmailConfirmCreateResult {
   /** @format uuid */
   id: string;
   /**
@@ -6401,6 +6587,161 @@ export interface UserPartialUpdatePayload {
 }
 
 export type UserPartialUpdateData = object;
+
+export interface EmailChangeCreateInput {
+  /** @format email */
+  email: string;
+}
+
+export interface EmailChangeCreateOutput {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  name: string;
+  /** @format email */
+  email: string;
+  /** @format password */
+  password: string;
+  user_type: string;
+  status: string;
+  /** @format date */
+  last_login_at: string | null;
+  /** @format date */
+  updated_at: string | null;
+  skills: string[];
+  experience_level: string;
+  bio: string;
+  certifications: string[];
+  /** @format date */
+  dateofbirth: string | null;
+  profile_image: string;
+  is_approved: boolean;
+  line_user_id: string;
+  line_display_name: string;
+  line_notification_enabled: boolean;
+  is_verified: boolean;
+  verify_token: string;
+  stripe_account_id: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
+  password_reset_token: string;
+  stripe_verified: boolean;
+  stripe_requirements: object;
+  address: string;
+  phone: string;
+  last_name: string;
+  given_name: string;
+  last_name_kana: string;
+  given_name_kana: string;
+  categories: number[];
+  postal_code: string;
+  prefecture: string;
+  address2: string;
+  city: string;
+  town: string;
+  street: string;
+  profile_completed: boolean;
+  magic_link: {
+    token: string;
+    /**
+     * Time the token expires
+     * @format timestamptz
+     */
+    expiration: number;
+    used: boolean;
+  } | null;
+}
+
+export interface EmailConfirmCreateInput {
+  token: string;
+}
+
+export interface EmailConfirmCreateOutput {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  name: string;
+  /** @format email */
+  email: string;
+  /** @format password */
+  password: string;
+  user_type: string;
+  status: string;
+  /** @format date */
+  last_login_at: string | null;
+  /** @format date */
+  updated_at: string | null;
+  skills: string[];
+  experience_level: string;
+  bio: string;
+  certifications: string[];
+  /** @format date */
+  dateofbirth: string | null;
+  profile_image: string;
+  is_approved: boolean;
+  line_user_id: string;
+  line_display_name: string;
+  line_notification_enabled: boolean;
+  is_verified: boolean;
+  verify_token: string;
+  stripe_account_id: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
+  password_reset_token: string;
+  stripe_verified: boolean;
+  stripe_requirements: object;
+  address: string;
+  phone: string;
+  last_name: string;
+  given_name: string;
+  last_name_kana: string;
+  given_name_kana: string;
+  categories: number[];
+  postal_code: string;
+  prefecture: string;
+  address2: string;
+  city: string;
+  town: string;
+  street: string;
+  profile_completed: boolean;
+  magic_link: {
+    token: string;
+    /**
+     * Time the token expires
+     * @format timestamptz
+     */
+    expiration: number;
+    used: boolean;
+  } | null;
+}
+
+export interface StripeAccountCheckCreateBody {
+  user_id: string;
+}
+
+export type StripeAccountCheckCreateResult = object;
+
+export interface StripeCreateAccountLinkCreateBody {
+  user_id: string;
+}
+
+export type StripeCreateAccountLinkCreateResult = object;
+
+export interface StripeCreateAccountCreateBody {
+  user_id: string;
+}
+
+export type StripeCreateAccountCreateResult = object;
 
 export interface ChefNotificationsListParams {
   user_id: string;

@@ -35,12 +35,11 @@ export class Auth<
   SecurityDataType = unknown,
 > extends HttpClient<SecurityDataType> {
   /**
-   * @description <br /><br /> <b>Authentication:</b> required
+   * @description <br /><br /> <b>Authentication:</b> not required
    *
    * @tags auth
    * @name ChangePasswordCreate
    * @request POST:/auth/change-password
-   * @secure
    */
   changePasswordCreate = (
     data: ChangePasswordCreatePayload,
@@ -50,7 +49,6 @@ export class Auth<
       path: `/auth/change-password`,
       method: "POST",
       body: data,
-      secure: true,
       type: ContentType.Json,
       format: "json",
       ...params,

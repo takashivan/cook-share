@@ -143,7 +143,7 @@ export default function ContactPage() {
               <Mail className="h-5 w-5 text-primary" />
               <div>
                 <h3 className="font-medium">メールでのお問い合わせ</h3>
-                <p className="text-sm">info@cookchef.jp</p>
+                <p className="text-sm">info@chefdom.jp</p>
                 <p className="text-xs text-gray-500">
                   24時間受付・平日3営業日以内に返信
                 </p>
