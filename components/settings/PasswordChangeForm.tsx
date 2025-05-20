@@ -29,9 +29,10 @@ interface PasswordChangeFormProps {
 export function PasswordChangeForm({
   userType,
 }: PasswordChangeFormProps) {
-  const { user: companyUser, changePassword: companyChangePassword } = useCompanyAuth();
-  const { user: chefUser, changePassword: chefChangePassword } = useAuth();
+  const { user: companyUser, login: companyLogin, changePassword: companyChangePassword } = useCompanyAuth();
+  const { user: chefUser, login: chefLogin, changePassword: chefChangePassword } = useAuth();
   const user = userType === "company" ? companyUser : chefUser;
+  const login = userType === "company" ? companyLogin : chefLogin;
   const changePassword = userType === "company" ? companyChangePassword : chefChangePassword;
 
   const {
@@ -59,7 +60,18 @@ export function PasswordChangeForm({
     }
 
     try {
-      await changePassword(data.currentPassword, data.newPassword);
+      await login(user.email, data.currentPassword);
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "現在のパスワードが間違っています",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await changePassword(data.newPassword);
       toast({
         title: "成功",
         description: "パスワードが変更されました",

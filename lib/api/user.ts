@@ -75,6 +75,8 @@ export interface UserProfile {
   line_display_name?: string;
   line_notification_enabled?: boolean;
   line_connected?: boolean;
+  pending_email?: string;
+  email_change_token?: string;
 }
 
 // 共通の型定義

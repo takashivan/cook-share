@@ -11,9 +11,9 @@
  */
 
 import {
-  ByUserDetailResult1,
-  MarkReadAllPartialUpdatePayload1,
-  MarkReadAllPartialUpdateResult1,
+  ByUserDetailOutput1,
+  MarkReadAllPartialUpdateBody1,
+  MarkReadAllPartialUpdateOutput1,
   MarkReadPartialUpdateResult,
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
@@ -30,7 +30,7 @@ export class CompanyuserNotification<
    * @request GET:/companyuser_notification/byUser/{user_id}
    */
   byUserDetail = (userId: string, params: RequestParams = {}) =>
-    this.request<ByUserDetailResult1, void>({
+    this.request<ByUserDetailOutput1, void>({
       path: `/companyuser_notification/byUser/${userId}`,
       method: "GET",
       format: "json",
@@ -57,10 +57,10 @@ export class CompanyuserNotification<
    * @request PATCH:/companyuser_notification/mark-read/all
    */
   markReadAllPartialUpdate = (
-    data: MarkReadAllPartialUpdatePayload1,
+    data: MarkReadAllPartialUpdateBody1,
     params: RequestParams = {},
   ) =>
-    this.request<MarkReadAllPartialUpdateResult1, void>({
+    this.request<MarkReadAllPartialUpdateOutput1, void>({
       path: `/companyuser_notification/mark-read/all`,
       method: "PATCH",
       body: data,
@@ -76,8 +76,8 @@ export class CompanyuserNotification<
     const key = enabled ? [`/companyuser_notification/mark-read/all`] : null;
     const fetcher: (
       url: string[],
-      { arg }: { arg: MarkReadAllPartialUpdatePayload1 },
-    ) => Promise<MarkReadAllPartialUpdateResult1> = (_, { arg }) =>
+      { arg }: { arg: MarkReadAllPartialUpdateBody1 },
+    ) => Promise<MarkReadAllPartialUpdateOutput1> = (_, { arg }) =>
       this.markReadAllPartialUpdate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };

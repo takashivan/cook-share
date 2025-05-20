@@ -21,6 +21,7 @@ import {
   Bell,
   ChevronDown,
   Mail,
+  HelpCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -95,13 +96,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             router.push("/admin");
             return;
           }
-  
+
           if (!user.is_verified) {
             console.log("User is not verified", user);
             router.push("/register/company-verify-email");
             return;
           }
-  
+
           if (!user.companies_id) {
             router.push("/register/company-profile");
             return;
@@ -201,25 +202,28 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         },
         ...(isStoreListOpen
           ? (restaurants ?? []).map((restaurant) => {
-            const notificationCount = notifications?.filter(
-              (notification) =>
-                notification.restaurant_id === restaurant.id && !notification.is_read
-            ).length ?? 0;
+              const notificationCount =
+                notifications?.filter(
+                  (notification) =>
+                    notification.restaurant_id === restaurant.id &&
+                    !notification.is_read
+                ).length ?? 0;
 
-            return {
-              title: restaurant.name,
-              href: `/admin/stores/${restaurant.id}`,
-              icon: Tag,
-              active: pathname === `/admin/stores/${restaurant.id}`,
-              show: true,
-              className: "ml-4",
-              notification: notificationCount > 0 ? (
-                <Badge className="h-5 flex items-center justify-center bg-red-500 text-white px-1.5 py-0.5 ml-auto">
-                  {notificationCount > 9 ? "9+" : notificationCount}
-                </Badge>
-              ) : null,
-            };
-          })
+              return {
+                title: restaurant.name,
+                href: `/admin/stores/${restaurant.id}`,
+                icon: Tag,
+                active: pathname === `/admin/stores/${restaurant.id}`,
+                show: true,
+                className: "ml-4",
+                notification:
+                  notificationCount > 0 ? (
+                    <Badge className="h-5 flex items-center justify-center bg-red-500 text-white px-1.5 py-0.5 ml-auto">
+                      {notificationCount > 9 ? "9+" : notificationCount}
+                    </Badge>
+                  ) : null,
+              };
+            })
           : []),
       ],
     },
@@ -259,6 +263,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           href: "/admin/contact",
           icon: Mail,
           active: pathname === "/admin/contact",
+          show: true,
+        },
+        {
+          title: "よくある質問",
+          href: "/admin/faq",
+          icon: HelpCircle,
+          active: pathname === "/admin/faq",
           show: true,
         },
       ],

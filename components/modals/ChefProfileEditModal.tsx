@@ -1,9 +1,9 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
-import { X, Upload, Plus } from "lucide-react";
+import { X, Upload } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -15,8 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { UserProfile, updateUserProfile } from "@/lib/api/user";
+import { UserProfile } from "@/lib/api/user";
 import {
   Select,
   SelectContent,
@@ -24,107 +23,93 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { format } from "date-fns";
+import { CERTIFICATIONS, EXPERIENCE_LEVELS, SKILLS } from "@/lib/const/chef-profile";
+import { Controller, useForm } from "react-hook-form";
+import { UsersPartialUpdatePayload } from "@/api/__generated__/base/data-contracts";
+import { Checkbox } from "../ui/checkbox";
+import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 interface ChefProfileEditModalProps {
   isOpen: boolean;
-  onClose: () => void;
-  onSave: (data: any) => void;
+  onCloseAction: () => void;
   user: UserProfile;
 }
 
-// スキルと経験年数の選択肢
-const SKILLS = [
-  "和食",
-  "洋食",
-  "中華",
-  "イタリアン",
-  "フレンチ",
-  "エスニック",
-  "デザート",
-  "パン",
-  "その他",
-] as const;
-
-const EXPERIENCE_LEVELS = [
-  { value: "未経験", label: "未経験" },
-  { value: "1年未満", label: "1年未満" },
-  { value: "1-3年", label: "1-3年" },
-  { value: "3-5年", label: "3-5年" },
-  { value: "5-10年", label: "5-10年" },
-  { value: "10年以上", label: "10年以上" },
-] as const;
-
-const CERTIFICATIONS = [
-  { id: "fugu", label: "ふぐ調理師免許" },
-  { id: "sushi", label: "寿司職人" },
-  { id: "ramen", label: "ラーメン職人" },
-  { id: "pastry", label: "製菓衛生師" },
-  { id: "wine", label: "ソムリエ" },
-  { id: "other", label: "その他" },
-] as const;
-
 export function ChefProfileEditModal({
   isOpen,
-  onClose,
-  onSave,
+  onCloseAction,
   user,
 }: ChefProfileEditModalProps) {
-  const [formData, setFormData] = useState({
-    name: user.name,
-    gender: user.gender || "",
-    phone: user.phone || "",
-    email: user.email,
-    postal_code: user.postal_code || "",
-    address: user.address || "",
-    town: user.town || "",
-    city: user.city || "",
-    prefecture: user.prefecture || "",
-    street: user.street || "",
-    address2: user.address2 || "",
-    skills: user.skills || [],
-    experience: user.experience_level || "",
-    certifications: user.certifications || [],
-    bio: user.bio || "",
-    profile_image: user.profile_image || "",
-    dateofbirth: user.dateofbirth || "",
-  });
+  const { update } = useAuth();
+
   const [otherCertificate, setOtherCertificate] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(
-    user.dateofbirth ? new Date(user.dateofbirth) : undefined
-  );
-  const [showAddressFields, setShowAddressFields] = useState(false);
+  const [showAddressFields, setShowAddressFields] = useState(true);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setValue,
+    control,
+    watch,
+    reset,
+    trigger,
+  } = useForm<Partial<UsersPartialUpdatePayload>>({
+    defaultValues: {
+      skills: user.skills || [],
+      experience_level: user.experience_level || "",
+      bio: user.bio || "",
+      certifications: user.certifications || [],
+      dateofbirth: user.dateofbirth || "",
+      profile_image: user.profile_image || "",
+      phone: user.phone || "",
+      last_name: user.last_name || "",
+      given_name: user.given_name || "",
+      last_name_kana: user.last_name_kana || "",
+      given_name_kana: user.given_name_kana || "",
+      postal_code: user.postal_code || "",
+      prefecture: user.prefecture || "",
+      address2: user.address2 || "",
+      city: user.city || "",
+      town: user.town || "",
+      street: user.street || "",
+    },
+    values: {
+      skills: user.skills || [],
+      experience_level: user.experience_level || "",
+      bio: user.bio || "",
+      certifications: user.certifications || [],
+      dateofbirth: user.dateofbirth || "",
+      profile_image: user.profile_image || "",
+      phone: user.phone || "",
+      last_name: user.last_name || "",
+      given_name: user.given_name || "",
+      last_name_kana: user.last_name_kana || "",
+      given_name_kana: user.given_name_kana || "",
+      postal_code: user.postal_code || "",
+      prefecture: user.prefecture || "",
+      address2: user.address2 || "",
+      city: user.city || "",
+      town: user.town || "",
+      street: user.street || "",
+    },
+  })
 
-  const handleSkillChange = (skill: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      skills: prev.skills.includes(skill)
-        ? prev.skills.filter((s) => s !== skill)
-        : [...prev.skills, skill],
-    }));
-  };
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const phone = e.target.value.replace(/[^0-9]/g, "");
+    setValue("phone", phone);
+    trigger("phone");
+  }
 
   const handlePostalCodeChange = async (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const postalCode = e.target.value.replace(/-/g, "");
-    setFormData((prev) => ({
-      ...prev,
-      postal_code: postalCode,
-    }));
+    setValue("postal_code", postalCode);
+    trigger("postal_code");
 
     if (postalCode.length === 7) {
       try {
@@ -133,60 +118,27 @@ export function ChefProfileEditModal({
         );
         const data = await response.json();
 
-        if (data.results) {
+        if (data.status === 200 && data.results) {
           const address = data.results[0];
-          setFormData((prev) => ({
-            ...prev,
-            address: `${address.address1}${address.address2}${address.address3}`,
-          }));
+          setValue("prefecture", address.address1);
+          setValue("city", address.address2);
+          setValue("town", address.address3);
           setShowAddressFields(true);
+        } else {
+          toast({
+            title: "エラー",
+            description: "住所が見つかりませんでした",
+            variant: "destructive",
+          });
         }
       } catch (error) {
         console.error("郵便番号検索エラー:", error);
+        toast({
+          title: "エラー",
+          description: "住所の取得に失敗しました",
+          variant: "destructive",
+        });
       }
-    }
-  };
-
-  const handleExperienceChange = (value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      experience: value,
-    }));
-  };
-
-  const handleCertificateChange = (certId: string) => {
-    const cert = CERTIFICATIONS.find((c) => c.id === certId);
-    if (!cert) return;
-
-    setFormData((prev) => {
-      const newCertifications = prev.certifications.includes(cert.label)
-        ? prev.certifications.filter((c) => c !== cert.label)
-        : [...prev.certifications, cert.label];
-
-      // その他が選択された場合、他の資格をクリア
-      if (certId === "other") {
-        return {
-          ...prev,
-          certifications: newCertifications,
-        };
-      }
-
-      // その他以外が選択された場合、その他の資格をクリア
-      if (prev.certifications.includes("その他")) {
-        return {
-          ...prev,
-          certifications: newCertifications.filter((c) => c !== "その他"),
-        };
-      }
-
-      return {
-        ...prev,
-        certifications: newCertifications,
-      };
-    });
-
-    if (certId === "other") {
-      setOtherCertificate("");
     }
   };
 
@@ -195,13 +147,23 @@ export function ChefProfileEditModal({
   ) => {
     const value = e.target.value;
     setOtherCertificate(value);
-    setFormData((prev) => ({
-      ...prev,
-      certifications: prev.certifications.includes("その他")
-        ? [...prev.certifications.filter((c) => c !== "その他"), value]
-        : prev.certifications,
-    }));
   };
+
+  useEffect(() => {
+    if (isOpen && user) {
+      // 保有資格のうち、CERTIFICATIONSに含まれないものがあればテキストボックスに表示し、「その他」を選択状態にする
+      const otherCertification = user.certifications?.find(
+        (cert) => !CERTIFICATIONS.some((c) => c.label === cert)
+      );
+      if (otherCertification != null) {
+        setOtherCertificate(otherCertification);
+        setValue("certifications", [
+          ...user.certifications ?? [],
+          "その他",
+        ]);
+      }
+    }
+  }, [isOpen, user])
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -218,58 +180,69 @@ export function ChefProfileEditModal({
   const handleRemoveImage = () => {
     setPreviewImage(null);
     setSelectedFile(null);
-    setFormData((prev) => ({
-      ...prev,
-      profile_image: "",
-    }));
+    setValue("profile_image", "");
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  const submit = async (data: Partial<UsersPartialUpdatePayload>) => {
     try {
-      const formDataToSend = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        if (value) {
-          if (Array.isArray(value)) {
-            value.forEach((item) => {
-              formDataToSend.append(`${key}[]`, item);
-            });
-          } else {
-            formDataToSend.append(key, value);
-          }
-        }
-      });
-      if (selectedFile) {
-        formDataToSend.append("photo", selectedFile);
-      } else if (formData.profile_image) {
-        formDataToSend.append("profile_image", formData.profile_image);
+      const certifications = data.certifications || [];
+      const validCertifications = certifications.filter(
+        (cert) =>
+          CERTIFICATIONS.some((c) => c.label === cert) && cert !== "その他"
+      );
+
+      if (otherCertificate) {
+        validCertifications.push(otherCertificate);
       }
-      const updatedProfile = await updateUserProfile(user.id, formDataToSend);
-      onSave(updatedProfile);
-      onClose();
+
+      data.certifications = validCertifications;
+
+      if (selectedFile) {
+        data.photo = selectedFile;
+      }
+
+      await update(data);
+
+      toast({
+        title: "成功",
+        description: "プロフィールが更新されました",
+      });
+      handleClose();
     } catch (error) {
       console.error("Error updating profile:", error);
-    } finally {
-      setIsSubmitting(false);
+      toast({
+        title: "エラー",
+        description: "プロフィールの更新に失敗しました",
+        variant: "destructive",
+      });
     }
   };
 
+
+  const handleClose = () => {
+    setPreviewImage(null);
+    setSelectedFile(null);
+    setOtherCertificate("");
+    setShowAddressFields(true);
+    reset();
+    onCloseAction();
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>プロフィール編集</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit(submit)} className="space-y-6">
           <div className="space-y-4">
             <div>
               <Label>プロフィール画像</Label>
               <div className="flex items-center gap-4 mt-2">
                 <div className="relative w-20 h-20 rounded-full overflow-hidden">
-                  {previewImage || formData.profile_image ? (
+                  {previewImage || watch("profile_image") ? (
                     <Image
-                      src={previewImage || formData.profile_image}
+                      src={previewImage || watch("profile_image") || ""}
                       alt="プロフィール画像"
                       fill
                       className="object-cover"
@@ -300,7 +273,7 @@ export function ChefProfileEditModal({
                       onChange={handleImageChange}
                     />
                   </Button>
-                  {(previewImage || formData.profile_image) && (
+                  {(previewImage || watch("profile_image")) && (
                     <Button
                       type="button"
                       variant="outline"
@@ -313,139 +286,306 @@ export function ChefProfileEditModal({
               </div>
             </div>
 
-            <div>
-              <Label htmlFor="name">名前</Label>
-              <Input
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="lastName">姓</Label>
+                <Input
+                  id="lastName"
+                  {...register("last_name", {
+                    required: "姓は必須です",
+                  })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="firstName">名</Label>
+                <Input
+                  id="firstName"
+                  {...register("given_name", {
+                    required: "名は必須です",
+                  })}
+                />
+              </div>
             </div>
 
-            <div>
-              <Label htmlFor="email">メールアドレス</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
+            {errors.last_name && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.last_name.message}
+              </p>
+            )}
+            {errors.given_name && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.given_name.message}
+              </p>
+            )}
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="lastName">セイ（カタカナ）</Label>
+                <Input
+                  id="lastNameKana"
+                  {...register("last_name_kana", {
+                    required: "セイ（カタカナ）は必須です",
+                  })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="firstNameKana">メイ（カタカナ）</Label>
+                <Input
+                  id="firstNameKana"
+                  {...register("given_name_kana", {
+                    required: "メイ（カタカナ）は必須です",
+                  })}
+                />
+              </div>
             </div>
+
+            {errors.last_name_kana && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.last_name_kana.message}
+              </p>
+            )}
+            {errors.given_name_kana && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.given_name_kana.message}
+              </p>
+            )}
 
             <div>
               <Label htmlFor="phone">電話番号</Label>
               <Input
                 id="phone"
-                name="phone"
                 type="tel"
-                value={formData.phone}
-                onChange={handleChange}
+                {...register("phone", {
+                  required: "電話番号は必須です",
+                })}
+                onChange={handlePhoneChange}
               />
             </div>
 
-            <div>
-              <Label htmlFor="postal_code">郵便番号</Label>
-              <Input
-                id="postal_code"
-                name="postal_code"
-                value={formData.postal_code}
-                onChange={handlePostalCodeChange}
-                placeholder="例: 1234567"
-                maxLength={7}
-              />
-            </div>
-
-            {showAddressFields && (
-              <div>
-                <Label htmlFor="address">住所</Label>
-                <Input
-                  id="address"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                />
-              </div>
+            {errors.phone && (
+              <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
             )}
 
             <div>
               <Label htmlFor="dateofbirth">生年月日</Label>
               <Input
                 id="dateofbirth"
-                name="dateofbirth"
                 type="date"
-                value={formData.dateofbirth}
-                onChange={handleChange}
+                {...register("dateofbirth", {
+                  required: "生年月日は必須です",
+                })}
               />
             </div>
 
+            {errors.dateofbirth && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.dateofbirth.message}
+              </p>
+            )}
+
             <div>
-              <Label htmlFor="bio">自己紹介</Label>
-              <Textarea
-                id="bio"
-                name="bio"
-                value={formData.bio}
-                onChange={handleChange}
-                rows={4}
+              <Label htmlFor="postal_code">郵便番号</Label>
+              <Input
+                id="postal_code"
+                placeholder="例: 1234567"
+                maxLength={7}
+                {...register("postal_code")}
+                onChange={handlePostalCodeChange}
               />
             </div>
 
-            <div>
-              <Label htmlFor="experience">経験年数</Label>
-              <Select
-                value={formData.experience}
-                onValueChange={handleExperienceChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="経験年数を選択" />
-                </SelectTrigger>
-                <SelectContent>
-                  {EXPERIENCE_LEVELS.map((level) => (
-                    <SelectItem key={level.value} value={level.value}>
-                      {level.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {errors.postal_code && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.postal_code.message}
+              </p>
+            )}
+
+            {showAddressFields && (
+              <>
+                <div>
+                  <Label htmlFor="prefecture">都道府県</Label>
+                  <Input
+                    id="prefecture"
+                    {...register("prefecture")}
+                    readOnly
+                    className="bg-gray-50"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="city">市区町村</Label>
+                  <Input
+                    id="city"
+                    {...register("city")}
+                    readOnly
+                    className="bg-gray-50"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="town">町名</Label>
+                  <Input
+                    id="town"
+                    {...register("town")}
+                    readOnly
+                    className="bg-gray-50"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="street">番地</Label>
+                  <Input
+                    id="street"
+                    placeholder="例: 1-2-3"
+                    {...register("street", {
+                      required: "番地は必須です",
+                    })}
+                  />
+                </div>
+
+                {errors.street && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.street.message}
+                  </p>
+                )}
+
+                <div>
+                  <Label htmlFor="address2">建物名・部屋番号</Label>
+                  <Input
+                    id="address2"
+                    placeholder="例: 〇〇マンション101"
+                    {...register("address2")}
+                  />
+                </div>
+
+                {errors.address2 && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.address2.message}
+                  </p>
+                )}
+              </>
+            )}
 
             <div>
-              <Label>スキル</Label>
+              <Label>スキル（複数選択可）</Label>
               <div className="grid grid-cols-2 gap-2">
                 {SKILLS.map((skill) => (
-                  <div key={skill} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id={`skill-${skill}`}
-                      checked={formData.skills.includes(skill)}
-                      onChange={() => handleSkillChange(skill)}
-                      className="h-4 w-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500"
+                  <div key={skill.id} className="flex items-center space-x-2">
+                    <Controller
+                      name="skills"
+                      control={control}
+                      render={({ field }) => {
+                        const isChecked = field.value?.includes(skill.label);
+
+                        return (
+                          <>
+                            <Checkbox
+                              id={`skill-${skill.id}`}
+                              checked={isChecked}
+                              onCheckedChange={(checked) => {
+                                const newValue = checked
+                                  ? [...(field.value ?? []), skill.label]
+                                  : field.value?.filter((v: string) => v !== skill.label);
+                                field.onChange(newValue);
+                              }}
+                              className="h-4 w-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500"
+                            />
+                            <Label
+                              htmlFor={`skill-${skill.id}`}
+                              className="text-sm font-normal text-gray-600">
+                              {skill.label}
+                            </Label>
+                          </>
+                        );
+                      }}
                     />
-                    <label htmlFor={`skill-${skill}`}>{skill}</label>
                   </div>
                 ))}
               </div>
             </div>
 
+
             <div>
-              <Label>資格</Label>
+              <Label htmlFor="experience">調理経験年数</Label>
+              <Controller
+                name="experience_level"
+                control={control}
+                rules={{
+                  required: "経験年数は必須です",
+                }}
+                render={({ field }) => (
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="経験年数を選択">
+                        {field.value
+                          ? EXPERIENCE_LEVELS.find(
+                              (level) => level.value === field.value
+                            )?.label
+                          : "経験年数を選択"}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {EXPERIENCE_LEVELS.map((level) => (
+                        <SelectItem key={level.id} value={level.value}>
+                          {level.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+
+            {errors.experience_level && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.experience_level.message}
+              </p>
+            )}
+
+            <div>
+              <Label>保有資格（複数選択可）</Label>
               <div className="grid grid-cols-2 gap-2 mb-4">
                 {CERTIFICATIONS.map((cert) => (
                   <div key={cert.id} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id={`cert-${cert.id}`}
-                      checked={formData.certifications.includes(cert.label)}
-                      onChange={() => handleCertificateChange(cert.id)}
-                      className="h-4 w-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500"
+                    <Controller
+                      name="certifications"
+                      control={control}
+                      render={({ field }) => {
+                        const isChecked = field.value?.includes(cert.label);
+
+                        return (
+                          <>
+                            <Checkbox
+                              id={`certification-${cert.id}`}
+                              checked={isChecked}
+                              onCheckedChange={(checked) => {
+                                const newCertifications = checked
+                                  ? [...(field.value ?? []), cert.label]
+                                  : field.value?.filter((v: string) => v !== cert.label);
+                                field.onChange(newCertifications);
+
+                                // その他が選択された場合、その他入力欄を初期化
+                                if (cert.id === "other") {
+                                  setOtherCertificate("");
+                                }
+                              }}
+                              className="h-4 w-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500"
+                            />
+                            <Label
+                              htmlFor={`certification-${cert.id}`}
+                              className="text-sm font-normal text-gray-600">
+                              {cert.label}
+                            </Label>
+                          </>
+                        );
+                      }}
                     />
-                    <label htmlFor={`cert-${cert.id}`}>{cert.label}</label>
                   </div>
                 ))}
               </div>
-              {formData.certifications.includes("その他") && (
+              {watch("certifications")?.includes("その他") && (
                 <div className="mt-2">
                   <Input
                     value={otherCertificate}
@@ -455,10 +595,31 @@ export function ChefProfileEditModal({
                 </div>
               )}
             </div>
+
+            {errors.certifications && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.certifications.message}
+              </p>
+            )}
+
+            <div>
+              <Label htmlFor="bio">自己紹介</Label>
+              <Textarea
+                id="bio"
+                rows={4}
+                {...register("bio", {
+                  required: "自己紹介は必須です",
+                })}
+              />
+            </div>
+
+            {errors.bio && (
+              <p className="mt-1 text-sm text-red-600">{errors.bio.message}</p>
+            )}
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={handleClose}>
               キャンセル
             </Button>
             <Button type="submit" disabled={isSubmitting}>

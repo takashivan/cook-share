@@ -30,8 +30,9 @@ export interface CompanyAuthContextType {
   logout: () => void;
   register: (data: CompanyUserData) => Promise<void>;
   update: (data: Partial<CompanyusersPartialUpdatePayload>) => Promise<void>;
-  changeEmail: (email: string, currentEmail: string, password: string) => Promise<void>;
-  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  changeEmail: (email: string) => Promise<void>;
+  confirmEmail: (token: string) => Promise<void>;
+  changePassword: (newPassword: string) => Promise<void>;
   deleteAccount: (password: string) => Promise<void>;
   setUser: (user: CompanyUser | null) => void;
   reloadUser: () => Promise<CompanyUser | undefined>;
@@ -146,25 +147,11 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const handleChangeEmail = async (email: string, currentEmail: string, password: string) => {
+  const handleChangeEmail = async (email: string) => {
     try {
-      // 現在のメアドとPWでログインできるか確認
-      const { sessionToken, user: currentUser } = await login({
-        email: currentEmail,
-        password,
-      });
-
-      const userId = currentUser?.id;
-      if (!userId) {
-        throw new Error("User ID not found");
-      }
-
-      setAuth(sessionToken, currentUser);
-
-      const authApi = getApi(Auth);
-      const response = await authApi.updateEmailCreate({
+      const companyUsersApi = getApi(Companyusers);
+      const response = await companyUsersApi.emailChangeCreate({
         email,
-        user_id: userId,
       }, {
         headers: {
           "X-User-Type": "company"
@@ -176,34 +163,33 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
       }
     }
     catch (error: any) {
-      if (error?.response?.status === 401) {
-        // 認証エラー（ログイン失敗）
-        throw new Error("現在のメールアドレスまたはパスワードが間違っています");
-      }
-
       console.error("Change email error:", error);
       throw error;
     }
   };
 
-  const handleChangePassword = async (currentPassword: string, newPassword: string) => {
+  const handleConfirmEmail = async (token: string) => {
     try {
-      // 現在のパスワードでログインできるか確認
-      const { sessionToken, user: currentUser } = await login({
-        email: user?.email || "",
-        password: currentPassword,
+      const companyUsersApi = getApi(Companyusers);
+      const response = await companyUsersApi.emailConfirmCreate({
+        token,
+      }, {
+        headers: {
+          "X-User-Type": "company"
+        }
       });
-      if (!currentUser) {
-        throw new Error("現在のパスワードが間違っています");
+
+      if (response) {
+        saveUser(response.data as unknown as CompanyUser);
       }
+    } catch (error) {
+      console.error("Confirm email error:", error);
+      throw error;
+    }
+  };
 
-      setAuth(sessionToken, currentUser);
-
-      const userId = currentUser?.id;
-      if (!userId) {
-        throw new Error("User ID not found");
-      }
-
+  const handleChangePassword = async (newPassword: string) => {
+    try {
       const authApi = getApi(Auth);
       const response = await authApi.changePasswordCreate({ new_password: newPassword }, {
         headers: {
@@ -212,7 +198,7 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (response) {
-        saveUser(response.data as unknown as CompanyUser);
+        saveUser(response.data.user as unknown as CompanyUser);
       }
     } catch (error) {
       console.error("Change password error:", error);
@@ -259,6 +245,7 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
         register: handleRegister,
         update: handleUpdate,
         changeEmail: handleChangeEmail,
+        confirmEmail: handleConfirmEmail,
         changePassword: handleChangePassword,
         deleteAccount: handleDeleteAccount,
         setUser,
