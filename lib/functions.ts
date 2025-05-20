@@ -50,6 +50,12 @@ export function formatDateToLocalISOStringForDatetimeLocal(date: Date): string {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
+// モバイル判定関数
+export function isMobile() {
+  if (typeof window === "undefined") return false;
+  return /iPhone|Android.+Mobile|iPad|iPod/.test(navigator.userAgent);
+}
+
 export function formatWorkSessionJapaneseStatus(status: string): string {
   switch (status) {
     case "VERIFIED":
