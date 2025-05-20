@@ -5,20 +5,17 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { createStripeAccountLink } from "@/lib/api/user";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "@/hooks/use-toast";
 
 export function ConnectSettings() {
   const { user, reloadUser } = useAuth();
   const router = useRouter();
+  const [isLineUnlinkModalOpen, setIsLineUnlinkModalOpen] = useState(false);
+  const [isUnlinking, setIsUnlinking] = useState(false);
 
   const memoizedReloadUser = useCallback(reloadUser, []);
 
@@ -34,7 +31,7 @@ export function ConnectSettings() {
           variant: "destructive",
         });
       }
-    }
+    };
     fetchUser();
   }, [memoizedReloadUser]);
 
@@ -65,6 +62,33 @@ export function ConnectSettings() {
     }
   };
 
+  // 仮のLINE連携解除API
+  const dislinkLineAccount = async () => {
+    // TODO: 実際のAPI実装に置き換え
+    return new Promise((resolve) => setTimeout(resolve, 1000));
+  };
+
+  const handleUnlinkLine = async () => {
+    setIsUnlinking(true);
+    try {
+      await dislinkLineAccount();
+      await reloadUser();
+      toast({
+        title: "LINE連携を解除しました",
+        description: "LINE連携が正常に解除されました。",
+      });
+      setIsLineUnlinkModalOpen(false);
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "LINE連携の解除に失敗しました。",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUnlinking(false);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -87,9 +111,7 @@ export function ConnectSettings() {
             />
           </div>
           <div className="flex-1">
-            <div className="font-semibold text-gray-900 mb-1">
-              Stripe連携
-            </div>
+            <div className="font-semibold text-gray-900 mb-1">Stripe連携</div>
             <div className="text-gray-500 text-sm mb-2">
               {user.stripe_verified
                 ? "Stripeアカウントが登録されています。"
@@ -112,32 +134,62 @@ export function ConnectSettings() {
           }}
           className="flex items-center bg-white rounded-lg shadow p-4 mb-2 transition">
           <div className="flex-shrink-0 mr-4">
-            <Image
-              src="/logos/LINE.png"
-              alt="LINE"
-              width={40}
-              height={40}
-            />
+            <Image src="/logos/LINE.png" alt="LINE" width={40} height={40} />
           </div>
           <div className="flex-1">
-            <div className="font-semibold text-gray-900 mb-1">
-              LINE連携
-            </div>
+            <div className="font-semibold text-gray-900 mb-1">LINE連携</div>
             <div className="text-gray-500 text-sm mb-2">
               {user.line_user_id
                 ? "LINEと連携済みです。"
                 : "LINE連携でお仕事の通知が届きます。"}
             </div>
-            <Button
-              variant="outline"
-              className="px-4 py-2 rounded bg-green-500 text-white hover:bg-green-600 transition"
-              onClick={() => router.push("/chef/line-connect/liff")}>
-              <MessageCircle className="w-4 h-4 mr-2" />
-              {user.line_user_id ? "連携済み" : "連携する"}
-            </Button>
+            {user.line_user_id ? (
+              <Button
+                variant="outline"
+                className="px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600 transition"
+                onClick={() => setIsLineUnlinkModalOpen(true)}
+                disabled={isUnlinking}>
+                連携を解除する
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                className="px-4 py-2 rounded bg-green-500 text-white hover:bg-green-600 transition"
+                onClick={() => router.push("/chef/line-connect/liff")}>
+                <MessageCircle className="w-4 h-4 mr-2" />
+                連携する
+              </Button>
+            )}
           </div>
         </motion.div>
+        {/* LINE連携解除モーダル */}
+        {isLineUnlinkModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
+              <div className="mb-4 font-semibold text-lg text-gray-900">
+                LINE連携を解除しますか？
+              </div>
+              <div className="mb-6 text-gray-600 text-sm">
+                連携を解除すると、LINEでの通知が届かなくなります。本当によろしいですか？
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsLineUnlinkModalOpen(false)}
+                  disabled={isUnlinking}>
+                  キャンセル
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleUnlinkLine}
+                  disabled={isUnlinking}>
+                  解除する
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
-  )
+  );
 }

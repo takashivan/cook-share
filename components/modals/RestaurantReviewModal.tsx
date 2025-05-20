@@ -155,6 +155,9 @@ export function RestaurantReviewModal({
 
           <Card className="mb-4">
             <CardContent className="p-4 bg-amber-50">
+              <p className="text-sm text-gray-500">
+                72時間以内に完了報告を行なってください。72時間を経過すると、自動で承認されます。
+              </p>
               <p className="text-sm text-amber-800">
                 勤務を承認すると、シェフに報酬が支払われます。問題がある場合は、チェックを外してください。
               </p>
@@ -170,7 +173,7 @@ export function RestaurantReviewModal({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={rating === 0}
+            disabled={rating === 0 || !approved}
             className="w-full sm:w-auto">
             送信する
           </Button>

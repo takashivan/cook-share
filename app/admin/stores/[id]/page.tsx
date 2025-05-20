@@ -74,6 +74,13 @@ import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { useDeleteCompanyUserByRestaurantId } from "@/hooks/api/companyuser/companyUsers/useDeleteCompanyUserByRestaurantId";
 import { formatDateToLocalISOStringForDatetimeLocal } from "@/lib/functions";
 import { useGetCompanyUserNotificationsByUserId } from "@/hooks/api/companyuser/companyUserNotifications/useGetCompanyUserNotificationsByUserId";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 
 interface JobWithWorkSessions
   extends Omit<JobsListOutput[number], "workSessionCount"> {
@@ -116,6 +123,12 @@ export default function RestaurantDetailPage(props: {
   const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
   const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
   const [copiedJob, setCopiedJob] = useState<Partial<Job> | null>(null);
+
+  const [selectedChat, setSelectedChat] = useState<{
+    id: number;
+    name: string;
+    avatar: string;
+  } | null>(null);
 
   // レストラン情報の取得
   const { data: restaurant, error: restaurantError } = useGetRestaurant({
@@ -314,7 +327,9 @@ export default function RestaurantDetailPage(props: {
         minute: "2-digit",
         hour12: false,
       }),
-      expiry_date: formatDateToLocalISOStringForDatetimeLocal(new Date(job.expiry_date)),
+      expiry_date: formatDateToLocalISOStringForDatetimeLocal(
+        new Date(job.expiry_date)
+      ),
     };
     setCopiedJob(jobData);
     setIsCreateJobModalOpen(true);
@@ -410,7 +425,10 @@ export default function RestaurantDetailPage(props: {
     const filteredJobs = jobWithWorkSessions.filter((job) => {
       switch (selectedTab) {
         case "published":
-          return job.status === "PUBLISHED" && (!job.expiry_date || job.expiry_date > Date.now());
+          return (
+            job.status === "PUBLISHED" &&
+            (!job.expiry_date || job.expiry_date > Date.now())
+          );
         case "draft":
           return job.status === "DRAFT";
         case "pending":
@@ -427,115 +445,111 @@ export default function RestaurantDetailPage(props: {
     return (
       <TabsContent value={selectedTab}>
         <div className="grid gap-4">
-          {filteredJobs
-            .map((job) => {
-              const notificationCount = notifications?.filter(notification => notification.job_id === job.id && !notification.is_read).length || 0;
-              return (
-                <div
-                  key={job.id}
-                  className="items-center justify-between p-3 border rounded-lg bg-white/50 hover:bg-white/80 transition-colors cursor-pointer"
-                  onClick={() => router.push(`/admin/job/${job.id}`)}>
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        {job.status === "PUBLISHED" && (!job.expiry_date || job.expiry_date > Date.now()) && (
+          {filteredJobs.map((job) => {
+            const notificationCount =
+              notifications?.filter(
+                (notification) =>
+                  notification.job_id === job.id && !notification.is_read
+              ).length || 0;
+            return (
+              <div
+                key={job.id}
+                className="items-center justify-between p-3 border rounded-lg bg-white/50 hover:bg-white/80 transition-colors cursor-pointer"
+                onClick={() => router.push(`/admin/job/${job.id}`)}>
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {job.status === "PUBLISHED" &&
+                        (!job.expiry_date || job.expiry_date > Date.now()) && (
                           <Badge className="bg-green-500 hover:bg-green-600">
                             公開中
                           </Badge>
                         )}
-                        {job.status === "FILLED" && (
-                          <Badge className="bg-blue-500 hover:bg-blue-600">
-                            応募あり
-                          </Badge>
-                        )}
-                        {job.status === "DRAFT" && (
-                          <Badge className="bg-gray-500 hover:bg-gray-600">
-                            下書き
-                          </Badge>
-                        )}
-                        {job.status === "PENDING" && (
-                          <Badge className="bg-yellow-500 hover:bg-yellow-600">
-                            一時停止中
-                          </Badge>
-                        )}
-                        {job.expiry_date &&
-                          job.expiry_date <= Date.now() && (
-                            <Badge className="bg-red-500 hover:bg-red-600">
-                              募集終了
-                            </Badge>
-                          )}
-                      </div>
-                      {notificationCount > 0 && (
-                        <Badge className="h-5 flex items-center justify-center bg-red-500 text-white px-1.5 py-0.5 ml-auto">
-                          {notificationCount > 9 ? "9+" : notificationCount}
+                      {job.status === "FILLED" && (
+                        <Badge className="bg-blue-500 hover:bg-blue-600">
+                          応募あり
                         </Badge>
                       )}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger
-                          asChild
-                          onClick={(e) => e.stopPropagation()}
-                          onMouseDown={(e) => e.stopPropagation()}>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <Link href={`/admin/job/${job.id}`}>
-                              詳細を見る
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleCopyJob(job)
-                            }}>
-                            コピーして新規作成
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-medium text-sm">
-                        {job.title}
-                      </h3>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-xs">
-                        {job.formattedWorkDate}
-                      </Badge>
-                      <span className="text-xs text-gray-500">
-                        {job.formattedTime}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {job.fee}円
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      {job.workSessionCount > 0 ? (
-                        <div className="flex items-center gap-1 text-muted-foreground">
-                          <Users className="h-4 w-4" />
-                          <span className="text-sm">応募あり</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-1 text-muted-foreground">
-                          <Users className="h-4 w-4" />
-                          <span className="text-sm">応募なし</span>
-                        </div>
+                      {job.status === "DRAFT" && (
+                        <Badge className="bg-gray-500 hover:bg-gray-600">
+                          下書き
+                        </Badge>
+                      )}
+                      {job.status === "PENDING" && (
+                        <Badge className="bg-yellow-500 hover:bg-yellow-600">
+                          一時停止中
+                        </Badge>
+                      )}
+                      {job.expiry_date && job.expiry_date <= Date.now() && (
+                        <Badge className="bg-red-500 hover:bg-red-600">
+                          募集終了
+                        </Badge>
                       )}
                     </div>
+                    {notificationCount > 0 && (
+                      <Badge className="h-5 flex items-center justify-center bg-red-500 text-white px-1.5 py-0.5 ml-auto">
+                        {notificationCount > 9 ? "9+" : notificationCount}
+                      </Badge>
+                    )}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger
+                        asChild
+                        onClick={(e) => e.stopPropagation()}
+                        onMouseDown={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                          <Link href={`/admin/job/${job.id}`}>詳細を見る</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCopyJob(job);
+                          }}>
+                          コピーして新規作成
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-medium text-sm">{job.title}</h3>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">
+                      {job.formattedWorkDate}
+                    </Badge>
+                    <span className="text-xs text-gray-500">
+                      {job.formattedTime}
+                    </span>
+                    <span className="text-xs text-gray-500">{job.fee}円</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {job.workSessionCount > 0 ? (
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <Users className="h-4 w-4" />
+                        <span className="text-sm">応募あり</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <Users className="h-4 w-4" />
+                        <span className="text-sm">応募なし</span>
+                      </div>
+                    )}
                   </div>
                 </div>
-              )
-            })
-          }
+              </div>
+            );
+          })}
         </div>
       </TabsContent>
-    )
-  }
+    );
+  };
 
   return (
     <div className="container mx-auto py-1">
@@ -693,12 +707,77 @@ export default function RestaurantDetailPage(props: {
             </Card>
           </div> */}
 
-          <Tabs defaultValue="jobs" className="mt-1">
+          <Tabs defaultValue="messages" className="mt-1">
             <TabsList>
+              <TabsTrigger value="messages">メッセージ</TabsTrigger>
               <TabsTrigger value="jobs">求人</TabsTrigger>
               <TabsTrigger value="info">店舗詳細</TabsTrigger>
               <TabsTrigger value="staff">管理スタッフ</TabsTrigger>
             </TabsList>
+            <TabsContent value="messages">
+              <div className="space-y-4">
+                {/* ダミーのチャット一覧 */}
+                {[
+                  {
+                    id: 1,
+                    name: "田中 シェフ",
+                    lastMessage:
+                      "明日のシフトについて確認させていただきたいです。",
+                    time: "10:30",
+                    unread: 2,
+                    avatar: "/placeholder.svg",
+                  },
+                  {
+                    id: 2,
+                    name: "佐藤 シェフ",
+                    lastMessage: "ありがとうございます。承知しました。",
+                    time: "昨日",
+                    unread: 0,
+                    avatar: "/placeholder.svg",
+                  },
+                  {
+                    id: 3,
+                    name: "鈴木 シェフ",
+                    lastMessage: "シフトの調整について相談させてください。",
+                    time: "2日前",
+                    unread: 1,
+                    avatar: "/placeholder.svg",
+                  },
+                ].map((chat) => (
+                  <div
+                    key={chat.id}
+                    className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                    onClick={() => setSelectedChat(chat)}>
+                    <div className="relative h-12 w-12 rounded-full overflow-hidden">
+                      <Image
+                        src={chat.avatar}
+                        alt={chat.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className="font-medium truncate">{chat.name}</h3>
+                        <span className="text-sm text-gray-500">
+                          {chat.time}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm text-gray-500 truncate">
+                          {chat.lastMessage}
+                        </p>
+                        {chat.unread > 0 && (
+                          <span className="flex items-center justify-center h-5 w-5 rounded-full bg-blue-500 text-white text-xs">
+                            {chat.unread}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
 
             <TabsContent value="info">
               <div className="grid gap-4">
@@ -1021,11 +1100,11 @@ export default function RestaurantDetailPage(props: {
                     <TabsTrigger value="expired">募集終了</TabsTrigger>
                   </TabsList>
 
-                  <JobTabContent selectedTab="published"/>
-                  <JobTabContent selectedTab="filled"/>
-                  <JobTabContent selectedTab="draft"/>
-                  <JobTabContent selectedTab="pending"/>
-                  <JobTabContent selectedTab="expired"/>
+                  <JobTabContent selectedTab="published" />
+                  <JobTabContent selectedTab="filled" />
+                  <JobTabContent selectedTab="draft" />
+                  <JobTabContent selectedTab="pending" />
+                  <JobTabContent selectedTab="expired" />
                 </Tabs>
               )}
             </TabsContent>
@@ -1136,13 +1215,18 @@ export default function RestaurantDetailPage(props: {
         }}
         onSubmit={handleCreateJob}
         restaurantId={parseInt(params.id)}
-        initialData={copiedJob || selectedDate ? {
-          ...copiedJob,
-          work_date: copiedJob
-            ? copiedJob.work_date : selectedDate
-            ? format(selectedDate, "yyyy-MM-dd")
-            : undefined,
-        } : undefined}
+        initialData={
+          copiedJob || selectedDate
+            ? {
+                ...copiedJob,
+                work_date: copiedJob
+                  ? copiedJob.work_date
+                  : selectedDate
+                  ? format(selectedDate, "yyyy-MM-dd")
+                  : undefined,
+              }
+            : undefined
+        }
       />
       <EditRestaurantModal
         isOpen={isEditModalOpen && !!restaurant}
@@ -1234,6 +1318,99 @@ export default function RestaurantDetailPage(props: {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Sheet open={!!selectedChat} onOpenChange={() => setSelectedChat(null)}>
+        <SheetContent side="right" className="w-full sm:max-w-lg">
+          <SheetHeader className="mb-4">
+            <div className="flex items-center gap-3">
+              <div className="relative h-10 w-10 rounded-full overflow-hidden">
+                <Image
+                  src={selectedChat?.avatar || "/placeholder.svg"}
+                  alt={selectedChat?.name || ""}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div>
+                <SheetTitle>{selectedChat?.name}</SheetTitle>
+                <SheetDescription>オンライン</SheetDescription>
+              </div>
+            </div>
+          </SheetHeader>
+
+          <div className="flex flex-col h-[calc(100vh-8rem)]">
+            <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+              {/* ダミーのメッセージ */}
+              {[
+                {
+                  id: 1,
+                  sender: "田中 シェフ",
+                  message: "明日のシフトについて確認させていただきたいです。",
+                  time: "10:30",
+                  isOwn: false,
+                },
+                {
+                  id: 2,
+                  sender: "あなた",
+                  message: "はい、どのようなことでしょうか？",
+                  time: "10:31",
+                  isOwn: true,
+                },
+                {
+                  id: 3,
+                  sender: "田中 シェフ",
+                  message:
+                    "18時から22時までのシフトを希望しているのですが、可能でしょうか？",
+                  time: "10:32",
+                  isOwn: false,
+                },
+              ].map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`flex ${
+                    msg.isOwn ? "justify-end" : "justify-start"
+                  }`}>
+                  <div
+                    className={`max-w-[80%] rounded-lg p-3 ${
+                      msg.isOwn
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-100 text-gray-900"
+                    }`}>
+                    <p className="text-sm">{msg.message}</p>
+                    <span className="text-xs opacity-70 mt-1 block">
+                      {msg.time}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="border-t pt-4">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="メッセージを入力..."
+                  className="flex-1 rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <Button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-5 w-5">
+                    <path d="m22 2-7 20-4-9-9-4Z" />
+                    <path d="M22 2 11 13" />
+                  </svg>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

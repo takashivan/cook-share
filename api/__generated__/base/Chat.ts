@@ -13,6 +13,8 @@
 import {
   SummaryChefListData,
   SummaryChefListParams,
+  SummaryRestaurantListData,
+  SummaryRestaurantListParams,
   UnreadSummaryChefListData,
   UnreadSummaryRestaurantDetailData,
   UpdateReadChefPartialUpdateData,
@@ -54,6 +56,38 @@ export class Chat<
       : null;
     const fetcher = () =>
       this.summaryChefList(query, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags chat
+   * @name SummaryRestaurantList
+   * @request GET:/chat/summary-restaurant
+   */
+  summaryRestaurantList = (
+    query: SummaryRestaurantListParams,
+    params: RequestParams = {},
+  ) =>
+    this.request<SummaryRestaurantListData, void>({
+      path: `/chat/summary-restaurant`,
+      method: "GET",
+      query: query,
+      format: "json",
+      ...params,
+    });
+
+  summaryRestaurantListQueryArgs = (
+    query: SummaryRestaurantListParams,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled
+      ? [`/chat/summary-restaurant`, ...(query ? [query] : [])]
+      : null;
+    const fetcher = () =>
+      this.summaryRestaurantList(query, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
