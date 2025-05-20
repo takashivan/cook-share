@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,6 @@ import { ja } from "date-fns/locale";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { ChefProfileEditModal } from "@/components/modals/ChefProfileEditModal";
 import { useGetReviewsByUserId } from "@/hooks/api/user/reviews/useGetReviewsByUserId";
-import { getUserProfile, UserProfile } from "@/lib/api/user";
 import {
   Card,
   CardHeader,
@@ -20,30 +19,16 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Star } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { EXPERIENCE_LEVELS } from "@/lib/const/chef-profile";
 
 export default function ChefProfile() {
-  const { user: authUser, logout } = useAuth();
-  const [user, setUser] = useState(authUser);
+  const { user, logout } = useAuth();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const { data: reviewsData } = useGetReviewsByUserId({
-    userId: authUser?.id ?? undefined,
+    userId: user?.id ?? undefined,
   });
   console.log("reviewsData", reviewsData);
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (authUser?.id) {
-        try {
-          const fullProfile = await getUserProfile(authUser.id);
-          setUser(fullProfile);
-        } catch (error) {
-          console.error("Error fetching user profile:", error);
-        }
-      }
-    };
-
-    fetchUserProfile();
-  }, [authUser?.id]);
 
   const handleLogout = () => {
     logout();
@@ -59,10 +44,6 @@ export default function ChefProfile() {
 
   const handleEditModalClose = () => {
     setIsEditModalOpen(false);
-  };
-
-  const handleSave = async (updatedProfile: UserProfile) => {
-    setUser(updatedProfile);
   };
 
   return (
@@ -90,26 +71,33 @@ export default function ChefProfile() {
             <CardContent className="space-y-4">
               <div className="flex items-center gap-4">
                 <Avatar className="h-20 w-20">
-                  <AvatarImage src={authUser?.profile_image} />
-                  <AvatarFallback>{authUser?.name.charAt(0)}</AvatarFallback>
+                  <AvatarImage src={user.profile_image} />
+                  <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <h2 className="text-2xl font-bold">{authUser?.name}</h2>
-                  <p className="text-muted-foreground">
-                    {authUser?.experience_level}
-                  </p>
+                  <span className="text-sm font-normal text-gray-600">{`${user.last_name_kana}${user.given_name_kana}`}</span>
+                  <h2 className="text-2xl font-bold">{user.name}</h2>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">
-                    メールアドレス
-                  </p>
-                  <p>{authUser?.email}</p>
-                </div>
+              <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">電話番号</p>
-                  <p>{authUser?.phone}</p>
+                  <p>{user.phone}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">生年月日</p>
+                  <p>
+                    {user.dateofbirth
+                      ? format(new Date(user.dateofbirth), "yyyy/MM/dd", {
+                          locale: ja,
+                        })
+                      : "未設定"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">住所</p>
+                  <p>〒{user.postal_code}</p>
+                  <p>{`${user.prefecture}${user.city}${user.town}${user.street}${user.address2}`}</p>
                 </div>
               </div>
             </CardContent>
@@ -120,36 +108,37 @@ export default function ChefProfile() {
             <CardHeader>
               <CardTitle>スキル</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               <div className="flex flex-wrap gap-2">
-                {authUser?.skills?.map((skill, index) => (
+                {user.skills?.map((skill, index) => (
                   <Badge key={index} variant="secondary">
                     {skill}
                   </Badge>
                 ))}
               </div>
+              <div>
+                <p className="text-sm text-muted-foreground">調理経験年数</p>
+                <p>{EXPERIENCE_LEVELS.find(level => level.value === user.experience_level)?.label}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">保有資格</p>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {user.certifications?.map((ertification, index) => (
+                    <Badge key={index} variant="secondary">
+                      {ertification}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader></CardHeader>
+            <CardHeader>
+              <CardTitle>自己紹介</CardTitle>
+            </CardHeader>
             <CardContent>
-              <div>
-                <p className="text-sm text-muted-foreground">自己紹介</p>
-                <p>{authUser?.bio}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">誕生日</p>
-                <p>{authUser?.dateofbirth}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">資格</p>
-                <p>{authUser?.certifications}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">経験レベル</p>
-                <p>{authUser?.experience_level}</p>
-              </div>
+              <p>{user.bio}</p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -283,8 +272,7 @@ export default function ChefProfile() {
 
       <ChefProfileEditModal
         isOpen={isEditModalOpen}
-        onClose={handleEditModalClose}
-        onSave={handleSave}
+        onCloseAction={handleEditModalClose}
         user={user}
       />
     </div>

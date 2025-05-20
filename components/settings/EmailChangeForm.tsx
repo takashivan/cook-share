@@ -15,6 +15,7 @@ import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { useForm } from "react-hook-form";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 interface ChangeForm {
   newEmail: string;
@@ -29,9 +30,11 @@ interface EmailChangeFormProps {
 export function EmailChangeForm({
   userType,
 }: EmailChangeFormProps) {
-  const { user: companyUser, changeEmail: companyChangeEmail } = useCompanyAuth();
-  const { user: chefUser, changeEmail: chefChangeEmail } = useAuth();
+  const router = useRouter();
+  const { user: companyUser, login: companyLogin, changeEmail: companyChangeEmail } = useCompanyAuth();
+  const { user: chefUser, login: chefLogin, changeEmail: chefChangeEmail } = useAuth();
   const user = userType === "company" ? companyUser : chefUser;
+  const login = userType === "company" ? companyLogin : chefLogin;
   const changeEmail = userType === "company" ? companyChangeEmail : chefChangeEmail;
   
   const {
@@ -59,12 +62,27 @@ export function EmailChangeForm({
     }
 
     try {
-      await changeEmail(data.newEmail, user.email, data.password);
+      await login(user.email, data.password);
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "パスワードが間違っています",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await changeEmail(data.newEmail);
       toast({
         title: "成功",
-        description: "メールアドレスが変更されました",
+        description: "メールアドレスの変更を受け付けました",
       });
       reset();
+
+      router.push(
+        userType === "company" ? "/email-changed/company/verify-email" : "/email-changed/chef/verify-email"
+      );
     } catch (error) {
       toast({
         title: "エラー",

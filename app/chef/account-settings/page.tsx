@@ -1,118 +1,12 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
-import { changeEmail } from "@/lib/api/user";
-import { useAuth } from "@/lib/contexts/AuthContext";
 import { EmailChangeForm } from "@/components/settings/EmailChangeForm";
 import { PasswordChangeForm } from "@/components/settings/PasswordChangeForm";
 import { DeleteAccountForm } from "@/components/settings/DeleteAccountForm";
 import { ConnectSettings } from "./components/ConnectSettings";
 
 export default function AccountSettings() {
-  const [activeTab, setActiveTab] = useState("account");
-
-  // アカウント情報のステート
-  const [accountInfo, setAccountInfo] = useState({
-    email: "yamada@example.com",
-    phone: "090-1234-5678",
-    language: "ja",
-  });
-  const { user, reloadUser } = useAuth();
-
-  // パスワード変更のステート
-  const [passwordInfo, setPasswordInfo] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
-
-  const handleEmailChange = async (email: string) => {
-    await changeEmail(email);
-    await reloadUser();
-    console.log(email);
-  };
-
-  // 通知設定のステート
-  const [notificationSettings, setNotificationSettings] = useState({
-    email: {
-      newJobs: true,
-      applicationUpdates: true,
-      messages: true,
-      reviews: true,
-      payments: true,
-    },
-    push: {
-      newJobs: true,
-      applicationUpdates: true,
-      messages: true,
-      reviews: false,
-      payments: true,
-    },
-  });
-
-  // アカウント情報の変更ハンドラ
-  const handleAccountChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setAccountInfo((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // パスワード変更のハンドラ
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setPasswordInfo((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // 通知設定の変更ハンドラ
-  const handleNotificationChange = (
-    type: "email" | "push",
-    setting: string,
-    checked: boolean
-  ) => {
-    setNotificationSettings((prev) => ({
-      ...prev,
-      [type]: {
-        ...prev[type],
-        [setting]: checked,
-      },
-    }));
-  };
-
-  // アカウント情報保存ハンドラ
-  const handleSaveAccount = (e: React.FormEvent) => {
-    e.preventDefault();
-    // APIリクエストを送信する処理をここに実装
-    alert("アカウント情報を保存しました");
-  };
-
-  // パスワード変更ハンドラ
-  const handleChangePassword = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // パスワードの検証
-    if (passwordInfo.newPassword !== passwordInfo.confirmPassword) {
-      alert("新しいパスワードと確認用パスワードが一致しません");
-      return;
-    }
-
-    // APIリクエストを送信する処理をここに実装
-    alert("パスワードを変更しました");
-    setPasswordInfo({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
-  };
-
-  // 通知設定保存ハンドラ
-  const handleSaveNotifications = (e: React.FormEvent) => {
-    e.preventDefault();
-    // APIリクエストを送信する処理をここに実装
-    alert("通知設定を保存しました");
-  };
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center mb-6">

@@ -33,6 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { CERTIFICATIONS, SKILLS } from "@/lib/const/chef-profile";
 
 const STEPS = [
   { id: 1, title: "基本情報", shortTitle: "基本" },
@@ -78,25 +79,8 @@ export default function ChefProfilePage() {
   const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(undefined);
   const [checking, setChecking] = useState(true);
 
-  const skills = [
-    { id: "fish-cutting", label: "魚が捌ける" },
-    { id: "japanese-cuisine", label: "和食" },
-    { id: "western-cuisine", label: "洋食" },
-    { id: "chinese-cuisine", label: "中華" },
-    { id: "italian-cuisine", label: "イタリアン" },
-    { id: "french-cuisine", label: "フレンチ" },
-    { id: "dessert", label: "デザート" },
-    { id: "bread", label: "パン" },
-  ];
-
-  const certificates = [
-    { id: "cooking-license", label: "調理師免許" },
-    { id: "fugu-license", label: "ふぐ調理師免許" },
-    { id: "other", label: "その他" },
-  ];
-
   const handleSkillChange = (skill: string) => {
-    const skillLabel = skills.find((s) => s.id === skill)?.label || skill;
+    const skillLabel = SKILLS.find((s) => s.id === skill)?.label || skill;
     setSelectedSkills((prev) =>
       prev.includes(skillLabel)
         ? prev.filter((s) => s !== skillLabel)
@@ -114,7 +98,7 @@ export default function ChefProfilePage() {
       }
     } else {
       const certLabel =
-        certificates.find((c) => c.id === certificate)?.label || certificate;
+        CERTIFICATIONS.find((c) => c.id === certificate)?.label || certificate;
       setSelectedCertificates((prev) =>
         prev.includes(certLabel)
           ? prev.filter((c) => c !== certLabel)
@@ -563,7 +547,7 @@ export default function ChefProfilePage() {
                 スキル（複数選択可）
               </Label>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
-                {skills.map((skill) => (
+                {SKILLS.map((skill) => (
                   <div key={skill.id} className="flex items-center space-x-2">
                     <Checkbox
                       id={skill.id}
@@ -668,7 +652,7 @@ export default function ChefProfilePage() {
                 保有資格（複数選択可）
               </Label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
-                {certificates.map((cert) => (
+                {CERTIFICATIONS.map((cert) => (
                   <div key={cert.id} className="flex items-center space-x-2">
                     <Checkbox
                       id={cert.id}

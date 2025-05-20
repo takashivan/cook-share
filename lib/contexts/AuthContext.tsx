@@ -29,8 +29,9 @@ interface AuthContextType {
   logout: () => void;
   register: (data: UserData) => Promise<void>;
   update: (data: Partial<UsersPartialUpdatePayload>) => Promise<void>;
-  changeEmail: (email: string, currentEmail: string, password: string) => Promise<void>;
-  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  changeEmail: (email: string) => Promise<void>;
+  confirmEmail: (token: string) => Promise<void>;
+  changePassword: (newPassword: string) => Promise<void>;
   deleteAccount: (password: string) => Promise<void>;
   setUser: (user: UserProfile | null) => void;
   reloadUser: () => Promise<void>;
@@ -45,6 +46,7 @@ const AuthContext = createContext<AuthContextType>({
   register: async () => {},
   update: async () => {},
   changeEmail: async () => {},
+  confirmEmail: async () => {},
   changePassword: async () => {},
   deleteAccount: async () => {},
   setUser: () => {},
@@ -89,11 +91,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const saveUser = (userData: UserProfile | null) => {
     setUser(userData);
     setCurrentUser(userData, "chef");
-    if (userData) {
-      localStorage.setItem("user", JSON.stringify(userData));
-    } else {
-      localStorage.removeItem("user");
-    }
   };
 
   const reloadUser = async () => {
@@ -145,7 +142,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setIsAuthenticated(false);
     clearAuthToken();
-    localStorage.removeItem("user");
   };
 
   const handleRegister = async (data: UserData) => {
@@ -173,7 +169,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (response) {
-        saveUser(response.data as unknown as UserProfile);
+        saveUser(response.data.result1 as unknown as UserProfile);
       }
     } catch (error) {
       console.error("Update error:", error);
@@ -181,25 +177,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const handleChangeEmail = async (email: string, currentEmail: string, password: string) => {
+  const handleChangeEmail = async (email: string) => {
     try {
-      // 現在のメアドとPWでログインできるか確認
-      const { sessionToken, user: currentUser } = await login({
-        email: currentEmail,
-        password,
-      });
-
-      const userId = currentUser?.id;
-      if (!userId) {
-        throw new Error("User ID not found");
-      }
-
-      setAuth(sessionToken, currentUser);
-
-      const authApi = getApi(Auth);
-      const response = await authApi.updateEmailCreate({
+      const usersApi = getApi(Users);
+      const response = await usersApi.emailChangeCreate({
         email,
-        user_id: userId,
       }, {
         headers: {
           "X-User-Type": "chef"
@@ -211,34 +193,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
     catch (error: any) {
-      if (error?.response?.status === 401) {
-        // 認証エラー（ログイン失敗）
-        throw new Error("現在のメールアドレスまたはパスワードが間違っています");
-      }
-
       console.error("Change email error:", error);
       throw error;
     }
   };
 
-  const handleChangePassword = async (currentPassword: string, newPassword: string) => {
+  const handleConfirmEmail = async (token: string) => {
     try {
-      // 現在のパスワードでログインできるか確認
-      const { sessionToken, user: currentUser } = await login({
-        email: user?.email || "",
-        password: currentPassword,
+      const usersApi = getApi(Users);
+      const response = await usersApi.emailConfirmCreate({
+        token,
+      }, {
+        headers: {
+          "X-User-Type": "chef"
+        }
       });
-      if (!currentUser) {
-        throw new Error("現在のパスワードが間違っています");
+
+      if (response) {
+        saveUser(response.data as unknown as UserProfile);
       }
+    }
+    catch (error) {
+      console.error("Confirm email error:", error);
+      throw error;
+    }
+  }
 
-      setAuth(sessionToken, currentUser);
-
-      const userId = currentUser?.id;
-      if (!userId) {
-        throw new Error("User ID not found");
-      }
-
+  const handleChangePassword = async (newPassword: string) => {
+    try {
       const authApi = getApi(Auth);
       const response = await authApi.changePasswordCreate({ new_password: newPassword }, {
         headers: {
@@ -247,7 +229,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (response) {
-        saveUser(response.data as unknown as UserProfile);
+        saveUser(response.data.result1 as unknown as UserProfile);
       }
     } catch (error) {
       console.error("Change password error:", error);
@@ -299,6 +281,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         update: handleUpdate,
         setUser: saveUser,
         changeEmail: handleChangeEmail,
+        confirmEmail: handleConfirmEmail,
         changePassword: handleChangePassword,
         deleteAccount: handleDeleteAccount,
         reloadUser,
