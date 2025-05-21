@@ -2457,6 +2457,57 @@ export interface DashboardListData {
   chef_review: {
     chef_review_rating: number;
   };
+  to_be_verified_worksessions: {
+    /** @format int64 */
+    id: number;
+    /** @format timestamptz */
+    check_in_time: number;
+    /** @format timestamptz */
+    check_out_time: number;
+    status:
+      | "SCHEDULED"
+      | "IN_PROGRESS"
+      | "CANCELED_BY_CHEF"
+      | "CANCELED_BY_RESTAURANT"
+      | "COMPLETED"
+      | "VERIFIED"
+      | "DISPUTE"
+      | "ESCALATED"
+      | "PAID"
+      | "CANCELED";
+    /** @format int64 */
+    restaurant_id: number;
+    /** @format int64 */
+    job_id: number;
+    job: {
+      /** @format int64 */
+      id: number;
+      title: string;
+      /** @format date */
+      work_date: string;
+      /** @format timestamptz */
+      start_time: number;
+      /** @format timestamptz */
+      end_time: number;
+      /** @format int64 */
+      restaurant_id: number;
+    } | null;
+    restaurant: {
+      /** @format int64 */
+      id: number;
+      name: string;
+    } | null;
+    user: {
+      name: string;
+      profile_image: string;
+    } | null;
+    chef_review: {
+      /** @format int64 */
+      id: number;
+      /** @format timestamptz */
+      updated_at: number;
+    } | null;
+  }[];
 }
 
 export type RestaurantsListResult = {
