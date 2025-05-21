@@ -49,6 +49,7 @@ import {
 } from "@/components/ui/dialog";
 import { JobChangeRequest } from "@/hooks/api/companyuser/jobChangeRequests/useGetJobChangeRequests";
 import { Input } from "@/components/ui/input";
+import styles from "./styles.module.css";
 
 interface JobDetail {
   job: {
@@ -697,9 +698,9 @@ export default function JobDetail({ params }: PageProps) {
                   "カメラをQRコードに向けてください"
                 )}
               </p>
-              <div className="flex justify-center items-center rounded-lg overflow-hidden">
+              <div className="flex justify-center items-center overflow-hidden">
                 {!isQrScanned ? (
-                  <div className="flex flex-col items-center justify-center gap-3">
+                  <div className="flex flex-col items-center justify-center gap-3 w-full">
                     {error && (
                       <div className="text-red-600 border border-red-300 bg-red-50 p-3 rounded w-full max-w-sm text-center">
                         {error}
@@ -710,19 +711,24 @@ export default function JobDetail({ params }: PageProps) {
                         カメラアクセスを許可してスキャンする
                       </Button>
                     )}
-                    <div
-                      id="qr-reader"
-                      ref={ref}
-                      style={hasPermission ? { width: "300px", height: "300px" } : undefined}
-                    />
-                    <Input
-                      type="text"
-                      placeholder="または、コードを入力してください"
-                      value={checkInCode || ""}
-                      onChange={handleCheckInCodeChange}
-                      className="w-full mt-4"
-                      maxLength={6}
-                    />
+                    <div  className={`flex justify-center items-center flex-col overflow-hidden ${styles.qr_container}`}>
+                      <div className={styles.qr_reader_wrapper}>
+                        <div
+                          id="qr-reader"
+                          ref={ref}
+                          className={hasPermission ? styles.qr_reader : undefined}
+                        />
+                      </div>
+                      
+                      <Input
+                        type="text"
+                        placeholder="または、コードを入力してください"
+                        value={checkInCode || ""}
+                        onChange={handleCheckInCodeChange}
+                        className={`mt-4 ${styles.input}`}
+                        maxLength={6}
+                      />
+                    </div>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center p-8">
