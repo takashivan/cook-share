@@ -15,11 +15,7 @@ import {
   AlertCircle,
   CheckSquare,
   XCircle,
-  TrendingUp,
   PieChart,
-  ChevronUp,
-  ChevronDown,
-  ArrowUpDown,
   FileText,
   ClipboardCheck,
   X,
@@ -45,10 +41,7 @@ import {
 } from "@/components/ui/dialog";
 import { useGetDashboardList } from "@/hooks/api/companyuser/dashboard/userGetDashboardList";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
-import {
-  DashboardListData,
-  WorksessionListData,
-} from "@/api/__generated__/base/data-contracts";
+import { CheckInQRModal } from "@/components/modals/CheckInQRModal";
 
 interface DisplayWorksession {
   id: string;
@@ -738,59 +731,18 @@ export default function AdminDashboard() {
       </Dialog>
 
       {/* チェックインコードモーダル */}
-      <Dialog
-        open={isCheckInCodeModalOpen}
-        onOpenChange={setIsCheckInCodeModalOpen}>
-        <DialogContent className="sm:max-w-md max-w-[95vw] rounded-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <ClipboardCheck className="h-5 w-5 text-blue-600" />
-              チェックインコード
-            </DialogTitle>
-            <DialogDescription>
-              {selectedWorksession && (
-                <span className="line-clamp-1">
-                  {selectedWorksession.name} - {selectedWorksession.store}
-                </span>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div className="text-center">
-              <p className="text-sm text-gray-500 mb-2">
-                シェフに以下のコードを共有してください
-              </p>
-              {selectedCheckInCode ? (
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-3xl font-mono font-bold tracking-wider">
-                    {selectedCheckInCode}
-                  </p>
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500">
-                  チェックインコードが設定されていません
-                </p>
-              )}
-            </div>
-
-            <div className="text-sm text-gray-500">
-              <p>
-                ※ このコードは勤務開始時にシェフがチェックインする際に必要です
-              </p>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsCheckInCodeModalOpen(false)}
-              className="w-full sm:w-auto">
-              閉じる
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {selectedWorksession && (
+        <CheckInQRModal
+          isOpen={isCheckInCodeModalOpen}
+          onCloseAction={() => { setIsCheckInCodeModalOpen(false) }}
+          workSessionData={{
+            id: selectedWorksession.id,
+            check_in_code: selectedWorksession.check_in_code ?? null,
+            chefName: selectedWorksession.name,
+            restaurantName: selectedWorksession.store,
+          }}
+        />
+      )}
 
       {/* 勤務詳細モーダル */}
       <Dialog

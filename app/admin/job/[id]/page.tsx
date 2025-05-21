@@ -92,6 +92,7 @@ import { useGetRestaurantReviewByWorksessionId } from "@/hooks/api/companyuser/r
 import { useMarkReadMultipleCompanyUserNotifications } from "@/hooks/api/companyuser/companyUserNotifications/useMarkReadMultipleCompanyUserNotifications";
 import { useGetCompanyUserNotificationsByUserId } from "@/hooks/api/companyuser/companyUserNotifications/useGetCompanyUserNotificationsByUserId";
 import { RestaurantReviewCompleteModal } from "@/components/modals/RestaurantReviewCompleteModal";
+import { CheckInQRModal } from "@/components/modals/CheckInQRModal";
 
 interface PageParams {
   params: Promise<{ id: string }>;
@@ -850,42 +851,31 @@ ${changeRequest.reason}
                 <div className="flex items-center gap-1 sm:gap-2 ml-2 flex-shrink-0">
                   {selectedWorkSession.status === "SCHEDULED" && (
                     <>
-                      <Dialog
-                        open={isQrDialogOpen}
-                        onOpenChange={setIsQrDialogOpen}>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 w-8 sm:h-9 sm:w-auto sm:px-3 p-0">
-                            <QrCode className="h-4 w-4" />
-                            <span className="hidden sm:inline ml-2">
-                              チェックインQR
-                            </span>
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>チェックインQRコード</DialogTitle>
-                            <DialogDescription>
-                              シェフにこのQRコード、もしくは6桁のチェックインコードを提示してください
-                            </DialogDescription>
-                          </DialogHeader>
-                          <div className="flex flex-col items-center justify-center p-4">
-                            <div className="flex flex-col items-center justify-center bg-white p-4 rounded-lg shadow-md">
-                              <QRCodeSVG
-                                value={selectedWorkSession.id.toString()}
-                                size={200}
-                                level="H"
-                                includeMargin={true}
-                              />
-                              <span className="text-lg font-bold text-center">
-                                {selectedWorkSession.check_in_code}
-                              </span>
-                            </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 w-8 sm:h-9 sm:w-auto sm:px-3 p-0"
+                        onClick={() => {
+                          setIsQrDialogOpen(true);
+                        }}
+                      >
+                        <QrCode className="h-4 w-4" />
+                        <span className="hidden sm:inline ml-2">
+                          チェックインQR
+                        </span>
+                      </Button>
+                      <CheckInQRModal
+                        isOpen={isQrDialogOpen}
+                        onCloseAction={() => {
+                          setIsQrDialogOpen(false);
+                        }}
+                        workSessionData={{
+                          id: selectedWorkSession.id.toString(),
+                          check_in_code: selectedWorkSession.check_in_code,
+                          chefName: selectedWorkSession.user.name,
+                          restaurantName: restaurant?.name ?? '',
+                        }}
+                      />
 
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
