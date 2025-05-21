@@ -64,10 +64,7 @@ import {
   JobsPartialUpdatePayload,
   WorksessionsRestaurantTodosListData,
 } from "@/api/__generated__/base/data-contracts";
-import { useVerifyWorksession } from "@/hooks/api/companyuser/worksessions/useVerifyWorksession";
 import { useUpdateJob } from "@/hooks/api/companyuser/jobs/useUpdateJob";
-import { getApi } from "@/api/api-factory";
-import { Worksessions } from "@/api/__generated__/base/Worksessions";
 import { useSubscriptionMessagesByCompanyUserId } from "@/hooks/api/companyuser/messages/useSubscriptionMessagesByCompanyUserId";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { useUpdateReadMessageByCompanyUser } from "@/hooks/api/companyuser/messages/useUpdateReadMessageByCompanyUser";
@@ -94,6 +91,7 @@ import { useDeleteJobChangeRequest } from "@/hooks/api/companyuser/jobChangeRequ
 import { useGetRestaurantReviewByWorksessionId } from "@/hooks/api/companyuser/reviews/useGetRestaurantReviewByWorksessionId";
 import { useMarkReadMultipleCompanyUserNotifications } from "@/hooks/api/companyuser/companyUserNotifications/useMarkReadMultipleCompanyUserNotifications";
 import { useGetCompanyUserNotificationsByUserId } from "@/hooks/api/companyuser/companyUserNotifications/useGetCompanyUserNotificationsByUserId";
+import { RestaurantReviewCompleteModal } from "@/components/modals/RestaurantReviewCompleteModal";
 
 interface PageParams {
   params: Promise<{ id: string }>;
@@ -129,7 +127,6 @@ export default function JobDetail({ params }: PageParams) {
     WorksessionsRestaurantTodosListData[number] | null
   >(null);
   const [isChefReviewModalOpen, setIsChefReviewModalOpen] = useState(false);
-  const [chefReview, setChefReview] = useState<any>(null);
   const [isEditJobModalOpen, setIsEditJobModalOpen] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [cancellationPenalty, setCancellationPenalty] = useState<{
@@ -166,11 +163,6 @@ export default function JobDetail({ params }: PageParams) {
     jobId: Number(jobId),
     companyId: restaurant?.companies_id ?? undefined,
     restaurantId: restaurant?.id ?? undefined,
-  });
-
-  const { trigger: verifyWorksessionTrigger } = useVerifyWorksession({
-    worksessionId: selectedWorkSession?.id,
-    jobId: Number(jobId),
   });
 
   const { trigger: cancelWorksessionTrigger } =
@@ -295,30 +287,6 @@ export default function JobDetail({ params }: PageParams) {
         description: "メッセージの送信に失敗しました。",
         variant: "destructive",
       });
-    }
-  };
-
-  const handleReviewSubmit = async (
-    rating: number,
-    comment: string,
-    approved: boolean
-  ) => {
-    if (!selectedWorkSession) return;
-
-    try {
-      await verifyWorksessionTrigger({
-        rating,
-        feedback: comment,
-      });
-
-      const worksessionsClient = getApi(Worksessions);
-      const review = await worksessionsClient.chefReviewList(
-        selectedWorkSession.id
-      );
-      setChefReview(review);
-      setIsChefReviewModalOpen(true);
-    } catch (err) {
-      console.error("Failed to submit review:", err);
     }
   };
 
@@ -1174,79 +1142,23 @@ ${changeRequest.reason}
           )}
         </Card>
       </div>
-      <RestaurantReviewModal
-        isOpen={isReviewModalOpen}
-        onClose={() => setIsReviewModalOpen(false)}
-        onSubmit={handleReviewSubmit}
-        chefName={selectedWorkSession?.user.name || ""}
-        chefImage={selectedWorkSession?.user.profile_image}
-        jobTitle={selectedWorkSession?.job.title || ""}
-        jobDate={
-          selectedWorkSession?.job.work_date
-            ? format(new Date(selectedWorkSession.job.work_date), "yyyy/MM/dd")
-            : "未定"
-        }
-        jobTime={
-          selectedWorkSession?.job.start_time &&
-          selectedWorkSession?.job.end_time
-            ? `${format(
-                new Date(selectedWorkSession.job.start_time),
-                "HH:mm"
-              )}〜${format(
-                new Date(selectedWorkSession.job.end_time),
-                "HH:mm"
-              )}`
-            : "未定"
-        }
-      />
-      <Dialog
-        open={isChefReviewModalOpen}
-        onOpenChange={setIsChefReviewModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>お疲れ様でした！</DialogTitle>
-            <DialogDescription>
-              シェフからの評価が届いています
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            {chefReview ? (
-              <>
-                <div className="flex items-center gap-2">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <FaStar
-                        key={i}
-                        className={`h-5 w-5 ${
-                          i < chefReview.rating
-                            ? "text-yellow-400"
-                            : "text-gray-300"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    ({chefReview.rating}点)
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium">シェフからのコメント</h3>
-                  <p className="text-sm">{chefReview.comment}</p>
-                </div>
-              </>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                シェフからの評価はまだありません
-              </p>
-            )}
-          </div>
-          <DialogFooter>
-            <Button onClick={() => setIsChefReviewModalOpen(false)}>
-              閉じる
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {selectedWorkSession &&
+        <>
+          <RestaurantReviewModal
+            isOpen={isReviewModalOpen}
+            onCloseAction={() => setIsReviewModalOpen(false)}
+            worksession={selectedWorkSession}
+            handleSuccessAction={() => {
+              setIsChefReviewModalOpen(true);
+            }}
+          />
+          <RestaurantReviewCompleteModal
+            isOpen={isChefReviewModalOpen}
+            onCloseAction={() => setIsChefReviewModalOpen(false)}
+            worksessionId={selectedWorkSession?.id}
+          />
+        </>
+      }
       {formattedJob && (
         <EditJobModal
           isOpen={isEditJobModalOpen}
