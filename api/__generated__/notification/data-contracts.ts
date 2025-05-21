@@ -280,7 +280,7 @@ export interface MarkReadAllPartialUpdatePayload1 {
   user_id: string;
 }
 
-export type MarkReadAllPartialUpdateOutput1 = {
+export type MarkReadAllPartialUpdateResult1 = {
   /** @format uuid */
   id: string;
   /**
