@@ -459,7 +459,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </div>
       </div>
 
-      <div className="flex-1 lg:pl-72">
+      <div className="flex-1 lg:pl-72 min-w-0">
         <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-white px-4 md:px-6">
           <Button
             variant="ghost"

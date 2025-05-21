@@ -28,6 +28,11 @@ export default function MessagesPage() {
     userId: user?.id,
     workSessionId: selectedWorkSession?.id ?? undefined,
   });
+  const sortedMessageSummaryData = messageSummaryData?.message_summaries.sort((a, b) => {
+    const aDate = new Date(a.first_message?.created_at || 0);
+    const bDate = new Date(b.first_message?.created_at || 0);
+    return bDate.getTime() - aDate.getTime();
+  });
 
   const openChat = (worksession: MessageSummary["worksession"]) => {
     setSelectedWorkSession(worksession);
@@ -50,9 +55,9 @@ export default function MessagesPage() {
   return (
     <div className="container mx-auto px-4 py-8 space-y-4">
       <h1 className="text-2xl font-bold mb-6">メッセージ</h1>
-      {messageSummaryData && messageSummaryData.message_summaries.length > 0 ? (
+      {sortedMessageSummaryData && sortedMessageSummaryData.length > 0 ? (
         <>
-          {messageSummaryData.message_summaries.map((messageSummary) => {
+          {sortedMessageSummaryData.map((messageSummary) => {
             return (
               <Link
                 key={messageSummary.worksession.id}
@@ -107,7 +112,7 @@ export default function MessagesPage() {
         </>
       ) : (
         <div className="bg-gray-50 rounded-lg p-8 text-center text-gray-500">
-          未読メッセージはありません
+          メッセージはありません
         </div>
       )}
     </div>

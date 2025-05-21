@@ -27,10 +27,14 @@ export const useUpdateReadMessageByCompanyUser = (params: Params) => {
         mutate(messagesByUserIdKey);
       }
 
-      // 未読のMessagesリストのキャッシュを更新
       if (params.restaurantId) {
+        // 未読のMessagesリストのキャッシュを更新
         const unreadMessagesByCompanyUserIdKey = chat.unreadSummaryRestaurantDetailQueryArgs(params.restaurantId)[0];
         mutate(unreadMessagesByCompanyUserIdKey);
+
+        // メッセージのサマリーリストのキャッシュを更新
+        const messageSummaryByRestaurantIdKey = chat.summaryRestaurantListQueryArgs({ restaurant_id: params.restaurantId })[0];
+        mutate(messageSummaryByRestaurantIdKey);
       }
     }
   })
