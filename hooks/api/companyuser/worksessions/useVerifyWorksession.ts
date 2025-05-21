@@ -1,3 +1,4 @@
+import { Companyusers } from '@/api/__generated__/base/Companyusers';
 import { Jobs } from '@/api/__generated__/base/Jobs';
 import { Restaurants } from '@/api/__generated__/base/Restaurants';
 import { Worksessions } from '@/api/__generated__/base/Worksessions';
@@ -9,6 +10,7 @@ export interface Params {
   worksessionId?: number;
   jobId?: number;
   restaurantId?: number;
+  executedCompanyuserId?: string;
   handleSuccess?: () => void;
   handleError?: () => void;
 }
@@ -40,6 +42,13 @@ export const useVerifyWorksession = (params: Params) => {
         const worksessions = getApi(Worksessions);
         const worksessionsByIdKey = worksessions.chefReviewListQueryArgs(params.worksessionId)[0];
         mutate(worksessionsByIdKey);
+      }
+
+      if (params.executedCompanyuserId) {
+        // ダッシュボードのキャッシュを更新
+        const companyusers = getApi(Companyusers);
+        const dashboardListKey = companyusers.dashboardListQueryArgs(params.executedCompanyuserId)[0];
+        mutate(dashboardListKey);
       }
 
       if (params.handleSuccess) {

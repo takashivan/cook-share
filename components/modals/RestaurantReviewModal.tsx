@@ -7,39 +7,59 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Star, Clock, Calendar } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
-import { WorksessionsRestaurantTodosListData } from "@/api/__generated__/base/data-contracts";
 import { format } from "date-fns";
 import { useVerifyWorksession } from "@/hooks/api/companyuser/worksessions/useVerifyWorksession";
 import { toast } from "@/hooks/use-toast";
+import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 
 interface RestaurantReviewModalProps {
   isOpen: boolean;
   onCloseAction: () => void;
-  worksession: WorksessionsRestaurantTodosListData[number];
+  worksessionData: {
+    id: number;
+    user: {
+      name: string;
+      profile_image: string | null;
+    };
+    job: {
+      id: number;
+      title: string;
+      restaurant_id: number;
+      work_date: string | null;
+      start_time: number | null;
+      end_time: number | null;
+    };
+    restaurant: {
+      name: string;
+    }
+  };
   handleSuccessAction: () => void;
 }
 
 export function RestaurantReviewModal({
   isOpen,
   onCloseAction,
-  worksession,
+  worksessionData,
   handleSuccessAction,
 }: RestaurantReviewModalProps) {
+  const { user } = useCompanyAuth();
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");
   const [approved, setApproved] = useState(true);
 
   const { trigger: verifyWorksessionTrigger } = useVerifyWorksession({
-    worksessionId: worksession?.id,
-    jobId: Number(worksession?.job.id),
-    restaurantId: Number(worksession?.job.restaurant_id),
+    worksessionId: worksessionData?.id,
+    jobId: Number(worksessionData?.job.id),
+    restaurantId: Number(worksessionData?.job.restaurant_id),
+    executedCompanyuserId: user?.id,
     handleSuccess: () => {
       toast({
         title: "シェフの評価を送信しました",
@@ -83,36 +103,41 @@ export function RestaurantReviewModal({
           <DialogTitle className="text-xl font-bold">
             シェフの勤務確認・評価
           </DialogTitle>
+          <DialogDescription>
+            <span className="line-clamp-1">
+              {worksessionData.restaurant.name}
+            </span>
+          </DialogDescription>
         </DialogHeader>
         <div className="py-4">
           <div className="flex items-center gap-3 mb-4">
             <Avatar className="h-12 w-12">
               <AvatarImage
-                src={worksession.user.profile_image || "/chef-logo.png"}
-                alt={worksession.user.name}
+                src={worksessionData.user.profile_image || "/chef-logo.png"}
+                alt={worksessionData.user.name}
               />
-              <AvatarFallback>{worksession.user.name.charAt(0)}</AvatarFallback>
+              <AvatarFallback>{worksessionData.user.name.charAt(0)}</AvatarFallback>
             </Avatar>
             <div>
-              <h3 className="font-medium">{worksession.user.name}</h3>
-              <p className="text-sm text-muted-foreground">{worksession.job.title}</p>
+              <h3 className="font-medium">{worksessionData.user.name}</h3>
+              <p className="text-sm text-muted-foreground">{worksessionData.job.title}</p>
               <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
                 <div className="flex items-center">
                   <Calendar className="h-3 w-3 mr-1" />
-                  {worksession.job.work_date
-                    ? format(new Date(worksession.job.work_date), "yyyy/MM/dd")
+                  {worksessionData.job.work_date
+                    ? format(new Date(worksessionData.job.work_date), "yyyy/MM/dd")
                     : "未定"
                   }
                 </div>
                 <div className="flex items-center">
                   <Clock className="h-3 w-3 mr-1" />
-                  {worksession?.job.start_time &&
-                    worksession?.job.end_time
+                  {worksessionData?.job.start_time &&
+                    worksessionData?.job.end_time
                       ? `${format(
-                          new Date(worksession.job.start_time),
+                          new Date(worksessionData.job.start_time),
                           "HH:mm"
                         )}〜${format(
-                          new Date(worksession.job.end_time),
+                          new Date(worksessionData.job.end_time),
                           "HH:mm"
                         )}`
                       : "未定"

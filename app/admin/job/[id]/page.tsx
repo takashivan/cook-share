@@ -1137,14 +1137,34 @@ ${changeRequest.reason}
           <RestaurantReviewModal
             isOpen={isReviewModalOpen}
             onCloseAction={() => setIsReviewModalOpen(false)}
-            worksession={selectedWorkSession}
+            worksessionData={{
+              id: selectedWorkSession.id,
+              user: {
+                name: selectedWorkSession.user.name,
+                profile_image: selectedWorkSession.user.profile_image
+              },
+              job: {
+                id: selectedWorkSession.job.id,
+                title: selectedWorkSession.job.title,
+                restaurant_id: selectedWorkSession.job.restaurant_id,
+                work_date: selectedWorkSession.job.work_date,
+                start_time: selectedWorkSession.job.start_time,
+                end_time: selectedWorkSession.job.end_time,
+              },
+              restaurant: {
+                name: restaurant?.name || "",
+              },
+            }}
             handleSuccessAction={() => {
               setIsChefReviewModalOpen(true);
             }}
           />
           <RestaurantReviewCompleteModal
             isOpen={isChefReviewModalOpen}
-            onCloseAction={() => setIsChefReviewModalOpen(false)}
+            onCloseAction={() => {
+              setIsChefReviewModalOpen(false)
+              setSelectedWorkSession(null)
+            }}
             worksessionId={selectedWorkSession?.id}
           />
         </>
