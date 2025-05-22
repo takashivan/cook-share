@@ -9,7 +9,7 @@ const protectedDomains = ["chefdom.jp", "www.chefdom.jp"];
 
 export function middleware(req: NextRequest) {
   // 本番環境でのみ認証をかける
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env.VERCEL_ENV !== "production") {
     return NextResponse.next();
   }
 
