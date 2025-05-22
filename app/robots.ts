@@ -8,9 +8,7 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: '*',
-      // TODO: 本番公開時にコメントを戻す
-      // disallow: isProduction ? undefined : '/'
-      disallow: '/',
+      disallow: isProduction ? undefined : '/'
     },
   };
 }
