@@ -2457,6 +2457,57 @@ export interface DashboardListData {
   chef_review: {
     chef_review_rating: number;
   };
+  to_be_verified_worksessions: {
+    /** @format int64 */
+    id: number;
+    /** @format timestamptz */
+    check_in_time: number;
+    /** @format timestamptz */
+    check_out_time: number;
+    status:
+      | "SCHEDULED"
+      | "IN_PROGRESS"
+      | "CANCELED_BY_CHEF"
+      | "CANCELED_BY_RESTAURANT"
+      | "COMPLETED"
+      | "VERIFIED"
+      | "DISPUTE"
+      | "ESCALATED"
+      | "PAID"
+      | "CANCELED";
+    /** @format int64 */
+    restaurant_id: number;
+    /** @format int64 */
+    job_id: number;
+    job: {
+      /** @format int64 */
+      id: number;
+      title: string;
+      /** @format date */
+      work_date: string;
+      /** @format timestamptz */
+      start_time: number;
+      /** @format timestamptz */
+      end_time: number;
+      /** @format int64 */
+      restaurant_id: number;
+    } | null;
+    restaurant: {
+      /** @format int64 */
+      id: number;
+      name: string;
+    } | null;
+    user: {
+      name: string;
+      profile_image: string;
+    } | null;
+    chef_review: {
+      /** @format int64 */
+      id: number;
+      /** @format timestamptz */
+      updated_at: number;
+    } | null;
+  }[];
 }
 
 export type RestaurantsListResult = {
@@ -8913,145 +8964,6 @@ export interface ChefReviewListResult {
   reviewer_id: string;
   /** @format int64 */
   reviewee_id: number;
-  worksession: {
-    /** @format int64 */
-    id: number;
-    /**
-     * @format timestamptz
-     * @default "now"
-     */
-    created_at: number;
-    /** @format timestamptz */
-    check_in_time: number;
-    /** @format timestamptz */
-    check_out_time: number;
-    total_hours: number;
-    location_data: string;
-    status:
-      | "SCHEDULED"
-      | "IN_PROGRESS"
-      | "CANCELED_BY_CHEF"
-      | "CANCELED_BY_RESTAURANT"
-      | "COMPLETED"
-      | "VERIFIED"
-      | "DISPUTE"
-      | "ESCALATED"
-      | "PAID"
-      | "CANCELED";
-    /** @format timestamptz */
-    updated_at: number;
-    /** @format uuid */
-    application_id: string | null;
-    /** @format uuid */
-    user_id: string | null;
-    /** @format int64 */
-    restaurant_id: number;
-    /** @format int64 */
-    job_id: number;
-    /** @format int64 */
-    paid_amount: number;
-    chef_feedback: string;
-    restaurant_feedback: string;
-    /** @format int64 */
-    chef_rating: number;
-    /** @format int64 */
-    restaurant_rating: number;
-    /** @format timestamptz */
-    start_time: number | null;
-    /** @format int64 */
-    check_in_code: number | null;
-  };
-  restaurant: {
-    /** @format int64 */
-    id: number;
-    /**
-     * @format timestamptz
-     * @default "now"
-     */
-    created_at: number;
-    name: string;
-    address: string;
-    cuisine_type: string;
-    business_hours: string;
-    contact_info: string;
-    profile_image: string;
-    /** @format timestamptz */
-    updated_at: number;
-    /** Whether the restaurant is active. */
-    is_active: boolean;
-    /** @format uuid */
-    companies_id: string | null;
-    station: string;
-    access: string;
-    rating: number;
-    /** @default "1" */
-    is_approved: boolean;
-    restaurant_cuisine_id: number[];
-    description: string;
-    phone: string;
-    status: "BANNED" | "PENDING" | "DELETED";
-  };
-  user: {
-    /** @format uuid */
-    id: string;
-    /**
-     * @format timestamptz
-     * @default "now"
-     */
-    created_at: number;
-    name: string;
-    /** @format email */
-    email: string;
-    user_type: string;
-    status: string;
-    /** @format date */
-    last_login_at: string | null;
-    /** @format date */
-    updated_at: string | null;
-    skills: string[];
-    experience_level: string;
-    bio: string;
-    certifications: string[];
-    /** @format date */
-    dateofbirth: string | null;
-    profile_image: string;
-    is_approved: boolean;
-    line_user_id: string;
-    line_display_name: string;
-    line_notification_enabled: boolean;
-    is_verified: boolean;
-    verify_token: string;
-    stripe_account_id: string;
-    /** @format email */
-    pending_email: string;
-    email_change_token: string;
-    password_reset_token: string;
-    stripe_verified: boolean;
-    stripe_requirements: object;
-    address: string;
-    phone: string;
-    last_name: string;
-    given_name: string;
-    last_name_kana: string;
-    given_name_kana: string;
-    categories: number[];
-    postal_code: string;
-    prefecture: string;
-    address2: string;
-    city: string;
-    town: string;
-    street: string;
-    profile_completed: boolean;
-    magic_link: {
-      token: string;
-      /**
-       * Time the token expires
-       * @format timestamptz
-       */
-      expiration: number;
-      used: boolean;
-    } | null;
-  };
 }
 
 export interface FinishPartialUpdateBody {

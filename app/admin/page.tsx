@@ -15,11 +15,7 @@ import {
   AlertCircle,
   CheckSquare,
   XCircle,
-  TrendingUp,
   PieChart,
-  ChevronUp,
-  ChevronDown,
-  ArrowUpDown,
   FileText,
   ClipboardCheck,
   X,
@@ -45,10 +41,10 @@ import {
 } from "@/components/ui/dialog";
 import { useGetDashboardList } from "@/hooks/api/companyuser/dashboard/userGetDashboardList";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
-import {
-  DashboardListData,
-  WorksessionListData,
-} from "@/api/__generated__/base/data-contracts";
+import { CheckInQRModal } from "@/components/modals/CheckInQRModal";
+import { DashboardListData } from "@/api/__generated__/base/data-contracts";
+import { RestaurantReviewModal } from "@/components/modals/RestaurantReviewModal";
+import { RestaurantReviewCompleteModal } from "@/components/modals/RestaurantReviewCompleteModal";
 
 interface DisplayWorksession {
   id: string;
@@ -146,30 +142,21 @@ export default function AdminDashboard() {
     check_in_code: session.check_in_code,
   }));
 
-  // 承認待ちのレビュー
-  const pendingReviews: DisplayReview[] = (
-    dashboardData?.to_be_verified_reviews ?? []
-  ).map((review) => ({
-    id: review.id,
-    name: review.worksession.user?.name ?? "未設定",
-    store: review.restaurant?.name ?? "未設定",
-    time: format(new Date(review.worksession.check_in_time), "HH:mm"),
-    rating: review.rating,
-    comment: review.comment,
-    reportTime: format(new Date(review.updated_at), "HH:mm"),
-  }));
-
+  // 承認待ちのworksessionのリスト
+  const pendingWorksessions = dashboardData?.to_be_verified_worksessions ?? [];
+  
   // ソート関連の状態
   const [sortField, setSortField] = useState<string>("store");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   // モーダル関連の状態
-  const [selectedReview, setSelectedReview] = useState<DisplayReview | null>(
+  const [selectedPendingWorksession, setSelectedPendingWorksession] = useState<DashboardListData['to_be_verified_worksessions'][number] | null>(
     null
   );
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [isChefReviewModalOpen, setIsChefReviewModalOpen] = useState(false);
   const [selectedWorksession, setSelectedWorksession] =
     useState<DisplayWorksession | null>(null);
-  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isWorksessionModalOpen, setIsWorksessionModalOpen] = useState(false);
   const [isCheckInCodeModalOpen, setIsCheckInCodeModalOpen] = useState(false);
   const [selectedCheckInCode, setSelectedCheckInCode] = useState<string | null>(
@@ -177,9 +164,9 @@ export default function AdminDashboard() {
   );
 
   // レビュー詳細を表示
-  const showReviewDetails = (review: DisplayReview) => {
-    setSelectedReview(review);
-    setIsReportModalOpen(true);
+  const showPendingWorksessionDetails = (worksession: DashboardListData['to_be_verified_worksessions'][number]) => {
+    setSelectedPendingWorksession(worksession);
+    setIsReviewModalOpen(true);
   };
 
   // 勤務詳細を表示
@@ -316,7 +303,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <div className="text-2xl font-bold">{jobStats.averageRating}</div>
+              <div className="text-2xl font-bold">{Math.round(jobStats.averageRating * 10) / 10}</div>
               <div className="flex">
                 {[...Array(5)].map((_, i) => (
                   <Star
@@ -554,36 +541,36 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <Badge className="bg-amber-100 text-amber-800">
-                    承認待ち: {pendingReviews.length}件
+                    承認待ち: {pendingWorksessions.length}件
                   </Badge>
                 </div>
               </div>
 
-              {pendingReviews.length > 0 ? (
+              {pendingWorksessions.length > 0 ? (
                 <>
                   {/* デスクトップ表示 */}
                   <div className="hidden md:block border rounded-lg overflow-hidden">
                     <div className="divide-y max-h-[500px] overflow-y-auto">
-                      {pendingReviews.map((review) => (
+                      {pendingWorksessions.map((worksession) => (
                         <div
-                          key={review.id}
+                          key={worksession.id}
                           className="p-3 hover:bg-gray-50 cursor-pointer"
-                          onClick={() => showReviewDetails(review)}>
+                          onClick={() => showPendingWorksessionDetails(worksession)}>
                           <div className="flex items-center gap-2 mb-2">
                             <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
                               <span className="text-sm font-medium">
-                                {review.name.charAt(0)}
+                                {worksession.user?.name.charAt(0)}
                               </span>
                             </div>
-                            <span className="font-medium">{review.name}</span>
+                            <span className="font-medium">{worksession.user?.name}</span>
                           </div>
                           <div className="text-sm text-gray-600 mb-1 truncate">
-                            {review.store}
+                            {worksession.restaurant?.name}
                           </div>
                           <div className="flex justify-between items-center text-xs">
-                            <span className="text-gray-500">{review.time}</span>
+                            <span className="text-gray-500">{format(new Date(worksession.check_in_time), "HH:mm")}</span>
                             <span className="text-gray-500">
-                              報告: {review.reportTime}
+                              報告: {worksession.chef_review ? format(new Date(worksession.chef_review.updated_at), "HH:mm") : '未'}
                             </span>
                           </div>
                           <div className="mt-2">
@@ -591,7 +578,7 @@ export default function AdminDashboard() {
                               variant="outline"
                               size="sm"
                               className="w-full h-8 px-2 text-blue-600"
-                              onClick={() => showReviewDetails(review)}>
+                              onClick={() => showPendingWorksessionDetails(worksession)}>
                               <FileText className="h-4 w-4 mr-1" />
                               詳細を見る
                             </Button>
@@ -603,19 +590,19 @@ export default function AdminDashboard() {
 
                   {/* モバイル表示 - カード形式 */}
                   <div className="md:hidden space-y-3">
-                    {pendingReviews.map((review) => (
+                    {pendingWorksessions.map((worksession) => (
                       <div
-                        key={review.id}
+                        key={worksession.id}
                         className="border rounded-lg p-3 bg-white hover:bg-gray-50"
-                        onClick={() => showReviewDetails(review)}>
+                        onClick={() => showPendingWorksessionDetails(worksession)}>
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
                             <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
                               <span className="text-sm font-medium">
-                                {review.name.charAt(0)}
+                                {worksession.user?.name.charAt(0)}
                               </span>
                             </div>
-                            <span className="font-medium">{review.name}</span>
+                            <span className="font-medium">{worksession.user?.name}</span>
                           </div>
                           <ChevronRight className="h-5 w-5 text-gray-400" />
                         </div>
@@ -623,16 +610,16 @@ export default function AdminDashboard() {
                           <div className="flex items-center gap-1">
                             <Store className="h-3.5 w-3.5 text-gray-400" />
                             <span className="truncate text-gray-600">
-                              {review.store}
+                              {worksession.restaurant?.name}
                             </span>
                           </div>
                           <div className="flex items-center gap-1 justify-end">
                             <Clock className="h-3.5 w-3.5 text-gray-400" />
-                            <span className="text-gray-600">{review.time}</span>
+                            <span className="text-gray-600">{worksession.check_in_time}</span>
                           </div>
                         </div>
                         <div className="mt-2 flex justify-between items-center text-xs text-gray-500">
-                          <span>報告時刻: {review.reportTime}</span>
+                          <span>報告時刻: {worksession.chef_review?.updated_at}</span>
                           <Badge className="bg-amber-100 text-amber-800 text-xs">
                             承認待ち
                           </Badge>
@@ -653,144 +640,59 @@ export default function AdminDashboard() {
       </div>
 
       {/* レビュー詳細モーダル */}
-      <Dialog open={isReportModalOpen} onOpenChange={setIsReportModalOpen}>
-        <DialogContent className="sm:max-w-lg max-w-[95vw] rounded-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-blue-600" />
-              レビュー詳細
-            </DialogTitle>
-            <DialogDescription>
-              {selectedReview && (
-                <span className="line-clamp-1">
-                  {selectedReview.name} - {selectedReview.store}
-                </span>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-
-          {selectedReview && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">勤務日</p>
-                  <p className="mt-1">{formattedDate}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500">勤務時間</p>
-                  <p className="mt-1">{selectedReview.time}</p>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-sm font-medium text-gray-500">評価</p>
-                <div className="mt-1 flex items-center gap-2">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-5 w-5 ${
-                          i < selectedReview.rating
-                            ? "text-yellow-500 fill-yellow-500"
-                            : "text-gray-300"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-sm text-gray-600">
-                    {selectedReview.rating}/5
-                  </span>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-sm font-medium text-gray-500">
-                  レビュー内容
-                </p>
-                <p className="mt-1 text-sm text-gray-700 whitespace-pre-line">
-                  {selectedReview.comment}
-                </p>
-              </div>
-            </div>
-          )}
-
-          <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-between gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setIsReportModalOpen(false)}
-              className="w-full sm:w-auto">
-              閉じる
-            </Button>
-            <div className="flex gap-2 w-full sm:w-auto">
-              <Button
-                variant="outline"
-                className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 flex-1 sm:flex-auto">
-                <X className="h-4 w-4 mr-1" />
-                却下
-              </Button>
-              <Button className="bg-green-600 hover:bg-green-700 flex-1 sm:flex-auto">
-                <CheckCircle className="h-4 w-4 mr-1" />
-                承認
-              </Button>
-            </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {selectedPendingWorksession &&
+        selectedPendingWorksession.user && selectedPendingWorksession.job && selectedPendingWorksession.restaurant &&  (
+        <>
+          <RestaurantReviewModal
+            isOpen={isReviewModalOpen}
+            onCloseAction={() => setIsReviewModalOpen(false)}
+            worksessionData={{
+              id: selectedPendingWorksession.id,
+              user: {
+                name: selectedPendingWorksession.user.name,
+                profile_image: selectedPendingWorksession.user.profile_image
+              },
+              job: {
+                id: selectedPendingWorksession.job.id,
+                title: selectedPendingWorksession.job.title,
+                restaurant_id: selectedPendingWorksession.job.restaurant_id,
+                work_date: selectedPendingWorksession.job.work_date,
+                start_time: selectedPendingWorksession.job.start_time,
+                end_time: selectedPendingWorksession.job.end_time,
+              },
+              restaurant: {
+                name: selectedPendingWorksession.restaurant?.name || "",
+              },
+            }}
+            handleSuccessAction={() => {
+              setIsChefReviewModalOpen(true);
+            }}
+          />
+          <RestaurantReviewCompleteModal
+            isOpen={isChefReviewModalOpen}
+            onCloseAction={() => {
+              setIsChefReviewModalOpen(false)
+              setSelectedPendingWorksession(null)
+            }}
+            worksessionId={selectedPendingWorksession?.id}
+          />
+        </>
+      )}
+      
 
       {/* チェックインコードモーダル */}
-      <Dialog
-        open={isCheckInCodeModalOpen}
-        onOpenChange={setIsCheckInCodeModalOpen}>
-        <DialogContent className="sm:max-w-md max-w-[95vw] rounded-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <ClipboardCheck className="h-5 w-5 text-blue-600" />
-              チェックインコード
-            </DialogTitle>
-            <DialogDescription>
-              {selectedWorksession && (
-                <span className="line-clamp-1">
-                  {selectedWorksession.name} - {selectedWorksession.store}
-                </span>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div className="text-center">
-              <p className="text-sm text-gray-500 mb-2">
-                シェフに以下のコードを共有してください
-              </p>
-              {selectedCheckInCode ? (
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-3xl font-mono font-bold tracking-wider">
-                    {selectedCheckInCode}
-                  </p>
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500">
-                  チェックインコードが設定されていません
-                </p>
-              )}
-            </div>
-
-            <div className="text-sm text-gray-500">
-              <p>
-                ※ このコードは勤務開始時にシェフがチェックインする際に必要です
-              </p>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsCheckInCodeModalOpen(false)}
-              className="w-full sm:w-auto">
-              閉じる
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {selectedWorksession && (
+        <CheckInQRModal
+          isOpen={isCheckInCodeModalOpen}
+          onCloseAction={() => { setIsCheckInCodeModalOpen(false) }}
+          workSessionData={{
+            id: selectedWorksession.id,
+            check_in_code: selectedWorksession.check_in_code ?? null,
+            chefName: selectedWorksession.name,
+            restaurantName: selectedWorksession.store,
+          }}
+        />
+      )}
 
       {/* 勤務詳細モーダル */}
       <Dialog
