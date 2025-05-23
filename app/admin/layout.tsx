@@ -557,6 +557,27 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   <span className="text-foreground">アカウント設定</span>
                 </>
               )}
+
+              {pathname.includes("/notifications") && (
+                <>
+                  <ChevronRight className="h-4 w-4" />
+                  <span className="text-foreground">すべての通知</span>
+                </>
+              )}
+
+              {pathname.includes("/contact") && (
+                <>
+                  <ChevronRight className="h-4 w-4" />
+                  <span className="text-foreground">お問い合わせ</span>
+                </>
+              )}
+
+              {pathname.includes("/faq") && (
+                <>
+                  <ChevronRight className="h-4 w-4" />
+                  <span className="text-foreground">よくある質問</span>
+                </>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-4">

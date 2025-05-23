@@ -93,6 +93,7 @@ import { useMarkReadMultipleCompanyUserNotifications } from "@/hooks/api/company
 import { useGetCompanyUserNotificationsByUserId } from "@/hooks/api/companyuser/companyUserNotifications/useGetCompanyUserNotificationsByUserId";
 import { RestaurantReviewCompleteModal } from "@/components/modals/RestaurantReviewCompleteModal";
 import { CheckInQRModal } from "@/components/modals/CheckInQRModal";
+import { JobStatusBadgeForAdmin } from "@/components/badge/JobStatusBadgeForAdmin";
 
 interface PageParams {
   params: Promise<{ id: string }>;
@@ -600,17 +601,23 @@ ${changeRequest.reason}
                       variant="outline"
                       size="sm"
                       onClick={() => setIsEditJobModalOpen(true)}
-                      disabled={workSessions && workSessions.length > 0}>
+                      disabled={(workSessions && workSessions.length > 0) || (job?.status === "PUBLISHED" && job.expiry_date != null && job.expiry_date <= Date.now())}>
                       <Edit className="h-4 w-4" />
                       <span className="hidden sm:inline ml-2">編集</span>
                     </Button>
                   </span>
                 </TooltipTrigger>
-                {workSessions && workSessions.length > 0 && (
+                {(job?.status === "FILLED" && selectedWorkSession?.status === "CANCELED_BY_CHEF")
+                  || (job?.status === "FILLED" && selectedWorkSession?.status === "CANCELED_BY_RESTAURANT")
+                  || (job?.status === "PUBLISHED" && job.expiry_date != null && job.expiry_date <= Date.now()) ?
+                  <TooltipContent>
+                    <p>募集が終了しているため編集できません</p>
+                  </TooltipContent>
+                : workSessions && workSessions.length > 0 ? (
                   <TooltipContent>
                     <p>応募があるため編集できません</p>
                   </TooltipContent>
-                )}
+                ) : null}
               </Tooltip>
             </TooltipProvider>
             <Button asChild size="sm" variant="outline">
@@ -629,9 +636,12 @@ ${changeRequest.reason}
             </h1>
 
             <div className="flex flex-wrap items-center gap-2 mt-2">
-              <Badge className="bg-green-100 text-sm text-green-800 hover:bg-green-100">
-                {formatJobPostingJapaneseStatus(job?.status || "")}
-              </Badge>
+              {job != null &&
+                <JobStatusBadgeForAdmin
+                  job={job}
+                  lastWorksession={selectedWorkSession}
+                />
+              }
               <Badge variant="outline" className="text-sm bg-white">
                 {job?.work_date
                   ? format(new Date(job.work_date), "MM/dd")

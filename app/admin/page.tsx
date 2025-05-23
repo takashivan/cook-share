@@ -45,6 +45,7 @@ import { CheckInQRModal } from "@/components/modals/CheckInQRModal";
 import { DashboardListData } from "@/api/__generated__/base/data-contracts";
 import { RestaurantReviewModal } from "@/components/modals/RestaurantReviewModal";
 import { RestaurantReviewCompleteModal } from "@/components/modals/RestaurantReviewCompleteModal";
+import { useGetCompany } from "@/hooks/api/companyuser/companies/useGetCompany";
 
 interface DisplayWorksession {
   id: string;
@@ -76,6 +77,9 @@ interface DisplayReview {
 
 export default function AdminDashboard() {
   const { user } = useCompanyAuth();
+
+  const { data: company } = useGetCompany({ companyId: user?.companies_id ?? undefined });
+
   const { data: dashboardData, error: dashboardError } = useGetDashboardList({
     companyuserId: user?.id,
   });
@@ -239,7 +243,9 @@ export default function AdminDashboard() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">ダッシュボード</h2>
-          <p className="text-muted-foreground">管理画面へようこそ</p>
+          <p className="text-muted-foreground">
+            {company?.name || "読み込み中..."}の管理画面へようこそ
+          </p>
         </div>
         <div className="flex items-center gap-2 bg-white p-2 rounded-lg shadow-sm border">
           <Calendar className="h-5 w-5 text-gray-500" />
@@ -339,13 +345,13 @@ export default function AdminDashboard() {
             <div className="space-y-2">
               <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge className="bg-green-100 text-green-800">
+                  <Badge className="bg-green-100 hover:bg-green-100 text-green-800">
                     チェックイン済: {checkedInWorkers}名
                   </Badge>
-                  <Badge className="bg-blue-100 text-blue-800">
+                  <Badge className="bg-blue-100 hover:bg-blue-100 text-blue-800">
                     勤務完了: {completedWorkers}名
                   </Badge>
-                  <Badge className="bg-gray-100 text-gray-800">
+                  <Badge className="bg-gray-100 hover:bg-gray-100 text-gray-800">
                     未チェックイン: {notCheckedInWorkers}名
                   </Badge>
                 </div>
@@ -384,16 +390,16 @@ export default function AdminDashboard() {
                 <div className="divide-y max-h-[500px] overflow-y-auto">
                   {sortedWorkers.map((worker) => {
                     // ステータスに応じたバッジの色とアイコンを設定
-                    let statusColor = "bg-gray-100 text-gray-800";
+                    let statusColor = "bg-gray-100 hover:bg-gray-100 text-gray-800";
                     let StatusIcon = XCircle;
                     let statusText = "未チェックイン";
 
                     if (worker.status === "IN_PROGRESS") {
-                      statusColor = "bg-green-100 text-green-800";
+                      statusColor = "bg-green-100 hover:bg-green-100 text-green-800";
                       StatusIcon = CheckCircle;
                       statusText = "チェックイン済";
                     } else if (worker.status === "COMPLETED") {
-                      statusColor = "bg-blue-100 text-blue-800";
+                      statusColor = "bg-blue-100 hover:bg-blue-100 text-blue-800";
                       StatusIcon = CheckSquare;
                       statusText = "勤務完了";
                     }
@@ -451,16 +457,16 @@ export default function AdminDashboard() {
               <div className="md:hidden space-y-3">
                 {sortedWorkers.map((worker) => {
                   // ステータスに応じたバッジの色とアイコンを設定
-                  let statusColor = "bg-gray-100 text-gray-800";
+                  let statusColor = "bg-gray-100 hover:bg-gray-100 text-gray-800";
                   let StatusIcon = XCircle;
                   let statusText = "未チェックイン";
 
                   if (worker.status === "IN_PROGRESS") {
-                    statusColor = "bg-green-100 text-green-800";
+                    statusColor = "bg-green-100 hover:bg-green-100 text-green-800";
                     StatusIcon = CheckCircle;
                     statusText = "チェックイン済";
                   } else if (worker.status === "COMPLETED") {
-                    statusColor = "bg-blue-100 text-blue-800";
+                    statusColor = "bg-blue-100 hover:bg-blue-100 text-blue-800";
                     StatusIcon = CheckSquare;
                     statusText = "勤務完了";
                   }
@@ -540,7 +546,7 @@ export default function AdminDashboard() {
             <div className="space-y-2">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Badge className="bg-amber-100 text-amber-800">
+                  <Badge className="bg-amber-100 hover:bg-amber-100 text-amber-800">
                     承認待ち: {pendingWorksessions.length}件
                   </Badge>
                 </div>
@@ -620,7 +626,7 @@ export default function AdminDashboard() {
                         </div>
                         <div className="mt-2 flex justify-between items-center text-xs text-gray-500">
                           <span>報告時刻: {worksession.chef_review?.updated_at}</span>
-                          <Badge className="bg-amber-100 text-amber-800 text-xs">
+                          <Badge className="bg-amber-100 hover:bg-amber-100 text-amber-800 text-xs">
                             承認待ち
                           </Badge>
                         </div>
@@ -742,10 +748,10 @@ export default function AdminDashboard() {
                     <Badge
                       className={
                         selectedWorksession.status === "COMPLETED"
-                          ? "bg-blue-100 text-blue-800"
+                          ? "bg-blue-100 hover:bg-blue-100 text-blue-800"
                           : selectedWorksession.status === "IN_PROGRESS"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-800"
+                          ? "bg-green-100 hover:bg-green-100 text-green-800"
+                          : "bg-gray-100 hover:bg-gray-100 text-gray-800"
                       }>
                       {selectedWorksession.status === "COMPLETED"
                         ? "勤務完了"
@@ -779,7 +785,7 @@ export default function AdminDashboard() {
                             <Badge
                               key={index}
                               variant="outline"
-                              className="bg-gray-50">
+                              className="bg-gray-50 hover:bg-gray-50">
                               {task}
                             </Badge>
                           )

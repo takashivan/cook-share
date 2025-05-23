@@ -45,7 +45,7 @@ export function MessageList({
           sortedMessageSummaryData?.map((messageSummary) => (
             <div
               key={messageSummary.worksession.id}
-              className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+              className="flex items-center gap-4 p-4 border rounded-lg bg-white hover:bg-gray-50 cursor-pointer transition-colors"
               onClick={() => handleMessageClick(messageSummary)}>
               <div className="relative h-12 w-12 rounded-full overflow-hidden">
                 <Image

@@ -119,7 +119,7 @@ export default function RestaurantNotificationsPage() {
           <TabsContent value="all" className="mt-0">
             {filteredNotifications.length > 0 ? (
               filteredNotifications.map((notification) => (
-                <Link key={notification.id} href="#">
+                <Link key={notification.id} href="#" className="block mt-2">
                   <Card
                     className={`${!notification.is_read ? "bg-gray-50" : ""}`}>
                     <CardContent className="p-4">
@@ -175,7 +175,7 @@ export default function RestaurantNotificationsPage() {
             {filteredNotifications
               .filter((n) => !n.is_read)
               .map((notification) => (
-                <Link key={notification.id} href="#">
+                <Link key={notification.id} href="#" className="block mt-2">
                   <Card className="bg-gray-50">
                     <CardContent className="p-4">
                       <div className="flex gap-3">
