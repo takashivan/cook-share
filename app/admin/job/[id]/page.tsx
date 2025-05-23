@@ -601,17 +601,23 @@ ${changeRequest.reason}
                       variant="outline"
                       size="sm"
                       onClick={() => setIsEditJobModalOpen(true)}
-                      disabled={workSessions && workSessions.length > 0}>
+                      disabled={(workSessions && workSessions.length > 0) || (job?.status === "PUBLISHED" && job.expiry_date != null && job.expiry_date <= Date.now())}>
                       <Edit className="h-4 w-4" />
                       <span className="hidden sm:inline ml-2">編集</span>
                     </Button>
                   </span>
                 </TooltipTrigger>
-                {workSessions && workSessions.length > 0 && (
+                {(job?.status === "FILLED" && selectedWorkSession?.status === "CANCELED_BY_CHEF")
+                  || (job?.status === "FILLED" && selectedWorkSession?.status === "CANCELED_BY_RESTAURANT")
+                  || (job?.status === "PUBLISHED" && job.expiry_date != null && job.expiry_date <= Date.now()) ?
+                  <TooltipContent>
+                    <p>募集が終了しているため編集できません</p>
+                  </TooltipContent>
+                : workSessions && workSessions.length > 0 ? (
                   <TooltipContent>
                     <p>応募があるため編集できません</p>
                   </TooltipContent>
-                )}
+                ) : null}
               </Tooltip>
             </TooltipProvider>
             <Button asChild size="sm" variant="outline">
