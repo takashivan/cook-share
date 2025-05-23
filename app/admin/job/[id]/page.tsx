@@ -93,6 +93,7 @@ import { useMarkReadMultipleCompanyUserNotifications } from "@/hooks/api/company
 import { useGetCompanyUserNotificationsByUserId } from "@/hooks/api/companyuser/companyUserNotifications/useGetCompanyUserNotificationsByUserId";
 import { RestaurantReviewCompleteModal } from "@/components/modals/RestaurantReviewCompleteModal";
 import { CheckInQRModal } from "@/components/modals/CheckInQRModal";
+import { JobStatusBadgeForAdmin } from "@/components/badge/JobStatusBadgeForAdmin";
 
 interface PageParams {
   params: Promise<{ id: string }>;
@@ -629,9 +630,12 @@ ${changeRequest.reason}
             </h1>
 
             <div className="flex flex-wrap items-center gap-2 mt-2">
-              <Badge className="bg-green-100 text-sm text-green-800 hover:bg-green-100">
-                {formatJobPostingJapaneseStatus(job?.status || "")}
-              </Badge>
+              {job != null &&
+                <JobStatusBadgeForAdmin
+                  job={job}
+                  lastWorksession={selectedWorkSession}
+                />
+              }
               <Badge variant="outline" className="text-sm bg-white">
                 {job?.work_date
                   ? format(new Date(job.work_date), "MM/dd")

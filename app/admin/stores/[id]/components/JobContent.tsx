@@ -1,3 +1,5 @@
+"use client";
+
 import { Calendar, List, Plus } from "lucide-react";
 import { JobCalendar } from "./JobCalendar";
 import { Button } from "@/components/ui/button";
