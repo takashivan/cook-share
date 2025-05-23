@@ -1,10 +1,10 @@
 import { Calendar, List, Plus } from "lucide-react";
 import { JobCalendar } from "./JobCalendar";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 import { CreateJobModal } from "@/components/modals/CreateJobModal";
-import { JobsCreatePayload, JobsListOutput } from "@/api/__generated__/base/data-contracts";
+import { JobsCreatePayload, JobsListOutput, WorksessionsRestaurantTodosListData } from "@/api/__generated__/base/data-contracts";
 import { useCreateJob } from "@/hooks/api/companyuser/jobs/useCreateJob";
 import { toast } from "@/hooks/use-toast";
 import { JobList } from "./JobList";
@@ -15,11 +15,11 @@ import { useGetJobsByRestaurantId } from "@/hooks/api/companyuser/jobs/useGetJob
 import { useGetMultipleWorksessionsByJobId } from "@/hooks/api/companyuser/worksessions/useGetMultipleWorksessionsByJobId";
 import { ja } from "date-fns/locale";
 
-export interface JobWithWorkSessions
-  extends Omit<JobsListOutput[number], "workSessionCount"> {
+export interface JobWithWorkSessions extends Omit<JobsListOutput[number], "workSessionCount"> {
   formattedWorkDate: string;
   formattedTime: string;
   workSessionCount: number;
+  lastWorksession: WorksessionsRestaurantTodosListData[number] | null;
 }
 
 interface JobContentProps {
@@ -47,12 +47,19 @@ export function JobContent({
   });
 
   // 求人とworksessionの結合
-  const jobWithWorkSessions: JobWithWorkSessions[] | undefined =
-    jobs?.map((job) => {
-      const workSessionCount =
-        worksessionsbyJob?.find((workSessions) =>
-          workSessions.some((workSession) => workSession.job_id === job.id)
-        )?.length || 0;
+  const jobWithWorkSessions: JobWithWorkSessions[] =
+    (jobs?.map((job) => {
+      const workSessions = worksessionsbyJob?.find((workSessions) =>
+        workSessions.some((workSession) => workSession.job_id === job.id)
+      ) || [];
+
+      const workSessionCount = workSessions.length;
+      const lastWorksession = workSessions.length > 0 ? workSessions.reduce((prev, current) => {
+        return new Date(prev.created_at) > new Date(current.created_at)
+          ? prev
+          : current;
+      }, workSessions[0]) : null;
+        
       return {
         ...job,
         formattedWorkDate: format(new Date(job.work_date), "yyyy年MM月dd日", {
@@ -63,8 +70,47 @@ export function JobContent({
           "HH:mm"
         )} 〜 ${format(new Date(job.end_time), "HH:mm")}`,
         workSessionCount,
+        lastWorksession,
       };
-    }) ?? [];
+    }) ?? []).sort((a, b) => {
+      // work_dateの降順でソート
+      return new Date(b.work_date).getTime() - new Date(a.work_date).getTime();
+    });
+
+  // 求人を状態ごとにフィルタリング
+  const filteredJobsList = {
+    // マッチング済み、かつ、未チェックインorチェックイン済or勤務完了 の求人
+    filled: jobWithWorkSessions.filter((job) => {
+      const lastWorksessionStatus = job.lastWorksession?.status;
+
+      return (
+        job.status === "FILLED" &&
+          (lastWorksessionStatus === "SCHEDULED" || lastWorksessionStatus === "IN_PROGRESS" || lastWorksessionStatus === "COMPLETED")
+      )
+    }),
+    // 未マッチング、かつ、掲載期限より前、かつ、応募が１回も無い求人
+    published: jobWithWorkSessions.filter((job) => {
+      return (
+        job.status === "PUBLISHED" &&
+        (!job.expiry_date || job.expiry_date > Date.now()) &&
+        job.workSessionCount === 0
+      );
+    }),
+    // 下書きの求人
+    draft: jobWithWorkSessions.filter((job) => job.status === "DRAFT"),
+    // 一時停止中の求人
+    pending: jobWithWorkSessions.filter((job) => job.status === "PENDING"),
+    // 未マッチングかつ掲載期限が過ぎた求人、または、マッチング済みかつ勤務完了報告承認済みまたはキャンセル済みの求人
+    expired: jobWithWorkSessions.filter((job) => {
+      return (
+        (job.status === "PUBLISHED" &&
+          job.expiry_date && job.expiry_date <= Date.now()) ||
+        (job.status === "FILLED" &&
+          (job.lastWorksession?.status === "VERIFIED" || job.lastWorksession?.status === "CANCELED_BY_CHEF" || job.lastWorksession?.status === "CANCELED_BY_RESTAURANT")
+        )
+      );
+    }),
+  }
 
   // レストラン情報の取得
   const { data: restaurant } = useGetRestaurant({
@@ -136,7 +182,7 @@ export function JobContent({
           }}
         />
       ) : (
-        <Tabs defaultValue="published" className="w-full">
+        <Tabs defaultValue="filled" className="w-full">
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="filled">マッチング済</TabsTrigger>
             <TabsTrigger value="published">未マッチング</TabsTrigger>
@@ -145,31 +191,36 @@ export function JobContent({
             <TabsTrigger value="expired">過去の求人</TabsTrigger>
           </TabsList>
 
-          <JobList
-            selectedTab="filled"
-            jobWithWorkSessions={jobWithWorkSessions}
-            onCopyJob={handleCopyJob}
-          />
-          <JobList
-            selectedTab="published"
-            jobWithWorkSessions={jobWithWorkSessions}
-            onCopyJob={handleCopyJob}
-          />
-          <JobList
-            selectedTab="draft"
-            jobWithWorkSessions={jobWithWorkSessions}
-            onCopyJob={handleCopyJob}
-          />
-          <JobList
-            selectedTab="pending"
-            jobWithWorkSessions={jobWithWorkSessions}
-            onCopyJob={handleCopyJob}
-          />
-          <JobList
-            selectedTab="expired"
-            jobWithWorkSessions={jobWithWorkSessions}
-            onCopyJob={handleCopyJob}
-          />
+          <TabsContent value={"filled"}>
+            <JobList
+              jobWithWorkSessions={filteredJobsList.filled}
+              onCopyJob={handleCopyJob}
+            />
+          </TabsContent>
+          <TabsContent value={"published"}>
+            <JobList
+              jobWithWorkSessions={filteredJobsList.published}
+              onCopyJob={handleCopyJob}
+            />
+          </TabsContent>
+          <TabsContent value={"draft"}>
+            <JobList
+              jobWithWorkSessions={filteredJobsList.draft}
+              onCopyJob={handleCopyJob}
+            />
+          </TabsContent>
+          <TabsContent value={"pending"}>
+            <JobList
+              jobWithWorkSessions={filteredJobsList.pending}
+              onCopyJob={handleCopyJob}
+            />
+          </TabsContent>
+          <TabsContent value={"expired"}>
+            <JobList
+              jobWithWorkSessions={filteredJobsList.expired}
+              onCopyJob={handleCopyJob}
+            />
+          </TabsContent>
         </Tabs>
       )}
 
