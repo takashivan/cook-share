@@ -45,6 +45,7 @@ import { CheckInQRModal } from "@/components/modals/CheckInQRModal";
 import { DashboardListData } from "@/api/__generated__/base/data-contracts";
 import { RestaurantReviewModal } from "@/components/modals/RestaurantReviewModal";
 import { RestaurantReviewCompleteModal } from "@/components/modals/RestaurantReviewCompleteModal";
+import { useGetCompany } from "@/hooks/api/companyuser/companies/useGetCompany";
 
 interface DisplayWorksession {
   id: string;
@@ -76,6 +77,9 @@ interface DisplayReview {
 
 export default function AdminDashboard() {
   const { user } = useCompanyAuth();
+
+  const { data: company } = useGetCompany({ companyId: user?.companies_id ?? undefined });
+
   const { data: dashboardData, error: dashboardError } = useGetDashboardList({
     companyuserId: user?.id,
   });
@@ -239,7 +243,9 @@ export default function AdminDashboard() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">ダッシュボード</h2>
-          <p className="text-muted-foreground">管理画面へようこそ</p>
+          <p className="text-muted-foreground">
+            {company?.name || "読み込み中..."}の管理画面へようこそ
+          </p>
         </div>
         <div className="flex items-center gap-2 bg-white p-2 rounded-lg shadow-sm border">
           <Calendar className="h-5 w-5 text-gray-500" />
