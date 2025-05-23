@@ -381,6 +381,10 @@ export default function Home() {
             <Link href="/contact" className="hover:underline">
               お問い合わせ
             </Link>
+            <span>|</span>
+            <Link href="/faq" className="hover:underline">
+              よくある質問
+            </Link>
           </div>
         </div>
       </footer>
