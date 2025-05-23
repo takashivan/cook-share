@@ -68,68 +68,68 @@ export function JobList({
         return (
           <div
             key={job.id}
-            className="items-center justify-between p-3 border rounded-lg bg-white/50 hover:bg-white/80 transition-colors cursor-pointer"
+            className="items-center justify-between p-3 border rounded-lg bg-white hover:bg-gray-50 transition-colors cursor-pointer"
             onClick={() => router.push(`/admin/job/${job.id}`)}>
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {job.status === "FILLED" && job.lastWorksession?.status === "SCHEDULED" &&
-                    <Badge className="bg-yellow-500">
+                    <Badge className="bg-yellow-500 hover:bg-yellow-500">
                       未チェックイン
                     </Badge>
                   }
                   {job.status === "FILLED" && job.lastWorksession?.status === "IN_PROGRESS" &&
-                    <Badge className="bg-blue-500">
+                    <Badge className="bg-blue-500 hover:bg-blue-500">
                       チェックイン済
                     </Badge>
                   }
                   {job.status === "FILLED" && job.lastWorksession?.status === "COMPLETED" &&
-                    <Badge className="bg-green-5000">
+                    <Badge className="bg-green-500 hover:bg-green-500">
                       勤務完了
                     </Badge>
                   }
 
                   {job.status === "PUBLISHED" && job.expiry_date && job.expiry_date > Date.now() && job.workSessionCount === 0 &&
-                    <Badge className="bg-pink-500">
+                    <Badge className="bg-pink-500 hover:bg-pink-500">
                       募集中
                     </Badge>
                   }
 
                   {job.status === "DRAFT" &&
-                    <Badge className="bg-gray-500">
+                    <Badge className="bg-gray-500 hover:bg-gray-500">
                       下書き
                     </Badge>
                   }
 
                   {job.status === "PENDING" &&
-                    <Badge className="bg-gray-500">
+                    <Badge className="bg-gray-500 hover:bg-gray-500">
                       一時停止中
                     </Badge>
                   }
 
                   {job.status === "PUBLISHED" && job.expiry_date && job.expiry_date <= Date.now() &&
-                    <Badge className="bg-red-500">
+                    <Badge className="bg-red-500 hover:bg-red-500">
                       募集終了
                     </Badge>
                   }
                   {job.status === "FILLED" && job.lastWorksession?.status === "VERIFIED" &&
-                    <Badge className="bg-green-500">
+                    <Badge className="bg-green-500 hover:bg-green-500">
                       勤務完了承認済み
                     </Badge>
                   }
                   {job.status === "FILLED" && job.lastWorksession?.status === "CANCELED_BY_CHEF" &&
-                    <Badge className="bg-gray-500">
+                    <Badge className="bg-gray-500 hover:bg-gray-500">
                       シェフキャンセル
                     </Badge>
                   }
                   {job.status === "FILLED" && job.lastWorksession?.status === "CANCELED_BY_RESTAURANT" &&
-                    <Badge className="bg-gray-500">
+                    <Badge className="bg-gray-500 hover:bg-gray-500">
                       レストランキャンセル
                     </Badge>
                   }
                 </div>
                 {notificationCount > 0 && (
-                  <Badge className="h-5 flex items-center justify-center bg-red-500 text-white px-1.5 py-0.5 ml-auto">
+                  <Badge className="h-5 flex items-center justify-center bg-red-500 hover:bg-red-500 text-white px-1.5 py-0.5 ml-auto">
                     {notificationCount > 9 ? "9+" : notificationCount}
                   </Badge>
                 )}

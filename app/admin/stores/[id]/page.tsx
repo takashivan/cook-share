@@ -142,11 +142,13 @@ export default function RestaurantDetailPage(props: {
                     <Badge className="bg-green-500 hover:bg-green-600">
                       {restaurant?.is_active ? "公開中" : "非公開"}
                     </Badge>
-                    <Badge
-                      variant="outline"
-                      className="bg-white/20 backdrop-blur-sm text-white border-white/40">
-                      {restaurant?.cuisine_type}
-                    </Badge>
+                    {restaurant?.cuisine_type &&
+                      <Badge
+                        variant="outline"
+                        className="bg-white/20 backdrop-blur-sm text-white border-white/40">
+                        {restaurant?.cuisine_type}
+                      </Badge>
+                    }
                     {restaurantReview && restaurantReview.length > 0 && (
                       <Badge
                         variant="outline"

@@ -136,7 +136,7 @@ export function StaffList({
       </div>
 
       <div className="space-y-6">
-        <div className="border rounded-lg">
+        <div className="border rounded-lg bg-white">
           <Table>
             <TableHeader>
               <TableRow>
@@ -190,7 +190,7 @@ export function StaffList({
           </Table>
         </div>
 
-        <div className="border rounded-lg">
+        <div className="border rounded-lg bg-white">
           <Table>
             <TableHeader>
               <TableRow>

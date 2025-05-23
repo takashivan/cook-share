@@ -96,7 +96,7 @@ export default function ChefDashboard() {
         )}
         {/* 追加: 連携促進カード */}
         {user && (
-          <div className="container mx-auto px-4 pb-8 space-y-4">
+          <div className="mx-auto pb-8 space-y-4">
             {/* Stripe未連携カード */}
             {user.stripe_verified === false && (
               <motion.div
