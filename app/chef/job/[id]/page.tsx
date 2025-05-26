@@ -377,6 +377,12 @@ export default function JobDetail({ params }: PageProps) {
             勤務終了・完了報告
           </Button>
         );
+      case "VERIFY_REJECTED":
+        return (
+          <Button className="w-full" onClick={() => setIsReviewModalOpen(true)}>
+            差し戻し
+          </Button>
+        );
       case "COMPLETED":
         return (
           <Button className="w-full" disabled>
@@ -693,11 +699,13 @@ export default function JobDetail({ params }: PageProps) {
             <span>報酬</span>
             <span>¥{job.fee.toLocaleString()}</span>
           </div>
-          <button
-            onClick={handleCancelClick}
-            className="text-sm text-gray-500 hover:text-red-500 transition-colors">
-            お仕事をキャンセルする
-          </button>
+          {workSession?.status == "SCHEDULED" && (
+            <button
+              onClick={handleCancelClick}
+              className="text-sm text-gray-500 hover:text-red-500 transition-colors">
+              お仕事をキャンセルする
+            </button>
+          )}
         </div>
       </div>
 
