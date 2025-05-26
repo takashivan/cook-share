@@ -46,6 +46,8 @@ import { DashboardListData } from "@/api/__generated__/base/data-contracts";
 import { RestaurantReviewModal } from "@/components/modals/RestaurantReviewModal";
 import { RestaurantReviewCompleteModal } from "@/components/modals/RestaurantReviewCompleteModal";
 import { useGetCompany } from "@/hooks/api/companyuser/companies/useGetCompany";
+import { ErrorPage } from "@/components/layout/ErrorPage";
+import { LoadingScreen } from "@/components/LoadingScreen";
 
 interface DisplayWorksession {
   id: string;
@@ -65,22 +67,20 @@ interface DisplayWorksession {
   check_in_code?: number | null;
 }
 
-interface DisplayReview {
-  id: number;
-  name: string;
-  store: string;
-  time: string;
-  rating: number;
-  comment: string;
-  reportTime: string;
-}
-
 export default function AdminDashboard() {
   const { user } = useCompanyAuth();
 
-  const { data: company } = useGetCompany({ companyId: user?.companies_id ?? undefined });
+  const {
+    data: company,
+    isLoading: isCompanyLoading,
+    error: companyError,
+  } = useGetCompany({ companyId: user?.companies_id ?? undefined });
 
-  const { data: dashboardData, error: dashboardError } = useGetDashboardList({
+  const {
+    data: dashboardData,
+    error: dashboardError,
+    isLoading: isDashboardLoading,
+  } = useGetDashboardList({
     companyuserId: user?.id,
   });
 
@@ -238,13 +238,28 @@ export default function AdminDashboard() {
     (worker) => worker.status === "SCHEDULED"
   ).length;
 
+  if (companyError || dashboardError) {
+    return (
+      <ErrorPage />
+    );
+  }
+
+  if (isCompanyLoading || isDashboardLoading) {
+    return (
+      <LoadingScreen
+        fullScreen={false}
+        message="ダッシュボードを読み込んでいます..."
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">ダッシュボード</h2>
           <p className="text-muted-foreground">
-            {company?.name || "読み込み中..."}の管理画面へようこそ
+            {company?.name || "会社名未設定"}の管理画面へようこそ
           </p>
         </div>
         <div className="flex items-center gap-2 bg-white p-2 rounded-lg shadow-sm border">
@@ -388,7 +403,83 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="divide-y max-h-[500px] overflow-y-auto">
-                  {sortedWorkers.map((worker) => {
+                  {sortedWorkers.length > 0 ?
+                    sortedWorkers.map((worker) => {
+                      // ステータスに応じたバッジの色とアイコンを設定
+                      let statusColor = "bg-gray-100 hover:bg-gray-100 text-gray-800";
+                      let StatusIcon = XCircle;
+                      let statusText = "未チェックイン";
+
+                      if (worker.status === "IN_PROGRESS") {
+                        statusColor = "bg-green-100 hover:bg-green-100 text-green-800";
+                        StatusIcon = CheckCircle;
+                        statusText = "チェックイン済";
+                      } else if (worker.status === "COMPLETED") {
+                        statusColor = "bg-blue-100 hover:bg-blue-100 text-blue-800";
+                        StatusIcon = CheckSquare;
+                        statusText = "勤務完了";
+                      }
+
+                      return (
+                        <div
+                          key={worker.id}
+                          className="p-3 grid grid-cols-12 gap-1 items-center hover:bg-gray-50">
+                          <div className="col-span-3 flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                              <span className="text-sm font-medium">
+                                {worker.name.charAt(0)}
+                              </span>
+                            </div>
+                            <span className="font-medium">{worker.name}</span>
+                          </div>
+                          <div className="col-span-3 flex items-center gap-2">
+                            <Store className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                            <span className="truncate text-xs text-gray-600 max-w-[90px]">
+                              {worker.store}
+                            </span>
+                          </div>
+                          <div className="col-span-3 flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                            <span className="text-xs">{worker.time}</span>
+                          </div>
+                          <div className="col-span-3">
+                            <div className="flex justify-end pr-0">
+                              {worker.status === "SCHEDULED" ? (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-6 px-1 text-[11px] text-blue-600 whitespace-nowrap min-w-0 w-auto"
+                                  onClick={() => showCheckInCode(worker)}>
+                                  <ClipboardCheck className="h-3 w-3 mr-1" />
+                                  チェックインコード
+                                </Button>
+                              ) : (
+                                <Badge className={statusColor}>
+                                  {React.createElement(StatusIcon, {
+                                    className: "h-3 w-3 mr-1",
+                                  })}
+                                  {statusText}
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  : (
+                    <div className="p-6 text-center text-gray-500">
+                      <XCircle className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                      <p>本日の勤務者はいません</p>
+                    </div>
+                    )
+                  }
+                </div>
+              </div>
+
+              {/* モバイル表示 - カード形式 */}
+              <div className="md:hidden space-y-3">
+                {sortedWorkers.length > 0 ?
+                  sortedWorkers.map((worker) => {
                     // ステータスに応じたバッジの色とアイコンを設定
                     let statusColor = "bg-gray-100 hover:bg-gray-100 text-gray-800";
                     let StatusIcon = XCircle;
@@ -407,127 +498,67 @@ export default function AdminDashboard() {
                     return (
                       <div
                         key={worker.id}
-                        className="p-3 grid grid-cols-12 gap-1 items-center hover:bg-gray-50">
-                        <div className="col-span-3 flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                            <span className="text-sm font-medium">
-                              {worker.name.charAt(0)}
-                            </span>
+                        className="border rounded-lg p-3 bg-white">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                              <span className="text-sm font-medium">
+                                {worker.name.charAt(0)}
+                              </span>
+                            </div>
+                            <span className="font-medium">{worker.name}</span>
                           </div>
-                          <span className="font-medium">{worker.name}</span>
-                        </div>
-                        <div className="col-span-3 flex items-center gap-2">
-                          <Store className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                          <span className="truncate text-xs text-gray-600 max-w-[90px]">
-                            {worker.store}
-                          </span>
-                        </div>
-                        <div className="col-span-3 flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                          <span className="text-xs">{worker.time}</span>
-                        </div>
-                        <div className="col-span-3">
-                          <div className="flex justify-end pr-0">
-                            {worker.status === "SCHEDULED" ? (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-6 px-1 text-[11px] text-blue-600 whitespace-nowrap min-w-0 w-auto"
-                                onClick={() => showCheckInCode(worker)}>
-                                <ClipboardCheck className="h-3 w-3 mr-1" />
-                                チェックインコード
-                              </Button>
-                            ) : (
-                              <Badge className={statusColor}>
-                                {React.createElement(StatusIcon, {
-                                  className: "h-3 w-3 mr-1",
-                                })}
-                                {statusText}
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* モバイル表示 - カード形式 */}
-              <div className="md:hidden space-y-3">
-                {sortedWorkers.map((worker) => {
-                  // ステータスに応じたバッジの色とアイコンを設定
-                  let statusColor = "bg-gray-100 hover:bg-gray-100 text-gray-800";
-                  let StatusIcon = XCircle;
-                  let statusText = "未チェックイン";
-
-                  if (worker.status === "IN_PROGRESS") {
-                    statusColor = "bg-green-100 hover:bg-green-100 text-green-800";
-                    StatusIcon = CheckCircle;
-                    statusText = "チェックイン済";
-                  } else if (worker.status === "COMPLETED") {
-                    statusColor = "bg-blue-100 hover:bg-blue-100 text-blue-800";
-                    StatusIcon = CheckSquare;
-                    statusText = "勤務完了";
-                  }
-
-                  return (
-                    <div
-                      key={worker.id}
-                      className="border rounded-lg p-3 bg-white">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                            <span className="text-sm font-medium">
-                              {worker.name.charAt(0)}
-                            </span>
-                          </div>
-                          <span className="font-medium">{worker.name}</span>
-                        </div>
-                        {/* ステータスバッジのみ表示。ボタンは下部に移動 */}
-                        <Badge className={statusColor}>
-                          {React.createElement(StatusIcon, {
-                            className: "h-3 w-3 mr-1",
-                          })}
-                          {statusText}
-                        </Badge>
-                      </div>
-                      <div className="grid grid-cols-1 gap-2 text-sm">
-                        <div className="flex items-center gap-1">
-                          <Store className="h-3.5 w-3.5 text-gray-400" />
-                          <span className="truncate text-gray-600 max-w-[160px] text-xs">
-                            {worker.store}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1 justify-end">
-                          <Clock className="h-3.5 w-3.5 text-gray-400" />
-                          <span className="text-gray-600 text-xs">
-                            {worker.time}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="mt-2 flex justify-end">
-                        {worker.status === "SCHEDULED" ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-7 px-2 text-xs text-blue-600 whitespace-nowrap"
-                            onClick={() => showCheckInCode(worker)}>
-                            <ClipboardCheck className="h-3 w-3 mr-1" />
-                            チェックインコード
-                          </Button>
-                        ) : (
+                          {/* ステータスバッジのみ表示。ボタンは下部に移動 */}
                           <Badge className={statusColor}>
                             {React.createElement(StatusIcon, {
                               className: "h-3 w-3 mr-1",
                             })}
                             {statusText}
                           </Badge>
-                        )}
+                        </div>
+                        <div className="grid grid-cols-1 gap-2 text-sm">
+                          <div className="flex items-center gap-1">
+                            <Store className="h-3.5 w-3.5 text-gray-400" />
+                            <span className="truncate text-gray-600 max-w-[160px] text-xs">
+                              {worker.store}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1 justify-end">
+                            <Clock className="h-3.5 w-3.5 text-gray-400" />
+                            <span className="text-gray-600 text-xs">
+                              {worker.time}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="mt-2 flex justify-end">
+                          {worker.status === "SCHEDULED" ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 px-2 text-xs text-blue-600 whitespace-nowrap"
+                              onClick={() => showCheckInCode(worker)}>
+                              <ClipboardCheck className="h-3 w-3 mr-1" />
+                              チェックインコード
+                            </Button>
+                          ) : (
+                            <Badge className={statusColor}>
+                              {React.createElement(StatusIcon, {
+                                className: "h-3 w-3 mr-1",
+                              })}
+                              {statusText}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                : (
+                  <div className="p-6 text-center text-gray-500">
+                    <XCircle className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                    <p>本日の勤務者はいません</p>
+                  </div>
+                  )
+                }
               </div>
             </div>
           </CardContent>

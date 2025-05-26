@@ -144,7 +144,7 @@ export default function StaffPage() {
     );
   }
 
-  if (!company || companyLoading || !companyUsers || companyUsersLoading) {
+  if (companyLoading || !companyUsers || companyUsersLoading) {
     return (
       <LoadingScreen
         fullScreen={false}
@@ -172,7 +172,7 @@ export default function StaffPage() {
         isOpen={isAddStaffModalOpen}
         onClose={() => setIsAddStaffModalOpen(false)}
         onSubmit={handleAddStaff}
-        companyName={company.name || "会社名未設定"}
+        companyName={company?.name || "会社名未設定"}
       />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
