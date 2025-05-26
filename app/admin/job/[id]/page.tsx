@@ -1173,7 +1173,6 @@ ${changeRequest.reason}
             isOpen={isChefReviewModalOpen}
             onCloseAction={() => {
               setIsChefReviewModalOpen(false)
-              setSelectedWorkSession(null)
             }}
             worksessionId={selectedWorkSession?.id}
           />

@@ -67,17 +67,22 @@ export default function SchedulePage() {
     setSelectedJobId(null);
   };
 
+  const sortedWorkSessions = workSessions?.slice().sort((a, b) => {
+    // 日付の降順にソート
+    return new Date(b.job.work_date).getTime() - new Date(a.job.work_date).getTime();
+  });
+
   // ワークセッションをステータスでフィルタリング
   const filteredWorkSessions = {
-    upcoming: workSessions?.filter((ws) => ws.status === "SCHEDULED") || [],
+    upcoming: sortedWorkSessions?.filter((ws) => ws.status === "SCHEDULED") || [],
     completed:
-      workSessions?.filter((ws) =>
+      sortedWorkSessions?.filter((ws) =>
         ["COMPLETED", "VERIFIED"].includes(ws.status)
       ) || [],
     cancelledByUser:
-      workSessions?.filter((ws) => ws.status === "CANCELED_BY_CHEF") || [],
+      sortedWorkSessions?.filter((ws) => ws.status === "CANCELED_BY_CHEF") || [],
     cancelledByRestaurant:
-      workSessions?.filter((ws) => ws.status === "CANCELED_BY_RESTAURANT") ||
+      sortedWorkSessions?.filter((ws) => ws.status === "CANCELED_BY_RESTAURANT") ||
       [],
   };
 

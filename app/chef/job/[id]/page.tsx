@@ -322,7 +322,11 @@ export default function JobDetail({ params }: PageProps) {
       router.refresh();
     } catch (error) {
       console.error("チェックイン処理に失敗しました:", error);
-      alert("チェックイン処理に失敗しました。もう一度お試しください。");
+      toast({
+        title: "エラー",
+        description: "チェックイン処理に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
       setIsQrScanned(false);
       setCheckInCode(null);
     }
@@ -344,7 +348,11 @@ export default function JobDetail({ params }: PageProps) {
       router.refresh();
     } catch (error) {
       console.error("チェックアウト処理に失敗しました:", error);
-      alert("チェックアウト処理に失敗しました。もう一度お試しください。");
+      toast({
+        title: "エラー",
+        description: "チェックアウト処理に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
     }
   };
 
