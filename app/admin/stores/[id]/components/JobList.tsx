@@ -25,10 +25,7 @@ interface JobListProps {
   onCopyJob: (job: Job) => void;
 }
 
-export function JobList({
-  jobWithWorkSessions,
-  onCopyJob,
-}: JobListProps) {
+export function JobList({ jobWithWorkSessions, onCopyJob }: JobListProps) {
   const { user } = useCompanyAuth();
   const router = useRouter();
 
@@ -41,7 +38,7 @@ export function JobList({
     const { id, ...jobWithoutId } = job;
     const jobData = {
       ...jobWithoutId,
-      title: `${job.title} (コピー)`,
+      title: `${job.title}`,
       status: "DRAFT",
       start_time: new Date(job.start_time).toLocaleTimeString("ja-JP", {
         hour: "2-digit",
@@ -143,4 +140,4 @@ export function JobList({
       })}
     </div>
   );
-};
+}
