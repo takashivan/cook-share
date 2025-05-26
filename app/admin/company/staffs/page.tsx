@@ -46,6 +46,9 @@ import {
 import { useDeleteCompanyUserByCompanyId } from "@/hooks/api/companyuser/companyUsers/useDeleteCompanyUserByCompanyId";
 import { CompanyusersListData } from "@/api/__generated__/base/data-contracts";
 import { useCreateCompanyUserByCompanyId } from "@/hooks/api/companyuser/companyUsers/useCreateCompanyUserByCompanyId";
+import { ErrorPage } from "@/components/layout/ErrorPage";
+import { LoadingScreen } from "@/components/LoadingScreen";
+import { useGetCompany } from "@/hooks/api/companyuser/companies/useGetCompany";
 
 export default function StaffPage() {
   const { user } = useCompanyAuth();
@@ -53,7 +56,18 @@ export default function StaffPage() {
   const [deleteTargetStaff, setDeleteTargetStaff] =
     useState<CompanyusersListData[number] | null>(null);
 
-  const { data: companyUsers, isLoading, error } = useGetCompanyUsersByCompanyId({ companyId: user?.companies_id ?? undefined });
+  const { data: company, isLoading: companyLoading, error: companyError } = useGetCompany({
+    companyId: user?.companies_id ?? undefined,
+  });
+
+  const {
+    data: companyUsers,
+    isLoading: companyUsersLoading,
+    error: companyUsersError
+  } = useGetCompanyUsersByCompanyId({ companyId: user?.companies_id ?? undefined });
+
+  const adminUsers = companyUsers?.filter((staff) => staff.is_admin) || [];
+  const nonAdminUsers = companyUsers?.filter((staff) => !staff.is_admin) || [];
   
   const { trigger: createCompanyUserByCompanyIdTrigger } = useCreateCompanyUserByCompanyId({
     companyId: user?.companies_id ?? undefined,
@@ -63,7 +77,7 @@ export default function StaffPage() {
         description: `${data.companyUser.email}に招待メールを送信しました。`,
       });
     },
-    handleError: (error) => {
+    handleError: () => {
       toast({
         title: "エラーが発生しました",
         description: "招待の送信に失敗しました。もう一度お試しください。",
@@ -83,7 +97,7 @@ export default function StaffPage() {
         description: `${data.companyUser.name || data.companyUser.email}を削除しました。`,
       });
     },
-    handleError: (error) => {
+    handleError: () => {
       toast({
         title: "エラーが発生しました",
         description: "スタッフの削除に失敗しました。もう一度お試しください。",
@@ -124,23 +138,18 @@ export default function StaffPage() {
     }
   };
 
-  if (error) {
+  if (companyError || companyUsersError) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center text-red-600">
-          <p>{error}</p>
-        </div>
-      </div>
+      <ErrorPage />
     );
   }
 
-  if (isLoading || !companyUsers) {
+  if (!company || companyLoading || !companyUsers || companyUsersLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p>Loading...</p>
-        </div>
-      </div>
+      <LoadingScreen
+        fullScreen={false}
+        message="スタッフ情報を読み込んでいます..."
+      />
     );
   }
 
@@ -163,7 +172,7 @@ export default function StaffPage() {
         isOpen={isAddStaffModalOpen}
         onClose={() => setIsAddStaffModalOpen(false)}
         onSubmit={handleAddStaff}
-        companyName="あなたの会社名" // 実際の会社名を渡す
+        companyName={company.name || "会社名未設定"}
       />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -189,7 +198,7 @@ export default function StaffPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {companyUsers.filter((user) => user.is_admin).length}
+              {adminUsers.length}
             </div>
           </CardContent>
         </Card>
@@ -211,9 +220,8 @@ export default function StaffPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {companyUsers
-                    .filter((staff) => staff.is_admin)
-                    .map((staff) => (
+                  {adminUsers.length > 0 ?
+                    adminUsers.map((staff) => (
                       <TableRow key={staff.id}>
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-3">
@@ -251,7 +259,16 @@ export default function StaffPage() {
                           </DropdownMenu>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    ))
+                    : (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center">
+                          <p className="text-sm text-muted-foreground">
+                            管理者はいません
+                          </p>
+                        </TableCell>
+                      </TableRow>
+                    )}
                 </TableBody>
               </Table>
             </CardContent>
@@ -274,9 +291,8 @@ export default function StaffPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {companyUsers
-                    .filter((staff) => !staff.is_admin)
-                    .map((staff) => (
+                  {nonAdminUsers.length > 0 ?
+                    nonAdminUsers.map((staff) => (
                       <TableRow key={staff.id}>
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-3">
@@ -295,7 +311,16 @@ export default function StaffPage() {
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    ))
+                    : (
+                      <TableRow>
+                        <TableCell colSpan={3} className="text-center">
+                          <p className="text-sm text-muted-foreground">
+                            各店舗のスタッフはいません
+                          </p>
+                        </TableCell>
+                      </TableRow>
+                    )}
                 </TableBody>
               </Table>
             </CardContent>
@@ -308,9 +333,8 @@ export default function StaffPage() {
         <div>
           <h3 className="text-lg font-medium mb-4">管理者</h3>
           <div className="grid gap-4">
-            {companyUsers
-              .filter((staff) => staff.is_admin)
-              .map((staff) => (
+            {adminUsers.length > 0 ?
+              adminUsers.map((staff) => (
                 <Card key={staff.id}>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
@@ -359,16 +383,24 @@ export default function StaffPage() {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              ))
+              : (
+                <Card>
+                  <CardContent className="p-4 text-center">
+                    <p className="text-sm text-muted-foreground">
+                      管理者はいません
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
           </div>
         </div>
 
         <div>
           <h3 className="text-lg font-medium mb-4">各店舗のスタッフ</h3>
           <div className="grid gap-4">
-            {companyUsers
-              .filter((staff) => !staff.is_admin)
-              .map((staff) => (
+            {nonAdminUsers.length > 0 ?
+              nonAdminUsers.map((staff) => (
                 <Card key={staff.id}>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
@@ -400,7 +432,16 @@ export default function StaffPage() {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              ))
+              : (
+                <Card>
+                  <CardContent className="p-4 text-center">
+                    <p className="text-sm text-muted-foreground">
+                      各店舗のスタッフはいません
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
           </div>
         </div>
       </div>
