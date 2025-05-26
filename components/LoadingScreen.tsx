@@ -34,8 +34,8 @@ export function LoadingScreen({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center bg-white",
-        fullScreen ? "fixed inset-0 z-50" : "w-full h-full min-h-[300px]",
+        "flex flex-col items-center justify-center",
+        fullScreen ? "fixed inset-0 z-50 bg-white" : "w-full h-full min-h-[300px]",
         className
       )}>
       <div className="flex flex-col items-center max-w-md px-8 text-center">
