@@ -4,6 +4,8 @@ import { MessageSummary, useSubscriptionMessageSummaryByRestaurantId } from "@/h
 import Image from "next/image";
 import { useState } from "react";
 import { ChatSheet, ChatSheetProps } from "./ChatSheet";
+import { ErrorPage } from "@/components/layout/ErrorPage";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 interface MessageListProps {
   restaurantId: number;
@@ -14,7 +16,11 @@ export function MessageList({
 }: MessageListProps) {
   const [selectedChat, setSelectedChat] = useState<ChatSheetProps['selectedChat']>(null);
 
-  const { messageSummaryData, isLoading } = useSubscriptionMessageSummaryByRestaurantId({ restaurantId });
+  const {
+    messageSummaryData,
+    isLoading,
+    error,
+  } = useSubscriptionMessageSummaryByRestaurantId({ restaurantId });
   const sortedMessageSummaryData = messageSummaryData?.sort((a, b) => {
     const aDate = new Date(a.first_message?.created_at || 0);
     const bDate = new Date(b.first_message?.created_at || 0);
@@ -30,12 +36,16 @@ export function MessageList({
     });
   }
 
-  if (isLoading) {
+  if (error) {
     return (
-      <div className="flex justify-center items-center min-h-[200px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
-      </div>
+      <ErrorPage />
     );
+  }
+
+  if (isLoading || !messageSummaryData) {
+    return (
+      <LoadingSpinner />
+    )
   }
 
   return (
