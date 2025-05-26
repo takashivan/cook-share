@@ -80,9 +80,7 @@ export default function RestaurantDetailPage(props: {
   // };
 
   if (restaurantError || reviewError) {
-    return (
-      <ErrorPage />
-    );
+    return <ErrorPage />;
   }
 
   if (restaurantLoading || reviewLoading) {
@@ -135,13 +133,13 @@ export default function RestaurantDetailPage(props: {
                   <Badge className="bg-green-500 hover:bg-green-600">
                     {restaurant?.is_active ? "公開中" : "非公開"}
                   </Badge>
-                  {restaurant?.cuisine_type &&
+                  {restaurant?.cuisine_type && (
                     <Badge
                       variant="outline"
                       className="bg-white/20 backdrop-blur-sm text-white border-white/40">
                       {restaurant?.cuisine_type}
                     </Badge>
-                  }
+                  )}
                   {restaurantReview && restaurantReview.length > 0 && (
                     <Badge
                       variant="outline"
@@ -188,9 +186,7 @@ export default function RestaurantDetailPage(props: {
                   </div>
                   <div className="flex items-center gap-1">
                     <Phone className="h-4 w-4" />
-                    <span className="text-sm">
-                      {restaurant?.contact_info}
-                    </span>
+                    <span className="text-sm">{restaurant?.contact_info}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="h-4 w-4" />
@@ -256,19 +252,13 @@ export default function RestaurantDetailPage(props: {
 
           <TabsContent value="info">
             <div className="grid gap-4">
-              <RestaurantDetail
-                restaurantId={Number(params.id)}
-              />
-              <ReviewList
-                restaurantId={Number(params.id)}
-              />
+              <RestaurantDetail restaurantId={Number(params.id)} />
+              <ReviewList restaurantId={Number(params.id)} />
             </div>
           </TabsContent>
 
           <TabsContent value="jobs" className="space-y-4">
-            <JobContent
-              restaurantId={Number(params.id)}
-            />
+            <JobContent restaurantId={Number(params.id)} />
           </TabsContent>
 
           <TabsContent value="staff">
