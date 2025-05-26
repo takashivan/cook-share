@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "@/hooks/use-toast";
 import { JobsCreatePayload } from "@/api/__generated__/base/data-contracts";
 import { formatDateToLocalISOStringForDatetimeLocal } from "@/lib/functions";
@@ -17,6 +18,8 @@ interface CreateJobForm extends BaseCreateForm {
   start_time: string;
   end_time: string;
   expiry_date: string;
+  transportation_type: "NONE" | "MAX" | "FIXED";
+  transportation_amount: number;
 }
 
 interface CreateJobModalProps {
@@ -53,8 +56,12 @@ export const CreateJobModal = ({
       work_date: new Date().toISOString().split("T")[0],
       start_time: "10:00",
       end_time: "18:00",
-      expiry_date: formatDateToLocalISOStringForDatetimeLocal(new Date(new Date().setHours(10, 0, 0, 0))),
+      expiry_date: formatDateToLocalISOStringForDatetimeLocal(
+        new Date(new Date().setHours(10, 0, 0, 0))
+      ),
       fee: 12000,
+      transportation_type: "NONE",
+      transportation_amount: undefined,
     },
   });
 
@@ -92,8 +99,7 @@ export const CreateJobModal = ({
     setPreviewImage(null);
     setSelectedFile(null);
     onClose();
-  }
-
+  };
 
   const submit = handleSubmit(async (data) => {
     const status = data.status;
@@ -115,18 +121,34 @@ export const CreateJobModal = ({
         start_time: startTimestamp,
         end_time: endTimestamp,
         expiry_date: expiryDateTimestamp,
+        transportation_type: data.transportation_type,
+        transportation_amount:
+          data.transportation_type === "NONE"
+            ? 0
+            : Number(data.transportation_amount),
       };
+      // 不要なフィールドを除外
+      delete (newData as any).transportation;
 
       await onSubmit(newData);
       handleClose();
       toast({
-        title: status === "PUBLISHED" ? "求人を公開しました" : "下書きを保存しました",
-        description: status === "PUBLISHED" ? "求人が公開されました。" : "求人の下書きが保存されました。",
+        title:
+          status === "PUBLISHED"
+            ? "求人を公開しました"
+            : "下書きを保存しました",
+        description:
+          status === "PUBLISHED"
+            ? "求人が公開されました。"
+            : "求人の下書きが保存されました。",
       });
     } catch (error) {
       toast({
         title: "エラーが発生しました",
-        description: status === "PUBLISHED" ? "求人の公開に失敗しました。もう一度お試しください。" : "下書きの保存に失敗しました。もう一度お試しください。",
+        description:
+          status === "PUBLISHED"
+            ? "求人の公開に失敗しました。もう一度お試しください。"
+            : "下書きの保存に失敗しました。もう一度お試しください。",
         variant: "destructive",
       });
     }
@@ -135,7 +157,7 @@ export const CreateJobModal = ({
   const handlePublishClick = () => {
     setValue("status", "PUBLISHED");
     submit();
-  }
+  };
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -223,14 +245,11 @@ export const CreateJobModal = ({
                               const selectedDate = e.target.value;
                               const startTime = watch("start_time");
                               if (startTime) {
-                                const newExpiryDate = `${selectedDate}T${startTime}`
-                                setValue(
-                                  "expiry_date",
-                                  newExpiryDate
-                                );
+                                const newExpiryDate = `${selectedDate}T${startTime}`;
+                                setValue("expiry_date", newExpiryDate);
                               }
                               setValue("work_date", e.target.value);
-                            }
+                            },
                           })}
                           className="mt-1"
                         />
@@ -253,14 +272,11 @@ export const CreateJobModal = ({
                                 const selectedTime = e.target.value;
                                 const workDate = watch("work_date");
                                 if (workDate) {
-                                  const newExpiryDate = `${workDate}T${selectedTime}`
-                                  setValue(
-                                    "expiry_date",
-                                    newExpiryDate
-                                  );
+                                  const newExpiryDate = `${workDate}T${selectedTime}`;
+                                  setValue("expiry_date", newExpiryDate);
                                 }
                                 setValue("start_time", e.target.value);
-                              }
+                              },
                             })}
                             className="mt-1"
                           />
@@ -360,7 +376,9 @@ export const CreateJobModal = ({
                           {...register("expiry_date", {
                             required: "締め切りは必須です",
                             min: {
-                              value: formatDateToLocalISOStringForDatetimeLocal(new Date()),
+                              value: formatDateToLocalISOStringForDatetimeLocal(
+                                new Date()
+                              ),
                               message:
                                 "締め切りは今日以降の日付で設定してください",
                             },
@@ -373,9 +391,7 @@ export const CreateJobModal = ({
                                 formValues.end_time &&
                                 value != null
                               ) {
-                                const expiryDate = new Date(
-                                  `${value}:00`
-                                );
+                                const expiryDate = new Date(`${value}:00`);
                                 const startTime = new Date(
                                   `${formValues.work_date}T${formValues.start_time}:00`
                                 );
@@ -431,13 +447,74 @@ export const CreateJobModal = ({
                     </div>
 
                     <div>
-                      <Label htmlFor="transportation">交通費</Label>
-                      <Input
-                        id="transportation"
-                        {...register("transportation")}
-                        className="mt-1"
-                        placeholder="例：全額支給、上限1000円"
-                      />
+                      <Label htmlFor="transportation_type">交通費</Label>
+                      <RadioGroup
+                        defaultValue="NONE"
+                        className="flex gap-4 mt-1"
+                        onValueChange={(value) =>
+                          setValue(
+                            "transportation_type",
+                            value as "NONE" | "MAX" | "FIXED"
+                          )
+                        }
+                        {...register("transportation_type")}>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="NONE" id="none" />
+                          <Label htmlFor="none" className="cursor-pointer">
+                            交通費なし
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="MAX" id="max" />
+                          <Label htmlFor="max" className="cursor-pointer">
+                            上限
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="FIXED" id="fixed" />
+                          <Label htmlFor="fixed" className="cursor-pointer">
+                            一律
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                      {(watch("transportation_type") === "MAX" ||
+                        watch("transportation_type") === "FIXED") && (
+                        <div className="mt-2 flex items-center gap-2">
+                          <Input
+                            id="transportation_amount"
+                            type="number"
+                            min={0}
+                            {...register("transportation_amount", {
+                              required:
+                                watch("transportation_type") !== "NONE"
+                                  ? "金額を入力してください"
+                                  : false,
+                              min: {
+                                value: 0,
+                                message: "0円以上で入力してください",
+                              },
+                              validate: (value) => {
+                                if (
+                                  (watch("transportation_type") === "MAX" ||
+                                    watch("transportation_type") === "FIXED") &&
+                                  (!value || value <= 0)
+                                ) {
+                                  return "金額を入力してください";
+                                }
+                                return true;
+                              },
+                            })}
+                            className="w-32"
+                            placeholder="金額"
+                          />
+                          <span>円</span>
+                        </div>
+                      )}
+                      {errors.transportation_amount && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.transportation_amount.message as string}
+                        </p>
+                      )}
                     </div>
 
                     <div>
@@ -521,13 +598,17 @@ export const CreateJobModal = ({
                       type="submit"
                       variant="secondary"
                       disabled={isSubmitting}>
-                      {(isSubmitting && watch('status') === 'DRAFT') ? "保存中..." : "下書きとして保存"}
+                      {isSubmitting && watch("status") === "DRAFT"
+                        ? "保存中..."
+                        : "下書きとして保存"}
                     </Button>
                     <Button
                       type="button"
                       onClick={handlePublishClick}
                       disabled={isSubmitting}>
-                      {(isSubmitting && watch('status') === 'PUBLISHED') ? "公開中..." : "公開する"}
+                      {isSubmitting && watch("status") === "PUBLISHED"
+                        ? "公開中..."
+                        : "公開する"}
                     </Button>
                   </div>
                 </form>

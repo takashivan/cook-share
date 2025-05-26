@@ -18,6 +18,7 @@ import { format } from "date-fns";
 import { useVerifyWorksession } from "@/hooks/api/companyuser/worksessions/useVerifyWorksession";
 import { toast } from "@/hooks/use-toast";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
+import { useRejectWorksession } from "@/hooks/api/companyuser/worksessions/useRejectWorksession";
 
 interface RestaurantReviewModalProps {
   isOpen: boolean;
@@ -38,7 +39,8 @@ interface RestaurantReviewModalProps {
     };
     restaurant: {
       name: string;
-    }
+    };
+    transportation_expenses?: number;
   };
   handleSuccessAction: () => void;
 }
@@ -54,6 +56,8 @@ export function RestaurantReviewModal({
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");
   const [approved, setApproved] = useState(true);
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
 
   const { trigger: verifyWorksessionTrigger } = useVerifyWorksession({
     worksessionId: worksessionData?.id,
@@ -74,7 +78,29 @@ export function RestaurantReviewModal({
     handleError: () => {
       toast({
         title: "エラー",
-        description: "勤務確認・評価の送信に失敗しました。もう一度お試しください",
+        description:
+          "勤務確認・評価の送信に失敗しました。もう一度お試しください",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const { trigger: rejectWorksessionTrigger } = useRejectWorksession({
+    worksessionId: worksessionData?.id,
+    handleSuccess: () => {
+      toast({
+        title: "差し戻しを送信しました",
+        description: "シェフに差し戻し理由を通知しました。",
+      });
+      setIsRejectModalOpen(false);
+      setRejectReason("");
+      onCloseAction();
+      handleSuccessAction();
+    },
+    handleError: () => {
+      toast({
+        title: "エラー",
+        description: "差し戻しの送信に失敗しました。もう一度お試しください。",
         variant: "destructive",
       });
     },
@@ -116,32 +142,37 @@ export function RestaurantReviewModal({
                 src={worksessionData.user.profile_image || "/chef-logo.png"}
                 alt={worksessionData.user.name}
               />
-              <AvatarFallback>{worksessionData.user.name.charAt(0)}</AvatarFallback>
+              <AvatarFallback>
+                {worksessionData.user.name.charAt(0)}
+              </AvatarFallback>
             </Avatar>
             <div>
               <h3 className="font-medium">{worksessionData.user.name}</h3>
-              <p className="text-sm text-muted-foreground">{worksessionData.job.title}</p>
+              <p className="text-sm text-muted-foreground">
+                {worksessionData.job.title}
+              </p>
               <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
                 <div className="flex items-center">
                   <Calendar className="h-3 w-3 mr-1" />
                   {worksessionData.job.work_date
-                    ? format(new Date(worksessionData.job.work_date), "yyyy/MM/dd")
-                    : "未定"
-                  }
+                    ? format(
+                        new Date(worksessionData.job.work_date),
+                        "yyyy/MM/dd"
+                      )
+                    : "未定"}
                 </div>
                 <div className="flex items-center">
                   <Clock className="h-3 w-3 mr-1" />
                   {worksessionData?.job.start_time &&
-                    worksessionData?.job.end_time
-                      ? `${format(
-                          new Date(worksessionData.job.start_time),
-                          "HH:mm"
-                        )}〜${format(
-                          new Date(worksessionData.job.end_time),
-                          "HH:mm"
-                        )}`
-                      : "未定"
-                  }
+                  worksessionData?.job.end_time
+                    ? `${format(
+                        new Date(worksessionData.job.start_time),
+                        "HH:mm"
+                      )}〜${format(
+                        new Date(worksessionData.job.end_time),
+                        "HH:mm"
+                      )}`
+                    : "未定"}
                 </div>
               </div>
             </div>
@@ -204,6 +235,15 @@ export function RestaurantReviewModal({
             />
           </div>
 
+          <div className="mb-6">
+            <p className="text-sm font-medium mb-2">申請された交通費</p>
+            <p className="text-base text-gray-700 font-bold">
+              {typeof worksessionData.transportation_expenses === "number"
+                ? `${worksessionData.transportation_expenses.toLocaleString()}円`
+                : "-"}
+            </p>
+          </div>
+
           <div className="flex items-center gap-2 mb-4">
             <input
               type="checkbox"
@@ -236,6 +276,12 @@ export function RestaurantReviewModal({
             キャンセル
           </Button>
           <Button
+            variant="destructive"
+            onClick={() => setIsRejectModalOpen(true)}
+            className="w-full sm:w-auto">
+            差し戻し
+          </Button>
+          <Button
             onClick={handleSubmit}
             disabled={rating === 0 || !approved}
             className="w-full sm:w-auto">
@@ -243,6 +289,39 @@ export function RestaurantReviewModal({
           </Button>
         </DialogFooter>
       </DialogContent>
+      {/* 差し戻し理由入力モーダル */}
+      <Dialog open={isRejectModalOpen} onOpenChange={setIsRejectModalOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>差し戻し理由</DialogTitle>
+          </DialogHeader>
+          <div className="mb-4">
+            <Textarea
+              placeholder="差し戻し理由を入力してください"
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              className="min-h-[80px]"
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsRejectModalOpen(false)}>
+              キャンセル
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                rejectWorksessionTrigger({
+                  reason: rejectReason,
+                });
+              }}
+              disabled={!rejectReason.trim()}>
+              差し戻しを送信
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }

@@ -21,6 +21,8 @@ import {
   JobChangeRequestListData,
   MessagesListResult,
   NoShowPartialUpdateData,
+  RejectPartialUpdateInput,
+  RejectPartialUpdateOutput,
   RestaurantReviewListResult,
   StartPartialUpdateBody,
   StartPartialUpdateResult,
@@ -257,6 +259,43 @@ export class Worksessions<
     const key = enabled ? [`/worksessions/${worksessionId}/no-show`] : null;
     const fetcher: (url: string[]) => Promise<NoShowPartialUpdateData> = (_) =>
       this.noShowPartialUpdate(worksessionId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags worksessions
+   * @name RejectPartialUpdate
+   * @request PATCH:/worksessions/{worksession_id}/reject
+   */
+  rejectPartialUpdate = (
+    worksessionId: number,
+    data: RejectPartialUpdateInput,
+    params: RequestParams = {},
+  ) =>
+    this.request<RejectPartialUpdateOutput, void>({
+      path: `/worksessions/${worksessionId}/reject`,
+      method: "PATCH",
+      body: data,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+
+  rejectPartialUpdateQueryArgs = (
+    worksessionId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/worksessions/${worksessionId}/reject`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: RejectPartialUpdateInput },
+    ) => Promise<RejectPartialUpdateOutput> = (_, { arg }) =>
+      this.rejectPartialUpdate(worksessionId, arg, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 

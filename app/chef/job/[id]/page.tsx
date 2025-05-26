@@ -69,6 +69,8 @@ interface JobDetail {
     point: string;
     transportation: string;
     fee: number;
+    transportation_type: string;
+    transportation_amount: number;
   };
   restaurant: {
     id: string;
@@ -113,7 +115,8 @@ export default function JobDetail({ params }: PageProps) {
   const [cancelReason, setCancelReason] = useState("");
   const [isChangeRequestModalOpen, setIsChangeRequestModalOpen] =
     useState(false);
-  const [selectedChangeRequest, setSelectedChangeRequest] = useState<JobChangeRequest | null>(null);
+  const [selectedChangeRequest, setSelectedChangeRequest] =
+    useState<JobChangeRequest | null>(null);
 
   // ジョブ詳細の取得
   const { data: jobDetail } = useGetJob({ jobId: Number(id) });
@@ -164,8 +167,7 @@ export default function JobDetail({ params }: PageProps) {
   // 変更リクエストの取得
   const { data: changeRequests } = useGetJobChangeRequests();
   const pendingRequest = changeRequests?.find(
-    (req) =>
-      req.worksession_id === workSession?.id && req.status === "PENDING"
+    (req) => req.worksession_id === workSession?.id && req.status === "PENDING"
   );
 
   const { trigger: acceptJobChangeRequest } = useAcceptJobChangeRequest({
@@ -220,7 +222,7 @@ export default function JobDetail({ params }: PageProps) {
       const devices = await Html5Qrcode.getCameras();
 
       if (!devices?.length) {
-        throw new Error ("カメラデバイスが見つかりません");
+        throw new Error("カメラデバイスが見つかりません");
       }
 
       const storedConfig = getStoredCameraConfig();
@@ -297,7 +299,10 @@ export default function JobDetail({ params }: PageProps) {
     const value = e.target.value;
     setCheckInCode(value);
     if (value.length === 6) {
-      if (workSession?.check_in_code && workSession.check_in_code.toString() === value) {
+      if (
+        workSession?.check_in_code &&
+        workSession.check_in_code.toString() === value
+      ) {
         setIsQrScanned(true);
       } else {
         toast({
@@ -308,7 +313,7 @@ export default function JobDetail({ params }: PageProps) {
         });
       }
     }
-  }
+  };
 
   const handleSuccessfulScan = async () => {
     if (!workSession) return;
@@ -328,19 +333,21 @@ export default function JobDetail({ params }: PageProps) {
     }
   };
 
-  const handleCheckOut = async (rating: number, comment: string) => {
+  const handleCheckOut = async (
+    rating: number,
+    comment: string,
+    transportation_expenses: number | null
+  ) => {
     if (!workSession) return;
-
     try {
       console.log("チェックアウト処理を開始します");
       await finishWorksessionTrigger({
         check_out_time: Date.now(),
         rating,
         feedback: comment,
+        transportation_expenses,
       });
       console.log("チェックアウトが完了しました");
-
-      // ページをリロードして状態を更新
       router.refresh();
     } catch (error) {
       console.error("チェックアウト処理に失敗しました:", error);
@@ -368,6 +375,12 @@ export default function JobDetail({ params }: PageProps) {
         return (
           <Button className="w-full" onClick={() => setIsReviewModalOpen(true)}>
             勤務終了・完了報告
+          </Button>
+        );
+      case "VERIFY_REJECTED":
+        return (
+          <Button className="w-full" onClick={() => setIsReviewModalOpen(true)}>
+            差し戻し
           </Button>
         );
       case "COMPLETED":
@@ -628,7 +641,13 @@ export default function JobDetail({ params }: PageProps) {
             <div>
               <h4 className="font-medium">勤務場所</h4>
               <p className="text-sm">{restaurant?.address}</p>
-              <p className="text-sm">{job.transportation}</p>
+              <p className="text-sm">
+                {job.transportation_type === "NONE"
+                  ? "交通費なし"
+                  : job.transportation_type === "MAX"
+                  ? `上限${job.transportation_amount.toLocaleString()}円`
+                  : `${job.transportation_amount.toLocaleString()}円`}
+              </p>
             </div>
           </div>
         </div>
@@ -662,7 +681,13 @@ export default function JobDetail({ params }: PageProps) {
             <div>
               <h4 className="font-medium">勤務場所</h4>
               <p className="text-sm">{restaurant?.address}</p>
-              <p className="text-sm">{job.transportation}</p>
+              <p className="text-sm">
+                {job.transportation_type === "NONE"
+                  ? "交通費なし"
+                  : job.transportation_type === "MAX"
+                  ? `上限${job.transportation_amount.toLocaleString()}円`
+                  : `${job.transportation_amount.toLocaleString()}円`}
+              </p>
             </div>
           </div>
         </div>
@@ -674,11 +699,13 @@ export default function JobDetail({ params }: PageProps) {
             <span>報酬</span>
             <span>¥{job.fee.toLocaleString()}</span>
           </div>
-          <button
-            onClick={handleCancelClick}
-            className="text-sm text-gray-500 hover:text-red-500 transition-colors">
-            お仕事をキャンセルする
-          </button>
+          {workSession?.status == "SCHEDULED" && (
+            <button
+              onClick={handleCancelClick}
+              className="text-sm text-gray-500 hover:text-red-500 transition-colors">
+              お仕事をキャンセルする
+            </button>
+          )}
         </div>
       </div>
 
@@ -694,9 +721,7 @@ export default function JobDetail({ params }: PageProps) {
           <div className="space-y-4">
             <div className="border p-4 rounded-lg text-center">
               <p className="text-sm text-gray-500 mb-4">
-                {!isQrScanned && (
-                  "カメラをQRコードに向けてください"
-                )}
+                {!isQrScanned && "カメラをQRコードに向けてください"}
               </p>
               <div className="flex justify-center items-center overflow-hidden">
                 {!isQrScanned ? (
@@ -711,15 +736,18 @@ export default function JobDetail({ params }: PageProps) {
                         カメラアクセスを許可してスキャンする
                       </Button>
                     )}
-                    <div  className={`flex justify-center items-center flex-col overflow-hidden ${styles.qr_container}`}>
+                    <div
+                      className={`flex justify-center items-center flex-col overflow-hidden ${styles.qr_container}`}>
                       <div className={styles.qr_reader_wrapper}>
                         <div
                           id="qr-reader"
                           ref={ref}
-                          className={hasPermission ? styles.qr_reader : undefined}
+                          className={
+                            hasPermission ? styles.qr_reader : undefined
+                          }
                         />
                       </div>
-                      
+
                       <Input
                         type="text"
                         placeholder="または、コードを入力してください"
@@ -766,6 +794,9 @@ export default function JobDetail({ params }: PageProps) {
             ? format(new Date(job.work_date), "yyyy年MM月dd日", { locale: ja })
             : ""
         }
+        transportation_type={job?.transportation_type || "NONE"}
+        transportation_amount={job?.transportation_amount || 0}
+        transportation_expenses={workSession?.transportation_expenses ?? null}
       />
 
       {workSession && (

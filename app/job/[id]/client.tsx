@@ -501,7 +501,11 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                       <div>
                         <h3 className="text-base font-bold mb-3">交通費</h3>
                         <div className="text-sm text-gray-700">
-                          {jobDetail.job.transportation}
+                          {jobDetail.job.transportation_type === "NONE"
+                            ? "交通費なし"
+                            : jobDetail.job.transportation_type === "MAX"
+                            ? `上限${jobDetail.job.transportation_amount.toLocaleString()}円`
+                            : `${jobDetail.job.transportation_amount.toLocaleString()}円`}
                         </div>
                       </div>
                     </TabsContent>
