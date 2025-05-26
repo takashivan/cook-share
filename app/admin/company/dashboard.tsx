@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import Link from "next/link";
 import { Building, CreditCard, MessageSquare, Store } from "lucide-react";
 import {
@@ -16,32 +15,35 @@ import { useGetCompany } from "@/hooks/api/companyuser/companies/useGetCompany";
 import { useGetJobsByCompanyId } from "@/hooks/api/companyuser/jobs/useGetJobsByCompanyId";
 import { useGetCompanyUsersByCompanyId } from "@/hooks/api/companyuser/companyUsers/useGetCompanyUsersByCompanyId";
 import { useGetRestaurantsByCompanyUserId } from "@/hooks/api/companyuser/restaurants/useGetRestaurantsByCompanyUserId";
+import { ErrorPage } from "@/components/layout/ErrorPage";
+import { LoadingScreen } from "@/components/LoadingScreen";
 
 export function CompanyDashboard() {
   const { user } = useCompanyAuth();
 
-  const { data: company } = useGetCompany({ companyId: user?.companies_id ?? undefined });
+  const {
+    data: company,
+    isLoading: companyLoading,
+    error: companyError,
+  } = useGetCompany({ companyId: user?.companies_id ?? undefined });
+
   const {
     data: restaurants,
     isLoading: restaurantsLoading,
     error: restaurantsError,
   } = useGetRestaurantsByCompanyUserId({ companyuserId: user?.id });
+
   const {
     data: jobData,
     isLoading: jobsLoading,
     error: jobsError,
   } = useGetJobsByCompanyId({ companyId: user?.companies_id ?? undefined });
+
   const {
     data: companyUsers,
     isLoading: companyUsersLoading,
     error: companyUsersError,
   } = useGetCompanyUsersByCompanyId({ companyId: user?.companies_id ?? undefined });
-
-  // データが更新されたときのログ
-  useEffect(() => {
-    console.log("Company info updated:", company);
-    console.log("Restaurants updated:", restaurants);
-  }, [company, restaurants]);
 
   // const handleCreateRestaurant = async (data: FormData) => {
   //   try {
@@ -99,22 +101,23 @@ export function CompanyDashboard() {
   //   }
   // };
 
-  if (restaurantsLoading || jobsLoading || companyUsersLoading) {
-    return <div>Loading...</div>;
+  if (companyError || companyUsersError || restaurantsError || jobsError) {
+    return (
+      <ErrorPage />
+    );
   }
 
-  if (restaurantsError || jobsError) {
-    return <div>Error: {restaurantsError}</div>;
+  if (!company || companyLoading || !companyUsers || companyUsersLoading || !restaurants || restaurantsLoading || !jobData || jobsLoading) {
+    return (
+      <LoadingScreen
+        fullScreen={false}
+        message="会社情報を読み込んでいます..."
+      />
+    );
   }
 
   return (
     <>
-      {companyUsersError && (
-        <div className="bg-red-50 text-red-600 p-4 mb-4 rounded">
-          {companyUsersError}
-        </div>
-      )}
-
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
@@ -122,7 +125,7 @@ export function CompanyDashboard() {
               会社ダッシュボード
             </h2>
             <p className="text-muted-foreground">
-              {company?.name || "読み込み中..."}の管理画面へようこそ
+              {company.name}の管理画面へようこそ
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -141,7 +144,7 @@ export function CompanyDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {restaurants?.length ?? ""}
+                {restaurants.length}
               </div>
             </CardContent>
           </Card>
@@ -153,7 +156,7 @@ export function CompanyDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {jobData?.jobs.length ?? ""}
+                {jobData.jobs.length}
               </div>
             </CardContent>
           </Card>
@@ -164,7 +167,7 @@ export function CompanyDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {companyUsers?.length ?? ""}
+                {companyUsers.length}
               </div>
             </CardContent>
           </Card>

@@ -6,7 +6,6 @@ import Link from "next/link";
 import {
   formatJapanHHMM,
   formatWorkSessionJapaneseStatus,
-  formatJobPostingJapaneseStatus,
 } from "@/lib/functions";
 import {
   ArrowLeft,
@@ -43,7 +42,6 @@ import {
 import TextareaAutosize from "react-textarea-autosize";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import { QRCodeSVG } from "qrcode.react";
 import { RestaurantReviewModal } from "@/components/modals/RestaurantReviewModal";
 import { FaStar } from "react-icons/fa";
 import { EditJobModal } from "@/components/modals/EditJobModal";
@@ -94,6 +92,9 @@ import { useGetCompanyUserNotificationsByUserId } from "@/hooks/api/companyuser/
 import { RestaurantReviewCompleteModal } from "@/components/modals/RestaurantReviewCompleteModal";
 import { CheckInQRModal } from "@/components/modals/CheckInQRModal";
 import { JobStatusBadgeForAdmin } from "@/components/badge/JobStatusBadgeForAdmin";
+import { LoadingScreen } from "@/components/LoadingScreen";
+import { ErrorPage } from "@/components/layout/ErrorPage";
+import { EXPERIENCE_LEVELS } from "@/lib/const/chef-profile";
 
 interface PageParams {
   params: Promise<{ id: string }>;
@@ -110,18 +111,6 @@ export default function JobDetail({ params }: PageParams) {
   const { user } = useCompanyAuth();
   const router = useRouter();
 
-  const { data: jobData, error: jobError } = useGetJob({
-    jobId: Number(jobId),
-  });
-  const { data: workSessions, error: workSessionsError } =
-    useGetWorksessionsByJobId({ jobId: Number(jobId) });
-
-  const job = jobData?.job;
-  const restaurant = jobData?.restaurant;
-
-  const [selectedApplicant, setSelectedApplicant] = useState<number | null>(
-    null
-  );
   const [messageInput, setMessageInput] = useState("");
   const [isQrDialogOpen, setIsQrDialogOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -151,15 +140,64 @@ export default function JobDetail({ params }: PageParams) {
     reason: "",
   });
 
+  const { data: jobData, error: jobError, isLoading: jobLoading } = useGetJob({
+    jobId: Number(jobId),
+  });
+
+  const { data: workSessions, error: workSessionsError, isLoading: workSessionsLoading } =
+    useGetWorksessionsByJobId({ jobId: Number(jobId) });
+
+  const job = jobData?.job;
+  const restaurant = jobData?.restaurant;
+
   // シェフのこれまでのレビュー一覧を取得
-  const { data: reviewsData } = useGetReviewsByUserId({
+  const {
+    data: reviewsData,
+    error: reviewsError,
+    isLoading: reviewsLoading,
+  } = useGetReviewsByUserId({
     userId: selectedWorkSession?.user_id ?? undefined,
   });
   
   // この求人に対する、シェフからのレビューを取得
-  const { data: restaurantReview } = useGetRestaurantReviewByWorksessionId({
+  const {
+    data: restaurantReview,
+    error: restaurantReviewError,
+    isLoading: restaurantReviewLoading,
+  } = useGetRestaurantReviewByWorksessionId({
     worksessionId: selectedWorkSession?.id,
   })
+
+  // メッセージの取得
+  const {
+    messagesData,
+    isLoading: messagesLoading,
+    error: messagesError,
+    sendMessage
+  } = useSubscriptionMessagesByCompanyUserId({
+    companyUserId: user?.id,
+    workSessionId: selectedWorkSession?.id,
+  });
+
+  const {
+    data: existingChangeRequest,
+    error: changeRequestError,
+    isLoading: changeRequestLoading,
+  } = useGetJobChangeRequests();
+  const pendingRequest = existingChangeRequest?.find(
+    (req) =>
+      req.worksession_id === selectedWorkSession?.id && req.status === "PENDING"
+  );
+
+  // 既読対象の通知を取得
+  const {
+    data: notifications,
+    error: notificationsError,
+    isLoading: notificationsLoading,
+  } = useGetCompanyUserNotificationsByUserId({
+    userId: user?.id,
+  });
+  const targetNotificationIds = notifications?.filter(notification => notification.job_id === job?.id && !notification.is_read).map(notification => notification.id) ?? [];
 
   const { trigger: updateJobTrigger } = useUpdateJob({
     jobId: Number(jobId),
@@ -179,12 +217,6 @@ export default function JobDetail({ params }: PageParams) {
       jobId: Number(jobId),
     });
 
-  // メッセージの取得
-  const { messagesData, sendMessage } = useSubscriptionMessagesByCompanyUserId({
-    companyUserId: user?.id,
-    workSessionId: selectedWorkSession?.id,
-  });
-
   const { trigger: updateReadMessageTrigger } =
     useUpdateReadMessageByCompanyUser({
       companyUserId: user?.id,
@@ -194,21 +226,9 @@ export default function JobDetail({ params }: PageParams) {
 
   const { trigger: createJobChangeRequest } = useCreateJobChangeRequest();
 
-  const { data: existingChangeRequest } = useGetJobChangeRequests();
-  const pendingRequest = existingChangeRequest?.find(
-    (req) =>
-      req.worksession_id === selectedWorkSession?.id && req.status === "PENDING"
-  );
-
   const { trigger: deleteJobChangeRequest } = useDeleteJobChangeRequest({
     jobChangeRequestId: pendingRequest?.id,
   });
-
-  // 既読対象の通知を取得
-  const { data: notifications } = useGetCompanyUserNotificationsByUserId({
-    userId: user?.id,
-  });
-  const targetNotificationIds = notifications?.filter(notification => notification.job_id === job?.id && !notification.is_read).map(notification => notification.id) ?? [];
 
   // 通知の既読処理
   const { trigger: markReadMultipleCompanyUserNotificationsTrigger } = useMarkReadMultipleCompanyUserNotifications({
@@ -220,10 +240,8 @@ export default function JobDetail({ params }: PageParams) {
   useEffect(() => {
     if (workSessions && workSessions.length > 0) {
       setSelectedWorkSession(workSessions[0]);
-      setSelectedApplicant(workSessions[0].id);
     } else {
       setSelectedWorkSession(null);
-      setSelectedApplicant(null);
     }
   }, [workSessions]);
 
@@ -577,6 +595,24 @@ ${changeRequest.reason}
     }
   };
 
+  if (jobError || workSessionsError || reviewsError
+    || restaurantReviewError || messagesError || changeRequestError || notificationsError) {
+    return (
+      <ErrorPage />
+    );
+  }
+
+  if (jobLoading || !workSessions || workSessionsLoading || !reviewsData || reviewsLoading
+    || restaurantReviewLoading || !messagesData || messagesLoading
+    || !existingChangeRequest || changeRequestLoading || !notifications || notificationsLoading) {
+    return (
+      <LoadingScreen
+        fullScreen={false}
+        message="求人情報を読み込んでいます..."
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* ヘッダー */}
@@ -744,7 +780,11 @@ ${changeRequest.reason}
                               {selectedWorkSession.user.name}
                             </h3>
                             <p className="text-sm text-muted-foreground">
-                              {selectedWorkSession.user.experience_level}
+                              {EXPERIENCE_LEVELS.find(
+                                (level) =>
+                                  level.value ===
+                                  selectedWorkSession.user.experience_level
+                              )?.label || ""}
                             </p>
                           </div>
                         </div>
@@ -752,7 +792,7 @@ ${changeRequest.reason}
                         <div className="space-y-4">
                           <div>
                             <h4 className="text-sm font-medium mb-1">
-                              経歴・スキル
+                              経歴・自己紹介
                             </h4>
                             <p className="text-sm">
                               {selectedWorkSession.user.bio}
@@ -790,11 +830,11 @@ ${changeRequest.reason}
                             </div>
                           )}
                           {reviewsData && reviewsData.length > 0 && (
-                            <div>
-                              <h4 className="text-sm font-medium mb-1">
-                                店舗からの評価
-                              </h4>
-                              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+                          <div>
+                            <h4 className="text-sm font-medium mb-1">
+                              店舗からの評価
+                            </h4>
+                            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
                                 {reviewsData.map((review) => (
                                   <div
                                     key={review.id}
@@ -828,8 +868,8 @@ ${changeRequest.reason}
                                     </div>
                                   </div>
                                 ))}
-                              </div>
                             </div>
+                          </div>
                           )}
                         </div>
                       </div>
