@@ -175,6 +175,8 @@ export const useSubscriptionUnreadMessagesByUser = (
 
   return {
     unreadMessagesData: getRequest.data,
+    isLoading: getRequest.isLoading,
+    error: getRequest.error,
     mutateUnreadMessages: getRequest.mutate,
   };
 };

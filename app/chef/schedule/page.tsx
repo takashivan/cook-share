@@ -15,6 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { formatJapanHHMM } from "@/lib/functions";
 import { Star } from "lucide-react";
 import { useGetReviewsByUserId } from "@/hooks/api/user/reviews/useGetReviewsByUserId";
+import { ErrorPage } from "@/components/layout/ErrorPage";
+import { LoadingScreen } from "@/components/LoadingScreen";
 
 export default function SchedulePage() {
   const { user } = useAuth();
@@ -22,30 +24,45 @@ export default function SchedulePage() {
   const [activeTab, setActiveTab] = useState("upcoming");
 
   // ワークセッション一覧の取得
-  const { data: workSessions } = useGetWorksessionsByUserId({
+  const {
+    data: workSessions,
+    isLoading: isWorkSessionsLoading,
+    error: workSessionsError,
+  } = useGetWorksessionsByUserId({
     userId: user?.id,
   });
-  console.log(workSessions);
 
   // 選択されたワークセッション
   const selectedWorkSession = workSessions?.find(
     (ws) => ws?.job?.id === selectedJobId
   );
-  console.log(selectedWorkSession);
 
   // レビューの取得
-  const { data: reviews } = useGetReviewsByUserId({
+  const {
+    data: reviews,
+    isLoading: isReviewsLoading,
+    error: reviewsError,
+  } = useGetReviewsByUserId({
     userId: user?.id,
   });
 
   // メッセージの取得
-  const { messagesData, sendMessage } = useSubscriptionMessagesByUserId({
+  const {
+    messagesData,
+    sendMessage,
+    isLoading: isMessagesLoading,
+    error: messagesError,
+  } = useSubscriptionMessagesByUserId({
     userId: user?.id,
     workSessionId: selectedWorkSession?.id,
   });
 
   // 未読メッセージの取得
-  const { unreadMessagesData } = useSubscriptionUnreadMessagesByUser({
+  const {
+    unreadMessagesData,
+    isLoading: isUnreadMessagesLoading,
+    error: unreadMessagesError,
+  } = useSubscriptionUnreadMessagesByUser({
     userId: user?.id,
   });
 
@@ -86,6 +103,23 @@ export default function SchedulePage() {
       [],
   };
 
+  if (workSessionsError || reviewsError || unreadMessagesError) {
+    return (
+      <div className="flex px-4">
+        <ErrorPage />
+      </div>
+    );
+  }
+
+  if (isWorkSessionsLoading || isReviewsLoading || isUnreadMessagesLoading) {
+    return (
+      <LoadingScreen
+        fullScreen={false}
+        message="スケジュールを読み込んでいます..."
+      />
+    );
+  }
+  
   const renderWorkSessionCard = (
     workSession: WorksessionsListResult[number]
   ) => {

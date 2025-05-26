@@ -20,12 +20,18 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Star } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { EXPERIENCE_LEVELS } from "@/lib/const/chef-profile";
+import { ErrorPage } from "@/components/layout/ErrorPage";
+import { LoadingScreen } from "@/components/LoadingScreen";
 
 export default function ChefProfile() {
   const { user, logout } = useAuth();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const { data: reviewsData } = useGetReviewsByUserId({
+  const {
+    data: reviewsData,
+    isLoading: isReviewsLoading,
+    error: reviewsError,
+  } = useGetReviewsByUserId({
     userId: user?.id ?? undefined,
   });
   console.log("reviewsData", reviewsData);
@@ -45,6 +51,23 @@ export default function ChefProfile() {
   const handleEditModalClose = () => {
     setIsEditModalOpen(false);
   };
+
+  if (reviewsError) {
+    return (
+      <div className="flex px-4">
+        <ErrorPage />
+      </div>
+    );
+  }
+
+  if (isReviewsLoading) {
+    return (
+      <LoadingScreen
+        fullScreen={false}
+        message="スタッフ情報を読み込んでいます..."
+      />
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">

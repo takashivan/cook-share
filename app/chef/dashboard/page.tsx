@@ -8,34 +8,40 @@ import { Button } from "@/components/ui/button";
 import { useGetWorksessionsByUserIdByTodo } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserIdByTodo";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { LoadingScreen } from "@/components/LoadingScreen";
+import { ErrorPage } from "@/components/layout/ErrorPage";
 
 export default function ChefDashboard() {
   const { user } = useAuth();
 
   // ワークセッションの取得
-  const { data: workSessionsData } = useGetWorksessionsByUserIdByTodo({
+  const {
+    data: workSessionsData,
+    isLoading: isWorkSessionsLoading,
+    error: workSessionsError,
+  } = useGetWorksessionsByUserIdByTodo({
     userId: user?.id,
   });
 
   const upcomingJobs =
     workSessionsData?.filter((session) => session.status === "SCHEDULED") ?? [];
-  console.log("upcomingJobs", upcomingJobs);
 
-  // const { data: applications } = useSWR<ApplicationWithJob[]>(
-  //   user ? ["applications", user.id.toString()] : null,
-  //   async ([_, userId]: [string, string]) => {
-  //     const result = await applicationApi.getApplicationsByUser(userId);
-  //     return result.map((app: any) => ({
-  //       ...app,
-  //       job: app.job
-  //         ? {
-  //             ...app.job,
-  //             restaurant: app.job._restaurant,
-  //           }
-  //         : undefined,
-  //     }));
-  //   }
-  // );
+  if (workSessionsError) {
+    return (
+      <div className="flex px-4">
+        <ErrorPage />
+      </div>
+    );
+  }
+
+  if (isWorkSessionsLoading) {
+    return (
+      <LoadingScreen
+        fullScreen={false}
+        message="ダッシュボードを読み込んでいます..."
+      />
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
