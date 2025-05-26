@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import {
@@ -21,6 +22,8 @@ interface UpdateJob
   start_time: string;
   end_time: string;
   expiry_date: string;
+  transportation_type: "NONE" | "MAX" | "FIXED";
+  transportation_amount: number;
 }
 
 interface EditJobModalProps {
@@ -97,7 +100,8 @@ export const EditJobModal = ({
       task: job?.task || "",
       skill: job?.skill || "",
       whattotake: job?.whattotake || "",
-      transportation: job?.transportation || "",
+      transportation_type: job?.transportation_type || "NONE",
+      transportation_amount: job?.transportation_amount || 0,
       note: job?.note || "",
       point: job?.point || "",
       status: job?.status || "",
@@ -124,7 +128,8 @@ export const EditJobModal = ({
         task: job.task || "",
         skill: job.skill || "",
         whattotake: job.whattotake || "",
-        transportation: job.transportation || "",
+        transportation_type: job.transportation_type || "NONE",
+        transportation_amount: job.transportation_amount || 0,
         note: job.note || "",
         point: job.point || "",
         status: job.status || "",
@@ -161,7 +166,8 @@ export const EditJobModal = ({
 
   const submit = handleSubmit(async (data) => {
     // 今回初めて公開する場合
-    const isPublished = job.status !== data.status && data.status === "PUBLISHED";
+    const isPublished =
+      job.status !== data.status && data.status === "PUBLISHED";
 
     try {
       // 日付文字列を作成（YYYY-MM-DDThh:mm:ss）
@@ -190,12 +196,16 @@ export const EditJobModal = ({
       onClose();
       toast({
         title: isPublished ? "求人を公開しました" : "求人を更新しました",
-        description: isPublished ? "求人が公開されました。" : "求人の情報が更新されました。",
+        description: isPublished
+          ? "求人が公開されました。"
+          : "求人の情報が更新されました。",
       });
     } catch (error) {
       toast({
         title: "エラーが発生しました",
-        description: isPublished ? "求人の公開に失敗しました。もう一度お試しください。" : "求人の更新に失敗しました。もう一度お試しください。",
+        description: isPublished
+          ? "求人の公開に失敗しました。もう一度お試しください。"
+          : "求人の更新に失敗しました。もう一度お試しください。",
         variant: "destructive",
       });
     }
@@ -422,13 +432,74 @@ export const EditJobModal = ({
                     </div>
 
                     <div>
-                      <Label htmlFor="transportation">交通費</Label>
-                      <Input
-                        id="transportation"
-                        {...register("transportation")}
-                        className="mt-1"
-                        placeholder="例：全額支給、上限1000円"
-                      />
+                      <Label htmlFor="transportation_type">交通費</Label>
+                      <RadioGroup
+                        defaultValue={job?.transportation_type || "NONE"}
+                        className="flex gap-4 mt-1"
+                        onValueChange={(value) =>
+                          setValue(
+                            "transportation_type",
+                            value as "NONE" | "MAX" | "FIXED"
+                          )
+                        }
+                        {...register("transportation_type")}>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="NONE" id="none" />
+                          <Label htmlFor="none" className="cursor-pointer">
+                            交通費なし
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="MAX" id="max" />
+                          <Label htmlFor="max" className="cursor-pointer">
+                            上限
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="FIXED" id="fixed" />
+                          <Label htmlFor="fixed" className="cursor-pointer">
+                            一律
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                      {(watch("transportation_type") === "MAX" ||
+                        watch("transportation_type") === "FIXED") && (
+                        <div className="mt-2 flex items-center gap-2">
+                          <Input
+                            id="transportation_amount"
+                            type="number"
+                            min={0}
+                            {...register("transportation_amount", {
+                              required:
+                                watch("transportation_type") !== "NONE"
+                                  ? "金額を入力してください"
+                                  : false,
+                              min: {
+                                value: 0,
+                                message: "0円以上で入力してください",
+                              },
+                              validate: (value) => {
+                                if (
+                                  (watch("transportation_type") === "MAX" ||
+                                    watch("transportation_type") === "FIXED") &&
+                                  (!value || value <= 0)
+                                ) {
+                                  return "金額を入力してください";
+                                }
+                                return true;
+                              },
+                            })}
+                            className="w-32"
+                            placeholder="金額"
+                          />
+                          <span>円</span>
+                        </div>
+                      )}
+                      {errors.transportation_amount && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.transportation_amount.message as string}
+                        </p>
+                      )}
                     </div>
 
                     <div>
@@ -460,7 +531,9 @@ export const EditJobModal = ({
                         {...register("expiry_date", {
                           required: "締め切りは必須です",
                           min: {
-                            value: formatDateToLocalISOStringForDatetimeLocal(new Date()),
+                            value: formatDateToLocalISOStringForDatetimeLocal(
+                              new Date()
+                            ),
                             message:
                               "締め切りは今日以降の日付で設定してください",
                           },
@@ -472,9 +545,7 @@ export const EditJobModal = ({
                               formValues.end_time &&
                               value != null
                             ) {
-                              const expiryDate = new Date(
-                                `${value}:00`
-                              );
+                              const expiryDate = new Date(`${value}:00`);
                               const startTime = new Date(
                                 `${formValues.work_date}T${formValues.start_time}:00`
                               );
@@ -506,10 +577,10 @@ export const EditJobModal = ({
                       disabled={isSubmitting}>
                       キャンセル
                     </Button>
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}>
-                      {(isSubmitting && job.status === watch('status')) ? "更新中..." : "更新する"}
+                    <Button type="submit" disabled={isSubmitting}>
+                      {isSubmitting && job.status === watch("status")
+                        ? "更新中..."
+                        : "更新する"}
                     </Button>
                     {job?.status === "DRAFT" && (
                       <Button
@@ -517,7 +588,9 @@ export const EditJobModal = ({
                         variant="default"
                         onClick={handlePublish}
                         disabled={isSubmitting}>
-                        {(isSubmitting && watch('status') === 'PUBLISHED') ? "公開中..." : "公開する"}
+                        {isSubmitting && watch("status") === "PUBLISHED"
+                          ? "公開中..."
+                          : "公開する"}
                       </Button>
                     )}
                   </div>

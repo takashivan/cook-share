@@ -15,10 +15,17 @@ import { Star } from "lucide-react";
 interface ChefReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (rating: number, comment: string) => void;
+  onSubmit: (
+    rating: number,
+    comment: string,
+    transportation_expenses: number | null
+  ) => void;
   storeName: string;
   jobTitle: string;
   jobDate: string;
+  transportation_type: "NONE" | "MAX" | "FIXED";
+  transportation_amount: number;
+  transportation_expenses?: number | null;
 }
 
 export function ChefReviewModal({
@@ -28,16 +35,57 @@ export function ChefReviewModal({
   storeName,
   jobTitle,
   jobDate,
+  transportation_type,
+  transportation_amount,
+  transportation_expenses: initialExpenses = null,
 }: ChefReviewModalProps) {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");
+  const [transportationExpenses, setTransportationExpenses] = useState<
+    number | ""
+  >(initialExpenses ?? "");
+  const [expenseError, setExpenseError] = useState<string>("");
+
+  // 入力時バリデーション
+  const handleExpensesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value === "" ? "" : Number(e.target.value);
+    setTransportationExpenses(value);
+    if (value === "" || isNaN(Number(value))) {
+      setExpenseError("交通費を入力してください");
+      return;
+    }
+    if (
+      transportation_type === "MAX" &&
+      Number(value) > transportation_amount
+    ) {
+      setExpenseError(
+        `交通費は上限${transportation_amount.toLocaleString()}円までです`
+      );
+      return;
+    }
+    if (
+      transportation_type === "FIXED" &&
+      Number(value) !== transportation_amount
+    ) {
+      setExpenseError(
+        `交通費は${transportation_amount.toLocaleString()}円で入力してください`
+      );
+      return;
+    }
+    setExpenseError("");
+  };
 
   const handleSubmit = () => {
     if (rating === 0) return;
-    onSubmit(rating, comment);
+    if (transportation_type !== "NONE") {
+      onSubmit(rating, comment, Number(transportationExpenses));
+    } else {
+      onSubmit(rating, comment, null);
+    }
     setRating(0);
     setComment("");
+    setTransportationExpenses(initialExpenses ?? "");
     onClose();
   };
 
@@ -57,6 +105,14 @@ export function ChefReviewModal({
             <h3 className="font-medium">{storeName}</h3>
             <p className="text-sm text-gray-500">{jobTitle}</p>
             <p className="text-sm text-gray-500">{jobDate}</p>
+            <div className="mt-2 text-sm">
+              <span className="font-semibold">交通費設定：</span>
+              {transportation_type === "NONE"
+                ? "交通費なし"
+                : transportation_type === "MAX"
+                ? `上限${transportation_amount.toLocaleString()}円`
+                : `${transportation_amount.toLocaleString()}円`}
+            </div>
           </div>
 
           <div className="mb-6">
@@ -95,6 +151,45 @@ export function ChefReviewModal({
             />
           </div>
 
+          {typeof transportation_type === "string" &&
+            (transportation_type === "MAX" ||
+              transportation_type === "FIXED") && (
+              <div className="mb-6">
+                <p className="text-sm font-medium mb-2">実際にかかった交通費</p>
+                <input
+                  type="number"
+                  min={0}
+                  max={
+                    transportation_type === "MAX"
+                      ? transportation_amount
+                      : undefined
+                  }
+                  value={transportationExpenses}
+                  onChange={handleExpensesChange}
+                  className="w-full border rounded-md p-2 text-sm bg-white"
+                  placeholder={
+                    transportation_type === "FIXED"
+                      ? `${transportation_amount.toLocaleString()}円で入力してください`
+                      : "金額を入力してください"
+                  }
+                />
+                {/* 上限・固定金額の表示 */}
+                {transportation_type === "MAX" && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    上限 {transportation_amount.toLocaleString()}円
+                  </p>
+                )}
+                {transportation_type === "FIXED" && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    固定 {transportation_amount.toLocaleString()}円
+                  </p>
+                )}
+                {expenseError && (
+                  <p className="text-red-500 text-xs mt-1">{expenseError}</p>
+                )}
+              </div>
+            )}
+
           <div className="bg-amber-50 p-3 rounded-md mb-4">
             <p className="text-sm text-amber-800">
               完了報告を送信すると、お店側の承認後に報酬が確定します。正確な情報を入力してください。
@@ -110,7 +205,10 @@ export function ChefReviewModal({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={rating === 0}
+            disabled={
+              rating === 0 ||
+              (transportation_type !== "NONE" && transportationExpenses === "")
+            }
             className="w-full sm:w-auto"
             style={{ backgroundColor: "#DB3F1C", color: "white" }}>
             送信する

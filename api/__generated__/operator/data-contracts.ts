@@ -448,6 +448,9 @@ export interface JobApprovePartialUpdateData {
     fee: number;
     /** @format timestamptz */
     expiry_date: number | null;
+    transportation_type: "NONE" | "MAX" | "FIXED";
+    /** @format int64 */
+    transportation_amount: number;
   };
   adminlog: {
     /** @format int64 */
@@ -518,6 +521,9 @@ export interface JobBanPartialUpdateData {
     fee: number;
     /** @format timestamptz */
     expiry_date: number | null;
+    transportation_type: "NONE" | "MAX" | "FIXED";
+    /** @format int64 */
+    transportation_amount: number;
   };
   adminlog: {
     /** @format int64 */
@@ -587,6 +593,9 @@ export interface JobsApprovePartialUpdateData {
     fee: number;
     /** @format timestamptz */
     expiry_date: number | null;
+    transportation_type: "NONE" | "MAX" | "FIXED";
+    /** @format int64 */
+    transportation_amount: number;
   };
   adminlog: {
     /** @format int64 */
@@ -656,6 +665,9 @@ export interface JobsBanPartialUpdateData {
     fee: number;
     /** @format timestamptz */
     expiry_date: number | null;
+    transportation_type: "NONE" | "MAX" | "FIXED";
+    /** @format int64 */
+    transportation_amount: number;
   };
   adminlog: {
     /** @format int64 */
@@ -734,7 +746,7 @@ export interface RestaurantApprovePartialUpdateData {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
-    status: "BANNED" | "PENDING" | "DELETED";
+    status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   };
   adminlog: {
     /** @format int64 */
@@ -788,7 +800,7 @@ export interface RestaurantBanPartialUpdateData {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
-    status: "BANNED" | "PENDING" | "DELETED";
+    status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   };
   adminlog: {
     /** @format int64 */
@@ -859,6 +871,9 @@ export interface RestaurantsApprovePartialUpdateData {
     fee: number;
     /** @format timestamptz */
     expiry_date: number | null;
+    transportation_type: "NONE" | "MAX" | "FIXED";
+    /** @format int64 */
+    transportation_amount: number;
   };
   adminlog: {
     /** @format int64 */
@@ -911,7 +926,7 @@ export interface RestaurantsBanPartialUpdateData {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
-    status: "BANNED" | "PENDING" | "DELETED";
+    status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   };
   adminlog: {
     /** @format int64 */
