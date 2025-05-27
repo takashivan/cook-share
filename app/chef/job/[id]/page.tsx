@@ -97,8 +97,6 @@ export default function JobDetail({ params }: PageProps) {
   const router = useRouter();
   const { user } = useAuth();
 
-  // ローディング状態の管理
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [isQrScanned, setIsQrScanned] = useState(false);
@@ -123,16 +121,12 @@ export default function JobDetail({ params }: PageProps) {
   const [selectedChangeRequest, setSelectedChangeRequest] =
     useState<JobChangeRequest | null>(null);
 
-  const { data: jobDetail, error: jobError } = useGetJob({ jobId: Number(id) });
-
-  useEffect(() => {
-    if (jobDetail || jobError) {
-      setIsLoading(false);
-    }
-    if (jobError) {
-      setError("ジョブの取得に失敗しました");
-    }
-  }, [jobDetail, jobError]);
+  // ジョブ詳細の取得
+  const {
+    data: jobDetail,
+    isLoading: isJobDetailLoading,
+    error: jobDetailError,
+  } = useGetJob({ jobId: Number(id) });
 
   const job = jobDetail?.job;
   const restaurant = jobDetail?.restaurant;
@@ -541,26 +535,22 @@ export default function JobDetail({ params }: PageProps) {
     }
   };
 
-  if (isLoading) {
+  if (jobDetailError || workSessionsError || unreadMessagesError || changeRequestsError) {
     return (
-      <div className="container mx-auto px-4 py-6 max-w-md">
-        <div className="flex items-center justify-center min-h-[200px]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-        </div>
+      <div className="flex px-4">
+        <ErrorPage />
       </div>
     );
   }
 
-  if (error || !job) {
+  if (isJobDetailLoading || isWorkSessionsLoading || isUnreadMessagesLoading || isChangeRequestsLoading
+    || !job || !workSessions || !unreadMessagesData || !changeRequests
+  ) {
     return (
-      <div className="container mx-auto px-4 py-6 max-w-md">
-        <div className="text-center text-red-600">
-          {error || "ジョブが見つかりませんでした"}
-        </div>
-        <div className="mt-4 text-center">
-          <Button onClick={() => router.back()}>戻る</Button>
-        </div>
-      </div>
+      <LoadingScreen
+        fullScreen={false}
+        message="お仕事詳細を読み込んでいます..."
+      />
     );
   }
 
@@ -836,24 +826,26 @@ export default function JobDetail({ params }: PageProps) {
         </AlertDialogContent>
       </AlertDialog>
 
-      <ChefReviewModal
-        isOpen={isReviewModalOpen}
-        workSessionStart={workSession?.check_in_time || 0}
-        workSessionEnd={job?.end_time || 0}
-        jobFee={job?.fee || 0}
-        onClose={() => setIsReviewModalOpen(false)}
-        onSubmit={handleCheckOut}
-        storeName={restaurant?.name || ""}
-        jobTitle={job?.title || ""}
-        jobDate={
-          job?.work_date
-            ? format(new Date(job.work_date), "yyyy年MM月dd日", { locale: ja })
-            : ""
-        }
-        transportation_type={job?.transportation_type || "NONE"}
-        transportation_amount={job?.transportation_amount || 0}
-        transportation_expenses={workSession?.transportation_expenses ?? null}
-      />
+      {workSession && job && workSession.check_in_time !== 0 && job.end_time !== 0 && (
+        <ChefReviewModal
+          isOpen={isReviewModalOpen}
+          workSessionStart={workSession.check_in_time}
+          workSessionEnd={job.end_time}
+          jobFee={job.fee || 0}
+          onClose={() => setIsReviewModalOpen(false)}
+          onSubmit={handleCheckOut}
+          storeName={restaurant?.name || ""}
+          jobTitle={job.title || ""}
+          jobDate={
+            job.work_date
+              ? format(new Date(job.work_date), "yyyy年MM月dd日", { locale: ja })
+              : ""
+          }
+          transportation_type={job.transportation_type || "NONE"}
+          transportation_amount={job.transportation_amount || 0}
+          transportation_expenses={workSession.transportation_expenses ?? null}
+        />
+      )}
 
       {workSession && (
         <ChatSheet

@@ -95,18 +95,26 @@ export function ChefReviewModal({
   };
 
   // 時間選択肢の生成（30分間隔）
-  const generateTimeOptions = () => {
-    const options = [];
+  const generateTimeOptions = (
+    workSessionStart: number,
+    workSessionEnd: number,
+  ): string[] => {
+    const options: string[] = [];
+
     const startDate = new Date(workSessionStart);
     const endDate = new Date(workSessionEnd);
 
-    // 開始時間から終了予定時間まで30分間隔で生成
-    for (
-      let time = new Date(startDate);
-      time <= endDate;
-      time.setMinutes(time.getMinutes() + 30)
-    ) {
+    // 入力チェック：無効な日付、逆転している日付を除外
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || startDate > endDate) {
+      return options;
+    }
+
+    console.log("Generating time options from", startDate, "to", endDate);
+
+    let time = new Date(startDate);
+    while (time <= endDate) {
       options.push(format(time, "HH:mm"));
+      time = new Date(time.getTime() + 30 * 60 * 1000); // 30分加算（ミリ秒単位）
     }
 
     return options;
@@ -163,7 +171,7 @@ export function ChefReviewModal({
                     <SelectValue placeholder="時間を選択" />
                   </SelectTrigger>
                   <SelectContent>
-                    {generateTimeOptions().map((time) => (
+                    {generateTimeOptions(workSessionStart, workSessionEnd).map((time) => (
                       <SelectItem key={time} value={time}>
                         {time}
                       </SelectItem>
