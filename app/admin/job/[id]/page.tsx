@@ -158,7 +158,7 @@ export default function JobDetail({ params }: PageParams) {
   } = useGetReviewsByUserId({
     userId: selectedWorkSession?.user_id ?? undefined,
   });
-  
+
   // この求人に対する、シェフからのレビューを取得
   const {
     data: restaurantReview,
@@ -166,7 +166,7 @@ export default function JobDetail({ params }: PageParams) {
     isLoading: restaurantReviewLoading,
   } = useGetRestaurantReviewByWorksessionId({
     worksessionId: selectedWorkSession?.id,
-  })
+  });
 
   // メッセージの取得
   const {
@@ -197,7 +197,13 @@ export default function JobDetail({ params }: PageParams) {
   } = useGetCompanyUserNotificationsByUserId({
     userId: user?.id,
   });
-  const targetNotificationIds = notifications?.filter(notification => notification.job_id === job?.id && !notification.is_read).map(notification => notification.id) ?? [];
+  const targetNotificationIds =
+    notifications
+      ?.filter(
+        (notification) =>
+          notification.job_id === job?.id && !notification.is_read
+      )
+      .map((notification) => notification.id) ?? [];
 
   const { trigger: updateJobTrigger } = useUpdateJob({
     jobId: Number(jobId),
@@ -231,10 +237,11 @@ export default function JobDetail({ params }: PageParams) {
   });
 
   // 通知の既読処理
-  const { trigger: markReadMultipleCompanyUserNotificationsTrigger } = useMarkReadMultipleCompanyUserNotifications({
-    companyUserNotificationIds: targetNotificationIds,
-    userId: user?.id,
-  })
+  const { trigger: markReadMultipleCompanyUserNotificationsTrigger } =
+    useMarkReadMultipleCompanyUserNotifications({
+      companyUserNotificationIds: targetNotificationIds,
+      userId: user?.id,
+    });
 
   // シェフが応募している場合は自動的に選択
   useEffect(() => {
@@ -336,6 +343,8 @@ export default function JobDetail({ params }: PageParams) {
         number_of_spots: job.number_of_spots || 1,
         fee: job.fee || 12000,
         expiry_date: job.expiry_date ? Number(job.expiry_date) : 0,
+        transportation_type: job.transportation_type || "",
+        transportation_amount: job.transportation_amount || 0,
       }
     : null;
 
@@ -637,19 +646,28 @@ ${changeRequest.reason}
                       variant="outline"
                       size="sm"
                       onClick={() => setIsEditJobModalOpen(true)}
-                      disabled={(workSessions && workSessions.length > 0) || (job?.status === "PUBLISHED" && job.expiry_date != null && job.expiry_date <= Date.now())}>
+                      disabled={
+                        (workSessions && workSessions.length > 0) ||
+                        (job?.status === "PUBLISHED" &&
+                          job.expiry_date != null &&
+                          job.expiry_date <= Date.now())
+                      }>
                       <Edit className="h-4 w-4" />
                       <span className="hidden sm:inline ml-2">編集</span>
                     </Button>
                   </span>
                 </TooltipTrigger>
-                {(job?.status === "FILLED" && selectedWorkSession?.status === "CANCELED_BY_CHEF")
-                  || (job?.status === "FILLED" && selectedWorkSession?.status === "CANCELED_BY_RESTAURANT")
-                  || (job?.status === "PUBLISHED" && job.expiry_date != null && job.expiry_date <= Date.now()) ?
+                {(job?.status === "FILLED" &&
+                  selectedWorkSession?.status === "CANCELED_BY_CHEF") ||
+                (job?.status === "FILLED" &&
+                  selectedWorkSession?.status === "CANCELED_BY_RESTAURANT") ||
+                (job?.status === "PUBLISHED" &&
+                  job.expiry_date != null &&
+                  job.expiry_date <= Date.now()) ? (
                   <TooltipContent>
                     <p>募集が終了しているため編集できません</p>
                   </TooltipContent>
-                : workSessions && workSessions.length > 0 ? (
+                ) : workSessions && workSessions.length > 0 ? (
                   <TooltipContent>
                     <p>応募があるため編集できません</p>
                   </TooltipContent>
@@ -672,12 +690,12 @@ ${changeRequest.reason}
             </h1>
 
             <div className="flex flex-wrap items-center gap-2 mt-2">
-              {job != null &&
+              {job != null && (
                 <JobStatusBadgeForAdmin
                   job={job}
                   lastWorksession={selectedWorkSession}
                 />
-              }
+              )}
               <Badge variant="outline" className="text-sm bg-white">
                 {job?.work_date
                   ? format(new Date(job.work_date), "MM/dd")
@@ -698,7 +716,9 @@ ${changeRequest.reason}
           {restaurantReview && (
             <div className="md:w-1/2 w-full border rounded-lg py-2 px-3 bg-white">
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-sm font-semibold">シェフからのレビュー</span>
+                <span className="text-sm font-semibold">
+                  シェフからのレビュー
+                </span>
                 <div className="flex">
                   {[...Array(5)].map((_, i) => (
                     <FaStar
@@ -730,7 +750,6 @@ ${changeRequest.reason}
             </div>
           )}
         </div>
-
       </div>
       {/* メインコンテンツ */}{" "}
       <div className="grid grid-cols-1 gap-6">
@@ -907,8 +926,7 @@ ${changeRequest.reason}
                         className="h-8 w-8 sm:h-9 sm:w-auto sm:px-3 p-0"
                         onClick={() => {
                           setIsQrDialogOpen(true);
-                        }}
-                      >
+                        }}>
                         <QrCode className="h-4 w-4" />
                         <span className="hidden sm:inline ml-2">
                           チェックインQR
@@ -923,7 +941,7 @@ ${changeRequest.reason}
                           id: selectedWorkSession.id.toString(),
                           check_in_code: selectedWorkSession.check_in_code,
                           chefName: selectedWorkSession.user.name,
-                          restaurantName: restaurant?.name ?? '',
+                          restaurantName: restaurant?.name ?? "",
                         }}
                       />
 
@@ -1182,16 +1200,18 @@ ${changeRequest.reason}
           )}
         </Card>
       </div>
-      {selectedWorkSession &&
+      {selectedWorkSession && (
         <>
           <RestaurantReviewModal
             isOpen={isReviewModalOpen}
             onCloseAction={() => setIsReviewModalOpen(false)}
             worksessionData={{
               id: selectedWorkSession.id,
+              transportation_expenses:
+                selectedWorkSession.transportation_expenses ?? undefined,
               user: {
                 name: selectedWorkSession.user.name,
-                profile_image: selectedWorkSession.user.profile_image
+                profile_image: selectedWorkSession.user.profile_image,
               },
               job: {
                 id: selectedWorkSession.job.id,
@@ -1217,7 +1237,7 @@ ${changeRequest.reason}
             worksessionId={selectedWorkSession?.id}
           />
         </>
-      }
+      )}
       {formattedJob && (
         <EditJobModal
           isOpen={isEditJobModalOpen}

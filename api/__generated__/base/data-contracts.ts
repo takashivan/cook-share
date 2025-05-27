@@ -247,6 +247,9 @@ export type GetApplication2Data = {
     fee: number;
     /** @format timestamptz */
     expiry_date: number | null;
+    transportation_type: "NONE" | "MAX" | "FIXED";
+    /** @format int64 */
+    transportation_amount: number;
     _restaurant: {
       /** @format int64 */
       id: number;
@@ -275,7 +278,7 @@ export type GetApplication2Data = {
       restaurant_cuisine_id: number[];
       description: string;
       phone: string;
-      status: "BANNED" | "PENDING" | "DELETED";
+      status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
     };
   };
 }[];
@@ -452,7 +455,8 @@ export interface WorksessionsListData {
       | "DISPUTE"
       | "ESCALATED"
       | "PAID"
-      | "CANCELED";
+      | "CANCELED"
+      | "VERIFY_REJECTED";
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
@@ -475,6 +479,11 @@ export interface WorksessionsListData {
     start_time: number | null;
     /** @format int64 */
     check_in_code: number | null;
+    /** @format int64 */
+    transportation_expenses: number | null;
+    /** @format int64 */
+    actual_fee: number;
+    transportation_type: "FIXED" | "NONE" | "MAX";
   };
   messages: {
     /** @format int64 */
@@ -1274,7 +1283,8 @@ export interface BySessionDetailData {
       | "DISPUTE"
       | "ESCALATED"
       | "PAID"
-      | "CANCELED";
+      | "CANCELED"
+      | "VERIFY_REJECTED";
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
@@ -1297,6 +1307,11 @@ export interface BySessionDetailData {
     start_time: number | null;
     /** @format int64 */
     check_in_code: number | null;
+    /** @format int64 */
+    transportation_expenses: number | null;
+    /** @format int64 */
+    actual_fee: number;
+    transportation_type: "FIXED" | "NONE" | "MAX";
   };
   restaurant: {
     /** @format int64 */
@@ -1326,7 +1341,7 @@ export interface BySessionDetailData {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
-    status: "BANNED" | "PENDING" | "DELETED";
+    status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   };
   user: {
     /** @format uuid */
@@ -1438,7 +1453,7 @@ export type ByUserDetailResult = {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
-    status: "BANNED" | "PENDING" | "DELETED";
+    status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   };
 }[];
 
@@ -1946,7 +1961,7 @@ export type RestaurantsListData = {
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
-  status: "BANNED" | "PENDING" | "DELETED";
+  status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
 }[];
 
 export interface StripeCustomersCreatePayload {
@@ -2393,7 +2408,8 @@ export interface DashboardListData {
         | "DISPUTE"
         | "ESCALATED"
         | "PAID"
-        | "CANCELED";
+        | "CANCELED"
+        | "VERIFY_REJECTED";
       job: {
         title: string;
         /** @format date */
@@ -2427,7 +2443,8 @@ export interface DashboardListData {
       | "DISPUTE"
       | "ESCALATED"
       | "PAID"
-      | "CANCELED";
+      | "CANCELED"
+      | "VERIFY_REJECTED";
     /** @format uuid */
     user_id: string | null;
     /** @format int64 */
@@ -2474,7 +2491,8 @@ export interface DashboardListData {
       | "DISPUTE"
       | "ESCALATED"
       | "PAID"
-      | "CANCELED";
+      | "CANCELED"
+      | "VERIFY_REJECTED";
     /** @format int64 */
     restaurant_id: number;
     /** @format int64 */
@@ -2538,7 +2556,7 @@ export type RestaurantsListResult = {
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
-  status: "BANNED" | "PENDING" | "DELETED";
+  status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
 }[];
 
 export interface WorksessionsMessagesListData {
@@ -2883,6 +2901,9 @@ export interface AcceptPartialUpdateOutput {
     fee: number;
     /** @format timestamptz */
     expiry_date: number | null;
+    transportation_type: "NONE" | "MAX" | "FIXED";
+    /** @format int64 */
+    transportation_amount: number;
   };
 }
 
@@ -3135,7 +3156,7 @@ export interface QueryUpcomingjobsListData {
       }[];
       description: string;
       phone: string;
-      status: "BANNED" | "PENDING" | "DELETED";
+      status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
     };
   }[];
 }
@@ -3227,7 +3248,7 @@ export interface QueryUpcomingListData {
       }[];
       description: string;
       phone: string;
-      status: "BANNED" | "PENDING" | "DELETED";
+      status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
     };
   }[];
 }
@@ -3277,6 +3298,9 @@ export type RestaurantDetailData = {
   fee: number;
   /** @format timestamptz */
   expiry_date: number | null;
+  transportation_type: "NONE" | "MAX" | "FIXED";
+  /** @format int64 */
+  transportation_amount: number;
 }[];
 
 export type DeleteJobData = object;
@@ -3327,6 +3351,9 @@ export interface GetJobData {
     fee: number;
     /** @format timestamptz */
     expiry_date: number | null;
+    transportation_type: "NONE" | "MAX" | "FIXED";
+    /** @format int64 */
+    transportation_amount: number;
   };
   restaurant: {
     /** @format int64 */
@@ -3356,7 +3383,7 @@ export interface GetJobData {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
-    status: "BANNED" | "PENDING" | "DELETED";
+    status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   };
 }
 
@@ -3398,6 +3425,9 @@ export interface PatchJobPayload {
   fee: number;
   /** @format timestamptz */
   expiry_date: number | null;
+  transportation_type: "NONE" | "MAX" | "FIXED";
+  /** @format int64 */
+  transportation_amount: number;
 }
 
 export interface PatchJobData {
@@ -3445,6 +3475,9 @@ export interface PatchJobData {
   fee: number;
   /** @format timestamptz */
   expiry_date: number | null;
+  transportation_type: "NONE" | "MAX" | "FIXED";
+  /** @format int64 */
+  transportation_amount: number;
 }
 
 export interface QueryUpcomingListResult {
@@ -3534,7 +3567,7 @@ export interface QueryUpcomingListResult {
       }[];
       description: string;
       phone: string;
-      status: "BANNED" | "PENDING" | "DELETED";
+      status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
     };
   }[];
 }
@@ -3654,7 +3687,8 @@ export type WorksessionsRestaurantTodosListData = {
     | "DISPUTE"
     | "ESCALATED"
     | "PAID"
-    | "CANCELED";
+    | "CANCELED"
+    | "VERIFY_REJECTED";
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
@@ -3677,6 +3711,11 @@ export type WorksessionsRestaurantTodosListData = {
   start_time: number | null;
   /** @format int64 */
   check_in_code: number | null;
+  /** @format int64 */
+  transportation_expenses: number | null;
+  /** @format int64 */
+  actual_fee: number;
+  transportation_type: "FIXED" | "NONE" | "MAX";
   user: {
     /** @format uuid */
     id: string;
@@ -3783,6 +3822,9 @@ export type WorksessionsRestaurantTodosListData = {
     fee: number;
     /** @format timestamptz */
     expiry_date: number | null;
+    transportation_type: "NONE" | "MAX" | "FIXED";
+    /** @format int64 */
+    transportation_amount: number;
   };
 }[];
 
@@ -3831,6 +3873,9 @@ export interface JobsDeleteData {
   fee: number;
   /** @format timestamptz */
   expiry_date: number | null;
+  transportation_type: "NONE" | "MAX" | "FIXED";
+  /** @format int64 */
+  transportation_amount: number;
 }
 
 export interface JobsDetailData {
@@ -3879,6 +3924,9 @@ export interface JobsDetailData {
     fee: number;
     /** @format timestamptz */
     expiry_date: number | null;
+    transportation_type: "NONE" | "MAX" | "FIXED";
+    /** @format int64 */
+    transportation_amount: number;
   };
   restaurant: {
     /** @format int64 */
@@ -3908,7 +3956,7 @@ export interface JobsDetailData {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
-    status: "BANNED" | "PENDING" | "DELETED";
+    status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   };
 }
 
@@ -3943,6 +3991,9 @@ export interface JobsPartialUpdatePayload {
   fee: number;
   /** @format timestamptz */
   expiry_date: number | null;
+  transportation_type: "NONE" | "MAX" | "FIXED";
+  /** @format int64 */
+  transportation_amount: number;
 }
 
 export interface JobsPartialUpdateData {
@@ -3990,6 +4041,9 @@ export interface JobsPartialUpdateData {
   fee: number;
   /** @format timestamptz */
   expiry_date: number | null;
+  transportation_type: "NONE" | "MAX" | "FIXED";
+  /** @format int64 */
+  transportation_amount: number;
 }
 
 export interface JobsListResult {
@@ -4066,7 +4120,7 @@ export interface JobsListResult {
       restaurant_cuisine_id: number[];
       description: string;
       phone: string;
-      status: "BANNED" | "PENDING" | "DELETED";
+      status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
       cuisine_category: {
         "0": {
           /** @format int64 */
@@ -4118,6 +4172,9 @@ export interface JobsCreatePayload {
   fee: number;
   /** @format timestamptz */
   expiry_date: number | null;
+  transportation_type: "NONE" | "MAX" | "FIXED";
+  /** @format int64 */
+  transportation_amount: number;
 }
 
 export interface JobsCreateData {
@@ -4165,6 +4222,9 @@ export interface JobsCreateData {
   fee: number;
   /** @format timestamptz */
   expiry_date: number | null;
+  transportation_type: "NONE" | "MAX" | "FIXED";
+  /** @format int64 */
+  transportation_amount: number;
 }
 
 export interface GetJob2Data {
@@ -4241,7 +4301,7 @@ export interface GetJob2Data {
       restaurant_cuisine_id: number[];
       description: string;
       phone: string;
-      status: "BANNED" | "PENDING" | "DELETED";
+      status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
       cuisine_category: {
         "0": {
           /** @format int64 */
@@ -4298,6 +4358,9 @@ export interface PostJobPayload {
   fee: number;
   /** @format timestamptz */
   expiry_date: number | null;
+  transportation_type: "NONE" | "MAX" | "FIXED";
+  /** @format int64 */
+  transportation_amount: number;
 }
 
 export interface PostJobData {
@@ -4345,6 +4408,9 @@ export interface PostJobData {
   fee: number;
   /** @format timestamptz */
   expiry_date: number | null;
+  transportation_type: "NONE" | "MAX" | "FIXED";
+  /** @format int64 */
+  transportation_amount: number;
 }
 
 export interface WorksessionDetailData {
@@ -4786,7 +4852,7 @@ export type CompanyDetailOutput = {
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
-  status: "BANNED" | "PENDING" | "DELETED";
+  status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
 }[];
 
 export type CompanyusersClone0ListData = object;
@@ -4936,7 +5002,7 @@ export interface RestaurantDetailResult {
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
-  status: "BANNED" | "PENDING" | "DELETED";
+  status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
 }
 
 export interface RestaurantPartialUpdatePayload {
@@ -4960,7 +5026,7 @@ export interface RestaurantPartialUpdatePayload {
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
-  status: "BANNED" | "PENDING" | "DELETED";
+  status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   /** @format binary */
   photo: File | null;
 }
@@ -5014,7 +5080,7 @@ export type ByChefDetailData = {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
-    status: "BANNED" | "PENDING" | "DELETED";
+    status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   };
 }[];
 
@@ -5143,7 +5209,8 @@ export interface BySessionDetailResult {
       | "DISPUTE"
       | "ESCALATED"
       | "PAID"
-      | "CANCELED";
+      | "CANCELED"
+      | "VERIFY_REJECTED";
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
@@ -5166,6 +5233,11 @@ export interface BySessionDetailResult {
     start_time: number | null;
     /** @format int64 */
     check_in_code: number | null;
+    /** @format int64 */
+    transportation_expenses: number | null;
+    /** @format int64 */
+    actual_fee: number;
+    transportation_type: "FIXED" | "NONE" | "MAX";
   };
   user: {
     /** @format uuid */
@@ -5256,7 +5328,7 @@ export interface BySessionDetailResult {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
-    status: "BANNED" | "PENDING" | "DELETED";
+    status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   };
 }
 
@@ -5863,6 +5935,9 @@ export type JobsListOutput = {
   fee: number;
   /** @format timestamptz */
   expiry_date: number | null;
+  transportation_type: "NONE" | "MAX" | "FIXED";
+  /** @format int64 */
+  transportation_amount: number;
 }[];
 
 export type RestaurantReviewsListResult = {
@@ -5996,7 +6071,7 @@ export interface RestaurantsDeleteData {
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
-  status: "BANNED" | "PENDING" | "DELETED";
+  status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
 }
 
 export interface RestaurantsDetailData {
@@ -6027,7 +6102,7 @@ export interface RestaurantsDetailData {
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
-  status: "BANNED" | "PENDING" | "DELETED";
+  status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
 }
 
 export interface RestaurantsPartialUpdatePayload {
@@ -6051,7 +6126,7 @@ export interface RestaurantsPartialUpdatePayload {
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
-  status: "BANNED" | "PENDING" | "DELETED";
+  status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   /** @format binary */
   photo: File | null;
 }
@@ -6080,7 +6155,7 @@ export type RestaurantsListOutput = {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
-    status: "BANNED" | "PENDING" | "DELETED";
+    status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
     /** @format int64 */
     id: number;
     /**
@@ -6115,7 +6190,7 @@ export interface RestaurantsCreatePayload {
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
-  status: "BANNED" | "PENDING" | "DELETED";
+  status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   /** @format binary */
   photo: File | null;
 }
@@ -6144,7 +6219,7 @@ export type RestaurantListData = {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
-    status: "BANNED" | "PENDING" | "DELETED";
+    status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
     /** @format int64 */
     id: number;
     /**
@@ -6179,7 +6254,7 @@ export interface RestaurantCreatePayload {
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
-  status: "BANNED" | "PENDING" | "DELETED";
+  status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   /** @format binary */
   photo: File | null;
 }
@@ -6418,7 +6493,8 @@ export type SessionHistoryCurrentListData = {
     | "DISPUTE"
     | "ESCALATED"
     | "PAID"
-    | "CANCELED";
+    | "CANCELED"
+    | "VERIFY_REJECTED";
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
@@ -6441,6 +6517,11 @@ export type SessionHistoryCurrentListData = {
   start_time: number | null;
   /** @format int64 */
   check_in_code: number | null;
+  /** @format int64 */
+  transportation_expenses: number | null;
+  /** @format int64 */
+  actual_fee: number;
+  transportation_type: "FIXED" | "NONE" | "MAX";
   restaurant: {
     /** @format int64 */
     id: number;
@@ -6469,7 +6550,7 @@ export type SessionHistoryCurrentListData = {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
-    status: "BANNED" | "PENDING" | "DELETED";
+    status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   };
   job: {
     /** @format int64 */
@@ -6516,6 +6597,9 @@ export type SessionHistoryCurrentListData = {
     fee: number;
     /** @format timestamptz */
     expiry_date: number | null;
+    transportation_type: "NONE" | "MAX" | "FIXED";
+    /** @format int64 */
+    transportation_amount: number;
   };
 }[];
 
@@ -6895,7 +6979,7 @@ export type ChefReviewsListResult = {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
-    status: "BANNED" | "PENDING" | "DELETED";
+    status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   };
 }[];
 
@@ -6965,7 +7049,7 @@ export type RestaurantReviewsListOutput = {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
-    status: "BANNED" | "PENDING" | "DELETED";
+    status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   };
 }[];
 
@@ -7016,7 +7100,7 @@ export type ReviewsListResult = {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
-    status: "BANNED" | "PENDING" | "DELETED";
+    status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   };
 }[];
 
@@ -7044,7 +7128,8 @@ export type SessionHistoryCurrentListResult = {
     | "DISPUTE"
     | "ESCALATED"
     | "PAID"
-    | "CANCELED";
+    | "CANCELED"
+    | "VERIFY_REJECTED";
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
@@ -7067,6 +7152,11 @@ export type SessionHistoryCurrentListResult = {
   start_time: number | null;
   /** @format int64 */
   check_in_code: number | null;
+  /** @format int64 */
+  transportation_expenses: number | null;
+  /** @format int64 */
+  actual_fee: number;
+  transportation_type: "FIXED" | "NONE" | "MAX";
   restaurant: {
     /** @format int64 */
     id: number;
@@ -7095,7 +7185,7 @@ export type SessionHistoryCurrentListResult = {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
-    status: "BANNED" | "PENDING" | "DELETED";
+    status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   };
   job: {
     /** @format int64 */
@@ -7142,6 +7232,9 @@ export type SessionHistoryCurrentListResult = {
     fee: number;
     /** @format timestamptz */
     expiry_date: number | null;
+    transportation_type: "NONE" | "MAX" | "FIXED";
+    /** @format int64 */
+    transportation_amount: number;
   };
 }[];
 
@@ -7173,7 +7266,8 @@ export type WorksessionsUserTodosListData = {
     | "DISPUTE"
     | "ESCALATED"
     | "PAID"
-    | "CANCELED";
+    | "CANCELED"
+    | "VERIFY_REJECTED";
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
@@ -7196,6 +7290,11 @@ export type WorksessionsUserTodosListData = {
   start_time: number | null;
   /** @format int64 */
   check_in_code: number | null;
+  /** @format int64 */
+  transportation_expenses: number | null;
+  /** @format int64 */
+  actual_fee: number;
+  transportation_type: "FIXED" | "NONE" | "MAX";
   job: {
     /** @format int64 */
     id: number;
@@ -7241,6 +7340,9 @@ export type WorksessionsUserTodosListData = {
     fee: number;
     /** @format timestamptz */
     expiry_date: number | null;
+    transportation_type: "NONE" | "MAX" | "FIXED";
+    /** @format int64 */
+    transportation_amount: number;
     restaurant: {
       /** @format int64 */
       id: number;
@@ -7269,7 +7371,7 @@ export type WorksessionsUserTodosListData = {
       restaurant_cuisine_id: number[];
       description: string;
       phone: string;
-      status: "BANNED" | "PENDING" | "DELETED";
+      status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
     };
   };
 }[];
@@ -7336,7 +7438,8 @@ export type WorksessionsListResult = {
     | "DISPUTE"
     | "ESCALATED"
     | "PAID"
-    | "CANCELED";
+    | "CANCELED"
+    | "VERIFY_REJECTED";
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
@@ -7359,6 +7462,11 @@ export type WorksessionsListResult = {
   start_time: number | null;
   /** @format int64 */
   check_in_code: number | null;
+  /** @format int64 */
+  transportation_expenses: number | null;
+  /** @format int64 */
+  actual_fee: number;
+  transportation_type: "FIXED" | "NONE" | "MAX";
   job: {
     /** @format int64 */
     id: number;
@@ -7404,6 +7512,9 @@ export type WorksessionsListResult = {
     fee: number;
     /** @format timestamptz */
     expiry_date: number | null;
+    transportation_type: "NONE" | "MAX" | "FIXED";
+    /** @format int64 */
+    transportation_amount: number;
     restaurant: {
       /** @format int64 */
       id: number;
@@ -7432,7 +7543,7 @@ export type WorksessionsListResult = {
       restaurant_cuisine_id: number[];
       description: string;
       phone: string;
-      status: "BANNED" | "PENDING" | "DELETED";
+      status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
     };
   };
 }[];
@@ -7927,7 +8038,8 @@ export interface ApplicationDetailResult {
       | "DISPUTE"
       | "ESCALATED"
       | "PAID"
-      | "CANCELED";
+      | "CANCELED"
+      | "VERIFY_REJECTED";
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
@@ -7950,6 +8062,11 @@ export interface ApplicationDetailResult {
     start_time: number | null;
     /** @format int64 */
     check_in_code: number | null;
+    /** @format int64 */
+    transportation_expenses: number | null;
+    /** @format int64 */
+    actual_fee: number;
+    transportation_type: "FIXED" | "NONE" | "MAX";
   };
   messages: {
     /** @format int64 */
@@ -8004,7 +8121,8 @@ export type RestaurantTodoDetailData = {
     | "DISPUTE"
     | "ESCALATED"
     | "PAID"
-    | "CANCELED";
+    | "CANCELED"
+    | "VERIFY_REJECTED";
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
@@ -8027,6 +8145,11 @@ export type RestaurantTodoDetailData = {
   start_time: number | null;
   /** @format int64 */
   check_in_code: number | null;
+  /** @format int64 */
+  transportation_expenses: number | null;
+  /** @format int64 */
+  actual_fee: number;
+  transportation_type: "FIXED" | "NONE" | "MAX";
   user: {
     /** @format uuid */
     id: string;
@@ -8133,6 +8256,9 @@ export type RestaurantTodoDetailData = {
     fee: number;
     /** @format timestamptz */
     expiry_date: number | null;
+    transportation_type: "NONE" | "MAX" | "FIXED";
+    /** @format int64 */
+    transportation_amount: number;
   };
 }[];
 
@@ -8160,7 +8286,8 @@ export type UserDetailResult = {
     | "DISPUTE"
     | "ESCALATED"
     | "PAID"
-    | "CANCELED";
+    | "CANCELED"
+    | "VERIFY_REJECTED";
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
@@ -8183,6 +8310,11 @@ export type UserDetailResult = {
   start_time: number | null;
   /** @format int64 */
   check_in_code: number | null;
+  /** @format int64 */
+  transportation_expenses: number | null;
+  /** @format int64 */
+  actual_fee: number;
+  transportation_type: "FIXED" | "NONE" | "MAX";
   job: {
     /** @format int64 */
     id: number;
@@ -8228,6 +8360,9 @@ export type UserDetailResult = {
     fee: number;
     /** @format timestamptz */
     expiry_date: number | null;
+    transportation_type: "NONE" | "MAX" | "FIXED";
+    /** @format int64 */
+    transportation_amount: number;
     restaurant: {
       /** @format int64 */
       id: number;
@@ -8256,7 +8391,7 @@ export type UserDetailResult = {
       restaurant_cuisine_id: number[];
       description: string;
       phone: string;
-      status: "BANNED" | "PENDING" | "DELETED";
+      status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
     };
   };
 }[];
@@ -8285,7 +8420,8 @@ export type UserTodoDetailData = {
     | "DISPUTE"
     | "ESCALATED"
     | "PAID"
-    | "CANCELED";
+    | "CANCELED"
+    | "VERIFY_REJECTED";
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
@@ -8308,6 +8444,11 @@ export type UserTodoDetailData = {
   start_time: number | null;
   /** @format int64 */
   check_in_code: number | null;
+  /** @format int64 */
+  transportation_expenses: number | null;
+  /** @format int64 */
+  actual_fee: number;
+  transportation_type: "FIXED" | "NONE" | "MAX";
   job: {
     /** @format int64 */
     id: number;
@@ -8353,6 +8494,9 @@ export type UserTodoDetailData = {
     fee: number;
     /** @format timestamptz */
     expiry_date: number | null;
+    transportation_type: "NONE" | "MAX" | "FIXED";
+    /** @format int64 */
+    transportation_amount: number;
     restaurant: {
       /** @format int64 */
       id: number;
@@ -8381,7 +8525,7 @@ export type UserTodoDetailData = {
       restaurant_cuisine_id: number[];
       description: string;
       phone: string;
-      status: "BANNED" | "PENDING" | "DELETED";
+      status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
     };
   };
 }[];
@@ -8419,7 +8563,8 @@ export interface FinishPartialUpdateData {
       | "DISPUTE"
       | "ESCALATED"
       | "PAID"
-      | "CANCELED";
+      | "CANCELED"
+      | "VERIFY_REJECTED";
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
@@ -8442,6 +8587,11 @@ export interface FinishPartialUpdateData {
     start_time: number | null;
     /** @format int64 */
     check_in_code: number | null;
+    /** @format int64 */
+    transportation_expenses: number | null;
+    /** @format int64 */
+    actual_fee: number;
+    transportation_type: "FIXED" | "NONE" | "MAX";
   };
   review: {
     /** @format int64 */
@@ -8494,7 +8644,8 @@ export interface StartPartialUpdateData {
     | "DISPUTE"
     | "ESCALATED"
     | "PAID"
-    | "CANCELED";
+    | "CANCELED"
+    | "VERIFY_REJECTED";
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
@@ -8517,6 +8668,11 @@ export interface StartPartialUpdateData {
   start_time: number | null;
   /** @format int64 */
   check_in_code: number | null;
+  /** @format int64 */
+  transportation_expenses: number | null;
+  /** @format int64 */
+  actual_fee: number;
+  transportation_type: "FIXED" | "NONE" | "MAX";
 }
 
 export interface VerifyPartialUpdatePayload {
@@ -8550,7 +8706,8 @@ export interface VerifyPartialUpdateData {
       | "DISPUTE"
       | "ESCALATED"
       | "PAID"
-      | "CANCELED";
+      | "CANCELED"
+      | "VERIFY_REJECTED";
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
@@ -8573,6 +8730,11 @@ export interface VerifyPartialUpdateData {
     start_time: number | null;
     /** @format int64 */
     check_in_code: number | null;
+    /** @format int64 */
+    transportation_expenses: number | null;
+    /** @format int64 */
+    actual_fee: number;
+    transportation_type: "FIXED" | "NONE" | "MAX";
   };
   review: {
     /** @format int64 */
@@ -8622,7 +8784,8 @@ export interface WorksessionDetailResult {
     | "DISPUTE"
     | "ESCALATED"
     | "PAID"
-    | "CANCELED";
+    | "CANCELED"
+    | "VERIFY_REJECTED";
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
@@ -8645,6 +8808,11 @@ export interface WorksessionDetailResult {
   start_time: number | null;
   /** @format int64 */
   check_in_code: number | null;
+  /** @format int64 */
+  transportation_expenses: number | null;
+  /** @format int64 */
+  actual_fee: number;
+  transportation_type: "FIXED" | "NONE" | "MAX";
 }
 
 export interface WorksessionPartialUpdatePayload {
@@ -8664,7 +8832,8 @@ export interface WorksessionPartialUpdatePayload {
     | "DISPUTE"
     | "ESCALATED"
     | "PAID"
-    | "CANCELED";
+    | "CANCELED"
+    | "VERIFY_REJECTED";
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
@@ -8687,6 +8856,11 @@ export interface WorksessionPartialUpdatePayload {
   start_time: number | null;
   /** @format int64 */
   check_in_code: number | null;
+  /** @format int64 */
+  transportation_expenses: number | null;
+  /** @format int64 */
+  actual_fee: number;
+  transportation_type: "FIXED" | "NONE" | "MAX";
 }
 
 export interface WorksessionPartialUpdateData {
@@ -8713,7 +8887,8 @@ export interface WorksessionPartialUpdateData {
     | "DISPUTE"
     | "ESCALATED"
     | "PAID"
-    | "CANCELED";
+    | "CANCELED"
+    | "VERIFY_REJECTED";
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
@@ -8736,6 +8911,11 @@ export interface WorksessionPartialUpdateData {
   start_time: number | null;
   /** @format int64 */
   check_in_code: number | null;
+  /** @format int64 */
+  transportation_expenses: number | null;
+  /** @format int64 */
+  actual_fee: number;
+  transportation_type: "FIXED" | "NONE" | "MAX";
 }
 
 export interface CancelByChefPartialUpdatePayload {
@@ -8767,7 +8947,8 @@ export interface CancelByChefPartialUpdateData {
       | "DISPUTE"
       | "ESCALATED"
       | "PAID"
-      | "CANCELED";
+      | "CANCELED"
+      | "VERIFY_REJECTED";
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
@@ -8790,6 +8971,11 @@ export interface CancelByChefPartialUpdateData {
     start_time: number | null;
     /** @format int64 */
     check_in_code: number | null;
+    /** @format int64 */
+    transportation_expenses: number | null;
+    /** @format int64 */
+    actual_fee: number;
+    transportation_type: "FIXED" | "NONE" | "MAX";
   };
   cancel_log: {
     /** @format uuid */
@@ -8863,6 +9049,9 @@ export interface CancelByChefPartialUpdateData {
     fee: number;
     /** @format timestamptz */
     expiry_date: number | null;
+    transportation_type: "NONE" | "MAX" | "FIXED";
+    /** @format int64 */
+    transportation_amount: number;
   };
   x1: string;
 }
@@ -8896,7 +9085,8 @@ export interface CancelByRestaurantPartialUpdateData {
       | "DISPUTE"
       | "ESCALATED"
       | "PAID"
-      | "CANCELED";
+      | "CANCELED"
+      | "VERIFY_REJECTED";
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
@@ -8919,6 +9109,11 @@ export interface CancelByRestaurantPartialUpdateData {
     start_time: number | null;
     /** @format int64 */
     check_in_code: number | null;
+    /** @format int64 */
+    transportation_expenses: number | null;
+    /** @format int64 */
+    actual_fee: number;
+    transportation_type: "FIXED" | "NONE" | "MAX";
   };
   cancel_log: {
     /** @format uuid */
@@ -8972,6 +9167,8 @@ export interface FinishPartialUpdateBody {
   feedback: string;
   /** @format timestamptz */
   check_out_time: number | null;
+  /** @format int64 */
+  transportation_expenses: number | null;
 }
 
 export interface FinishPartialUpdateResult {
@@ -8999,7 +9196,8 @@ export interface FinishPartialUpdateResult {
       | "DISPUTE"
       | "ESCALATED"
       | "PAID"
-      | "CANCELED";
+      | "CANCELED"
+      | "VERIFY_REJECTED";
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
@@ -9022,6 +9220,11 @@ export interface FinishPartialUpdateResult {
     start_time: number | null;
     /** @format int64 */
     check_in_code: number | null;
+    /** @format int64 */
+    transportation_expenses: number | null;
+    /** @format int64 */
+    actual_fee: number;
+    transportation_type: "FIXED" | "NONE" | "MAX";
   };
   review: {
     /** @format int64 */
@@ -9122,7 +9325,8 @@ export interface NoShowPartialUpdateData {
       | "DISPUTE"
       | "ESCALATED"
       | "PAID"
-      | "CANCELED";
+      | "CANCELED"
+      | "VERIFY_REJECTED";
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
@@ -9145,6 +9349,11 @@ export interface NoShowPartialUpdateData {
     start_time: number | null;
     /** @format int64 */
     check_in_code: number | null;
+    /** @format int64 */
+    transportation_expenses: number | null;
+    /** @format int64 */
+    actual_fee: number;
+    transportation_type: "FIXED" | "NONE" | "MAX";
   };
   cancel_log: {
     /** @format uuid */
@@ -9173,6 +9382,68 @@ export interface NoShowPartialUpdateData {
     /** @format int64 */
     worksession_id: number;
   };
+}
+
+export interface RejectPartialUpdateInput {
+  reason: string;
+}
+
+export interface RejectPartialUpdateOutput {
+  result1: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format timestamptz */
+    check_in_time: number;
+    /** @format timestamptz */
+    check_out_time: number;
+    total_hours: number;
+    location_data: string;
+    status:
+      | "SCHEDULED"
+      | "IN_PROGRESS"
+      | "CANCELED_BY_CHEF"
+      | "CANCELED_BY_RESTAURANT"
+      | "COMPLETED"
+      | "VERIFIED"
+      | "DISPUTE"
+      | "ESCALATED"
+      | "PAID"
+      | "CANCELED"
+      | "VERIFY_REJECTED";
+    /** @format timestamptz */
+    updated_at: number;
+    /** @format uuid */
+    application_id: string | null;
+    /** @format uuid */
+    user_id: string | null;
+    /** @format int64 */
+    restaurant_id: number;
+    /** @format int64 */
+    job_id: number;
+    /** @format int64 */
+    paid_amount: number;
+    chef_feedback: string;
+    restaurant_feedback: string;
+    /** @format int64 */
+    chef_rating: number;
+    /** @format int64 */
+    restaurant_rating: number;
+    /** @format timestamptz */
+    start_time: number | null;
+    /** @format int64 */
+    check_in_code: number | null;
+    /** @format int64 */
+    transportation_expenses: number | null;
+    /** @format int64 */
+    actual_fee: number;
+    transportation_type: "FIXED" | "NONE" | "MAX";
+  };
+  review: string;
 }
 
 export interface RestaurantReviewListResult {
@@ -9218,7 +9489,8 @@ export interface RestaurantReviewListResult {
       | "DISPUTE"
       | "ESCALATED"
       | "PAID"
-      | "CANCELED";
+      | "CANCELED"
+      | "VERIFY_REJECTED";
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
@@ -9241,6 +9513,11 @@ export interface RestaurantReviewListResult {
     start_time: number | null;
     /** @format int64 */
     check_in_code: number | null;
+    /** @format int64 */
+    transportation_expenses: number | null;
+    /** @format int64 */
+    actual_fee: number;
+    transportation_type: "FIXED" | "NONE" | "MAX";
   };
   user: {
     /** @format uuid */
@@ -9331,7 +9608,7 @@ export interface RestaurantReviewListResult {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
-    status: "BANNED" | "PENDING" | "DELETED";
+    status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   };
 }
 
@@ -9364,7 +9641,8 @@ export interface StartPartialUpdateResult {
     | "DISPUTE"
     | "ESCALATED"
     | "PAID"
-    | "CANCELED";
+    | "CANCELED"
+    | "VERIFY_REJECTED";
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
@@ -9387,6 +9665,11 @@ export interface StartPartialUpdateResult {
   start_time: number | null;
   /** @format int64 */
   check_in_code: number | null;
+  /** @format int64 */
+  transportation_expenses: number | null;
+  /** @format int64 */
+  actual_fee: number;
+  transportation_type: "FIXED" | "NONE" | "MAX";
 }
 
 export interface VerifyPartialUpdateBody {
@@ -9420,7 +9703,8 @@ export interface VerifyPartialUpdateResult {
       | "DISPUTE"
       | "ESCALATED"
       | "PAID"
-      | "CANCELED";
+      | "CANCELED"
+      | "VERIFY_REJECTED";
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
@@ -9443,6 +9727,11 @@ export interface VerifyPartialUpdateResult {
     start_time: number | null;
     /** @format int64 */
     check_in_code: number | null;
+    /** @format int64 */
+    transportation_expenses: number | null;
+    /** @format int64 */
+    actual_fee: number;
+    transportation_type: "FIXED" | "NONE" | "MAX";
   };
   review: {
     /** @format int64 */
@@ -9492,7 +9781,8 @@ export interface WorksessionsDetailData {
     | "DISPUTE"
     | "ESCALATED"
     | "PAID"
-    | "CANCELED";
+    | "CANCELED"
+    | "VERIFY_REJECTED";
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
@@ -9515,6 +9805,11 @@ export interface WorksessionsDetailData {
   start_time: number | null;
   /** @format int64 */
   check_in_code: number | null;
+  /** @format int64 */
+  transportation_expenses: number | null;
+  /** @format int64 */
+  actual_fee: number;
+  transportation_type: "FIXED" | "NONE" | "MAX";
 }
 
 export interface WorksessionsPartialUpdatePayload {
@@ -9534,7 +9829,8 @@ export interface WorksessionsPartialUpdatePayload {
     | "DISPUTE"
     | "ESCALATED"
     | "PAID"
-    | "CANCELED";
+    | "CANCELED"
+    | "VERIFY_REJECTED";
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
@@ -9557,6 +9853,11 @@ export interface WorksessionsPartialUpdatePayload {
   start_time: number | null;
   /** @format int64 */
   check_in_code: number | null;
+  /** @format int64 */
+  transportation_expenses: number | null;
+  /** @format int64 */
+  actual_fee: number;
+  transportation_type: "FIXED" | "NONE" | "MAX";
 }
 
 export interface WorksessionsPartialUpdateData {
@@ -9583,7 +9884,8 @@ export interface WorksessionsPartialUpdateData {
     | "DISPUTE"
     | "ESCALATED"
     | "PAID"
-    | "CANCELED";
+    | "CANCELED"
+    | "VERIFY_REJECTED";
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
@@ -9606,6 +9908,11 @@ export interface WorksessionsPartialUpdateData {
   start_time: number | null;
   /** @format int64 */
   check_in_code: number | null;
+  /** @format int64 */
+  transportation_expenses: number | null;
+  /** @format int64 */
+  actual_fee: number;
+  transportation_type: "FIXED" | "NONE" | "MAX";
 }
 
 export type WorksessionsListOutput = {
@@ -9632,7 +9939,8 @@ export type WorksessionsListOutput = {
     | "DISPUTE"
     | "ESCALATED"
     | "PAID"
-    | "CANCELED";
+    | "CANCELED"
+    | "VERIFY_REJECTED";
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
@@ -9655,6 +9963,11 @@ export type WorksessionsListOutput = {
   start_time: number | null;
   /** @format int64 */
   check_in_code: number | null;
+  /** @format int64 */
+  transportation_expenses: number | null;
+  /** @format int64 */
+  actual_fee: number;
+  transportation_type: "FIXED" | "NONE" | "MAX";
 }[];
 
 export type WorksessionListData = {
@@ -9681,7 +9994,8 @@ export type WorksessionListData = {
     | "DISPUTE"
     | "ESCALATED"
     | "PAID"
-    | "CANCELED";
+    | "CANCELED"
+    | "VERIFY_REJECTED";
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
@@ -9704,6 +10018,11 @@ export type WorksessionListData = {
   start_time: number | null;
   /** @format int64 */
   check_in_code: number | null;
+  /** @format int64 */
+  transportation_expenses: number | null;
+  /** @format int64 */
+  actual_fee: number;
+  transportation_type: "FIXED" | "NONE" | "MAX";
 }[];
 
 export interface WorksessionCreatePayload {
@@ -9723,7 +10042,8 @@ export interface WorksessionCreatePayload {
     | "DISPUTE"
     | "ESCALATED"
     | "PAID"
-    | "CANCELED";
+    | "CANCELED"
+    | "VERIFY_REJECTED";
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
@@ -9746,6 +10066,11 @@ export interface WorksessionCreatePayload {
   start_time: number | null;
   /** @format int64 */
   check_in_code: number | null;
+  /** @format int64 */
+  transportation_expenses: number | null;
+  /** @format int64 */
+  actual_fee: number;
+  transportation_type: "FIXED" | "NONE" | "MAX";
 }
 
 export interface WorksessionCreateData {
@@ -9772,7 +10097,8 @@ export interface WorksessionCreateData {
     | "DISPUTE"
     | "ESCALATED"
     | "PAID"
-    | "CANCELED";
+    | "CANCELED"
+    | "VERIFY_REJECTED";
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
@@ -9795,4 +10121,9 @@ export interface WorksessionCreateData {
   start_time: number | null;
   /** @format int64 */
   check_in_code: number | null;
+  /** @format int64 */
+  transportation_expenses: number | null;
+  /** @format int64 */
+  actual_fee: number;
+  transportation_type: "FIXED" | "NONE" | "MAX";
 }

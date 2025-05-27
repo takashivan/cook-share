@@ -485,7 +485,8 @@ export type WorksessionsThismonthListData = {
     | "DISPUTE"
     | "ESCALATED"
     | "PAID"
-    | "CANCELED";
+    | "CANCELED"
+    | "VERIFY_REJECTED";
   /** @format timestamptz */
   updated_at: number;
   /** @format uuid */
@@ -508,6 +509,11 @@ export type WorksessionsThismonthListData = {
   start_time: number | null;
   /** @format int64 */
   check_in_code: number | null;
+  /** @format int64 */
+  transportation_expenses: number | null;
+  /** @format int64 */
+  actual_fee: number;
+  transportation_type: "FIXED" | "NONE" | "MAX";
   user: {
     /** @format uuid */
     id: string;
@@ -614,6 +620,9 @@ export type WorksessionsThismonthListData = {
     fee: number;
     /** @format timestamptz */
     expiry_date: number | null;
+    transportation_type: "NONE" | "MAX" | "FIXED";
+    /** @format int64 */
+    transportation_amount: number;
   };
   restaurant: {
     /** @format int64 */
@@ -643,7 +652,7 @@ export type WorksessionsThismonthListData = {
     restaurant_cuisine_id: number[];
     description: string;
     phone: string;
-    status: "BANNED" | "PENDING" | "DELETED";
+    status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   };
 }[];
 
@@ -762,7 +771,8 @@ export interface SessionHistoryCurrentListData {
       | "DISPUTE"
       | "ESCALATED"
       | "PAID"
-      | "CANCELED";
+      | "CANCELED"
+      | "VERIFY_REJECTED";
     /** @format timestamptz */
     updated_at: number;
     /** @format uuid */
@@ -785,6 +795,11 @@ export interface SessionHistoryCurrentListData {
     start_time: number | null;
     /** @format int64 */
     check_in_code: number | null;
+    /** @format int64 */
+    transportation_expenses: number | null;
+    /** @format int64 */
+    actual_fee: number;
+    transportation_type: "FIXED" | "NONE" | "MAX";
   }[];
   star: string;
   end: string;

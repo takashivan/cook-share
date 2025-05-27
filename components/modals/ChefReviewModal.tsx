@@ -11,14 +11,33 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Star } from "lucide-react";
+import { format } from "date-fns";
+import { ja } from "date-fns/locale";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ChefReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (rating: number, comment: string) => void;
+  onSubmit: (
+    rating: number,
+    comment: string,
+    transportation_expenses: number | null
+  ) => void;
   storeName: string;
   jobTitle: string;
   jobDate: string;
+  transportation_type: "NONE" | "MAX" | "FIXED";
+  transportation_amount: number;
+  transportation_expenses?: number | null;
+  workSessionStart: number;
+  workSessionEnd: number;
+  jobFee: number;
 }
 
 export function ChefReviewModal({
@@ -28,16 +47,81 @@ export function ChefReviewModal({
   storeName,
   jobTitle,
   jobDate,
+  workSessionStart,
+  jobFee,
+  workSessionEnd,
+  transportation_type,
+  transportation_amount,
+  transportation_expenses: initialExpenses = null,
 }: ChefReviewModalProps) {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");
+  const [transportationExpenses, setTransportationExpenses] = useState<
+    number | ""
+  >(initialExpenses ?? "");
+  const [expenseError, setExpenseError] = useState<string>("");
+  const [selectedEndTime, setSelectedEndTime] = useState<string>(
+    workSessionEnd.toString()
+  );
+
+  // 入力時バリデーション
+  const handleExpensesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value === "" ? "" : Number(e.target.value);
+    setTransportationExpenses(value);
+    if (value === "" || isNaN(Number(value))) {
+      setExpenseError("交通費を入力してください");
+      return;
+    }
+    if (
+      transportation_type === "MAX" &&
+      Number(value) > transportation_amount
+    ) {
+      setExpenseError(
+        `交通費は上限${transportation_amount.toLocaleString()}円までです`
+      );
+      return;
+    }
+    if (
+      transportation_type === "FIXED" &&
+      Number(value) !== transportation_amount
+    ) {
+      setExpenseError(
+        `交通費は${transportation_amount.toLocaleString()}円で入力してください`
+      );
+      return;
+    }
+    setExpenseError("");
+  };
+
+  // 時間選択肢の生成（30分間隔）
+  const generateTimeOptions = () => {
+    const options = [];
+    const startDate = new Date(workSessionStart);
+    const endDate = new Date(workSessionEnd);
+
+    // 開始時間から終了予定時間まで30分間隔で生成
+    for (
+      let time = new Date(startDate);
+      time <= endDate;
+      time.setMinutes(time.getMinutes() + 30)
+    ) {
+      options.push(format(time, "HH:mm"));
+    }
+
+    return options;
+  };
 
   const handleSubmit = () => {
     if (rating === 0) return;
-    onSubmit(rating, comment);
+    if (transportation_type !== "NONE") {
+      onSubmit(rating, comment, Number(transportationExpenses));
+    } else {
+      onSubmit(rating, comment, null);
+    }
     setRating(0);
     setComment("");
+    setTransportationExpenses(initialExpenses ?? "");
     onClose();
   };
 
@@ -49,7 +133,7 @@ export function ChefReviewModal({
             完了報告・レビュー
           </DialogTitle>
           <p className="text-sm text-gray-500">
-            72時間以内に完了報告を行なってください。
+            お仕事の終了予定時間から72時間以内に完了報告を行なってください。
           </p>
         </DialogHeader>
         <div className="py-4">
@@ -57,7 +141,85 @@ export function ChefReviewModal({
             <h3 className="font-medium">{storeName}</h3>
             <p className="text-sm text-gray-500">{jobTitle}</p>
             <p className="text-sm text-gray-500">{jobDate}</p>
+            <div className="mt-2 text-sm">
+              <span className="font-semibold">交通費設定：</span>
+              {transportation_type === "NONE"
+                ? "交通費なし"
+                : transportation_type === "MAX"
+                ? `上限${transportation_amount.toLocaleString()}円`
+                : `${transportation_amount.toLocaleString()}円`}
+            </div>
+            <div className="mt-2 text-sm">
+              <span className="font-semibold">勤務開始時間：</span>
+              {workSessionStart}
+            </div>
+            <div className="mt-2 text-sm">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold">勤務終了時間：</span>
+                <Select
+                  value={selectedEndTime}
+                  onValueChange={setSelectedEndTime}>
+                  <SelectTrigger className="w-[120px]">
+                    <SelectValue placeholder="時間を選択" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {generateTimeOptions().map((time) => (
+                      <SelectItem key={time} value={time}>
+                        {time}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="mt-2 text-sm">
+              <span className="font-semibold">報酬：</span>
+              {jobFee.toLocaleString()}円
+            </div>
+            <div className="mt-2 text-xs text-gray-500">
+              ※
+              勤務時間の変更により報酬の変更が必要な場合は、お店にチャットでご相談ください。
+            </div>
           </div>
+
+          {typeof transportation_type === "string" &&
+            (transportation_type === "MAX" ||
+              transportation_type === "FIXED") && (
+              <div className="mb-6">
+                <p className="text-sm font-medium mb-2">実際にかかった交通費</p>
+                <input
+                  type="number"
+                  min={0}
+                  max={
+                    transportation_type === "MAX"
+                      ? transportation_amount
+                      : undefined
+                  }
+                  value={transportationExpenses}
+                  onChange={handleExpensesChange}
+                  className="w-full border rounded-md p-2 text-sm bg-white"
+                  placeholder={
+                    transportation_type === "FIXED"
+                      ? `${transportation_amount.toLocaleString()}円で入力してください`
+                      : "金額を入力してください"
+                  }
+                />
+                {/* 上限・固定金額の表示 */}
+                {transportation_type === "MAX" && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    上限 {transportation_amount.toLocaleString()}円
+                  </p>
+                )}
+                {transportation_type === "FIXED" && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    固定 {transportation_amount.toLocaleString()}円
+                  </p>
+                )}
+                {expenseError && (
+                  <p className="text-red-500 text-xs mt-1">{expenseError}</p>
+                )}
+              </div>
+            )}
 
           <div className="mb-6">
             <p className="text-sm font-medium mb-2">お店の評価</p>
@@ -110,7 +272,10 @@ export function ChefReviewModal({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={rating === 0}
+            disabled={
+              rating === 0 ||
+              (transportation_type !== "NONE" && transportationExpenses === "")
+            }
             className="w-full sm:w-auto"
             style={{ backgroundColor: "#DB3F1C", color: "white" }}>
             送信する
