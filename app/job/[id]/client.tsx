@@ -644,7 +644,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                           <div className="mt-4">
                             <GoogleMap
                               address={jobDetail.restaurant.address}
-                              className="h-64 w-full rounded-lg shadow-md"
+                              className="h-48 sm:h-64 w-full rounded-lg shadow-md"
                             />
                           </div>
                         </div>
