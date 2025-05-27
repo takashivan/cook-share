@@ -785,6 +785,9 @@ export default function JobDetail({ params }: PageProps) {
 
       <ChefReviewModal
         isOpen={isReviewModalOpen}
+        workSessionStart={workSession?.check_in_time || 0}
+        workSessionEnd={job?.end_time || 0}
+        jobFee={job?.fee || 0}
         onClose={() => setIsReviewModalOpen(false)}
         onSubmit={handleCheckOut}
         storeName={restaurant?.name || ""}
