@@ -86,6 +86,7 @@ export const useSubscriptionCompanyUserNotificationsByUserId = (params: Params) 
   return {
     notifications: getRequest.data,
     isLoading: getRequest.isLoading,
+    error: getRequest.error,
     mutateNotifications: getRequest.mutate,
   };
 }

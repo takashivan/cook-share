@@ -50,6 +50,8 @@ import {
 import { JobChangeRequest } from "@/hooks/api/companyuser/jobChangeRequests/useGetJobChangeRequests";
 import { Input } from "@/components/ui/input";
 import styles from "./styles.module.css";
+import { ErrorPage } from "@/components/layout/ErrorPage";
+import { LoadingScreen } from "@/components/LoadingScreen";
 
 interface JobDetail {
   job: {
@@ -119,13 +121,21 @@ export default function JobDetail({ params }: PageProps) {
     useState<JobChangeRequest | null>(null);
 
   // ジョブ詳細の取得
-  const { data: jobDetail } = useGetJob({ jobId: Number(id) });
+  const {
+    data: jobDetail,
+    isLoading: isJobDetailLoading,
+    error: jobDetailError,
+  } = useGetJob({ jobId: Number(id) });
 
   const job = jobDetail?.job;
   const restaurant = jobDetail?.restaurant;
 
   // ワークセッションの取得
-  const { data: workSessions } = useGetWorksessionsByUserId({
+  const {
+    data: workSessions,
+    isLoading: isWorkSessionsLoading,
+    error: workSessionsError,
+  } = useGetWorksessionsByUserId({
     userId: user?.id,
   });
 
@@ -148,13 +158,22 @@ export default function JobDetail({ params }: PageProps) {
   });
 
   // メッセージの取得
-  const { messagesData, sendMessage } = useSubscriptionMessagesByUserId({
+  const {
+    messagesData,
+    sendMessage,
+    isLoading: isMessagesLoading,
+    error: messagesError,
+  } = useSubscriptionMessagesByUserId({
     userId: user?.id,
     workSessionId: workSession?.id,
   });
 
   // 未読メッセージの取得
-  const { unreadMessagesData } = useSubscriptionUnreadMessagesByUser({
+  const {
+    unreadMessagesData,
+    isLoading: isUnreadMessagesLoading,
+    error: unreadMessagesError,
+  } = useSubscriptionUnreadMessagesByUser({
     userId: user?.id,
   });
 
@@ -165,7 +184,11 @@ export default function JobDetail({ params }: PageProps) {
     )?.unread_message_count || 0;
 
   // 変更リクエストの取得
-  const { data: changeRequests } = useGetJobChangeRequests();
+  const {
+    data: changeRequests,
+    isLoading: isChangeRequestsLoading,
+    error: changeRequestsError,
+  } = useGetJobChangeRequests();
   const pendingRequest = changeRequests?.find(
     (req) => req.worksession_id === workSession?.id && req.status === "PENDING"
   );
@@ -327,7 +350,11 @@ export default function JobDetail({ params }: PageProps) {
       router.refresh();
     } catch (error) {
       console.error("チェックイン処理に失敗しました:", error);
-      alert("チェックイン処理に失敗しました。もう一度お試しください。");
+      toast({
+        title: "エラー",
+        description: "チェックイン処理に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
       setIsQrScanned(false);
       setCheckInCode(null);
     }
@@ -351,7 +378,11 @@ export default function JobDetail({ params }: PageProps) {
       router.refresh();
     } catch (error) {
       console.error("チェックアウト処理に失敗しました:", error);
-      alert("チェックアウト処理に失敗しました。もう一度お試しください。");
+      toast({
+        title: "エラー",
+        description: "チェックアウト処理に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
     }
   };
 
@@ -503,11 +534,22 @@ export default function JobDetail({ params }: PageProps) {
     }
   };
 
-  if (!job) {
+  if (jobDetailError || workSessionsError || unreadMessagesError || changeRequestsError) {
     return (
-      <div className="container mx-auto px-4 py-6 max-w-md">
-        <div className="text-center">読み込み中...</div>
+      <div className="flex px-4">
+        <ErrorPage />
       </div>
+    );
+  }
+
+  if (isJobDetailLoading || isWorkSessionsLoading || isUnreadMessagesLoading || isChangeRequestsLoading
+    || !job || !workSessions || !unreadMessagesData || !changeRequests
+  ) {
+    return (
+      <LoadingScreen
+        fullScreen={false}
+        message="お仕事詳細を読み込んでいます..."
+      />
     );
   }
 
@@ -808,6 +850,8 @@ export default function JobDetail({ params }: PageProps) {
           onClose={() => setIsChatOpen(false)}
           worksessionId={workSession.id}
           messagesData={messagesData}
+          isMessagesDataLoading={isMessagesLoading}
+          messagesDataError={messagesError}
           onSendMessage={sendMessage}
           restaurantName={restaurant?.name || ""}
           restaurantImage={restaurant?.profile_image}

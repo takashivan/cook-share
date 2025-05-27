@@ -121,6 +121,8 @@ export const useSubscriptionMessagesByUserId = (
 
   return {
     messagesData: getRequest.data,
+    isLoading: getRequest.isLoading,
+    error: getRequest.error,
     mutateMessages: getRequest.mutate,
     sendMessage,
   };

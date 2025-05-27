@@ -10,17 +10,32 @@ import { useGetPayoutLogsByUserId } from "@/hooks/api/user/payout-logs/useGetPay
 import { useGetWorksessionHistoryCurrentMonth } from "@/hooks/api/user/worksessions/useGetWorksessionHistoryCurrentMonth";
 import { useGetWorksessionsByUserId } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserId";
 import { SessionHistoryCurrentListResult } from "@/api/__generated__/base/data-contracts";
+import { LoadingScreen } from "@/components/LoadingScreen";
+import { ErrorPage } from "@/components/layout/ErrorPage";
 
 export default function ChefSalary() {
   const { user } = useAuth();
   const [monthlyIncome, setMonthlyIncome] = useState(0);
-  const { data: payoutLogs } = useGetPayoutLogsByUserId({ userId: user?.id });
 
-  const { data: worksessionHistory, isLoading } =
-    useGetWorksessionHistoryCurrentMonth({
-      userId: user?.id,
-    });
-  const { data: worksessions } = useGetWorksessionsByUserId({
+  const {
+    data: payoutLogs,
+    isLoading: payoutLogsLoading,
+    error: payoutLogsError,
+  } = useGetPayoutLogsByUserId({ userId: user?.id });
+
+  const {
+    data: worksessionHistory,
+    isLoading: worksessionHistoryLoading,
+    error: worksessionHistoryError,
+  } = useGetWorksessionHistoryCurrentMonth({
+    userId: user?.id,
+  });
+
+  const {
+    data: worksessions,
+    isLoading: worksessionLoading,
+    error: worksessionError,
+  } = useGetWorksessionsByUserId({
     userId: user?.id,
   });
 
@@ -32,7 +47,7 @@ export default function ChefSalary() {
   };
 
   console.log("userId:", user?.id);
-  console.log("isLoading:", isLoading);
+  console.log("isLoading:", worksessionHistoryLoading);
   console.log("worksessionHistory type:", typeof worksessionHistory);
   console.log("worksessionHistory:", worksessionHistory);
   console.log(
@@ -114,6 +129,23 @@ export default function ChefSalary() {
   //   fetchMonthlyIncome();
   // }, [user?.id]);
 
+  if (worksessionHistoryError || worksessionError || payoutLogsError) {
+    return (
+      <div className="flex px-4">
+        <ErrorPage />
+      </div>
+    );
+  }
+
+  if (worksessionLoading || payoutLogsLoading) {
+    return (
+      <LoadingScreen
+        fullScreen={false}
+        message="給料情報を読み込んでいます..."
+      />
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">収入管理</h1>
@@ -133,7 +165,7 @@ export default function ChefSalary() {
               {workSessionCount}回の勤務
             </span>
           </div>
-          {isLoading || !worksessionHistory ? (
+          {worksessionHistoryLoading || !worksessionHistory ? (
             <div className="flex items-center">
               <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
             </div>
@@ -173,20 +205,26 @@ export default function ChefSalary() {
         </div>
 
         <div className="space-y-4">
-          {months.map((month) => (
-            <Link key={month.id} href={`/chef/salary/${month.id}`}>
-              <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
-                <div>
-                  <p className="font-medium">{month.month}</p>
-                  <p className="text-sm text-gray-500">{month.status}</p>
+          {months.length > 0 ? 
+            months.map((month) => (
+              <Link key={month.id} href={`/chef/salary/${month.id}`}>
+                <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
+                  <div>
+                    <p className="font-medium">{month.month}</p>
+                    <p className="text-sm text-gray-500">{month.status}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="font-bold">{month.amount}</span>
+                    <ChevronRight className="h-5 w-5 text-gray-400" />
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="font-bold">{month.amount}</span>
-                  <ChevronRight className="h-5 w-5 text-gray-400" />
-                </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))
+          : (
+            <div className="text-center py-4 text-gray-500">
+              収入履歴はありません
+            </div>
+          )}
         </div>
       </div>
 

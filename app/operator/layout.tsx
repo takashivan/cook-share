@@ -39,14 +39,9 @@ function OperatorLayout({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
+  // 認証確認中は何も表示しない（一瞬で終わるのでローディングは表示しない）
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   // 未認証の場合は何も表示しない（ログインページへのリダイレクトを待つ）
