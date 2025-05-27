@@ -293,6 +293,8 @@ export default function SchedulePage() {
         onClose={closeChat}
         worksessionId={selectedWorkSession?.id}
         messagesData={messagesData}
+        isMessagesDataLoading={isMessagesLoading}
+        messagesDataError={messagesError}
         onSendMessage={handleSendMessage}
         restaurantName={selectedWorkSession?.job?.restaurant.name || ""}
         restaurantImage={

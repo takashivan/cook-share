@@ -126,6 +126,8 @@ export default function MessagesPage() {
             onClose={closeChat}
             worksessionId={selectedWorkSession?.id ?? undefined}
             messagesData={messagesData}
+            isMessagesDataLoading={isMessagesLoading}
+            messagesDataError={messagesError}
             onSendMessage={handleSendMessage}
             restaurantName={selectedWorkSession?.restaurant?.name || ""}
             restaurantImage={

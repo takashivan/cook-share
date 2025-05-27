@@ -521,7 +521,7 @@ export default function JobDetail({ params }: PageProps) {
     }
   };
 
-  if (jobDetailError || workSessionsError || messagesError || unreadMessagesError || changeRequestsError) {
+  if (jobDetailError || workSessionsError || unreadMessagesError || changeRequestsError) {
     return (
       <div className="flex px-4">
         <ErrorPage />
@@ -529,8 +529,8 @@ export default function JobDetail({ params }: PageProps) {
     );
   }
 
-  if (isJobDetailLoading || isWorkSessionsLoading || isMessagesLoading || isUnreadMessagesLoading || isChangeRequestsLoading
-    || !job || !workSessions || !messagesData || !unreadMessagesData || !changeRequests
+  if (isJobDetailLoading || isWorkSessionsLoading || isUnreadMessagesLoading || isChangeRequestsLoading
+    || !job || !workSessions || !unreadMessagesData || !changeRequests
   ) {
     return (
       <LoadingScreen
@@ -816,6 +816,8 @@ export default function JobDetail({ params }: PageProps) {
           onClose={() => setIsChatOpen(false)}
           worksessionId={workSession.id}
           messagesData={messagesData}
+          isMessagesDataLoading={isMessagesLoading}
+          messagesDataError={messagesError}
           onSendMessage={sendMessage}
           restaurantName={restaurant?.name || ""}
           restaurantImage={restaurant?.profile_image}
