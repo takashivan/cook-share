@@ -53,7 +53,7 @@ import styles from "./styles.module.css";
 import { ErrorPage } from "@/components/layout/ErrorPage";
 import { LoadingScreen } from "@/components/LoadingScreen";
 
-interface JobDetail {
+type JobDetail = {
   job: {
     id: number;
     title: string;
@@ -84,7 +84,7 @@ interface JobDetail {
     station: string;
     access: string;
   };
-}
+};
 
 type PageProps = {
   params: Promise<{
@@ -92,8 +92,8 @@ type PageProps = {
   }>;
 };
 
-export default function JobDetail({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function JobDetail({ params }: PageProps) {
+  const { id } = use(params);
   const router = useRouter();
   const { user } = useAuth();
 
@@ -123,7 +123,6 @@ export default function JobDetail({ params }: { params: { id: string } }) {
   const [selectedChangeRequest, setSelectedChangeRequest] =
     useState<JobChangeRequest | null>(null);
 
-
   const { data: jobDetail, error: jobError } = useGetJob({ jobId: Number(id) });
 
   useEffect(() => {
@@ -134,8 +133,6 @@ export default function JobDetail({ params }: { params: { id: string } }) {
       setError("ジョブの取得に失敗しました");
     }
   }, [jobDetail, jobError]);
- 
-
 
   const job = jobDetail?.job;
   const restaurant = jobDetail?.restaurant;
@@ -389,7 +386,8 @@ export default function JobDetail({ params }: { params: { id: string } }) {
       console.error("チェックアウト処理に失敗しました:", error);
       toast({
         title: "エラー",
-        description: "チェックアウト処理に失敗しました。もう一度お試しください。",
+        description:
+          "チェックアウト処理に失敗しました。もう一度お試しください。",
         variant: "destructive",
       });
     }
@@ -543,7 +541,6 @@ export default function JobDetail({ params }: { params: { id: string } }) {
     }
   };
 
-
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-6 max-w-md">
@@ -563,19 +560,7 @@ export default function JobDetail({ params }: { params: { id: string } }) {
         <div className="mt-4 text-center">
           <Button onClick={() => router.back()}>戻る</Button>
         </div>
-
       </div>
-    );
-  }
-
-  if (isJobDetailLoading || isWorkSessionsLoading || isUnreadMessagesLoading || isChangeRequestsLoading
-    || !job || !workSessions || !unreadMessagesData || !changeRequests
-  ) {
-    return (
-      <LoadingScreen
-        fullScreen={false}
-        message="お仕事詳細を読み込んでいます..."
-      />
     );
   }
 
