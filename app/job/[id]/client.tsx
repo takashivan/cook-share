@@ -37,6 +37,7 @@ import {
 } from "@/api/__generated__/base/data-contracts";
 import { formatJapanHHMM } from "@/lib/functions";
 import { useApplyJob } from "@/hooks/api/user/jobs/useApplyJob";
+import { LoadingScreen } from "@/components/LoadingScreen";
 
 // 時間のフォーマット関数を追加
 const formatTime = (timestamp: number) => {
@@ -44,18 +45,20 @@ const formatTime = (timestamp: number) => {
 };
 
 export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
-  const [activeTab, setActiveTab] = useState<"details" | "store" | "access">(
-    "details"
-  );
-
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const isMobile = useMobile();
   const router = useRouter();
-  const { user: authUser } = useAuth();
+  const { user: authUser, loading } = useAuth();
   const [user, setUser] = useState(authUser);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const { toast } = useToast();
+
   const { data: workSessions } = useGetWorksessionsByUserId({
     userId: user?.id,
+  });
+
+  const { data: restaurantReview } = useGetRestaurantReviewByRestaurantId({
+    restaurantId: Number(jobDetail.restaurant.id),
   });
 
   useEffect(() => {
@@ -72,15 +75,6 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
 
     fetchUserProfile();
   }, [authUser?.id]);
-
-  console.log("user", user);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const { toast } = useToast();
-
-  const { data: restaurantReview } = useGetRestaurantReviewByRestaurantId({
-    restaurantId: Number(jobDetail.restaurant.id),
-  });
-  console.log("restaurantReview", restaurantReview);
 
   const { trigger: applyJobTrigger } = useApplyJob({
     jobId: jobDetail.job.id,
@@ -273,6 +267,12 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
 
     return `https://calendar.google.com/calendar/render?${params.toString()}`;
   };
+
+  if (loading) {
+    return (
+      <LoadingScreen />
+    )
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -644,7 +644,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                           <div className="mt-4">
                             <GoogleMap
                               address={jobDetail.restaurant.address}
-                              className="h-64 w-full rounded-lg shadow-md"
+                              className="h-48 sm:h-64 w-full rounded-lg shadow-md"
                             />
                           </div>
                         </div>

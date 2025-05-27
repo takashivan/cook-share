@@ -11,6 +11,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Star } from "lucide-react";
+import { format } from "date-fns";
+import { ja } from "date-fns/locale";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ChefReviewModalProps {
   isOpen: boolean;
@@ -26,6 +35,9 @@ interface ChefReviewModalProps {
   transportation_type: "NONE" | "MAX" | "FIXED";
   transportation_amount: number;
   transportation_expenses?: number | null;
+  workSessionStart: number;
+  workSessionEnd: number;
+  jobFee: number;
 }
 
 export function ChefReviewModal({
@@ -35,6 +47,9 @@ export function ChefReviewModal({
   storeName,
   jobTitle,
   jobDate,
+  workSessionStart,
+  jobFee,
+  workSessionEnd,
   transportation_type,
   transportation_amount,
   transportation_expenses: initialExpenses = null,
@@ -46,6 +61,9 @@ export function ChefReviewModal({
     number | ""
   >(initialExpenses ?? "");
   const [expenseError, setExpenseError] = useState<string>("");
+  const [selectedEndTime, setSelectedEndTime] = useState<string>(
+    workSessionEnd.toString()
+  );
 
   // 入力時バリデーション
   const handleExpensesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,6 +94,24 @@ export function ChefReviewModal({
     setExpenseError("");
   };
 
+  // 時間選択肢の生成（30分間隔）
+  const generateTimeOptions = () => {
+    const options = [];
+    const startDate = new Date(workSessionStart);
+    const endDate = new Date(workSessionEnd);
+
+    // 開始時間から終了予定時間まで30分間隔で生成
+    for (
+      let time = new Date(startDate);
+      time <= endDate;
+      time.setMinutes(time.getMinutes() + 30)
+    ) {
+      options.push(format(time, "HH:mm"));
+    }
+
+    return options;
+  };
+
   const handleSubmit = () => {
     if (rating === 0) return;
     if (transportation_type !== "NONE") {
@@ -97,7 +133,7 @@ export function ChefReviewModal({
             完了報告・レビュー
           </DialogTitle>
           <p className="text-sm text-gray-500">
-            72時間以内に完了報告を行なってください。
+            お仕事の終了予定時間から72時間以内に完了報告を行なってください。
           </p>
         </DialogHeader>
         <div className="py-4">
@@ -113,42 +149,37 @@ export function ChefReviewModal({
                 ? `上限${transportation_amount.toLocaleString()}円`
                 : `${transportation_amount.toLocaleString()}円`}
             </div>
-          </div>
-
-          <div className="mb-6">
-            <p className="text-sm font-medium mb-2">お店の評価</p>
-            <div className="flex justify-center mb-2">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  onClick={() => setRating(star)}
-                  onMouseEnter={() => setHoverRating(star)}
-                  onMouseLeave={() => setHoverRating(0)}
-                  className="p-1">
-                  <Star
-                    className={`h-8 w-8 ${
-                      star <= (hoverRating || rating)
-                        ? "fill-current text-yellow-400"
-                        : "text-gray-300"
-                    }`}
-                  />
-                </button>
-              ))}
+            <div className="mt-2 text-sm">
+              <span className="font-semibold">勤務開始時間：</span>
+              {workSessionStart}
             </div>
-            <p className="text-center text-sm text-gray-500">
-              {rating === 0 ? "評価してください" : `${rating}点を選択中`}
-            </p>
-          </div>
-
-          <div className="mb-6">
-            <p className="text-sm font-medium mb-2">コメント</p>
-            <Textarea
-              placeholder="お店への感想やフィードバックを入力してください"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              className="min-h-[100px]"
-            />
+            <div className="mt-2 text-sm">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold">勤務終了時間：</span>
+                <Select
+                  value={selectedEndTime}
+                  onValueChange={setSelectedEndTime}>
+                  <SelectTrigger className="w-[120px]">
+                    <SelectValue placeholder="時間を選択" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {generateTimeOptions().map((time) => (
+                      <SelectItem key={time} value={time}>
+                        {time}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="mt-2 text-sm">
+              <span className="font-semibold">報酬：</span>
+              {jobFee.toLocaleString()}円
+            </div>
+            <div className="mt-2 text-xs text-gray-500">
+              ※
+              勤務時間の変更により報酬の変更が必要な場合は、お店にチャットでご相談ください。
+            </div>
           </div>
 
           {typeof transportation_type === "string" &&
@@ -189,6 +220,42 @@ export function ChefReviewModal({
                 )}
               </div>
             )}
+
+          <div className="mb-6">
+            <p className="text-sm font-medium mb-2">お店の評価</p>
+            <div className="flex justify-center mb-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setRating(star)}
+                  onMouseEnter={() => setHoverRating(star)}
+                  onMouseLeave={() => setHoverRating(0)}
+                  className="p-1">
+                  <Star
+                    className={`h-8 w-8 ${
+                      star <= (hoverRating || rating)
+                        ? "fill-current text-yellow-400"
+                        : "text-gray-300"
+                    }`}
+                  />
+                </button>
+              ))}
+            </div>
+            <p className="text-center text-sm text-gray-500">
+              {rating === 0 ? "評価してください" : `${rating}点を選択中`}
+            </p>
+          </div>
+
+          <div className="mb-6">
+            <p className="text-sm font-medium mb-2">コメント</p>
+            <Textarea
+              placeholder="お店への感想やフィードバックを入力してください"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              className="min-h-[100px]"
+            />
+          </div>
 
           <div className="bg-amber-50 p-3 rounded-md mb-4">
             <p className="text-sm text-amber-800">

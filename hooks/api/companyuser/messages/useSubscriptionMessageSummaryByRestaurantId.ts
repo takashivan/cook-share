@@ -232,5 +232,6 @@ export const useSubscriptionMessageSummaryByRestaurantId = (params: Params) => {
     messageSummaryData: getRequest.data?.message_summaries,
     mutateMessageSummary: getRequest.mutate,
     isLoading: getRequest.isLoading,
+    error: getRequest.error,
   };
 }

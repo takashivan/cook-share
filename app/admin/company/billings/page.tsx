@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import {
   CreditCard,
   Download,
@@ -27,29 +26,15 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { format } from "date-fns";
-import { toast } from "@/hooks/use-toast";
 import { useGetCurrentBillingSummaryByCompanyId } from "@/hooks/api/companyuser/billings/useGetCurrentBillingSummaryByCompanyId";
+import { ErrorPage } from "@/components/layout/ErrorPage";
+import { LoadingScreen } from "@/components/LoadingScreen";
 
 export default function BillingList() {
   const { user } = useCompanyAuth();
-  const {
-    data: billings,
-    isLoading,
-    error,
-  } = useGetCurrentBillingSummaryByCompanyId({
+  const { data: billings, isLoading, error } = useGetCurrentBillingSummaryByCompanyId({
     companyId: user?.companies_id ?? undefined,
   });
-
-  useEffect(() => {
-    if (error) {
-      console.error("Error fetching billing data:", error);
-      toast({
-        title: "エラーが発生しました",
-        description: "請求データの取得に失敗しました。",
-        variant: "destructive",
-      });
-    }
-  }, [error]);
 
   const formatAmount = (amount: number) => {
     return new Intl.NumberFormat("ja-JP", {
@@ -65,8 +50,19 @@ export default function BillingList() {
     return format(new Date(milliseconds), "yyyy/MM/dd");
   };
 
-  if (isLoading) {
-    return <div>読み込み中...</div>;
+  if (error) {
+    return (
+      <ErrorPage />
+    );
+  }
+
+  if (isLoading || !billings) {
+    return (
+      <LoadingScreen
+        fullScreen={false}
+        message="スタッフ情報を読み込んでいます..."
+      />
+    );
   }
 
   return (
@@ -120,58 +116,66 @@ export default function BillingList() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {billings?.map((billing) => (
-                <TableRow key={billing.id}>
-                  <TableCell className="font-medium">
-                    {billing.invoice_number}
-                  </TableCell>
-                  <TableCell>{formatDate(billing.created_at)}</TableCell>
-                  <TableCell>{billing.month || "-"}</TableCell>
-                  <TableCell>{formatAmount(billing.amount)}</TableCell>
-                  <TableCell>{billing.fee_rate * 100}%</TableCell>
-                  <TableCell>{billing.session_count}回</TableCell>
-                  <TableCell>
-                    <div
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        billing.status === "PAID"
-                          ? "bg-green-100 text-green-800"
-                          : billing.status === "PENDING"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-red-100 text-red-800"
-                      }`}>
-                      {billing.status === "PAID" ? "支払済" : "未払い"}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">メニューを開く</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
-                          <a
-                            href={billing.hosted_invoice_url}
-                            target="_blank"
-                            rel="noopener noreferrer">
-                            請求書を表示
-                          </a>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <a
-                            href={billing.invoice_pdf}
-                            target="_blank"
-                            rel="noopener noreferrer">
-                            PDFをダウンロード
-                          </a>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {(billings.length > 0) ?
+                billings.map((billing) => (
+                  <TableRow key={billing.id}>
+                    <TableCell className="font-medium">
+                      {billing.invoice_number}
+                    </TableCell>
+                    <TableCell>{formatDate(billing.created_at)}</TableCell>
+                    <TableCell>{billing.month || "-"}</TableCell>
+                    <TableCell>{formatAmount(billing.amount)}</TableCell>
+                    <TableCell>{billing.fee_rate * 100}%</TableCell>
+                    <TableCell>{billing.session_count}回</TableCell>
+                    <TableCell>
+                      <div
+                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                          billing.status === "PAID"
+                            ? "bg-green-100 text-green-800"
+                            : billing.status === "PENDING"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-red-100 text-red-800"
+                        }`}>
+                        {billing.status === "PAID" ? "支払済" : "未払い"}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">メニューを開く</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem asChild>
+                            <a
+                              href={billing.hosted_invoice_url}
+                              target="_blank"
+                              rel="noopener noreferrer">
+                              請求書を表示
+                            </a>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <a
+                              href={billing.invoice_pdf}
+                              target="_blank"
+                              rel="noopener noreferrer">
+                              PDFをダウンロード
+                            </a>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+                : (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center text-muted-foreground">
+                      請求情報がありません
+                    </TableCell>
+                  </TableRow>
+                )}
             </TableBody>
           </Table>
         </CardContent>

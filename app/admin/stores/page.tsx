@@ -36,17 +36,20 @@ import Link from "next/link";
 import { useCreateRestaurant } from "@/hooks/api/companyuser/restaurants/useCreateRestaurant";
 import { RestaurantsCreatePayload } from "@/api/__generated__/base/data-contracts";
 import { useGetRestaurantsByCompanyUserId } from "@/hooks/api/companyuser/restaurants/useGetRestaurantsByCompanyUserId";
+import { LoadingScreen } from "@/components/LoadingScreen";
+import { ErrorPage } from "@/components/layout/ErrorPage";
 
 export default function StoresPage() {
   const { user } = useCompanyAuth();
+
+  const [isCreateRestaurantModalOpen, setIsCreateRestaurantModalOpen] =
+    useState(false);
+
   const {
     data: restaurants,
     isLoading,
-    error: getRestaurantsError,
+    error,
   } = useGetRestaurantsByCompanyUserId({ companyuserId: user?.id });
-  const [isCreateRestaurantModalOpen, setIsCreateRestaurantModalOpen] =
-    useState(false);
-  const [hasMounted, setHasMounted] = useState(false);
 
   const { trigger: createRestaurantTrigger } = useCreateRestaurant({
     companyId: user?.companies_id ?? undefined,
@@ -70,56 +73,35 @@ export default function StoresPage() {
     },
   });
 
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
-
   const handleCreateRestaurantModal = useCallback(() => {
-    if (!hasMounted) return;
     setIsCreateRestaurantModalOpen(true);
-  }, [hasMounted]);
+  }, [setIsCreateRestaurantModalOpen]);
 
   const handleCloseRestaurantModal = useCallback(() => {
-    if (!hasMounted) return;
     setIsCreateRestaurantModalOpen(false);
-  }, [hasMounted]);
+  }, [setIsCreateRestaurantModalOpen]);
 
   const handleCreateRestaurant = useCallback(
     async (data: RestaurantsCreatePayload) => {
-      if (!hasMounted || !user?.companies_id) return;
+      if (!user?.companies_id) return;
 
       await createRestaurantTrigger(data);
     },
-    [hasMounted, user?.companies_id]
+    [user?.companies_id, createRestaurantTrigger]
   );
 
-  if (!hasMounted) {
+  if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p>Loading...</p>
-        </div>
-      </div>
+      <ErrorPage />
     );
   }
-
-  if (isLoading) {
+  
+  if (isLoading || !restaurants) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (getRestaurantsError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center text-red-600">
-          <p>{getRestaurantsError}</p>
-        </div>
-      </div>
+      <LoadingScreen
+        fullScreen={false}
+        message="店舗一覧を読み込んでいます..."
+      />
     );
   }
 
@@ -145,7 +127,7 @@ export default function StoresPage() {
             <Store className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{restaurants?.length ?? ''}</div>
+            <div className="text-2xl font-bold">{restaurants.length}</div>
           </CardContent>
         </Card>
 
@@ -156,7 +138,7 @@ export default function StoresPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {restaurants?.filter((r) => r.is_active).length  ?? ''}
+              {restaurants.filter((r) => r.is_active).length}
             </div>
           </CardContent>
         </Card>
@@ -175,24 +157,33 @@ export default function StoresPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {restaurants?.map((restaurant) => (
-                <TableRow 
-                  key={restaurant.id} 
-                  className="hover:bg-gray-50 cursor-pointer"
-                  onClick={() => window.location.href = `/admin/stores/${restaurant.id}`}
-                >
-                  <TableCell className="font-medium">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center">
-                        <Store className="h-4 w-4 text-gray-500" />
+              {restaurants.length > 0 ?
+                restaurants.map((restaurant) => (
+                  <TableRow 
+                    key={restaurant.id} 
+                    className="hover:bg-gray-50 cursor-pointer"
+                    onClick={() => window.location.href = `/admin/stores/${restaurant.id}`}
+                  >
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center">
+                          <Store className="h-4 w-4 text-gray-500" />
+                        </div>
+                        {restaurant.name}
                       </div>
-                      {restaurant.name}
-                    </div>
-                  </TableCell>
-                  <TableCell>{restaurant.address}</TableCell>
-                  <TableCell>{restaurant.cuisine_type}</TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                    <TableCell>{restaurant.address}</TableCell>
+                    <TableCell>{restaurant.cuisine_type}</TableCell>
+                  </TableRow>
+                ))
+                : (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center text-muted-foreground">
+                      店舗はありません
+                    </TableCell>
+                  </TableRow>
+                )
+              }
             </TableBody>
           </Table>
         </CardContent>
@@ -200,71 +191,82 @@ export default function StoresPage() {
 
       {/* Mobile View */}
       <div className="grid gap-4 md:hidden">
-        {restaurants?.map((restaurant) => (
-          <Card key={restaurant.id}>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-md bg-gray-100 flex items-center justify-center">
-                    <Store className="h-5 w-5 text-gray-500" />
+        {restaurants.length > 0 ?
+          restaurants.map((restaurant) => (
+            <Card key={restaurant.id}>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-md bg-gray-100 flex items-center justify-center">
+                      <Store className="h-5 w-5 text-gray-500" />
+                    </div>
+                    <div>
+                      <p className="font-medium">{restaurant.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {restaurant.address}
+                      </p>
+                    </div>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">メニューを開く</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>
+                        <Link
+                          href={`/admin/stores/${restaurant.id}`}
+                          className="w-full flex items-center">
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          詳細を表示
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Edit className="h-4 w-4 mr-2" />
+                        編集
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">ジャンル</p>
+                    <p>{restaurant.cuisine_type}</p>
                   </div>
                   <div>
-                    <p className="font-medium">{restaurant.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {restaurant.address}
-                    </p>
+                    <p className="text-muted-foreground">ステータス</p>
+                    <div
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        restaurant.is_active
+                          ? "bg-green-100 text-green-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}>
+                      {restaurant.is_active ? "営業中" : "準備中"}
+                    </div>
                   </div>
                 </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <MoreHorizontal className="h-4 w-4" />
-                      <span className="sr-only">メニューを開く</span>
+                <div className="mt-3">
+                  <Link href={`/admin/stores/${restaurant.id}`}>
+                    <Button variant="outline" size="sm" className="w-full">
+                      詳細を表示
                     </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
-                      <Link
-                        href={`/admin/stores/${restaurant.id}`}
-                        className="w-full flex items-center">
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        詳細を表示
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Edit className="h-4 w-4 mr-2" />
-                      編集
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-              <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <p className="text-muted-foreground">ジャンル</p>
-                  <p>{restaurant.cuisine_type}</p>
+                  </Link>
                 </div>
-                <div>
-                  <p className="text-muted-foreground">ステータス</p>
-                  <div
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      restaurant.is_active
-                        ? "bg-green-100 text-green-800"
-                        : "bg-yellow-100 text-yellow-800"
-                    }`}>
-                    {restaurant.is_active ? "営業中" : "準備中"}
-                  </div>
-                </div>
-              </div>
-              <div className="mt-3">
-                <Link href={`/admin/stores/${restaurant.id}`}>
-                  <Button variant="outline" size="sm" className="w-full">
-                    詳細を表示
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          ))
+          : (
+            <Card>
+              <CardContent className="p-4 text-center">
+                <p className="text-muted-foreground">
+                  店舗はありません
+                </p>
+              </CardContent>
+            </Card>
+          )
+        }
       </div>
 
       <CreateRestaurantModal

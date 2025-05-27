@@ -24,6 +24,8 @@ import { toast } from "@/hooks/use-toast";
 import { AddRestaurantStaffModal } from "@/components/modals/AddRestaurantStaff";
 import { CompanyusersCreateInput } from "@/api/__generated__/base/data-contracts";
 import { useCreateCompanyUserByRestaurantId } from "@/hooks/api/companyuser/companyUsers/useCreateCompanyUserByRestaurantId";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { ErrorPage } from "@/components/layout/ErrorPage";
 
 interface StaffListProps {
   restaurantId?: number;
@@ -44,9 +46,16 @@ export function StaffList({
     companyuser: { name: string; email: string };
   } | null>(null);
 
-  const { data: staffData } = useGetCompanyUsersByRestaurantId({
+  const {
+    data: staffData,
+    isLoading: isStaffLoading,
+    error: staffError,
+  } = useGetCompanyUsersByRestaurantId({
     restaurantId,
   });
+
+  const adminStaff = staffData?.admin.filter((staff) => staff.is_admin) || [];
+  const generalStaff = staffData?.admin.filter((staff) => !staff.is_admin) || [];
 
   // スタッフの招待
   const { trigger: createCompanyUserTrigger } =
@@ -127,6 +136,18 @@ export function StaffList({
     deleteRestaurantStaffTrigger();
   };
 
+  if (staffError) {
+    return (
+      <ErrorPage />
+    );
+  }
+
+  if (isStaffLoading) {
+    return (
+      <LoadingSpinner />
+    )
+  }
+
   return (
     <>
       <div className="flex justify-between items-center mb-4">
@@ -151,9 +172,8 @@ export function StaffList({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {staffData?.admin
-                ?.filter((staff) => !staff.is_admin)
-                .map((staff) => (
+              {generalStaff.length > 0 ?
+                generalStaff.map((staff) => (
                   <TableRow key={`staff-${staff.id}`}>
                     <TableCell className="font-medium">
                       {staff.name}
@@ -187,7 +207,14 @@ export function StaffList({
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                ))}
+                ))
+                : (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center text-muted-foreground">
+                      一般スタッフは登録されていません
+                    </TableCell>
+                  </TableRow>
+                )}
             </TableBody>
           </Table>
         </div>
@@ -205,9 +232,8 @@ export function StaffList({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {staffData?.admin
-                ?.filter((staff) => staff.is_admin)
-                .map((staff) => (
+              {adminStaff.length > 0 ?
+                adminStaff.map((staff) => (
                   <TableRow key={`staff-${staff.id}`}>
                     <TableCell className="font-medium">
                       {staff.name}
@@ -215,7 +241,14 @@ export function StaffList({
                     <TableCell>{staff.email}</TableCell>
                     <TableCell></TableCell>
                   </TableRow>
-                ))}
+                ))
+                : (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center text-muted-foreground">
+                      管理者は登録されていません
+                    </TableCell>
+                  </TableRow>
+                )}
             </TableBody>
           </Table>
         </div>

@@ -34,12 +34,12 @@ export function LoadingScreen({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center bg-white",
-        fullScreen ? "fixed inset-0 z-50" : "w-full h-full min-h-[300px]",
+        "flex flex-col items-center justify-center",
+        fullScreen ? "fixed inset-0 z-50 bg-white" : "w-full h-full min-h-[300px]",
         className
       )}>
       <div className="flex flex-col items-center max-w-md px-8 text-center">
-        <div className="relative w-48 h-48 mb-6 animate-pulse">
+        <div className="relative animate-pulse" style={{ height: 192, width: 192 }}>
           <img
             src={logo}
             alt="CHEFDOM"
