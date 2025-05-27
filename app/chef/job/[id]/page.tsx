@@ -90,11 +90,14 @@ type PageProps = {
   }>;
 };
 
-export default function JobDetail({ params }: PageProps) {
-  const { id } = use(params);
+export default function JobDetail({ params }: { params: { id: string } }) {
+  const { id } = params;
   const router = useRouter();
-
   const { user } = useAuth();
+
+  // ローディング状態の管理
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [isQrScanned, setIsQrScanned] = useState(false);
   const [checkInCode, setCheckInCode] = useState<string | null>(null);
@@ -119,7 +122,16 @@ export default function JobDetail({ params }: PageProps) {
     useState<JobChangeRequest | null>(null);
 
   // ジョブ詳細の取得
-  const { data: jobDetail } = useGetJob({ jobId: Number(id) });
+  const { data: jobDetail, error: jobError } = useGetJob({ jobId: Number(id) });
+
+  useEffect(() => {
+    if (jobDetail || jobError) {
+      setIsLoading(false);
+    }
+    if (jobError) {
+      setError("ジョブの取得に失敗しました");
+    }
+  }, [jobDetail, jobError]);
 
   const job = jobDetail?.job;
   const restaurant = jobDetail?.restaurant;
@@ -213,7 +225,6 @@ export default function JobDetail({ params }: PageProps) {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(config));
   };
 
-  const [error, setError] = useState<string | null>(null);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
 
   const initCamera = async () => {
@@ -503,10 +514,25 @@ export default function JobDetail({ params }: PageProps) {
     }
   };
 
-  if (!job) {
+  if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-6 max-w-md">
-        <div className="text-center">読み込み中...</div>
+        <div className="flex items-center justify-center min-h-[200px]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !job) {
+    return (
+      <div className="container mx-auto px-4 py-6 max-w-md">
+        <div className="text-center text-red-600">
+          {error || "ジョブが見つかりませんでした"}
+        </div>
+        <div className="mt-4 text-center">
+          <Button onClick={() => router.back()}>戻る</Button>
+        </div>
       </div>
     );
   }
