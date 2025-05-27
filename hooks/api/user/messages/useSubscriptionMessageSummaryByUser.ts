@@ -137,6 +137,8 @@ export const useSubscriptionMessageSummaryByUser = (
 
   return {
     messageSummaryData: getRequest.data,
+    isLoading: getRequest.isLoading,
+    error: getRequest.error,
     mutateUnreadMessages: getRequest.mutate,
   };
 };

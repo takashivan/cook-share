@@ -27,13 +27,19 @@ import { ja } from "date-fns/locale";
 import { useSubscriptionChefNotificationsByUserId } from "@/hooks/api/user/chefNotifications/useSubscriptionChefNotificationsByUserId";
 import { ChefMarkAsReadButton } from "@/components/notifications/chefMarkAsReadButton/ChefMarkAsReadButton";
 import { useMarkReadAllChefNotifications } from "@/hooks/api/user/chefNotifications/useMarkReadAllChefNotifications";
+import { LoadingScreen } from "@/components/LoadingScreen";
+import { ErrorPage } from "@/components/layout/ErrorPage";
 
 export default function ChefNotificationsPage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"all" | "unread">("all");
   const [filter, setFilter] = useState<ChefNotificationType | "all">("all");
 
-  const { notifications, isLoading } = useSubscriptionChefNotificationsByUserId({
+  const {
+    notifications,
+    isLoading,
+    error,
+  } = useSubscriptionChefNotificationsByUserId({
     userId: user?.id,
   });
 
@@ -120,8 +126,21 @@ export default function ChefNotificationsPage() {
     return matchesTab && matchesFilter;
   }) ?? [];
 
+  if (error) {
+    return (
+      <div className="flex px-4">
+        <ErrorPage />
+      </div>
+    );
+  }
+
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <LoadingScreen
+        fullScreen={false}
+        message="通知を読み込んでいます..."
+      />
+    )
   }
 
   return (

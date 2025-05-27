@@ -16,6 +16,8 @@ import { useGetRestaurant } from "@/hooks/api/companyuser/restaurants/useGetRest
 import { useGetJobsByRestaurantId } from "@/hooks/api/companyuser/jobs/useGetJobsByRestaurantId";
 import { useGetMultipleWorksessionsByJobId } from "@/hooks/api/companyuser/worksessions/useGetMultipleWorksessionsByJobId";
 import { ja } from "date-fns/locale";
+import { ErrorPage } from "@/components/layout/ErrorPage";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 export interface JobWithWorkSessions extends Omit<JobsListOutput[number], "workSessionCount"> {
   formattedWorkDate: string;
@@ -39,12 +41,20 @@ export function JobContent({
   const [copiedJob, setCopiedJob] = useState<Partial<Job> | null>(null);
 
   // 求人の取得
-  const { data: jobs } = useGetJobsByRestaurantId({
+  const {
+    data: jobs,
+    isLoading: isJobsLoading,
+    error: jobsError,
+  } = useGetJobsByRestaurantId({
     restaurantId,
   });
 
   // worksessionの取得
-  const { data: worksessionsbyJob } = useGetMultipleWorksessionsByJobId({
+  const {
+    data: worksessionsbyJob,
+    isLoading: isWorkSessionsLoading,
+    error: worksessionsError,
+  } = useGetMultipleWorksessionsByJobId({
     jobIds: jobs?.map((job) => job.id) || [],
   });
 
@@ -115,7 +125,11 @@ export function JobContent({
   }
 
   // レストラン情報の取得
-  const { data: restaurant } = useGetRestaurant({
+  const {
+    data: restaurant,
+    isLoading: isRestaurantLoading,
+    error: restaurantError,
+  } = useGetRestaurant({
     restaurantId,
   });
 
@@ -148,6 +162,18 @@ export function JobContent({
   const handleCopyJob = (jobData: Job) => {
     setCopiedJob(jobData);
     setIsCreateJobModalOpen(true);
+  }
+
+  if (jobsError || worksessionsError || restaurantError) {
+    return (
+      <ErrorPage />
+    );
+  }
+
+  if (isJobsLoading || !jobs || isWorkSessionsLoading || isRestaurantLoading) {
+    return (
+      <LoadingSpinner />
+    )
   }
 
   return (
@@ -196,30 +222,35 @@ export function JobContent({
           <TabsContent value={"filled"}>
             <JobList
               jobWithWorkSessions={filteredJobsList.filled}
+              statusText="マッチング済み"
               onCopyJob={handleCopyJob}
             />
           </TabsContent>
           <TabsContent value={"published"}>
             <JobList
               jobWithWorkSessions={filteredJobsList.published}
+              statusText="未マッチング"
               onCopyJob={handleCopyJob}
             />
           </TabsContent>
           <TabsContent value={"draft"}>
             <JobList
               jobWithWorkSessions={filteredJobsList.draft}
+              statusText="下書き"
               onCopyJob={handleCopyJob}
             />
           </TabsContent>
           <TabsContent value={"pending"}>
             <JobList
               jobWithWorkSessions={filteredJobsList.pending}
+              statusText="一時停止中"
               onCopyJob={handleCopyJob}
             />
           </TabsContent>
           <TabsContent value={"expired"}>
             <JobList
               jobWithWorkSessions={filteredJobsList.expired}
+              statusText="過去"
               onCopyJob={handleCopyJob}
             />
           </TabsContent>

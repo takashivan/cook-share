@@ -31,14 +31,18 @@ import {
 
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
-import { formatJapanHHMM, formatToJapanDate } from "@/lib/functions";
+import { formatJapanHHMM } from "@/lib/functions";
 import { useRouter } from "next/navigation";
+import { ErrorPage } from "../layout/ErrorPage";
+import { LoadingSpinner } from "../LoadingSpinner";
 
 interface ChatSheetProps {
   isOpen: boolean;
   onClose: () => void;
   worksessionId?: number;
   messagesData: WorksessionsMessagesListResult | undefined;
+  isMessagesDataLoading: boolean;
+  messagesDataError: any;
   onSendMessage: (message: string) => void;
   restaurantName: string;
   restaurantImage?: string;
@@ -60,6 +64,8 @@ export function ChatSheet({
   onClose,
   worksessionId,
   messagesData,
+  isMessagesDataLoading,
+  messagesDataError,
   onSendMessage,
   restaurantName,
   restaurantImage,
@@ -74,23 +80,29 @@ export function ChatSheet({
 
   const [messageInput, setMessageInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isChangeRequestModalOpen, setIsChangeRequestModalOpen] =
+    useState(false);
+  const [selectedChangeRequest, setSelectedChangeRequest] = useState<any>(null);
 
+  // 変更リクエスト取得
+  const {
+    data: changeRequests,
+    isLoading: isChangeRequestsLoading,
+    error: changeRequestsError,
+  } = useGetJobChangeRequests();
+  const pendingRequest = changeRequests?.find(
+    (req) => req.worksession_id === worksessionId && req.status === "PENDING"
+  );
+  
   const { trigger: updateReadMessageTrigger } = useUpdateReadMessageByUser({
     userId: user?.id,
     workSessionId: worksessionId,
   });
 
-  // 変更リクエスト取得
-  const { data: changeRequests } = useGetJobChangeRequests();
-  const pendingRequest = changeRequests?.find(
-    (req) => req.worksession_id === worksessionId && req.status === "PENDING"
-  );
-  const [isChangeRequestModalOpen, setIsChangeRequestModalOpen] =
-    useState(false);
-  const [selectedChangeRequest, setSelectedChangeRequest] = useState<any>(null);
   const { trigger: acceptJobChangeRequest } = useAcceptJobChangeRequest({
     jobChangeRequestId: selectedChangeRequest?.id,
   });
+
   const { trigger: rejectJobChangeRequest } = useRejectJobChangeRequest({
     jobChangeRequestId: selectedChangeRequest?.id,
   });
@@ -250,139 +262,149 @@ export function ChatSheet({
             </div>
           </div>
 
-          {/* メッセージエリア */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messagesData &&
-            messagesData.messages &&
-            messagesData.messages.length > 0 ? (
-              messagesData.messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${
-                    message.sender_type === "chef"
-                      ? "justify-end"
-                      : "justify-start"
-                  }`}>
-                  <div
-                    className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                      message.sender_type === "chef"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-gray-100"
-                    }`}>
-                    <p className="text-sm">
-                      {message.content.split("\n").map((line, idx) => (
-                        <span key={idx}>
-                          {line}
-                          {idx !== message.content.split("\n").length - 1 && (
-                            <br />
-                          )}
-                        </span>
-                      ))}
-                    </p>
-                    <p
-                      className={`text-xs mt-1 ${
+          {messagesDataError || changeRequestsError ? (
+            <div className="flex flex-1 justify-center w-full">
+              <ErrorPage />
+            </div>
+          ) : isMessagesDataLoading || isChangeRequestsLoading ? (
+            <LoadingSpinner />
+          ): (
+            <>
+              {/* メッセージエリア */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {messagesData &&
+                messagesData.messages &&
+                messagesData.messages.length > 0 ? (
+                  messagesData.messages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`flex ${
                         message.sender_type === "chef"
-                          ? "text-primary-foreground/70"
-                          : "text-gray-500"
+                          ? "justify-end"
+                          : "justify-start"
                       }`}>
-                      {format(new Date(message.created_at), "HH:mm")}
+                      <div
+                        className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                          message.sender_type === "chef"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-gray-100"
+                        }`}>
+                        <p className="text-sm">
+                          {message.content.split("\n").map((line, idx) => (
+                            <span key={idx}>
+                              {line}
+                              {idx !== message.content.split("\n").length - 1 && (
+                                <br />
+                              )}
+                            </span>
+                          ))}
+                        </p>
+                        <p
+                          className={`text-xs mt-1 ${
+                            message.sender_type === "chef"
+                              ? "text-primary-foreground/70"
+                              : "text-gray-500"
+                          }`}>
+                          {format(new Date(message.created_at), "HH:mm")}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500 mb-4">メッセージはまだありません</p>
+                    <p className="text-sm text-muted-foreground">
+                      まずは「はじめまして」の挨拶から始めてみましょう！
                     </p>
                   </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-gray-500 mb-4">メッセージはまだありません</p>
-                <p className="text-sm text-muted-foreground">
-                  まずは「はじめまして」の挨拶から始めてみましょう！
-                </p>
+                )}
+                <div ref={messagesEndRef} />
               </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
 
-          {/* 入力エリア */}
-          <div className="border-t bg-background">
-            <div className="px-4 py-3 border-b">
-              <p className="text-sm text-muted-foreground mb-2">
-                クイックメッセージ
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    setMessageInput(
-                      "はじめまして！この度は採用いただき、ありがとうございます。"
-                    )
-                  }>
-                  👋 はじめまして
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    setMessageInput(
-                      `集合時間・場所の確認をさせていただきます。\n\n${format(
-                        new Date(workDate),
-                        "MM月dd日"
-                      )} ${formatJapanHHMM(
-                        startTime
-                      )}に${restaurantName}に伺えばよろしいでしょうか？`
-                    )
-                  }>
-                  🕒 集合時間の確認
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    setMessageInput(
-                      "持ち物について確認させていただきたいのですが、必要な物はありますでしょうか？"
-                    )
-                  }>
-                  📋 持ち物の確認
-                </Button>
+              {/* 入力エリア */}
+              <div className="border-t bg-background">
+                <div className="px-4 py-3 border-b">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    クイックメッセージ
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setMessageInput(
+                          "はじめまして！この度は採用いただき、ありがとうございます。"
+                        )
+                      }>
+                      👋 はじめまして
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setMessageInput(
+                          `集合時間・場所の確認をさせていただきます。\n\n${format(
+                            new Date(workDate),
+                            "MM月dd日"
+                          )} ${formatJapanHHMM(
+                            startTime
+                          )}に${restaurantName}に伺えばよろしいでしょうか？`
+                        )
+                      }>
+                      🕒 集合時間の確認
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setMessageInput(
+                          "持ち物について確認させていただきたいのですが、必要な物はありますでしょうか？"
+                        )
+                      }>
+                      📋 持ち物の確認
+                    </Button>
+                  </div>
+                </div>
+                <div className="border-t p-4 flex gap-2">
+                  <TextareaAutosize
+                    minRows={1}
+                    maxRows={6}
+                    placeholder="メッセージを入力..."
+                    value={messageInput}
+                    onChange={(e) => setMessageInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      // PC: Enterで送信、Shift+Enterで改行
+                      if (
+                        e.key === "Enter" &&
+                        !e.shiftKey &&
+                        !e.nativeEvent.isComposing &&
+                        !isMobile()
+                      ) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                      // Shift+Enterで改行
+                      if (e.key === "Enter" && e.shiftKey) {
+                        setMessageInput((prev) => prev + "\n");
+                      }
+                      // モバイル: Enterは常に改行
+                      if (e.key === "Enter" && isMobile()) {
+                        setMessageInput((prev) => prev + "\n");
+                      }
+                    }}
+                    className="flex-1 resize-none px-3 py-2 border rounded-md text-base bg-white focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
+                    enterKeyHint="enter"
+                  />
+                  <Button
+                    size="icon"
+                    onClick={handleSendMessage}
+                    disabled={!messageInput.trim()}>
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-            </div>
-            <div className="border-t p-4 flex gap-2">
-              <TextareaAutosize
-                minRows={1}
-                maxRows={6}
-                placeholder="メッセージを入力..."
-                value={messageInput}
-                onChange={(e) => setMessageInput(e.target.value)}
-                onKeyDown={(e) => {
-                  // PC: Enterで送信、Shift+Enterで改行
-                  if (
-                    e.key === "Enter" &&
-                    !e.shiftKey &&
-                    !e.nativeEvent.isComposing &&
-                    !isMobile()
-                  ) {
-                    e.preventDefault();
-                    handleSendMessage();
-                  }
-                  // Shift+Enterで改行
-                  if (e.key === "Enter" && e.shiftKey) {
-                    setMessageInput((prev) => prev + "\n");
-                  }
-                  // モバイル: Enterは常に改行
-                  if (e.key === "Enter" && isMobile()) {
-                    setMessageInput((prev) => prev + "\n");
-                  }
-                }}
-                className="flex-1 resize-none px-3 py-2 border rounded-md text-base bg-white focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
-                enterKeyHint="enter"
-              />
-              <Button
-                size="icon"
-                onClick={handleSendMessage}
-                disabled={!messageInput.trim()}>
-                <Send className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+            </>
+          )}
         </div>
 
         {/* 変更リクエストモーダル */}

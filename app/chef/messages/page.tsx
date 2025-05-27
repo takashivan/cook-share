@@ -11,6 +11,8 @@ import {
   MessageSummary,
   useSubscriptionMessageSummaryByUser,
 } from "@/hooks/api/user/messages/useSubscriptionMessageSummaryByUser";
+import { ErrorPage } from "@/components/layout/ErrorPage";
+import { LoadingScreen } from "@/components/LoadingScreen";
 
 export default function MessagesPage() {
   const { user } = useAuth();
@@ -19,12 +21,21 @@ export default function MessagesPage() {
   >(null);
 
   // メッセージの取得
-  const { messageSummaryData } = useSubscriptionMessageSummaryByUser({
+  const {
+    messageSummaryData,
+    isLoading: isMessageSummaryLoading,
+    error: messageSummaryError,
+  } = useSubscriptionMessageSummaryByUser({
     userId: user?.id,
   });
 
   // メッセージの取得
-  const { messagesData, sendMessage } = useSubscriptionMessagesByUserId({
+  const {
+    messagesData,
+    sendMessage,
+    isLoading: isMessagesLoading,
+    error: messagesError,
+  } = useSubscriptionMessagesByUserId({
     userId: user?.id,
     workSessionId: selectedWorkSession?.id ?? undefined,
   });
@@ -51,6 +62,23 @@ export default function MessagesPage() {
       console.error("Failed to send message:", error);
     }
   };
+
+  if (messageSummaryError) {
+    return (
+      <div className="flex px-4">
+        <ErrorPage />
+      </div>
+    )
+  }
+
+  if (isMessageSummaryLoading) {
+    return (
+      <LoadingScreen
+        fullScreen={false}
+        message="メッセージを読み込んでいます..."
+      />
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-4">
@@ -98,6 +126,8 @@ export default function MessagesPage() {
             onClose={closeChat}
             worksessionId={selectedWorkSession?.id ?? undefined}
             messagesData={messagesData}
+            isMessagesDataLoading={isMessagesLoading}
+            messagesDataError={messagesError}
             onSendMessage={handleSendMessage}
             restaurantName={selectedWorkSession?.restaurant?.name || ""}
             restaurantImage={

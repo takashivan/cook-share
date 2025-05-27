@@ -58,9 +58,8 @@ interface NavigationGroup {
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, isAuthenticated, logout } = useCompanyAuth();
+  const { user, isLoading, isAuthenticated, logout } = useCompanyAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [isStoreListOpen, setIsStoreListOpen] = useState(false);
   const { toast } = useToast();
 
@@ -84,32 +83,37 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const token = localStorage.getItem("company_auth_token");
-        if (!token) {
+        if (isLoading) {
+          // 認証状態の初期化中は何もしない
+          return;
+        }
+
+        // 初期ロード後、未認証の場合はログインページへ
+        if (!isAuthenticated && pathname.startsWith("/admin")) {
           router.push("/login/company");
           return;
         }
 
         // 認証済みの場合
         if (isAuthenticated && user) {
+          // 通常のスタッフが会社管理画面にアクセスしようとした場合、ダッシュボードにリダイレクト
           if (!user.is_admin && pathname.startsWith("/admin/company")) {
             router.push("/admin");
             return;
           }
 
+          // メール認証が未完了の場合、メール認証ページへリダイレクト
           if (!user.is_verified) {
-            console.log("User is not verified", user);
             router.push("/register/company-verify-email");
             return;
           }
 
+          // 会社IDが無い＝会社情報未登録の場合、会社プロフィール登録ページへリダイレクト
           if (!user.companies_id) {
             router.push("/register/company-profile");
             return;
           }
         }
-
-        setIsLoading(false);
       } catch (error) {
         console.error("Auth initialization error:", error);
         router.push("/login/company");
@@ -117,18 +121,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     };
 
     initAuth();
-  }, [isAuthenticated, router, user?.is_admin, pathname]);
+  }, [isLoading, isAuthenticated, user, pathname, router]);
 
+  // 認証確認中は何も表示しない（一瞬で終わるのでローディングは表示しない）
   if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
+  // 認証済みでない場合は何も表示しない
   if (!isAuthenticated) {
     return null;
   }

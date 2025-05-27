@@ -14,6 +14,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { Button } from "@/components/ui/button";
 import { useMarkReadAllCompanyUserNotifications } from "@/hooks/api/companyuser/companyUserNotifications/useMarkReadAllCompanyUserNotifications";
+import { LoadingScreen } from "@/components/LoadingScreen";
+import { ErrorPage } from "@/components/layout/ErrorPage";
 
 export default function RestaurantNotificationsPage() {
   const { user } = useCompanyAuth();
@@ -23,7 +25,7 @@ export default function RestaurantNotificationsPage() {
   );
   const { toast } = useToast();
 
-  const { notifications, isLoading } = useSubscriptionCompanyUserNotificationsByUserId({
+  const { notifications, isLoading, error } = useSubscriptionCompanyUserNotificationsByUserId({
     userId: user?.id,
     handleSuccessGetMessage: (message: any) => {
       toast({
@@ -36,10 +38,14 @@ export default function RestaurantNotificationsPage() {
   });
 
   // 通知をフィルタリングする
-  const filteredNotifications = notifications?.filter((notification) => {
-    if (activeTab === "unread" && notification.is_read) return false;
+  const allTabNotifications = notifications?.filter((notification) => {
     if (filter !== "all" && notification.type !== filter) return false;
     return true;
+  }) ?? [];
+
+  const unreadTabNotifications = notifications?.filter((notification) => {
+    if (filter !== "all" && notification.type !== filter) return false;
+    return !notification.is_read;
   }) ?? [];
 
   const { trigger: markReadAllTrigger } = useMarkReadAllCompanyUserNotifications({
@@ -95,8 +101,19 @@ export default function RestaurantNotificationsPage() {
     return typeMap[type] || type;
   };
 
+  if (error) {
+    return (
+      <ErrorPage />
+    );
+  }
+
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <LoadingScreen
+        fullScreen={false}
+        message="通知を読み込んでいます..."
+      />
+    );
   }
 
   return (
@@ -117,8 +134,8 @@ export default function RestaurantNotificationsPage() {
             <TabsTrigger value="unread">未読</TabsTrigger>
           </TabsList>
           <TabsContent value="all" className="mt-0">
-            {filteredNotifications.length > 0 ? (
-              filteredNotifications.map((notification) => (
+            {allTabNotifications.length > 0 ? (
+              allTabNotifications.map((notification) => (
                 <Link key={notification.id} href="#" className="block mt-2">
                   <Card
                     className={`${!notification.is_read ? "bg-gray-50" : ""}`}>
@@ -172,9 +189,8 @@ export default function RestaurantNotificationsPage() {
             )}
           </TabsContent>
           <TabsContent value="unread" className="mt-0">
-            {filteredNotifications
-              .filter((n) => !n.is_read)
-              .map((notification) => (
+            {unreadTabNotifications.length > 0 ?
+              unreadTabNotifications.map((notification) => (
                 <Link key={notification.id} href="#" className="block mt-2">
                   <Card className="bg-gray-50">
                     <CardContent className="p-4">
@@ -219,7 +235,11 @@ export default function RestaurantNotificationsPage() {
                     </CardContent>
                   </Card>
                 </Link>
-              ))}
+              )) : (
+              <div className="text-center py-8 text-muted-foreground">
+                未読の通知はありません
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>

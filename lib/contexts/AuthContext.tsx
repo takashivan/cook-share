@@ -265,10 +265,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <AuthContext.Provider
       value={{

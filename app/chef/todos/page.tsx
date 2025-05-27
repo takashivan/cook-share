@@ -8,18 +8,41 @@ import { ja } from "date-fns/locale";
 import { useGetWorksessionsByUserIdByTodo } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserIdByTodo";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { ErrorPage } from "@/components/layout/ErrorPage";
+import { LoadingScreen } from "@/components/LoadingScreen";
 
 export default function TodosPage() {
   const { user } = useAuth();
 
   // ワークセッションの取得
-  const { data: workSessionsData } = useGetWorksessionsByUserIdByTodo({
+  const {
+    data: workSessionsData,
+    isLoading: isWorkSessionsLoading,
+    error: workSessionsError,
+  } = useGetWorksessionsByUserIdByTodo({
     userId: user?.id,
   });
 
   const inProgressJobs =
     workSessionsData?.filter((session) => session.status === "IN_PROGRESS") ??
     [];
+
+  if (workSessionsError) {
+    return (
+      <div className="flex px-4">
+        <ErrorPage />
+      </div>
+    );
+  }
+
+  if (isWorkSessionsLoading) {
+    return (
+      <LoadingScreen
+        fullScreen={false}
+        message="やることを読み込んでいます..."
+      />
+    );
+  }
 
   return (
     <div>

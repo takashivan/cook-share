@@ -25,13 +25,12 @@ export default function ChefLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, loading, user, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentTab = searchParams.get("tab") || "upcoming";
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   const handleLogout = () => {
     logout();
@@ -54,40 +53,49 @@ export default function ChefLayout({
     }, 0) || 0;
 
   useEffect(() => {
-    // 初期ロード時は何もしない
-    if (isInitialLoad) {
-      setIsInitialLoad(false);
-      return;
-    }
+    const initAuth = async () => {
+      try {
+        if (loading) {
+          // 認証状態の初期化中は何もしない
+          return;
+        }
 
-    // 初期ロード後、未認証の場合はログインページへ
-    if (!isAuthenticated && pathname.startsWith("/chef")) {
-      router.replace("/login");
-      return;
-    }
+        // 初期ロード後、未認証の場合はログインページへ
+        if (!isAuthenticated && pathname.startsWith("/chef")) {
+          router.replace("/login");
+          return;
+        }
 
-    // 認証済みの場合、メール認証とプロフィール完了状態をチェック
-    if (isAuthenticated && user) {
-      // @ts-ignore - TODO: Fix type definition
-      if (!user.is_verified) {
-        router.replace("/register/chef-verify-email");
-        return;
+        // 認証済みの場合
+        if (isAuthenticated && user) {
+          // メール認証が未完了の場合、メール認証ページへリダイレクト
+          if (!user.is_verified) {
+            router.replace("/register/chef-verify-email");
+            return;
+          }
+
+          // プロフィールが未完了の場合、プロフィール登録ページへリダイレクト
+          if (!user.profile_completed) {
+            router.replace("/register/chef-profile");
+            return;
+          }
+        }
+      } catch (error) {
+        console.error("Auth initialization error:", error);
+        router.push("/login");
       }
-      // @ts-ignore - TODO: Fix type definition
-      if (!user.profile_completed) {
-        router.replace("/register/chef-profile");
-        return;
-      }
-    }
-  }, [isAuthenticated, router, pathname, isInitialLoad, user]);
+    };
 
-  // 初期ロード時は表示を維持
-  if (isInitialLoad) {
+    initAuth();
+  }, [loading, isAuthenticated, user, pathname, router]);
+
+  // 認証確認中は何も表示しない（一瞬で終わるのでローディングは表示しない）
+  if (loading) {
     return null;
   }
 
   // 初期ロード後、未認証の場合は何も表示しない
-  if (!isAuthenticated && pathname.startsWith("/chef")) {
+  if (!isAuthenticated) {
     return null;
   }
 
