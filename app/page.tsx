@@ -282,14 +282,14 @@ export default function Home() {
               ))}
             </div>
 
-            <div className="flex justify-center mt-8">
+            {/* <div className="flex justify-center mt-8">
               <Button
                 variant="outline"
                 className="rounded-full flex items-center gap-1">
                 もっと見る
                 <ChevronRight className="h-4 w-4" />
               </Button>
-            </div>
+            </div> */}
           </div>
         </section>
 
@@ -320,7 +320,7 @@ export default function Home() {
                   <Button
                     variant="outline"
                     className="border rounded-md py-2 px-4 text-center">
-                    飲食業社のご登録はこちら
+                    求人掲載ご希望の方はこちら
                   </Button>
                 </Link>
               </div>
