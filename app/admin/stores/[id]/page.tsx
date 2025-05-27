@@ -2,22 +2,13 @@
 
 import { useState, use } from "react";
 import Link from "next/link";
-import {
-  MapPin,
-  Phone,
-  Clock,
-  ChevronRight,
-  Store,
-  Star,
-} from "lucide-react";
+import { MapPin, Phone, Clock, ChevronRight, Store, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { useGetRestaurant } from "@/hooks/api/companyuser/restaurants/useGetRestaurant";
-import {
-  CompanyusersListOutput,
-} from "@/api/__generated__/base/data-contracts";
+import { CompanyusersListOutput } from "@/api/__generated__/base/data-contracts";
 import Image from "next/image";
 import {
   Dialog,
@@ -142,13 +133,13 @@ export default function RestaurantDetailPage(props: {
                     <Badge className="bg-green-500 hover:bg-green-600">
                       {restaurant?.is_active ? "公開中" : "非公開"}
                     </Badge>
-                    {restaurant?.cuisine_type &&
+                    {restaurant?.cuisine_type && (
                       <Badge
                         variant="outline"
                         className="bg-white/20 backdrop-blur-sm text-white border-white/40">
                         {restaurant?.cuisine_type}
                       </Badge>
-                    }
+                    )}
                     {restaurantReview && restaurantReview.length > 0 && (
                       <Badge
                         variant="outline"
@@ -263,19 +254,13 @@ export default function RestaurantDetailPage(props: {
 
             <TabsContent value="info">
               <div className="grid gap-4">
-                <RestaurantDetail
-                  restaurantId={Number(params.id)}
-                />
-                <ReviewList
-                  restaurantId={Number(params.id)}
-                />
+                <RestaurantDetail restaurantId={Number(params.id)} />
+                <ReviewList restaurantId={Number(params.id)} />
               </div>
             </TabsContent>
 
             <TabsContent value="jobs" className="space-y-4">
-              <JobContent
-                restaurantId={Number(params.id)}
-              />
+              <JobContent restaurantId={Number(params.id)} />
             </TabsContent>
 
             <TabsContent value="staff">
