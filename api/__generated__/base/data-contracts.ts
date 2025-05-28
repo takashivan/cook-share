@@ -144,6 +144,7 @@ export type GetApplicationData = {
     town: string;
     street: string;
     profile_completed: boolean;
+    position_level: "1" | "2" | "3" | "4";
     magic_link: {
       token: string;
       /**
@@ -1228,6 +1229,7 @@ export type ByRestaurantDetailData = {
     town: string;
     street: string;
     profile_completed: boolean;
+    position_level: "1" | "2" | "3" | "4";
     magic_link: {
       token: string;
       /**
@@ -1394,6 +1396,7 @@ export interface BySessionDetailData {
     town: string;
     street: string;
     profile_completed: boolean;
+    position_level: "1" | "2" | "3" | "4";
     magic_link: {
       token: string;
       /**
@@ -3645,6 +3648,7 @@ export type ApplicationsListResult = {
     town: string;
     street: string;
     profile_completed: boolean;
+    position_level: "1" | "2" | "3" | "4";
     magic_link: {
       token: string;
       /**
@@ -3767,6 +3771,7 @@ export type WorksessionsRestaurantTodosListData = {
     town: string;
     street: string;
     profile_completed: boolean;
+    position_level: "1" | "2" | "3" | "4";
     magic_link: {
       token: string;
       /**
@@ -5154,6 +5159,7 @@ export type ByRestaurantDetailResult = {
     town: string;
     street: string;
     profile_completed: boolean;
+    position_level: "1" | "2" | "3" | "4";
     magic_link: {
       token: string;
       /**
@@ -5290,6 +5296,7 @@ export interface BySessionDetailResult {
     town: string;
     street: string;
     profile_completed: boolean;
+    position_level: "1" | "2" | "3" | "4";
     magic_link: {
       token: string;
       /**
@@ -5789,6 +5796,7 @@ export type ChefReviewsListData = {
     town: string;
     street: string;
     profile_completed: boolean;
+    position_level: "1" | "2" | "3" | "4";
     magic_link: {
       token: string;
       /**
@@ -6010,6 +6018,7 @@ export type RestaurantReviewsListResult = {
     town: string;
     street: string;
     profile_completed: boolean;
+    position_level: "1" | "2" | "3" | "4";
     magic_link: {
       token: string;
       /**
@@ -6112,21 +6121,12 @@ export interface RestaurantsPartialUpdatePayload {
   business_hours: string;
   contact_info: string;
   profile_image: string;
-  /** @format timestamptz */
-  updated_at: number;
-  /** Whether the restaurant is active. */
-  is_active: boolean;
-  /** @format uuid */
-  companies_id: string | null;
   station: string;
   access: string;
   rating: number;
-  /** @default "1" */
-  is_approved: boolean;
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
-  status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   /** @format binary */
   photo: File | null;
 }
@@ -6319,6 +6319,7 @@ export interface EmailChangeCreateResult {
   town: string;
   street: string;
   profile_completed: boolean;
+  position_level: "1" | "2" | "3" | "4";
   magic_link: {
     token: string;
     /**
@@ -6387,6 +6388,7 @@ export interface EmailConfirmCreateResult {
   town: string;
   street: string;
   profile_completed: boolean;
+  position_level: "1" | "2" | "3" | "4";
   magic_link: {
     token: string;
     /**
@@ -6454,6 +6456,7 @@ export interface ProfilePartialUpdatePayload {
   city: string;
   town: string;
   street: string;
+  position_level: "1" | "2" | "3" | "4";
   /** @format binary */
   photo: File | null;
   magic_link: {
@@ -6658,6 +6661,7 @@ export interface UserDetailData {
   town: string;
   street: string;
   profile_completed: boolean;
+  position_level: "1" | "2" | "3" | "4";
   magic_link: {
     token: string;
     /**
@@ -6708,6 +6712,7 @@ export interface UserPartialUpdatePayload {
   town: string;
   street: string;
   profile_completed: boolean;
+  position_level: "1" | "2" | "3" | "4";
   /** @format binary */
   photo: File | null;
   magic_link: {
@@ -6781,6 +6786,7 @@ export interface EmailChangeCreateOutput {
   town: string;
   street: string;
   profile_completed: boolean;
+  position_level: "1" | "2" | "3" | "4";
   magic_link: {
     token: string;
     /**
@@ -6849,6 +6855,7 @@ export interface EmailConfirmCreateOutput {
   town: string;
   street: string;
   profile_completed: boolean;
+  position_level: "1" | "2" | "3" | "4";
   magic_link: {
     token: string;
     /**
@@ -7603,6 +7610,7 @@ export interface UsersDetailData {
   town: string;
   street: string;
   profile_completed: boolean;
+  position_level: "1" | "2" | "3" | "4";
   magic_link: {
     token: string;
     /**
@@ -7633,6 +7641,7 @@ export interface UsersPartialUpdatePayload {
   city: string;
   town: string;
   street: string;
+  position_level: "1" | "2" | "3" | "4";
   /** @format binary */
   photo: File | null;
 }
@@ -7695,6 +7704,7 @@ export type UsersListData = {
   town: string;
   street: string;
   profile_completed: boolean;
+  position_level: "1" | "2" | "3" | "4";
   magic_link: {
     token: string;
     /**
@@ -7750,6 +7760,7 @@ export interface UsersCreatePayload {
   town: string;
   street: string;
   profile_completed: boolean;
+  position_level: "1" | "2" | "3" | "4";
   magic_link: {
     token: string;
     /**
@@ -7814,6 +7825,7 @@ export interface UsersCreateData {
   town: string;
   street: string;
   profile_completed: boolean;
+  position_level: "1" | "2" | "3" | "4";
   magic_link: {
     token: string;
     /**
@@ -7878,6 +7890,7 @@ export type UserListData = {
   town: string;
   street: string;
   profile_completed: boolean;
+  position_level: "1" | "2" | "3" | "4";
   magic_link: {
     token: string;
     /**
@@ -7933,6 +7946,7 @@ export interface UserCreatePayload {
   town: string;
   street: string;
   profile_completed: boolean;
+  position_level: "1" | "2" | "3" | "4";
   magic_link: {
     token: string;
     /**
@@ -7997,6 +8011,7 @@ export interface UserCreateData {
   town: string;
   street: string;
   profile_completed: boolean;
+  position_level: "1" | "2" | "3" | "4";
   magic_link: {
     token: string;
     /**
@@ -8201,6 +8216,7 @@ export type RestaurantTodoDetailData = {
     town: string;
     street: string;
     profile_completed: boolean;
+    position_level: "1" | "2" | "3" | "4";
     magic_link: {
       token: string;
       /**
@@ -9443,7 +9459,6 @@ export interface RejectPartialUpdateOutput {
     actual_fee: number;
     transportation_type: "FIXED" | "NONE" | "MAX";
   };
-  review: string;
 }
 
 export interface RestaurantReviewListResult {
@@ -9570,6 +9585,7 @@ export interface RestaurantReviewListResult {
     town: string;
     street: string;
     profile_completed: boolean;
+    position_level: "1" | "2" | "3" | "4";
     magic_link: {
       token: string;
       /**

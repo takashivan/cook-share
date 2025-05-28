@@ -565,6 +565,7 @@ export type WorksessionsThismonthListData = {
     town: string;
     street: string;
     profile_completed: boolean;
+    position_level: "1" | "2" | "3" | "4";
     magic_link: {
       token: string;
       /**

@@ -68,6 +68,7 @@ export interface ChangePasswordCreateData {
     town: string;
     street: string;
     profile_completed: boolean;
+    position_level: "1" | "2" | "3" | "4";
     magic_link: {
       token: string;
       /**
@@ -255,6 +256,7 @@ export interface RequestPasswordResetCreateData {
   town: string;
   street: string;
   profile_completed: boolean;
+  position_level: "1" | "2" | "3" | "4";
   magic_link: {
     token: string;
     /**
@@ -324,6 +326,7 @@ export interface ResendVerificationCreateData {
     town: string;
     street: string;
     profile_completed: boolean;
+    position_level: "1" | "2" | "3" | "4";
     magic_link: {
       token: string;
       /**
@@ -395,6 +398,7 @@ export interface ResetPasswordCreateData {
     town: string;
     street: string;
     profile_completed: boolean;
+    position_level: "1" | "2" | "3" | "4";
     magic_link: {
       token: string;
       /**
@@ -470,6 +474,7 @@ export interface SignupCreateData {
     town: string;
     street: string;
     profile_completed: boolean;
+    position_level: "1" | "2" | "3" | "4";
     magic_link: {
       token: string;
       /**
@@ -542,6 +547,7 @@ export interface UpdateEmailCreateData {
   town: string;
   street: string;
   profile_completed: boolean;
+  position_level: "1" | "2" | "3" | "4";
   magic_link: {
     token: string;
     /**
@@ -612,6 +618,7 @@ export interface VerifyEmailCreateData {
     town: string;
     street: string;
     profile_completed: boolean;
+    position_level: "1" | "2" | "3" | "4";
     magic_link: {
       token: string;
       /**
