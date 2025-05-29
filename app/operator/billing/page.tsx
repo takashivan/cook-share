@@ -34,60 +34,42 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { operatorApi } from "@/lib/api/operator";
+import useSWR from "swr";
+
+interface Billing {
+  id: string;
+  created_at: number;
+  companies_id: string;
+  month: string;
+  amount: number;
+  invoice_id: string;
+  status: string;
+  fee_rate: number;
+  session_count: number;
+  start_date?: string;
+  end_date?: string;
+  hosted_invoice_url: string;
+  invoice_pdf: string;
+  invoice_number: string;
+  companies?: {
+    name: string;
+  };
+}
 
 export default function BillingList() {
-  const billings = [
-    {
-      id: "INV-2024-001",
-      company: "株式会社フードサービス",
-      date: "2024/03/01",
-      dueDate: "2024/03/15",
-      amount: "¥45,000",
-      status: "支払済",
-      paymentMethod: "クレジットカード",
-      period: "2024年3月分",
-    },
-    {
-      id: "INV-2024-002",
-      company: "レストラングループ株式会社",
-      date: "2024/03/01",
-      dueDate: "2024/03/15",
-      amount: "¥38,500",
-      status: "支払済",
-      paymentMethod: "銀行振込",
-      period: "2024年3月分",
-    },
-    {
-      id: "INV-2024-003",
-      company: "株式会社キッチンワークス",
-      date: "2024/03/01",
-      dueDate: "2024/03/15",
-      amount: "¥22,000",
-      status: "未払い",
-      paymentMethod: "クレジットカード",
-      period: "2024年3月分",
-    },
-    {
-      id: "INV-2024-004",
-      company: "株式会社ダイニングプラス",
-      date: "2024/03/01",
-      dueDate: "2024/03/15",
-      amount: "¥15,000",
-      status: "期限切れ",
-      paymentMethod: "銀行振込",
-      period: "2024年3月分",
-    },
-    {
-      id: "INV-2024-005",
-      company: "グルメフード株式会社",
-      date: "2024/03/01",
-      dueDate: "2024/03/15",
-      amount: "¥10,000",
-      status: "支払済",
-      paymentMethod: "クレジットカード",
-      period: "2024年3月分",
-    },
-  ];
+  const { data: billings, isLoading } = useSWR<Billing[]>(
+    "/api/operator/billings",
+    operatorApi.getAllBilling
+  );
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!billings) {
+    return <div>No billings found</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -124,43 +106,40 @@ export default function BillingList() {
             <TableHeader>
               <TableRow>
                 <TableHead>請求番号</TableHead>
-                <TableHead>会社名</TableHead>
+                <TableHead>会社ID</TableHead>
                 <TableHead>発行日</TableHead>
-                <TableHead>支払期限</TableHead>
+                <TableHead>期間</TableHead>
                 <TableHead>金額</TableHead>
                 <TableHead>ステータス</TableHead>
-                <TableHead>支払い方法</TableHead>
+                <TableHead>セッション数</TableHead>
                 <TableHead className="w-[100px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {billings.map((billing) => (
                 <TableRow key={billing.id}>
-                  <TableCell className="font-medium">{billing.id}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center">
-                        <Building className="h-4 w-4 text-primary" />
-                      </div>
-                      {billing.company}
-                    </div>
+                  <TableCell className="font-medium">
+                    {billing.invoice_number}
                   </TableCell>
-                  <TableCell>{billing.date}</TableCell>
-                  <TableCell>{billing.dueDate}</TableCell>
-                  <TableCell>{billing.amount}</TableCell>
+                  <TableCell>{billing.companies?.name || "---"}</TableCell>
+                  <TableCell>
+                    {new Date(billing.created_at).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>{billing.month}</TableCell>
+                  <TableCell>¥{billing.amount.toLocaleString()}</TableCell>
                   <TableCell>
                     <div
                       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        billing.status === "支払済"
+                        billing.status === "PAID"
                           ? "bg-green-100 text-green-800"
-                          : billing.status === "未払い"
+                          : billing.status === "PENDING"
                           ? "bg-amber-100 text-amber-800"
                           : "bg-red-100 text-red-800"
                       }`}>
                       {billing.status}
                     </div>
                   </TableCell>
-                  <TableCell>{billing.paymentMethod}</TableCell>
+                  <TableCell>{billing.session_count}</TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -171,74 +150,23 @@ export default function BillingList() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem>
-                          <Link
-                            href={`/operator/billing/${billing.id}`}
+                          <a
+                            href={billing.hosted_invoice_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="w-full">
-                            詳細を表示
-                          </Link>
+                            請求書を表示
+                          </a>
                         </DropdownMenuItem>
                         <DropdownMenuItem>
-                          請求書をダウンロード
+                          <a
+                            href={billing.invoice_pdf}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full">
+                            PDFをダウンロード
+                          </a>
                         </DropdownMenuItem>
-                        {billing.status !== "支払済" && (
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <DropdownMenuItem
-                                onSelect={(e) => e.preventDefault()}>
-                                支払い状態を更新
-                              </DropdownMenuItem>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>支払い状態の更新</DialogTitle>
-                                <DialogDescription>
-                                  {billing.company}の請求 {billing.id}{" "}
-                                  の支払い状態を更新します。
-                                </DialogDescription>
-                              </DialogHeader>
-                              <div className="py-4 space-y-4">
-                                <div className="flex items-center gap-2">
-                                  <Button variant="outline" className="w-full">
-                                    未払い
-                                  </Button>
-                                  <Button variant="outline" className="w-full">
-                                    支払い中
-                                  </Button>
-                                  <Button className="w-full">支払済</Button>
-                                </div>
-                              </div>
-                              <DialogFooter>
-                                <Button variant="outline">キャンセル</Button>
-                                <Button>更新する</Button>
-                              </DialogFooter>
-                            </DialogContent>
-                          </Dialog>
-                        )}
-                        {billing.status === "期限切れ" && (
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <DropdownMenuItem
-                                onSelect={(e) => e.preventDefault()}>
-                                リマインダーを送信
-                              </DropdownMenuItem>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>
-                                  支払いリマインダーの送信
-                                </DialogTitle>
-                                <DialogDescription>
-                                  {billing.company}
-                                  に支払いリマインダーを送信します。
-                                </DialogDescription>
-                              </DialogHeader>
-                              <DialogFooter>
-                                <Button variant="outline">キャンセル</Button>
-                                <Button>送信する</Button>
-                              </DialogFooter>
-                            </DialogContent>
-                          </Dialog>
-                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -256,15 +184,10 @@ export default function BillingList() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium">{billing.id}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className="w-5 h-5 rounded-md bg-primary/10 flex items-center justify-center">
-                      <Building className="h-3 w-3 text-primary" />
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {billing.company}
-                    </p>
-                  </div>
+                  <p className="font-medium">{billing.invoice_number}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {billing.companies_id}
+                  </p>
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -275,83 +198,54 @@ export default function BillingList() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem>
-                      <Link
-                        href={`/operator/billing/${billing.id}`}
+                      <a
+                        href={billing.hosted_invoice_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="w-full">
-                        詳細を表示
-                      </Link>
+                        請求書を表示
+                      </a>
                     </DropdownMenuItem>
-                    <DropdownMenuItem>請求書をダウンロード</DropdownMenuItem>
-                    {billing.status !== "支払済" && (
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <DropdownMenuItem
-                            onSelect={(e) => e.preventDefault()}>
-                            支払い状態を更新
-                          </DropdownMenuItem>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>支払い状態の更新</DialogTitle>
-                            <DialogDescription>
-                              {billing.company}の請求 {billing.id}{" "}
-                              の支払い状態を更新します。
-                            </DialogDescription>
-                          </DialogHeader>
-                          <div className="py-4 space-y-4">
-                            <div className="flex items-center gap-2">
-                              <Button variant="outline" className="w-full">
-                                未払い
-                              </Button>
-                              <Button variant="outline" className="w-full">
-                                支払い中
-                              </Button>
-                              <Button className="w-full">支払済</Button>
-                            </div>
-                          </div>
-                          <DialogFooter>
-                            <Button variant="outline">キャンセル</Button>
-                            <Button>更新する</Button>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
-                    )}
+                    <DropdownMenuItem>
+                      <a
+                        href={billing.invoice_pdf}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full">
+                        PDFをダウンロード
+                      </a>
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
               <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
                 <div>
                   <p className="text-muted-foreground">発行日</p>
-                  <p>{billing.date}</p>
+                  <p>{new Date(billing.created_at).toLocaleDateString()}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">支払期限</p>
-                  <p>{billing.dueDate}</p>
+                  <p className="text-muted-foreground">期間</p>
+                  <p>{billing.month}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">金額</p>
-                  <p className="font-medium">{billing.amount}</p>
+                  <p className="font-medium">
+                    ¥{billing.amount.toLocaleString()}
+                  </p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">ステータス</p>
                   <div
                     className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      billing.status === "支払済"
+                      billing.status === "PAID"
                         ? "bg-green-100 text-green-800"
-                        : billing.status === "未払い"
+                        : billing.status === "PENDING"
                         ? "bg-amber-100 text-amber-800"
                         : "bg-red-100 text-red-800"
                     }`}>
                     {billing.status}
                   </div>
                 </div>
-              </div>
-              <div className="mt-3">
-                <Link href={`/operator/billing/${billing.id}`}>
-                  <Button variant="outline" size="sm" className="w-full">
-                    詳細を表示
-                  </Button>
-                </Link>
               </div>
             </CardContent>
           </Card>
