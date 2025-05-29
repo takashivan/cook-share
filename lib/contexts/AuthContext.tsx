@@ -19,7 +19,8 @@ import { login, logout, getUserProfile, register } from "@/lib/api/user";
 import { getApi } from "@/api/api-factory";
 import { Users } from "@/api/__generated__/base/Users";
 import { Auth } from "@/api/__generated__/authentication/Auth";
-import { UsersPartialUpdatePayload } from "@/api/__generated__/base/data-contracts";
+import { ProfilePartialUpdatePayload, UsersPartialUpdatePayload } from "@/api/__generated__/base/data-contracts";
+import { User } from "@/api/__generated__/base/User";
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -28,6 +29,10 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   register: (data: UserData) => Promise<void>;
+  createProfile: (data: ProfilePartialUpdatePayload) => Promise<{
+    status: "success" | "error";
+    error?: string;
+  }>;
   update: (data: Partial<UsersPartialUpdatePayload>) => Promise<void>;
   changeEmail: (email: string) => Promise<void>;
   confirmEmail: (token: string) => Promise<void>;
@@ -44,6 +49,7 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => {},
   logout: () => {},
   register: async () => {},
+  createProfile: async () => ({ status: "error" as const, error: "Not implemented" }),
   update: async () => {},
   changeEmail: async () => {},
   confirmEmail: async () => {},
@@ -154,6 +160,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  /**
+   * ユーザー登録直後の、プロフィールの更新を行う関数
+   */
+  const handleCreateProfile = async (data: ProfilePartialUpdatePayload): Promise<{ status: "success" | "error"; error?: string }> => {
+    try {
+      const userId = user?.id;
+      if (!userId) {
+        return {
+          status: "error",
+          error: "ユーザー情報が見つかりません",
+        };
+      }
+
+      const userApi = getApi(User);
+      const response = await userApi.profilePartialUpdate(userId, data, {
+        headers: {
+          "X-User-Type": "chef"
+        }
+      });
+
+      // stripeのエラーがある場合、エラーの内容を返す
+      if ((response.data as any).data?.error != null) {
+        return {
+          status: "error",
+          error: String((response.data as any).data.error.message || "不明なエラーが発生しました"),
+        };
+      }
+
+      saveUser(response.data as unknown as UserProfile);
+      return {
+        status: "success",
+      };
+    } catch (error: any) {
+      console.error("Update profile error:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * ユーザープロフィールの更新を行う関数
+   */
   const handleUpdate = async (data: Partial<UsersPartialUpdatePayload>) => {
     try {
       const userId = user?.id;
@@ -275,6 +322,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout: handleLogout,
         register: handleRegister,
         update: handleUpdate,
+        createProfile: handleCreateProfile,
         setUser: saveUser,
         changeEmail: handleChangeEmail,
         confirmEmail: handleConfirmEmail,

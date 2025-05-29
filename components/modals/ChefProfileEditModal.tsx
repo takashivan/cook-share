@@ -109,9 +109,9 @@ export function ChefProfileEditModal({
   ) => {
     const postalCode = e.target.value.replace(/-/g, "");
     setValue("postal_code", postalCode);
-    trigger("postal_code");
+    const isValid = await trigger("postal_code");
 
-    if (postalCode.length === 7) {
+    if (isValid && postalCode.length === 7) {
       try {
         const response = await fetch(
           `https://zipcloud.ibsnet.co.jp/api/search?zipcode=${postalCode}`
