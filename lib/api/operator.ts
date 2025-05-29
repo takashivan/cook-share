@@ -51,6 +51,23 @@ export const operatorApi = {
     );
   },
 
+  getOperators: async (): Promise<any[]> => {
+    return apiRequest(
+      `${API_CONFIG.baseURLs.operator}`,
+      "GET",
+      undefined,
+      "operator"
+    );
+  },
+  createOperator: async (data: any): Promise<any> => {
+    return apiRequest(
+      `${API_CONFIG.baseURLs.operator}`,
+      "POST",
+      data,
+      "operator"
+    );
+  },
+
   // 会社管理
   getCompanies: async (): Promise<any[]> => {
     return apiRequest(
@@ -83,6 +100,15 @@ export const operatorApi = {
   getChef: async (id: string): Promise<any> => {
     return apiRequest(
       `${API_CONFIG.baseURLs.operator}/chefs/${id}`,
+      "GET",
+      undefined,
+      "operator"
+    );
+  },
+
+  getAllBilling: async (): Promise<any[]> => {
+    return apiRequest(
+      `${API_CONFIG.baseURLs.operator}/billings/all`,
       "GET",
       undefined,
       "operator"
