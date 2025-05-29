@@ -32,7 +32,11 @@ import { LoadingScreen } from "@/components/LoadingScreen";
 
 export default function BillingList() {
   const { user } = useCompanyAuth();
-  const { data: billings, isLoading, error } = useGetCurrentBillingSummaryByCompanyId({
+  const {
+    data: billings,
+    isLoading,
+    error,
+  } = useGetCurrentBillingSummaryByCompanyId({
     companyId: user?.companies_id ?? undefined,
   });
 
@@ -51,9 +55,7 @@ export default function BillingList() {
   };
 
   if (error) {
-    return (
-      <ErrorPage />
-    );
+    return <ErrorPage />;
   }
 
   if (isLoading || !billings) {
@@ -72,12 +74,6 @@ export default function BillingList() {
           <h2 className="text-2xl font-bold tracking-tight">請求一覧</h2>
           <p className="text-muted-foreground">会社の請求履歴一覧です</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button>
-            <CreditCard className="mr-2 h-4 w-4" />
-            支払い方法を変更
-          </Button>
-        </div>
       </div>
 
       <div className="flex flex-col md:flex-row items-center gap-4">
@@ -89,14 +85,6 @@ export default function BillingList() {
             className="w-full pl-8"
           />
         </div>
-        <Button variant="outline" size="sm" className="ml-auto">
-          <Download className="mr-2 h-4 w-4" />
-          エクスポート
-        </Button>
-        <Button variant="outline" size="sm">
-          <SlidersHorizontal className="mr-2 h-4 w-4" />
-          フィルター
-        </Button>
       </div>
 
       {/* Desktop View */}
@@ -116,7 +104,7 @@ export default function BillingList() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {(billings.length > 0) ?
+              {billings.length > 0 ? (
                 billings.map((billing) => (
                   <TableRow key={billing.id}>
                     <TableCell className="font-medium">
@@ -169,13 +157,15 @@ export default function BillingList() {
                     </TableCell>
                   </TableRow>
                 ))
-                : (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center text-muted-foreground">
-                      請求情報がありません
-                    </TableCell>
-                  </TableRow>
-                )}
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={8}
+                    className="text-center text-muted-foreground">
+                    請求情報がありません
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>

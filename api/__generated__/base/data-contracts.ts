@@ -6419,30 +6419,14 @@ export interface StripeCreateAccountCreatePayload {
 export type StripeCreateAccountCreateData = object;
 
 export interface ProfilePartialUpdatePayload {
-  name: string;
   /** @format email */
   email: string;
-  user_type: string;
-  status: string;
-  /** @format date */
-  last_login_at: string | null;
-  /** @format date */
-  updated_at: string | null;
   skills: string[];
   experience_level: string;
   bio: string;
   certifications: string[];
   /** @format date */
   dateofbirth: string | null;
-  profile_image: string;
-  is_approved: boolean;
-  is_verified: boolean;
-  /** @format email */
-  pending_email: string;
-  email_change_token: string;
-  password_reset_token: string;
-  stripe_verified: boolean;
-  stripe_requirements: object;
   address: string;
   phone: string;
   last_name: string;
@@ -6459,15 +6443,6 @@ export interface ProfilePartialUpdatePayload {
   position_level: "1" | "2" | "3" | "4";
   /** @format binary */
   photo: File | null;
-  magic_link: {
-    token: string;
-    /**
-     * Time the token expires
-     * @format timestamptz
-     */
-    expiration: number;
-    used: boolean;
-  } | null;
 }
 
 export type ProfilePartialUpdateData = object;
