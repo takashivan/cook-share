@@ -11,7 +11,7 @@
  */
 
 import {
-  BillingSummaryCurrentListData,
+  BillingSummaryListData,
   CompaniesCreateData,
   CompaniesCreatePayload,
   CompaniesDeleteData,
@@ -294,27 +294,25 @@ export class Companies<
    * @description <br /><br /> <b>Authentication:</b> not required
    *
    * @tags companies
-   * @name BillingSummaryCurrentList
-   * @request GET:/companies/{company_id}/billing-summary/current
+   * @name BillingSummaryList
+   * @request GET:/companies/{company_id}/billing-summary
    */
-  billingSummaryCurrentList = (companyId: string, params: RequestParams = {}) =>
-    this.request<BillingSummaryCurrentListData, void>({
-      path: `/companies/${companyId}/billing-summary/current`,
+  billingSummaryList = (companyId: string, params: RequestParams = {}) =>
+    this.request<BillingSummaryListData, void>({
+      path: `/companies/${companyId}/billing-summary`,
       method: "GET",
       format: "json",
       ...params,
     });
 
-  billingSummaryCurrentListQueryArgs = (
+  billingSummaryListQueryArgs = (
     companyId: string,
     params: RequestParams = {},
     enabled: boolean = true,
   ) => {
-    const key = enabled
-      ? [`/companies/${companyId}/billing-summary/current`]
-      : null;
+    const key = enabled ? [`/companies/${companyId}/billing-summary`] : null;
     const fetcher = () =>
-      this.billingSummaryCurrentList(companyId, params).then((res) => res.data);
+      this.billingSummaryList(companyId, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 

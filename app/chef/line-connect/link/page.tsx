@@ -29,8 +29,8 @@ export default function LinkAccountPage() {
           profile.displayName,
           profile.pictureUrl || ""
         );
-        if (response.success) {
-          router.push("/chef/line-connect/liff");
+        if (response.user) {
+          router.push("/chef/dashboard");
         } else {
           setError(response.message || "連携に失敗しました");
         }
