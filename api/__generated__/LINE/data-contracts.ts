@@ -74,6 +74,7 @@ export interface ConnectLineAccountCreateData {
   town: string;
   street: string;
   profile_completed: boolean;
+  position_level: "1" | "2" | "3" | "4";
   magic_link: {
     token: string;
     /**
@@ -142,6 +143,7 @@ export interface LineDisconnectCreateData {
   town: string;
   street: string;
   profile_completed: boolean;
+  position_level: "1" | "2" | "3" | "4";
   magic_link: {
     token: string;
     /**
@@ -223,6 +225,7 @@ export interface LinkLineIdCreateData {
   town: string;
   street: string;
   profile_completed: boolean;
+  position_level: "1" | "2" | "3" | "4";
   magic_link: {
     token: string;
     /**
