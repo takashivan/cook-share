@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "@/hooks/use-toast";
+import { UnlinkLineId } from "@/lib/api/line";
 
 export function ConnectSettings() {
   const { user, reloadUser } = useAuth();
@@ -62,16 +63,10 @@ export function ConnectSettings() {
     }
   };
 
-  // 仮のLINE連携解除API
-  const dislinkLineAccount = async () => {
-    // TODO: 実際のAPI実装に置き換え
-    return new Promise((resolve) => setTimeout(resolve, 1000));
-  };
-
   const handleUnlinkLine = async () => {
     setIsUnlinking(true);
     try {
-      await dislinkLineAccount();
+      await UnlinkLineId(user.id);
       await reloadUser();
       toast({
         title: "LINE連携を解除しました",

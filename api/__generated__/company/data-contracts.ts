@@ -721,7 +721,7 @@ export interface CompaniesPartialUpdateData {
   company_email: string;
 }
 
-export type BillingSummaryCurrentListData = {
+export type BillingSummaryListData = {
   /** @format uuid */
   id: string;
   /**

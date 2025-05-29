@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import {
   Download,
@@ -36,50 +37,80 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { operatorApi } from "@/lib/api/operator";
+import useSWR from "swr";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { toast } from "@/hooks/use-toast";
+
+const formSchema = z.object({
+  name: z.string().min(1, "名前は必須です"),
+  email: z.string().email("有効なメールアドレスを入力してください"),
+  password: z.string().min(8, "パスワードは8文字以上で入力してください"),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 export default function StaffList() {
-  const staff = [
-    {
-      id: 1,
-      name: "管理者 太郎",
-      email: "admin1@CHEFDOM.jp",
-      role: "システム管理者",
-      lastLogin: "2024/03/31 10:30",
-      status: "アクティブ",
+  const [isOpen, setIsOpen] = useState(false);
+  const {
+    data: operators,
+    isLoading,
+    mutate,
+  } = useSWR("/api/operator/operator", operatorApi.getOperators);
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
     },
-    {
-      id: 2,
-      name: "運営 花子",
-      email: "operator1@CHEFDOM.jp",
-      role: "運営担当",
-      lastLogin: "2024/03/30 15:45",
-      status: "アクティブ",
-    },
-    {
-      id: 3,
-      name: "サポート 一郎",
-      email: "support1@CHEFDOM.jp",
-      role: "カスタマーサポート",
-      lastLogin: "2024/03/29 09:15",
-      status: "アクティブ",
-    },
-    {
-      id: 4,
-      name: "経理 次郎",
-      email: "finance1@CHEFDOM.jp",
-      role: "経理担当",
-      lastLogin: "2024/03/28 14:20",
-      status: "アクティブ",
-    },
-    {
-      id: 5,
-      name: "マーケ 三郎",
-      email: "marketing1@CHEFDOM.jp",
-      role: "マーケティング担当",
-      lastLogin: "2024/03/25 11:10",
-      status: "停止中",
-    },
-  ];
+  });
+
+  const onSubmit = async (data: FormValues) => {
+    try {
+      await operatorApi.createOperator(data);
+      toast({
+        title: "スタッフを追加しました",
+        description: "新しいスタッフが追加されました",
+      });
+      setIsOpen(false);
+      form.reset();
+      mutate();
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "スタッフの追加に失敗しました",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!operators) {
+    return <div>No operators found</div>;
+  }
+
+  const staff = operators.map((operator) => ({
+    id: operator.id,
+    name: operator.name,
+    email: operator.email,
+    role: operator.role,
+    status: operator.is_active ? "アクティブ" : "非アクティブ",
+  }));
 
   return (
     <div className="space-y-6">
@@ -91,10 +122,80 @@ export default function StaffList() {
           <p className="text-muted-foreground">運営スタッフの一覧と管理</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            スタッフを追加
-          </Button>
+          <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                スタッフを追加
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>スタッフを追加</DialogTitle>
+                <DialogDescription>
+                  新しい運営スタッフを追加します。入力された情報は即時に反映されます。
+                </DialogDescription>
+              </DialogHeader>
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>名前</FormLabel>
+                        <FormControl>
+                          <Input placeholder="山田 太郎" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>メールアドレス</FormLabel>
+                        <FormControl>
+                          <Input placeholder="yamada@example.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>パスワード</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="********"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <DialogFooter>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsOpen(false)}>
+                      キャンセル
+                    </Button>
+                    <Button type="submit">追加する</Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -107,14 +208,6 @@ export default function StaffList() {
             className="w-full pl-8"
           />
         </div>
-        <Button variant="outline" size="sm" className="ml-auto">
-          <Download className="mr-2 h-4 w-4" />
-          エクスポート
-        </Button>
-        <Button variant="outline" size="sm">
-          <SlidersHorizontal className="mr-2 h-4 w-4" />
-          フィルター
-        </Button>
       </div>
 
       {/* Desktop View */}
@@ -154,7 +247,6 @@ export default function StaffList() {
                       {person.role}
                     </Badge>
                   </TableCell>
-                  <TableCell>{person.lastLogin}</TableCell>
                   <TableCell>
                     <div
                       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
@@ -314,10 +406,7 @@ export default function StaffList() {
                     {person.role}
                   </Badge>
                 </div>
-                <div>
-                  <p className="text-muted-foreground">最終ログイン</p>
-                  <p>{person.lastLogin}</p>
-                </div>
+                <div></div>
                 <div className="col-span-2">
                   <p className="text-muted-foreground">ステータス</p>
                   <div

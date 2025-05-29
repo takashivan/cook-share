@@ -17,6 +17,22 @@ import { useGetCompanyUsersByCompanyId } from "@/hooks/api/companyuser/companyUs
 import { useGetRestaurantsByCompanyUserId } from "@/hooks/api/companyuser/restaurants/useGetRestaurantsByCompanyUserId";
 import { ErrorPage } from "@/components/layout/ErrorPage";
 import { LoadingScreen } from "@/components/LoadingScreen";
+import { useGetCurrentBillingSummaryByCompanyId } from "@/hooks/api/companyuser/billings/useGetCurrentBillingSummaryByCompanyId";
+import { CompanyProfileEditModal } from "@/components/modals/CompanyProfileEditModal";
+import { useState } from "react";
+
+interface BillingSummary {
+  id: string;
+  created_at: number;
+  companies_id: string | null;
+  month: string;
+  amount: number;
+  invoice_id: string;
+  status: "PENDING" | "PAID" | "FAILED";
+  fee_rate: number;
+  session_count: number;
+  invoice_number: string;
+}
 
 export function CompanyDashboard() {
   const { user } = useCompanyAuth();
@@ -39,11 +55,24 @@ export function CompanyDashboard() {
     error: jobsError,
   } = useGetJobsByCompanyId({ companyId: user?.companies_id ?? undefined });
 
+  const [isCompanyProfileEditModalOpen, setIsCompanyProfileEditModalOpen] =
+    useState(false);
+
   const {
     data: companyUsers,
     isLoading: companyUsersLoading,
     error: companyUsersError,
-  } = useGetCompanyUsersByCompanyId({ companyId: user?.companies_id ?? undefined });
+  } = useGetCompanyUsersByCompanyId({
+    companyId: user?.companies_id ?? undefined,
+  });
+
+  const {
+    data: billings,
+    isLoading: billingsLoading,
+    error: billingsError,
+  } = useGetCurrentBillingSummaryByCompanyId({
+    companyId: user?.companies_id ?? undefined,
+  });
 
   // const handleCreateRestaurant = async (data: FormData) => {
   //   try {
@@ -101,13 +130,28 @@ export function CompanyDashboard() {
   //   }
   // };
 
-  if (companyError || companyUsersError || restaurantsError || jobsError) {
-    return (
-      <ErrorPage />
-    );
+  if (
+    companyError ||
+    companyUsersError ||
+    restaurantsError ||
+    jobsError ||
+    billingsError
+  ) {
+    return <ErrorPage />;
   }
 
-  if (!company || companyLoading || !companyUsers || companyUsersLoading || !restaurants || restaurantsLoading || !jobData || jobsLoading) {
+  if (
+    !company ||
+    companyLoading ||
+    !companyUsers ||
+    companyUsersLoading ||
+    !restaurants ||
+    restaurantsLoading ||
+    !jobData ||
+    jobsLoading ||
+    !billings ||
+    billingsLoading
+  ) {
     return (
       <LoadingScreen
         fullScreen={false}
@@ -129,8 +173,12 @@ export function CompanyDashboard() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button>
-              <Building className="mr-2 h-4 w-4" />
+            <CompanyProfileEditModal
+              isOpen={isCompanyProfileEditModalOpen}
+              onClose={() => setIsCompanyProfileEditModalOpen(false)}
+              company={company}
+            />
+            <Button onClick={() => setIsCompanyProfileEditModalOpen(true)}>
               会社情報を編集
             </Button>
           </div>
@@ -143,9 +191,7 @@ export function CompanyDashboard() {
               <Store className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {restaurants.length}
-              </div>
+              <div className="text-2xl font-bold">{restaurants.length}</div>
             </CardContent>
           </Card>
 
@@ -155,9 +201,7 @@ export function CompanyDashboard() {
               <MessageSquare className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {jobData.jobs.length}
-              </div>
+              <div className="text-2xl font-bold">{jobData.jobs.length}</div>
             </CardContent>
           </Card>
           <Card>
@@ -166,9 +210,7 @@ export function CompanyDashboard() {
               <MessageSquare className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {companyUsers.length}
-              </div>
+              <div className="text-2xl font-bold">{companyUsers.length}</div>
             </CardContent>
           </Card>
         </div>
@@ -181,21 +223,35 @@ export function CompanyDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-center gap-4">
+                {billings.slice(0, 3).map((billing: BillingSummary) => (
+                  <div key={billing.id} className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center">
                       <CreditCard className="h-6 w-6 text-gray-500" />
                     </div>
                     <div className="flex-1 space-y-1">
                       <p className="text-sm font-medium leading-none">
-                        請求 #{202400 + i}
+                        請求 #{billing.invoice_number}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        ¥{45000 + i * 5000} - 2024/0{i}/01
+                        ¥{billing.amount.toLocaleString()} -{" "}
+                        {new Date(billing.created_at).toLocaleDateString(
+                          "ja-JP"
+                        )}
                       </p>
                     </div>
-                    <div className="rounded-full px-2 py-1 text-xs bg-green-100 text-green-800">
-                      支払済
+                    <div
+                      className={`rounded-full px-2 py-1 text-xs ${
+                        billing.status === "PAID"
+                          ? "bg-green-100 text-green-800"
+                          : billing.status === "PENDING"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-red-100 text-red-800"
+                      }`}>
+                      {billing.status === "PAID"
+                        ? "支払済"
+                        : billing.status === "PENDING"
+                        ? "支払い待ち"
+                        : "未払い"}
                     </div>
                   </div>
                 ))}
