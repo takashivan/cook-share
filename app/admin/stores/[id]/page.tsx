@@ -247,7 +247,11 @@ export default function RestaurantDetailPage(props: {
             <TabsTrigger value="staff">管理スタッフ</TabsTrigger>
           </TabsList>
           <TabsContent value="messages">
-            <MessageList restaurantId={Number(params.id)} />
+            <MessageList
+              restaurantId={Number(params.id)}
+              restaurantName={restaurant?.name || ""}
+              restaurantAddress={restaurant?.address || ""}
+            />
           </TabsContent>
 
           <TabsContent value="info">

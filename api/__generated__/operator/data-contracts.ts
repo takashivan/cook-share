@@ -1003,6 +1003,7 @@ export interface UserApprovePartialUpdateData {
   town: string;
   street: string;
   profile_completed: boolean;
+  position_level: "1" | "2" | "3" | "4";
   magic_link: {
     token: string;
     /**
@@ -1073,6 +1074,7 @@ export interface UserBanPartialUpdateData {
     town: string;
     street: string;
     profile_completed: boolean;
+    position_level: "1" | "2" | "3" | "4";
     magic_link: {
       token: string;
       /**
@@ -1154,6 +1156,7 @@ export interface UsersApprovePartialUpdateData {
   town: string;
   street: string;
   profile_completed: boolean;
+  position_level: "1" | "2" | "3" | "4";
   magic_link: {
     token: string;
     /**
@@ -1223,6 +1226,7 @@ export interface UsersBanPartialUpdateData {
     town: string;
     street: string;
     profile_completed: boolean;
+    position_level: "1" | "2" | "3" | "4";
     magic_link: {
       token: string;
       /**
@@ -1562,6 +1566,7 @@ export type ToBeReviewedListData = {
   town: string;
   street: string;
   profile_completed: boolean;
+  position_level: "1" | "2" | "3" | "4";
   magic_link: {
     token: string;
     /**

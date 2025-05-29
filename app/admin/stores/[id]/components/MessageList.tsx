@@ -9,10 +9,14 @@ import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 interface MessageListProps {
   restaurantId: number;
+  restaurantName: string;
+  restaurantAddress?: string;
 }
 
 export function MessageList({
-  restaurantId
+  restaurantId,
+  restaurantName,
+  restaurantAddress,
 }: MessageListProps) {
   const [selectedChat, setSelectedChat] = useState<ChatSheetProps['selectedChat']>(null);
 
@@ -21,10 +25,24 @@ export function MessageList({
     isLoading,
     error,
   } = useSubscriptionMessageSummaryByRestaurantId({ restaurantId });
+
   const sortedMessageSummaryData = messageSummaryData?.sort((a, b) => {
-    const aDate = new Date(a.first_message?.created_at || 0);
-    const bDate = new Date(b.first_message?.created_at || 0);
-    return bDate.getTime() - aDate.getTime();
+    const aDate = a.first_message ? new Date(a.first_message.created_at) : null;
+    const bDate = b.first_message ? new Date(b.first_message.created_at) : null;
+
+    // メッセージがある場合はメッセージの作成日時の降順でソート
+    if (aDate && bDate) {
+      return bDate.getTime() - aDate.getTime();
+    }
+
+    // 一方にのみメッセージがある場合: メッセージがある方を前に
+    if (aDate && !bDate) return -1;
+    if (!aDate && bDate) return 1;
+
+    // 両方にメッセージがない場合はjobのstart_timeの降順でソート
+    const aWorkDate = new Date(a.worksession.job.start_time);
+    const bWorkDate = new Date(b.worksession.job.start_time);
+    return bWorkDate.getTime() - aWorkDate.getTime();
   });
 
   const handleMessageClick = (messageSummary: MessageSummary) => {
@@ -32,7 +50,7 @@ export function MessageList({
       id: messageSummary.worksession.user.id,
       name: messageSummary.worksession.user.name,
       avatar: messageSummary.worksession.user.profile_image,
-      workSessionId: messageSummary.worksession.id,
+      jobId: messageSummary.worksession.job_id,
     });
   }
 
@@ -110,6 +128,8 @@ export function MessageList({
       </div>
       <ChatSheet
         restaurantId={restaurantId}
+        restaurantName={restaurantName}
+        restaurantAddress={restaurantAddress}
         selectedChat={selectedChat}
         handleCloseAction={() => setSelectedChat(null)}
       />
