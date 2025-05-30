@@ -723,7 +723,7 @@ export function ChefProfileEditModal({
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose}>
+            <Button type="button" variant="outline" onClick={handleClose} className="mt-2 sm:mt-0">
               キャンセル
             </Button>
             <Button type="submit" disabled={isSubmitting}>

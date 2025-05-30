@@ -91,7 +91,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
       });
     },
     handleError: (error) => {
-      if (error.response?.payload.status === "already_applied") {
+      if (error.response?.payload?.status === "already_applied") {
         toast({
           variant: "destructive",
           description: "応募が締め切られているため、応募できません",

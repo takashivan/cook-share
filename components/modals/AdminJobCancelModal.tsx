@@ -14,6 +14,7 @@ import { useState } from "react";
 import { useUserCancelWorksessionByRestaurant } from "@/hooks/api/companyuser/worksessions/useCancelWorksessionByRestaurant";
 import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { Textarea } from "@/components/ui/textarea";
 
 interface CancellationPenalty {
   isOpen: boolean;
@@ -124,13 +125,13 @@ export function AdminJobCancelModal({
               className="block text-sm font-medium text-gray-700">
               キャンセル理由
             </label>
-            <textarea
+            <Textarea
               id="cancel-reason"
               value={cancelReason}
               onChange={(e) => setCancelReason(e.target.value)}
               placeholder="キャンセルの理由を具体的にご記入ください"
               required
-              className="w-full h-24 p-2 border rounded-md text-sm bg-white focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
+              className="w-full h-24 p-2 border rounded-md bg-white focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
             />
           </div>
 
