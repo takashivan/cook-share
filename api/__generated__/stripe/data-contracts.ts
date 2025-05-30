@@ -154,4 +154,8 @@ export interface BillingSummaryCreateData {
   invoice_number: string;
 }
 
-export type WebhookCreateData = object;
+export type WebhookConnectCreateData = object;
+
+export interface WebhookCreateData {
+  stripe: string;
+}

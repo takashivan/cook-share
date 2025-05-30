@@ -26,6 +26,7 @@ export type ByUserDetailData = {
     | "operator"
     | "payment";
   content: string;
+  /** @default "false" */
   is_read: boolean;
   /** @format timestamptz */
   updated_at: number;
@@ -55,6 +56,7 @@ export type MarkReadAllPartialUpdateData = {
     | "operator"
     | "payment";
   content: string;
+  /** @default "false" */
   is_read: boolean;
   /** @format timestamptz */
   updated_at: number;
@@ -80,6 +82,7 @@ export interface ReadPartialUpdateData {
     | "operator"
     | "payment";
   content: string;
+  /** @default "false" */
   is_read: boolean;
   /** @format timestamptz */
   updated_at: number;
@@ -105,6 +108,7 @@ export type ByUserDetailResult = {
     | "operator"
     | "payment";
   content: string;
+  /** @default "false" */
   is_read: boolean;
   /** @format timestamptz */
   updated_at: number;
@@ -134,6 +138,7 @@ export type MarkReadAllPartialUpdateResult = {
     | "operator"
     | "payment";
   content: string;
+  /** @default "false" */
   is_read: boolean;
   /** @format timestamptz */
   updated_at: number;
@@ -159,6 +164,7 @@ export interface ReadPartialUpdateResult {
     | "operator"
     | "payment";
   content: string;
+  /** @default "false" */
   is_read: boolean;
   /** @format timestamptz */
   updated_at: number;
@@ -186,6 +192,7 @@ export type ByUserDetailOutput = {
     | "operator"
     | "payment";
   related_link: string;
+  /** @default "false" */
   is_read: boolean;
   content: string;
   /** @format int64 */
@@ -216,6 +223,7 @@ export type MarkReadAllPartialUpdateOutput = {
     | "operator"
     | "payment";
   related_link: string;
+  /** @default "false" */
   is_read: boolean;
   content: string;
   /** @format int64 */
@@ -242,6 +250,7 @@ export interface MarkReadPartialUpdateData {
     | "operator"
     | "payment";
   related_link: string;
+  /** @default "false" */
   is_read: boolean;
   content: string;
   /** @format int64 */
@@ -250,7 +259,7 @@ export interface MarkReadPartialUpdateData {
   restaurant_id: number | null;
 }
 
-export type ByUserDetailResult1 = {
+export type ByUserDetailOutput1 = {
   /** @format uuid */
   id: string;
   /**
@@ -268,6 +277,7 @@ export type ByUserDetailResult1 = {
     | "operator"
     | "payment";
   related_link: string;
+  /** @default "false" */
   is_read: boolean;
   content: string;
   /** @format int64 */
@@ -280,7 +290,7 @@ export interface MarkReadAllPartialUpdateBody1 {
   user_id: string;
 }
 
-export type MarkReadAllPartialUpdateOutput1 = {
+export type MarkReadAllPartialUpdateResult1 = {
   /** @format uuid */
   id: string;
   /**
@@ -298,6 +308,7 @@ export type MarkReadAllPartialUpdateOutput1 = {
     | "operator"
     | "payment";
   related_link: string;
+  /** @default "false" */
   is_read: boolean;
   content: string;
   /** @format int64 */
@@ -324,6 +335,7 @@ export interface MarkReadPartialUpdateResult {
     | "operator"
     | "payment";
   related_link: string;
+  /** @default "false" */
   is_read: boolean;
   content: string;
   /** @format int64 */
