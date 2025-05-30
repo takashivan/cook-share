@@ -256,7 +256,7 @@ export function SecondStep({
               <Label htmlFor="town">町名 *</Label>
               <Input
                 id="town"
-                {...register("town", { required: "町名は必須です" })}
+                {...register("town", { required: "町名は必須です。郵便番号が正しいか確認してください" })}
                 readOnly
                 className="bg-gray-50"
               />
@@ -286,7 +286,7 @@ export function SecondStep({
               <Input
                 id="address2"
                 {...register("address2")}
-                placeholder="例: サンハイツ101"
+                placeholder="例: 〇〇マンション101"
               />
               {errors.address2 && (
                 <p className="text-red-500 text-xs mt-1">
