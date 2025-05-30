@@ -397,6 +397,54 @@ export interface DailyMetricsCreateData {
   total_jobs: number;
 }
 
+export type BillingsAllListData = {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format uuid */
+  companies_id: string | null;
+  month: string;
+  /** @format int64 */
+  amount: number;
+  /** stripe invoice id */
+  invoice_id: string;
+  status: "PENDING" | "PAID" | "FAILED";
+  fee_rate: number;
+  /** @format int64 */
+  session_count: number;
+  start_date: string;
+  end_date: string;
+  hosted_invoice_url: string;
+  invoice_pdf: string;
+  invoice_number: string;
+  companies: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    name: string;
+    address: string;
+    phone: string;
+    website: string;
+    description: string;
+    status: "pending" | "approved" | "banned" | "rejected";
+    /** @format date */
+    updated_at: string | null;
+    business_registration_number: string;
+    logo_url: string;
+    stripe_customer_id: string;
+    /** @format email */
+    company_email: string;
+  };
+}[];
+
 export interface JobApprovePartialUpdatePayload {
   job_id: string;
   reason: string;
@@ -734,7 +782,10 @@ export interface RestaurantApprovePartialUpdateData {
     profile_image: string;
     /** @format timestamptz */
     updated_at: number;
-    /** Whether the restaurant is active. */
+    /**
+     * Whether the restaurant is active.
+     * @default "false"
+     */
     is_active: boolean;
     /** @format uuid */
     companies_id: string | null;
@@ -788,7 +839,10 @@ export interface RestaurantBanPartialUpdateData {
     profile_image: string;
     /** @format timestamptz */
     updated_at: number;
-    /** Whether the restaurant is active. */
+    /**
+     * Whether the restaurant is active.
+     * @default "false"
+     */
     is_active: boolean;
     /** @format uuid */
     companies_id: string | null;
@@ -914,7 +968,10 @@ export interface RestaurantsBanPartialUpdateData {
     profile_image: string;
     /** @format timestamptz */
     updated_at: number;
-    /** Whether the restaurant is active. */
+    /**
+     * Whether the restaurant is active.
+     * @default "false"
+     */
     is_active: boolean;
     /** @format uuid */
     companies_id: string | null;
@@ -976,10 +1033,13 @@ export interface UserApprovePartialUpdateData {
   /** @format date */
   dateofbirth: string | null;
   profile_image: string;
+  /** @default "false" */
   is_approved: boolean;
   line_user_id: string;
   line_display_name: string;
+  /** @default "false" */
   line_notification_enabled: boolean;
+  /** @default "false" */
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
@@ -987,6 +1047,7 @@ export interface UserApprovePartialUpdateData {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  /** @default "false" */
   stripe_verified: boolean;
   stripe_requirements: object;
   address: string;
@@ -1002,6 +1063,7 @@ export interface UserApprovePartialUpdateData {
   city: string;
   town: string;
   street: string;
+  /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
   magic_link: {
@@ -1011,6 +1073,7 @@ export interface UserApprovePartialUpdateData {
      * @format timestamptz
      */
     expiration: number;
+    /** @default "false" */
     used: boolean;
   } | null;
 }
@@ -1047,10 +1110,13 @@ export interface UserBanPartialUpdateData {
     /** @format date */
     dateofbirth: string | null;
     profile_image: string;
+    /** @default "false" */
     is_approved: boolean;
     line_user_id: string;
     line_display_name: string;
+    /** @default "false" */
     line_notification_enabled: boolean;
+    /** @default "false" */
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
@@ -1058,6 +1124,7 @@ export interface UserBanPartialUpdateData {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    /** @default "false" */
     stripe_verified: boolean;
     stripe_requirements: object;
     address: string;
@@ -1073,6 +1140,7 @@ export interface UserBanPartialUpdateData {
     city: string;
     town: string;
     street: string;
+    /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
     magic_link: {
@@ -1082,6 +1150,7 @@ export interface UserBanPartialUpdateData {
        * @format timestamptz
        */
       expiration: number;
+      /** @default "false" */
       used: boolean;
     } | null;
   };
@@ -1129,10 +1198,13 @@ export interface UsersApprovePartialUpdateData {
   /** @format date */
   dateofbirth: string | null;
   profile_image: string;
+  /** @default "false" */
   is_approved: boolean;
   line_user_id: string;
   line_display_name: string;
+  /** @default "false" */
   line_notification_enabled: boolean;
+  /** @default "false" */
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
@@ -1140,6 +1212,7 @@ export interface UsersApprovePartialUpdateData {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  /** @default "false" */
   stripe_verified: boolean;
   stripe_requirements: object;
   address: string;
@@ -1155,6 +1228,7 @@ export interface UsersApprovePartialUpdateData {
   city: string;
   town: string;
   street: string;
+  /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
   magic_link: {
@@ -1164,6 +1238,7 @@ export interface UsersApprovePartialUpdateData {
      * @format timestamptz
      */
     expiration: number;
+    /** @default "false" */
     used: boolean;
   } | null;
 }
@@ -1199,10 +1274,13 @@ export interface UsersBanPartialUpdateData {
     /** @format date */
     dateofbirth: string | null;
     profile_image: string;
+    /** @default "false" */
     is_approved: boolean;
     line_user_id: string;
     line_display_name: string;
+    /** @default "false" */
     line_notification_enabled: boolean;
+    /** @default "false" */
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
@@ -1210,6 +1288,7 @@ export interface UsersBanPartialUpdateData {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    /** @default "false" */
     stripe_verified: boolean;
     stripe_requirements: object;
     address: string;
@@ -1225,6 +1304,7 @@ export interface UsersBanPartialUpdateData {
     city: string;
     town: string;
     street: string;
+    /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
     magic_link: {
@@ -1234,6 +1314,7 @@ export interface UsersBanPartialUpdateData {
        * @format timestamptz
        */
       expiration: number;
+      /** @default "false" */
       used: boolean;
     } | null;
   };
@@ -1385,6 +1466,8 @@ export type OperatorListData = {
 export interface OperatorCreatePayload {
   /** @format email */
   email: string;
+  /** @format password */
+  password: string;
   name: string;
 }
 
@@ -1413,13 +1496,19 @@ export interface RestaurantCuisineDetailData {
    * @default "now"
    */
   created_at: number;
-  /** Whether this cuisine is the primary cuisine for the restaurant. */
+  /**
+   * Whether this cuisine is the primary cuisine for the restaurant.
+   * @default "false"
+   */
   is_primary: boolean;
   category: string;
 }
 
 export interface RestaurantCuisinePartialUpdatePayload {
-  /** Whether this cuisine is the primary cuisine for the restaurant. */
+  /**
+   * Whether this cuisine is the primary cuisine for the restaurant.
+   * @default "false"
+   */
   is_primary: boolean;
   category: string;
 }
@@ -1432,13 +1521,19 @@ export interface RestaurantCuisinePartialUpdateData {
    * @default "now"
    */
   created_at: number;
-  /** Whether this cuisine is the primary cuisine for the restaurant. */
+  /**
+   * Whether this cuisine is the primary cuisine for the restaurant.
+   * @default "false"
+   */
   is_primary: boolean;
   category: string;
 }
 
 export interface RestaurantCuisineUpdatePayload {
-  /** Whether this cuisine is the primary cuisine for the restaurant. */
+  /**
+   * Whether this cuisine is the primary cuisine for the restaurant.
+   * @default "false"
+   */
   is_primary: boolean;
   category: string;
 }
@@ -1451,7 +1546,10 @@ export interface RestaurantCuisineUpdateData {
    * @default "now"
    */
   created_at: number;
-  /** Whether this cuisine is the primary cuisine for the restaurant. */
+  /**
+   * Whether this cuisine is the primary cuisine for the restaurant.
+   * @default "false"
+   */
   is_primary: boolean;
   category: string;
 }
@@ -1464,13 +1562,19 @@ export type RestaurantCuisineListData = {
    * @default "now"
    */
   created_at: number;
-  /** Whether this cuisine is the primary cuisine for the restaurant. */
+  /**
+   * Whether this cuisine is the primary cuisine for the restaurant.
+   * @default "false"
+   */
   is_primary: boolean;
   category: string;
 }[];
 
 export interface RestaurantCuisineCreatePayload {
-  /** Whether this cuisine is the primary cuisine for the restaurant. */
+  /**
+   * Whether this cuisine is the primary cuisine for the restaurant.
+   * @default "false"
+   */
   is_primary: boolean;
   category: string;
 }
@@ -1483,7 +1587,10 @@ export interface RestaurantCuisineCreateData {
    * @default "now"
    */
   created_at: number;
-  /** Whether this cuisine is the primary cuisine for the restaurant. */
+  /**
+   * Whether this cuisine is the primary cuisine for the restaurant.
+   * @default "false"
+   */
   is_primary: boolean;
   category: string;
 }
@@ -1539,10 +1646,13 @@ export type ToBeReviewedListData = {
   /** @format date */
   dateofbirth: string | null;
   profile_image: string;
+  /** @default "false" */
   is_approved: boolean;
   line_user_id: string;
   line_display_name: string;
+  /** @default "false" */
   line_notification_enabled: boolean;
+  /** @default "false" */
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
@@ -1550,6 +1660,7 @@ export type ToBeReviewedListData = {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  /** @default "false" */
   stripe_verified: boolean;
   stripe_requirements: object;
   address: string;
@@ -1565,6 +1676,7 @@ export type ToBeReviewedListData = {
   city: string;
   town: string;
   street: string;
+  /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
   magic_link: {
@@ -1574,6 +1686,7 @@ export type ToBeReviewedListData = {
      * @format timestamptz
      */
     expiration: number;
+    /** @default "false" */
     used: boolean;
   } | null;
 }[];

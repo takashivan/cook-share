@@ -19,13 +19,20 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Star } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { EXPERIENCE_LEVELS } from "@/lib/const/chef-profile";
+import { EXPERIENCE_LEVELS, POSITION_LEVEL } from "@/lib/const/chef-profile";
 import { ErrorPage } from "@/components/layout/ErrorPage";
 import { LoadingScreen } from "@/components/LoadingScreen";
+import { useGetRestaurantCuisines } from "@/hooks/api/all/restaurantCuisines/useGetRestaurantCuisines";
 
 export default function ChefProfile() {
   const { user, logout } = useAuth();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const {
+    data: cuisinesData,
+    isLoading: isCuisinesLoading,
+    error: cuisinesError,
+  } = useGetRestaurantCuisines();
 
   const {
     data: reviewsData,
@@ -40,6 +47,10 @@ export default function ChefProfile() {
     logout();
   };
 
+  const handleEditModalClose = () => {
+    setIsEditModalOpen(false);
+  };
+
   if (!user) {
     return (
       <div className="container mx-auto px-4 py-6 max-w-md">
@@ -48,11 +59,7 @@ export default function ChefProfile() {
     );
   }
 
-  const handleEditModalClose = () => {
-    setIsEditModalOpen(false);
-  };
-
-  if (reviewsError) {
+  if (cuisinesError || reviewsError) {
     return (
       <div className="flex px-4">
         <ErrorPage />
@@ -60,7 +67,7 @@ export default function ChefProfile() {
     );
   }
 
-  if (isReviewsLoading) {
+  if (isCuisinesLoading || isReviewsLoading) {
     return (
       <LoadingScreen
         fullScreen={false}
@@ -102,14 +109,14 @@ export default function ChefProfile() {
                   <h2 className="text-2xl font-bold">{user.name}</h2>
                 </div>
               </div>
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">電話番号</p>
-                  <p>{user.phone}</p>
+                  <p className="mt-1">{user.phone}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">生年月日</p>
-                  <p>
+                  <p className="mt-1">
                     {user.dateofbirth
                       ? format(new Date(user.dateofbirth), "yyyy/MM/dd", {
                           locale: ja,
@@ -119,7 +126,7 @@ export default function ChefProfile() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">住所</p>
-                  <p>〒{user.postal_code}</p>
+                  <p className="mt-1">〒{user.postal_code}</p>
                   <p>{`${user.prefecture}${user.city}${user.town}${user.street}${user.address2}`}</p>
                 </div>
               </div>
@@ -129,19 +136,26 @@ export default function ChefProfile() {
           {/* スキルセクション */}
           <Card>
             <CardHeader>
-              <CardTitle>スキル</CardTitle>
+              <CardTitle>スキル・経験</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex flex-wrap gap-2">
-                {user.skills?.map((skill, index) => (
-                  <Badge key={index} variant="secondary">
-                    {skill}
-                  </Badge>
-                ))}
+              <div>
+                <p className="text-sm text-muted-foreground">スキル</p>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {user.skills?.map((skill, index) => (
+                    <Badge key={index} variant="secondary">
+                      {skill}
+                    </Badge>
+                  ))}
+                </div>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">調理経験年数</p>
-                <p>{EXPERIENCE_LEVELS.find(level => level.value === user.experience_level)?.label}</p>
+                <p className="mt-1">{EXPERIENCE_LEVELS.find(level => level.value === user.experience_level)?.label}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">経験ポジション</p>
+                <p className="mt-1">{POSITION_LEVEL.find(level => level.value === user.position_level)?.label}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">保有資格</p>
@@ -158,10 +172,23 @@ export default function ChefProfile() {
 
           <Card>
             <CardHeader>
-              <CardTitle>自己紹介</CardTitle>
+              <CardTitle>ジャンル・自己紹介</CardTitle>
             </CardHeader>
-            <CardContent>
-              <p>{user.bio}</p>
+            <CardContent className="space-y-4">
+              <div>
+                <p className="text-sm text-muted-foreground">ジャンル</p>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {cuisinesData?.filter(c => user.categories?.includes(c.id)).map(c => (
+                    <Badge key={c.id} variant="secondary">
+                      {c.category}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">自己紹介</p>
+                <p className="whitespace-pre-line mt-1">{user.bio}</p>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -297,6 +324,7 @@ export default function ChefProfile() {
         isOpen={isEditModalOpen}
         onCloseAction={handleEditModalClose}
         user={user}
+        cuisinesData={cuisinesData}
       />
     </div>
   );

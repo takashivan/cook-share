@@ -11,6 +11,7 @@
  */
 
 import {
+  BillingsAllListData,
   JobApprovePartialUpdateData,
   JobApprovePartialUpdatePayload,
   JobBanPartialUpdateData,
@@ -48,6 +49,32 @@ import { ContentType, HttpClient, RequestParams } from "./http-client";
 export class Operator<
   SecurityDataType = unknown,
 > extends HttpClient<SecurityDataType> {
+  /**
+   * @description <br /><br /> <b>Authentication:</b> required
+   *
+   * @tags operator
+   * @name BillingsAllList
+   * @request GET:/operator/billings/all
+   * @secure
+   */
+  billingsAllList = (params: RequestParams = {}) =>
+    this.request<BillingsAllListData, void>({
+      path: `/operator/billings/all`,
+      method: "GET",
+      secure: true,
+      format: "json",
+      ...params,
+    });
+
+  billingsAllListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/operator/billings/all`] : null;
+    const fetcher = () => this.billingsAllList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description <br /><br /> <b>Authentication:</b> required
    *
@@ -596,17 +623,19 @@ export class Operator<
   };
 
   /**
-   * @description Query all Operator records <br /><br /> <b>Authentication:</b> not required
+   * @description Query all Operator records <br /><br /> <b>Authentication:</b> required
    *
    * @tags operator
    * @name OperatorList
    * @summary Query all Operator records
    * @request GET:/operator
+   * @secure
    */
   operatorList = (params: RequestParams = {}) =>
     this.request<OperatorListData, void>({
       path: `/operator`,
       method: "GET",
+      secure: true,
       format: "json",
       ...params,
     });

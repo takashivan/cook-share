@@ -52,6 +52,7 @@ import { Input } from "@/components/ui/input";
 import styles from "./styles.module.css";
 import { ErrorPage } from "@/components/layout/ErrorPage";
 import { LoadingScreen } from "@/components/LoadingScreen";
+import { Textarea } from "@/components/ui/textarea";
 
 type JobDetail = {
   job: {
@@ -901,11 +902,11 @@ export default function JobDetail({ params }: PageProps) {
                   className="block text-sm font-medium text-gray-700">
                   キャンセル理由
                 </label>
-                <textarea
+                <Textarea
                   id="cancel-reason"
                   value={cancelReason}
                   onChange={(e) => setCancelReason(e.target.value)}
-                  className="w-full h-24 p-2 border rounded-md text-sm bg-white"
+                  className="w-full h-24 p-2 border rounded-md bg-white"
                   placeholder="キャンセルの理由を具体的にご記入ください"
                   required
                 />

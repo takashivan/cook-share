@@ -2,11 +2,12 @@
 
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CERTIFICATIONS, EXPERIENCE_LEVELS, SKILLS } from "@/lib/const/chef-profile";
+import { CERTIFICATIONS, EXPERIENCE_LEVELS, POSITION_LEVEL, SKILLS } from "@/lib/const/chef-profile";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
 import { Control, Controller, FieldErrors, UseFormRegister, UseFormSetValue, UseFormWatch } from "react-hook-form";
 import { UpdateProfileForm } from "../page";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface ThirdStepProps {
   register: UseFormRegister<UpdateProfileForm>;
@@ -80,6 +81,9 @@ export function ThirdStep({
         <Controller
           name="experience_level"
           control={control}
+          rules={{
+            required: "経験年数を選択してください",
+          }}
           render={({ field }) => (
             <RadioGroup
               value={field.value}
@@ -109,12 +113,51 @@ export function ThirdStep({
           </p>
         )}
       </div>
+      
+      <div className="space-y-4">
+        <Label className="text-base font-semibold text-gray-700">
+          経験ポジション *
+        </Label>
+        <Controller
+          name="position_level"
+          control={control}
+          rules={{
+            required: "経験ポジションを選択してください",
+          }}
+          render={({ field }) => (
+            <Select
+              value={field.value}
+              onValueChange={field.onChange}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="ポジションを選択" />
+              </SelectTrigger>
+              <SelectContent>
+                {POSITION_LEVEL.map((position) => (
+                  <SelectItem
+                    key={position.id}
+                    value={position.value}
+                    className="text-sm text-gray-600"
+                  >
+                    {position.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
+        {errors.position_level && (
+          <p className="text-red-500 text-xs mt-1">
+            {errors.position_level.message}
+          </p>
+        )}
+      </div>
 
       <div className="space-y-4">
         <Label className="text-base font-semibold text-gray-700">
           保有資格（複数選択可）
         </Label>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-3">
           {CERTIFICATIONS.map((cert) => (
             <div key={cert.id} className="flex items-center space-x-2">
               <Controller

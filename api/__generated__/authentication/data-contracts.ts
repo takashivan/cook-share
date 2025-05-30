@@ -41,10 +41,13 @@ export interface ChangePasswordCreateData {
     /** @format date */
     dateofbirth: string | null;
     profile_image: string;
+    /** @default "false" */
     is_approved: boolean;
     line_user_id: string;
     line_display_name: string;
+    /** @default "false" */
     line_notification_enabled: boolean;
+    /** @default "false" */
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
@@ -52,6 +55,7 @@ export interface ChangePasswordCreateData {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    /** @default "false" */
     stripe_verified: boolean;
     stripe_requirements: object;
     address: string;
@@ -67,6 +71,7 @@ export interface ChangePasswordCreateData {
     city: string;
     town: string;
     street: string;
+    /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
     magic_link: {
@@ -76,6 +81,7 @@ export interface ChangePasswordCreateData {
        * @format timestamptz
        */
       expiration: number;
+      /** @default "false" */
       used: boolean;
     } | null;
   };
@@ -116,14 +122,18 @@ export interface LoginCreateData {
     /** @format date */
     dateofbirth: string | null;
     profile_image: string;
+    /** @default "false" */
     is_approved: boolean;
     line_user_id: string;
     line_display_name: string;
+    /** @default "false" */
     line_notification_enabled: boolean;
+    /** @default "false" */
     is_verified: boolean;
     stripe_account_id: string;
     /** @format email */
     pending_email: string;
+    /** @default "false" */
     stripe_verified: boolean;
     stripe_requirements: object;
     address: string;
@@ -139,6 +149,7 @@ export interface LoginCreateData {
     city: string;
     town: string;
     street: string;
+    /** @default "false" */
     profile_completed: boolean;
     magic_link: {
       token: string;
@@ -147,6 +158,7 @@ export interface LoginCreateData {
        * @format timestamptz
        */
       expiration: number;
+      /** @default "false" */
       used: boolean;
     } | null;
   };
@@ -177,10 +189,13 @@ export interface GetAuthData {
   /** @format date */
   dateofbirth: string | null;
   profile_image: string;
+  /** @default "false" */
   is_approved: boolean;
   line_user_id: string;
   line_display_name: string;
+  /** @default "false" */
   line_notification_enabled: boolean;
+  /** @default "false" */
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
@@ -195,6 +210,7 @@ export interface GetAuthData {
      * @format timestamptz
      */
     expiration: number;
+    /** @default "false" */
     used: boolean;
   } | null;
 }
@@ -229,10 +245,13 @@ export interface RequestPasswordResetCreateData {
   /** @format date */
   dateofbirth: string | null;
   profile_image: string;
+  /** @default "false" */
   is_approved: boolean;
   line_user_id: string;
   line_display_name: string;
+  /** @default "false" */
   line_notification_enabled: boolean;
+  /** @default "false" */
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
@@ -240,6 +259,7 @@ export interface RequestPasswordResetCreateData {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  /** @default "false" */
   stripe_verified: boolean;
   stripe_requirements: object;
   address: string;
@@ -255,6 +275,7 @@ export interface RequestPasswordResetCreateData {
   city: string;
   town: string;
   street: string;
+  /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
   magic_link: {
@@ -264,6 +285,7 @@ export interface RequestPasswordResetCreateData {
      * @format timestamptz
      */
     expiration: number;
+    /** @default "false" */
     used: boolean;
   } | null;
 }
@@ -299,10 +321,13 @@ export interface ResendVerificationCreateData {
     /** @format date */
     dateofbirth: string | null;
     profile_image: string;
+    /** @default "false" */
     is_approved: boolean;
     line_user_id: string;
     line_display_name: string;
+    /** @default "false" */
     line_notification_enabled: boolean;
+    /** @default "false" */
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
@@ -310,6 +335,7 @@ export interface ResendVerificationCreateData {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    /** @default "false" */
     stripe_verified: boolean;
     stripe_requirements: object;
     address: string;
@@ -325,6 +351,7 @@ export interface ResendVerificationCreateData {
     city: string;
     town: string;
     street: string;
+    /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
     magic_link: {
@@ -334,6 +361,7 @@ export interface ResendVerificationCreateData {
        * @format timestamptz
        */
       expiration: number;
+      /** @default "false" */
       used: boolean;
     } | null;
   };
@@ -371,10 +399,13 @@ export interface ResetPasswordCreateData {
     /** @format date */
     dateofbirth: string | null;
     profile_image: string;
+    /** @default "false" */
     is_approved: boolean;
     line_user_id: string;
     line_display_name: string;
+    /** @default "false" */
     line_notification_enabled: boolean;
+    /** @default "false" */
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
@@ -382,6 +413,7 @@ export interface ResetPasswordCreateData {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    /** @default "false" */
     stripe_verified: boolean;
     stripe_requirements: object;
     address: string;
@@ -397,6 +429,7 @@ export interface ResetPasswordCreateData {
     city: string;
     town: string;
     street: string;
+    /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
     magic_link: {
@@ -406,6 +439,7 @@ export interface ResetPasswordCreateData {
        * @format timestamptz
        */
       expiration: number;
+      /** @default "false" */
       used: boolean;
     } | null;
   };
@@ -447,10 +481,13 @@ export interface SignupCreateData {
     /** @format date */
     dateofbirth: string | null;
     profile_image: string;
+    /** @default "false" */
     is_approved: boolean;
     line_user_id: string;
     line_display_name: string;
+    /** @default "false" */
     line_notification_enabled: boolean;
+    /** @default "false" */
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
@@ -458,6 +495,7 @@ export interface SignupCreateData {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    /** @default "false" */
     stripe_verified: boolean;
     stripe_requirements: object;
     address: string;
@@ -473,6 +511,7 @@ export interface SignupCreateData {
     city: string;
     town: string;
     street: string;
+    /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
     magic_link: {
@@ -482,6 +521,7 @@ export interface SignupCreateData {
        * @format timestamptz
        */
       expiration: number;
+      /** @default "false" */
       used: boolean;
     } | null;
   };
@@ -520,10 +560,13 @@ export interface UpdateEmailCreateData {
   /** @format date */
   dateofbirth: string | null;
   profile_image: string;
+  /** @default "false" */
   is_approved: boolean;
   line_user_id: string;
   line_display_name: string;
+  /** @default "false" */
   line_notification_enabled: boolean;
+  /** @default "false" */
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
@@ -531,6 +574,7 @@ export interface UpdateEmailCreateData {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  /** @default "false" */
   stripe_verified: boolean;
   stripe_requirements: object;
   address: string;
@@ -546,6 +590,7 @@ export interface UpdateEmailCreateData {
   city: string;
   town: string;
   street: string;
+  /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
   magic_link: {
@@ -555,6 +600,7 @@ export interface UpdateEmailCreateData {
      * @format timestamptz
      */
     expiration: number;
+    /** @default "false" */
     used: boolean;
   } | null;
 }
@@ -591,10 +637,13 @@ export interface VerifyEmailCreateData {
     /** @format date */
     dateofbirth: string | null;
     profile_image: string;
+    /** @default "false" */
     is_approved: boolean;
     line_user_id: string;
     line_display_name: string;
+    /** @default "false" */
     line_notification_enabled: boolean;
+    /** @default "false" */
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
@@ -602,6 +651,7 @@ export interface VerifyEmailCreateData {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    /** @default "false" */
     stripe_verified: boolean;
     stripe_requirements: object;
     address: string;
@@ -617,6 +667,7 @@ export interface VerifyEmailCreateData {
     city: string;
     town: string;
     street: string;
+    /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
     magic_link: {
@@ -626,6 +677,7 @@ export interface VerifyEmailCreateData {
        * @format timestamptz
        */
       expiration: number;
+      /** @default "false" */
       used: boolean;
     } | null;
   };

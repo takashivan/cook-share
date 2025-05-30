@@ -205,7 +205,7 @@ export function ChefReviewModal({
                   }
                   value={transportationExpenses}
                   onChange={handleExpensesChange}
-                  className="w-full border rounded-md p-2 text-sm bg-white"
+                  className="w-full border rounded-md p-2 bg-white"
                   placeholder={
                     transportation_type === "FIXED"
                       ? `${transportation_amount.toLocaleString()}円で入力してください`

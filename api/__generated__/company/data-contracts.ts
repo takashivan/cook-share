@@ -31,9 +31,11 @@ export interface ChangePasswordCreateData {
     phone: string | null;
     /** @format password */
     password: string;
+    /** @default "false" */
     is_admin: boolean;
     /** @default "1" */
     is_active: boolean;
+    /** @default "false" */
     is_verified: boolean;
     /** @format timestamptz */
     updated_at: number | null;
@@ -71,9 +73,11 @@ export interface LoginCreateData {
     phone: string | null;
     /** @format password */
     password: string;
+    /** @default "false" */
     is_admin: boolean;
     /** @default "1" */
     is_active: boolean;
+    /** @default "false" */
     is_verified: boolean;
     /** @format timestamptz */
     updated_at: number | null;
@@ -95,9 +99,11 @@ export interface GetAuthData {
   /** @format email */
   email: string;
   phone: string | null;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -123,9 +129,11 @@ export interface RequestPasswordResetCreateData {
   phone: string | null;
   /** @format password */
   password: string;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -158,9 +166,11 @@ export interface ResendVerificationCreateData {
     phone: string | null;
     /** @format password */
     password: string;
+    /** @default "false" */
     is_admin: boolean;
     /** @default "1" */
     is_active: boolean;
+    /** @default "false" */
     is_verified: boolean;
     /** @format timestamptz */
     updated_at: number | null;
@@ -195,9 +205,11 @@ export interface ResetPasswordCreateData {
     phone: string | null;
     /** @format password */
     password: string;
+    /** @default "false" */
     is_admin: boolean;
     /** @default "1" */
     is_active: boolean;
+    /** @default "false" */
     is_verified: boolean;
     /** @format timestamptz */
     updated_at: number | null;
@@ -237,9 +249,11 @@ export interface SignupCreateData {
     phone: string | null;
     /** @format password */
     password: string;
+    /** @default "false" */
     is_admin: boolean;
     /** @default "1" */
     is_active: boolean;
+    /** @default "false" */
     is_verified: boolean;
     /** @format timestamptz */
     updated_at: number | null;
@@ -275,9 +289,11 @@ export interface UpdateEmailCreateData {
   phone: string | null;
   /** @format password */
   password: string;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -311,9 +327,11 @@ export interface VerifyEmailCreateData {
     phone: string | null;
     /** @format password */
     password: string;
+    /** @default "false" */
     is_admin: boolean;
     /** @default "1" */
     is_active: boolean;
+    /** @default "false" */
     is_verified: boolean;
     /** @format timestamptz */
     updated_at: number | null;
@@ -385,9 +403,11 @@ export interface InitialCreateData {
     phone: string | null;
     /** @format password */
     password: string;
+    /** @default "false" */
     is_admin: boolean;
     /** @default "1" */
     is_active: boolean;
+    /** @default "false" */
     is_verified: boolean;
     /** @format timestamptz */
     updated_at: number | null;
@@ -422,9 +442,11 @@ export interface StaffDeleteCreateData {
     phone: string | null;
     /** @format password */
     password: string;
+    /** @default "false" */
     is_admin: boolean;
     /** @default "1" */
     is_active: boolean;
+    /** @default "false" */
     is_verified: boolean;
     /** @format timestamptz */
     updated_at: number | null;
@@ -538,10 +560,13 @@ export type WorksessionsThismonthListData = {
     /** @format date */
     dateofbirth: string | null;
     profile_image: string;
+    /** @default "false" */
     is_approved: boolean;
     line_user_id: string;
     line_display_name: string;
+    /** @default "false" */
     line_notification_enabled: boolean;
+    /** @default "false" */
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
@@ -549,6 +574,7 @@ export type WorksessionsThismonthListData = {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    /** @default "false" */
     stripe_verified: boolean;
     stripe_requirements: object;
     address: string;
@@ -564,6 +590,7 @@ export type WorksessionsThismonthListData = {
     city: string;
     town: string;
     street: string;
+    /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
     magic_link: {
@@ -573,6 +600,7 @@ export type WorksessionsThismonthListData = {
        * @format timestamptz
        */
       expiration: number;
+      /** @default "false" */
       used: boolean;
     } | null;
   };
@@ -641,7 +669,10 @@ export type WorksessionsThismonthListData = {
     profile_image: string;
     /** @format timestamptz */
     updated_at: number;
-    /** Whether the restaurant is active. */
+    /**
+     * Whether the restaurant is active.
+     * @default "false"
+     */
     is_active: boolean;
     /** @format uuid */
     companies_id: string | null;
@@ -900,9 +931,11 @@ export interface SignupCreateResult {
     phone: string | null;
     /** @format password */
     password: string;
+    /** @default "false" */
     is_admin: boolean;
     /** @default "1" */
     is_active: boolean;
+    /** @default "false" */
     is_verified: boolean;
     /** @format timestamptz */
     updated_at: number | null;
@@ -963,9 +996,11 @@ export type CompanyDetailData = {
   phone: string | null;
   /** @format password */
   password: string;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -998,9 +1033,11 @@ export interface EmailChangeCreateData {
   phone: string | null;
   /** @format password */
   password: string;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -1032,9 +1069,11 @@ export interface EmailConfirmCreateData {
   phone: string | null;
   /** @format password */
   password: string;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -1064,9 +1103,11 @@ export interface CompanyuserDeleteData {
   phone: string | null;
   /** @format password */
   password: string;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -1094,9 +1135,11 @@ export interface CompanyuserDetailData {
   phone: string | null;
   /** @format password */
   password: string;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -1115,9 +1158,11 @@ export interface CompanyuserPartialUpdatePayload {
   /** @format email */
   email: string;
   phone: string | null;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -1145,9 +1190,11 @@ export interface CompanyuserPartialUpdateData {
   phone: string | null;
   /** @format password */
   password: string;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -1175,9 +1222,11 @@ export type CompanyuserListData = {
   phone: string | null;
   /** @format password */
   password: string;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -1196,9 +1245,11 @@ export interface CompanyuserCreatePayload {
   /** @format email */
   email: string;
   phone: string | null;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -1226,9 +1277,11 @@ export interface CompanyuserCreateData {
   phone: string | null;
   /** @format password */
   password: string;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -1316,9 +1369,11 @@ export type StaffsListData = {
     phone: string | null;
     /** @format password */
     password: string;
+    /** @default "false" */
     is_admin: boolean;
     /** @default "1" */
     is_active: boolean;
+    /** @default "false" */
     is_verified: boolean;
     /** @format timestamptz */
     updated_at: number | null;

@@ -38,6 +38,7 @@ export interface UserProfile {
   bio?: string;
   skills?: string[];
   experience_level?: string;
+  position_level: "1" | "2" | "3" | "4";
   certifications?: string[];
   dateofbirth?: string;
   status?: string;
@@ -119,6 +120,7 @@ export const login = async (
         bio?: string;
         skills?: string[];
         experience_level?: string;
+        position_level: "1" | "2" | "3" | "4";
         certifications?: string[];
         dateofbirth?: string;
         status?: string;
@@ -158,6 +160,7 @@ export const register = async (
       bio?: string;
       skills?: string[];
       experience_level?: string;
+      position_level: "1" | "2" | "3" | "4";
       certifications?: string[];
       dateofbirth?: string;
       status?: string;

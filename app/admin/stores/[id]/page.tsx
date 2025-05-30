@@ -93,7 +93,15 @@ export default function RestaurantDetailPage(props: {
   }
 
   return (
-    <div className="container mx-auto py-1">
+    <div className="relative h-full">
+      {restaurant?.is_approved === false && (
+        <div className="absolute inset-0 backdrop-blur-sm z-50 flex items-center justify-center pointer-events-auto">
+          <div className="text-center p-6 bg-white/90 rounded-xl shadow-md border">
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">店舗へのアクセスが制限されています</h2>
+            <p className="text-gray-600 text-sm">この店舗は現在、一時的に操作が制限されています。ご不明な点がある場合は管理者へお問い合わせください。</p>
+          </div>
+        </div>
+      )}
       <div className="space-y-6">
         <div className="flex items-center gap-1 mb-6">
           <Link

@@ -66,6 +66,7 @@ export default function ChefProfilePage() {
       otherCertificate: "",
       bio: "",
       experience_level: "3-5",
+      position_level: "2",
       photo: null,
       last_name: "",
       given_name: "",
@@ -127,6 +128,7 @@ export default function ChefProfilePage() {
         address2: data.address2,
         bio: data.bio,
         experience_level: data.experience_level,
+        position_level: data.position_level,
         photo: data.photo || null,
         skills: data.skills || [],
         email: user.email,
@@ -134,7 +136,6 @@ export default function ChefProfilePage() {
         certifications: validCertifications,
         address: '',
         categories: data.categories || [],
-        position_level: "1" as const,
       }
 
       const res = await createProfile(newData);

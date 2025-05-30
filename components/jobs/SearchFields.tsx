@@ -136,7 +136,7 @@ export function SearchFields({
               <Input
                 type="text"
                 placeholder="キーワードを入力"
-                className="border-0 p-0 h-auto focus-visible:ring-0 text-sm"
+                className="border-0 p-0 h-auto focus-visible:ring-0"
                 value={keyword}
                 onChange={handleKeywordChange}
               />
