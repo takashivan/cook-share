@@ -92,6 +92,7 @@ export type GetApplicationData = {
   user_id: string | null;
   /** @format timestamptz */
   expiry_date: number | null;
+  /** @default "false" */
   urgent: boolean;
   user: {
     /** @format uuid */
@@ -117,10 +118,13 @@ export type GetApplicationData = {
     /** @format date */
     dateofbirth: string | null;
     profile_image: string;
+    /** @default "false" */
     is_approved: boolean;
     line_user_id: string;
     line_display_name: string;
+    /** @default "false" */
     line_notification_enabled: boolean;
+    /** @default "false" */
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
@@ -128,6 +132,7 @@ export type GetApplicationData = {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    /** @default "false" */
     stripe_verified: boolean;
     stripe_requirements: object;
     address: string;
@@ -143,6 +148,7 @@ export type GetApplicationData = {
     city: string;
     town: string;
     street: string;
+    /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
     magic_link: {
@@ -152,6 +158,7 @@ export type GetApplicationData = {
        * @format timestamptz
        */
       expiration: number;
+      /** @default "false" */
       used: boolean;
     } | null;
   };
@@ -178,6 +185,7 @@ export type MyComingDetailData = {
   user_id: string | null;
   /** @format timestamptz */
   expiry_date: number | null;
+  /** @default "false" */
   urgent: boolean;
 }[];
 
@@ -202,6 +210,7 @@ export type GetApplication2Data = {
   user_id: string | null;
   /** @format timestamptz */
   expiry_date: number | null;
+  /** @default "false" */
   urgent: boolean;
   job: {
     /** @format int64 */
@@ -267,7 +276,10 @@ export type GetApplication2Data = {
       profile_image: string;
       /** @format timestamptz */
       updated_at: number;
-      /** Whether the restaurant is active. */
+      /**
+       * Whether the restaurant is active.
+       * @default "false"
+       */
       is_active: boolean;
       /** @format uuid */
       companies_id: string | null;
@@ -311,6 +323,7 @@ export interface ApplicationDetailData {
   user_id: string | null;
   /** @format timestamptz */
   expiry_date: number | null;
+  /** @default "false" */
   urgent: boolean;
 }
 
@@ -328,6 +341,7 @@ export interface ApplicationPartialUpdatePayload {
   user_id: string | null;
   /** @format timestamptz */
   expiry_date: number | null;
+  /** @default "false" */
   urgent: boolean;
 }
 
@@ -352,6 +366,7 @@ export interface ApplicationPartialUpdateData {
   user_id: string | null;
   /** @format timestamptz */
   expiry_date: number | null;
+  /** @default "false" */
   urgent: boolean;
 }
 
@@ -369,6 +384,7 @@ export interface ApplicationUpdatePayload {
   user_id: string | null;
   /** @format timestamptz */
   expiry_date: number | null;
+  /** @default "false" */
   urgent: boolean;
 }
 
@@ -393,6 +409,7 @@ export interface ApplicationUpdateData {
   user_id: string | null;
   /** @format timestamptz */
   expiry_date: number | null;
+  /** @default "false" */
   urgent: boolean;
 }
 
@@ -421,6 +438,7 @@ export type MeComingListData = {
   user_id: string | null;
   /** @format timestamptz */
   expiry_date: number | null;
+  /** @default "false" */
   urgent: boolean;
 }[];
 
@@ -495,6 +513,7 @@ export interface WorksessionsListData {
      */
     created_at: number;
     content: string;
+    /** @default "false" */
     is_read: boolean;
     /** @format timestamptz */
     updated_at: number;
@@ -538,6 +557,7 @@ export interface ApplicationsDetailData {
   user_id: string | null;
   /** @format timestamptz */
   expiry_date: number | null;
+  /** @default "false" */
   urgent: boolean;
 }
 
@@ -555,6 +575,7 @@ export interface ApplicationsPartialUpdatePayload {
   user_id: string | null;
   /** @format timestamptz */
   expiry_date: number | null;
+  /** @default "false" */
   urgent: boolean;
 }
 
@@ -579,6 +600,7 @@ export interface ApplicationsPartialUpdateData {
   user_id: string | null;
   /** @format timestamptz */
   expiry_date: number | null;
+  /** @default "false" */
   urgent: boolean;
 }
 
@@ -603,6 +625,7 @@ export type ApplicationsListData = {
   user_id: string | null;
   /** @format timestamptz */
   expiry_date: number | null;
+  /** @default "false" */
   urgent: boolean;
 }[];
 
@@ -620,6 +643,7 @@ export interface ApplicationsCreatePayload {
   user_id: string | null;
   /** @format timestamptz */
   expiry_date: number | null;
+  /** @default "false" */
   urgent: boolean;
 }
 
@@ -644,6 +668,7 @@ export interface ApplicationsCreateData {
   user_id: string | null;
   /** @format timestamptz */
   expiry_date: number | null;
+  /** @default "false" */
   urgent: boolean;
 }
 
@@ -668,6 +693,7 @@ export type ApplicationListData = {
   user_id: string | null;
   /** @format timestamptz */
   expiry_date: number | null;
+  /** @default "false" */
   urgent: boolean;
 }[];
 
@@ -685,6 +711,7 @@ export interface ApplicationCreatePayload {
   user_id: string | null;
   /** @format timestamptz */
   expiry_date: number | null;
+  /** @default "false" */
   urgent: boolean;
 }
 
@@ -709,6 +736,7 @@ export interface ApplicationCreateData {
   user_id: string | null;
   /** @format timestamptz */
   expiry_date: number | null;
+  /** @default "false" */
   urgent: boolean;
 }
 
@@ -851,6 +879,7 @@ export type ByUserDetailData = {
     | "operator"
     | "payment";
   content: string;
+  /** @default "false" */
   is_read: boolean;
   /** @format timestamptz */
   updated_at: number;
@@ -880,6 +909,7 @@ export type MarkReadAllPartialUpdateData = {
     | "operator"
     | "payment";
   content: string;
+  /** @default "false" */
   is_read: boolean;
   /** @format timestamptz */
   updated_at: number;
@@ -905,6 +935,7 @@ export interface ReadPartialUpdateData {
     | "operator"
     | "payment";
   content: string;
+  /** @default "false" */
   is_read: boolean;
   /** @format timestamptz */
   updated_at: number;
@@ -1202,10 +1233,13 @@ export type ByRestaurantDetailData = {
     /** @format date */
     dateofbirth: string | null;
     profile_image: string;
+    /** @default "false" */
     is_approved: boolean;
     line_user_id: string;
     line_display_name: string;
+    /** @default "false" */
     line_notification_enabled: boolean;
+    /** @default "false" */
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
@@ -1213,6 +1247,7 @@ export type ByRestaurantDetailData = {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    /** @default "false" */
     stripe_verified: boolean;
     stripe_requirements: object;
     address: string;
@@ -1228,6 +1263,7 @@ export type ByRestaurantDetailData = {
     city: string;
     town: string;
     street: string;
+    /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
     magic_link: {
@@ -1237,6 +1273,7 @@ export type ByRestaurantDetailData = {
        * @format timestamptz
        */
       expiration: number;
+      /** @default "false" */
       used: boolean;
     } | null;
   };
@@ -1331,7 +1368,10 @@ export interface BySessionDetailData {
     profile_image: string;
     /** @format timestamptz */
     updated_at: number;
-    /** Whether the restaurant is active. */
+    /**
+     * Whether the restaurant is active.
+     * @default "false"
+     */
     is_active: boolean;
     /** @format uuid */
     companies_id: string | null;
@@ -1369,10 +1409,13 @@ export interface BySessionDetailData {
     /** @format date */
     dateofbirth: string | null;
     profile_image: string;
+    /** @default "false" */
     is_approved: boolean;
     line_user_id: string;
     line_display_name: string;
+    /** @default "false" */
     line_notification_enabled: boolean;
+    /** @default "false" */
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
@@ -1380,6 +1423,7 @@ export interface BySessionDetailData {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    /** @default "false" */
     stripe_verified: boolean;
     stripe_requirements: object;
     address: string;
@@ -1395,6 +1439,7 @@ export interface BySessionDetailData {
     city: string;
     town: string;
     street: string;
+    /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
     magic_link: {
@@ -1404,6 +1449,7 @@ export interface BySessionDetailData {
        * @format timestamptz
        */
       expiration: number;
+      /** @default "false" */
       used: boolean;
     } | null;
   };
@@ -1444,7 +1490,10 @@ export type ByUserDetailResult = {
     profile_image: string;
     /** @format timestamptz */
     updated_at: number;
-    /** Whether the restaurant is active. */
+    /**
+     * Whether the restaurant is active.
+     * @default "false"
+     */
     is_active: boolean;
     /** @format uuid */
     companies_id: string | null;
@@ -1682,9 +1731,11 @@ export interface StaffInviteCreateData {
     phone: string | null;
     /** @format password */
     password: string;
+    /** @default "false" */
     is_admin: boolean;
     /** @default "1" */
     is_active: boolean;
+    /** @default "false" */
     is_verified: boolean;
     /** @format timestamptz */
     updated_at: number | null;
@@ -1719,9 +1770,11 @@ export interface CompanyusersCreateData {
     phone: string | null;
     /** @format password */
     password: string;
+    /** @default "false" */
     is_admin: boolean;
     /** @default "1" */
     is_active: boolean;
+    /** @default "false" */
     is_verified: boolean;
     /** @format timestamptz */
     updated_at: number | null;
@@ -1820,9 +1873,11 @@ export interface CompanyusersDeleteData {
     phone: string | null;
     /** @format password */
     password: string;
+    /** @default "false" */
     is_admin: boolean;
     /** @default "1" */
     is_active: boolean;
+    /** @default "false" */
     is_verified: boolean;
     /** @format timestamptz */
     updated_at: number | null;
@@ -1851,9 +1906,11 @@ export type CompanyusersListData = {
   phone: string | null;
   /** @format password */
   password: string;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -1952,7 +2009,10 @@ export type RestaurantsListData = {
   profile_image: string;
   /** @format timestamptz */
   updated_at: number;
-  /** Whether the restaurant is active. */
+  /**
+   * Whether the restaurant is active.
+   * @default "false"
+   */
   is_active: boolean;
   /** @format uuid */
   companies_id: string | null;
@@ -2055,9 +2115,11 @@ export interface CompaniesCreateData {
     phone: string | null;
     /** @format password */
     password: string;
+    /** @default "false" */
     is_admin: boolean;
     /** @default "1" */
     is_active: boolean;
+    /** @default "false" */
     is_verified: boolean;
     /** @format timestamptz */
     updated_at: number | null;
@@ -2088,6 +2150,7 @@ export type ByUserDetailOutput = {
     | "operator"
     | "payment";
   related_link: string;
+  /** @default "false" */
   is_read: boolean;
   content: string;
   /** @format int64 */
@@ -2118,6 +2181,7 @@ export type MarkReadAllPartialUpdateResult = {
     | "operator"
     | "payment";
   related_link: string;
+  /** @default "false" */
   is_read: boolean;
   content: string;
   /** @format int64 */
@@ -2144,6 +2208,7 @@ export interface MarkReadPartialUpdateData {
     | "operator"
     | "payment";
   related_link: string;
+  /** @default "false" */
   is_read: boolean;
   content: string;
   /** @format int64 */
@@ -2168,9 +2233,11 @@ export type CompanyDetailData = {
   phone: string | null;
   /** @format password */
   password: string;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -2203,9 +2270,11 @@ export interface MeRestaurantsListData {
     phone: string | null;
     /** @format password */
     password: string;
+    /** @default "false" */
     is_admin: boolean;
     /** @default "1" */
     is_active: boolean;
+    /** @default "false" */
     is_verified: boolean;
     /** @format timestamptz */
     updated_at: number | null;
@@ -2235,9 +2304,11 @@ export interface CompanyuserDetailData {
   phone: string | null;
   /** @format password */
   password: string;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -2256,9 +2327,11 @@ export interface CompanyuserPartialUpdatePayload {
   /** @format email */
   email: string;
   phone: string | null;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -2286,9 +2359,11 @@ export interface CompanyuserPartialUpdateData {
   phone: string | null;
   /** @format password */
   password: string;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -2321,9 +2396,11 @@ export interface EmailChangeCreateData {
   phone: string | null;
   /** @format password */
   password: string;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -2355,9 +2432,11 @@ export interface EmailConfirmCreateData {
   phone: string | null;
   /** @format password */
   password: string;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -2547,7 +2626,10 @@ export type RestaurantsListResult = {
   profile_image: string;
   /** @format timestamptz */
   updated_at: number;
-  /** Whether the restaurant is active. */
+  /**
+   * Whether the restaurant is active.
+   * @default "false"
+   */
   is_active: boolean;
   /** @format uuid */
   companies_id: string | null;
@@ -2572,6 +2654,7 @@ export interface WorksessionsMessagesListData {
      */
     created_at: number;
     content: string;
+    /** @default "false" */
     is_read: boolean;
     /** @format timestamptz */
     updated_at: number;
@@ -2623,9 +2706,11 @@ export interface CompanyusersPartialUpdateData {
   phone: string | null;
   /** @format password */
   password: string;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -2655,6 +2740,7 @@ export type CompanyuserNotificationsListData = {
     | "operator"
     | "payment";
   related_link: string;
+  /** @default "false" */
   is_read: boolean;
   content: string;
   /** @format int64 */
@@ -2679,9 +2765,11 @@ export type CompanyusersListResult = {
   phone: string | null;
   /** @format password */
   password: string;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -2700,9 +2788,11 @@ export interface CompanyusersCreateBody {
   /** @format email */
   email: string;
   phone: string | null;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -2730,9 +2820,11 @@ export interface CompanyusersCreateResult {
   phone: string | null;
   /** @format password */
   password: string;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -2760,9 +2852,11 @@ export type CompanyuserListData = {
   phone: string | null;
   /** @format password */
   password: string;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -2781,9 +2875,11 @@ export interface CompanyuserCreatePayload {
   /** @format email */
   email: string;
   phone: string | null;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -2811,9 +2907,11 @@ export interface CompanyuserCreateData {
   phone: string | null;
   /** @format password */
   password: string;
+  /** @default "false" */
   is_admin: boolean;
   /** @default "1" */
   is_active: boolean;
+  /** @default "false" */
   is_verified: boolean;
   /** @format timestamptz */
   updated_at: number | null;
@@ -3134,7 +3232,10 @@ export interface QueryUpcomingjobsListData {
       profile_image: string;
       /** @format timestamptz */
       updated_at: number;
-      /** Whether the restaurant is active. */
+      /**
+       * Whether the restaurant is active.
+       * @default "false"
+       */
       is_active: boolean;
       /** @format uuid */
       companies_id: string | null;
@@ -3152,7 +3253,10 @@ export interface QueryUpcomingjobsListData {
            * @default "now"
            */
           created_at: number;
-          /** Whether this cuisine is the primary cuisine for the restaurant. */
+          /**
+           * Whether this cuisine is the primary cuisine for the restaurant.
+           * @default "false"
+           */
           is_primary: boolean;
           category: string;
         };
@@ -3226,7 +3330,10 @@ export interface QueryUpcomingListData {
       profile_image: string;
       /** @format timestamptz */
       updated_at: number;
-      /** Whether the restaurant is active. */
+      /**
+       * Whether the restaurant is active.
+       * @default "false"
+       */
       is_active: boolean;
       /** @format uuid */
       companies_id: string | null;
@@ -3244,7 +3351,10 @@ export interface QueryUpcomingListData {
            * @default "now"
            */
           created_at: number;
-          /** Whether this cuisine is the primary cuisine for the restaurant. */
+          /**
+           * Whether this cuisine is the primary cuisine for the restaurant.
+           * @default "false"
+           */
           is_primary: boolean;
           category: string;
         };
@@ -3374,7 +3484,10 @@ export interface GetJobData {
     profile_image: string;
     /** @format timestamptz */
     updated_at: number;
-    /** Whether the restaurant is active. */
+    /**
+     * Whether the restaurant is active.
+     * @default "false"
+     */
     is_active: boolean;
     /** @format uuid */
     companies_id: string | null;
@@ -3545,7 +3658,10 @@ export interface QueryUpcomingListResult {
       profile_image: string;
       /** @format timestamptz */
       updated_at: number;
-      /** Whether the restaurant is active. */
+      /**
+       * Whether the restaurant is active.
+       * @default "false"
+       */
       is_active: boolean;
       /** @format uuid */
       companies_id: string | null;
@@ -3563,7 +3679,10 @@ export interface QueryUpcomingListResult {
            * @default "now"
            */
           created_at: number;
-          /** Whether this cuisine is the primary cuisine for the restaurant. */
+          /**
+           * Whether this cuisine is the primary cuisine for the restaurant.
+           * @default "false"
+           */
           is_primary: boolean;
           category: string;
         };
@@ -3596,6 +3715,7 @@ export type ApplicationsListResult = {
   user_id: string | null;
   /** @format timestamptz */
   expiry_date: number | null;
+  /** @default "false" */
   urgent: boolean;
   user: {
     /** @format uuid */
@@ -3621,10 +3741,13 @@ export type ApplicationsListResult = {
     /** @format date */
     dateofbirth: string | null;
     profile_image: string;
+    /** @default "false" */
     is_approved: boolean;
     line_user_id: string;
     line_display_name: string;
+    /** @default "false" */
     line_notification_enabled: boolean;
+    /** @default "false" */
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
@@ -3632,6 +3755,7 @@ export type ApplicationsListResult = {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    /** @default "false" */
     stripe_verified: boolean;
     stripe_requirements: object;
     address: string;
@@ -3647,6 +3771,7 @@ export type ApplicationsListResult = {
     city: string;
     town: string;
     street: string;
+    /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
     magic_link: {
@@ -3656,6 +3781,7 @@ export type ApplicationsListResult = {
        * @format timestamptz
        */
       expiration: number;
+      /** @default "false" */
       used: boolean;
     } | null;
   };
@@ -3744,10 +3870,13 @@ export type WorksessionsRestaurantTodosListData = {
     /** @format date */
     dateofbirth: string | null;
     profile_image: string;
+    /** @default "false" */
     is_approved: boolean;
     line_user_id: string;
     line_display_name: string;
+    /** @default "false" */
     line_notification_enabled: boolean;
+    /** @default "false" */
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
@@ -3755,6 +3884,7 @@ export type WorksessionsRestaurantTodosListData = {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    /** @default "false" */
     stripe_verified: boolean;
     stripe_requirements: object;
     address: string;
@@ -3770,6 +3900,7 @@ export type WorksessionsRestaurantTodosListData = {
     city: string;
     town: string;
     street: string;
+    /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
     magic_link: {
@@ -3779,6 +3910,7 @@ export type WorksessionsRestaurantTodosListData = {
        * @format timestamptz
        */
       expiration: number;
+      /** @default "false" */
       used: boolean;
     } | null;
   };
@@ -3949,7 +4081,10 @@ export interface JobsDetailData {
     profile_image: string;
     /** @format timestamptz */
     updated_at: number;
-    /** Whether the restaurant is active. */
+    /**
+     * Whether the restaurant is active.
+     * @default "false"
+     */
     is_active: boolean;
     /** @format uuid */
     companies_id: string | null;
@@ -4113,7 +4248,10 @@ export interface JobsListResult {
       profile_image: string;
       /** @format timestamptz */
       updated_at: number;
-      /** Whether the restaurant is active. */
+      /**
+       * Whether the restaurant is active.
+       * @default "false"
+       */
       is_active: boolean;
       /** @format uuid */
       companies_id: string | null;
@@ -4135,7 +4273,10 @@ export interface JobsListResult {
            * @default "now"
            */
           created_at: number;
-          /** Whether this cuisine is the primary cuisine for the restaurant. */
+          /**
+           * Whether this cuisine is the primary cuisine for the restaurant.
+           * @default "false"
+           */
           is_primary: boolean;
           category: string;
         };
@@ -4294,7 +4435,10 @@ export interface GetJob2Data {
       profile_image: string;
       /** @format timestamptz */
       updated_at: number;
-      /** Whether the restaurant is active. */
+      /**
+       * Whether the restaurant is active.
+       * @default "false"
+       */
       is_active: boolean;
       /** @format uuid */
       companies_id: string | null;
@@ -4316,7 +4460,10 @@ export interface GetJob2Data {
            * @default "now"
            */
           created_at: number;
-          /** Whether this cuisine is the primary cuisine for the restaurant. */
+          /**
+           * Whether this cuisine is the primary cuisine for the restaurant.
+           * @default "false"
+           */
           is_primary: boolean;
           category: string;
         };
@@ -4428,6 +4575,7 @@ export interface WorksessionDetailData {
      */
     created_at: number;
     content: string;
+    /** @default "false" */
     is_read: boolean;
     /** @format timestamptz */
     updated_at: number;
@@ -4467,6 +4615,7 @@ export interface MessageDetailData {
    */
   created_at: number;
   content: string;
+  /** @default "false" */
   is_read: boolean;
   /** @format timestamptz */
   updated_at: number;
@@ -4488,6 +4637,7 @@ export interface MessageDetailData {
 
 export interface MessagePartialUpdatePayload {
   content: string;
+  /** @default "false" */
   is_read: boolean;
   /** @format timestamptz */
   updated_at: number;
@@ -4516,6 +4666,7 @@ export interface MessagePartialUpdateData {
    */
   created_at: number;
   content: string;
+  /** @default "false" */
   is_read: boolean;
   /** @format timestamptz */
   updated_at: number;
@@ -4546,6 +4697,7 @@ export interface MessagesDetailData {
    */
   created_at: number;
   content: string;
+  /** @default "false" */
   is_read: boolean;
   /** @format timestamptz */
   updated_at: number;
@@ -4567,6 +4719,7 @@ export interface MessagesDetailData {
 
 export interface MessagesPartialUpdatePayload {
   content: string;
+  /** @default "false" */
   is_read: boolean;
   /** @format timestamptz */
   updated_at: number;
@@ -4595,6 +4748,7 @@ export interface MessagesPartialUpdateData {
    */
   created_at: number;
   content: string;
+  /** @default "false" */
   is_read: boolean;
   /** @format timestamptz */
   updated_at: number;
@@ -4623,6 +4777,7 @@ export type MessagesListData = {
    */
   created_at: number;
   content: string;
+  /** @default "false" */
   is_read: boolean;
   /** @format timestamptz */
   updated_at: number;
@@ -4658,6 +4813,7 @@ export interface MessagesCreateData {
    */
   created_at: number;
   content: string;
+  /** @default "false" */
   is_read: boolean;
   /** @format timestamptz */
   updated_at: number;
@@ -4686,6 +4842,7 @@ export type MessageListData = {
    */
   created_at: number;
   content: string;
+  /** @default "false" */
   is_read: boolean;
   /** @format timestamptz */
   updated_at: number;
@@ -4707,6 +4864,7 @@ export type MessageListData = {
 
 export interface MessageCreatePayload {
   content: string;
+  /** @default "false" */
   is_read: boolean;
   /** @format timestamptz */
   updated_at: number;
@@ -4733,6 +4891,7 @@ export interface MessageCreateData {
    */
   created_at: number;
   content: string;
+  /** @default "false" */
   is_read: boolean;
   /** @format timestamptz */
   updated_at: number;
@@ -4768,7 +4927,10 @@ export interface RestaurantCuisinesDeleteData {
 }
 
 export interface RestaurantCuisinesPartialUpdatePayload {
-  /** Whether this cuisine is the primary cuisine for the restaurant. */
+  /**
+   * Whether this cuisine is the primary cuisine for the restaurant.
+   * @default "false"
+   */
   is_primary: boolean;
   category: string;
 }
@@ -4781,7 +4943,10 @@ export interface RestaurantCuisinesPartialUpdateData {
    * @default "now"
    */
   created_at: number;
-  /** Whether this cuisine is the primary cuisine for the restaurant. */
+  /**
+   * Whether this cuisine is the primary cuisine for the restaurant.
+   * @default "false"
+   */
   is_primary: boolean;
   category: string;
 }
@@ -4794,13 +4959,19 @@ export type RestaurantCuisinesListData = {
    * @default "now"
    */
   created_at: number;
-  /** Whether this cuisine is the primary cuisine for the restaurant. */
+  /**
+   * Whether this cuisine is the primary cuisine for the restaurant.
+   * @default "false"
+   */
   is_primary: boolean;
   category: string;
 }[];
 
 export interface RestaurantCuisinesCreatePayload {
-  /** Whether this cuisine is the primary cuisine for the restaurant. */
+  /**
+   * Whether this cuisine is the primary cuisine for the restaurant.
+   * @default "false"
+   */
   is_primary: boolean;
   category: string;
 }
@@ -4813,7 +4984,10 @@ export interface RestaurantCuisinesCreateData {
    * @default "now"
    */
   created_at: number;
-  /** Whether this cuisine is the primary cuisine for the restaurant. */
+  /**
+   * Whether this cuisine is the primary cuisine for the restaurant.
+   * @default "false"
+   */
   is_primary: boolean;
   category: string;
 }
@@ -4845,7 +5019,10 @@ export type CompanyDetailOutput = {
   profile_image: string;
   /** @format timestamptz */
   updated_at: number;
-  /** Whether the restaurant is active. */
+  /**
+   * Whether the restaurant is active.
+   * @default "false"
+   */
   is_active: boolean;
   /** @format uuid */
   companies_id: string | null;
@@ -4918,7 +5095,9 @@ export interface StaffInviteCreateBody {
   email: string;
   /** @format int64 */
   restaurant_id: number;
+  /** @default "false" */
   can_edit: boolean;
+  /** @default "false" */
   can_manage_jobs: boolean;
   restaurant_name: string;
 }
@@ -4962,9 +5141,11 @@ export type StaffsListData = {
     phone: string | null;
     /** @format password */
     password: string;
+    /** @default "false" */
     is_admin: boolean;
     /** @default "1" */
     is_active: boolean;
+    /** @default "false" */
     is_verified: boolean;
     /** @format timestamptz */
     updated_at: number | null;
@@ -4995,7 +5176,10 @@ export interface RestaurantDetailResult {
   profile_image: string;
   /** @format timestamptz */
   updated_at: number;
-  /** Whether the restaurant is active. */
+  /**
+   * Whether the restaurant is active.
+   * @default "false"
+   */
   is_active: boolean;
   /** @format uuid */
   companies_id: string | null;
@@ -5019,7 +5203,10 @@ export interface RestaurantPartialUpdatePayload {
   profile_image: string;
   /** @format timestamptz */
   updated_at: number;
-  /** Whether the restaurant is active. */
+  /**
+   * Whether the restaurant is active.
+   * @default "false"
+   */
   is_active: boolean;
   /** @format uuid */
   companies_id: string | null;
@@ -5073,7 +5260,10 @@ export type ByChefDetailData = {
     profile_image: string;
     /** @format timestamptz */
     updated_at: number;
-    /** Whether the restaurant is active. */
+    /**
+     * Whether the restaurant is active.
+     * @default "false"
+     */
     is_active: boolean;
     /** @format uuid */
     companies_id: string | null;
@@ -5132,10 +5322,13 @@ export type ByRestaurantDetailResult = {
     /** @format date */
     dateofbirth: string | null;
     profile_image: string;
+    /** @default "false" */
     is_approved: boolean;
     line_user_id: string;
     line_display_name: string;
+    /** @default "false" */
     line_notification_enabled: boolean;
+    /** @default "false" */
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
@@ -5143,6 +5336,7 @@ export type ByRestaurantDetailResult = {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    /** @default "false" */
     stripe_verified: boolean;
     stripe_requirements: object;
     address: string;
@@ -5158,6 +5352,7 @@ export type ByRestaurantDetailResult = {
     city: string;
     town: string;
     street: string;
+    /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
     magic_link: {
@@ -5167,6 +5362,7 @@ export type ByRestaurantDetailResult = {
        * @format timestamptz
        */
       expiration: number;
+      /** @default "false" */
       used: boolean;
     } | null;
   };
@@ -5269,10 +5465,13 @@ export interface BySessionDetailResult {
     /** @format date */
     dateofbirth: string | null;
     profile_image: string;
+    /** @default "false" */
     is_approved: boolean;
     line_user_id: string;
     line_display_name: string;
+    /** @default "false" */
     line_notification_enabled: boolean;
+    /** @default "false" */
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
@@ -5280,6 +5479,7 @@ export interface BySessionDetailResult {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    /** @default "false" */
     stripe_verified: boolean;
     stripe_requirements: object;
     address: string;
@@ -5295,6 +5495,7 @@ export interface BySessionDetailResult {
     city: string;
     town: string;
     street: string;
+    /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
     magic_link: {
@@ -5304,6 +5505,7 @@ export interface BySessionDetailResult {
        * @format timestamptz
        */
       expiration: number;
+      /** @default "false" */
       used: boolean;
     } | null;
   };
@@ -5323,7 +5525,10 @@ export interface BySessionDetailResult {
     profile_image: string;
     /** @format timestamptz */
     updated_at: number;
-    /** Whether the restaurant is active. */
+    /**
+     * Whether the restaurant is active.
+     * @default "false"
+     */
     is_active: boolean;
     /** @format uuid */
     companies_id: string | null;
@@ -5719,7 +5924,9 @@ export interface StaffInviteCreateInput {
   email: string;
   /** @format int64 */
   restaurant_id: number;
+  /** @default "false" */
   can_edit: boolean;
+  /** @default "false" */
   can_manage_jobs: boolean;
   restaurant_name: string;
 }
@@ -5769,10 +5976,13 @@ export type ChefReviewsListData = {
     /** @format date */
     dateofbirth: string | null;
     profile_image: string;
+    /** @default "false" */
     is_approved: boolean;
     line_user_id: string;
     line_display_name: string;
+    /** @default "false" */
     line_notification_enabled: boolean;
+    /** @default "false" */
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
@@ -5780,6 +5990,7 @@ export type ChefReviewsListData = {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    /** @default "false" */
     stripe_verified: boolean;
     stripe_requirements: object;
     address: string;
@@ -5795,6 +6006,7 @@ export type ChefReviewsListData = {
     city: string;
     town: string;
     street: string;
+    /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
     magic_link: {
@@ -5804,6 +6016,7 @@ export type ChefReviewsListData = {
        * @format timestamptz
        */
       expiration: number;
+      /** @default "false" */
       used: boolean;
     } | null;
   };
@@ -5872,9 +6085,11 @@ export interface CompanyusersListOutput {
     phone: string | null;
     /** @format password */
     password: string;
+    /** @default "false" */
     is_admin: boolean;
     /** @default "1" */
     is_active: boolean;
+    /** @default "false" */
     is_verified: boolean;
     /** @format timestamptz */
     updated_at: number | null;
@@ -5891,7 +6106,9 @@ export interface CompanyusersCreateInput {
   companies_id: string;
   /** @format email */
   email: string;
+  /** @default "false" */
   can_edit: boolean;
+  /** @default "false" */
   can_manage_jobs: boolean;
   restaurant_name: string;
 }
@@ -5991,10 +6208,13 @@ export type RestaurantReviewsListResult = {
     /** @format date */
     dateofbirth: string | null;
     profile_image: string;
+    /** @default "false" */
     is_approved: boolean;
     line_user_id: string;
     line_display_name: string;
+    /** @default "false" */
     line_notification_enabled: boolean;
+    /** @default "false" */
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
@@ -6002,6 +6222,7 @@ export type RestaurantReviewsListResult = {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    /** @default "false" */
     stripe_verified: boolean;
     stripe_requirements: object;
     address: string;
@@ -6017,6 +6238,7 @@ export type RestaurantReviewsListResult = {
     city: string;
     town: string;
     street: string;
+    /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
     magic_link: {
@@ -6026,6 +6248,7 @@ export type RestaurantReviewsListResult = {
        * @format timestamptz
        */
       expiration: number;
+      /** @default "false" */
       used: boolean;
     } | null;
   };
@@ -6068,7 +6291,10 @@ export interface RestaurantsDeleteData {
   profile_image: string;
   /** @format timestamptz */
   updated_at: number;
-  /** Whether the restaurant is active. */
+  /**
+   * Whether the restaurant is active.
+   * @default "false"
+   */
   is_active: boolean;
   /** @format uuid */
   companies_id: string | null;
@@ -6099,7 +6325,10 @@ export interface RestaurantsDetailData {
   profile_image: string;
   /** @format timestamptz */
   updated_at: number;
-  /** Whether the restaurant is active. */
+  /**
+   * Whether the restaurant is active.
+   * @default "false"
+   */
   is_active: boolean;
   /** @format uuid */
   companies_id: string | null;
@@ -6143,7 +6372,10 @@ export type RestaurantsListOutput = {
     profile_image: string;
     /** @format timestamptz */
     updated_at: number;
-    /** Whether the restaurant is active. */
+    /**
+     * Whether the restaurant is active.
+     * @default "false"
+     */
     is_active: boolean;
     /** @format uuid */
     companies_id: string | null;
@@ -6163,7 +6395,10 @@ export type RestaurantsListOutput = {
      * @default "now"
      */
     created_at: number;
-    /** Whether this cuisine is the primary cuisine for the restaurant. */
+    /**
+     * Whether this cuisine is the primary cuisine for the restaurant.
+     * @default "false"
+     */
     is_primary: boolean;
     category: string;
   };
@@ -6178,7 +6413,10 @@ export interface RestaurantsCreatePayload {
   profile_image: string;
   /** @format timestamptz */
   updated_at: number;
-  /** Whether the restaurant is active. */
+  /**
+   * Whether the restaurant is active.
+   * @default "false"
+   */
   is_active: boolean;
   /** @format uuid */
   companies_id: string | null;
@@ -6207,7 +6445,10 @@ export type RestaurantListData = {
     profile_image: string;
     /** @format timestamptz */
     updated_at: number;
-    /** Whether the restaurant is active. */
+    /**
+     * Whether the restaurant is active.
+     * @default "false"
+     */
     is_active: boolean;
     /** @format uuid */
     companies_id: string | null;
@@ -6227,7 +6468,10 @@ export type RestaurantListData = {
      * @default "now"
      */
     created_at: number;
-    /** Whether this cuisine is the primary cuisine for the restaurant. */
+    /**
+     * Whether this cuisine is the primary cuisine for the restaurant.
+     * @default "false"
+     */
     is_primary: boolean;
     category: string;
   };
@@ -6242,7 +6486,10 @@ export interface RestaurantCreatePayload {
   profile_image: string;
   /** @format timestamptz */
   updated_at: number;
-  /** Whether the restaurant is active. */
+  /**
+   * Whether the restaurant is active.
+   * @default "false"
+   */
   is_active: boolean;
   /** @format uuid */
   companies_id: string | null;
@@ -6292,10 +6539,13 @@ export interface EmailChangeCreateResult {
   /** @format date */
   dateofbirth: string | null;
   profile_image: string;
+  /** @default "false" */
   is_approved: boolean;
   line_user_id: string;
   line_display_name: string;
+  /** @default "false" */
   line_notification_enabled: boolean;
+  /** @default "false" */
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
@@ -6303,6 +6553,7 @@ export interface EmailChangeCreateResult {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  /** @default "false" */
   stripe_verified: boolean;
   stripe_requirements: object;
   address: string;
@@ -6318,6 +6569,7 @@ export interface EmailChangeCreateResult {
   city: string;
   town: string;
   street: string;
+  /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
   magic_link: {
@@ -6327,6 +6579,7 @@ export interface EmailChangeCreateResult {
      * @format timestamptz
      */
     expiration: number;
+    /** @default "false" */
     used: boolean;
   } | null;
 }
@@ -6361,10 +6614,13 @@ export interface EmailConfirmCreateResult {
   /** @format date */
   dateofbirth: string | null;
   profile_image: string;
+  /** @default "false" */
   is_approved: boolean;
   line_user_id: string;
   line_display_name: string;
+  /** @default "false" */
   line_notification_enabled: boolean;
+  /** @default "false" */
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
@@ -6372,6 +6628,7 @@ export interface EmailConfirmCreateResult {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  /** @default "false" */
   stripe_verified: boolean;
   stripe_requirements: object;
   address: string;
@@ -6387,6 +6644,7 @@ export interface EmailConfirmCreateResult {
   city: string;
   town: string;
   street: string;
+  /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
   magic_link: {
@@ -6396,6 +6654,7 @@ export interface EmailConfirmCreateResult {
      * @format timestamptz
      */
     expiration: number;
+    /** @default "false" */
     used: boolean;
   } | null;
 }
@@ -6516,7 +6775,10 @@ export type SessionHistoryCurrentListData = {
     profile_image: string;
     /** @format timestamptz */
     updated_at: number;
-    /** Whether the restaurant is active. */
+    /**
+     * Whether the restaurant is active.
+     * @default "false"
+     */
     is_active: boolean;
     /** @format uuid */
     companies_id: string | null;
@@ -6609,10 +6871,13 @@ export interface UserDetailData {
   /** @format date */
   dateofbirth: string | null;
   profile_image: string;
+  /** @default "false" */
   is_approved: boolean;
   line_user_id: string;
   line_display_name: string;
+  /** @default "false" */
   line_notification_enabled: boolean;
+  /** @default "false" */
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
@@ -6620,6 +6885,7 @@ export interface UserDetailData {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  /** @default "false" */
   stripe_verified: boolean;
   stripe_requirements: object;
   address: string;
@@ -6635,6 +6901,7 @@ export interface UserDetailData {
   city: string;
   town: string;
   street: string;
+  /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
   magic_link: {
@@ -6644,6 +6911,7 @@ export interface UserDetailData {
      * @format timestamptz
      */
     expiration: number;
+    /** @default "false" */
     used: boolean;
   } | null;
 }
@@ -6671,6 +6939,7 @@ export interface UserPartialUpdatePayload {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  /** @default "false" */
   stripe_verified: boolean;
   stripe_requirements: object;
   address: string;
@@ -6686,6 +6955,7 @@ export interface UserPartialUpdatePayload {
   city: string;
   town: string;
   street: string;
+  /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
   /** @format binary */
@@ -6697,6 +6967,7 @@ export interface UserPartialUpdatePayload {
      * @format timestamptz
      */
     expiration: number;
+    /** @default "false" */
     used: boolean;
   } | null;
 }
@@ -6734,10 +7005,13 @@ export interface EmailChangeCreateOutput {
   /** @format date */
   dateofbirth: string | null;
   profile_image: string;
+  /** @default "false" */
   is_approved: boolean;
   line_user_id: string;
   line_display_name: string;
+  /** @default "false" */
   line_notification_enabled: boolean;
+  /** @default "false" */
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
@@ -6745,6 +7019,7 @@ export interface EmailChangeCreateOutput {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  /** @default "false" */
   stripe_verified: boolean;
   stripe_requirements: object;
   address: string;
@@ -6760,6 +7035,7 @@ export interface EmailChangeCreateOutput {
   city: string;
   town: string;
   street: string;
+  /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
   magic_link: {
@@ -6769,6 +7045,7 @@ export interface EmailChangeCreateOutput {
      * @format timestamptz
      */
     expiration: number;
+    /** @default "false" */
     used: boolean;
   } | null;
 }
@@ -6803,10 +7080,13 @@ export interface EmailConfirmCreateOutput {
   /** @format date */
   dateofbirth: string | null;
   profile_image: string;
+  /** @default "false" */
   is_approved: boolean;
   line_user_id: string;
   line_display_name: string;
+  /** @default "false" */
   line_notification_enabled: boolean;
+  /** @default "false" */
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
@@ -6814,6 +7094,7 @@ export interface EmailConfirmCreateOutput {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  /** @default "false" */
   stripe_verified: boolean;
   stripe_requirements: object;
   address: string;
@@ -6829,6 +7110,7 @@ export interface EmailConfirmCreateOutput {
   city: string;
   town: string;
   street: string;
+  /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
   magic_link: {
@@ -6838,6 +7120,7 @@ export interface EmailConfirmCreateOutput {
      * @format timestamptz
      */
     expiration: number;
+    /** @default "false" */
     used: boolean;
   } | null;
 }
@@ -6881,6 +7164,7 @@ export type ChefNotificationsListData = {
     | "operator"
     | "payment";
   content: string;
+  /** @default "false" */
   is_read: boolean;
   /** @format timestamptz */
   updated_at: number;
@@ -6911,6 +7195,7 @@ export type ApplicationsListOutput = {
   user_id: string | null;
   /** @format timestamptz */
   expiry_date: number | null;
+  /** @default "false" */
   urgent: boolean;
 }[];
 
@@ -6949,7 +7234,10 @@ export type ChefReviewsListResult = {
     profile_image: string;
     /** @format timestamptz */
     updated_at: number;
-    /** Whether the restaurant is active. */
+    /**
+     * Whether the restaurant is active.
+     * @default "false"
+     */
     is_active: boolean;
     /** @format uuid */
     companies_id: string | null;
@@ -7019,7 +7307,10 @@ export type RestaurantReviewsListOutput = {
     profile_image: string;
     /** @format timestamptz */
     updated_at: number;
-    /** Whether the restaurant is active. */
+    /**
+     * Whether the restaurant is active.
+     * @default "false"
+     */
     is_active: boolean;
     /** @format uuid */
     companies_id: string | null;
@@ -7070,7 +7361,10 @@ export type ReviewsListResult = {
     profile_image: string;
     /** @format timestamptz */
     updated_at: number;
-    /** Whether the restaurant is active. */
+    /**
+     * Whether the restaurant is active.
+     * @default "false"
+     */
     is_active: boolean;
     /** @format uuid */
     companies_id: string | null;
@@ -7155,7 +7449,10 @@ export type SessionHistoryCurrentListResult = {
     profile_image: string;
     /** @format timestamptz */
     updated_at: number;
-    /** Whether the restaurant is active. */
+    /**
+     * Whether the restaurant is active.
+     * @default "false"
+     */
     is_active: boolean;
     /** @format uuid */
     companies_id: string | null;
@@ -7341,7 +7638,10 @@ export type WorksessionsUserTodosListData = {
       profile_image: string;
       /** @format timestamptz */
       updated_at: number;
-      /** Whether the restaurant is active. */
+      /**
+       * Whether the restaurant is active.
+       * @default "false"
+       */
       is_active: boolean;
       /** @format uuid */
       companies_id: string | null;
@@ -7368,6 +7668,7 @@ export interface WorksessionsMessagesListResult {
      */
     created_at: number;
     content: string;
+    /** @default "false" */
     is_read: boolean;
     /** @format timestamptz */
     updated_at: number;
@@ -7513,7 +7814,10 @@ export type WorksessionsListResult = {
       profile_image: string;
       /** @format timestamptz */
       updated_at: number;
-      /** Whether the restaurant is active. */
+      /**
+       * Whether the restaurant is active.
+       * @default "false"
+       */
       is_active: boolean;
       /** @format uuid */
       companies_id: string | null;
@@ -7558,10 +7862,13 @@ export interface UsersDetailData {
   /** @format date */
   dateofbirth: string | null;
   profile_image: string;
+  /** @default "false" */
   is_approved: boolean;
   line_user_id: string;
   line_display_name: string;
+  /** @default "false" */
   line_notification_enabled: boolean;
+  /** @default "false" */
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
@@ -7569,6 +7876,7 @@ export interface UsersDetailData {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  /** @default "false" */
   stripe_verified: boolean;
   stripe_requirements: object;
   address: string;
@@ -7584,6 +7892,7 @@ export interface UsersDetailData {
   city: string;
   town: string;
   street: string;
+  /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
   magic_link: {
@@ -7593,6 +7902,7 @@ export interface UsersDetailData {
      * @format timestamptz
      */
     expiration: number;
+    /** @default "false" */
     used: boolean;
   } | null;
 }
@@ -7610,6 +7920,7 @@ export interface UsersPartialUpdatePayload {
   given_name: string;
   last_name_kana: string;
   given_name_kana: string;
+  categories: number[];
   postal_code: string;
   prefecture: string;
   address2: string;
@@ -7652,10 +7963,13 @@ export type UsersListData = {
   /** @format date */
   dateofbirth: string | null;
   profile_image: string;
+  /** @default "false" */
   is_approved: boolean;
   line_user_id: string;
   line_display_name: string;
+  /** @default "false" */
   line_notification_enabled: boolean;
+  /** @default "false" */
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
@@ -7663,6 +7977,7 @@ export type UsersListData = {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  /** @default "false" */
   stripe_verified: boolean;
   stripe_requirements: object;
   address: string;
@@ -7678,6 +7993,7 @@ export type UsersListData = {
   city: string;
   town: string;
   street: string;
+  /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
   magic_link: {
@@ -7687,6 +8003,7 @@ export type UsersListData = {
      * @format timestamptz
      */
     expiration: number;
+    /** @default "false" */
     used: boolean;
   } | null;
 }[];
@@ -7708,10 +8025,13 @@ export interface UsersCreatePayload {
   /** @format date */
   dateofbirth: string | null;
   profile_image: string;
+  /** @default "false" */
   is_approved: boolean;
   line_user_id: string;
   line_display_name: string;
+  /** @default "false" */
   line_notification_enabled: boolean;
+  /** @default "false" */
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
@@ -7719,6 +8039,7 @@ export interface UsersCreatePayload {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  /** @default "false" */
   stripe_verified: boolean;
   stripe_requirements: object;
   address: string;
@@ -7734,6 +8055,7 @@ export interface UsersCreatePayload {
   city: string;
   town: string;
   street: string;
+  /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
   magic_link: {
@@ -7743,6 +8065,7 @@ export interface UsersCreatePayload {
      * @format timestamptz
      */
     expiration: number;
+    /** @default "false" */
     used: boolean;
   } | null;
 }
@@ -7773,10 +8096,13 @@ export interface UsersCreateData {
   /** @format date */
   dateofbirth: string | null;
   profile_image: string;
+  /** @default "false" */
   is_approved: boolean;
   line_user_id: string;
   line_display_name: string;
+  /** @default "false" */
   line_notification_enabled: boolean;
+  /** @default "false" */
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
@@ -7784,6 +8110,7 @@ export interface UsersCreateData {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  /** @default "false" */
   stripe_verified: boolean;
   stripe_requirements: object;
   address: string;
@@ -7799,6 +8126,7 @@ export interface UsersCreateData {
   city: string;
   town: string;
   street: string;
+  /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
   magic_link: {
@@ -7808,6 +8136,7 @@ export interface UsersCreateData {
      * @format timestamptz
      */
     expiration: number;
+    /** @default "false" */
     used: boolean;
   } | null;
 }
@@ -7838,10 +8167,13 @@ export type UserListData = {
   /** @format date */
   dateofbirth: string | null;
   profile_image: string;
+  /** @default "false" */
   is_approved: boolean;
   line_user_id: string;
   line_display_name: string;
+  /** @default "false" */
   line_notification_enabled: boolean;
+  /** @default "false" */
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
@@ -7849,6 +8181,7 @@ export type UserListData = {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  /** @default "false" */
   stripe_verified: boolean;
   stripe_requirements: object;
   address: string;
@@ -7864,6 +8197,7 @@ export type UserListData = {
   city: string;
   town: string;
   street: string;
+  /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
   magic_link: {
@@ -7873,6 +8207,7 @@ export type UserListData = {
      * @format timestamptz
      */
     expiration: number;
+    /** @default "false" */
     used: boolean;
   } | null;
 }[];
@@ -7894,10 +8229,13 @@ export interface UserCreatePayload {
   /** @format date */
   dateofbirth: string | null;
   profile_image: string;
+  /** @default "false" */
   is_approved: boolean;
   line_user_id: string;
   line_display_name: string;
+  /** @default "false" */
   line_notification_enabled: boolean;
+  /** @default "false" */
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
@@ -7905,6 +8243,7 @@ export interface UserCreatePayload {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  /** @default "false" */
   stripe_verified: boolean;
   stripe_requirements: object;
   address: string;
@@ -7920,6 +8259,7 @@ export interface UserCreatePayload {
   city: string;
   town: string;
   street: string;
+  /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
   magic_link: {
@@ -7929,6 +8269,7 @@ export interface UserCreatePayload {
      * @format timestamptz
      */
     expiration: number;
+    /** @default "false" */
     used: boolean;
   } | null;
 }
@@ -7959,10 +8300,13 @@ export interface UserCreateData {
   /** @format date */
   dateofbirth: string | null;
   profile_image: string;
+  /** @default "false" */
   is_approved: boolean;
   line_user_id: string;
   line_display_name: string;
+  /** @default "false" */
   line_notification_enabled: boolean;
+  /** @default "false" */
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
@@ -7970,6 +8314,7 @@ export interface UserCreateData {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  /** @default "false" */
   stripe_verified: boolean;
   stripe_requirements: object;
   address: string;
@@ -7985,6 +8330,7 @@ export interface UserCreateData {
   city: string;
   town: string;
   street: string;
+  /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
   magic_link: {
@@ -7994,6 +8340,7 @@ export interface UserCreateData {
      * @format timestamptz
      */
     expiration: number;
+    /** @default "false" */
     used: boolean;
   } | null;
 }
@@ -8067,6 +8414,7 @@ export interface ApplicationDetailResult {
      */
     created_at: number;
     content: string;
+    /** @default "false" */
     is_read: boolean;
     /** @format timestamptz */
     updated_at: number;
@@ -8164,10 +8512,13 @@ export type RestaurantTodoDetailData = {
     /** @format date */
     dateofbirth: string | null;
     profile_image: string;
+    /** @default "false" */
     is_approved: boolean;
     line_user_id: string;
     line_display_name: string;
+    /** @default "false" */
     line_notification_enabled: boolean;
+    /** @default "false" */
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
@@ -8175,6 +8526,7 @@ export type RestaurantTodoDetailData = {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    /** @default "false" */
     stripe_verified: boolean;
     stripe_requirements: object;
     address: string;
@@ -8190,6 +8542,7 @@ export type RestaurantTodoDetailData = {
     city: string;
     town: string;
     street: string;
+    /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
     magic_link: {
@@ -8199,6 +8552,7 @@ export type RestaurantTodoDetailData = {
        * @format timestamptz
        */
       expiration: number;
+      /** @default "false" */
       used: boolean;
     } | null;
   };
@@ -8370,7 +8724,10 @@ export type UserDetailResult = {
       profile_image: string;
       /** @format timestamptz */
       updated_at: number;
-      /** Whether the restaurant is active. */
+      /**
+       * Whether the restaurant is active.
+       * @default "false"
+       */
       is_active: boolean;
       /** @format uuid */
       companies_id: string | null;
@@ -8504,7 +8861,10 @@ export type UserTodoDetailData = {
       profile_image: string;
       /** @format timestamptz */
       updated_at: number;
-      /** Whether the restaurant is active. */
+      /**
+       * Whether the restaurant is active.
+       * @default "false"
+       */
       is_active: boolean;
       /** @format uuid */
       companies_id: string | null;
@@ -9272,6 +9632,7 @@ export type MessagesListResult = {
    */
   created_at: number;
   content: string;
+  /** @default "false" */
   is_read: boolean;
   /** @format timestamptz */
   updated_at: number;
@@ -9533,10 +9894,13 @@ export interface RestaurantReviewListResult {
     /** @format date */
     dateofbirth: string | null;
     profile_image: string;
+    /** @default "false" */
     is_approved: boolean;
     line_user_id: string;
     line_display_name: string;
+    /** @default "false" */
     line_notification_enabled: boolean;
+    /** @default "false" */
     is_verified: boolean;
     verify_token: string;
     stripe_account_id: string;
@@ -9544,6 +9908,7 @@ export interface RestaurantReviewListResult {
     pending_email: string;
     email_change_token: string;
     password_reset_token: string;
+    /** @default "false" */
     stripe_verified: boolean;
     stripe_requirements: object;
     address: string;
@@ -9559,6 +9924,7 @@ export interface RestaurantReviewListResult {
     city: string;
     town: string;
     street: string;
+    /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
     magic_link: {
@@ -9568,6 +9934,7 @@ export interface RestaurantReviewListResult {
        * @format timestamptz
        */
       expiration: number;
+      /** @default "false" */
       used: boolean;
     } | null;
   };
@@ -9587,7 +9954,10 @@ export interface RestaurantReviewListResult {
     profile_image: string;
     /** @format timestamptz */
     updated_at: number;
-    /** Whether the restaurant is active. */
+    /**
+     * Whether the restaurant is active.
+     * @default "false"
+     */
     is_active: boolean;
     /** @format uuid */
     companies_id: string | null;

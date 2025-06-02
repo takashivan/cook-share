@@ -8,7 +8,7 @@ export interface Params {
   jobId?: number;
   userId?: string;
   handleSuccess?: () => void;
-  handleError?: () => void;
+  handleError?: (error: any) => void;
 }
 
 export const useApplyJob = (params: Params) => {
@@ -42,9 +42,9 @@ export const useApplyJob = (params: Params) => {
         params.handleSuccess();
       }
     },
-    onError: () => {
+    onError: (error) => {
       if (params.handleError) {
-        params.handleError();
+        params.handleError(error);
       }
     }
   })
