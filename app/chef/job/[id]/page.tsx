@@ -830,11 +830,11 @@ export default function JobDetail({ params }: PageProps) {
       {workSession && job && workSession.check_in_time !== 0 && job.end_time !== 0 && (
         <ChefReviewModal
           isOpen={isReviewModalOpen}
+          workSessionId={workSession.id}
           workSessionStart={workSession.check_in_time}
           workSessionEnd={job.end_time}
           jobFee={job.fee || 0}
-          onClose={() => setIsReviewModalOpen(false)}
-          onSubmit={handleCheckOut}
+          onCloseAction={() => setIsReviewModalOpen(false)}
           storeName={restaurant?.name || ""}
           jobTitle={job.title || ""}
           jobDate={
@@ -852,7 +852,7 @@ export default function JobDetail({ params }: PageProps) {
         <ChatSheet
           isOpen={isChatOpen}
           onClose={() => setIsChatOpen(false)}
-          worksessionId={workSession.id}
+          worksession={workSession}
           messagesData={messagesData}
           isMessagesDataLoading={isMessagesLoading}
           messagesDataError={messagesError}

@@ -4,7 +4,7 @@ import { Chat } from "@/api/__generated__/base/Chat";
 import useSWRSubscription from "swr/subscription";
 import realTimeClient from "@/api/xano";
 import { XanoRealtimeChannel } from "@xano/js-sdk/lib/models/realtime-channel";
-import { JobsDetailData } from "@/api/__generated__/base/data-contracts";
+import { JobsDetailData, WorksessionsUserTodosListData } from "@/api/__generated__/base/data-contracts";
 
 // XANOから生成されるSwaggerの定義が不完全なため、レスポンスの型を手動で定義する
 type FirstMessage = {
@@ -47,7 +47,10 @@ type Worksession = {
 export type MessageSummary = {
   first_message: FirstMessage;
   unread_count: number;
-  worksession: Worksession;
+  worksession: Omit<WorksessionsUserTodosListData[number], 'job' | 'restaurant'> & {
+    job: WorksessionsUserTodosListData[number]['job'];
+    restaurant: WorksessionsUserTodosListData[number]['job']['restaurant'];
+  };
 };
 
 // シェフ画面用のメッセージサマリー

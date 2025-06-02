@@ -28,6 +28,11 @@ export default function MessagesPage() {
   } = useSubscriptionMessageSummaryByUser({
     userId: user?.id,
   });
+  const sortedMessageSummaryData = messageSummaryData?.message_summaries.sort((a, b) => {
+    const aDate = new Date(a.first_message?.created_at || 0);
+    const bDate = new Date(b.first_message?.created_at || 0);
+    return bDate.getTime() - aDate.getTime();
+  });
 
   // メッセージの取得
   const {
@@ -38,11 +43,6 @@ export default function MessagesPage() {
   } = useSubscriptionMessagesByUserId({
     userId: user?.id,
     workSessionId: selectedWorkSession?.id ?? undefined,
-  });
-  const sortedMessageSummaryData = messageSummaryData?.message_summaries.sort((a, b) => {
-    const aDate = new Date(a.first_message?.created_at || 0);
-    const bDate = new Date(b.first_message?.created_at || 0);
-    return bDate.getTime() - aDate.getTime();
   });
 
   const openChat = (worksession: MessageSummary["worksession"]) => {
@@ -124,7 +124,7 @@ export default function MessagesPage() {
           <ChatSheet
             isOpen={selectedWorkSession !== null}
             onClose={closeChat}
-            worksessionId={selectedWorkSession?.id ?? undefined}
+            worksession={selectedWorkSession ?? undefined}
             messagesData={messagesData}
             isMessagesDataLoading={isMessagesLoading}
             messagesDataError={messagesError}
