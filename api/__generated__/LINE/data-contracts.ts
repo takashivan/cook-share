@@ -47,10 +47,13 @@ export interface ConnectLineAccountCreateData {
   /** @format date */
   dateofbirth: string | null;
   profile_image: string;
+  /** @default "false" */
   is_approved: boolean;
   line_user_id: string;
   line_display_name: string;
+  /** @default "false" */
   line_notification_enabled: boolean;
+  /** @default "false" */
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
@@ -58,6 +61,7 @@ export interface ConnectLineAccountCreateData {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  /** @default "false" */
   stripe_verified: boolean;
   stripe_requirements: object;
   address: string;
@@ -73,6 +77,7 @@ export interface ConnectLineAccountCreateData {
   city: string;
   town: string;
   street: string;
+  /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
   magic_link: {
@@ -82,6 +87,7 @@ export interface ConnectLineAccountCreateData {
      * @format timestamptz
      */
     expiration: number;
+    /** @default "false" */
     used: boolean;
   } | null;
 }
@@ -116,10 +122,13 @@ export interface LineDisconnectCreateData {
   /** @format date */
   dateofbirth: string | null;
   profile_image: string;
+  /** @default "false" */
   is_approved: boolean;
   line_user_id: string;
   line_display_name: string;
+  /** @default "false" */
   line_notification_enabled: boolean;
+  /** @default "false" */
   is_verified: boolean;
   verify_token: string;
   stripe_account_id: string;
@@ -127,6 +136,7 @@ export interface LineDisconnectCreateData {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  /** @default "false" */
   stripe_verified: boolean;
   stripe_requirements: object;
   address: string;
@@ -142,6 +152,7 @@ export interface LineDisconnectCreateData {
   city: string;
   town: string;
   street: string;
+  /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
   magic_link: {
@@ -151,6 +162,7 @@ export interface LineDisconnectCreateData {
      * @format timestamptz
      */
     expiration: number;
+    /** @default "false" */
     used: boolean;
   } | null;
 }
@@ -172,67 +184,4 @@ export interface LinkLineIdCreatePayload {
   user_id: string;
 }
 
-export interface LinkLineIdCreateData {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  name: string;
-  /** @format email */
-  email: string;
-  /** @format password */
-  password: string;
-  user_type: string;
-  status: string;
-  /** @format date */
-  last_login_at: string | null;
-  /** @format date */
-  updated_at: string | null;
-  skills: string[];
-  experience_level: string;
-  bio: string;
-  certifications: string[];
-  /** @format date */
-  dateofbirth: string | null;
-  profile_image: string;
-  is_approved: boolean;
-  line_user_id: string;
-  line_display_name: string;
-  line_notification_enabled: boolean;
-  is_verified: boolean;
-  verify_token: string;
-  stripe_account_id: string;
-  /** @format email */
-  pending_email: string;
-  email_change_token: string;
-  password_reset_token: string;
-  stripe_verified: boolean;
-  stripe_requirements: object;
-  address: string;
-  phone: string;
-  last_name: string;
-  given_name: string;
-  last_name_kana: string;
-  given_name_kana: string;
-  categories: number[];
-  postal_code: string;
-  prefecture: string;
-  address2: string;
-  city: string;
-  town: string;
-  street: string;
-  profile_completed: boolean;
-  position_level: "1" | "2" | "3" | "4";
-  magic_link: {
-    token: string;
-    /**
-     * Time the token expires
-     * @format timestamptz
-     */
-    expiration: number;
-    used: boolean;
-  } | null;
-}
+export type LinkLineIdCreateData = object;

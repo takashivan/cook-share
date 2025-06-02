@@ -459,8 +459,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </div>
       </div>
 
-      <div className="flex-1 lg:pl-72 min-w-0">
-        <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-white px-4 md:px-6">
+      <div className="flex-1 lg:pl-72 min-w-0 flex flex-col">
+        <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-white px-4 md:px-6 flex-shrink-0">
           <Button
             variant="ghost"
             size="icon"
@@ -588,7 +588,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             />
           </div>
         </header>
-        <main className="p-4 md:p-6">{children}</main>
+        <main className="p-4 md:p-6 flex-1">{children}</main>
       </div>
     </div>
   );

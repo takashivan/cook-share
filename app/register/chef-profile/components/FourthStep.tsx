@@ -134,7 +134,7 @@ export function FourthStep({
 
       <div className="space-y-4">
         <Label className="text-base font-semibold text-gray-700">
-          プロフィール画像（任意）
+          プロフィール画像
         </Label>
         <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
           <div className="relative w-24 h-24 border-2 border-dashed border-gray-200 rounded-lg overflow-hidden flex items-center justify-center bg-gray-50">

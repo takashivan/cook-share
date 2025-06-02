@@ -38,6 +38,9 @@ import {
 import { formatJapanHHMM } from "@/lib/functions";
 import { useApplyJob } from "@/hooks/api/user/jobs/useApplyJob";
 import { LoadingScreen } from "@/components/LoadingScreen";
+import { getApi } from "@/api/api-factory";
+import { Jobs } from "@/api/__generated__/base/Jobs";
+import { useSWRConfig } from "swr";
 
 // 時間のフォーマット関数を追加
 const formatTime = (timestamp: number) => {
@@ -45,13 +48,15 @@ const formatTime = (timestamp: number) => {
 };
 
 export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
-  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { mutate } = useSWRConfig();
+  const { toast } = useToast();
   const router = useRouter();
   const { user: authUser, loading } = useAuth();
+
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [user, setUser] = useState(authUser);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const { toast } = useToast();
 
   const { data: workSessions } = useGetWorksessionsByUserId({
     userId: user?.id,
@@ -85,7 +90,21 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
         description: "応募が完了しました",
       });
     },
-    handleError: () => {
+    handleError: (error) => {
+      if (error.response?.payload?.status === "already_applied") {
+        toast({
+          variant: "destructive",
+          description: "応募が締め切られているため、応募できません",
+        });
+
+        // このjobの詳細データを取り直す
+        const jobsApi = getApi(Jobs);
+        const worksessionsByUserIdKey = jobsApi.queryUpcomingListQueryArgs()[0];
+        mutate(worksessionsByUserIdKey);
+
+        return;
+      }
+
       toast({
         variant: "destructive",
         description: "応募に失敗しました",
@@ -93,46 +112,12 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
     },
   });
 
-  // 時間重複チェック
-  const hasTimeOverlap = workSessions?.some((session) => {
-    const targetDate = new Date(jobDetail.job.work_date);
-    const targetStartTime = new Date(targetDate);
-    targetStartTime.setHours(
-      new Date(jobDetail.job.start_time * 1000).getHours(),
-      new Date(jobDetail.job.start_time * 1000).getMinutes()
-    );
-    const targetEndTime = new Date(targetDate);
-    targetEndTime.setHours(
-      new Date(jobDetail.job.end_time * 1000).getHours(),
-      new Date(jobDetail.job.end_time * 1000).getMinutes()
-    );
-
-    const sessionDate = new Date(session.job.work_date);
-    const sessionStartTime = new Date(sessionDate);
-    sessionStartTime.setHours(
-      new Date(session.job.start_time * 1000).getHours(),
-      new Date(session.job.start_time * 1000).getMinutes()
-    );
-    const sessionEndTime = new Date(sessionDate);
-    sessionEndTime.setHours(
-      new Date(session.job.end_time * 1000).getHours(),
-      new Date(session.job.end_time * 1000).getMinutes()
-    );
-
-    if (targetDate.toDateString() !== sessionDate.toDateString()) {
-      return false;
-    }
-
-    return (
-      (targetStartTime >= sessionStartTime &&
-        targetStartTime < sessionEndTime) ||
-      (targetEndTime > sessionStartTime && targetEndTime <= sessionEndTime) ||
-      (targetStartTime <= sessionStartTime && targetEndTime >= sessionEndTime)
-    );
-  });
-
-  // 重複している仕事の情報を取得
+  // 重複している仕事の情報があれば取得
   const overlappingJob = workSessions?.find((session) => {
+    if (session.status === "CANCELED_BY_CHEF" || session.status === "CANCELED_BY_RESTAURANT") {
+      return false; // キャンセルされた仕事は無視
+    }
+
     const targetDate = new Date(jobDetail.job.work_date);
     const sessionDate = new Date(session.job.work_date);
     if (targetDate.toDateString() !== sessionDate.toDateString()) {
@@ -168,6 +153,8 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
       (targetStartTime <= sessionStartTime && targetEndTime >= sessionEndTime)
     );
   });
+
+  console.log("Overlapping Job:", overlappingJob);
 
   const applyToJob = async () => {
     if (!user) {
@@ -199,7 +186,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
       return;
     }
 
-    if (hasTimeOverlap) {
+    if (overlappingJob) {
       toast({
         variant: "destructive",
         description: "この時間帯にはすでに他の仕事が入っています",
@@ -400,7 +387,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                         ) ||
                         (jobDetail.job.expiry_date != null &&
                           new Date(jobDetail.job.expiry_date) <= new Date()) ||
-                        hasTimeOverlap
+                        overlappingJob != null
                       }
                       className={`w-full py-2 text-sm font-medium transition-all duration-300 transform hover:scale-[1.02] ${
                         user &&
@@ -410,7 +397,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                         ) &&
                         jobDetail.job.expiry_date != null &&
                         new Date(jobDetail.job.expiry_date) > new Date() &&
-                        !hasTimeOverlap
+                        overlappingJob == null
                           ? "bg-orange-600 hover:bg-orange-700 text-white"
                           : "bg-gray-300 text-gray-500 cursor-not-allowed"
                       }`}>
@@ -427,8 +414,8 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                         : jobDetail.job.expiry_date != null &&
                           new Date(jobDetail.job.expiry_date) <= new Date()
                         ? "募集期間が終了しました"
-                        : hasTimeOverlap
-                        ? `この時間帯には${overlappingJob?.job.restaurant.name}の仕事が入っています`
+                        : overlappingJob != null
+                        ? `この時間帯には${overlappingJob.job.restaurant.name}の仕事が入っています`
                         : "応募する"}
                     </Button>
                   </div>
@@ -731,7 +718,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                     ) ||
                     (jobDetail.job.expiry_date != null &&
                       new Date(jobDetail.job.expiry_date) <= new Date()) ||
-                    hasTimeOverlap
+                    overlappingJob != null
                   }
                   className={`w-full py-2 text-sm font-medium transition-all duration-300 transform hover:scale-[1.02] ${
                     user &&
@@ -741,7 +728,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                     ) &&
                     jobDetail.job.expiry_date &&
                     new Date(jobDetail.job.expiry_date) > new Date() &&
-                    !hasTimeOverlap
+                    overlappingJob == null
                       ? "bg-orange-600 hover:bg-orange-700 text-white"
                       : "bg-gray-300 text-gray-500 cursor-not-allowed"
                   }`}>
@@ -758,8 +745,8 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                     : jobDetail.job.expiry_date != null &&
                       new Date(jobDetail.job.expiry_date) <= new Date()
                     ? "募集期間が終了しました"
-                    : hasTimeOverlap
-                    ? `この時間帯には${overlappingJob?.job.restaurant.name}の仕事が入っています`
+                    : overlappingJob != null
+                    ? `この時間帯には${overlappingJob.job.restaurant.name}の仕事が入っています`
                     : "応募する"}
                 </Button>
               </div>

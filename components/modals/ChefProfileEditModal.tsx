@@ -23,23 +23,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CERTIFICATIONS, EXPERIENCE_LEVELS, SKILLS } from "@/lib/const/chef-profile";
+import { CERTIFICATIONS, EXPERIENCE_LEVELS, POSITION_LEVEL, SKILLS } from "@/lib/const/chef-profile";
 import { Controller, useForm } from "react-hook-form";
-import { UsersPartialUpdatePayload } from "@/api/__generated__/base/data-contracts";
+import { RestaurantCuisinesListData, UsersPartialUpdatePayload } from "@/api/__generated__/base/data-contracts";
 import { Checkbox } from "../ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface ChefProfileEditModalProps {
   isOpen: boolean;
   onCloseAction: () => void;
   user: UserProfile;
+  cuisinesData?: RestaurantCuisinesListData;
 }
 
 export function ChefProfileEditModal({
   isOpen,
   onCloseAction,
   user,
+  cuisinesData,
 }: ChefProfileEditModalProps) {
   const { update } = useAuth();
 
@@ -61,8 +64,10 @@ export function ChefProfileEditModal({
     defaultValues: {
       skills: user.skills || [],
       experience_level: user.experience_level || "",
+      position_level: user.position_level || "",
       bio: user.bio || "",
       certifications: user.certifications || [],
+      categories: user.categories || [],
       dateofbirth: user.dateofbirth || "",
       profile_image: user.profile_image || "",
       phone: user.phone || "",
@@ -80,8 +85,10 @@ export function ChefProfileEditModal({
     values: {
       skills: user.skills || [],
       experience_level: user.experience_level || "",
+      position_level: user.position_level || "",
       bio: user.bio || "",
       certifications: user.certifications || [],
+      categories: user.categories || [],
       dateofbirth: user.dateofbirth || "",
       profile_image: user.profile_image || "",
       phone: user.phone || "",
@@ -288,20 +295,28 @@ export function ChefProfileEditModal({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="lastName">姓</Label>
+                <Label htmlFor="lastName">姓 *</Label>
                 <Input
                   id="lastName"
                   {...register("last_name", {
                     required: "姓は必須です",
+                    pattern: {
+                      value: /^[\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FFa-zA-Z.-]+$/,
+                      message: "漢字、ひらがな、カタカナ、ラテン文字、ドット、ダッシュのみ使用できます。",
+                    },
                   })}
                 />
               </div>
               <div>
-                <Label htmlFor="firstName">名</Label>
+                <Label htmlFor="firstName">名 *</Label>
                 <Input
                   id="firstName"
                   {...register("given_name", {
                     required: "名は必須です",
+                    pattern: {
+                      value: /^[\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FFa-zA-Z.-]+$/,
+                      message: "漢字、ひらがな、カタカナ、ラテン文字、ドット、ダッシュのみ使用できます。",
+                    },
                   })}
                 />
               </div>
@@ -320,20 +335,28 @@ export function ChefProfileEditModal({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="lastName">セイ（カタカナ）</Label>
+                <Label htmlFor="lastName">セイ（カタカナ） *</Label>
                 <Input
                   id="lastNameKana"
                   {...register("last_name_kana", {
                     required: "セイ（カタカナ）は必須です",
+                    pattern: {
+                      value: /^[ァ-ヶー]+$/,
+                      message: "カタカナで入力してください",
+                    },
                   })}
                 />
               </div>
               <div>
-                <Label htmlFor="firstNameKana">メイ（カタカナ）</Label>
+                <Label htmlFor="firstNameKana">メイ（カタカナ） *</Label>
                 <Input
                   id="firstNameKana"
                   {...register("given_name_kana", {
                     required: "メイ（カタカナ）は必須です",
+                    pattern: {
+                      value: /^[ァ-ヶー]+$/,
+                      message: "カタカナで入力してください",
+                    },
                   })}
                 />
               </div>
@@ -351,7 +374,7 @@ export function ChefProfileEditModal({
             )}
 
             <div>
-              <Label htmlFor="phone">電話番号</Label>
+              <Label htmlFor="phone">電話番号 *</Label>
               <Input
                 id="phone"
                 type="tel"
@@ -367,7 +390,7 @@ export function ChefProfileEditModal({
             )}
 
             <div>
-              <Label htmlFor="dateofbirth">生年月日</Label>
+              <Label htmlFor="dateofbirth">生年月日 *</Label>
               <Input
                 id="dateofbirth"
                 type="date"
@@ -384,12 +407,14 @@ export function ChefProfileEditModal({
             )}
 
             <div>
-              <Label htmlFor="postal_code">郵便番号</Label>
+              <Label htmlFor="postal_code">郵便番号 *</Label>
               <Input
                 id="postal_code"
                 placeholder="例: 1234567"
                 maxLength={7}
-                {...register("postal_code")}
+                {...register("postal_code", {
+                  required: "郵便番号は必須です",
+                })}
                 onChange={handlePostalCodeChange}
               />
             </div>
@@ -403,42 +428,42 @@ export function ChefProfileEditModal({
             {showAddressFields && (
               <>
                 <div>
-                  <Label htmlFor="prefecture">都道府県</Label>
+                  <Label htmlFor="prefecture">都道府県 *</Label>
                   <Input
                     id="prefecture"
-                    {...register("prefecture")}
+                    {...register("prefecture", { required: "都道府県は必須です。郵便番号が正しいか確認してください" })}
                     readOnly
                     className="bg-gray-50"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="city">市区町村</Label>
+                  <Label htmlFor="city">市区町村 *</Label>
                   <Input
                     id="city"
-                    {...register("city")}
+                    {...register("city", { required: "市区町村は必須です。郵便番号が正しいか確認してください" })}
                     readOnly
                     className="bg-gray-50"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="town">町名</Label>
+                  <Label htmlFor="town">町名 *</Label>
                   <Input
                     id="town"
-                    {...register("town")}
+                    {...register("town", { required: "町名は必須です。郵便番号が正しいか確認してください" })}
                     readOnly
                     className="bg-gray-50"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="street">番地</Label>
+                  <Label htmlFor="street">丁目・番地・号 *</Label>
                   <Input
                     id="street"
                     placeholder="例: 1-2-3"
                     {...register("street", {
-                      required: "番地は必須です",
+                      required: "丁目・番地・号は必須です",
                     })}
                   />
                 </div>
@@ -467,13 +492,16 @@ export function ChefProfileEditModal({
             )}
 
             <div>
-              <Label>スキル（複数選択可）</Label>
-              <div className="grid grid-cols-2 gap-2">
+              <Label>スキル（複数選択可） *</Label>
+              <div className="grid grid-cols-2 gap-2 mt-1">
                 {SKILLS.map((skill) => (
                   <div key={skill.id} className="flex items-center space-x-2">
                     <Controller
                       name="skills"
                       control={control}
+                      rules={{
+                        validate: (value) => value && value.length > 0 || "スキルを1つ以上選択してください",
+                      }}
                       render={({ field }) => {
                         const isChecked = field.value?.includes(skill.label);
 
@@ -488,7 +516,7 @@ export function ChefProfileEditModal({
                                   : field.value?.filter((v: string) => v !== skill.label);
                                 field.onChange(newValue);
                               }}
-                              className="h-4 w-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500"
+                              className="border-gray-300 data-[state=checked]:bg-[#DB3F1C] data-[state=checked]:border-[#DB3F1C]"
                             />
                             <Label
                               htmlFor={`skill-${skill.id}`}
@@ -506,7 +534,7 @@ export function ChefProfileEditModal({
 
 
             <div>
-              <Label htmlFor="experience">調理経験年数</Label>
+              <Label htmlFor="experience">調理経験年数 *</Label>
               <Controller
                 name="experience_level"
                 control={control}
@@ -514,26 +542,25 @@ export function ChefProfileEditModal({
                   required: "経験年数は必須です",
                 }}
                 render={({ field }) => (
-                  <Select
+                  <RadioGroup
                     value={field.value}
-                    onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="経験年数を選択">
-                        {field.value
-                          ? EXPERIENCE_LEVELS.find(
-                              (level) => level.value === field.value
-                            )?.label
-                          : "経験年数を選択"}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {EXPERIENCE_LEVELS.map((level) => (
-                        <SelectItem key={level.id} value={level.value}>
+                    onValueChange={field.onChange}
+                    className="grid grid-cols-2 gap-2 mt-1">
+                    {EXPERIENCE_LEVELS.map((level) => (
+                      <div key={level.id} className="flex items-center space-x-2">
+                        <RadioGroupItem
+                          value={level.value}
+                          id={level.id}
+                          className="border-gray-300 text-[#DB3F1C]"
+                        />
+                        <Label
+                          htmlFor={level.id}
+                          className="text-sm font-normal text-gray-600">
                           {level.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
                 )}
               />
             </div>
@@ -545,8 +572,44 @@ export function ChefProfileEditModal({
             )}
 
             <div>
+              <Label htmlFor="position">経験ポジション *</Label>
+              <Controller
+                name="position_level"
+                control={control}
+                rules={{
+                  required: "経験ポジションは必須です",
+                }}
+                render={({ field }) => (
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="ポジションを選択" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {POSITION_LEVEL.map((position) => (
+                        <SelectItem
+                          key={position.id}
+                          value={position.value}
+                          className="text-sm text-gray-600">
+                          {position.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+
+            {errors.position_level && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.position_level.message}
+              </p>
+            )}
+
+            <div>
               <Label>保有資格（複数選択可）</Label>
-              <div className="grid grid-cols-2 gap-2 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4 mt-1">
                 {CERTIFICATIONS.map((cert) => (
                   <div key={cert.id} className="flex items-center space-x-2">
                     <Controller
@@ -571,7 +634,7 @@ export function ChefProfileEditModal({
                                   setOtherCertificate("");
                                 }
                               }}
-                              className="h-4 w-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500"
+                              className="border-gray-300 data-[state=checked]:bg-[#DB3F1C] data-[state=checked]:border-[#DB3F1C]"
                             />
                             <Label
                               htmlFor={`certification-${cert.id}`}
@@ -603,13 +666,54 @@ export function ChefProfileEditModal({
             )}
 
             <div>
-              <Label htmlFor="bio">自己紹介</Label>
+              <Label htmlFor="cuisines">ジャンル（複数選択可）</Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4 mt-1">
+                {cuisinesData?.map((cuisine) => (
+                  <div
+                    key={cuisine.id}
+                    className="flex items-center space-x-2">
+                    <Controller
+                      name="categories"
+                      control={control}
+                      render={({ field }) => {
+                        const isChecked = field.value?.includes(cuisine.id);
+
+                        return (
+                          <>
+                            <Checkbox
+                              id={`genre-${cuisine.id}`}
+                              checked={isChecked}
+                              onCheckedChange={(checked) => {
+                                const newValue = checked
+                                  ? [...(field.value ?? []), cuisine.id]
+                                  : field.value?.filter((v: number) => v !== cuisine.id);
+                                field.onChange(newValue);
+                              }}
+                              className="border-gray-300 data-[state=checked]:bg-[#DB3F1C] data-[state=checked]:border-[#DB3F1C]"
+                            />
+                            <Label
+                              htmlFor={`genre-${cuisine.id}`}
+                              className="text-sm font-normal text-gray-600">
+                              {cuisine.category}
+                            </Label>
+                          </>
+                        );
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="bio">自己紹介 *</Label>
               <Textarea
                 id="bio"
                 rows={4}
                 {...register("bio", {
                   required: "自己紹介は必須です",
                 })}
+                placeholder="あなたの経験やスキル、得意な料理などをアピールしてください"
               />
             </div>
 
@@ -619,7 +723,7 @@ export function ChefProfileEditModal({
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose}>
+            <Button type="button" variant="outline" onClick={handleClose} className="mt-2 sm:mt-0">
               キャンセル
             </Button>
             <Button type="submit" disabled={isSubmitting}>

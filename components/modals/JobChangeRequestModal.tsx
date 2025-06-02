@@ -345,7 +345,7 @@ ${data.reason}
                         required: "業務内容は必須です",
                       })}
                       minRows={2}
-                      className="w-full px-3 py-2 border rounded-md text-sm bg-white resize-none focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
+                      className="w-full px-3 py-2 border rounded-md text-base bg-white resize-none focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
                     />
                   </div>
                   <div className="space-y-2">
@@ -357,7 +357,7 @@ ${data.reason}
                         required: "変更理由は必須です",
                       })}
                       minRows={2}
-                      className="w-full px-3 py-2 border rounded-md text-sm bg-white resize-none focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
+                      className="w-full px-3 py-2 border rounded-md text-base bg-white resize-none focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
                     />
                   </div>
                 </div>
