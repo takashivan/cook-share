@@ -2579,6 +2579,13 @@ export interface DashboardListData {
     restaurant_id: number;
     /** @format int64 */
     job_id: number;
+    /** @format int64 */
+    paid_amount: number;
+    /** @format int64 */
+    transportation_expenses: number | null;
+    /** @format int64 */
+    actual_fee: number;
+    transportation_type: "FIXED" | "NONE" | "MAX";
     job: {
       /** @format int64 */
       id: number;
@@ -9577,26 +9584,7 @@ export interface FinishPartialUpdateResult {
     actual_fee: number;
     transportation_type: "FIXED" | "NONE" | "MAX";
   };
-  review: {
-    /** @format int64 */
-    id: number;
-    /**
-     * @format timestamptz
-     * @default "now"
-     */
-    created_at: number;
-    /** @format int64 */
-    rating: number;
-    comment: string;
-    /** @format timestamptz */
-    updated_at: number;
-    /** @format int64 */
-    session_id: number;
-    /** @format uuid */
-    reviewer_id: string;
-    /** @format int64 */
-    reviewee_id: number;
-  };
+  review: string;
 }
 
 export interface JobChangeRequestListData {
