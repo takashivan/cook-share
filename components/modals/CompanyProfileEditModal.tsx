@@ -24,7 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { useGetCompany } from "@/hooks/api/companyuser/companies/useUpdateCompany";
+import { useUpdateCompany } from "@/hooks/api/companyuser/companies/useUpdateCompany";
 import {
   CompaniesPartialUpdatePayload,
   CompaniesDetailData,
@@ -59,32 +59,9 @@ export function CompanyProfileEditModal({
   company,
 }: CompanyProfileEditModalProps) {
   const [isUploading, setIsUploading] = useState(false);
-  const { data, mutate } = useGetCompany({
+  const { trigger, isMutating} = useUpdateCompany({
     companyId: company.id,
-    name: company.name,
-    address: company.address,
-    phone: company.phone,
-    email: company.company_email,
-    website: company.website || "",
-    logo: company.logo_url || "",
   });
-
-  const { trigger, isMutating } = useSWRMutation(
-    `/api/companies/${company.id}`,
-    async (url: string, { arg }: { arg: CompaniesPartialUpdatePayload }) => {
-      const response = await fetch(url, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(arg),
-      });
-      if (!response.ok) {
-        throw new Error("Failed to update company");
-      }
-      return response.json();
-    }
-  );
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
