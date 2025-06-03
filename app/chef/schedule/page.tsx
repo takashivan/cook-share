@@ -291,7 +291,7 @@ export default function SchedulePage() {
       <ChatSheet
         isOpen={selectedJobId !== null}
         onClose={closeChat}
-        worksessionId={selectedWorkSession?.id}
+        worksession={selectedWorkSession}
         messagesData={messagesData}
         isMessagesDataLoading={isMessagesLoading}
         messagesDataError={messagesError}

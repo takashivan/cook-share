@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect, useRef } from "react";
 import {
   Send,
@@ -14,7 +16,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import TextareaAutosize from "react-textarea-autosize";
 import { Button } from "@/components/ui/button";
-import { WorksessionsMessagesListResult } from "@/api/__generated__/base/data-contracts";
+import { WorksessionsListResult, WorksessionsMessagesListResult } from "@/api/__generated__/base/data-contracts";
 import { useUpdateReadMessageByUser } from "@/hooks/api/user/messages/useUpdateReadMessageByUser";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useGetJobChangeRequests } from "@/hooks/api/user/jobChangeRequests/useGetJobChangeRequests";
@@ -28,18 +30,19 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-
+import { ja } from "date-fns/locale";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { formatJapanHHMM } from "@/lib/functions";
 import { useRouter } from "next/navigation";
 import { ErrorPage } from "../layout/ErrorPage";
 import { LoadingSpinner } from "../LoadingSpinner";
+import { ChefReviewModal } from "../modals/ChefReviewModal";
 
 interface ChatSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  worksessionId?: number;
+  worksession?: WorksessionsListResult[number];
   messagesData: WorksessionsMessagesListResult | undefined;
   isMessagesDataLoading: boolean;
   messagesDataError: any;
@@ -62,7 +65,7 @@ function isMobile() {
 export function ChatSheet({
   isOpen,
   onClose,
-  worksessionId,
+  worksession,
   messagesData,
   isMessagesDataLoading,
   messagesDataError,
@@ -83,6 +86,7 @@ export function ChatSheet({
   const [isChangeRequestModalOpen, setIsChangeRequestModalOpen] =
     useState(false);
   const [selectedChangeRequest, setSelectedChangeRequest] = useState<any>(null);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   // 変更リクエスト取得
   const {
@@ -91,12 +95,12 @@ export function ChatSheet({
     error: changeRequestsError,
   } = useGetJobChangeRequests();
   const pendingRequest = changeRequests?.find(
-    (req) => req.worksession_id === worksessionId && req.status === "PENDING"
+    (req) => req.worksession_id === worksession?.id && req.status === "PENDING"
   );
   
   const { trigger: updateReadMessageTrigger } = useUpdateReadMessageByUser({
     userId: user?.id,
-    workSessionId: worksessionId,
+    workSessionId: worksession?.id,
   });
 
   const { trigger: acceptJobChangeRequest } = useAcceptJobChangeRequest({
@@ -133,7 +137,7 @@ export function ChatSheet({
 
     console.log("latestMessage", latestMessage);
 
-    if (!latestMessage || !worksessionId) return;
+    if (!latestMessage || !worksession?.id) return;
     // 既読情報が最新のメッセージと同じ場合は何もしない
     if (
       latestMessage.message_seq ===
@@ -143,10 +147,10 @@ export function ChatSheet({
 
     // 既読情報更新
     updateReadMessageTrigger({
-      worksession_id: worksessionId,
+      worksession_id: worksession.id,
       last_read_message_seq: latestMessage.message_seq,
     });
-  }, [messagesData, worksessionId, scrollToBottom, updateReadMessageTrigger]);
+  }, [messagesData, worksession?.id, scrollToBottom, updateReadMessageTrigger]);
 
   const handleSendMessage = () => {
     try {
@@ -218,7 +222,7 @@ export function ChatSheet({
         <div className="flex flex-col h-full">
           {/* ヘッダー */}
           <div className="border-b p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10">
                   <AvatarImage
@@ -250,13 +254,24 @@ export function ChatSheet({
               {pendingRequest && (
                 <Button
                   variant="outline"
-                  className="bg-red-50 text-red-800 border-red-200 hover:bg-red-100"
+                  className="bg-red-50 text-red-800 border-red-200 hover:bg-red-100 ml-auto"
                   onClick={() => {
                     setSelectedChangeRequest(pendingRequest);
                     setIsChangeRequestModalOpen(true);
                   }}>
                   <AlertCircle className="h-4 w-4 mr-2" />
                   変更リクエストが届いています
+                </Button>
+              )}
+              {/* 差し戻し通知ボタン */}
+              {worksession?.status === "VERIFY_REJECTED" && (
+                <Button
+                  variant="outline"
+                  className="bg-red-50 text-red-800 border-red-200 hover:bg-red-100 ml-auto"
+                  onClick={() => setIsReviewModalOpen(true)}
+                >
+                  <AlertCircle className="h-4 w-4 mr-2" />
+                  完了報告に差し戻しがありました
                 </Button>
               )}
             </div>
@@ -477,6 +492,28 @@ export function ChatSheet({
             )}
           </DialogContent>
         </Dialog>
+
+        {/* 勤務終了・完了報告モーダル */}
+        {worksession != null && worksession.status === "VERIFY_REJECTED" && (
+          <ChefReviewModal
+            isOpen={isReviewModalOpen}
+            workSessionId={worksession.id}
+            workSessionStart={worksession.check_in_time}
+            workSessionEnd={worksession.job.end_time}
+            jobFee={worksession.job.fee || 0}
+            onCloseAction={() => setIsReviewModalOpen(false)}
+            storeName={restaurantName}
+            jobTitle={worksession.job.title || ""}
+            jobDate={
+              worksession.job.work_date
+                ? format(new Date(worksession.job.work_date), "yyyy年MM月dd日", { locale: ja })
+                : ""
+            }
+            transportation_type={worksession.job.transportation_type || "NONE"}
+            transportation_amount={worksession.job.transportation_amount || 0}
+            transportation_expenses={worksession.transportation_expenses ?? null}
+          />
+        )}
       </SheetContent>
     </Sheet>
   );
