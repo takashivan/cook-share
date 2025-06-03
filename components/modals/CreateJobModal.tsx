@@ -350,8 +350,8 @@ export const CreateJobModal = ({
                                 (1000 * 60 * 60);
                               const hourlyRate = Number(value) / hours;
 
-                              if (hourlyRate < 1500) {
-                                return `時給ベースで1500円を下回らないように設定してください（現在: ${Math.floor(
+                              if (hourlyRate < 1850) {
+                                return `時給ベースで1850円を下回らないように設定してください（現在: ${Math.floor(
                                   hourlyRate
                                 )}円）`;
                               }
