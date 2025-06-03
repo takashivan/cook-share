@@ -700,6 +700,7 @@ export default function AdminDashboard() {
               restaurant: {
                 name: selectedPendingWorksession.restaurant?.name || "",
               },
+              transportation_expenses: selectedPendingWorksession.transportation_expenses || 0,
             }}
             handleSuccessAction={() => {
               setIsChefReviewModalOpen(true);
