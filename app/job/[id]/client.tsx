@@ -89,25 +89,37 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
       toast({
         description: "応募が完了しました",
       });
+
+      // // カレンダーイベントのデータを作成
+      // const eventData = {
+      //   text: `${jobDetail.job.title} @ ${jobDetail.restaurant.name}`,
+      //   dates: jobDetail.job.work_date,
+      //   details: `勤務時間: ${formatTime(
+      //     jobDetail.job.start_time
+      //   )} - ${formatTime(jobDetail.job.end_time)}\n場所: ${
+      //     jobDetail.restaurant.address
+      //   }`,
+      // };
     },
     handleError: (error) => {
-      if (error.response?.payload?.status === "already_applied") {
+      if (error.response?.data?.payload?.code === "already_applied") {
         toast({
+          title: "エラーが発生しました",
           variant: "destructive",
           description: "応募が締め切られているため、応募できません",
         });
 
-        // このjobの詳細データを取り直す
-        const jobsApi = getApi(Jobs);
-        const worksessionsByUserIdKey = jobsApi.queryUpcomingListQueryArgs()[0];
-        mutate(worksessionsByUserIdKey);
+        // 応募モーダルを閉じて画面をリフレッシュする
+        setIsApplyModalOpen(false);
+        router.refresh();
 
         return;
       }
 
       toast({
+        title: "エラーが発生しました",
         variant: "destructive",
-        description: "応募に失敗しました",
+        description: "応募に失敗しました。もう一度お試しください。",
       });
     },
   });
@@ -202,29 +214,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
   };
 
   const handleApply = async () => {
-    try {
-      await applyToJob();
-
-      // カレンダーイベントのデータを作成
-      const eventData = {
-        text: `${jobDetail.job.title} @ ${jobDetail.restaurant.name}`,
-        dates: jobDetail.job.work_date,
-        details: `勤務時間: ${formatTime(
-          jobDetail.job.start_time
-        )} - ${formatTime(jobDetail.job.end_time)}\n場所: ${
-          jobDetail.restaurant.address
-        }`,
-      };
-
-      setShowSuccessModal(true);
-    } catch (error) {
-      console.error("Failed to apply:", error);
-      toast({
-        title: "エラーが発生しました",
-        description: "応募に失敗しました。もう一度お試しください。",
-        variant: "destructive",
-      });
-    }
+    await applyToJob();
   };
 
   const generateGoogleCalendarUrl = (event: {
