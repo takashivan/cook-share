@@ -42,7 +42,7 @@ interface RestaurantReviewModalProps {
     };
     transportation_expenses?: number;
   };
-  handleSuccessAction: () => void;
+  handleSuccessAction: (status: 'verify' | 'reject') => void;
 }
 
 export function RestaurantReviewModal({
@@ -73,7 +73,7 @@ export function RestaurantReviewModal({
       setComment("");
       setApproved(true);
       onCloseAction();
-      handleSuccessAction();
+      handleSuccessAction('verify');
     },
     handleError: () => {
       toast({
@@ -95,7 +95,7 @@ export function RestaurantReviewModal({
       setIsRejectModalOpen(false);
       setRejectReason("");
       onCloseAction();
-      handleSuccessAction();
+      handleSuccessAction('reject');
     },
     handleError: () => {
       toast({

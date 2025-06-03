@@ -60,6 +60,7 @@ import { LoadingScreen } from "@/components/LoadingScreen";
 import { ErrorPage } from "@/components/layout/ErrorPage";
 import { AdminJobActionsMenu } from "@/components/dropdownMenu/AdminJobActionsMenu";
 import { ChefProfileForAdminModal } from "@/components/modals/ChefProfileForAdminModal";
+import { RestaurantRejectWorksessionModal } from "@/components/modals/RestaurantRejectWorksessionModal";
 
 interface PageParams {
   params: Promise<{ id: string }>;
@@ -86,6 +87,7 @@ export default function JobDetail({ params }: PageParams) {
   const [isChefProfileForAdminModalOpen, setIsChefProfileForAdminModalOpen] = useState(false);
 
   const [isChefReviewModalOpen, setIsChefReviewModalOpen] = useState(false);
+  const [isRestaurantRejectWorksessionModalOpen, setIsRestaurantRejectWorksessionModalOpen] = useState(false);
   const [isEditJobModalOpen, setIsEditJobModalOpen] = useState(false);
 
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -744,8 +746,12 @@ export default function JobDetail({ params }: PageParams) {
                 name: restaurant?.name || "",
               },
             }}
-            handleSuccessAction={() => {
-              setIsChefReviewModalOpen(true);
+            handleSuccessAction={(status) => {
+              if (status === 'reject') {
+                setIsRestaurantRejectWorksessionModalOpen(true);
+              } else {
+                setIsChefReviewModalOpen(true);
+              }
             }}
           />
           <RestaurantReviewCompleteModal
@@ -754,6 +760,12 @@ export default function JobDetail({ params }: PageParams) {
               setIsChefReviewModalOpen(false)
             }}
             worksessionId={selectedWorkSession?.id}
+          />
+          <RestaurantRejectWorksessionModal
+            isOpen={isRestaurantRejectWorksessionModalOpen}
+            onCloseAction={() => {
+              setIsRestaurantRejectWorksessionModalOpen(false)
+            }}
           />
           <ChefProfileForAdminModal
             isOpen={isChefProfileForAdminModalOpen}
