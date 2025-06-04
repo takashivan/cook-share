@@ -1,20 +1,17 @@
 import { getApi } from "@/api/api-factory";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import { Companies } from "@/api/__generated__/base/Companies";
+import useSWRMutation from "swr/mutation";
 
 export interface Params {
   companyId: string;
-  name: string;
-  address: string;
-  phone: string;
-  email: string;
-  website: string;
-  logo: string;
 }
 
-export const useGetCompany = (params: Params) => {
+export const useUpdateCompany = (params: Params) => {
+  const { mutate } = useSWRConfig();
+
   const companies = getApi(Companies);
-  return useSWR(
+  return useSWRMutation(
     ...companies.companiesPartialUpdateQueryArgs(
       params.companyId ?? "",
       {
@@ -23,6 +20,14 @@ export const useGetCompany = (params: Params) => {
         },
       },
       params.companyId != null
-    )
+    ), {
+      onSuccess: () => {
+        // キャッシュを更新
+        if (params.companyId) {
+          const companyDetailKey = companies.companiesDetailQueryArgs(params.companyId)[0];
+          mutate(companyDetailKey);
+        }
+      }
+    }
   );
 };
