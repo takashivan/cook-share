@@ -17,7 +17,6 @@ import { useEffect, useState } from "react";
 import { getUserProfile } from "@/lib/api/user";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useMobile } from "@/hooks/use-mobile";
 import { ApplyJobModal } from "@/components/modals/ApplyJobModal";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -38,8 +37,6 @@ import {
 import { formatJapanHHMM } from "@/lib/functions";
 import { useApplyJob } from "@/hooks/api/user/jobs/useApplyJob";
 import { LoadingScreen } from "@/components/LoadingScreen";
-import { getApi } from "@/api/api-factory";
-import { Jobs } from "@/api/__generated__/base/Jobs";
 import { useSWRConfig } from "swr";
 
 // 時間のフォーマット関数を追加
