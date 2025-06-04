@@ -6339,13 +6339,11 @@ export interface RestaurantsDetailData {
 export interface RestaurantsPartialUpdatePayload {
   name: string;
   address: string;
-  cuisine_type: string;
   business_hours: string;
   contact_info: string;
   profile_image: string;
   station: string;
   access: string;
-  rating: number;
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
@@ -6400,28 +6398,15 @@ export type RestaurantsListOutput = {
 export interface RestaurantsCreatePayload {
   name: string;
   address: string;
-  cuisine_type: string;
   business_hours: string;
   contact_info: string;
-  profile_image: string;
-  /** @format timestamptz */
-  updated_at: number;
-  /**
-   * Whether the restaurant is active.
-   * @default "false"
-   */
-  is_active: boolean;
   /** @format uuid */
   companies_id: string | null;
   station: string;
   access: string;
-  rating: number;
-  /** @default "1" */
-  is_approved: boolean;
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
-  status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   /** @format binary */
   photo: File | null;
 }
