@@ -3061,19 +3061,11 @@ export type JobChangeRequestsListData = {
 
 export interface JobChangeRequestsCreatePayload {
   /** @format int64 */
-  job_id: number;
-  /** @format uuid */
-  user_id: string | null;
-  /** @format int64 */
   requested_by: number;
   proposed_changes: object;
-  status: "PENDING" | "APPROVED" | "REJECTED";
-  /** @format timestamptz */
-  updated_at: number | null;
   reason: string;
   /** @format int64 */
   worksession_id: number;
-  as_is: object;
 }
 
 export interface JobChangeRequestsCreateData {
