@@ -195,7 +195,11 @@ export function JobContent({
             <Calendar className="h-4 w-4" />
           </Button>
         </div>
-        <Button size="sm" onClick={() => setIsCreateJobModalOpen(true)}>
+        <Button
+          size="sm"
+          onClick={() => setIsCreateJobModalOpen(true)}
+          disabled={restaurant?.status !== "APPROVED"}
+        >
           <Plus className="h-4 w-4 mr-2" />
           求人を追加
         </Button>
