@@ -435,8 +435,8 @@ export type BillingsAllListData = {
     website: string;
     description: string;
     status: "pending" | "approved" | "banned" | "rejected";
-    /** @format date */
-    updated_at: string | null;
+    /** @format timestamptz */
+    updated_at: number | null;
     business_registration_number: string;
     logo_url: string;
     stripe_customer_id: string;
