@@ -98,7 +98,7 @@ export default function RestaurantsPage() {
       searchQuery === "" ||
       restaurant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       restaurant.email.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = !showSuspendedOnly || !restaurant.is_approved;
+    const matchesStatus = !showSuspendedOnly || restaurant.status !== "APPROVED";
     return matchesSearch && matchesStatus;
   });
 
@@ -165,10 +165,16 @@ export default function RestaurantsPage() {
                 <TableCell>{restaurant.email}</TableCell>
                 <TableCell>{restaurant.address || "-"}</TableCell>
                 <TableCell>
-                  {restaurant.is_approved ? (
+                  {restaurant.status === "APPROVED" ? (
                     <Badge variant="default">承認済み</Badge>
-                  ) : (
+                  ) : restaurant.status === "BANNED" ? (
                     <Badge variant="destructive">一時停止中</Badge>
+                  ) : restaurant.status === "PENDING" ? (
+                    <Badge variant="secondary">承認待ち</Badge>
+                  ) : restaurant.status === "DELETED" ? (
+                    <Badge variant="outline">削除済み</Badge>
+                  ) : (
+                    <Badge variant="outline">不明</Badge>
                   )}
                 </TableCell>
                 <TableCell>
@@ -205,13 +211,19 @@ export default function RestaurantsPage() {
                             <p>住所: {restaurant.address || "-"}</p>
                             <p>
                               ステータス:{" "}
-                              {restaurant.is_approved
+                              {restaurant.status === "APPROVED"
                                 ? "承認済み"
-                                : "一時停止中"}
+                                : restaurant.status === "BANNED"
+                                ? "一時停止中"
+                                : restaurant.status === "PENDING"
+                                ? "承認待ち"
+                                : restaurant.status === "DELETED"
+                                ? "削除済み"
+                                : "不明"}
                             </p>
                           </div>
                         </div>
-                        {!restaurant.is_approved ? (
+                        {restaurant.status === "BANNED" || restaurant.status === "PENDING" ? (
                           <div>
                             <h3 className="font-semibold mb-2">承認</h3>
                             <Button
@@ -221,7 +233,7 @@ export default function RestaurantsPage() {
                               承認する
                             </Button>
                           </div>
-                        ) : (
+                        ) : restaurant.status === "APPROVED" ? (
                           <div>
                             <h3 className="font-semibold mb-2">BAN</h3>
                             <Input
@@ -236,7 +248,7 @@ export default function RestaurantsPage() {
                               BANする
                             </Button>
                           </div>
-                        )}
+                        ): null}
                       </div>
                     </DialogContent>
                   </Dialog>

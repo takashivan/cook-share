@@ -87,6 +87,7 @@ export function RestaurantReviewModal({
 
   const { trigger: rejectWorksessionTrigger } = useRejectWorksession({
     worksessionId: worksessionData?.id,
+    jobId: worksessionData?.job.id,
     handleSuccess: () => {
       toast({
         title: "差し戻しを送信しました",

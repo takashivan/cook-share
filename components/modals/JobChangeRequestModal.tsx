@@ -21,6 +21,7 @@ import { useGetJobChangeRequests } from "@/hooks/api/companyuser/jobChangeReques
 import { useDeleteJobChangeRequest } from "@/hooks/api/companyuser/jobChangeRequests/useDeleteJobChangeRequest";
 import { ErrorPage } from "../layout/ErrorPage";
 import { LoadingSpinner } from "../LoadingSpinner";
+import { useRouter } from "next/navigation";
 
 interface CreateJobChangeRequestData {
   work_date: string;
@@ -46,6 +47,7 @@ export function JobChangeRequestModal({
   worksession,
   sendMessageAction,
 }: JobChangeRequestModalProps) {
+  const router = useRouter();
 
   const {
     data: existingChangeRequest,
@@ -77,7 +79,30 @@ export function JobChangeRequestModal({
     },
   });
 
-  const { trigger: createJobChangeRequest } = useCreateJobChangeRequest();
+  const handleClose = () => {
+    // モーダルを閉じる前にフォームをリセット
+    reset();
+    onCloseAction();
+  }
+
+  const { trigger: createJobChangeRequest } = useCreateJobChangeRequest({
+    handleError: (error) => {
+      if (error.response?.data?.payload?.code === "already_exist") {
+        toast({
+          title: "変更リクエストが既に存在します",
+          description:
+            "既存の変更リクエストが承認または拒否されるまで、新しいリクエストを作成できません。",
+          variant: "destructive",
+        });
+
+        // 応募モーダルを閉じて画面をリフレッシュする
+        handleClose();
+        router.refresh();
+
+        return;
+      }
+    }
+  });
 
   const { trigger: deleteJobChangeRequest } = useDeleteJobChangeRequest({
     jobChangeRequestId: pendingRequest?.id,
@@ -92,14 +117,17 @@ export function JobChangeRequestModal({
           "既存の変更リクエストが承認または拒否されるまで、新しいリクエストを作成できません。",
         variant: "destructive",
       });
+
+      // 応募モーダルを閉じて画面をリフレッシュする
+      handleClose();
+      router.refresh();
+      
       return;
     }
 
     try {
       // 変更リクエストのデータ構造を作成
       const changeRequestData = {
-        job_id: job.id,
-        user_id: worksession.user_id,
         requested_by: worksession.restaurant_id,
         proposed_changes: {
           work_date: data.work_date,
@@ -112,17 +140,8 @@ export function JobChangeRequestModal({
           task: data.task,
           fee: data.fee,
         },
-        status: "PENDING" as const,
         reason: data.reason,
         worksession_id: worksession.id,
-        as_is: {
-          work_date: job.work_date,
-          start_time: job.start_time,
-          end_time: job.end_time,
-          task: job.task,
-          fee: job.fee,
-        },
-        updated_at: new Date().getTime(),
       };
 
       // 変更リクエストを作成
@@ -147,8 +166,7 @@ ${data.reason}
         description: "シェフの承認をお待ちください。",
       });
 
-      reset();
-      onCloseAction();
+      handleClose();
     } catch (error) {
       toast({
         title: "エラー",
@@ -194,7 +212,7 @@ ${data.reason}
         description: "新しい変更リクエストを作成できます。",
       });
 
-      onCloseAction();
+      handleClose();
     } catch (error) {
       toast({
         title: "エラー",
@@ -207,7 +225,7 @@ ${data.reason}
   return (
     <Dialog
       open={isOpen}
-      onOpenChange={onCloseAction}>
+      onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[425px]">
         {changeRequestError ? (
           <ErrorPage />
@@ -269,7 +287,7 @@ ${data.reason}
                 <DialogFooter>
                   <Button
                     variant="outline"
-                    onClick={onCloseAction}>
+                    onClick={handleClose}>
                     閉じる
                   </Button>
                   <Button
@@ -425,7 +443,7 @@ ${data.reason}
                 <DialogFooter>
                   <Button
                     variant="outline"
-                    onClick={onCloseAction}>
+                    onClick={handleClose}>
                     キャンセル
                   </Button>
                   <Button type="submit">

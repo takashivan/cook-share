@@ -1803,8 +1803,8 @@ export interface CompaniesDetailData {
   website: string;
   description: string;
   status: "pending" | "approved" | "banned" | "rejected";
-  /** @format date */
-  updated_at: string | null;
+  /** @format timestamptz */
+  updated_at: number | null;
   business_registration_number: string;
   logo_url: string;
   stripe_customer_id: string;
@@ -1818,12 +1818,6 @@ export interface CompaniesPartialUpdatePayload {
   phone: string;
   website: string;
   description: string;
-  status: "pending" | "approved" | "banned" | "rejected";
-  /** @format date */
-  updated_at: string | null;
-  business_registration_number: string;
-  logo_url: string;
-  stripe_customer_id: string;
   /** @format email */
   company_email: string;
 }
@@ -1842,8 +1836,8 @@ export interface CompaniesPartialUpdateData {
   website: string;
   description: string;
   status: "pending" | "approved" | "banned" | "rejected";
-  /** @format date */
-  updated_at: string | null;
+  /** @format timestamptz */
+  updated_at: number | null;
   business_registration_number: string;
   logo_url: string;
   stripe_customer_id: string;
@@ -1937,8 +1931,8 @@ export interface JobsListData {
     website: string;
     description: string;
     status: "pending" | "approved" | "banned" | "rejected";
-    /** @format date */
-    updated_at: string | null;
+    /** @format timestamptz */
+    updated_at: number | null;
     business_registration_number: string;
     logo_url: string;
     stripe_customer_id: string;
@@ -2048,8 +2042,8 @@ export type CompaniesListData = {
   website: string;
   description: string;
   status: "pending" | "approved" | "banned" | "rejected";
-  /** @format date */
-  updated_at: string | null;
+  /** @format timestamptz */
+  updated_at: number | null;
   business_registration_number: string;
   logo_url: string;
   stripe_customer_id: string;
@@ -2064,8 +2058,8 @@ export interface CompaniesCreatePayload {
   website: string;
   description: string;
   status: "pending" | "approved" | "banned" | "rejected";
-  /** @format date */
-  updated_at: string | null;
+  /** @format timestamptz */
+  updated_at: number | null;
   business_registration_number: string;
   logo_url: string;
   stripe_customer_id: string;
@@ -2091,8 +2085,8 @@ export interface CompaniesCreateData {
     website: string;
     description: string;
     status: "pending" | "approved" | "banned" | "rejected";
-    /** @format date */
-    updated_at: string | null;
+    /** @format timestamptz */
+    updated_at: number | null;
     business_registration_number: string;
     logo_url: string;
     stripe_customer_id: string;
@@ -3067,19 +3061,11 @@ export type JobChangeRequestsListData = {
 
 export interface JobChangeRequestsCreatePayload {
   /** @format int64 */
-  job_id: number;
-  /** @format uuid */
-  user_id: string | null;
-  /** @format int64 */
   requested_by: number;
   proposed_changes: object;
-  status: "PENDING" | "APPROVED" | "REJECTED";
-  /** @format timestamptz */
-  updated_at: number | null;
   reason: string;
   /** @format int64 */
   worksession_id: number;
-  as_is: object;
 }
 
 export interface JobChangeRequestsCreateData {
@@ -3121,8 +3107,8 @@ export interface CompanyDetailResult {
     website: string;
     description: string;
     status: "pending" | "approved" | "banned" | "rejected";
-    /** @format date */
-    updated_at: string | null;
+    /** @format timestamptz */
+    updated_at: number | null;
     business_registration_number: string;
     logo_url: string;
     stripe_customer_id: string;
@@ -5061,8 +5047,8 @@ export interface CompanyusersDetailData {
     website: string;
     description: string;
     status: "pending" | "approved" | "banned" | "rejected";
-    /** @format date */
-    updated_at: string | null;
+    /** @format timestamptz */
+    updated_at: number | null;
     business_registration_number: string;
     logo_url: string;
     stripe_customer_id: string;
@@ -6068,8 +6054,8 @@ export interface CompanyusersListOutput {
     website: string;
     description: string;
     status: "pending" | "approved" | "banned" | "rejected";
-    /** @format date */
-    updated_at: string | null;
+    /** @format timestamptz */
+    updated_at: number | null;
     business_registration_number: string;
     logo_url: string;
     stripe_customer_id: string;
@@ -6353,13 +6339,11 @@ export interface RestaurantsDetailData {
 export interface RestaurantsPartialUpdatePayload {
   name: string;
   address: string;
-  cuisine_type: string;
   business_hours: string;
   contact_info: string;
   profile_image: string;
   station: string;
   access: string;
-  rating: number;
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
@@ -6414,28 +6398,15 @@ export type RestaurantsListOutput = {
 export interface RestaurantsCreatePayload {
   name: string;
   address: string;
-  cuisine_type: string;
   business_hours: string;
   contact_info: string;
-  profile_image: string;
-  /** @format timestamptz */
-  updated_at: number;
-  /**
-   * Whether the restaurant is active.
-   * @default "false"
-   */
-  is_active: boolean;
   /** @format uuid */
   companies_id: string | null;
   station: string;
   access: string;
-  rating: number;
-  /** @default "1" */
-  is_approved: boolean;
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
-  status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   /** @format binary */
   photo: File | null;
 }

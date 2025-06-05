@@ -4,8 +4,10 @@ import { JobChangeRequests } from "@/api/__generated__/base/JobChangeRequests";
 import { useSWRConfig } from "swr";
 import { JobChangeRequestsListData, JobsDetailData } from "@/api/__generated__/base/data-contracts";
 import { Jobs } from "@/api/__generated__/base/Jobs";
+import { Users } from "@/api/__generated__/base/Users";
 export interface Params {
   jobChangeRequestId?: string;
+  userId?: string;
 }
 
 export const useAcceptJobChangeRequest = (params: Params) => {
@@ -46,13 +48,22 @@ export const useAcceptJobChangeRequest = (params: Params) => {
         mutate(jobKey, async (currentJob: JobsDetailData | undefined) => {
           if (!currentJob) return currentJob;
 
-          // レスポンスのidと一致するJobを見つけたら、更新されたデータで上書き
+          // 更新されたデータで上書き
           return {
             ...currentJob,
             job: data.job,
           };
         }
         , { revalidate: false });
+
+        if (params.userId) {
+          const users = getApi(Users);
+          const worksessionsByUserIdKey = users.worksessionsListQueryArgs(params.userId)[0];
+          mutate(worksessionsByUserIdKey);
+  
+          const worksessionsByUserIdTodoKey = users.worksessionsUserTodosListQueryArgs(params.userId)[0];
+          mutate(worksessionsByUserIdTodoKey);
+        }
       }
     }
   );

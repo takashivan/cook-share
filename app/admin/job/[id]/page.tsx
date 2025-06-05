@@ -39,7 +39,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useGetJob } from "@/hooks/api/companyuser/jobs/useGetJob";
+import { useGetJob } from "@/hooks/api/all/jobs/useGetJob";
 import { useGetWorksessionsByJobId } from "@/hooks/api/companyuser/worksessions/useGetWorksessionsByJobId";
 import {
   JobsDetailData,

@@ -12,6 +12,8 @@ import { useGetRestaurant } from "@/hooks/api/companyuser/restaurants/useGetRest
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { ErrorPage } from "@/components/layout/ErrorPage";
+import { Badge } from "@/components/ui/badge";
+import { useGetRestaurantCuisines } from "@/hooks/api/all/restaurantCuisines/useGetRestaurantCuisines";
 
 interface RestaurantDetailProps {
   restaurantId: number;
@@ -22,6 +24,8 @@ export function RestaurantDetail({
 }: RestaurantDetailProps) {
   const { user } = useCompanyAuth();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const { data: cuisines, error: errorGetCuisines, isLoading: isCuisinesLoading } = useGetRestaurantCuisines();
 
   // レストラン情報の取得
   const {
@@ -64,9 +68,9 @@ export function RestaurantDetail({
           <CardTitle>店舗詳細</CardTitle>
         </CardHeader>
         <CardContent>
-          {restaurantError ? (
+          {restaurantError || errorGetCuisines ? (
             <ErrorPage />
-          ) : isRestaurantLoading ? (
+          ) : isRestaurantLoading || isCuisinesLoading ? (
             <div className="flex justify-center items-center min-h-[200px]">
               <LoadingSpinner />
             </div>
@@ -87,9 +91,15 @@ export function RestaurantDetail({
 
               <div>
                 <h4 className="font-medium">ジャンル</h4>
-                <p className="text-sm text-gray-500">
-                  {restaurant?.cuisine_type}
-                </p>
+                {restaurant != null && restaurant.restaurant_cuisine_id.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {cuisines?.filter((cuisine) => restaurant.restaurant_cuisine_id.includes(cuisine.id)).map((cuisine) => (
+                      <Badge key={cuisine.id} variant="secondary">
+                        {cuisine.category}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
               </div>
               <div>
                 <h4 className="font-medium">説明文</h4>
@@ -129,28 +139,14 @@ export function RestaurantDetail({
           )}
         </CardContent>
       </Card>
-      <EditRestaurantModal
-        isOpen={isEditModalOpen && !!restaurant}
-        onClose={() => setIsEditModalOpen(false)}
-        onSubmit={handleSubmit}
-        restaurant={
-          restaurant || {
-            id: 0,
-            name: "",
-            description: "",
-            address: "",
-            contact_info: "",
-            cuisine_type: "",
-            is_active: true,
-            is_approved: false,
-            profile_image: "",
-            restaurant_cuisine_id: [],
-            business_hours: "",
-            station: "",
-            access: "",
-          }
-        }
-      />
+      {restaurant &&
+        <EditRestaurantModal
+          isOpen={isEditModalOpen && !!restaurant}
+          onClose={() => setIsEditModalOpen(false)}
+          onSubmit={handleSubmit}
+          restaurant={restaurant}
+        />
+      }
     </>
   )
 };

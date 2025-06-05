@@ -18,6 +18,9 @@ export const useGetDashboardList = (params: Params) => {
         },
       },
       params.companyuserId != null
-    )
+    ), {
+      revalidateOnMount: true,
+      dedupingInterval: 0,
+    }
   );
 };

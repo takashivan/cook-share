@@ -15,37 +15,32 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Upload, Building2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
-import { initializeCompany } from "@/lib/api/company";
 import { getAuthToken } from "@/lib/api/config";
 import { toast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
-
-type CompanyFormData = {
-  name: string;
-  description: string;
-  address: string;
-  phone: string;
-  website?: string;
-  business_registration_number?: string;
-};
+import { useCreateCompany } from "@/hooks/api/companyuser/companies/useCreateCompany";
+import { InitialCreatePayload } from "@/api/__generated__/company/data-contracts";
 
 export default function CompanyProfilePage() {
   const router = useRouter();
   const { user, reloadUser, isLoading } = useCompanyAuth();
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  // const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [checking, setChecking] = useState(true);
+
+  const {
+    trigger: initializeCompanyTrigger,
+  } = useCreateCompany({});
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<CompanyFormData>();
+  } = useForm<InitialCreatePayload>();
 
-  const onSubmit = async (data: CompanyFormData) => {
+  const onSubmit = async (data: InitialCreatePayload) => {
     if (!user?.id) {
       toast({
         title: "エラーが発生しました",
@@ -58,18 +53,10 @@ export default function CompanyProfilePage() {
     setIsSubmitting(true);
 
     try {
-      const companyData = {
+      await initializeCompanyTrigger({
         ...data,
-        logo_url: profileImage || "",
-        created_by: user.id,
-        status: "approved",
-      };
-
-      const initializedCompany = await initializeCompany(
-        user.id,
-        profileImage || "",
-        companyData
-      );
+        companyUser_id: user.id,
+      })
 
       const token = getAuthToken("company");
       if (!token) throw new Error("認証トークンが見つかりません");
@@ -94,16 +81,16 @@ export default function CompanyProfilePage() {
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setProfileImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  // const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onload = () => {
+  //       setProfileImage(reader.result as string);
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
 
   useEffect(() => {
     // ユーザー情報ロード中は何もしない
@@ -239,7 +226,7 @@ export default function CompanyProfilePage() {
               </div>
 
               {/* 会社ロゴ */}
-              <div className="space-y-3">
+              {/* <div className="space-y-3">
                 <Label className="text-base">会社ロゴ（任意）</Label>
                 <div className="flex items-center gap-4">
                   <div className="relative w-24 h-24 border rounded-lg overflow-hidden flex items-center justify-center bg-gray-50">
@@ -273,7 +260,7 @@ export default function CompanyProfilePage() {
                     </p>
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               <div className="flex justify-between pt-4">
                 <Button variant="outline" type="button" asChild>

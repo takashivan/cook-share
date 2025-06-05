@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { CreateRestaurantModal } from "@/components/modals/CreateRestaurantModal";
 import { toast } from "@/hooks/use-toast";
@@ -38,12 +38,17 @@ import { RestaurantsCreatePayload } from "@/api/__generated__/base/data-contract
 import { useGetRestaurantsByCompanyUserId } from "@/hooks/api/companyuser/restaurants/useGetRestaurantsByCompanyUserId";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { ErrorPage } from "@/components/layout/ErrorPage";
+import { useGetRestaurantCuisines } from "@/hooks/api/all/restaurantCuisines/useGetRestaurantCuisines";
+import { Badge } from "@/components/ui/badge";
+import { RestaurantStatusBadgeForAdmin } from "@/components/badge/RestaurantStatusBadgeForAdmin";
 
 export default function StoresPage() {
   const { user } = useCompanyAuth();
 
   const [isCreateRestaurantModalOpen, setIsCreateRestaurantModalOpen] =
     useState(false);
+
+  const { data: cuisines, error: errorGetCuisines, isLoading: isCuisinesLoading } = useGetRestaurantCuisines();
 
   const {
     data: restaurants,
@@ -90,13 +95,13 @@ export default function StoresPage() {
     [user?.companies_id, createRestaurantTrigger]
   );
 
-  if (error) {
+  if (error || errorGetCuisines) {
     return (
       <ErrorPage />
     );
   }
   
-  if (isLoading || !restaurants) {
+  if (isLoading || !restaurants || isCuisinesLoading) {
     return (
       <LoadingScreen
         fullScreen={false}
@@ -133,12 +138,12 @@ export default function StoresPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">営業中の店舗</CardTitle>
+            <CardTitle className="text-sm font-medium">公開中の店舗</CardTitle>
             <Store className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {restaurants.filter((r) => r.is_active).length}
+              {restaurants.filter((r) => r.status === "APPROVED").length}
             </div>
           </CardContent>
         </Card>
@@ -153,7 +158,7 @@ export default function StoresPage() {
                 <TableHead>店舗名</TableHead>
                 <TableHead>住所</TableHead>
                 <TableHead>ジャンル</TableHead>
-                {/* <TableHead>ステータス</TableHead> */}
+                <TableHead className="w-24">ステータス</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -173,7 +178,20 @@ export default function StoresPage() {
                       </div>
                     </TableCell>
                     <TableCell>{restaurant.address}</TableCell>
-                    <TableCell>{restaurant.cuisine_type}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-2">
+                        {cuisines?.filter((cuisine) => restaurant.restaurant_cuisine_id.includes(cuisine.id)).map((cuisine) => (
+                          <Badge key={cuisine.id} variant="secondary">
+                            {cuisine.category}
+                          </Badge>
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <RestaurantStatusBadgeForAdmin
+                        status={restaurant.status}
+                      />
+                    </TableCell>
                   </TableRow>
                 ))
                 : (
@@ -233,18 +251,19 @@ export default function StoresPage() {
                 <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
                   <div>
                     <p className="text-muted-foreground">ジャンル</p>
-                    <p>{restaurant.cuisine_type}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {cuisines?.filter((cuisine) => restaurant.restaurant_cuisine_id.includes(cuisine.id)).map((cuisine) => (
+                        <Badge key={cuisine.id} variant="secondary">
+                          {cuisine.category}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
                   <div>
                     <p className="text-muted-foreground">ステータス</p>
-                    <div
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        restaurant.is_active
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}>
-                      {restaurant.is_active ? "営業中" : "準備中"}
-                    </div>
+                    <RestaurantStatusBadgeForAdmin
+                      status={restaurant.status}
+                    />
                   </div>
                 </div>
                 <div className="mt-3">

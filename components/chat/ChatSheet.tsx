@@ -105,6 +105,7 @@ export function ChatSheet({
 
   const { trigger: acceptJobChangeRequest } = useAcceptJobChangeRequest({
     jobChangeRequestId: selectedChangeRequest?.id,
+    userId: user?.id,
   });
 
   const { trigger: rejectJobChangeRequest } = useRejectJobChangeRequest({

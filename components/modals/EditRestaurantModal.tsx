@@ -1,6 +1,6 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState, useRef, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,25 +10,14 @@ import { toast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { useGetRestaurantCuisines } from "@/hooks/api/all/restaurantCuisines/useGetRestaurantCuisines";
 import { RestaurantsPartialUpdatePayload } from "@/api/__generated__/base/data-contracts";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface EditRestaurantModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: RestaurantsPartialUpdatePayload) => void;
-  restaurant: {
+  restaurant: Omit<RestaurantsPartialUpdatePayload, "photo"> & {
     id: number;
-    name: string;
-    description?: string;
-    address: string;
-    contact_info?: string;
-    cuisine_type: string;
-    is_active: boolean;
-    is_approved: boolean;
-    profile_image?: string;
-    restaurant_cuisine_id?: number[] | number;
-    business_hours?: string;
-    station?: string;
-    access?: string;
   };
 }
 
@@ -43,19 +32,8 @@ export const EditRestaurantModal = ({
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [selectedCuisines, setSelectedCuisines] = useState<number[]>([]);
 
   const { data: cuisines, error: errorGetCuisines } = useGetRestaurantCuisines();
-
-  useEffect(() => {
-    // レストランの既存のジャンルを選択状態にする
-    if (restaurant.restaurant_cuisine_id) {
-      const cuisineIds = Array.isArray(restaurant.restaurant_cuisine_id)
-        ? restaurant.restaurant_cuisine_id
-        : [restaurant.restaurant_cuisine_id];
-      setSelectedCuisines(cuisineIds);
-    }
-  }, [restaurant.restaurant_cuisine_id, setSelectedCuisines]);
 
   useEffect(() => {
     if (errorGetCuisines) {
@@ -68,58 +46,27 @@ export const EditRestaurantModal = ({
     }
   }, [errorGetCuisines]);
 
-  console.log(" edit modal restaurant", restaurant);
-  console.log(" edit modal restaurant name", restaurant.name);
-
-  const handleCuisineChange = (id: number) => {
-    setSelectedCuisines((prev) => {
-      if (prev.includes(id)) {
-        return prev.filter((item) => item !== id);
-      } else {
-        return [...prev, id];
-      }
-    });
-  };
-
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
+    setValue,
+    watch,
+    control,
   } = useForm<RestaurantsPartialUpdatePayload>({
     defaultValues: {
       name: restaurant.name,
       description: restaurant.description || "",
       address: restaurant.address,
       contact_info: restaurant.contact_info || "",
-      cuisine_type: restaurant.cuisine_type,
       business_hours: restaurant.business_hours || "",
       station: restaurant.station || "",
       access: restaurant.access || "",
+      restaurant_cuisine_id: restaurant.restaurant_cuisine_id || [],
+      profile_image: restaurant.profile_image || "",
     },
   });
-
-  useEffect(() => {
-    if (restaurant) {
-      reset({
-        name: restaurant.name,
-        description: restaurant.description || "",
-        address: restaurant.address,
-        contact_info: restaurant.contact_info || "",
-        cuisine_type: restaurant.cuisine_type,
-        business_hours: restaurant.business_hours || "",
-        station: restaurant.station || "",
-        access: restaurant.access || "",
-      });
-      setPreviewImage(restaurant.profile_image || null);
-      if (restaurant.restaurant_cuisine_id) {
-        const cuisineIds = Array.isArray(restaurant.restaurant_cuisine_id)
-          ? restaurant.restaurant_cuisine_id
-          : [restaurant.restaurant_cuisine_id];
-        setSelectedCuisines(cuisineIds);
-      }
-    }
-  }, [restaurant, reset]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -139,22 +86,24 @@ export const EditRestaurantModal = ({
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+    setValue("profile_image", "");
   };
+
+  const handleClose = () => {
+    removeImage();
+    reset();
+    onClose();
+  }
 
   const onSubmitHandler = handleSubmit(async (data) => {
     try {
       const newData: RestaurantsPartialUpdatePayload = {
         ...data,
-        restaurant_cuisine_id: selectedCuisines,
         photo: selectedFile,
       }
 
       onSubmit(newData);
-      onClose();
-      toast({
-        title: "店舗情報を更新しました",
-        description: "店舗情報の更新が完了しました。",
-      });
+      handleClose();
     } catch (error) {
       console.error("Error submitting form:", error);
       toast({
@@ -170,7 +119,7 @@ export const EditRestaurantModal = ({
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
+      <Dialog as="div" className="relative z-50" onClose={handleClose}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -236,23 +185,51 @@ export const EditRestaurantModal = ({
                       <Label>ジャンル *</Label>
                       <div className="flex flex-wrap gap-2 mt-2">
                         {cuisines?.map((cuisine) => (
-                          <Button
+                          <div
                             key={cuisine.id}
-                            type="button"
-                            variant={
-                              selectedCuisines.includes(cuisine.id)
-                                ? "default"
-                                : "outline"
-                            }
-                            onClick={() => handleCuisineChange(cuisine.id)}
-                            className="rounded-full">
-                            {cuisine.category}
-                          </Button>
+                            className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200">
+                            <Controller
+                              name="restaurant_cuisine_id"
+                              control={control}
+                              rules={{
+                                validate: (value) => {
+                                  if (!value || value.length === 0) {
+                                    return "ジャンルを１つ以上選択してください";
+                                  }
+                                  return true;
+                                },
+                              }}
+                              render={({ field }) => {
+                                const isChecked = field.value?.includes(cuisine.id);
+
+                                return (
+                                  <>
+                                    <Checkbox
+                                      id={`genre-${cuisine.id}`}
+                                      checked={isChecked}
+                                      onCheckedChange={(checked) => {
+                                        const newValue = checked
+                                          ? [...(field.value ?? []), cuisine.id]
+                                          : field.value?.filter((v: number) => v !== cuisine.id);
+                                        field.onChange(newValue);
+                                      }}
+                                      className="border-gray-300 data-[state=checked]:bg-[#DB3F1C] data-[state=checked]:border-[#DB3F1C]"
+                                    />
+                                    <Label
+                                      htmlFor={`genre-${cuisine.id}`}
+                                      className="text-sm text-gray-700">
+                                      {cuisine.category}
+                                    </Label>
+                                  </>
+                                )
+                              }}
+                            />
+                          </div>
                         ))}
                       </div>
-                      {selectedCuisines.length === 0 && (
+                      {errors.restaurant_cuisine_id && (
                         <p className="mt-1 text-sm text-red-600">
-                          少なくとも1つのジャンルを選択してください
+                          {errors.restaurant_cuisine_id.message}
                         </p>
                       )}
                     </div>
@@ -285,7 +262,6 @@ export const EditRestaurantModal = ({
                         {...register("business_hours")}
                         className="mt-1"
                         placeholder="例：10:00-20:00"
-                        defaultValue={restaurant.business_hours}
                       />
                     </div>
 
@@ -296,7 +272,6 @@ export const EditRestaurantModal = ({
                         {...register("station")}
                         className="mt-1"
                         placeholder="例：東京駅"
-                        defaultValue={restaurant.station}
                       />
                     </div>
 
@@ -307,17 +282,16 @@ export const EditRestaurantModal = ({
                         {...register("access")}
                         className="mt-1"
                         placeholder="例：地下鉄千代田線 都庁前駅 徒歩2分"
-                        defaultValue={restaurant.access}
                       />
                     </div>
 
                     <div className="col-span-full">
                       <Label htmlFor="photo">店舗画像</Label>
                       <div className="mt-1 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-                        {previewImage ? (
+                        {previewImage || watch("profile_image") ? (
                           <div className="relative">
                             <Image
-                              src={previewImage}
+                              src={previewImage || watch("profile_image") || ""}
                               alt="プレビュー画像"
                               width={200}
                               height={200}
@@ -363,7 +337,7 @@ export const EditRestaurantModal = ({
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={onClose}
+                      onClick={handleClose}
                       disabled={isSubmitting}>
                       キャンセル
                     </Button>

@@ -1,8 +1,8 @@
 import { apiRequest } from "./config";
 import { API_CONFIG } from "./config";
 import { getCompany } from "./company";
-import { Restaurant as RestaurantType } from "@/types/restaurant";
 import { CompanyUserNotification } from "./companyUserNotification";
+import { RESTAURANT_STATUS } from "../const/restaurant";
 
 const BASE_URL = API_CONFIG.baseURLs.restaurant;
 
@@ -37,6 +37,7 @@ export interface Restaurant {
   company?: Company;
   profile_image?: string;
   restaurant_cuisine_id?: number[] | number;
+  status: typeof RESTAURANT_STATUS[number]['value'];
 }
 
 export type CreateRestaurantData = {

@@ -14,5 +14,8 @@ export const useGetReviewsByUserId = (
     headers: {
       "X-User-Type": "chef"
     }
-  }, params.userId != null));
+  }, params.userId != null), {
+    revalidateOnMount: true,
+    dedupingInterval: 0,
+  });
 };
