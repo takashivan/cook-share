@@ -46,7 +46,7 @@ export const useAcceptJobChangeRequest = (params: Params) => {
         mutate(jobKey, async (currentJob: JobsDetailData | undefined) => {
           if (!currentJob) return currentJob;
 
-          // レスポンスのidと一致するJobを見つけたら、更新されたデータで上書き
+          // 更新されたデータで上書き
           return {
             ...currentJob,
             job: data.job,
