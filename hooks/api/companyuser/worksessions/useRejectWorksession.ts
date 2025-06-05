@@ -8,7 +8,7 @@ import useSWRMutation from "swr/mutation";
 
 export interface Params {
   worksessionId?: number;
-  reason?: string;
+  jobId?: number;
   handleSuccess?: () => void;
   handleError?: () => void;
 }
@@ -29,6 +29,16 @@ export const useRejectWorksession = (params: Params) => {
     ),
     {
       onSuccess: () => {
+        // キャッシュを更新
+        if (params.jobId) {
+          const jobs = getApi(Jobs);
+          const worksessionsByJobIdKey =
+            jobs.worksessionsRestaurantTodosListQueryArgs(
+              params.jobId
+            )[0];
+          mutate(worksessionsByJobIdKey);
+        }
+
         if (params.handleSuccess) params.handleSuccess();
       },
       onError: () => {

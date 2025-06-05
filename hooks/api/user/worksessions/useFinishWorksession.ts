@@ -28,6 +28,9 @@ export const useFinishWorksession = (params: Params) => {
 
         const worksessionsByUserIdTodoKey = users.worksessionsUserTodosListQueryArgs(params.userId)[0];
         mutate(worksessionsByUserIdTodoKey);
+
+        const myReviews = users.chefReviewsListQueryArgs(params.userId)[0];
+        mutate(myReviews);
       }
 
       if (params.handleSuccess) {

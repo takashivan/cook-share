@@ -157,6 +157,7 @@ export default function JobDetail({ params }: PageProps) {
 
   const { trigger: cancelWorksessionTrigger } = useCancelWorksessionByChef({
     worksessionId: workSession?.id,
+    userId: user?.id,
   });
 
   // メッセージの取得
@@ -197,6 +198,7 @@ export default function JobDetail({ params }: PageProps) {
 
   const { trigger: acceptJobChangeRequest } = useAcceptJobChangeRequest({
     jobChangeRequestId: selectedChangeRequest?.id,
+    userId: user?.id,
   });
 
   const { trigger: rejectJobChangeRequest } = useRejectJobChangeRequest({
