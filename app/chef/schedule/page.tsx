@@ -91,7 +91,10 @@ export default function SchedulePage() {
 
   // ワークセッションをステータスでフィルタリング
   const filteredWorkSessions = {
-    upcoming: sortedWorkSessions?.filter((ws) => ws.status === "SCHEDULED") || [],
+    upcoming: sortedWorkSessions?.filter((ws) => ws.status === "SCHEDULED").sort((a, b) => {
+      // 日付の昇順にソート
+      return new Date(a.job.work_date).getTime() - new Date(b.job.work_date).getTime();
+    }) || [],
     completed:
       sortedWorkSessions?.filter((ws) =>
         ["COMPLETED", "VERIFIED"].includes(ws.status)

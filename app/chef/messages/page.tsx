@@ -28,10 +28,24 @@ export default function MessagesPage() {
   } = useSubscriptionMessageSummaryByUser({
     userId: user?.id,
   });
+
   const sortedMessageSummaryData = messageSummaryData?.message_summaries.sort((a, b) => {
-    const aDate = new Date(a.first_message?.created_at || 0);
-    const bDate = new Date(b.first_message?.created_at || 0);
-    return bDate.getTime() - aDate.getTime();
+    const aDate = a.first_message ? new Date(a.first_message.created_at) : null;
+    const bDate = b.first_message ? new Date(b.first_message.created_at) : null;
+
+    // メッセージがある場合はメッセージの作成日時の降順でソート
+    if (aDate && bDate) {
+      return bDate.getTime() - aDate.getTime();
+    }
+
+    // 一方にのみメッセージがある場合: メッセージがある方を前に
+    if (aDate && !bDate) return -1;
+    if (!aDate && bDate) return 1;
+
+    // 両方にメッセージがない場合はworksessionのcreated_at（マッチング日時）の降順でソート
+    const aWorkDate = new Date(a.worksession.created_at);
+    const bWorkDate = new Date(b.worksession.created_at);
+    return bWorkDate.getTime() - aWorkDate.getTime();
   });
 
   // メッセージの取得

@@ -54,8 +54,13 @@ export function StaffList({
     restaurantId,
   });
 
-  const adminStaff = staffData?.admin.filter((staff) => staff.is_admin) || [];
-  const generalStaff = staffData?.admin.filter((staff) => !staff.is_admin) || [];
+  const sortedStaff = staffData?.admin.sort((a, b) => {
+    // ソート１：名前の50音昇順
+    // ソート２：スタッフの登録日時昇順
+    return a.name.localeCompare(b.name) || new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+  }) || [];
+  const adminStaff = sortedStaff.filter((staff) => staff.is_admin) || [];
+  const generalStaff = sortedStaff.filter((staff) => !staff.is_admin) || [];
 
   // スタッフの招待
   const { trigger: createCompanyUserTrigger } =
