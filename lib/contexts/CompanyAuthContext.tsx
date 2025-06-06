@@ -14,16 +14,19 @@ import {
   setCurrentUser,
   clearCurrentUser,
 } from "@/lib/api/config";
-import type { CompanyUser, CompanyUserData } from "@/lib/api/companyUser";
+import type { CompanyUserData } from "@/lib/api/companyUser";
 import { login, register } from "@/lib/api/companyUser";
 import { getApi } from "@/api/api-factory";
 import { Companyuser } from "@/api/__generated__/base/Companyuser";
 import { CompanyusersPartialUpdatePayload } from "@/api/__generated__/base/data-contracts";
 import { Companyusers } from "@/api/__generated__/base/Companyusers";
 import { Auth } from "@/api/__generated__/company/Auth";
+import { Company } from "@/api/__generated__/company/Company";
+import { LoginCreateData, SignupCreatePayload } from "@/api/__generated__/company/data-contracts";
+import { useSWRConfig } from "swr";
 
 export interface CompanyAuthContextType {
-  user: CompanyUser | null;
+  user: LoginCreateData["user"] | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
@@ -34,8 +37,8 @@ export interface CompanyAuthContextType {
   confirmEmail: (token: string) => Promise<void>;
   changePassword: (newPassword: string) => Promise<void>;
   deleteAccount: (password: string) => Promise<void>;
-  setUser: (user: CompanyUser | null) => void;
-  reloadUser: () => Promise<CompanyUser | undefined>;
+  setUser: (user: LoginCreateData["user"] | null) => void;
+  reloadUser: () => Promise<LoginCreateData["user"] | undefined>;
 }
 
 const CompanyAuthContext = createContext<CompanyAuthContextType | undefined>(
@@ -43,9 +46,11 @@ const CompanyAuthContext = createContext<CompanyAuthContextType | undefined>(
 );
 
 export function CompanyAuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<CompanyUser | null>(null);
+  const [user, setUser] = useState<LoginCreateData["user"] | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  const { mutate } = useSWRConfig()
 
   useEffect(() => {
     const currentUser = getCurrentUser("company");
@@ -56,7 +61,7 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  const saveUser = (userData: CompanyUser | null) => {
+  const saveUser = (userData: LoginCreateData["user"] | null) => {
     setUser(userData);
     setCurrentUser(userData, "company");
   };
@@ -78,9 +83,9 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
         throw new Error("User not found");
       }
 
-      saveUser(userData.data as unknown as CompanyUser);
+      saveUser(userData.data);
 
-      return userData.data as unknown as CompanyUser;
+      return userData.data;
     } catch (error) {
       console.error("Error reloading user:", error);
       setUser(null);
@@ -88,7 +93,7 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const setAuth = (token: string,  userData: CompanyUser) => {
+  const setAuth = (token: string,  userData: LoginCreateData["user"]) => {
     setAuthToken(token, "company");
     saveUser(userData);
     setIsAuthenticated(true);
@@ -96,11 +101,12 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
 
   const handleLogin = async (email: string, password: string) => {
     try {
-      const { sessionToken, user } = await login({
+      const authApi = getApi(Auth);
+      const { data } = await authApi.loginCreate({
         email,
         password,
       });
-      setAuth(sessionToken, user);
+      setAuth(data.sessionToken, data.user);
     } catch (error) {
       console.error("Login error:", error);
       throw error;
@@ -113,12 +119,19 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setIsAuthenticated(false);
     setIsLoading(false);
+    // SWRで管理するすべてのキャッシュをクリア
+    mutate(
+      key => true,
+      undefined,
+      { revalidate: false }
+    )
   };
 
-  const handleRegister = async (data: CompanyUserData) => {
+  const handleRegister = async (data: SignupCreatePayload) => {
     try {
-      const response = await register(data);
-      setAuth(response.sessionToken, response.user);
+      const authApi = getApi(Auth);
+      const { data: newData } = await authApi.signupCreate(data);
+      setAuth(newData.sessionToken, newData.user);
     } catch (error) {
       console.error("Login error:", error);
       throw error;
@@ -139,7 +152,7 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
         }
       });
       if (response) {
-        saveUser(response.data as unknown as CompanyUser);
+        saveUser(response.data);
       }
     } catch (error) {
       console.error("Update error:", error);
@@ -159,7 +172,7 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (response) {
-        saveUser(response.data as unknown as CompanyUser);
+        saveUser(response.data);
       }
     }
     catch (error: any) {
@@ -180,7 +193,7 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (response) {
-        saveUser(response.data as unknown as CompanyUser);
+        saveUser(response.data);
       }
     } catch (error) {
       console.error("Confirm email error:", error);
@@ -198,7 +211,7 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (response) {
-        saveUser(response.data.user as unknown as CompanyUser);
+        saveUser(response.data.user);
       }
     } catch (error) {
       console.error("Change password error:", error);
@@ -209,11 +222,12 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
   const handleDeleteAccount = async (password: string) => {
     try {
       // 現在のパスワードでログインできるか確認
-      const { user: currentUser } = await login({
+      const authApi = getApi(Auth);
+      const { data } = await authApi.loginCreate({
         email: user?.email || "",
         password,
       });
-      if (!currentUser) {
+      if (!data.user) {
         throw new Error("現在のパスワードが間違っています");
       }
 

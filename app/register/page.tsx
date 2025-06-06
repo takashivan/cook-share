@@ -18,12 +18,12 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
+import { SignupCreatePayload } from "@/api/__generated__/authentication/data-contracts";
 
 export default function RegisterPage() {
   const router = useRouter();
   const { register } = useAuth();
   const { user: companyUser, logout: companyUserLogout } = useCompanyAuth();
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -40,7 +40,7 @@ export default function RegisterPage() {
         password: formData.get("password") as string,
       };
 
-      await register(data);
+      await register(data as SignupCreatePayload);
 
       toast({
         title: "認証メールを送信しました",
@@ -55,8 +55,6 @@ export default function RegisterPage() {
         description: "登録に失敗しました。もう一度お試しください。",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
