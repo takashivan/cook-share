@@ -39,10 +39,9 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { useGetDashboardList } from "@/hooks/api/companyuser/dashboard/userGetDashboardList";
+import { DashboardListData, useGetDashboardList } from "@/hooks/api/companyuser/dashboard/userGetDashboardList";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { CheckInQRModal } from "@/components/modals/CheckInQRModal";
-import { DashboardListData } from "@/api/__generated__/base/data-contracts";
 import { RestaurantReviewModal } from "@/components/modals/RestaurantReviewModal";
 import { RestaurantReviewCompleteModal } from "@/components/modals/RestaurantReviewCompleteModal";
 import { useGetCompany } from "@/hooks/api/companyuser/companies/useGetCompany";

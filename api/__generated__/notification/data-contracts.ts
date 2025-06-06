@@ -286,11 +286,11 @@ export type ByUserDetailOutput1 = {
   restaurant_id: number | null;
 }[];
 
-export interface MarkReadAllPartialUpdateBody1 {
+export interface MarkReadAllPartialUpdatePayload1 {
   user_id: string;
 }
 
-export type MarkReadAllPartialUpdateData1 = {
+export type MarkReadAllPartialUpdateResult1 = {
   /** @format uuid */
   id: string;
   /**

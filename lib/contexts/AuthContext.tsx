@@ -13,22 +13,23 @@ import {
   setAuthToken,
   clearAuthToken,
   getAuthToken,
+  clearCurrentUser,
 } from "@/lib/api/config";
-import type { UserData, UserProfile } from "@/lib/api/user";
-import { login, logout, getUserProfile, register } from "@/lib/api/user";
 import { getApi } from "@/api/api-factory";
 import { Users } from "@/api/__generated__/base/Users";
 import { Auth } from "@/api/__generated__/authentication/Auth";
 import { ProfilePartialUpdatePayload, UsersPartialUpdatePayload } from "@/api/__generated__/base/data-contracts";
 import { User } from "@/api/__generated__/base/User";
+import { LoginCreateData, SignupCreatePayload } from "@/api/__generated__/authentication/data-contracts";
+import { useSWRConfig } from "swr";
 
-interface AuthContextType {
-  user: UserProfile | null;
+export interface AuthContextType {
+  user: LoginCreateData["user"] | null;
   isAuthenticated: boolean;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  register: (data: UserData) => Promise<void>;
+  register: (data: SignupCreatePayload) => Promise<void>;
   createProfile: (data: ProfilePartialUpdatePayload) => Promise<{
     status: "success" | "error";
     error?: string;
@@ -38,7 +39,7 @@ interface AuthContextType {
   confirmEmail: (token: string) => Promise<void>;
   changePassword: (newPassword: string) => Promise<void>;
   deleteAccount: (password: string) => Promise<void>;
-  setUser: (user: UserProfile | null) => void;
+  setUser: (user: LoginCreateData["user"] | null) => void;
   reloadUser: () => Promise<void>;
 }
 
@@ -60,41 +61,13 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<LoginCreateData["user"] | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const initAuth = async () => {
-    try {
-      const token = getAuthToken();
-      if (token) {
-        const userData = await getCurrentUser();
-        if (userData) {
-          const fullProfile = await getUserProfile(userData.id);
-          setUser(fullProfile);
-          setCurrentUser(fullProfile, "chef");
-          setIsAuthenticated(true);
-        } else {
-          clearAuthToken();
-          setIsAuthenticated(false);
-        }
-      } else {
-        setIsAuthenticated(false);
-      }
-    } catch (error) {
-      console.error("Auth initialization error:", error);
-      clearAuthToken();
-      setIsAuthenticated(false);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { mutate } = useSWRConfig()
 
-  useEffect(() => {
-    initAuth();
-  }, []);
-
-  const saveUser = (userData: UserProfile | null) => {
+  const saveUser = (userData: LoginCreateData["user"] | null) => {
     setUser(userData);
     setCurrentUser(userData, "chef");
   };
@@ -116,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error("User not found");
       }
 
-      saveUser(userData.data as unknown as UserProfile);
+      saveUser(userData.data);
     } catch (error) {
       console.error("Error reloading user:", error);
       setUser(null);
@@ -124,19 +97,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const setAuth = (token: string, userData: UserProfile) => {
+  const setAuth = (token: string, userData: LoginCreateData["user"]) => {
     setAuthToken(token, "chef");
     saveUser(userData);
     setIsAuthenticated(true);
   };
 
+  const initAuth = async () => {
+    try {
+      const token = getAuthToken();
+      if (token) {
+        const userData = await getCurrentUser();
+        if (userData) {
+          // stripeから戻ってきた時などに最新の情報を取得する
+          const userApi = getApi(Users);
+          const user = await userApi.usersDetail(userData.id, {
+            headers: {
+              "X-User-Type": "chef",
+            }
+          });
+          saveUser(user.data);
+          setIsAuthenticated(true);
+        } else {
+          clearAuthToken();
+          setIsAuthenticated(false);
+        }
+      } else {
+        setIsAuthenticated(false);
+      }
+    } catch (error) {
+      console.error("Auth initialization error:", error);
+      clearAuthToken();
+      setIsAuthenticated(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    initAuth();
+  }, []);
+
   const handleLogin = async (email: string, password: string) => {
     try {
-      const { sessionToken, user } = await login({
+      const authApi = getApi(Auth);
+      const { data } = await authApi.loginCreate({
         email,
         password,
       });
-      setAuth(sessionToken, user);
+      setAuth(data.sessionToken, data.user);
     } catch (error) {
       console.error("Login error:", error);
       throw error;
@@ -144,16 +153,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const handleLogout = () => {
-    logout();
+    clearAuthToken("chef");
+    clearCurrentUser("chef");
     setUser(null);
     setIsAuthenticated(false);
-    clearAuthToken();
+    // SWRで管理するすべてのキャッシュをクリア
+    mutate(
+      key => true,
+      undefined,
+      { revalidate: false }
+    )
   };
 
-  const handleRegister = async (data: UserData) => {
+  const handleRegister = async (data: SignupCreatePayload) => {
     try {
-      const response = await register(data);
-      setAuth(response.sessionToken, response.user);
+      const authApi = getApi(Auth);
+      const { data: newData } = await authApi.signupCreate(data);
+      setAuth(newData.sessionToken, newData.user);
     } catch (error) {
       console.error("Login error:", error);
       throw error;
@@ -188,7 +204,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
       }
 
-      saveUser(response.data as unknown as UserProfile);
+      saveUser(response.data as unknown as LoginCreateData["user"]);
       return {
         status: "success",
       };
@@ -216,7 +232,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (response) {
-        saveUser(response.data.result1 as unknown as UserProfile);
+        saveUser(response.data.result1 as unknown as LoginCreateData["user"]);
       }
     } catch (error) {
       console.error("Update error:", error);
@@ -236,7 +252,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (response) {
-        saveUser(response.data as unknown as UserProfile);
+        saveUser(response.data);
       }
     }
     catch (error: any) {
@@ -257,7 +273,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (response) {
-        saveUser(response.data as unknown as UserProfile);
+        saveUser(response.data);
       }
     }
     catch (error) {
@@ -276,7 +292,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (response) {
-        saveUser(response.data.result1 as unknown as UserProfile);
+        saveUser(response.data.result1);
       }
     } catch (error) {
       console.error("Change password error:", error);
@@ -287,11 +303,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const handleDeleteAccount = async (password: string) => {
     try {
       // 現在のパスワードでログインできるか確認
-      const { user: currentUser } = await login({
+      const authApi = getApi(Auth);
+      const { data } = await authApi.loginCreate({
         email: user?.email || "",
         password,
       });
-      if (!currentUser) {
+      if (!data.user) {
         throw new Error("現在のパスワードが間違っています");
       }
 

@@ -81,6 +81,12 @@ export interface LoginCreateData {
     is_verified: boolean;
     /** @format timestamptz */
     updated_at: number | null;
+    magic_link: object;
+    verify_token: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
+    password_reset_token: string;
   };
   sessionToken: string;
 }

@@ -130,9 +130,12 @@ export interface LoginCreateData {
     line_notification_enabled: boolean;
     /** @default "false" */
     is_verified: boolean;
+    verify_token: string;
     stripe_account_id: string;
     /** @format email */
     pending_email: string;
+    email_change_token: string;
+    password_reset_token: string;
     /** @default "false" */
     stripe_verified: boolean;
     stripe_requirements: object;
@@ -151,6 +154,7 @@ export interface LoginCreateData {
     street: string;
     /** @default "false" */
     profile_completed: boolean;
+    position_level: "1" | "2" | "3" | "4";
     magic_link: {
       token: string;
       /**

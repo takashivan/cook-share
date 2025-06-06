@@ -38,6 +38,8 @@ import { formatJapanHHMM } from "@/lib/functions";
 import { useApplyJob } from "@/hooks/api/user/jobs/useApplyJob";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { useSWRConfig } from "swr";
+import { getApi } from "@/api/api-factory";
+import { Users } from "@/api/__generated__/base/Users";
 
 // 時間のフォーマット関数を追加
 const formatTime = (timestamp: number) => {
@@ -67,8 +69,13 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
     const fetchUserProfile = async () => {
       if (authUser?.id) {
         try {
-          const fullProfile = await getUserProfile(authUser.id);
-          setUser(fullProfile);
+          const userApi = getApi(Users);
+          const { data } = await userApi.usersDetail(authUser.id, {
+            headers: {
+              "X-User-Type": "chef",
+            }
+          });
+          setUser(data);
         } catch (error) {
           console.error("Error fetching user profile:", error);
         }
