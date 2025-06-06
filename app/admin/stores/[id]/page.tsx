@@ -3,11 +3,9 @@
 import { use } from "react";
 import Link from "next/link";
 import { MapPin, Phone, Clock, ChevronRight, Store, Star } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useGetRestaurant } from "@/hooks/api/companyuser/restaurants/useGetRestaurant";
-import { CompanyusersListOutput } from "@/api/__generated__/base/data-contracts";
 import Image from "next/image";
 import { useGetRestaurantReviewByRestaurantId } from "@/hooks/api/companyuser/reviews/useGetRestaurantReviewByRestaurantId";
 import { MessageList } from "./components/MessageList";
@@ -20,10 +18,10 @@ import { LoadingScreen } from "@/components/LoadingScreen";
 import { RestaurantStatusBadgeForAdmin } from "@/components/badge/RestaurantStatusBadgeForAdmin";
 import { useGetRestaurantCuisines } from "@/hooks/api/all/restaurantCuisines/useGetRestaurantCuisines";
 
-interface EditStaffPermissions {
-  canEdit: boolean;
-  canManageJobs: boolean;
-}
+// interface EditStaffPermissions {
+//   canEdit: boolean;
+//   canManageJobs: boolean;
+// }
 
 export default function RestaurantDetailPage(props: {
   params: Promise<{ id: string }>;

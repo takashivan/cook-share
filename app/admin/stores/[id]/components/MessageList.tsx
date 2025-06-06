@@ -39,9 +39,9 @@ export function MessageList({
     if (aDate && !bDate) return -1;
     if (!aDate && bDate) return 1;
 
-    // 両方にメッセージがない場合はjobのstart_timeの降順でソート
-    const aWorkDate = new Date(a.worksession.job.start_time);
-    const bWorkDate = new Date(b.worksession.job.start_time);
+    // 両方にメッセージがない場合はworksessionのcreated_at（マッチング日時）の降順でソート
+    const aWorkDate = new Date(a.worksession.created_at);
+    const bWorkDate = new Date(b.worksession.created_at);
     return bWorkDate.getTime() - aWorkDate.getTime();
   });
 

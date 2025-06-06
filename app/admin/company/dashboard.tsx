@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Building, CreditCard, MessageSquare, Store } from "lucide-react";
+import { CreditCard, MessageSquare, Store } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -20,19 +20,6 @@ import { LoadingScreen } from "@/components/LoadingScreen";
 import { useGetCurrentBillingSummaryByCompanyId } from "@/hooks/api/companyuser/billings/useGetCurrentBillingSummaryByCompanyId";
 import { CompanyProfileEditModal } from "@/components/modals/CompanyProfileEditModal";
 import { useState } from "react";
-
-interface BillingSummary {
-  id: string;
-  created_at: number;
-  companies_id: string | null;
-  month: string;
-  amount: number;
-  invoice_id: string;
-  status: "PENDING" | "PAID" | "FAILED";
-  fee_rate: number;
-  session_count: number;
-  invoice_number: string;
-}
 
 export function CompanyDashboard() {
   const { user } = useCompanyAuth();
@@ -223,7 +210,7 @@ export function CompanyDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {billings.slice(0, 3).map((billing: BillingSummary) => (
+                {billings.slice(0, 3).map((billing) => (
                   <div key={billing.id} className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center">
                       <CreditCard className="h-6 w-6 text-gray-500" />
