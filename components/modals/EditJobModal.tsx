@@ -1,18 +1,18 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useState, useRef, useEffect } from "react";
+import { Fragment } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import {
   JobsDetailData,
   JobsPartialUpdatePayload,
 } from "@/api/__generated__/base/data-contracts";
 import { formatDateToLocalISOStringForDatetimeLocal } from "@/lib/functions";
+import { toast } from "@/hooks/use-toast";
 
 interface UpdateJob
   extends Omit<
@@ -39,11 +39,11 @@ export const EditJobModal = ({
   onSubmit,
   job,
 }: EditJobModalProps) => {
-  const [previewImage, setPreviewImage] = useState<string | null>(
-    job?.image || null
-  );
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  // const [previewImage, setPreviewImage] = useState<string | null>(
+  //   job?.image || null
+  // );
+  // const fileInputRef = useRef<HTMLInputElement>(null);
+  //const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   // 日付と時間のフォーマット
   const formatDate = (dateString: string | number) => {
@@ -94,7 +94,8 @@ export const EditJobModal = ({
       title: job?.title || "",
       description: job?.description || "",
       work_date: job?.work_date ? formatDate(job.work_date) : "",
-      hourly_rate: job?.hourly_rate || 12000,
+      hourly_rate: job?.hourly_rate || 0,
+      transportation: "",
       start_time: job?.start_time ? formatTime(job.start_time) : "",
       end_time: job?.end_time ? formatTime(job.end_time) : "",
       task: job?.task || "",
@@ -112,57 +113,50 @@ export const EditJobModal = ({
         ? formatExpiryDateTime(job.expiry_date)
         : "",
     },
+    values: {
+      title: job?.title || "",
+      description: job?.description || "",
+      work_date: job?.work_date ? formatDate(job.work_date) : "",
+      hourly_rate: job?.hourly_rate || 0,
+      transportation: "",
+      start_time: job?.start_time ? formatTime(job.start_time) : "",
+      end_time: job?.end_time ? formatTime(job.end_time) : "",
+      task: job?.task || "",
+      skill: job?.skill || "",
+      whattotake: job?.whattotake || "",
+      transportation_type: job?.transportation_type || "NONE",
+      transportation_amount: job?.transportation_amount || 0,
+      note: job?.note || "",
+      point: job?.point || "",
+      status: job?.status || "",
+      required_skills: job?.required_skills || [],
+      fee: job?.fee || 12000,
+      number_of_spots: job?.number_of_spots || 1,
+      expiry_date: job?.expiry_date
+        ? formatExpiryDateTime(job.expiry_date)
+        : "",
+    }
   });
 
-  // jobが変更されたときにフォームをリセット
-  useEffect(() => {
-    if (job) {
-      console.log("Resetting form with job data:", job);
-      reset({
-        title: job.title || "",
-        description: job.description || "",
-        work_date: formatDate(job.work_date),
-        hourly_rate: job.hourly_rate || 12000,
-        start_time: formatTime(job.start_time),
-        end_time: formatTime(job.end_time),
-        task: job.task || "",
-        skill: job.skill || "",
-        whattotake: job.whattotake || "",
-        transportation_type: job.transportation_type || "NONE",
-        transportation_amount: job.transportation_amount || 0,
-        note: job.note || "",
-        point: job.point || "",
-        status: job.status || "",
-        required_skills: job.required_skills || [],
-        fee: job.fee || 12000,
-        number_of_spots: job.number_of_spots || 1,
-        expiry_date: job.expiry_date
-          ? formatExpiryDateTime(job.expiry_date)
-          : "",
-      });
-      setPreviewImage(job.image || null);
-    }
-  }, [job, reset]);
+  // const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (file) {
+  //     setSelectedFile(file);
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setPreviewImage(reader.result as string);
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const removeImage = () => {
-    setPreviewImage(null);
-    setSelectedFile(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
+  // const removeImage = () => {
+  //   setPreviewImage(null);
+  //   setSelectedFile(null);
+  //   if (fileInputRef.current) {
+  //     fileInputRef.current.value = "";
+  //   }
+  // };
 
   const submit = handleSubmit(async (data) => {
     // 今回初めて公開する場合
@@ -187,12 +181,10 @@ export const EditJobModal = ({
         expiry_date: expiryDateTimestamp,
       };
 
-      console.log("確認", data, newData);
-
       await onSubmit(newData);
       reset();
-      setPreviewImage(null);
-      setSelectedFile(null);
+      // setPreviewImage(null);
+      // setSelectedFile(null);
       onClose();
       toast({
         title: isPublished ? "求人を公開しました" : "求人を更新しました",
@@ -211,18 +203,13 @@ export const EditJobModal = ({
     }
   });
 
-  const handlePublish = () => {
-    if (!job) {
-      toast({
-        title: "エラーが発生しました",
-        description: "求人情報が見つかりません。",
-        variant: "destructive",
-      });
-      return;
-    }
+  const handleUpdateClick = () => {
+    setValue("status", job.status);
+    submit();
+  };
 
+  const handlePublish = () => {
     setValue("status", "PUBLISHED");
-    console.log("wacth", watch("status"));
     submit();
   };
 
@@ -577,7 +564,11 @@ export const EditJobModal = ({
                       disabled={isSubmitting}>
                       キャンセル
                     </Button>
-                    <Button type="submit" disabled={isSubmitting}>
+                    <Button
+                      type="button"
+                      onClick={handleUpdateClick}
+                      disabled={isSubmitting}
+                    >
                       {isSubmitting && job.status === watch("status")
                         ? "更新中..."
                         : "更新する"}

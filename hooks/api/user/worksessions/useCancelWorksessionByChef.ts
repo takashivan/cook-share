@@ -25,6 +25,7 @@ export const useCancelWorksessionByChef = (params: Params) => {
       params.worksessionId != null
     ),
     {
+      throwOnError: true,
       onSuccess: () => {
         // キャッシュを更新
         if (params.userId) {

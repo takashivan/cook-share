@@ -20,6 +20,7 @@ export const useUpdateJob = (params: Params) => {
       "X-User-Type": "company"
     }
   }, params.jobId != null), {
+    throwOnError: true,
     onSuccess: () => {
       // Jobsリストのキャッシュを更新
       const jobsKey = jobs.jobsListQueryArgs()[0];

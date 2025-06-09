@@ -9,9 +9,6 @@ export interface Params {
   companyId?: string;
   companyUserId?: string;
   restaurantId?: number;
-  handleSuccess?: (data: CompanyusersDeleteOutput) => void;
-  handleError?: (error: any) => void;
-  hadnleFinally?: () => void;
 }
 
 export const useDeleteCompanyUserByRestaurantId = (params: Params) => {
@@ -33,9 +30,8 @@ export const useDeleteCompanyUserByRestaurantId = (params: Params) => {
     },
     params.restaurantId != null && params.companyUserId != null
   ), {
+    throwOnError: true,
     onSuccess: (data) => {
-      console.log("Company user deleted successfully:", data);
-
       // キャッシュを更新
       if (params.restaurantId) {
         const companyUsersListByCompanyIdKey = restaurants.companyusersListQueryArgs(params.restaurantId)[0];
@@ -56,24 +52,6 @@ export const useDeleteCompanyUserByRestaurantId = (params: Params) => {
 
           return currentItems.filter((staff) => staff.id !== params.companyUserId);
         }, { revalidate: false });
-      }
-
-      if (params.handleSuccess) {
-        params.handleSuccess(data);
-      }
-
-      if (params.hadnleFinally) {
-        params.hadnleFinally();
-      }
-    },
-    onError: (error) => {
-      console.error("Error deleting company user:", error);
-      if (params.handleError) {
-        params.handleError(error);
-      }
-
-      if (params.hadnleFinally) {
-        params.hadnleFinally();
       }
     },
   })

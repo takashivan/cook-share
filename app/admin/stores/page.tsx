@@ -59,23 +59,6 @@ export default function StoresPage() {
   const { trigger: createRestaurantTrigger } = useCreateRestaurant({
     companyId: user?.companies_id ?? undefined,
     companyUserId: user?.id ?? undefined,
-    handleSuccess: () => {
-      toast({
-        title: "店舗を追加しました",
-        description: "新しい店舗の登録が完了しました。",
-      });
-      handleCloseRestaurantModal();
-    },
-    handleError: (error) => {
-      toast({
-        title: "エラーが発生しました",
-        description:
-          error instanceof Error
-            ? error.message
-            : "店舗の追加に失敗しました。もう一度お試しください。",
-        variant: "destructive",
-      });
-    },
   });
 
   const handleCreateRestaurantModal = useCallback(() => {
@@ -90,7 +73,11 @@ export default function StoresPage() {
     async (data: RestaurantsCreatePayload) => {
       if (!user?.companies_id) return;
 
-      await createRestaurantTrigger(data);
+      try {
+        await createRestaurantTrigger(data);
+      } catch (error) {
+        throw error;
+      }
     },
     [user?.companies_id, createRestaurantTrigger]
   );

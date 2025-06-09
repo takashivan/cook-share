@@ -64,57 +64,12 @@ export function RestaurantReviewModal({
     jobId: Number(worksessionData?.job.id),
     restaurantId: Number(worksessionData?.job.restaurant_id),
     executedCompanyuserId: user?.id,
-    handleSuccess: () => {
-      toast({
-        title: "シェフの評価を送信しました",
-        description: "シェフの勤怠確認・評価を送信しました",
-      });
-      setRating(0);
-      setComment("");
-      setApproved(true);
-      onCloseAction();
-      handleSuccessAction('verify');
-    },
-    handleError: () => {
-      toast({
-        title: "エラー",
-        description:
-          "勤務確認・評価の送信に失敗しました。もう一度お試しください",
-        variant: "destructive",
-      });
-    },
   });
 
   const { trigger: rejectWorksessionTrigger } = useRejectWorksession({
     worksessionId: worksessionData?.id,
     jobId: worksessionData?.job.id,
-    handleSuccess: () => {
-      toast({
-        title: "差し戻しを送信しました",
-        description: "シェフに差し戻し理由を通知しました。",
-      });
-      setIsRejectModalOpen(false);
-      setRejectReason("");
-      onCloseAction();
-      handleSuccessAction('reject');
-    },
-    handleError: () => {
-      toast({
-        title: "エラー",
-        description: "差し戻しの送信に失敗しました。もう一度お試しください。",
-        variant: "destructive",
-      });
-    },
   });
-
-  const handleSubmit = () => {
-    if (rating === 0) return;
-
-    verifyWorksessionTrigger({
-      rating,
-      feedback: comment,
-    });
-  };
 
   const handleClose = () => {
     setRating(0);
@@ -122,6 +77,54 @@ export function RestaurantReviewModal({
     setApproved(true);
     onCloseAction();
   };
+
+  const handleSubmit = async () => {
+    if (rating === 0) return;
+
+    try {
+      await verifyWorksessionTrigger({
+        rating,
+        feedback: comment,
+      });
+
+      handleClose();
+      handleSuccessAction('verify');
+      toast({
+        title: "シェフの評価を送信しました",
+        description: "シェフの勤怠確認・評価を送信しました",
+      });
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "勤務確認・評価の送信に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleReject = async () => {
+    try {
+      await rejectWorksessionTrigger({
+        reason: rejectReason,
+      });
+      
+      setIsRejectModalOpen(false);
+      setRejectReason("");
+
+      handleClose();
+      handleSuccessAction('reject');
+      toast({
+        title: "差し戻しを送信しました",
+        description: "シェフに差し戻し理由を通知しました。",
+      });
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "差し戻しの送信に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
+    }
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -312,11 +315,7 @@ export function RestaurantReviewModal({
             </Button>
             <Button
               variant="destructive"
-              onClick={() => {
-                rejectWorksessionTrigger({
-                  reason: rejectReason,
-                });
-              }}
+              onClick={handleReject}
               disabled={!rejectReason.trim()}>
               差し戻しを送信
             </Button>

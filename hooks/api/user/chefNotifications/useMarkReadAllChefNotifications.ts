@@ -6,8 +6,6 @@ import useSWRMutation from 'swr/mutation'
 
 export interface Params {
   userId?: string;
-  handleSuccess?: () => void;
-  handleError?: () => void;
 }
 
 export const useMarkReadAllChefNotifications = (params: Params) => {
@@ -19,6 +17,7 @@ export const useMarkReadAllChefNotifications = (params: Params) => {
       "X-User-Type": "chef"
     }
   }), {
+    throwOnError: true,
     onSuccess: (data) => {
       // Notificationsリストのキャッシュを更新
       if (params.userId) {
@@ -33,15 +32,6 @@ export const useMarkReadAllChefNotifications = (params: Params) => {
         }
         , { revalidate: false });
       }
-
-      if (params.handleSuccess) {
-        params.handleSuccess();
-      }
     },
-    onError: (error) => {
-      if (params.handleError) {
-        params.handleError();
-      }
-    }
   })
 }

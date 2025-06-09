@@ -18,6 +18,7 @@ export const useCreateCompanyUserByRestaurantId = (params: Params) => {
       "X-User-Type": "company"
     }
   }, params.restaurantId != null), {
+    throwOnError: true,
     onSuccess: (data) => {
       console.log('Company user created successfully:', data);
 

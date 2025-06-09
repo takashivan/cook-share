@@ -31,7 +31,6 @@ import { ChatSheet } from "@/components/chat/ChatSheet";
 import { useSubscriptionMessagesByUserId } from "@/hooks/api/user/messages/useSubscriptionMessagesByUserId";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useStartWorksession } from "@/hooks/api/user/worksessions/useStartWorksession";
-import { useFinishWorksession } from "@/hooks/api/user/worksessions/useFinishWorksession";
 import { useGetJob } from "@/hooks/api/all/jobs/useGetJob";
 import { useCancelWorksessionByChef } from "@/hooks/api/user/worksessions/useCancelWorksessionByChef";
 import { useGetWorksessionsByUserId } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserId";
@@ -53,39 +52,6 @@ import styles from "./styles.module.css";
 import { ErrorPage } from "@/components/layout/ErrorPage";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { Textarea } from "@/components/ui/textarea";
-
-type JobDetail = {
-  job: {
-    id: number;
-    title: string;
-    description: string;
-    work_date: string;
-    start_time: number;
-    end_time: number;
-    hourly_rate: number;
-    status: string;
-    image: string;
-    task: string;
-    skill: string;
-    whattotake: string;
-    note: string;
-    point: string;
-    transportation: string;
-    fee: number;
-    transportation_type: string;
-    transportation_amount: number;
-  };
-  restaurant: {
-    id: string;
-    name: string;
-    address: string;
-    business_hours: string;
-    contact_info: string;
-    profile_image: string;
-    station: string;
-    access: string;
-  };
-};
 
 type PageProps = {
   params: Promise<{
@@ -150,11 +116,6 @@ export default function JobDetail({ params }: PageProps) {
     userId: user?.id,
   });
 
-  const { trigger: finishWorksessionTrigger } = useFinishWorksession({
-    worksessionId: workSession?.id,
-    userId: user?.id,
-  });
-
   const { trigger: cancelWorksessionTrigger } = useCancelWorksessionByChef({
     worksessionId: workSession?.id,
     userId: user?.id,
@@ -205,10 +166,6 @@ export default function JobDetail({ params }: PageProps) {
     jobChangeRequestId: selectedChangeRequest?.id,
   });
 
-  const handleOpenDialog = () => {
-    setIsDialogOpen(true);
-  };
-
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setIsQrScanned(false);
@@ -216,7 +173,6 @@ export default function JobDetail({ params }: PageProps) {
   };
 
   const handleStartWork = () => {
-    console.log("handleStartWork called");
     setIsDialogOpen(true);
   };
 
@@ -338,55 +294,6 @@ export default function JobDetail({ params }: PageProps) {
           variant: "destructive",
         });
       }
-    }
-  };
-
-  const handleSuccessfulScan = async () => {
-    if (!workSession) return;
-
-    try {
-      console.log("チェックイン処理を開始します");
-      await startWorksessionTrigger({
-        check_in_time: Date.now(),
-      });
-      console.log("チェックインが完了しました");
-      router.refresh();
-    } catch (error) {
-      console.error("チェックイン処理に失敗しました:", error);
-      toast({
-        title: "エラー",
-        description: "チェックイン処理に失敗しました。もう一度お試しください。",
-        variant: "destructive",
-      });
-      setIsQrScanned(false);
-      setCheckInCode(null);
-    }
-  };
-
-  const handleCheckOut = async (
-    rating: number,
-    comment: string,
-    transportation_expenses: number | null
-  ) => {
-    if (!workSession) return;
-    try {
-      console.log("チェックアウト処理を開始します");
-      await finishWorksessionTrigger({
-        check_out_time: Date.now(),
-        rating,
-        feedback: comment,
-        transportation_expenses,
-      });
-      console.log("チェックアウトが完了しました");
-      router.refresh();
-    } catch (error) {
-      console.error("チェックアウト処理に失敗しました:", error);
-      toast({
-        title: "エラー",
-        description:
-          "チェックアウト処理に失敗しました。もう一度お試しください。",
-        variant: "destructive",
-      });
     }
   };
 
@@ -577,7 +484,9 @@ export default function JobDetail({ params }: PageProps) {
 
   const handleCheckIn = async () => {
     try {
-      await handleSuccessfulScan();
+      await startWorksessionTrigger({
+        check_in_time: Date.now(),
+      });
       setIsDialogOpen(false);
       toast({
         title: "チェックインしました",
@@ -585,15 +494,13 @@ export default function JobDetail({ params }: PageProps) {
       });
       router.refresh();
     } catch (error) {
-      console.error("Failed to check in:", error);
       toast({
         title: "エラーが発生しました",
-        description:
-          error instanceof Error
-            ? error.message
-            : "チェックインに失敗しました。",
+        description: "チェックイン処理に失敗しました。もう一度お試しください。",
         variant: "destructive",
       });
+      setIsQrScanned(false);
+      setCheckInCode(null);
     }
   };
 

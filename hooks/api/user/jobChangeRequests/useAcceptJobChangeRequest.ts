@@ -23,6 +23,7 @@ export const useAcceptJobChangeRequest = (params: Params) => {
       },
       params.jobChangeRequestId != null
     ), {
+      throwOnError: true,
       onSuccess: (data) => {
         // Job変更リクエストのリストのキャッシュを更新
         const jobChangeRequestsKey =

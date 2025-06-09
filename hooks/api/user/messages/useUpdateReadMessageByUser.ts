@@ -20,6 +20,7 @@ export const useUpdateReadMessageByUser = (params: Params) => {
   });
 
   return useSWRMutation(key, fetcher, {
+    throwOnError: true,
     onSuccess: () => {
       // Messagesリストのキャッシュを更新
       if (params.userId && params.workSessionId) {

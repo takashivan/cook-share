@@ -9,6 +9,7 @@ import {
 import { ByUserDetailData } from "@/api/__generated__/base/data-contracts";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useMarkReadChefNotification } from "@/hooks/api/user/chefNotifications/useMarkReadChefNotification";
+import { toast } from "@/hooks/use-toast";
 
 interface ChefNotificationDropdownItemProps {
   notification: ByUserDetailData[number];
@@ -24,14 +25,24 @@ export function ChefNotificationDropdownItem({
   const { trigger: markReadTrigger } = useMarkReadChefNotification({
     userId: user?.id,
     chefNotificationId: notification.id,
-    handleSuccess: handleSuccessMarkRead,
   });
   
   const handleNotificationClick = async (
     notification: ByUserDetailData[number]
   ) => {
     if (!notification.is_read) {
-      await markReadTrigger();
+      try {
+        await markReadTrigger();
+        if (handleSuccessMarkRead) {
+          handleSuccessMarkRead();
+        }
+      } catch (error) {
+        toast({
+          title: "エラー",
+          description: "通知の既読処理に失敗しました",
+          variant: "destructive",
+        });
+      }
     }
   };
 

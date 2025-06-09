@@ -3,12 +3,9 @@ import { Companies } from '@/api/__generated__/base/Companies';
 import { getApi } from '@/api/api-factory';
 import { useSWRConfig } from 'swr';
 import useSWRMutation from 'swr/mutation'
-import { CompanyusersCreateData } from '@/api/__generated__/base/data-contracts';
 
 export interface Params {
   companyId?: string;
-  handleSuccess?: (data: CompanyusersCreateData) => void;
-  handleError?: (error: any) => void;
 }
 
 export const useCreateCompanyUserByCompanyId = (params: Params) => {
@@ -20,9 +17,8 @@ export const useCreateCompanyUserByCompanyId = (params: Params) => {
       "X-User-Type": "company"
     }
   }, params.companyId != null), {
+    throwOnError: true,
     onSuccess: (data) => {
-      console.log('Company user created successfully:', data);
-
       // キャッシュを更新
       // すべてのレストランのcompanyuserのキャッシュを更新する
       const restaurants = getApi(Restaurants);
@@ -39,17 +35,6 @@ export const useCreateCompanyUserByCompanyId = (params: Params) => {
         const companies = getApi(Companies);
         const companyUsersListByCompanyIdKey = companies.companyusersListQueryArgs(params.companyId)[0];
         mutate(companyUsersListByCompanyIdKey);
-      }
-
-      if (params.handleSuccess) {
-        params.handleSuccess(data);
-      }
-    },
-    onError: (error) => {
-      console.error('Error creating company user:', error);
-
-      if (params.handleError) {
-        params.handleError(error);
       }
     },
   })

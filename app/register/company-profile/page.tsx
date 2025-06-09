@@ -32,7 +32,7 @@ export default function CompanyProfilePage() {
 
   const {
     trigger: initializeCompanyTrigger,
-  } = useCreateCompany({});
+  } = useCreateCompany();
 
   const {
     register,
@@ -70,7 +70,6 @@ export default function CompanyProfilePage() {
 
       router.push("/");
     } catch (error) {
-      console.error("Company creation failed:", error);
       toast({
         title: "エラーが発生しました",
         description: "会社情報の登録に失敗しました。もう一度お試しください。",

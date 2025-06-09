@@ -37,28 +37,18 @@ export function RestaurantDetail({
   });
 
   // レストランの更新
-  const { trigger: updateRestaurantTrriger } = useUpdateRestaurant({
+  const { trigger: updateRestaurantTrigger } = useUpdateRestaurant({
     restaurantId,
     companyId: restaurant?.companies_id ?? undefined,
     companyuserId: user?.id,
-    handleSuccess: () => {
-      setIsEditModalOpen(false);
-      toast({
-        title: "更新成功",
-        description: "レストラン情報が更新されました",
-      });
-    },
-    handleError: () => {
-      toast({
-        title: "更新エラー",
-        description: "レストラン情報の更新に失敗しました",
-        variant: "destructive",
-      });
-    },
   });
 
   const handleSubmit = async (data: RestaurantsPartialUpdatePayload) => {
-    await updateRestaurantTrriger(data);
+    try {
+      await updateRestaurantTrigger(data);
+    } catch (error) {
+      throw error;
+    }
   };
 
   return (

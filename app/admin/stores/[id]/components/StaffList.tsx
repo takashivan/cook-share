@@ -91,17 +91,8 @@ export function StaffList({
         restaurant_name: restaurantName ?? "",
       };
       await createCompanyUserTrigger(data);
-      toast({
-        title: "招待を送信しました",
-        description: `${email}に招待メールを送信しました。`,
-      });
     } catch (error) {
-      console.error("Failed to invite staff:", error);
-      toast({
-        title: "エラーが発生しました",
-        description: "招待の送信に失敗しました。もう一度お試しください。",
-        variant: "destructive",
-      });
+      throw error;
     }
   };
 
@@ -111,34 +102,31 @@ export function StaffList({
       restaurantId,
       companyId,
       companyUserId: deleteTargetStaff?.id,
-      handleSuccess: () => {
-        toast({
-          title: "スタッフを削除しました",
-          description: `${
-            deleteTargetStaff?.companyuser.name ||
-            deleteTargetStaff?.companyuser.email
-          }をスタッフから削除しました。`,
-        });
-      },
-      handleError: (error) => {
-        console.error("Failed to delete staff:", error);
-        toast({
-          title: "エラーが発生しました",
-          description: "スタッフの削除に失敗しました。",
-          variant: "destructive",
-        });
-      },
-      hadnleFinally: () => {
-        setIsDeleting(false);
-        setDeleteTargetStaff(null);
-      },
     });
 
   const handleDeleteStaff = async () => {
     if (!deleteTargetStaff) return;
 
-    setIsDeleting(true);
-    deleteRestaurantStaffTrigger();
+    try {
+      setIsDeleting(true);
+      await deleteRestaurantStaffTrigger();
+      toast({
+        title: "スタッフを削除しました",
+        description: `${
+          deleteTargetStaff?.companyuser.name ||
+          deleteTargetStaff?.companyuser.email
+        }をスタッフから削除しました。`,
+      });
+    } catch (error) {
+      toast({
+        title: "エラーが発生しました",
+        description: "スタッフの削除に失敗しました。",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setDeleteTargetStaff(null);
+    }
   };
 
   if (staffError) {

@@ -15,7 +15,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { UserProfile } from "@/lib/api/user";
 import {
   Select,
   SelectContent,
@@ -30,11 +29,12 @@ import { Checkbox } from "../ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { LoginCreateData } from "@/api/__generated__/authentication/data-contracts";
 
 interface ChefProfileEditModalProps {
   isOpen: boolean;
   onCloseAction: () => void;
-  user: UserProfile;
+  user: LoginCreateData["user"];
   cuisinesData?: RestaurantCuisinesListData;
 }
 
@@ -170,7 +170,7 @@ export function ChefProfileEditModal({
         ]);
       }
     }
-  }, [isOpen, user])
+  }, [isOpen, user, setValue])
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -216,7 +216,6 @@ export function ChefProfileEditModal({
       });
       handleClose();
     } catch (error) {
-      console.error("Error updating profile:", error);
       toast({
         title: "エラー",
         description: "プロフィールの更新に失敗しました",

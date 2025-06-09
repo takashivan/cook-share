@@ -1,29 +1,11 @@
+import { JobsDetailData } from "@/api/__generated__/base/data-contracts";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
 import { useForm } from "react-hook-form";
-
-interface Job {
-  id: number;
-  title: string;
-  description: string;
-  work_date: string;
-  start_time: number;
-  end_time: number;
-  hourly_rate: number;
-  status: string;
-  image: string;
-  task: string;
-  skill: string;
-  whattotake: string;
-  note: string;
-  point: string;
-  transportation: string;
-}
-
 interface ApplyJobModalProps {
   isOpen: boolean;
   onClose: () => void;
-  job: Job;
+  job: JobsDetailData["job"];
   onSubmit: (data: { notes: string }) => Promise<void>;
   isSubmitting?: boolean;
 }
@@ -39,11 +21,13 @@ export const ApplyJobModal = ({
   onSubmit,
   isSubmitting = false,
 }: ApplyJobModalProps) => {
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<ApplyFormData>();
+  
   const [confirmations, setConfirmations] = useState({
     tasks: false,
     skills: false,
@@ -52,7 +36,6 @@ export const ApplyJobModal = ({
   });
 
   const onSubmitForm = (data: ApplyFormData) => {
-    console.log("Form data:", data);
     onSubmit(data);
   };
 

@@ -105,37 +105,49 @@ export function ChatSheet({
     // メッセージが更新されたらスクロール
     scrollToBottom();
 
-    if (
-      !messagesData?.messages ||
-      messagesData.messages.length === 0 ||
-      !selectedChat
-    ) {
-      return;
-    }
-
-    // 最新のメッセージを取得（message_seqが最大のもの）
-    let latestMessage = null;
-    for (const message of messagesData.messages) {
-      if (!latestMessage || message.message_seq > latestMessage.message_seq) {
-        latestMessage = message;
+    const updateReadMessageIfNeeded = async () => {
+      if (
+        !messagesData?.messages ||
+        messagesData.messages.length === 0 ||
+        !selectedChat
+      ) {
+        return;
       }
-    }
 
-    if (!latestMessage) return;
-    // 既読情報が最新のメッセージと同じ場合は何もしない
-    if (
-      latestMessage.message_seq ===
-      messagesData.restaurant_last_read?.last_read_message_seq
-    )
-      return;
+      // 最新のメッセージを取得（message_seqが最大のもの）
+      let latestMessage = null;
+      for (const message of messagesData.messages) {
+        if (!latestMessage || message.message_seq > latestMessage.message_seq) {
+          latestMessage = message;
+        }
+      }
 
-    // 既読情報更新
-    if (selectedWorkSession) {
-      updateReadMessageTrigger({
-        worksession_id: selectedWorkSession?.id,
-        last_read_message_seq: latestMessage.message_seq,
-      });
-    }
+      if (!latestMessage) return;
+      // 既読情報が最新のメッセージと同じ場合は何もしない
+      if (
+        latestMessage.message_seq ===
+        messagesData.restaurant_last_read?.last_read_message_seq
+      )
+        return;
+
+      // 既読情報更新
+      if (selectedWorkSession) {
+        try {
+          await updateReadMessageTrigger({
+            worksession_id: selectedWorkSession?.id,
+            last_read_message_seq: latestMessage.message_seq,
+          });
+        } catch (error) {
+          toast({
+            title: "エラー",
+            description: "既読の更新に失敗しました。",
+            variant: "destructive",
+          });
+        }
+      }
+    };
+
+    updateReadMessageIfNeeded();
   }, [messagesData, selectedChat, updateReadMessageTrigger]);
 
   return (
