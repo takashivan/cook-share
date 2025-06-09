@@ -22,7 +22,7 @@ interface AddRestaurantStaffModalProps {
   onSubmit: (
     email: string,
     permissions: { canManageJobs: boolean; canEdit: boolean }
-  ) => void;
+  ) => Promise<void>;
   restaurantName: string;
 }
 

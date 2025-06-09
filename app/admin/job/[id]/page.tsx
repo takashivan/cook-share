@@ -42,7 +42,6 @@ import {
 import { useGetJob } from "@/hooks/api/all/jobs/useGetJob";
 import { useGetWorksessionsByJobId } from "@/hooks/api/companyuser/worksessions/useGetWorksessionsByJobId";
 import {
-  JobsDetailData,
   JobsPartialUpdatePayload,
   WorksessionsRestaurantTodosListData,
 } from "@/api/__generated__/base/data-contracts";
@@ -233,58 +232,10 @@ export default function JobDetail({ params }: PageParams) {
     }
   };
 
-  // 型チェックとデータ変換
-  // const formattedJob: JobsDetailData["job"] | null = job
-  //   ? {
-  //       id: job.id || 0,
-  //       created_at: job.created_at ? Number(job.created_at) : 0,
-  //       title: job.title || "",
-  //       description: job.description || "",
-  //       work_date: job.work_date || "",
-  //       start_time: job.start_time ? Number(job.start_time) : 0,
-  //       end_time: job.end_time ? Number(job.end_time) : 0,
-  //       hourly_rate: job.hourly_rate || 0,
-  //       required_skills: job.required_skills || [],
-  //       status: job.status || "",
-  //       updated_at: job.updated_at ? Number(job.updated_at) : 0,
-  //       restaurant_id: job.restaurant_id || 0,
-  //       image: job.image || "",
-  //       task: job.task || "",
-  //       skill: job.skill || "",
-  //       whattotake: job.whattotake || "",
-  //       note: job.note || "",
-  //       point: job.point || "",
-  //       transportation: job.transportation || "",
-  //       is_approved: job.is_approved || false,
-  //       number_of_spots: job.number_of_spots || 1,
-  //       fee: job.fee || 12000,
-  //       expiry_date: job.expiry_date ? Number(job.expiry_date) : 0,
-  //       transportation_type: job.transportation_type || "",
-  //       transportation_amount: job.transportation_amount || 0,
-  //     }
-  //   : null;
-
   const handleEditJobSubmit = async (data: JobsPartialUpdatePayload) => {
-    // 今回初めて公開する場合
-    const isPublished =
-      job?.status !== data.status && data.status === "PUBLISHED";
-
     try {
       await updateJobTrigger(data);
-      toast({
-        title: isPublished ? "求人を公開しました" : "求人を更新しました",
-        description: isPublished
-          ? "求人が公開されました。"
-          : "求人の情報が更新されました。",
-      });
     } catch (error) {
-      toast({
-        title: "エラーが発生しました",
-        description: isPublished
-          ? "求人の公開に失敗しました。もう一度お試しください。"
-          : "求人の更新に失敗しました。もう一度お試しください。",
-        variant: "destructive",
-      });
       throw error;
     }
   };

@@ -152,26 +152,16 @@ export function JobContent({
   const { trigger: createJobTrigger } = useCreateJob({
     companyId: restaurant?.companies_id ?? undefined,
     restaurantId: restaurant?.id,
-    handleSuccess: () => {
-      setIsCreateJobModalOpen(false);
-      setCopiedJob(null);
-      toast({
-        title: "求人を追加しました",
-        description: "新しい求人の登録が完了しました。",
-      });
-    },
-    handleError: (error) => {
-      console.error("Failed to create job:", error);
-      toast({
-        title: "エラーが発生しました",
-        description: "求人の追加に失敗しました。もう一度お試しください。",
-        variant: "destructive",
-      });
-    },
   });
 
   const handleCreateJob = async (data: JobsCreatePayload) => {
-    await createJobTrigger(data);
+    try {
+      await createJobTrigger(data);
+      setIsCreateJobModalOpen(false);
+      setCopiedJob(null);
+    } catch (error) {
+      throw error;
+    }
   };
 
   const handleCopyJob = (jobData: Job) => {

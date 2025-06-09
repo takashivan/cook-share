@@ -15,7 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 interface EditRestaurantModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: RestaurantsPartialUpdatePayload) => void;
+  onSubmit: (data: RestaurantsPartialUpdatePayload) => Promise<void>;
   restaurant: Omit<RestaurantsPartialUpdatePayload, "photo"> & {
     id: number;
   };
@@ -102,16 +102,16 @@ export const EditRestaurantModal = ({
         photo: selectedFile,
       }
 
-      onSubmit(newData);
+      await onSubmit(newData);
       handleClose();
+      toast({
+        title: "更新成功",
+        description: "レストラン情報が更新されました",
+      });
     } catch (error) {
-      console.error("Error submitting form:", error);
       toast({
         title: "エラーが発生しました",
-        description:
-          error instanceof Error
-            ? error.message
-            : "店舗情報の更新に失敗しました。もう一度お試しください。",
+        description: "店舗情報の更新に失敗しました。もう一度お試しください。",
         variant: "destructive",
       });
     }

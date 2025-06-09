@@ -12,6 +12,7 @@ import {
   JobsPartialUpdatePayload,
 } from "@/api/__generated__/base/data-contracts";
 import { formatDateToLocalISOStringForDatetimeLocal } from "@/lib/functions";
+import { toast } from "@/hooks/use-toast";
 
 interface UpdateJob
   extends Omit<
@@ -185,10 +186,27 @@ export const EditJobModal = ({
       // setPreviewImage(null);
       // setSelectedFile(null);
       onClose();
+      toast({
+        title: isPublished ? "求人を公開しました" : "求人を更新しました",
+        description: isPublished
+          ? "求人が公開されました。"
+          : "求人の情報が更新されました。",
+      });
     } catch (error) {
-      // 特に処理はしない
+      toast({
+        title: "エラーが発生しました",
+        description: isPublished
+          ? "求人の公開に失敗しました。もう一度お試しください。"
+          : "求人の更新に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
     }
   });
+
+  const handleUpdateClick = () => {
+    setValue("status", job.status);
+    submit();
+  };
 
   const handlePublish = () => {
     setValue("status", "PUBLISHED");
@@ -546,7 +564,11 @@ export const EditJobModal = ({
                       disabled={isSubmitting}>
                       キャンセル
                     </Button>
-                    <Button type="submit" disabled={isSubmitting}>
+                    <Button
+                      type="button"
+                      onClick={handleUpdateClick}
+                      disabled={isSubmitting}
+                    >
                       {isSubmitting && job.status === watch("status")
                         ? "更新中..."
                         : "更新する"}

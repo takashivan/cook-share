@@ -111,34 +111,31 @@ export function StaffList({
       restaurantId,
       companyId,
       companyUserId: deleteTargetStaff?.id,
-      handleSuccess: () => {
-        toast({
-          title: "スタッフを削除しました",
-          description: `${
-            deleteTargetStaff?.companyuser.name ||
-            deleteTargetStaff?.companyuser.email
-          }をスタッフから削除しました。`,
-        });
-      },
-      handleError: (error) => {
-        console.error("Failed to delete staff:", error);
-        toast({
-          title: "エラーが発生しました",
-          description: "スタッフの削除に失敗しました。",
-          variant: "destructive",
-        });
-      },
-      hadnleFinally: () => {
-        setIsDeleting(false);
-        setDeleteTargetStaff(null);
-      },
     });
 
   const handleDeleteStaff = async () => {
     if (!deleteTargetStaff) return;
 
-    setIsDeleting(true);
-    deleteRestaurantStaffTrigger();
+    try {
+      setIsDeleting(true);
+      await deleteRestaurantStaffTrigger();
+      toast({
+        title: "スタッフを削除しました",
+        description: `${
+          deleteTargetStaff?.companyuser.name ||
+          deleteTargetStaff?.companyuser.email
+        }をスタッフから削除しました。`,
+      });
+    } catch (error) {
+      toast({
+        title: "エラーが発生しました",
+        description: "スタッフの削除に失敗しました。",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setDeleteTargetStaff(null);
+    }
   };
 
   if (staffError) {
