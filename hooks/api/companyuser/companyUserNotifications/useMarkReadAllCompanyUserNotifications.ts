@@ -19,6 +19,7 @@ export const useMarkReadAllCompanyUserNotifications = (params: Params) => {
       "X-User-Type": "company"
     }
   }), {
+    throwOnError: true,
     onSuccess: (data) => {
       // Notificationsリストのキャッシュを更新
       if (params.userId) {
