@@ -17,6 +17,7 @@ import { Star } from "lucide-react";
 import { useGetReviewsByUserId } from "@/hooks/api/user/reviews/useGetReviewsByUserId";
 import { ErrorPage } from "@/components/layout/ErrorPage";
 import { LoadingScreen } from "@/components/LoadingScreen";
+import { toast } from "@/hooks/use-toast";
 
 export default function SchedulePage() {
   const { user } = useAuth();
@@ -72,7 +73,11 @@ export default function SchedulePage() {
     try {
       sendMessage(message);
     } catch (error) {
-      console.error("Failed to send message:", error);
+      toast({
+        title: "エラー",
+        description: "メッセージの送信に失敗しました。",
+        variant: "destructive",
+      });
     }
   };
 

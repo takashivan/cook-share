@@ -13,6 +13,7 @@ import {
 } from "@/hooks/api/user/messages/useSubscriptionMessageSummaryByUser";
 import { ErrorPage } from "@/components/layout/ErrorPage";
 import { LoadingScreen } from "@/components/LoadingScreen";
+import { toast } from "@/hooks/use-toast";
 
 export default function MessagesPage() {
   const { user } = useAuth();
@@ -73,7 +74,11 @@ export default function MessagesPage() {
     try {
       sendMessage(message);
     } catch (error) {
-      console.error("Failed to send message:", error);
+      toast({
+        title: "エラー",
+        description: "メッセージの送信に失敗しました。",
+        variant: "destructive",
+      });
     }
   };
 
