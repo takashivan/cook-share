@@ -20,6 +20,7 @@ export const useRejectJobChangeRequest = (params: Params) => {
       },
       params.jobChangeRequestId != null
     ), {
+      throwOnError: true,
       onSuccess: (data) => {
         console.log("Job change request rejected successfully:", data);
 

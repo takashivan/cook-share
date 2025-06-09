@@ -19,6 +19,7 @@ export const useStartWorksession = (params: Params) => {
       "X-User-Type": "chef"
     }
   }, params.worksessionId != null), {
+    throwOnError: true,
     onSuccess: () => {
       if (params.userId) {
         const users = getApi(Users);
