@@ -7,8 +7,6 @@ import useSWRMutation from 'swr/mutation'
 export interface Params {
   jobId?: number;
   userId?: string;
-  handleSuccess?: () => void;
-  handleError?: (error: any) => void;
 }
 
 export const useApplyJob = (params: Params) => {
@@ -20,6 +18,7 @@ export const useApplyJob = (params: Params) => {
       "X-User-Type": "chef"
     }
   }, params.jobId != null), {
+    throwOnError: true,
     onSuccess: (data) => {
       if (params.jobId) {
         const worksessionsByUserIdKey = jobsApi.queryUpcomingListQueryArgs()[0];
@@ -37,15 +36,6 @@ export const useApplyJob = (params: Params) => {
         const worksessionsByUserIdHistoryKey = usersApi.sessionHistoryCurrentListQueryArgs(params.userId)[0];
         mutate(worksessionsByUserIdHistoryKey);
       }
-
-      if (params.handleSuccess) {
-        params.handleSuccess();
-      }
     },
-    onError: (error) => {
-      if (params.handleError) {
-        params.handleError(error);
-      }
-    }
   })
 }

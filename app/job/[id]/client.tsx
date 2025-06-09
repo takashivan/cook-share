@@ -14,7 +14,6 @@ import {
   PartyPopper,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getUserProfile } from "@/lib/api/user";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ApplyJobModal } from "@/components/modals/ApplyJobModal";
@@ -37,7 +36,6 @@ import {
 import { formatJapanHHMM } from "@/lib/functions";
 import { useApplyJob } from "@/hooks/api/user/jobs/useApplyJob";
 import { LoadingScreen } from "@/components/LoadingScreen";
-import { useSWRConfig } from "swr";
 import { getApi } from "@/api/api-factory";
 import { Users } from "@/api/__generated__/base/Users";
 
@@ -47,7 +45,6 @@ const formatTime = (timestamp: number) => {
 };
 
 export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
-  const { mutate } = useSWRConfig();
   const { toast } = useToast();
   const router = useRouter();
   const { user: authUser, loading } = useAuth();
@@ -88,44 +85,6 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
   const { trigger: applyJobTrigger } = useApplyJob({
     jobId: jobDetail.job.id,
     userId: user?.id,
-    handleSuccess: () => {
-      setIsApplyModalOpen(false);
-      toast({
-        description: "応募が完了しました",
-      });
-
-      // // カレンダーイベントのデータを作成
-      // const eventData = {
-      //   text: `${jobDetail.job.title} @ ${jobDetail.restaurant.name}`,
-      //   dates: jobDetail.job.work_date,
-      //   details: `勤務時間: ${formatTime(
-      //     jobDetail.job.start_time
-      //   )} - ${formatTime(jobDetail.job.end_time)}\n場所: ${
-      //     jobDetail.restaurant.address
-      //   }`,
-      // };
-    },
-    handleError: (error) => {
-      if (error.response?.data?.payload?.code === "already_applied") {
-        toast({
-          title: "エラーが発生しました",
-          variant: "destructive",
-          description: "応募が締め切られているため、応募できません",
-        });
-
-        // 応募モーダルを閉じて画面をリフレッシュする
-        setIsApplyModalOpen(false);
-        router.refresh();
-
-        return;
-      }
-
-      toast({
-        title: "エラーが発生しました",
-        variant: "destructive",
-        description: "応募に失敗しました。もう一度お試しください。",
-      });
-    },
   });
 
   // 重複している仕事の情報があれば取得
@@ -214,7 +173,44 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
       user_id: user.id.toString(),
     };
 
-    await applyJobTrigger(applicationData);
+    try {
+      await applyJobTrigger(applicationData);
+      setIsApplyModalOpen(false);
+      toast({
+        description: "応募が完了しました",
+      });
+
+      // // カレンダーイベントのデータを作成
+      // const eventData = {
+      //   text: `${jobDetail.job.title} @ ${jobDetail.restaurant.name}`,
+      //   dates: jobDetail.job.work_date,
+      //   details: `勤務時間: ${formatTime(
+      //     jobDetail.job.start_time
+      //   )} - ${formatTime(jobDetail.job.end_time)}\n場所: ${
+      //     jobDetail.restaurant.address
+      //   }`,
+      // };
+    } catch (error) {
+      if ((error as any).response?.data?.payload?.code === "already_applied") {
+        toast({
+            title: "エラーが発生しました",
+            variant: "destructive",
+            description: "応募が締め切られているため、応募できません",
+        });
+
+        // 応募モーダルを閉じて画面をリフレッシュする
+        setIsApplyModalOpen(false);
+        router.refresh();
+
+        return;
+      }
+
+      toast({
+        title: "エラーが発生しました",
+        variant: "destructive",
+        description: "応募に失敗しました。もう一度お試しください。",
+      });
+    }
   };
 
   const handleApply = async () => {
