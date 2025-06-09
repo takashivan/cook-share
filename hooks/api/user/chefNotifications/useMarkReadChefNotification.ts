@@ -7,8 +7,6 @@ import useSWRMutation from 'swr/mutation'
 export interface Params {
   chefNotificationId?: number;
   userId?: string;
-  handleSuccess?: () => void;
-  handleError?: () => void;
 }
 
 export const useMarkReadChefNotification = (params: Params) => {
@@ -40,15 +38,6 @@ export const useMarkReadChefNotification = (params: Params) => {
         }
         , { revalidate: false });
       }
-
-      if (params.handleSuccess) {
-        params.handleSuccess();
-      }
     },
-    onError: (error) => {
-      if (params.handleError) {
-        params.handleError();
-      }
-    }
   })
 }

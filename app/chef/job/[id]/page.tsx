@@ -31,7 +31,6 @@ import { ChatSheet } from "@/components/chat/ChatSheet";
 import { useSubscriptionMessagesByUserId } from "@/hooks/api/user/messages/useSubscriptionMessagesByUserId";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useStartWorksession } from "@/hooks/api/user/worksessions/useStartWorksession";
-import { useFinishWorksession } from "@/hooks/api/user/worksessions/useFinishWorksession";
 import { useGetJob } from "@/hooks/api/all/jobs/useGetJob";
 import { useCancelWorksessionByChef } from "@/hooks/api/user/worksessions/useCancelWorksessionByChef";
 import { useGetWorksessionsByUserId } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserId";
