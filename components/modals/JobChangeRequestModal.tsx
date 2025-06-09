@@ -85,24 +85,7 @@ export function JobChangeRequestModal({
     onCloseAction();
   }
 
-  const { trigger: createJobChangeRequest } = useCreateJobChangeRequest({
-    handleError: (error) => {
-      if (error.response?.data?.payload?.code === "already_exist") {
-        toast({
-          title: "変更リクエストが既に存在します",
-          description:
-            "既存の変更リクエストが承認または拒否されるまで、新しいリクエストを作成できません。",
-          variant: "destructive",
-        });
-
-        // 応募モーダルを閉じて画面をリフレッシュする
-        handleClose();
-        router.refresh();
-
-        return;
-      }
-    }
-  });
+  const { trigger: createJobChangeRequest } = useCreateJobChangeRequest();
 
   const { trigger: deleteJobChangeRequest } = useDeleteJobChangeRequest({
     jobChangeRequestId: pendingRequest?.id,
@@ -168,6 +151,21 @@ ${data.reason}
 
       handleClose();
     } catch (error) {
+      if ((error as any).response?.data?.payload?.code === "already_exist") {
+        toast({
+          title: "変更リクエストが既に存在します",
+          description:
+            "既存の変更リクエストが承認または拒否されるまで、新しいリクエストを作成できません。",
+          variant: "destructive",
+        });
+
+        // 応募モーダルを閉じて画面をリフレッシュする
+        handleClose();
+        router.refresh();
+
+        return;
+      }
+
       toast({
         title: "エラー",
         description: "変更リクエストの送信に失敗しました。",

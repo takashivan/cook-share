@@ -32,15 +32,20 @@ export function RestaurantNotificationDropdownItem({
   const { trigger: markReadTrigger } = useMarkReadCompanyUserNotifications({
     userId: user?.id,
     companyUserNotificationId: notification.id ?? undefined,
-    handleSuccess: handleSuccessMarkRead,
-    handleError: handleErrorMarkRead,
   });
 
   const handleNotificationClick = async (
     notification: ByUserDetailOutput[number]
   ) => {
     if (!notification.is_read) {
-      await markReadTrigger();
+      try {
+        await markReadTrigger();
+        if (handleSuccessMarkRead) {
+          handleSuccessMarkRead();
+        }
+      } catch (error) {
+        handleErrorMarkRead();
+      }
     }
   };
 

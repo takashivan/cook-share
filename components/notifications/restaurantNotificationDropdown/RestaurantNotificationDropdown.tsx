@@ -45,11 +45,18 @@ export function RestaurantNotificationDropdown({
 
   const { trigger: markReadAllTrigger } = useMarkReadAllCompanyUserNotifications({
     userId,
-    handleSuccess: () => {
-      setOpen(false);
-    },
-    handleError: handleErrorMarkRead,
   });
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await markReadAllTrigger({
+        user_id: userId,
+      });
+      setOpen(false);
+    } catch (error) {
+      handleErrorMarkRead();
+    }
+  }
 
   const filteredNotifications = notifications.filter(
     (notification) =>
@@ -59,11 +66,6 @@ export function RestaurantNotificationDropdown({
   const unreadCount = filteredNotifications.filter(
     (notification) => !notification.is_read
   ).length;
-
-  console.log("Notifications:", notifications);
-  console.log("Filtered Notifications:", filteredNotifications);
-  console.log("Restaurant ID:", restaurantId);
-  console.log("Unread Count:", unreadCount);
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -85,7 +87,7 @@ export function RestaurantNotificationDropdown({
               variant="ghost"
               size="sm"
               className="text-xs h-auto py-1"
-              onClick={() => { markReadAllTrigger({ user_id: userId }) }}>
+              onClick={handleMarkAllAsRead}>
               すべて既読にする
             </Button>
           )}

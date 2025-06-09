@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { toast } from "@/hooks/use-toast";
 
 interface AddRestaurantStaffModalProps {
   isOpen: boolean;
@@ -44,8 +45,16 @@ export function AddRestaurantStaffModal({
       await onSubmit(email, { canManageJobs: true, canEdit: true });
       setEmail("");
       onClose();
+      toast({
+        title: "招待を送信しました",
+        description: `${email}に招待メールを送信しました。`,
+      });
     } catch (error) {
-      console.error("Error adding store staff:", error);
+      toast({
+        title: "エラーが発生しました",
+        description: "招待の送信に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }

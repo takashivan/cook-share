@@ -7,8 +7,6 @@ import useSWRMutation from 'swr/mutation'
 export interface Params {
   companyUserNotificationId?: string;
   userId?: string;
-  handleSuccess?: () => void;
-  handleError?: () => void;
 }
 
 export const useMarkReadCompanyUserNotifications = (params: Params) => {
@@ -20,6 +18,7 @@ export const useMarkReadCompanyUserNotifications = (params: Params) => {
       "X-User-Type": "company"
     }
   }, params.companyUserNotificationId != null), {
+    throwOnError: true,
     onSuccess: (data) => {
       // Notificationsリストのキャッシュを更新
       if (params.userId) {
@@ -39,15 +38,6 @@ export const useMarkReadCompanyUserNotifications = (params: Params) => {
         }
         , { revalidate: false });
       }
-
-      if (params.handleSuccess) {
-        params.handleSuccess();
-      }
     },
-    onError: (error) => {
-      if (params.handleError) {
-        params.handleError();
-      }
-    }
   })
 }

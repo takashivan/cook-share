@@ -60,7 +60,6 @@ export default function RestaurantNotificationsPage() {
         user_id: user.id,
       });
     } catch (error) {
-      console.error("Error marking all notifications as read:", error);
       toast({
         title: "エラー",
         description: "通知の既読処理に失敗しました",

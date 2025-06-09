@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { useState } from "react";
 import {
   Dialog,
@@ -15,11 +14,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { toast } from "@/hooks/use-toast";
 
 interface AddCompanyStaffModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (email: string) => void;
+  onSubmit: (email: string) => Promise<void>;
   companyName: string;
 }
 
@@ -41,9 +41,16 @@ export function AddCompanyStaffModal({
       await onSubmit(email);
       setEmail("");
       onClose();
+      toast({
+        title: "招待を送信しました",
+        description: `${email}に招待メールを送信しました。`,
+      });
     } catch (error) {
-      console.error("Error adding staff:", error);
-      // エラー処理をここに追加
+      toast({
+        title: "エラーが発生しました",
+        description: "招待の送信に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }

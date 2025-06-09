@@ -94,16 +94,8 @@ export default function StaffPage() {
       await createCompanyUserByCompanyIdTrigger({
         email,
       });
-      toast({
-        title: "招待を送信しました",
-        description: `${email}に招待メールを送信しました。`,
-      });
     } catch (error) {
-      toast({
-        title: "エラーが発生しました",
-        description: "招待の送信に失敗しました。もう一度お試しください。",
-        variant: "destructive",
-      });
+      throw error;
     }
   };
 

@@ -20,6 +20,7 @@ export const useMarkReadChefNotification = (params: Params) => {
       "X-User-Type": "chef"
     }
   }, params.chefNotificationId != null), {
+    throwOnError: true,
     onSuccess: (data) => {
       // Notificationsリストのキャッシュを更新
       if (params.userId) {

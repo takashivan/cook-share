@@ -216,7 +216,6 @@ export function ChefProfileEditModal({
       });
       handleClose();
     } catch (error) {
-      console.error("Error updating profile:", error);
       toast({
         title: "エラー",
         description: "プロフィールの更新に失敗しました",

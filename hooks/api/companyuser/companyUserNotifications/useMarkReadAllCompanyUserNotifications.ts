@@ -6,8 +6,6 @@ import useSWRMutation from 'swr/mutation'
 
 export interface Params {
   userId?: string;
-  handleSuccess?: () => void;
-  handleError?: () => void;
 }
 
 export const useMarkReadAllCompanyUserNotifications = (params: Params) => {
@@ -34,15 +32,6 @@ export const useMarkReadAllCompanyUserNotifications = (params: Params) => {
         }
         , { revalidate: false });
       }
-
-      if (params.handleSuccess) {
-        params.handleSuccess();
-      }
     },
-    onError: (error) => {
-      if (params.handleError) {
-        params.handleError();
-      }
-    }
   })
 }

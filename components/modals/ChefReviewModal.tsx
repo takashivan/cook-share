@@ -132,19 +132,6 @@ export function ChefReviewModal({
   const { trigger: finishWorksessionTrigger } = useFinishWorksession({
     worksessionId: workSessionId,
     userId: user?.id,
-    handleSuccess: () => {
-      router.refresh();
-      handleClose();
-    },
-    handleError: (error) => {
-      console.error("Error during finishWorksession:", error);
-      toast({
-        title: "エラー",
-        description:
-          "チェックアウト処理に失敗しました。もう一度お試しください。",
-        variant: "destructive",
-      });
-    },
   });
 
   // 勤怠終了時間を計算する
@@ -171,7 +158,7 @@ export function ChefReviewModal({
     return endDate;
   }
 
-  const submit = (data: ChefReviewForm) => {
+  const submit = async (data: ChefReviewForm) => {
     if (data.rating === 0 || (transportation_type !== "NONE" && data.transportation_expenses === "")) return;
 
     const submitData: FinishPartialUpdateBody = {
@@ -181,7 +168,19 @@ export function ChefReviewModal({
         // 型変換: transportation_expensesが空文字の場合はnull、そうでなければnumber型に変換
         (data.transportation_expenses === "" ? null : Number(data.transportation_expenses)),
     };
-    finishWorksessionTrigger(submitData);
+
+    try {
+      await finishWorksessionTrigger(submitData);
+      router.refresh();
+      handleClose();
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description:
+          "チェックアウト処理に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

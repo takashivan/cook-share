@@ -21,6 +21,7 @@ export const useUpdateCompany = (params: Params) => {
       },
       params.companyId != null
     ), {
+      throwOnError: true,
       onSuccess: () => {
         // キャッシュを更新
         if (params.companyId) {

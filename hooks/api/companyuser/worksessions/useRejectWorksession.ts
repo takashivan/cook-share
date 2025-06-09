@@ -1,6 +1,4 @@
-import { Companyusers } from "@/api/__generated__/base/Companyusers";
 import { Jobs } from "@/api/__generated__/base/Jobs";
-import { Restaurants } from "@/api/__generated__/base/Restaurants";
 import { Worksessions } from "@/api/__generated__/base/Worksessions";
 import { getApi } from "@/api/api-factory";
 import { useSWRConfig } from "swr";
@@ -9,8 +7,6 @@ import useSWRMutation from "swr/mutation";
 export interface Params {
   worksessionId?: number;
   jobId?: number;
-  handleSuccess?: () => void;
-  handleError?: () => void;
 }
 
 export const useRejectWorksession = (params: Params) => {
@@ -28,6 +24,7 @@ export const useRejectWorksession = (params: Params) => {
       params.worksessionId != null
     ),
     {
+      throwOnError: true,
       onSuccess: () => {
         // キャッシュを更新
         if (params.jobId) {
@@ -38,11 +35,6 @@ export const useRejectWorksession = (params: Params) => {
             )[0];
           mutate(worksessionsByJobIdKey);
         }
-
-        if (params.handleSuccess) params.handleSuccess();
-      },
-      onError: () => {
-        if (params.handleError) params.handleError();
       },
     }
   );

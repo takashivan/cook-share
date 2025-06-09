@@ -3,12 +3,7 @@ import { JobChangeRequests } from "@/api/__generated__/base/JobChangeRequests";
 import { getApi } from "@/api/api-factory";
 import { useSWRConfig } from "swr";
 
-interface Params {
-  handleSuccess?: () => void;
-  handleError?: (error: any) => void;
-}
-
-export const useCreateJobChangeRequest = (params: Params) => {
+export const useCreateJobChangeRequest = () => {
   const { mutate } = useSWRConfig();
 
   const jobChangeRequests = getApi(JobChangeRequests);
@@ -19,23 +14,13 @@ export const useCreateJobChangeRequest = (params: Params) => {
       },
     }),
     {
+      throwOnError: true,
       onSuccess: (data) => {
         // Job変更リクエストのリストのキャッシュを更新
         const jobChangeRequestsKey =
           jobChangeRequests.jobChangeRequestsListQueryArgs()[0];
         mutate(jobChangeRequestsKey);
-
-        // 成功時のコールバック
-        if (params.handleSuccess) {
-          params.handleSuccess();
-        }
       },
-      onError: (error) => {
-        // エラー時のコールバック
-        if (params.handleError) {
-          params.handleError(error);
-        }
-      }
     }
   );
 };

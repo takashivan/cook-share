@@ -76,6 +76,8 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
         } catch (error) {
           console.error("Error fetching user profile:", error);
         }
+      } else {
+        setUser(null);
       }
     };
 
@@ -176,9 +178,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
     try {
       await applyJobTrigger(applicationData);
       setIsApplyModalOpen(false);
-      toast({
-        description: "応募が完了しました",
-      });
+      setShowSuccessModal(true);
 
       // // カレンダーイベントのデータを作成
       // const eventData = {
@@ -211,10 +211,6 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
         description: "応募に失敗しました。もう一度お試しください。",
       });
     }
-  };
-
-  const handleApply = async () => {
-    await applyToJob();
   };
 
   const generateGoogleCalendarUrl = (event: {
@@ -808,7 +804,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
         isOpen={isApplyModalOpen}
         onClose={() => setIsApplyModalOpen(false)}
         job={jobDetail.job}
-        onSubmit={handleApply}
+        onSubmit={applyToJob}
         isSubmitting={isSubmitting}
       />
 
