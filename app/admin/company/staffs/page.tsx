@@ -71,19 +71,6 @@ export default function StaffPage() {
   
   const { trigger: createCompanyUserByCompanyIdTrigger } = useCreateCompanyUserByCompanyId({
     companyId: user?.companies_id ?? undefined,
-    handleSuccess: (data) => {
-      toast({
-        title: "招待を送信しました",
-        description: `${data.companyUser.email}に招待メールを送信しました。`,
-      });
-    },
-    handleError: () => {
-      toast({
-        title: "エラーが発生しました",
-        description: "招待の送信に失敗しました。もう一度お試しください。",
-        variant: "destructive",
-      });
-    },
   })
 
   const {
@@ -91,22 +78,6 @@ export default function StaffPage() {
   } = useDeleteCompanyUserByCompanyId({
     companyId: user?.companies_id ?? undefined,
     companyUserId: deleteTargetStaff?.id,
-    handleSuccess: (data) => {
-      toast({
-        title: "スタッフを削除しました",
-        description: `${data.companyUser.name || data.companyUser.email}を削除しました。`,
-      });
-    },
-    handleError: () => {
-      toast({
-        title: "エラーが発生しました",
-        description: "スタッフの削除に失敗しました。もう一度お試しください。",
-        variant: "destructive",
-      });
-    },
-    hadnleFinally: () => {
-      setDeleteTargetStaff(null);
-    }
   });
 
   const handleAddStaff = async (email: string) => {
@@ -116,9 +87,22 @@ export default function StaffPage() {
         description: "会社IDが取得できません。",
         variant: "destructive",
       });
-    } else {
+      return;
+    }
+
+    try {
       await createCompanyUserByCompanyIdTrigger({
         email,
+      });
+      toast({
+        title: "招待を送信しました",
+        description: `${email}に招待メールを送信しました。`,
+      });
+    } catch (error) {
+      toast({
+        title: "エラーが発生しました",
+        description: "招待の送信に失敗しました。もう一度お試しください。",
+        variant: "destructive",
       });
     }
   };
@@ -133,8 +117,22 @@ export default function StaffPage() {
         variant: "destructive",
       });
       return;
-    } else {
+    }
+
+    try {
       await deleteCompanyUserByCompanyIdTrigger();
+      toast({
+        title: "スタッフを削除しました",
+        description: `${deleteTargetStaff.name || deleteTargetStaff.email}を削除しました。`,
+      });
+    } catch (error) {
+      toast({
+        title: "エラーが発生しました",
+        description: "スタッフの削除に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteTargetStaff(null);
     }
   };
 
