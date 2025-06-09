@@ -25,7 +25,6 @@ export function ChefNotificationDropdownItem({
   const { trigger: markReadTrigger } = useMarkReadChefNotification({
     userId: user?.id,
     chefNotificationId: notification.id,
-    handleSuccess: handleSuccessMarkRead,
   });
   
   const handleNotificationClick = async (
@@ -34,6 +33,9 @@ export function ChefNotificationDropdownItem({
     if (!notification.is_read) {
       try {
         await markReadTrigger();
+        if (handleSuccessMarkRead) {
+          handleSuccessMarkRead();
+        }
       } catch (error) {
         toast({
           title: "エラー",
