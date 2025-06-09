@@ -103,7 +103,6 @@ export const CreateRestaurantModal = ({
       });
       handleClose();
     } catch (error) {
-      console.error("Error submitting form:", error);
       toast({
         title: "エラーが発生しました",
         description: "店舗の追加に失敗しました。もう一度お試しください。",
