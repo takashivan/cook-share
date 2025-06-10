@@ -11,8 +11,6 @@ export interface Params {
   jobId?: number;
   restaurantId?: number;
   executedCompanyuserId?: string;
-  handleSuccess?: () => void;
-  handleError?: () => void;
 }
 
 export const useVerifyWorksession = (params: Params) => {
@@ -24,6 +22,7 @@ export const useVerifyWorksession = (params: Params) => {
       "X-User-Type": "company"
     }
   }, params.worksessionId != null), {
+    throwOnError: true,
     onSuccess: () => {
       // 更新したWorksessionが属する求人のWorksessionリストのキャッシュを更新
       if (params.jobId) {
@@ -50,15 +49,6 @@ export const useVerifyWorksession = (params: Params) => {
         const dashboardListKey = companyusers.dashboardListQueryArgs(params.executedCompanyuserId)[0];
         mutate(dashboardListKey);
       }
-
-      if (params.handleSuccess) {
-        params.handleSuccess();
-      }
     },
-    onError: () => {
-      if (params.handleError) {
-        params.handleError();
-      }
-    }
   })
 }

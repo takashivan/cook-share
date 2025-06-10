@@ -3,11 +3,9 @@
 import { use } from "react";
 import Link from "next/link";
 import { MapPin, Phone, Clock, ChevronRight, Store, Star } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useGetRestaurant } from "@/hooks/api/companyuser/restaurants/useGetRestaurant";
-import { CompanyusersListOutput } from "@/api/__generated__/base/data-contracts";
 import Image from "next/image";
 import { useGetRestaurantReviewByRestaurantId } from "@/hooks/api/companyuser/reviews/useGetRestaurantReviewByRestaurantId";
 import { MessageList } from "./components/MessageList";
@@ -17,11 +15,13 @@ import { StaffList } from "./components/StaffList";
 import { JobContent } from "./components/JobContent";
 import { ErrorPage } from "@/components/layout/ErrorPage";
 import { LoadingScreen } from "@/components/LoadingScreen";
+import { RestaurantStatusBadgeForAdmin } from "@/components/badge/RestaurantStatusBadgeForAdmin";
+import { useGetRestaurantCuisines } from "@/hooks/api/all/restaurantCuisines/useGetRestaurantCuisines";
 
-interface EditStaffPermissions {
-  canEdit: boolean;
-  canManageJobs: boolean;
-}
+// interface EditStaffPermissions {
+//   canEdit: boolean;
+//   canManageJobs: boolean;
+// }
 
 export default function RestaurantDetailPage(props: {
   params: Promise<{ id: string }>;
@@ -54,6 +54,8 @@ export default function RestaurantDetailPage(props: {
     restaurantId: Number(params.id),
   });
 
+  const { data: cuisines, error: errorGetCuisines, isLoading: isCuisinesLoading } = useGetRestaurantCuisines();
+
   // const handleEditStaff = async () => {
   //   if (!editTargetStaff) return;
 
@@ -79,11 +81,11 @@ export default function RestaurantDetailPage(props: {
   //   }
   // };
 
-  if (restaurantError || reviewError) {
+  if (restaurantError || reviewError || errorGetCuisines) {
     return <ErrorPage />;
   }
 
-  if (restaurantLoading || reviewLoading) {
+  if (restaurantLoading || reviewLoading || !restaurant || isCuisinesLoading) {
     return (
       <LoadingScreen
         fullScreen={false}
@@ -92,9 +94,17 @@ export default function RestaurantDetailPage(props: {
     );
   }
 
+  if (restaurant?.status === "DELETED") {
+    return (
+      <ErrorPage
+        errorMessage="この店舗は削除されているため、詳細を表示できません。"
+      />
+    );
+  }
+
   return (
     <div className="relative h-full">
-      {restaurant?.is_approved === false && (
+      {restaurant?.status === "BANNED" && (
         <div className="absolute inset-0 backdrop-blur-sm z-50 flex items-center justify-center pointer-events-auto">
           <div className="text-center p-6 bg-white/90 rounded-xl shadow-md border">
             <h2 className="text-xl font-semibold text-gray-800 mb-2">店舗へのアクセスが制限されています</h2>
@@ -138,15 +148,17 @@ export default function RestaurantDetailPage(props: {
               </div> */}
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <Badge className="bg-green-500 hover:bg-green-600">
-                    {restaurant?.is_active ? "公開中" : "非公開"}
-                  </Badge>
-                  {restaurant?.cuisine_type && (
-                    <Badge
-                      variant="outline"
-                      className="bg-white/20 backdrop-blur-sm text-white border-white/40">
-                      {restaurant?.cuisine_type}
-                    </Badge>
+                  <RestaurantStatusBadgeForAdmin
+                    status={restaurant.status}
+                  />
+                  {restaurant.restaurant_cuisine_id.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {cuisines?.filter((cuisine) => restaurant.restaurant_cuisine_id.includes(cuisine.id)).map((cuisine) => (
+                        <Badge key={cuisine.id} variant="secondary">
+                          {cuisine.category}
+                        </Badge>
+                      ))}
+                    </div>
                   )}
                   {restaurantReview && restaurantReview.length > 0 && (
                     <Badge

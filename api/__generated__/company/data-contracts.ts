@@ -81,6 +81,12 @@ export interface LoginCreateData {
     is_verified: boolean;
     /** @format timestamptz */
     updated_at: number | null;
+    magic_link: object;
+    verify_token: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
+    password_reset_token: string;
   };
   sessionToken: string;
 }
@@ -351,14 +357,6 @@ export interface InitialCreatePayload {
   phone: string;
   website: string;
   description: string;
-  status: "pending" | "approved" | "banned" | "rejected";
-  /** @format date */
-  updated_at: string | null;
-  business_registration_number: string;
-  logo_url: string;
-  stripe_customer_id: string;
-  /** @format email */
-  company_email: string;
   companyUser_id: string;
   /** @format binary */
   photo: File | null;
@@ -379,8 +377,8 @@ export interface InitialCreateData {
     website: string;
     description: string;
     status: "pending" | "approved" | "banned" | "rejected";
-    /** @format date */
-    updated_at: string | null;
+    /** @format timestamptz */
+    updated_at: number | null;
     business_registration_number: string;
     logo_url: string;
     stripe_customer_id: string;
@@ -704,8 +702,8 @@ export interface CompaniesDetailData {
   website: string;
   description: string;
   status: "pending" | "approved" | "banned" | "rejected";
-  /** @format date */
-  updated_at: string | null;
+  /** @format timestamptz */
+  updated_at: number | null;
   business_registration_number: string;
   logo_url: string;
   stripe_customer_id: string;
@@ -720,8 +718,8 @@ export interface CompaniesPartialUpdatePayload {
   website: string;
   description: string;
   status: "pending" | "approved" | "banned" | "rejected";
-  /** @format date */
-  updated_at: string | null;
+  /** @format timestamptz */
+  updated_at: number | null;
   business_registration_number: string;
   logo_url: string;
   stripe_customer_id: string;
@@ -743,8 +741,8 @@ export interface CompaniesPartialUpdateData {
   website: string;
   description: string;
   status: "pending" | "approved" | "banned" | "rejected";
-  /** @format date */
-  updated_at: string | null;
+  /** @format timestamptz */
+  updated_at: number | null;
   business_registration_number: string;
   logo_url: string;
   stripe_customer_id: string;
@@ -851,8 +849,8 @@ export type CompaniesListData = {
   website: string;
   description: string;
   status: "pending" | "approved" | "banned" | "rejected";
-  /** @format date */
-  updated_at: string | null;
+  /** @format timestamptz */
+  updated_at: number | null;
   business_registration_number: string;
   logo_url: string;
   stripe_customer_id: string;
@@ -867,8 +865,8 @@ export interface CompaniesCreatePayload {
   website: string;
   description: string;
   status: "pending" | "approved" | "banned" | "rejected";
-  /** @format date */
-  updated_at: string | null;
+  /** @format timestamptz */
+  updated_at: number | null;
   business_registration_number: string;
   logo_url: string;
   stripe_customer_id: string;
@@ -890,8 +888,8 @@ export interface CompaniesCreateData {
   website: string;
   description: string;
   status: "pending" | "approved" | "banned" | "rejected";
-  /** @format date */
-  updated_at: string | null;
+  /** @format timestamptz */
+  updated_at: number | null;
   business_registration_number: string;
   logo_url: string;
   stripe_customer_id: string;
@@ -960,8 +958,8 @@ export interface SignupCreateResult {
     website: string;
     description: string;
     status: "pending" | "approved" | "banned" | "rejected";
-    /** @format date */
-    updated_at: string | null;
+    /** @format timestamptz */
+    updated_at: number | null;
     business_registration_number: string;
     logo_url: string;
     stripe_customer_id: string;
@@ -1321,8 +1319,8 @@ export interface CompanyusersDetailData {
     website: string;
     description: string;
     status: "pending" | "approved" | "banned" | "rejected";
-    /** @format date */
-    updated_at: string | null;
+    /** @format timestamptz */
+    updated_at: number | null;
     business_registration_number: string;
     logo_url: string;
     stripe_customer_id: string;

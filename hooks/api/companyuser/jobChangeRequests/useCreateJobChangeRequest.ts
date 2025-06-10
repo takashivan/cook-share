@@ -14,9 +14,8 @@ export const useCreateJobChangeRequest = () => {
       },
     }),
     {
+      throwOnError: true,
       onSuccess: (data) => {
-        console.log("Job change request created successfully:", data);
-
         // Job変更リクエストのリストのキャッシュを更新
         const jobChangeRequestsKey =
           jobChangeRequests.jobChangeRequestsListQueryArgs()[0];

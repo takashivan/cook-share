@@ -29,6 +29,7 @@ import { ChefMarkAsReadButton } from "@/components/notifications/chefMarkAsReadB
 import { useMarkReadAllChefNotifications } from "@/hooks/api/user/chefNotifications/useMarkReadAllChefNotifications";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { ErrorPage } from "@/components/layout/ErrorPage";
+import { toast } from "@/hooks/use-toast";
 
 export default function ChefNotificationsPage() {
   const { user } = useAuth();
@@ -50,9 +51,17 @@ export default function ChefNotificationsPage() {
   const handleMarkAllAsRead = async () => {
     if (!user?.id) return;
    
-    await markReadAllTrigger({
-      user_id: user.id,
-    });
+    try {
+      await markReadAllTrigger({
+        user_id: user.id,
+      });
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "通知の既読処理に失敗しました",
+        variant: "destructive",
+      });
+    }
   };
 
   // 通知タイプに応じたアイコンを返す関数

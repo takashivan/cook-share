@@ -39,10 +39,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useGetJob } from "@/hooks/api/companyuser/jobs/useGetJob";
+import { useGetJob } from "@/hooks/api/all/jobs/useGetJob";
 import { useGetWorksessionsByJobId } from "@/hooks/api/companyuser/worksessions/useGetWorksessionsByJobId";
 import {
-  JobsDetailData,
   JobsPartialUpdatePayload,
   WorksessionsRestaurantTodosListData,
 } from "@/api/__generated__/base/data-contracts";
@@ -60,6 +59,7 @@ import { LoadingScreen } from "@/components/LoadingScreen";
 import { ErrorPage } from "@/components/layout/ErrorPage";
 import { AdminJobActionsMenu } from "@/components/dropdownMenu/AdminJobActionsMenu";
 import { ChefProfileForAdminModal } from "@/components/modals/ChefProfileForAdminModal";
+import { RestaurantRejectWorksessionModal } from "@/components/modals/RestaurantRejectWorksessionModal";
 
 interface PageParams {
   params: Promise<{ id: string }>;
@@ -86,6 +86,7 @@ export default function JobDetail({ params }: PageParams) {
   const [isChefProfileForAdminModalOpen, setIsChefProfileForAdminModalOpen] = useState(false);
 
   const [isChefReviewModalOpen, setIsChefReviewModalOpen] = useState(false);
+  const [isRestaurantRejectWorksessionModalOpen, setIsRestaurantRejectWorksessionModalOpen] = useState(false);
   const [isEditJobModalOpen, setIsEditJobModalOpen] = useState(false);
 
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -142,6 +143,7 @@ export default function JobDetail({ params }: PageParams) {
     restaurantId: restaurant?.id ?? undefined,
   });
 
+  // メッセージの既読処理
   const { trigger: updateReadMessageTrigger } =
     useUpdateReadMessageByCompanyUser({
       companyUserId: user?.id,
@@ -168,7 +170,18 @@ export default function JobDetail({ params }: PageParams) {
   useEffect(() => {
     // このJobに関する通知を既読にする
     if (targetNotificationIds && targetNotificationIds.length > 0) {
-      markReadMultipleCompanyUserNotificationsTrigger();
+      const markRead = async () => {
+        try {
+          await markReadMultipleCompanyUserNotificationsTrigger();
+        } catch (error) {
+          toast({
+            title: "エラー",
+            description: "通知の既読処理に失敗しました。",
+            variant: "destructive",
+          });
+        }
+      };
+      markRead();
     }
   }, [targetNotificationIds, markReadMultipleCompanyUserNotificationsTrigger]);
 
@@ -182,35 +195,47 @@ export default function JobDetail({ params }: PageParams) {
   }, [messagesData?.messages]);
 
   useEffect(() => {
-    if (
-      !messagesData?.messages ||
-      messagesData.messages.length === 0 ||
-      !selectedWorkSession
-    ) {
-      return;
-    }
-
-    // 最新のメッセージを取得（message_seqが最大のもの）
-    let latestMessage = null;
-    for (const message of messagesData.messages) {
-      if (!latestMessage || message.message_seq > latestMessage.message_seq) {
-        latestMessage = message;
+    const updateReadStatus = async () => {
+      if (
+        !messagesData?.messages ||
+        messagesData.messages.length === 0 ||
+        !selectedWorkSession
+      ) {
+        return;
       }
-    }
 
-    if (!latestMessage) return;
-    // 既読情報が最新のメッセージと同じ場合は何もしない
-    if (
-      latestMessage.message_seq ===
-      messagesData.restaurant_last_read?.last_read_message_seq
-    )
-      return;
+      // 最新のメッセージを取得（message_seqが最大のもの）
+      let latestMessage = null;
+      for (const message of messagesData.messages) {
+        if (!latestMessage || message.message_seq > latestMessage.message_seq) {
+          latestMessage = message;
+        }
+      }
 
-    // 既読情報更新
-    updateReadMessageTrigger({
-      worksession_id: selectedWorkSession.id,
-      last_read_message_seq: latestMessage.message_seq,
-    });
+      if (!latestMessage) return;
+      // 既読情報が最新のメッセージと同じ場合は何もしない
+      if (
+        latestMessage.message_seq ===
+        messagesData.restaurant_last_read?.last_read_message_seq
+      )
+        return;
+
+      // 既読情報更新
+      try {
+        await updateReadMessageTrigger({
+          worksession_id: selectedWorkSession.id,
+          last_read_message_seq: latestMessage.message_seq,
+        });
+      } catch (error) {
+        toast({
+          title: "エラー",
+          description: "メッセージの既読更新に失敗しました。",
+          variant: "destructive",
+        });
+      }
+    };
+
+    updateReadStatus();
   }, [messagesData?.messages, selectedWorkSession, updateReadMessageTrigger]);
 
   const handleSendMessage = async (e?: React.FormEvent) => {
@@ -230,51 +255,11 @@ export default function JobDetail({ params }: PageParams) {
     }
   };
 
-  // 型チェックとデータ変換
-  const formattedJob: JobsDetailData["job"] | null = job
-    ? {
-        id: job.id || 0,
-        created_at: job.created_at ? Number(job.created_at) : 0,
-        title: job.title || "",
-        description: job.description || "",
-        work_date: job.work_date || "",
-        start_time: job.start_time ? Number(job.start_time) : 0,
-        end_time: job.end_time ? Number(job.end_time) : 0,
-        hourly_rate: job.hourly_rate || 0,
-        required_skills: job.required_skills || [],
-        status: job.status || "",
-        updated_at: job.updated_at ? Number(job.updated_at) : 0,
-        restaurant_id: job.restaurant_id || 0,
-        image: job.image || "",
-        task: job.task || "",
-        skill: job.skill || "",
-        whattotake: job.whattotake || "",
-        note: job.note || "",
-        point: job.point || "",
-        transportation: job.transportation || "",
-        is_approved: job.is_approved || false,
-        number_of_spots: job.number_of_spots || 1,
-        fee: job.fee || 12000,
-        expiry_date: job.expiry_date ? Number(job.expiry_date) : 0,
-        transportation_type: job.transportation_type || "",
-        transportation_amount: job.transportation_amount || 0,
-      }
-    : null;
-
   const handleEditJobSubmit = async (data: JobsPartialUpdatePayload) => {
     try {
       await updateJobTrigger(data);
-      setIsEditJobModalOpen(false);
-      toast({
-        title: "求人を更新しました",
-        description: "求人の情報が更新されました。",
-      });
     } catch (error) {
-      toast({
-        title: "エラーが発生しました",
-        description: "求人の更新に失敗しました。もう一度お試しください。",
-        variant: "destructive",
-      });
+      throw error;
     }
   };
 
@@ -744,8 +729,12 @@ export default function JobDetail({ params }: PageParams) {
                 name: restaurant?.name || "",
               },
             }}
-            handleSuccessAction={() => {
-              setIsChefReviewModalOpen(true);
+            handleSuccessAction={(status) => {
+              if (status === 'reject') {
+                setIsRestaurantRejectWorksessionModalOpen(true);
+              } else {
+                setIsChefReviewModalOpen(true);
+              }
             }}
           />
           <RestaurantReviewCompleteModal
@@ -755,6 +744,12 @@ export default function JobDetail({ params }: PageParams) {
             }}
             worksessionId={selectedWorkSession?.id}
           />
+          <RestaurantRejectWorksessionModal
+            isOpen={isRestaurantRejectWorksessionModalOpen}
+            onCloseAction={() => {
+              setIsRestaurantRejectWorksessionModalOpen(false)
+            }}
+          />
           <ChefProfileForAdminModal
             isOpen={isChefProfileForAdminModalOpen}
             onCloseAction={() => setIsChefProfileForAdminModalOpen(false)}
@@ -762,12 +757,12 @@ export default function JobDetail({ params }: PageParams) {
           />
         </>
       )}
-      {formattedJob && (
+      {job && (
         <EditJobModal
           isOpen={isEditJobModalOpen}
           onClose={() => setIsEditJobModalOpen(false)}
           onSubmit={handleEditJobSubmit}
-          job={formattedJob}
+          job={job}
         />
       )}
     </div>

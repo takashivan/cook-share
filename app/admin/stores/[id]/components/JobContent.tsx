@@ -60,7 +60,7 @@ export function JobContent({
 
   // 求人とworksessionの結合
   const jobWithWorkSessions: JobWithWorkSessions[] =
-    (jobs?.map((job) => {
+    jobs?.map((job) => {
       const workSessions = worksessionsbyJob?.find((workSessions) =>
         workSessions.some((workSession) => workSession.job_id === job.id)
       ) || [];
@@ -84,10 +84,7 @@ export function JobContent({
         workSessionCount,
         lastWorksession,
       };
-    }) ?? []).sort((a, b) => {
-      // work_dateの降順でソート
-      return new Date(b.work_date).getTime() - new Date(a.work_date).getTime();
-    });
+    }) ?? [];
 
   // 求人を状態ごとにフィルタリング
   const filteredJobsList = {
@@ -99,6 +96,17 @@ export function JobContent({
         job.status === "FILLED" &&
           (lastWorksessionStatus === "SCHEDULED" || lastWorksessionStatus === "IN_PROGRESS" || lastWorksessionStatus === "COMPLETED")
       )
+    }).sort((a, b) => {
+      // ソート１：jobのstart_timeの昇順
+      // ソート２：worksessionのステータス（COMPLETED→IN_PROGRESS→SCHEDULED）
+      // ソート３：worksessionのcreated_atの降順
+      return (
+        new Date(a.start_time).getTime() - new Date(b.start_time).getTime() ||
+        (a.lastWorksession?.status === "COMPLETED" ? 0 : a.lastWorksession?.status === "IN_PROGRESS" ? 1 : 2) -
+        (b.lastWorksession?.status === "COMPLETED" ? 0 : b.lastWorksession?.status === "IN_PROGRESS" ? 1 : 2) ||
+        (b.lastWorksession?.created_at ? new Date(b.lastWorksession.created_at).getTime() : 0) -
+        (a.lastWorksession?.created_at ? new Date(a.lastWorksession.created_at).getTime() : 0)
+      );
     }),
     // 未マッチング、かつ、掲載期限より前、かつ、応募が１回も無い求人
     published: jobWithWorkSessions.filter((job) => {
@@ -106,6 +114,13 @@ export function JobContent({
         job.status === "PUBLISHED" &&
         (!job.expiry_date || job.expiry_date > Date.now()) &&
         job.workSessionCount === 0
+      );
+    }).sort((a, b) => {
+      // ソート１：jobのexpiry_dateの昇順
+      // ソート２：jobのcreated_atの降順
+      return (
+        (a.expiry_date ? new Date(a.expiry_date).getTime() : 0) - (b.expiry_date ? new Date(b.expiry_date).getTime() : 0) ||
+        (b.created_at ? new Date(b.created_at).getTime() : 0) - (a.created_at ? new Date(a.created_at).getTime() : 0)
       );
     }),
     // 下書きの求人
@@ -137,26 +152,16 @@ export function JobContent({
   const { trigger: createJobTrigger } = useCreateJob({
     companyId: restaurant?.companies_id ?? undefined,
     restaurantId: restaurant?.id,
-    handleSuccess: () => {
-      setIsCreateJobModalOpen(false);
-      setCopiedJob(null);
-      toast({
-        title: "求人を追加しました",
-        description: "新しい求人の登録が完了しました。",
-      });
-    },
-    handleError: (error) => {
-      console.error("Failed to create job:", error);
-      toast({
-        title: "エラーが発生しました",
-        description: "求人の追加に失敗しました。もう一度お試しください。",
-        variant: "destructive",
-      });
-    },
   });
 
   const handleCreateJob = async (data: JobsCreatePayload) => {
-    await createJobTrigger(data);
+    try {
+      await createJobTrigger(data);
+      setIsCreateJobModalOpen(false);
+      setCopiedJob(null);
+    } catch (error) {
+      throw error;
+    }
   };
 
   const handleCopyJob = (jobData: Job) => {
@@ -195,7 +200,11 @@ export function JobContent({
             <Calendar className="h-4 w-4" />
           </Button>
         </div>
-        <Button size="sm" onClick={() => setIsCreateJobModalOpen(true)}>
+        <Button
+          size="sm"
+          onClick={() => setIsCreateJobModalOpen(true)}
+          disabled={restaurant?.status !== "APPROVED"}
+        >
           <Plus className="h-4 w-4 mr-2" />
           求人を追加
         </Button>

@@ -7,8 +7,6 @@ import useSWRMutation from 'swr/mutation'
 export interface Params {
   worksessionId?: number;
   userId?: string;
-  handleSuccess?: () => void;
-  handleError?: (error: any) => void;
 }
 
 export const useFinishWorksession = (params: Params) => {
@@ -20,6 +18,7 @@ export const useFinishWorksession = (params: Params) => {
       "X-User-Type": "chef"
     }
   }, params.worksessionId != null), {
+    throwOnError: true,
     onSuccess: () => {
       if (params.userId) {
         const users = getApi(Users);
@@ -28,16 +27,10 @@ export const useFinishWorksession = (params: Params) => {
 
         const worksessionsByUserIdTodoKey = users.worksessionsUserTodosListQueryArgs(params.userId)[0];
         mutate(worksessionsByUserIdTodoKey);
-      }
 
-      if (params.handleSuccess) {
-        params.handleSuccess();
+        const myReviews = users.chefReviewsListQueryArgs(params.userId)[0];
+        mutate(myReviews);
       }
     },
-    onError: (error) => {
-      if (params.handleError) {
-        params.handleError(error);
-      }
-    }
   })
 }

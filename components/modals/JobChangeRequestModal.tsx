@@ -21,6 +21,7 @@ import { useGetJobChangeRequests } from "@/hooks/api/companyuser/jobChangeReques
 import { useDeleteJobChangeRequest } from "@/hooks/api/companyuser/jobChangeRequests/useDeleteJobChangeRequest";
 import { ErrorPage } from "../layout/ErrorPage";
 import { LoadingSpinner } from "../LoadingSpinner";
+import { useRouter } from "next/navigation";
 
 interface CreateJobChangeRequestData {
   work_date: string;
@@ -46,6 +47,7 @@ export function JobChangeRequestModal({
   worksession,
   sendMessageAction,
 }: JobChangeRequestModalProps) {
+  const router = useRouter();
 
   const {
     data: existingChangeRequest,
@@ -61,6 +63,8 @@ export function JobChangeRequestModal({
     register,
     handleSubmit,
     reset,
+    watch,
+    formState: { errors },
   } = useForm<CreateJobChangeRequestData>({
     // Jobのデータを初期値として設定
     defaultValues: {
@@ -74,6 +78,12 @@ export function JobChangeRequestModal({
       reason: "",
     },
   });
+
+  const handleClose = () => {
+    // モーダルを閉じる前にフォームをリセット
+    reset();
+    onCloseAction();
+  }
 
   const { trigger: createJobChangeRequest } = useCreateJobChangeRequest();
 
@@ -90,14 +100,17 @@ export function JobChangeRequestModal({
           "既存の変更リクエストが承認または拒否されるまで、新しいリクエストを作成できません。",
         variant: "destructive",
       });
+
+      // 応募モーダルを閉じて画面をリフレッシュする
+      handleClose();
+      router.refresh();
+      
       return;
     }
 
     try {
       // 変更リクエストのデータ構造を作成
       const changeRequestData = {
-        job_id: job.id,
-        user_id: worksession.user_id,
         requested_by: worksession.restaurant_id,
         proposed_changes: {
           work_date: data.work_date,
@@ -110,17 +123,8 @@ export function JobChangeRequestModal({
           task: data.task,
           fee: data.fee,
         },
-        status: "PENDING" as const,
         reason: data.reason,
         worksession_id: worksession.id,
-        as_is: {
-          work_date: job.work_date,
-          start_time: job.start_time,
-          end_time: job.end_time,
-          task: job.task,
-          fee: job.fee,
-        },
-        updated_at: new Date().getTime(),
       };
 
       // 変更リクエストを作成
@@ -145,9 +149,23 @@ ${data.reason}
         description: "シェフの承認をお待ちください。",
       });
 
-      reset();
-      onCloseAction();
+      handleClose();
     } catch (error) {
+      if ((error as any).response?.data?.payload?.code === "already_exist") {
+        toast({
+          title: "変更リクエストが既に存在します",
+          description:
+            "既存の変更リクエストが承認または拒否されるまで、新しいリクエストを作成できません。",
+          variant: "destructive",
+        });
+
+        // 応募モーダルを閉じて画面をリフレッシュする
+        handleClose();
+        router.refresh();
+
+        return;
+      }
+
       toast({
         title: "エラー",
         description: "変更リクエストの送信に失敗しました。",
@@ -192,7 +210,7 @@ ${data.reason}
         description: "新しい変更リクエストを作成できます。",
       });
 
-      onCloseAction();
+      handleClose();
     } catch (error) {
       toast({
         title: "エラー",
@@ -205,7 +223,7 @@ ${data.reason}
   return (
     <Dialog
       open={isOpen}
-      onOpenChange={onCloseAction}>
+      onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[425px]">
         {changeRequestError ? (
           <ErrorPage />
@@ -267,7 +285,7 @@ ${data.reason}
                 <DialogFooter>
                   <Button
                     variant="outline"
-                    onClick={onCloseAction}>
+                    onClick={handleClose}>
                     閉じる
                   </Button>
                   <Button
@@ -296,6 +314,11 @@ ${data.reason}
                           required: "作業日は必須です",
                         })}
                       />
+                      {errors.work_date && (
+                        <p className="text-red-500 text-sm">
+                          {errors.work_date.message}
+                        </p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="fee">報酬</Label>
@@ -306,14 +329,48 @@ ${data.reason}
                         {...register("fee", {
                           required: "報酬は必須です",
                           valueAsNumber: true,
-                          min: {
-                            value: 0,
-                            message: "報酬は0円以上で入力してください",
+                          validate: (value) => {
+                            const formValues = watch();
+                            if (
+                              !formValues.start_time ||
+                              !formValues.end_time
+                            )
+                              return true;
+
+                            const startTime = new Date(
+                              `2000-01-01T${formValues.start_time}:00`
+                            );
+                            const endTime = new Date(
+                              `2000-01-01T${formValues.end_time}:00`
+                            );
+
+                            // 終了時間が開始時間より前の場合は翌日の時間として計算
+                            if (endTime < startTime) {
+                              endTime.setDate(endTime.getDate() + 1);
+                            }
+
+                            const hours =
+                              (endTime.getTime() - startTime.getTime()) /
+                              (1000 * 60 * 60);
+                            const hourlyRate = Number(value) / hours;
+
+                            if (hourlyRate < 1850) {
+                              return `時給ベースで1850円を下回らないように設定してください（現在: ${Math.floor(
+                                hourlyRate
+                              )}円）`;
+                            }
+                            return true;
                           },
                         })}
                       />
+                      {errors.fee && (
+                        <p className="text-red-500 text-sm">
+                          {errors.fee.message}
+                        </p>
+                      )}
                     </div>
                   </div>
+                  
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="start_time">開始時間</Label>
@@ -324,6 +381,11 @@ ${data.reason}
                           required: "開始時間は必須です",
                         })}
                       />
+                      {errors.start_time && (
+                        <p className="text-red-500 text-sm">
+                          {errors.start_time.message}
+                        </p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="end_time">終了時間</Label>
@@ -334,6 +396,11 @@ ${data.reason}
                           required: "終了時間は必須です",
                         })}
                       />
+                      {errors.end_time && (
+                        <p className="text-red-500 text-sm">
+                          {errors.end_time.message}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -347,6 +414,11 @@ ${data.reason}
                       minRows={2}
                       className="w-full px-3 py-2 border rounded-md text-base bg-white resize-none focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
                     />
+                    {errors.task && (
+                      <p className="text-red-500 text-sm">
+                        {errors.task.message}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="reason">変更理由</Label>
@@ -359,12 +431,17 @@ ${data.reason}
                       minRows={2}
                       className="w-full px-3 py-2 border rounded-md text-base bg-white resize-none focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
                     />
+                    {errors.reason && (
+                      <p className="text-red-500 text-sm">
+                        {errors.reason.message}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <DialogFooter>
                   <Button
                     variant="outline"
-                    onClick={onCloseAction}>
+                    onClick={handleClose}>
                     キャンセル
                   </Button>
                   <Button type="submit">

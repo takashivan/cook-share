@@ -22,6 +22,7 @@ export const useDeleteJobChangeRequest = (params: Params) => {
       params.jobChangeRequestId != null
     ),
     {
+      throwOnError: true,
       onSuccess: (data) => {
         console.log("Job change request deleted successfully:", data);
 

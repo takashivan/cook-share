@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { useForm, ControllerRenderProps, FieldValues } from "react-hook-form";
+"use client";
+
+import { useForm, ControllerRenderProps } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Building, Upload, X } from "lucide-react";
-import Image, { StaticImageData } from "next/image";
+import { Building } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,12 +24,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { useGetCompany } from "@/hooks/api/companyuser/companies/useUpdateCompany";
+import { useUpdateCompany } from "@/hooks/api/companyuser/companies/useUpdateCompany";
 import {
   CompaniesPartialUpdatePayload,
   CompaniesDetailData,
 } from "@/api/__generated__/base/data-contracts";
-import useSWRMutation from "swr/mutation";
 
 const formSchema = z.object({
   name: z.string().min(1, "会社名は必須です"),
@@ -42,7 +41,7 @@ const formSchema = z.object({
     .optional()
     .or(z.literal("")),
   description: z.string().optional(),
-  logo: z.string().optional(),
+  // logo: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -58,33 +57,10 @@ export function CompanyProfileEditModal({
   onClose,
   company,
 }: CompanyProfileEditModalProps) {
-  const [isUploading, setIsUploading] = useState(false);
-  const { data, mutate } = useGetCompany({
+  // const [isUploading, setIsUploading] = useState(false);
+  const { trigger, isMutating} = useUpdateCompany({
     companyId: company.id,
-    name: company.name,
-    address: company.address,
-    phone: company.phone,
-    email: company.company_email,
-    website: company.website || "",
-    logo: company.logo_url || "",
   });
-
-  const { trigger, isMutating } = useSWRMutation(
-    `/api/companies/${company.id}`,
-    async (url: string, { arg }: { arg: CompaniesPartialUpdatePayload }) => {
-      const response = await fetch(url, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(arg),
-      });
-      if (!response.ok) {
-        throw new Error("Failed to update company");
-      }
-      return response.json();
-    }
-  );
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -95,44 +71,44 @@ export function CompanyProfileEditModal({
       email: company.company_email,
       website: company.website || "",
       description: company.description || "",
-      logo: company.logo_url || "",
+      // logo: company.logo_url || "",
     },
   });
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (!file) return;
 
-    try {
-      setIsUploading(true);
-      const formData = new FormData();
-      formData.append("file", file);
+  //   try {
+  //     setIsUploading(true);
+  //     const formData = new FormData();
+  //     formData.append("file", file);
 
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+  //     const response = await fetch("/api/upload", {
+  //       method: "POST",
+  //       body: formData,
+  //     });
 
-      if (!response.ok) {
-        throw new Error("画像のアップロードに失敗しました");
-      }
+  //     if (!response.ok) {
+  //       throw new Error("画像のアップロードに失敗しました");
+  //     }
 
-      const data = await response.json();
-      form.setValue("logo", data.url);
-      toast({
-        title: "画像をアップロードしました",
-        description: "ロゴ画像が更新されました",
-      });
-    } catch (error) {
-      toast({
-        title: "エラー",
-        description: "画像のアップロードに失敗しました",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploading(false);
-    }
-  };
+  //     const data = await response.json();
+  //     form.setValue("logo", data.url);
+  //     toast({
+  //       title: "画像をアップロードしました",
+  //       description: "ロゴ画像が更新されました",
+  //     });
+  //   } catch (error) {
+  //     toast({
+  //       title: "エラー",
+  //       description: "画像のアップロードに失敗しました",
+  //       variant: "destructive",
+  //     });
+  //   } finally {
+  //     setIsUploading(false);
+  //   }
+  // };
 
   const onSubmit = async (data: FormValues) => {
     try {
@@ -142,11 +118,6 @@ export function CompanyProfileEditModal({
         phone: data.phone,
         website: data.website || "",
         description: data.description || "",
-        status: "approved",
-        updated_at: new Date().toISOString(),
-        business_registration_number: "",
-        logo_url: data.logo || "",
-        stripe_customer_id: "",
         company_email: data.email,
       };
 
@@ -181,8 +152,8 @@ export function CompanyProfileEditModal({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                {/* <div className="relative w-24 h-24 rounded-lg overflow-hidden bg-gray-100">
+              {/* <div className="flex items-center gap-4">
+                <div className="relative w-24 h-24 rounded-lg overflow-hidden bg-gray-100">
                   {form.watch("logo") ? (
                     <>
                       <Image
@@ -203,8 +174,8 @@ export function CompanyProfileEditModal({
                       <Building className="h-8 w-8" />
                     </div>
                   )}
-                </div> */}
-                {/* <div className="flex-1">
+                </div>
+                <div className="flex-1">
                   <FormField
                     control={form.control}
                     name="logo"
@@ -246,8 +217,8 @@ export function CompanyProfileEditModal({
                       </FormItem>
                     )}
                   />
-                </div> */}
-              </div>
+                </div>
+              </div> */}
 
               <FormField
                 control={form.control}
@@ -318,7 +289,6 @@ export function CompanyProfileEditModal({
                         <Input
                           placeholder="info@example.com"
                           {...field}
-                          disabled
                         />
                       </FormControl>
                       <FormMessage />

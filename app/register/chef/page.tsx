@@ -17,6 +17,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
+import { SignupCreatePayload } from "@/api/__generated__/authentication/data-contracts";
 
 export default function ChefRegisterPage() {
   const router = useRouter();
@@ -53,7 +54,7 @@ export default function ChefRegisterPage() {
         companyUserLogout();
       }
 
-      await register({ email, password });
+      await register({ email, password } as SignupCreatePayload);
 
       toast({
         title: "認証メールを送信しました",

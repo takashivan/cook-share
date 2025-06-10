@@ -17,6 +17,7 @@ import { Star } from "lucide-react";
 import { useGetReviewsByUserId } from "@/hooks/api/user/reviews/useGetReviewsByUserId";
 import { ErrorPage } from "@/components/layout/ErrorPage";
 import { LoadingScreen } from "@/components/LoadingScreen";
+import { toast } from "@/hooks/use-toast";
 
 export default function SchedulePage() {
   const { user } = useAuth();
@@ -72,7 +73,11 @@ export default function SchedulePage() {
     try {
       sendMessage(message);
     } catch (error) {
-      console.error("Failed to send message:", error);
+      toast({
+        title: "エラー",
+        description: "メッセージの送信に失敗しました。",
+        variant: "destructive",
+      });
     }
   };
 
@@ -91,7 +96,10 @@ export default function SchedulePage() {
 
   // ワークセッションをステータスでフィルタリング
   const filteredWorkSessions = {
-    upcoming: sortedWorkSessions?.filter((ws) => ws.status === "SCHEDULED") || [],
+    upcoming: sortedWorkSessions?.filter((ws) => ws.status === "SCHEDULED").sort((a, b) => {
+      // 日付の昇順にソート
+      return new Date(a.job.work_date).getTime() - new Date(b.job.work_date).getTime();
+    }) || [],
     completed:
       sortedWorkSessions?.filter((ws) =>
         ["COMPLETED", "VERIFIED"].includes(ws.status)

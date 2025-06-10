@@ -24,6 +24,7 @@ export const useNoShowWorksessionByRestaurant = (params: Params) => {
       params.worksession_id != null
     ),
     {
+      throwOnError: true,
       onSuccess: () => {
         // キャッシュを更新
         if (params.jobId) {

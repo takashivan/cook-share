@@ -19,6 +19,7 @@ export const useUpdateReadMessageByCompanyUser = (params: Params) => {
       "X-User-Type": "company"
     }
   }), {
+    throwOnError: true,
     onSuccess: () => {
       // Messagesリストのキャッシュを更新
       if (params.companyUserId && params.workSessionId) {

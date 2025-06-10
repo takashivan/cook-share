@@ -1803,8 +1803,8 @@ export interface CompaniesDetailData {
   website: string;
   description: string;
   status: "pending" | "approved" | "banned" | "rejected";
-  /** @format date */
-  updated_at: string | null;
+  /** @format timestamptz */
+  updated_at: number | null;
   business_registration_number: string;
   logo_url: string;
   stripe_customer_id: string;
@@ -1818,12 +1818,6 @@ export interface CompaniesPartialUpdatePayload {
   phone: string;
   website: string;
   description: string;
-  status: "pending" | "approved" | "banned" | "rejected";
-  /** @format date */
-  updated_at: string | null;
-  business_registration_number: string;
-  logo_url: string;
-  stripe_customer_id: string;
   /** @format email */
   company_email: string;
 }
@@ -1842,8 +1836,8 @@ export interface CompaniesPartialUpdateData {
   website: string;
   description: string;
   status: "pending" | "approved" | "banned" | "rejected";
-  /** @format date */
-  updated_at: string | null;
+  /** @format timestamptz */
+  updated_at: number | null;
   business_registration_number: string;
   logo_url: string;
   stripe_customer_id: string;
@@ -1937,8 +1931,8 @@ export interface JobsListData {
     website: string;
     description: string;
     status: "pending" | "approved" | "banned" | "rejected";
-    /** @format date */
-    updated_at: string | null;
+    /** @format timestamptz */
+    updated_at: number | null;
     business_registration_number: string;
     logo_url: string;
     stripe_customer_id: string;
@@ -2048,8 +2042,8 @@ export type CompaniesListData = {
   website: string;
   description: string;
   status: "pending" | "approved" | "banned" | "rejected";
-  /** @format date */
-  updated_at: string | null;
+  /** @format timestamptz */
+  updated_at: number | null;
   business_registration_number: string;
   logo_url: string;
   stripe_customer_id: string;
@@ -2064,8 +2058,8 @@ export interface CompaniesCreatePayload {
   website: string;
   description: string;
   status: "pending" | "approved" | "banned" | "rejected";
-  /** @format date */
-  updated_at: string | null;
+  /** @format timestamptz */
+  updated_at: number | null;
   business_registration_number: string;
   logo_url: string;
   stripe_customer_id: string;
@@ -2091,8 +2085,8 @@ export interface CompaniesCreateData {
     website: string;
     description: string;
     status: "pending" | "approved" | "banned" | "rejected";
-    /** @format date */
-    updated_at: string | null;
+    /** @format timestamptz */
+    updated_at: number | null;
     business_registration_number: string;
     logo_url: string;
     stripe_customer_id: string;
@@ -2450,164 +2444,13 @@ export interface EmailConfirmCreateData {
 
 export interface DashboardListData {
   restaurant_count: string;
-  /** @format int64 */
-  job_all_publised: number;
-  /** @format int64 */
-  job_filled: number;
-  /** @format int64 */
-  job_now_published: number;
-  to_be_verified_reviews: {
-    /** @format int64 */
-    id: number;
-    /**
-     * @format timestamptz
-     * @default "now"
-     */
-    created_at: number;
-    /** @format int64 */
-    rating: number;
-    comment: string;
-    /** @format timestamptz */
-    updated_at: number;
-    /** @format int64 */
-    session_id: number;
-    /** @format uuid */
-    reviewer_id: string;
-    /** @format int64 */
-    reviewee_id: number;
-    worksession: {
-      /** @format timestamptz */
-      check_in_time: number;
-      /** @format timestamptz */
-      check_out_time: number;
-      status:
-        | "SCHEDULED"
-        | "IN_PROGRESS"
-        | "CANCELED_BY_CHEF"
-        | "CANCELED_BY_RESTAURANT"
-        | "COMPLETED"
-        | "VERIFIED"
-        | "DISPUTE"
-        | "ESCALATED"
-        | "PAID"
-        | "CANCELED"
-        | "VERIFY_REJECTED";
-      job: {
-        title: string;
-        /** @format date */
-        work_date: string;
-        /** @format timestamptz */
-        start_time: number;
-        /** @format timestamptz */
-        end_time: number;
-      } | null;
-      user: {
-        name: string;
-        profile_image: string;
-      } | null;
-    };
-    restaurant: {
-      name: string;
-    } | null;
-  }[];
-  worksessions_today: {
-    /** @format int64 */
-    id: number;
-    /** @format timestamptz */
-    check_in_time: number;
-    status:
-      | "SCHEDULED"
-      | "IN_PROGRESS"
-      | "CANCELED_BY_CHEF"
-      | "CANCELED_BY_RESTAURANT"
-      | "COMPLETED"
-      | "VERIFIED"
-      | "DISPUTE"
-      | "ESCALATED"
-      | "PAID"
-      | "CANCELED"
-      | "VERIFY_REJECTED";
-    /** @format uuid */
-    user_id: string | null;
-    /** @format int64 */
-    restaurant_id: number;
-    /** @format int64 */
-    job_id: number;
-    /** @format int64 */
-    check_in_code: number | null;
-    job: {
-      title: string;
-      /** @format date */
-      work_date: string;
-      /** @format timestamptz */
-      start_time: number;
-      /** @format timestamptz */
-      end_time: number;
-    } | null;
-    restaurant: {
-      name: string;
-    } | null;
-    user: {
-      name: string;
-      profile_image: string;
-      phone: string;
-    } | null;
-  }[];
-  chef_review: {
-    chef_review_rating: number;
-  };
-  to_be_verified_worksessions: {
-    /** @format int64 */
-    id: number;
-    /** @format timestamptz */
-    check_in_time: number;
-    /** @format timestamptz */
-    check_out_time: number;
-    status:
-      | "SCHEDULED"
-      | "IN_PROGRESS"
-      | "CANCELED_BY_CHEF"
-      | "CANCELED_BY_RESTAURANT"
-      | "COMPLETED"
-      | "VERIFIED"
-      | "DISPUTE"
-      | "ESCALATED"
-      | "PAID"
-      | "CANCELED"
-      | "VERIFY_REJECTED";
-    /** @format int64 */
-    restaurant_id: number;
-    /** @format int64 */
-    job_id: number;
-    job: {
-      /** @format int64 */
-      id: number;
-      title: string;
-      /** @format date */
-      work_date: string;
-      /** @format timestamptz */
-      start_time: number;
-      /** @format timestamptz */
-      end_time: number;
-      /** @format int64 */
-      restaurant_id: number;
-    } | null;
-    restaurant: {
-      /** @format int64 */
-      id: number;
-      name: string;
-    } | null;
-    user: {
-      name: string;
-      profile_image: string;
-    } | null;
-    chef_review: {
-      /** @format int64 */
-      id: number;
-      /** @format timestamptz */
-      updated_at: number;
-    } | null;
-  }[];
+  job_all_publised: string;
+  job_filled: string;
+  job_now_published: string;
+  to_be_verified_reviews: string;
+  worksessions_today: string;
+  chef_review: string;
+  to_be_verified_worksessions: string;
 }
 
 export type RestaurantsListResult = {
@@ -3060,19 +2903,11 @@ export type JobChangeRequestsListData = {
 
 export interface JobChangeRequestsCreatePayload {
   /** @format int64 */
-  job_id: number;
-  /** @format uuid */
-  user_id: string | null;
-  /** @format int64 */
   requested_by: number;
   proposed_changes: object;
-  status: "PENDING" | "APPROVED" | "REJECTED";
-  /** @format timestamptz */
-  updated_at: number | null;
   reason: string;
   /** @format int64 */
   worksession_id: number;
-  as_is: object;
 }
 
 export interface JobChangeRequestsCreateData {
@@ -3114,8 +2949,8 @@ export interface CompanyDetailResult {
     website: string;
     description: string;
     status: "pending" | "approved" | "banned" | "rejected";
-    /** @format date */
-    updated_at: string | null;
+    /** @format timestamptz */
+    updated_at: number | null;
     business_registration_number: string;
     logo_url: string;
     stripe_customer_id: string;
@@ -5054,8 +4889,8 @@ export interface CompanyusersDetailData {
     website: string;
     description: string;
     status: "pending" | "approved" | "banned" | "rejected";
-    /** @format date */
-    updated_at: string | null;
+    /** @format timestamptz */
+    updated_at: number | null;
     business_registration_number: string;
     logo_url: string;
     stripe_customer_id: string;
@@ -6061,8 +5896,8 @@ export interface CompanyusersListOutput {
     website: string;
     description: string;
     status: "pending" | "approved" | "banned" | "rejected";
-    /** @format date */
-    updated_at: string | null;
+    /** @format timestamptz */
+    updated_at: number | null;
     business_registration_number: string;
     logo_url: string;
     stripe_customer_id: string;
@@ -6346,13 +6181,11 @@ export interface RestaurantsDetailData {
 export interface RestaurantsPartialUpdatePayload {
   name: string;
   address: string;
-  cuisine_type: string;
   business_hours: string;
   contact_info: string;
   profile_image: string;
   station: string;
   access: string;
-  rating: number;
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
@@ -6407,28 +6240,15 @@ export type RestaurantsListOutput = {
 export interface RestaurantsCreatePayload {
   name: string;
   address: string;
-  cuisine_type: string;
   business_hours: string;
   contact_info: string;
-  profile_image: string;
-  /** @format timestamptz */
-  updated_at: number;
-  /**
-   * Whether the restaurant is active.
-   * @default "false"
-   */
-  is_active: boolean;
   /** @format uuid */
   companies_id: string | null;
   station: string;
   access: string;
-  rating: number;
-  /** @default "1" */
-  is_approved: boolean;
   restaurant_cuisine_id: number[];
   description: string;
   phone: string;
-  status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   /** @format binary */
   photo: File | null;
 }
@@ -9577,26 +9397,7 @@ export interface FinishPartialUpdateResult {
     actual_fee: number;
     transportation_type: "FIXED" | "NONE" | "MAX";
   };
-  review: {
-    /** @format int64 */
-    id: number;
-    /**
-     * @format timestamptz
-     * @default "now"
-     */
-    created_at: number;
-    /** @format int64 */
-    rating: number;
-    comment: string;
-    /** @format timestamptz */
-    updated_at: number;
-    /** @format int64 */
-    session_id: number;
-    /** @format uuid */
-    reviewer_id: string;
-    /** @format int64 */
-    reviewee_id: number;
-  };
+  review: string;
 }
 
 export interface JobChangeRequestListData {

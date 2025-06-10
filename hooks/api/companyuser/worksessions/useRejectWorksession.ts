@@ -1,6 +1,4 @@
-import { Companyusers } from "@/api/__generated__/base/Companyusers";
 import { Jobs } from "@/api/__generated__/base/Jobs";
-import { Restaurants } from "@/api/__generated__/base/Restaurants";
 import { Worksessions } from "@/api/__generated__/base/Worksessions";
 import { getApi } from "@/api/api-factory";
 import { useSWRConfig } from "swr";
@@ -8,9 +6,7 @@ import useSWRMutation from "swr/mutation";
 
 export interface Params {
   worksessionId?: number;
-  reason?: string;
-  handleSuccess?: () => void;
-  handleError?: () => void;
+  jobId?: number;
 }
 
 export const useRejectWorksession = (params: Params) => {
@@ -28,11 +24,17 @@ export const useRejectWorksession = (params: Params) => {
       params.worksessionId != null
     ),
     {
+      throwOnError: true,
       onSuccess: () => {
-        if (params.handleSuccess) params.handleSuccess();
-      },
-      onError: () => {
-        if (params.handleError) params.handleError();
+        // キャッシュを更新
+        if (params.jobId) {
+          const jobs = getApi(Jobs);
+          const worksessionsByJobIdKey =
+            jobs.worksessionsRestaurantTodosListQueryArgs(
+              params.jobId
+            )[0];
+          mutate(worksessionsByJobIdKey);
+        }
       },
     }
   );

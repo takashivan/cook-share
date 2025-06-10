@@ -55,9 +55,18 @@ export default function RestaurantNotificationsPage() {
   const handleMarkAllAsRead = async () => {
     if (!user?.id) return;
    
-    await markReadAllTrigger({
-      user_id: user.id,
-    });
+    try {
+      await markReadAllTrigger({
+        user_id: user.id,
+      });
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "通知の既読処理に失敗しました",
+        variant: "destructive",
+      });
+      return;
+    }
   };
 
   // 通知タイプに応じたアイコンを返す関数

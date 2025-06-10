@@ -9,8 +9,6 @@ export interface Params {
   restaurantId?: number;
   companyId?: string;
   companyuserId?: string;
-  handleSuccess?: (data: any) => void;
-  handleError?: (error: any) => void;
 }
 
 export const useUpdateRestaurant = (params: Params) => {
@@ -26,6 +24,7 @@ export const useUpdateRestaurant = (params: Params) => {
     },
     params.restaurantId != null
   ), {
+    throwOnError: true,
     onSuccess: (data) => {
       console.log('Restaurant created successfully:', data);
 
@@ -45,16 +44,6 @@ export const useUpdateRestaurant = (params: Params) => {
         const companyusers = getApi(Companyusers);
         const restaurantsByCompanyUserIdKey = companyusers.restaurantsListQueryArgs(params.companyuserId)[0];
         mutate(restaurantsByCompanyUserIdKey);
-      }
-
-      if (params.handleSuccess) {
-        params.handleSuccess(data);
-      }
-    },
-    onError: (error) => {
-      console.error('Error creating restaurant:', error);
-      if (params.handleError) {
-        params.handleError(error);
       }
     },
   })

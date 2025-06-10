@@ -11,11 +11,7 @@ export const useGetJob = (params: Params) => {
   return useSWR(
     ...jobs.jobsDetailQueryArgs(
       params.jobId ?? -1,
-      {
-        headers: {
-          "X-User-Type": "company",
-        },
-      },
+      {},
       params.jobId != null
     )
   );

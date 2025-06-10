@@ -39,15 +39,15 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { useGetDashboardList } from "@/hooks/api/companyuser/dashboard/userGetDashboardList";
+import { DashboardListData, useGetDashboardList } from "@/hooks/api/companyuser/dashboard/userGetDashboardList";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { CheckInQRModal } from "@/components/modals/CheckInQRModal";
-import { DashboardListData } from "@/api/__generated__/base/data-contracts";
 import { RestaurantReviewModal } from "@/components/modals/RestaurantReviewModal";
 import { RestaurantReviewCompleteModal } from "@/components/modals/RestaurantReviewCompleteModal";
 import { useGetCompany } from "@/hooks/api/companyuser/companies/useGetCompany";
 import { ErrorPage } from "@/components/layout/ErrorPage";
 import { LoadingScreen } from "@/components/LoadingScreen";
+import { RestaurantRejectWorksessionModal } from "@/components/modals/RestaurantRejectWorksessionModal";
 
 interface DisplayWorksession {
   id: string;
@@ -159,6 +159,7 @@ export default function AdminDashboard() {
   );
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isChefReviewModalOpen, setIsChefReviewModalOpen] = useState(false);
+  const [isRestaurantRejectWorksessionModalOpen, setIsRestaurantRejectWorksessionModalOpen] = useState(false);
   const [selectedWorksession, setSelectedWorksession] =
     useState<DisplayWorksession | null>(null);
   const [isWorksessionModalOpen, setIsWorksessionModalOpen] = useState(false);
@@ -700,9 +701,14 @@ export default function AdminDashboard() {
               restaurant: {
                 name: selectedPendingWorksession.restaurant?.name || "",
               },
+              transportation_expenses: selectedPendingWorksession.transportation_expenses || 0,
             }}
-            handleSuccessAction={() => {
-              setIsChefReviewModalOpen(true);
+            handleSuccessAction={(status) => {
+              if (status === "reject") {
+                setIsRestaurantRejectWorksessionModalOpen(true);
+              } else {
+                setIsChefReviewModalOpen(true);
+              }
             }}
           />
           <RestaurantReviewCompleteModal
@@ -712,6 +718,13 @@ export default function AdminDashboard() {
               setSelectedPendingWorksession(null)
             }}
             worksessionId={selectedPendingWorksession?.id}
+          />
+          <RestaurantRejectWorksessionModal
+            isOpen={isRestaurantRejectWorksessionModalOpen}
+            onCloseAction={() => {
+              setIsRestaurantRejectWorksessionModalOpen(false)
+              setSelectedPendingWorksession(null)
+            }}
           />
         </>
       )}

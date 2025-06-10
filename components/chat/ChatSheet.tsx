@@ -105,6 +105,7 @@ export function ChatSheet({
 
   const { trigger: acceptJobChangeRequest } = useAcceptJobChangeRequest({
     jobChangeRequestId: selectedChangeRequest?.id,
+    userId: user?.id,
   });
 
   const { trigger: rejectJobChangeRequest } = useRejectJobChangeRequest({
@@ -119,37 +120,49 @@ export function ChatSheet({
     // メッセージが更新されたらスクロール
     scrollToBottom();
 
-    if (
-      !messagesData ||
-      !messagesData.messages ||
-      messagesData.messages.length === 0
-    ) {
-      return;
-    }
-
-    // 最新のメッセージを取得（message_seqが最大のもの）
-    let latestMessage = null;
-    for (const message of messagesData.messages) {
-      if (!latestMessage || message.message_seq > latestMessage.message_seq) {
-        latestMessage = message;
+    const updateReadStatus = async () => {
+      if (
+        !messagesData ||
+        !messagesData.messages ||
+        messagesData.messages.length === 0
+      ) {
+        return;
       }
-    }
 
-    console.log("latestMessage", latestMessage);
+      // 最新のメッセージを取得（message_seqが最大のもの）
+      let latestMessage = null;
+      for (const message of messagesData.messages) {
+        if (!latestMessage || message.message_seq > latestMessage.message_seq) {
+          latestMessage = message;
+        }
+      }
 
-    if (!latestMessage || !worksession?.id) return;
-    // 既読情報が最新のメッセージと同じ場合は何もしない
-    if (
-      latestMessage.message_seq ===
-      messagesData.chef_last_read?.last_read_message_seq
-    )
-      return;
+      console.log("latestMessage", latestMessage);
 
-    // 既読情報更新
-    updateReadMessageTrigger({
-      worksession_id: worksession.id,
-      last_read_message_seq: latestMessage.message_seq,
-    });
+      if (!latestMessage || !worksession?.id) return;
+      // 既読情報が最新のメッセージと同じ場合は何もしない
+      if (
+        latestMessage.message_seq ===
+        messagesData.chef_last_read?.last_read_message_seq
+      )
+        return;
+
+      // 既読情報更新
+      try {
+        await updateReadMessageTrigger({
+          worksession_id: worksession.id,
+          last_read_message_seq: latestMessage.message_seq,
+        });
+      } catch (error) {
+        toast({
+          title: "エラー",
+          description: "既読情報の更新に失敗しました。",
+          variant: "destructive",
+        });
+      }
+    };
+
+    updateReadStatus();
   }, [messagesData, worksession?.id, scrollToBottom, updateReadMessageTrigger]);
 
   const handleSendMessage = () => {

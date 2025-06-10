@@ -18,6 +18,7 @@ import { ByUserDetailData } from "@/api/__generated__/base/data-contracts";
 import { useMarkReadAllChefNotifications } from "@/hooks/api/user/chefNotifications/useMarkReadAllChefNotifications";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { ChefNotificationDropdownItem } from "./ChefNotificationDropdownItem";
+import { toast } from "@/hooks/use-toast";
 
 interface ChefNotificationDropdownProps {
   notifications: ByUserDetailData;
@@ -34,17 +35,23 @@ export function ChefNotificationDropdown({
 
   const { trigger: markReadAllTrigger } = useMarkReadAllChefNotifications({
     userId: user?.id,
-    handleSuccess: () => {
-      setOpen(false);
-    },
   });
 
   const handleMarkAllAsRead = async () => {
     if (!user?.id) return;
    
-    await markReadAllTrigger({
-      user_id: user.id,
-    });
+    try {
+      await markReadAllTrigger({
+        user_id: user.id,
+      });
+      setOpen(false);
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "通知の既読処理に失敗しました",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

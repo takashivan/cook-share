@@ -102,13 +102,13 @@ export function AdminJobActionsMenu({
             onClick={() => {
               handleCancelClick();
             }}
-            className="text-red-600 focus:text-red-600 focus:bg-red-50">
+            className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer">
             <XCircle className="h-4 w-4 mr-2" />
             キャンセル
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={handleOpenChangeRequestModal}
-            className="text-black-600 focus:text-black-600 focus:bg-black-50">
+            className="cursor-pointer">
             <Pencil className="h-4 w-4 mr-2" />
             シェフに業務内容の変更を依頼する
           </DropdownMenuItem>
@@ -117,7 +117,7 @@ export function AdminJobActionsMenu({
               onClick={() => {
                 handleNoShowClick();
               }}
-              className="text-red-600 focus:text-red-600 focus:bg-red-50">
+              className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer">
               <XCircle className="h-4 w-4 mr-2" />
               ノーショー報告
             </DropdownMenuItem>

@@ -20,6 +20,7 @@ export const useUpdateReadMessageByUser = (params: Params) => {
   });
 
   return useSWRMutation(key, fetcher, {
+    throwOnError: true,
     onSuccess: () => {
       // Messagesリストのキャッシュを更新
       if (params.userId && params.workSessionId) {
@@ -27,22 +28,19 @@ export const useUpdateReadMessageByUser = (params: Params) => {
         const messagesByUserIdKey = usersApi.worksessionsMessagesListQueryArgs(
           params.userId,
           params.workSessionId,
-          {
-            headers: {
-              "X-User-Type": "chef",
-            },
-          }
         )[0];
         mutate(messagesByUserIdKey);
       }
 
       // 未読のMessagesリストのキャッシュを更新
-      const unreadMessagesByUserIdKey = chat.unreadSummaryChefListQueryArgs({
-        headers: {
-          "X-User-Type": "chef",
-        },
-      })[0];
+      const unreadMessagesByUserIdKey = chat.unreadSummaryChefListQueryArgs()[0];
       mutate(unreadMessagesByUserIdKey);
+
+      // Messagesサマリーのキャッシュを更新
+      const messagesSummaryByUserIdKey = chat.summaryChefListQueryArgs({
+        user_id: params.userId ?? '',
+      })[0];
+      mutate(messagesSummaryByUserIdKey);
     },
   });
 };

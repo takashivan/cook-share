@@ -18,6 +18,7 @@ export const useUserCancelWorksessionByRestaurant = (params: Params) => {
       "X-User-Type": "company",
     },
   }, params.worksession_id != null), {
+    throwOnError: true,
     onSuccess: () => {
       // キャッシュを更新
       if (params.jobId) {

@@ -1,5 +1,5 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useState, useRef, useEffect } from "react";
+import { Fragment, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,9 +37,9 @@ export const CreateJobModal = ({
   restaurantId,
   initialData,
 }: CreateJobModalProps) => {
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  // const [previewImage, setPreviewImage] = useState<string | null>(null);
+  // const fileInputRef = useRef<HTMLInputElement>(null);
+  // const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const {
     register,
@@ -74,30 +74,30 @@ export const CreateJobModal = ({
     }
   }, [initialData, setValue]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  // const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (file) {
+  //     setSelectedFile(file);
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setPreviewImage(reader.result as string);
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
 
-  const removeImage = () => {
-    setPreviewImage(null);
-    setSelectedFile(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
+  // const removeImage = () => {
+  //   setPreviewImage(null);
+  //   setSelectedFile(null);
+  //   if (fileInputRef.current) {
+  //     fileInputRef.current.value = "";
+  //   }
+  // };
 
   const handleClose = () => {
     reset();
-    setPreviewImage(null);
-    setSelectedFile(null);
+    // setPreviewImage(null);
+    // setSelectedFile(null);
     onClose();
   };
 
@@ -153,6 +153,11 @@ export const CreateJobModal = ({
       });
     }
   });
+
+  const handleDraftClick = () => {
+    setValue("status", "DRAFT");
+    submit();
+  };
 
   const handlePublishClick = () => {
     setValue("status", "PUBLISHED");
@@ -350,8 +355,8 @@ export const CreateJobModal = ({
                                 (1000 * 60 * 60);
                               const hourlyRate = Number(value) / hours;
 
-                              if (hourlyRate < 1500) {
-                                return `時給ベースで1500円を下回らないように設定してください（現在: ${Math.floor(
+                              if (hourlyRate < 1850) {
+                                return `時給ベースで1850円を下回らないように設定してください（現在: ${Math.floor(
                                   hourlyRate
                                 )}円）`;
                               }
@@ -595,7 +600,8 @@ export const CreateJobModal = ({
                       キャンセル
                     </Button>
                     <Button
-                      type="submit"
+                      type="button"
+                      onClick={handleDraftClick}
                       variant="secondary"
                       disabled={isSubmitting}>
                       {isSubmitting && watch("status") === "DRAFT"
