@@ -33,7 +33,7 @@ import {
 import { ja } from "date-fns/locale";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
-import { formatJapanHHMM } from "@/lib/functions";
+import { formatJapanHHMM, formatSlashDateTime } from "@/lib/functions";
 import { useRouter } from "next/navigation";
 import { ErrorPage } from "../layout/ErrorPage";
 import { LoadingSpinner } from "../LoadingSpinner";
@@ -333,7 +333,7 @@ export function ChatSheet({
                               ? "text-primary-foreground/70"
                               : "text-gray-500"
                           }`}>
-                          {format(new Date(message.created_at), "HH:mm")}
+                          {formatSlashDateTime(message.created_at)}
                         </p>
                       </div>
                     </div>

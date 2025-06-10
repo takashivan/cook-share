@@ -1,4 +1,5 @@
-import { JobsDeleteData, JobsListOutput } from "@/api/__generated__/base/data-contracts";
+import { JobsListOutput } from "@/api/__generated__/base/data-contracts";
+import { format } from "date-fns";
 
 export function formatToJapanTime(ms: number): string {
   const date = new Date(ms);
@@ -36,6 +37,11 @@ export function formatJapanHHMM(ms: number): string {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+export function formatSlashDateTime(ms: number): string {
+  const date = new Date(ms);
+  return format(date, "yyyy/MM/dd HH:mm");
 }
 
 export function formatDateToLocalISOStringForDatetimeLocal(date: Date): string {

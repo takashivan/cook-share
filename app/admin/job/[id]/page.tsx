@@ -5,6 +5,7 @@ import { use } from "react";
 import Link from "next/link";
 import {
   formatJapanHHMM,
+  formatSlashDateTime,
 } from "@/lib/functions";
 import {
   ArrowLeft,
@@ -561,10 +562,7 @@ export default function JobDetail({ params }: PageParams) {
                                     {message.content}
                                   </p>
                                   <p className="text-xs text-muted-foreground mt-1">
-                                    {format(
-                                      new Date(message.created_at),
-                                      "yyyy/MM/dd HH:mm"
-                                    )}
+                                    {formatSlashDateTime(message.created_at)}
                                   </p>
                                 </div>
                               </div>
