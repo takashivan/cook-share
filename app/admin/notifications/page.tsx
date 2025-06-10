@@ -6,9 +6,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
-import {
-  CompanyUserNotificationType,
-} from "@/lib/api/companyUserNotification";
 import { useSubscriptionCompanyUserNotificationsByUserId } from "@/hooks/api/companyuser/companyUserNotifications/useSubscriptionCompanyUserNotificationsByUserId";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
@@ -16,11 +13,15 @@ import { Button } from "@/components/ui/button";
 import { useMarkReadAllCompanyUserNotifications } from "@/hooks/api/companyuser/companyUserNotifications/useMarkReadAllCompanyUserNotifications";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { ErrorPage } from "@/components/layout/ErrorPage";
+import { ByUserDetailOutput } from "@/api/__generated__/base/data-contracts";
+
+type CompanyUserNotificationType = ByUserDetailOutput[number]["type"];
+type CompanyUserNotificationFilterType = CompanyUserNotificationType | "all";
 
 export default function RestaurantNotificationsPage() {
   const { user } = useCompanyAuth();
   const [activeTab, setActiveTab] = useState<"all" | "unread">("all");
-  const [filter, setFilter] = useState<CompanyUserNotificationType | "all">(
+  const [filter, setFilter] = useState<CompanyUserNotificationFilterType>(
     "all"
   );
   const { toast } = useToast();
@@ -152,11 +153,9 @@ export default function RestaurantNotificationsPage() {
                       <div className="flex gap-3">
                         <div
                           className={`w-10 h-10 rounded-full flex items-center justify-center ${getNotificationColor(
-                            notification.type as CompanyUserNotificationType
+                            notification.type
                           )}`}>
-                          {getNotificationIcon(
-                            notification.type as CompanyUserNotificationType
-                          )}
+                          {getNotificationIcon(notification.type)}
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-1">
@@ -179,10 +178,10 @@ export default function RestaurantNotificationsPage() {
                           <Badge
                             variant="outline"
                             className={`text-xs ${getNotificationColor(
-                              notification.type as CompanyUserNotificationType
+                              notification.type
                             )}`}>
                             {getNotificationTypeLabel(
-                              notification.type as CompanyUserNotificationType
+                              notification.type
                             )}
                           </Badge>
                         </div>
@@ -206,10 +205,10 @@ export default function RestaurantNotificationsPage() {
                       <div className="flex gap-3">
                         <div
                           className={`w-10 h-10 rounded-full flex items-center justify-center ${getNotificationColor(
-                            notification.type as CompanyUserNotificationType
+                            notification.type
                           )}`}>
                           {getNotificationIcon(
-                            notification.type as CompanyUserNotificationType
+                            notification.type
                           )}
                         </div>
                         <div className="flex-1">
@@ -233,10 +232,10 @@ export default function RestaurantNotificationsPage() {
                           <Badge
                             variant="outline"
                             className={`text-xs ${getNotificationColor(
-                              notification.type as CompanyUserNotificationType
+                              notification.type
                             )}`}>
                             {getNotificationTypeLabel(
-                              notification.type as CompanyUserNotificationType
+                              notification.type
                             )}
                           </Badge>
                         </div>

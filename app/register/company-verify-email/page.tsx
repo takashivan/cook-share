@@ -20,8 +20,6 @@ import { Mail, RefreshCw, ArrowRight, CheckCircle2 } from "lucide-react";
 import {
   resendVerificationEmail,
   updateEmail,
-  getCurrentUser,
-  getUserProfile,
 } from "@/lib/api/companyUser";
 import { motion } from "framer-motion";
 
