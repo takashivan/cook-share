@@ -77,24 +77,6 @@ export interface WorkSession {
   restaurant_name: string;
 }
 
-export interface WorkSessionWithJob extends WorkSession {
-  id: number;
-  application_id: string;
-  user_id: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-  check_in_time: number;
-  check_out_time: number;
-  restaurant_name: string;
-  job: JobWithRestaurant;
-  user: User;
-  user_comment?: string;
-  user_rating?: number;
-  restaurant_comment?: string;
-  restaurant_rating?: number;
-}
-
 export interface WorkSessionWithUser extends WorkSession {
   user: User;
   job: Job;
@@ -134,18 +116,6 @@ export interface RestaurantReview {
   user: User;
   restaurant: Restaurant;
   worksession: WorkSession;
-}
-
-export interface Message {
-  id: string;
-  content: string;
-  created_at: string;
-  chef_id: string;
-  is_read: boolean;
-  sender_type: string;
-  restaurant_id: number;
-  worksession_id: number;
-  application_id: string;
 }
 
 export interface Restaurant {

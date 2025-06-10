@@ -2,7 +2,6 @@
 
 import { API_CONFIG, apiRequest } from "./config";
 import { CompanyUser } from "./companyUser";
-import { Staff } from "@/types/staff";
 
 const BASE_URL = API_CONFIG.baseURLs.company;
 
