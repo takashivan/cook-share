@@ -8,7 +8,7 @@ import { Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/contexts/AuthContext";
 
 export default function VerifyEmailPage() {
-  const { user, confirmEmail } = useAuth();
+  const { user, loading, confirmEmail } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -19,8 +19,7 @@ export default function VerifyEmailPage() {
   const hasRun = useRef(false);
 
   useEffect(() => {
-    if (hasRun.current) return;
-    hasRun.current = true;
+    if (hasRun.current || loading) return;
 
     const verifyingEmail = async () => {
       if (!token) {
@@ -29,13 +28,23 @@ export default function VerifyEmailPage() {
         return;
       }
 
+      // ログインユーザーがいない場合はログインしてから再試行するよう促す
+      if (!user) {
+        setStatus("error");
+        setErrorMessage("ログイン後、再度お試しください。");
+        return;
+      }
+
+      // メールアドレスが変更されていない場合はダッシュボードへリダイレクト
       if (!user?.pending_email) {
+        router.push("/chef/dashboard");
         return;
       }
 
       try {
         await confirmEmail(token);
         setStatus("success");
+        hasRun.current = true;
       } catch (error) {
         console.error("Email verification failed:", error);
         setStatus("error");
@@ -44,7 +53,7 @@ export default function VerifyEmailPage() {
     };
 
     verifyingEmail();
-  }, [token, user]);
+  }, [token, user, confirmEmail, router, loading]);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-md">
