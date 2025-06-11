@@ -8,9 +8,7 @@ import { useState } from "react";
 import { CreateJobModal } from "@/components/modals/CreateJobModal";
 import { JobsCreatePayload, JobsListOutput, WorksessionsRestaurantTodosListData } from "@/api/__generated__/base/data-contracts";
 import { useCreateJob } from "@/hooks/api/companyuser/jobs/useCreateJob";
-import { toast } from "@/hooks/use-toast";
 import { JobList } from "./JobList";
-import type { Job } from "@/lib/api/job";
 import { format } from "date-fns";
 import { useGetRestaurant } from "@/hooks/api/companyuser/restaurants/useGetRestaurant";
 import { useGetJobsByRestaurantId } from "@/hooks/api/companyuser/jobs/useGetJobsByRestaurantId";
@@ -38,7 +36,7 @@ export function JobContent({
 
   const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
 
-  const [copiedJob, setCopiedJob] = useState<Partial<Job> | null>(null);
+  const [copiedJob, setCopiedJob] = useState<JobsListOutput[number] | null>(null);
 
   // 求人の取得
   const {
@@ -164,7 +162,7 @@ export function JobContent({
     }
   };
 
-  const handleCopyJob = (jobData: Job) => {
+  const handleCopyJob = (jobData: JobsListOutput[number]) => {
     setCopiedJob(jobData);
     setIsCreateJobModalOpen(true);
   }
@@ -232,35 +230,35 @@ export function JobContent({
             <JobList
               jobWithWorkSessions={filteredJobsList.filled}
               statusText="マッチング済み"
-              onCopyJob={handleCopyJob}
+              onCopyJobAction={handleCopyJob}
             />
           </TabsContent>
           <TabsContent value={"published"}>
             <JobList
               jobWithWorkSessions={filteredJobsList.published}
               statusText="未マッチング"
-              onCopyJob={handleCopyJob}
+              onCopyJobAction={handleCopyJob}
             />
           </TabsContent>
           <TabsContent value={"draft"}>
             <JobList
               jobWithWorkSessions={filteredJobsList.draft}
               statusText="下書き"
-              onCopyJob={handleCopyJob}
+              onCopyJobAction={handleCopyJob}
             />
           </TabsContent>
           <TabsContent value={"pending"}>
             <JobList
               jobWithWorkSessions={filteredJobsList.pending}
               statusText="一時停止中"
-              onCopyJob={handleCopyJob}
+              onCopyJobAction={handleCopyJob}
             />
           </TabsContent>
           <TabsContent value={"expired"}>
             <JobList
               jobWithWorkSessions={filteredJobsList.expired}
               statusText="過去"
-              onCopyJob={handleCopyJob}
+              onCopyJobAction={handleCopyJob}
             />
           </TabsContent>
         </Tabs>

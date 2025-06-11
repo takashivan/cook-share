@@ -13,23 +13,22 @@ import {
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import Link from "next/link";
-import { formatDateToLocalISOStringForDatetimeLocal } from "@/lib/functions";
-import type { Job } from "@/lib/api/job";
 import { JobWithWorkSessions } from "./JobContent";
 import { JobStatusBadgeForAdmin } from "@/components/badge/JobStatusBadgeForAdmin";
 import { ErrorPage } from "@/components/layout/ErrorPage";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { JobsListOutput } from "@/api/__generated__/base/data-contracts";
 
 interface JobListProps {
   jobWithWorkSessions: JobWithWorkSessions[];
   statusText: string;
-  onCopyJob: (job: Job) => void;
+  onCopyJobAction: (job: JobsListOutput[number]) => void;
 }
 
 export function JobList({
   jobWithWorkSessions,
   statusText,
-  onCopyJob,
+  onCopyJobAction,
 }: JobListProps) {
   const { user } = useCompanyAuth();
   const router = useRouter();
@@ -43,27 +42,8 @@ export function JobList({
     userId: user?.id,
   });
 
-  const handleCopyJob = (job: any) => {
-    const { id, ...jobWithoutId } = job;
-    const jobData = {
-      ...jobWithoutId,
-      title: `${job.title}`,
-      status: "DRAFT",
-      start_time: new Date(job.start_time).toLocaleTimeString("ja-JP", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      }),
-      end_time: new Date(job.end_time).toLocaleTimeString("ja-JP", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      }),
-      expiry_date: formatDateToLocalISOStringForDatetimeLocal(
-        new Date(job.expiry_date)
-      ),
-    };
-    onCopyJob(jobData);
+  const handleCopyJob = (job: JobsListOutput[number]) => {
+    onCopyJobAction(job);
   };
 
   if (notificationsError) {

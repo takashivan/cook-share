@@ -3,75 +3,75 @@ import { getAuthToken } from "./config";
 import { Application } from "../../types";
 
 const API_URL = API_CONFIG.baseURLs.application;
-export type CreateApplicationParams = {
-  job_id: number;
-  status?: string;
-  notes?: string;
-  user_id: string;
-  application_date: string;
-};
+// export type CreateApplicationParams = {
+//   job_id: number;
+//   status?: string;
+//   notes?: string;
+//   user_id: string;
+//   application_date: string;
+// };
 
-export type UpdateApplicationParams = Partial<CreateApplicationParams>;
+// export type UpdateApplicationParams = Partial<CreateApplicationParams>;
 
-export type GetApplicationResponse = Application;
+// export type GetApplicationResponse = Application;
 export type GetApplicationsResponse = Application[];
-export type CreateApplicationResponse = Application;
-export type UpdateApplicationResponse = Application;
-export type DeleteApplicationResponse = void;
-export type AcceptApplicationResponse = void;
-export type RejectApplicationResponse = void;
+// export type CreateApplicationResponse = Application;
+// export type UpdateApplicationResponse = Application;
+// export type DeleteApplicationResponse = void;
+// export type AcceptApplicationResponse = void;
+// export type RejectApplicationResponse = void;
 
-export type AcceptApplicationParams = {
-  message?: string;
-};
+// export type AcceptApplicationParams = {
+//   message?: string;
+// };
 
 export const applicationApi = {
-  getApplications: async (): Promise<GetApplicationsResponse> => {
-    const response = await fetch(`${API_URL}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+  // getApplications: async (): Promise<GetApplicationsResponse> => {
+  //   const response = await fetch(`${API_URL}`, {
+  //     method: "GET",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //   });
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch applications");
-    }
+  //   if (!response.ok) {
+  //     throw new Error("Failed to fetch applications");
+  //   }
 
-    return response.json();
-  },
+  //   return response.json();
+  // },
 
-  getApplication: async (id: string): Promise<GetApplicationResponse> => {
-    const response = await fetch(`${API_URL}/${id}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+  // getApplication: async (id: string): Promise<GetApplicationResponse> => {
+  //   const response = await fetch(`${API_URL}/${id}`, {
+  //     method: "GET",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //   });
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch application");
-    }
+  //   if (!response.ok) {
+  //     throw new Error("Failed to fetch application");
+  //   }
 
-    return response.json();
-  },
+  //   return response.json();
+  // },
 
-  getApplicationsByUser: async (
-    userId: string
-  ): Promise<GetApplicationsResponse> => {
-    const response = await fetch(`${API_URL}/my/${userId}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+  // getApplicationsByUser: async (
+  //   userId: string
+  // ): Promise<GetApplicationsResponse> => {
+  //   const response = await fetch(`${API_URL}/my/${userId}`, {
+  //     method: "GET",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //   });
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch applications by user");
-    }
+  //   if (!response.ok) {
+  //     throw new Error("Failed to fetch applications by user");
+  //   }
 
-    return response.json();
-  },
+  //   return response.json();
+  // },
 
   getApplicationsByJob: async (
     jobId: number
@@ -90,95 +90,95 @@ export const applicationApi = {
     return response.json();
   },
 
-  createApplication: async (
-    params: CreateApplicationParams
-  ): Promise<CreateApplicationResponse> => {
-    const token = getAuthToken();
-    if (!token) {
-      throw new Error("認証トークンが見つかりません");
-    }
+  // createApplication: async (
+  //   params: CreateApplicationParams
+  // ): Promise<CreateApplicationResponse> => {
+  //   const token = getAuthToken();
+  //   if (!token) {
+  //     throw new Error("認証トークンが見つかりません");
+  //   }
 
-    const response = await fetch(`${API_URL}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(params),
-    });
+  //   const response = await fetch(`${API_URL}`, {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: `Bearer ${token}`,
+  //     },
+  //     body: JSON.stringify(params),
+  //   });
 
-    if (!response.ok) {
-      throw new Error("Failed to create application");
-    }
+  //   if (!response.ok) {
+  //     throw new Error("Failed to create application");
+  //   }
 
-    return response.json();
-  },
+  //   return response.json();
+  // },
 
-  updateApplication: async (
-    id: string,
-    params: UpdateApplicationParams
-  ): Promise<UpdateApplicationResponse> => {
-    const response = await fetch(`${API_URL}/${id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(params),
-    });
+  // updateApplication: async (
+  //   id: string,
+  //   params: UpdateApplicationParams
+  // ): Promise<UpdateApplicationResponse> => {
+  //   const response = await fetch(`${API_URL}/${id}`, {
+  //     method: "PATCH",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify(params),
+  //   });
 
-    if (!response.ok) {
-      throw new Error("Failed to update application");
-    }
+  //   if (!response.ok) {
+  //     throw new Error("Failed to update application");
+  //   }
 
-    return response.json();
-  },
+  //   return response.json();
+  // },
 
-  deleteApplication: async (id: string): Promise<DeleteApplicationResponse> => {
-    const response = await fetch(`${API_URL}/${id}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+  // deleteApplication: async (id: string): Promise<DeleteApplicationResponse> => {
+  //   const response = await fetch(`${API_URL}/${id}`, {
+  //     method: "DELETE",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //   });
 
-    if (!response.ok) {
-      throw new Error("Failed to delete application");
-    }
-  },
+  //   if (!response.ok) {
+  //     throw new Error("Failed to delete application");
+  //   }
+  // },
 
-  acceptApplication: async (
-    id: string,
-    params?: AcceptApplicationParams
-  ): Promise<AcceptApplicationResponse> => {
-    const response = await fetch(`${API_URL}/${id}/accept`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        application_id: id,
-        ...params,
-      }),
-    });
+  // acceptApplication: async (
+  //   id: string,
+  //   params?: AcceptApplicationParams
+  // ): Promise<AcceptApplicationResponse> => {
+  //   const response = await fetch(`${API_URL}/${id}/accept`, {
+  //     method: "PATCH",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({
+  //       application_id: id,
+  //       ...params,
+  //     }),
+  //   });
 
-    if (!response.ok) {
-      throw new Error("Failed to accept application");
-    }
-  },
+  //   if (!response.ok) {
+  //     throw new Error("Failed to accept application");
+  //   }
+  // },
 
-  rejectApplication: async (id: string): Promise<RejectApplicationResponse> => {
-    const response = await fetch(`${API_URL}/${id}/reject`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        application_id: id,
-      }),
-    });
+  // rejectApplication: async (id: string): Promise<RejectApplicationResponse> => {
+  //   const response = await fetch(`${API_URL}/${id}/reject`, {
+  //     method: "PATCH",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({
+  //       application_id: id,
+  //     }),
+  //   });
 
-    if (!response.ok) {
-      throw new Error("Failed to reject application");
-    }
-  },
+  //   if (!response.ok) {
+  //     throw new Error("Failed to reject application");
+  //   }
+  // },
 };

@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 
 export default function VerifyEmailPage() {
-  const { confirmEmail } = useCompanyAuth();
+  const { user, isLoading, confirmEmail } = useCompanyAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -20,8 +20,7 @@ export default function VerifyEmailPage() {
   const hasRun = useRef(false);
 
   useEffect(() => {
-    if (hasRun.current) return;
-    hasRun.current = true;
+    if (hasRun.current || isLoading) return;
     
     const verifyingEmail = async () => {
       if (!token) {
@@ -30,9 +29,23 @@ export default function VerifyEmailPage() {
         return;
       }
 
+      // ログインユーザーがいない場合はログインしてから再試行するよう促す
+      if (!user) {
+        setStatus("error");
+        setErrorMessage("ログイン後、再度お試しください。");
+        return;
+      }
+
+      // メールアドレスが変更されていない場合はダッシュボードへリダイレクト
+      if (!user?.pending_email) {
+        router.push("/admin");
+        return;
+      }
+
       try {
         await confirmEmail(token);
         setStatus("success");
+        hasRun.current = true;
         // 成功時に少し待ってからリダイレクト
         setTimeout(async () => {
           router.push("/admin");
@@ -40,14 +53,12 @@ export default function VerifyEmailPage() {
       } catch (error: any) {
         console.error("Email verification failed:", error);
         setStatus("error");
-        setErrorMessage(
-          error.message || "メール認証に失敗しました。もう一度お試しください。"
-        );
+        setErrorMessage("メール認証に失敗しました。もう一度お試しください。");
       }
     };
 
     verifyingEmail();
-  }, [token, router]);
+  }, [token, router, user, confirmEmail, isLoading]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-chefdom-orange/5 to-white">
