@@ -15,13 +15,11 @@ import {
   clearCurrentUser,
 } from "@/lib/api/config";
 import type { CompanyUserData } from "@/lib/api/companyUser";
-import { login, register } from "@/lib/api/companyUser";
 import { getApi } from "@/api/api-factory";
 import { Companyuser } from "@/api/__generated__/base/Companyuser";
 import { CompanyusersPartialUpdatePayload } from "@/api/__generated__/base/data-contracts";
 import { Companyusers } from "@/api/__generated__/base/Companyusers";
 import { Auth } from "@/api/__generated__/company/Auth";
-import { Company } from "@/api/__generated__/company/Company";
 import { LoginCreateData, SignupCreatePayload } from "@/api/__generated__/company/data-contracts";
 import { useSWRConfig } from "swr";
 

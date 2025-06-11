@@ -2,9 +2,6 @@
 
 import { useState } from "react";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import {
-  ChefNotificationType,
-} from "@/lib/api/chefNotification";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -30,11 +27,15 @@ import { useMarkReadAllChefNotifications } from "@/hooks/api/user/chefNotificati
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { ErrorPage } from "@/components/layout/ErrorPage";
 import { toast } from "@/hooks/use-toast";
+import { ByUserDetailData } from "@/api/__generated__/base/data-contracts";
+
+type ChefNotificationType = ByUserDetailData[number]["type"];
+type ChefNotificationFilterType = ChefNotificationType | "all";
 
 export default function ChefNotificationsPage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"all" | "unread">("all");
-  const [filter, setFilter] = useState<ChefNotificationType | "all">("all");
+  const [filter, setFilter] = useState<ChefNotificationFilterType>("all");
 
   const {
     notifications,
@@ -65,8 +66,7 @@ export default function ChefNotificationsPage() {
   };
 
   // 通知タイプに応じたアイコンを返す関数
-  const getNotificationIcon = (type: string) => {
-    const notificationType = type as ChefNotificationType;
+  const getNotificationIcon = (notificationType: ChefNotificationType) => {
     switch (notificationType) {
       case "new_job":
         return <User className="h-5 w-5" />;
@@ -86,8 +86,7 @@ export default function ChefNotificationsPage() {
   };
 
   // 通知タイプに応じた色を返す関数
-  const getNotificationColor = (type: string) => {
-    const notificationType = type as ChefNotificationType;
+  const getNotificationColor = (notificationType: ChefNotificationType) => {
     switch (notificationType) {
       case "new_job":
         return "bg-blue-100 text-blue-600";
@@ -107,9 +106,8 @@ export default function ChefNotificationsPage() {
   };
 
   // 通知タイプの日本語表示
-  const getNotificationTypeLabel = (type: string | "all") => {
-    if (type === "all") return "すべて";
-    const notificationType = type as ChefNotificationType;
+  const getNotificationTypeLabel = (notificationType: ChefNotificationFilterType) => {
+    if (notificationType === "all") return "すべて";
     switch (notificationType) {
       case "new_job":
         return "新着求人";
@@ -176,7 +174,7 @@ export default function ChefNotificationsPage() {
             <Select
               value={filter}
               onValueChange={(value) =>
-                setFilter(value as ChefNotificationType | "all")
+                setFilter(value as ChefNotificationFilterType)
               }>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="通知タイプ" />

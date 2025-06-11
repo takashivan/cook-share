@@ -12,13 +12,12 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { useSubscriptionMessagesByCompanyUserId } from "@/hooks/api/companyuser/messages/useSubscriptionMessagesByCompanyUserId";
 import { format } from "date-fns";
 import TextareaAutosize from "react-textarea-autosize";
 import { useEffect, useRef, useState } from "react";
-import { formatJapanHHMM, isMobile } from "@/lib/functions";
+import { formatJapanHHMM, formatSlashDateTime, isMobile } from "@/lib/functions";
 import { toast } from "@/hooks/use-toast";
 import { useUpdateReadMessageByCompanyUser } from "@/hooks/api/companyuser/messages/useUpdateReadMessageByCompanyUser";
 import { ErrorPage } from "@/components/layout/ErrorPage";
@@ -289,7 +288,7 @@ export function ChatSheet({
                             ))}
                           </p>
                           <span className="text-xs text-muted-foreground mt-1">
-                            {format(new Date(message.created_at), "HH:mm")}
+                            {formatSlashDateTime(message.created_at)}
                           </span>
                         </div>
                       </div>

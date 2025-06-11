@@ -1,6 +1,6 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,8 +18,6 @@ interface CreateJobForm extends BaseCreateForm {
   start_time: string;
   end_time: string;
   expiry_date: string;
-  transportation_type: "NONE" | "MAX" | "FIXED";
-  transportation_amount: number;
 }
 
 interface CreateJobModalProps {
@@ -27,7 +25,7 @@ interface CreateJobModalProps {
   onClose: () => void;
   onSubmit: (data: JobsCreatePayload) => Promise<void>;
   restaurantId: number;
-  initialData?: any;
+  initialData?: Partial<JobsCreatePayload>;
 }
 
 export const CreateJobModal = ({
@@ -48,6 +46,7 @@ export const CreateJobModal = ({
     reset,
     watch,
     setValue,
+    control,
   } = useForm<CreateJobForm>({
     defaultValues: {
       restaurant_id: restaurantId,
@@ -56,9 +55,6 @@ export const CreateJobModal = ({
       work_date: new Date().toISOString().split("T")[0],
       start_time: "10:00",
       end_time: "18:00",
-      expiry_date: formatDateToLocalISOStringForDatetimeLocal(
-        new Date(new Date().setHours(10, 0, 0, 0))
-      ),
       fee: 12000,
       transportation_type: "NONE",
       transportation_amount: undefined,
@@ -68,8 +64,30 @@ export const CreateJobModal = ({
   // initialDataが変更されたときにフォームの値を更新
   useEffect(() => {
     if (initialData) {
+      console.log("initialData:", initialData);
       Object.entries(initialData).forEach(([key, value]) => {
-        setValue(key as keyof JobsCreatePayload, value as any);
+        if (key === "start_time" || key === "end_time") {
+          // 時間のフォーマットを調整
+          let timeValue = "";
+          if (typeof value === "string" || typeof value === "number" || value instanceof Date) {
+            timeValue = new Date(value).toLocaleTimeString("ja-JP", {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+            });
+          }
+          setValue(key, timeValue);
+        } else if (key === "expiry_date") {
+          // 日時のフォーマットを調整
+          const dateValue = value
+            ? formatDateToLocalISOStringForDatetimeLocal(
+                new Date(value as string | number | Date)
+              )
+            : "";
+          setValue(key, dateValue); 
+        } else {
+          setValue(key as keyof CreateJobForm, value as CreateJobForm[keyof CreateJobForm]);
+        }
       });
     }
   }, [initialData, setValue]);
@@ -453,35 +471,37 @@ export const CreateJobModal = ({
 
                     <div>
                       <Label htmlFor="transportation_type">交通費</Label>
-                      <RadioGroup
+                      <Controller
+                        name="transportation_type"
+                        control={control}
                         defaultValue="NONE"
-                        className="flex gap-4 mt-1"
-                        onValueChange={(value) =>
-                          setValue(
-                            "transportation_type",
-                            value as "NONE" | "MAX" | "FIXED"
-                          )
-                        }
-                        {...register("transportation_type")}>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="NONE" id="none" />
-                          <Label htmlFor="none" className="cursor-pointer">
-                            交通費なし
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="MAX" id="max" />
-                          <Label htmlFor="max" className="cursor-pointer">
-                            上限
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="FIXED" id="fixed" />
-                          <Label htmlFor="fixed" className="cursor-pointer">
-                            一律
-                          </Label>
-                        </div>
-                      </RadioGroup>
+                        render={({ field: { onChange, value } }) => (
+                          <RadioGroup
+                            value={value}
+                            onValueChange={onChange}
+                            className="flex gap-4 mt-1"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="NONE" id="none" />
+                              <Label htmlFor="none" className="cursor-pointer">
+                                交通費なし
+                              </Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="MAX" id="max" />
+                              <Label htmlFor="max" className="cursor-pointer">
+                                上限
+                              </Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="FIXED" id="fixed" />
+                              <Label htmlFor="fixed" className="cursor-pointer">
+                                一律
+                              </Label>
+                            </div>
+                          </RadioGroup>
+                        )}
+                      />
                       {(watch("transportation_type") === "MAX" ||
                         watch("transportation_type") === "FIXED") && (
                         <div className="mt-2 flex items-center gap-2">
