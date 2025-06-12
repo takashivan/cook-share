@@ -27,7 +27,7 @@ export interface CompanyAuthContextType {
   user: LoginCreateData["user"] | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<LoginCreateData["user"]>;
   logout: () => void;
   register: (data: CompanyUserData) => Promise<void>;
   update: (data: Partial<CompanyusersPartialUpdatePayload>) => Promise<void>;
@@ -105,6 +105,7 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
         password,
       });
       setAuth(data.sessionToken, data.user);
+      return data.user;
     } catch (error) {
       console.error("Login error:", error);
       throw error;
