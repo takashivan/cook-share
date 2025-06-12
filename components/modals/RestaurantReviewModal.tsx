@@ -52,7 +52,7 @@ export function RestaurantReviewModal({
   handleSuccessAction,
 }: RestaurantReviewModalProps) {
   const { user } = useCompanyAuth();
-  const [rating, setRating] = useState(0);
+  const [rating, setRating] = useState(3);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");
   const [approved, setApproved] = useState(true);
@@ -72,7 +72,7 @@ export function RestaurantReviewModal({
   });
 
   const handleClose = () => {
-    setRating(0);
+    setRating(3);
     setComment("");
     setApproved(true);
     onCloseAction();
