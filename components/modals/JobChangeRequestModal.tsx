@@ -325,7 +325,7 @@ ${data.reason}
                       <Input
                         id="fee"
                         type="number"
-                        placeholder="例: 12000"
+                        placeholder="例: 14800"
                         {...register("fee", {
                           required: "報酬は必須です",
                           valueAsNumber: true,

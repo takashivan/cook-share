@@ -1,6 +1,6 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -89,6 +89,7 @@ export const EditJobModal = ({
     formState: { errors, isSubmitting },
     reset,
     setValue,
+    control,
   } = useForm<UpdateJob>({
     defaultValues: {
       title: job?.title || "",
@@ -107,7 +108,7 @@ export const EditJobModal = ({
       point: job?.point || "",
       status: job?.status || "",
       required_skills: job?.required_skills || [],
-      fee: job?.fee || 12000,
+      fee: job?.fee || 14800,
       number_of_spots: job?.number_of_spots || 1,
       expiry_date: job?.expiry_date
         ? formatExpiryDateTime(job.expiry_date)
@@ -130,7 +131,7 @@ export const EditJobModal = ({
       point: job?.point || "",
       status: job?.status || "",
       required_skills: job?.required_skills || [],
-      fee: job?.fee || 12000,
+      fee: job?.fee || 14800,
       number_of_spots: job?.number_of_spots || 1,
       expiry_date: job?.expiry_date
         ? formatExpiryDateTime(job.expiry_date)
@@ -339,9 +340,8 @@ export const EditJobModal = ({
                               return true;
                             },
                           })}
-                          defaultValue={12000}
                           className="mt-1"
-                          placeholder="例：12000"
+                          placeholder="例：14800"
                         />
                         {errors.fee && (
                           <p className="mt-1 text-sm text-red-600">
@@ -420,35 +420,35 @@ export const EditJobModal = ({
 
                     <div>
                       <Label htmlFor="transportation_type">交通費</Label>
-                      <RadioGroup
-                        defaultValue={job?.transportation_type || "NONE"}
-                        className="flex gap-4 mt-1"
-                        onValueChange={(value) =>
-                          setValue(
-                            "transportation_type",
-                            value as "NONE" | "MAX" | "FIXED"
-                          )
-                        }
-                        {...register("transportation_type")}>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="NONE" id="none" />
-                          <Label htmlFor="none" className="cursor-pointer">
-                            交通費なし
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="MAX" id="max" />
-                          <Label htmlFor="max" className="cursor-pointer">
-                            上限
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="FIXED" id="fixed" />
-                          <Label htmlFor="fixed" className="cursor-pointer">
-                            一律
-                          </Label>
-                        </div>
-                      </RadioGroup>
+                      <Controller
+                        name="transportation_type"
+                        control={control}
+                        render={({ field: { onChange, value } }) => (
+                          <RadioGroup
+                            value={value}
+                            onValueChange={onChange}
+                            className="flex gap-4 mt-1">
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="NONE" id="none" />
+                              <Label htmlFor="none" className="cursor-pointer">
+                                交通費なし
+                              </Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="MAX" id="max" />
+                              <Label htmlFor="max" className="cursor-pointer">
+                                上限
+                              </Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="FIXED" id="fixed" />
+                              <Label htmlFor="fixed" className="cursor-pointer">
+                                一律
+                              </Label>
+                            </div>
+                          </RadioGroup>
+                        )}
+                      />
                       {(watch("transportation_type") === "MAX" ||
                         watch("transportation_type") === "FIXED") && (
                         <div className="mt-2 flex items-center gap-2">
