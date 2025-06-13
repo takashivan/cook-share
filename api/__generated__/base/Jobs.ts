@@ -117,10 +117,11 @@ export class Jobs<
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH]restaurantの権限 <br /><br /> <b>Authentication:</b> not required
    *
    * @tags jobs
    * @name WorksessionsRestaurantTodosList
+   * @summary [AUTH]restaurantの権限
    * @request GET:/jobs/{job_id}/worksessions/restaurant_todos
    */
   worksessionsRestaurantTodosList = (

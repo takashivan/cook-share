@@ -1066,6 +1066,7 @@ export interface UserApprovePartialUpdateData {
   /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
+  invoice_number: string | null;
   magic_link: {
     token: string;
     /**
@@ -1143,6 +1144,7 @@ export interface UserBanPartialUpdateData {
     /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
+    invoice_number: string | null;
     magic_link: {
       token: string;
       /**
@@ -1231,6 +1233,7 @@ export interface UsersApprovePartialUpdateData {
   /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
+  invoice_number: string | null;
   magic_link: {
     token: string;
     /**
@@ -1307,6 +1310,7 @@ export interface UsersBanPartialUpdateData {
     /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
+    invoice_number: string | null;
     magic_link: {
       token: string;
       /**
@@ -1679,6 +1683,7 @@ export type ToBeReviewedListData = {
   /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
+  invoice_number: string | null;
   magic_link: {
     token: string;
     /**

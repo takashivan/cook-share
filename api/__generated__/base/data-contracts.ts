@@ -151,6 +151,7 @@ export type GetApplicationData = {
     /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
+    invoice_number: string | null;
     magic_link: {
       token: string;
       /**
@@ -1266,6 +1267,7 @@ export type ByRestaurantDetailData = {
     /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
+    invoice_number: string | null;
     magic_link: {
       token: string;
       /**
@@ -1442,6 +1444,7 @@ export interface BySessionDetailData {
     /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
+    invoice_number: string | null;
     magic_link: {
       token: string;
       /**
@@ -3609,6 +3612,7 @@ export type ApplicationsListResult = {
     /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
+    invoice_number: string | null;
     magic_link: {
       token: string;
       /**
@@ -3738,6 +3742,7 @@ export type WorksessionsRestaurantTodosListData = {
     /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
+    invoice_number: string | null;
     magic_link: {
       token: string;
       /**
@@ -5190,6 +5195,7 @@ export type ByRestaurantDetailResult = {
     /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
+    invoice_number: string | null;
     magic_link: {
       token: string;
       /**
@@ -5333,6 +5339,7 @@ export interface BySessionDetailResult {
     /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
+    invoice_number: string | null;
     magic_link: {
       token: string;
       /**
@@ -5844,6 +5851,7 @@ export type ChefReviewsListData = {
     /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
+    invoice_number: string | null;
     magic_link: {
       token: string;
       /**
@@ -6076,6 +6084,7 @@ export type RestaurantReviewsListResult = {
     /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
+    invoice_number: string | null;
     magic_link: {
       token: string;
       /**
@@ -6392,6 +6401,7 @@ export interface EmailChangeCreateResult {
   /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
+  invoice_number: string | null;
   magic_link: {
     token: string;
     /**
@@ -6467,6 +6477,7 @@ export interface EmailConfirmCreateResult {
   /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
+  invoice_number: string | null;
   magic_link: {
     token: string;
     /**
@@ -6520,6 +6531,7 @@ export interface ProfilePartialUpdatePayload {
   town: string;
   street: string;
   position_level: "1" | "2" | "3" | "4";
+  invoice_number: string | null;
   /** @format binary */
   photo: File | null;
 }
@@ -6724,6 +6736,7 @@ export interface UserDetailData {
   /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
+  invoice_number: string | null;
   magic_link: {
     token: string;
     /**
@@ -6778,6 +6791,7 @@ export interface UserPartialUpdatePayload {
   /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
+  invoice_number: string | null;
   /** @format binary */
   photo: File | null;
   magic_link: {
@@ -6858,6 +6872,7 @@ export interface EmailChangeCreateOutput {
   /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
+  invoice_number: string | null;
   magic_link: {
     token: string;
     /**
@@ -6933,6 +6948,7 @@ export interface EmailConfirmCreateOutput {
   /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
+  invoice_number: string | null;
   magic_link: {
     token: string;
     /**
@@ -7715,6 +7731,7 @@ export interface UsersDetailData {
   /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
+  invoice_number: string | null;
   magic_link: {
     token: string;
     /**
@@ -7748,6 +7765,7 @@ export interface UsersPartialUpdatePayload {
   town: string;
   street: string;
   position_level: "1" | "2" | "3" | "4";
+  invoice_number: string | null;
   /** @format binary */
   photo: File | null;
 }
@@ -7816,6 +7834,7 @@ export type UsersListData = {
   /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
+  invoice_number: string | null;
   magic_link: {
     token: string;
     /**
@@ -7878,6 +7897,7 @@ export interface UsersCreatePayload {
   /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
+  invoice_number: string | null;
   magic_link: {
     token: string;
     /**
@@ -7949,6 +7969,7 @@ export interface UsersCreateData {
   /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
+  invoice_number: string | null;
   magic_link: {
     token: string;
     /**
@@ -8020,6 +8041,7 @@ export type UserListData = {
   /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
+  invoice_number: string | null;
   magic_link: {
     token: string;
     /**
@@ -8082,6 +8104,7 @@ export interface UserCreatePayload {
   /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
+  invoice_number: string | null;
   magic_link: {
     token: string;
     /**
@@ -8153,6 +8176,7 @@ export interface UserCreateData {
   /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
+  invoice_number: string | null;
   magic_link: {
     token: string;
     /**
@@ -8365,6 +8389,7 @@ export type RestaurantTodoDetailData = {
     /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
+    invoice_number: string | null;
     magic_link: {
       token: string;
       /**
@@ -9400,6 +9425,54 @@ export interface FinishPartialUpdateResult {
   review: string;
 }
 
+export interface JobChangeRequestChefListData {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format int64 */
+  job_id: number;
+  /** @format uuid */
+  user_id: string | null;
+  /** @format int64 */
+  requested_by: number;
+  proposed_changes: object;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  /** @format timestamptz */
+  updated_at: number | null;
+  reason: string;
+  /** @format int64 */
+  worksession_id: number;
+  as_is: object;
+}
+
+export interface JobChangeRequestRestaurantListData {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format int64 */
+  job_id: number;
+  /** @format uuid */
+  user_id: string | null;
+  /** @format int64 */
+  requested_by: number;
+  proposed_changes: object;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  /** @format timestamptz */
+  updated_at: number | null;
+  reason: string;
+  /** @format int64 */
+  worksession_id: number;
+  as_is: object;
+}
+
 export interface JobChangeRequestListData {
   /** @format uuid */
   id: string;
@@ -9728,6 +9801,7 @@ export interface RestaurantReviewListResult {
     /** @default "false" */
     profile_completed: boolean;
     position_level: "1" | "2" | "3" | "4";
+    invoice_number: string | null;
     magic_link: {
       token: string;
       /**
