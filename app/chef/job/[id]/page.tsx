@@ -15,7 +15,7 @@ import {
   XCircle,
   ChevronRight,
 } from "lucide-react";
-import { format, differenceInDays } from "date-fns";
+import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { CameraDevice, Html5Qrcode } from "html5-qrcode";
@@ -47,13 +47,12 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { JobChangeRequest } from "@/hooks/api/companyuser/jobChangeRequests/useGetJobChangeRequest";
 import { Input } from "@/components/ui/input";
 import styles from "./styles.module.css";
 import { ErrorPage } from "@/components/layout/ErrorPage";
 import { LoadingScreen } from "@/components/LoadingScreen";
-import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
+import { ChefJobCancelModal } from "@/components/modals/ChefJobCancelModal";
 
 type PageProps = {
   params: Promise<{
@@ -78,13 +77,6 @@ export default function JobDetail({ params }: PageProps) {
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
-  const [cancellationPenalty, setCancellationPenalty] = useState<{
-    penalty: number;
-    message: string;
-    status: string;
-  } | null>(null);
-  const [isConfirmed, setIsConfirmed] = useState(false);
-  const [cancelReason, setCancelReason] = useState("");
   const [isChangeRequestModalOpen, setIsChangeRequestModalOpen] =
     useState(false);
 
@@ -352,48 +344,38 @@ export default function JobDetail({ params }: PageProps) {
     }
   };
 
-  const calculateCancellationPenalty = () => {
-    if (!job) return null;
-
-    const now = new Date();
-    const workDate = new Date(job.work_date);
-    const daysDifference = differenceInDays(workDate, now);
-
-    if (daysDifference >= 2) {
-      return {
-        penalty: 0,
-        message: "2日以上前のキャンセルは違約金なしで可能です。",
-        status: "cancelled_by_chef",
-      };
-    } else if (daysDifference >= 1) {
-      return {
-        penalty: job.fee * 0.8,
-        message:
-          "2日前〜前日のキャンセルは報酬予定額の80%の違約金が発生します。",
-        status: "cancelled_by_chef_late",
-      };
-    } else {
-      return {
-        penalty: job.fee,
-        message: "当日のキャンセルは報酬予定額の100%の違約金が発生します。",
-        status: "cancelled_by_chef_same_day",
-      };
-    }
-  };
-
   const handleCancelClick = () => {
-    if (!job) return;
-    setCancellationPenalty(calculateCancellationPenalty());
     setIsCancelModalOpen(true);
   };
 
-  const handleCancelConfirm = async () => {
-    if (!cancellationPenalty || !job || !isConfirmed || !cancelReason) return;
+  const handleCancelConfirm = async (cancelReason: string) => {
+    if (!job) return;
 
     try {
       await cancelWorksessionTrigger({
         reason: cancelReason,
       });
+
+      // メッセージとして変更リクエストの承認/拒否を送信
+      const message = `【お仕事のキャンセル】
+以下の求人がキャンセルになりました：
+
+日付: ${job.work_date}
+時間: ${format(
+        new Date(job.start_time),
+        "HH:mm"
+      )}〜${format(
+        new Date(job.end_time),
+        "HH:mm"
+      )}
+業務内容: ${job.title}
+報酬: ¥${job.fee}
+
+キャンセル理由:
+${cancelReason}`;
+
+      await sendMessage(message);
+
       toast({
         title: "キャンセル完了",
         description: "お仕事のキャンセルが完了しました。",
@@ -469,7 +451,7 @@ export default function JobDetail({ params }: PageProps) {
   }
 
   if (isJobDetailLoading || isWorkSessionsLoading || isUnreadMessagesLoading || ischangeRequestLoading
-    || !job || !workSessions || !unreadMessagesData || !changeRequest
+    || !job || !workSessions || !unreadMessagesData
   ) {
     return (
       <LoadingScreen
@@ -736,83 +718,12 @@ export default function JobDetail({ params }: PageProps) {
         />
       )}
 
-      <AlertDialog open={isCancelModalOpen} onOpenChange={setIsCancelModalOpen}>
-        <AlertDialogContent className="max-w-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
-              <AlertCircle className="h-5 w-5" />
-              お仕事のキャンセル確認
-            </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-4">
-              <div className="bg-red-50 p-4 rounded-lg">
-                <p className="text-red-800 font-medium">
-                  {cancellationPenalty?.message}
-                </p>
-                {cancellationPenalty?.penalty !== undefined &&
-                  cancellationPenalty.penalty > 0 && (
-                    <div className="mt-2">
-                      <p className="text-red-800 font-semibold">
-                        違約金: ¥{cancellationPenalty.penalty.toLocaleString()}
-                      </p>
-                    </div>
-                  )}
-              </div>
-
-              <div className="bg-yellow-50 p-4 rounded-lg">
-                <p className="text-yellow-800 text-sm">
-                  ※
-                  度重なるキャンセルや不当な理由でのキャンセルは、今後のご利用停止となる可能性があります。
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <label
-                  htmlFor="cancel-reason"
-                  className="block text-sm font-medium text-gray-700">
-                  キャンセル理由
-                </label>
-                <Textarea
-                  id="cancel-reason"
-                  value={cancelReason}
-                  onChange={(e) => setCancelReason(e.target.value)}
-                  className="w-full h-24 p-2 border rounded-md bg-white"
-                  placeholder="キャンセルの理由を具体的にご記入ください"
-                  required
-                />
-              </div>
-
-              <div className="flex items-start gap-2">
-                <input
-                  type="checkbox"
-                  id="confirm-cancel"
-                  checked={isConfirmed}
-                  onChange={(e) => setIsConfirmed(e.target.checked)}
-                  className="mt-1"
-                />
-                <label
-                  htmlFor="confirm-cancel"
-                  className="text-sm text-gray-600">
-                  上記の内容を確認し、キャンセルに同意します
-                </label>
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="flex justify-end gap-4 mt-4">
-            <Button
-              variant="outline"
-              onClick={() => setIsCancelModalOpen(false)}>
-              閉じる
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleCancelConfirm}
-              disabled={!isConfirmed || !cancelReason}
-              className="bg-red-600 hover:bg-red-700">
-              キャンセルを確定
-            </Button>
-          </div>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ChefJobCancelModal
+        isOpen={isCancelModalOpen}
+        onClose={() => setIsCancelModalOpen(false)}
+        job={job}
+        onSubmit={handleCancelConfirm}
+      />
 
       {/* 変更リクエストモーダル */}
       <Dialog

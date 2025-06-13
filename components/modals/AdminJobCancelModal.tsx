@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { differenceInDays } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { JobsDetailData, WorksessionsRestaurantTodosListData } from "@/api/__generated__/base/data-contracts";
 import { useState } from "react";
 import { useUserCancelWorksessionByRestaurant } from "@/hooks/api/companyuser/worksessions/useCancelWorksessionByRestaurant";
@@ -21,6 +21,7 @@ interface CancellationPenalty {
   onCloseAction: () => void;
   job: JobsDetailData["job"];
   workSession: WorksessionsRestaurantTodosListData[number];
+  sendMessageAction: (message: string) => Promise<void>;
 }
 
 export function AdminJobCancelModal({
@@ -28,6 +29,7 @@ export function AdminJobCancelModal({
   onCloseAction,
   job,
   workSession,
+  sendMessageAction,
 }: CancellationPenalty) {
   const router = useRouter();
 
@@ -71,6 +73,26 @@ export function AdminJobCancelModal({
       await cancelWorksessionTrigger({
         reason: cancelReason,
       });
+
+      // メッセージとして変更リクエストの承認/拒否を送信
+      const message = `【お仕事のキャンセル】
+以下の求人がキャンセルになりました：
+
+日付: ${job.work_date}
+時間: ${format(
+        new Date(job.start_time),
+        "HH:mm"
+      )}〜${format(
+        new Date(job.end_time),
+        "HH:mm"
+      )}
+業務内容: ${job.title}
+報酬: ¥${job.fee}
+
+キャンセル理由:
+${cancelReason}`;
+      
+      await sendMessageAction(message);
 
       toast({
         title: "キャンセル完了",
