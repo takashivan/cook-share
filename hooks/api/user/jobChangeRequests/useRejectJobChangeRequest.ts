@@ -2,9 +2,10 @@ import { getApi } from "@/api/api-factory";
 import useSWRMutation from "swr/mutation";
 import { JobChangeRequests } from "@/api/__generated__/base/JobChangeRequests";
 import { useSWRConfig } from "swr";
-import { JobChangeRequestsListData } from "@/api/__generated__/base/data-contracts";
+import { Worksessions } from "@/api/__generated__/base/Worksessions";
 export interface Params {
   jobChangeRequestId?: string;
+  workSessionId?: number;
 }
 
 export const useRejectJobChangeRequest = (params: Params) => {
@@ -24,22 +25,13 @@ export const useRejectJobChangeRequest = (params: Params) => {
       onSuccess: (data) => {
         console.log("Job change request rejected successfully:", data);
 
-        // Job変更リクエストのリストのキャッシュを更新
-        const jobChangeRequestsKey =
-          jobChangeRequests.jobChangeRequestsListQueryArgs()[0];
-        mutate(jobChangeRequestsKey, async (currentItems: JobChangeRequestsListData | undefined) => {
-          if (!currentItems) return currentItems;
-
-          const updatedItems = currentItems.map((item) => {
-            if (item.id !== data.id) {
-              return item;
-            }
-            // レスポンスのidと一致するJob変更リクエストを見つけたら、更新されたデータで上書き
-            return data;
-          });
-
-          return updatedItems;
-        });
+        if (params.workSessionId) {
+          // Job変更リクエストのリストのキャッシュを更新
+          const worksessionsApi = getApi(Worksessions);
+          const jobChangeRequestsKey =
+            worksessionsApi.jobChangeRequestChefListQueryArgs(params.workSessionId)[0];
+          mutate(jobChangeRequestsKey, null);
+        }
       }
     }
   );

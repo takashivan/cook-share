@@ -13,6 +13,7 @@ import {
   AlertCircle,
   CheckCircle,
   XCircle,
+  ChevronRight,
 } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { ja } from "date-fns/locale";
@@ -35,7 +36,7 @@ import { useGetJob } from "@/hooks/api/all/jobs/useGetJob";
 import { useCancelWorksessionByChef } from "@/hooks/api/user/worksessions/useCancelWorksessionByChef";
 import { useGetWorksessionsByUserId } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserId";
 import { useSubscriptionUnreadMessagesByUser } from "@/hooks/api/user/messages/useSubscriptionUnreadMessagesByUser";
-import { useGetJobChangeRequests } from "@/hooks/api/user/jobChangeRequests/useGetJobChangeRequests";
+import { useGetJobChangeRequest } from "@/hooks/api/user/jobChangeRequests/useGetJobChangeRequest";
 import { useAcceptJobChangeRequest } from "@/hooks/api/user/jobChangeRequests/useAcceptJobChangeRequest";
 import { useRejectJobChangeRequest } from "@/hooks/api/user/jobChangeRequests/useRejectJobChangeRequest";
 import {
@@ -46,12 +47,13 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { JobChangeRequest } from "@/hooks/api/companyuser/jobChangeRequests/useGetJobChangeRequests";
+import { JobChangeRequest } from "@/hooks/api/companyuser/jobChangeRequests/useGetJobChangeRequest";
 import { Input } from "@/components/ui/input";
 import styles from "./styles.module.css";
 import { ErrorPage } from "@/components/layout/ErrorPage";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { Textarea } from "@/components/ui/textarea";
+import Link from "next/link";
 
 type PageProps = {
   params: Promise<{
@@ -85,8 +87,6 @@ export default function JobDetail({ params }: PageProps) {
   const [cancelReason, setCancelReason] = useState("");
   const [isChangeRequestModalOpen, setIsChangeRequestModalOpen] =
     useState(false);
-  const [selectedChangeRequest, setSelectedChangeRequest] =
-    useState<JobChangeRequest | null>(null);
 
   // ジョブ詳細の取得
   const {
@@ -149,21 +149,23 @@ export default function JobDetail({ params }: PageProps) {
 
   // 変更リクエストの取得
   const {
-    data: changeRequests,
-    isLoading: isChangeRequestsLoading,
-    error: changeRequestsError,
-  } = useGetJobChangeRequests();
-  const pendingRequest = changeRequests?.find(
-    (req) => req.worksession_id === workSession?.id && req.status === "PENDING"
-  );
+    data: changeRequest,
+    isLoading: ischangeRequestLoading,
+    error: changeRequestError,
+  } = useGetJobChangeRequest({
+    worksessionsId: workSession?.id,
+  });
+  const pendingRequest = changeRequest?.status === "PENDING" ? changeRequest : null;
 
   const { trigger: acceptJobChangeRequest } = useAcceptJobChangeRequest({
-    jobChangeRequestId: selectedChangeRequest?.id,
+    jobChangeRequestId: pendingRequest?.id,
     userId: user?.id,
+    workSessionId: workSession?.id,
   });
 
   const { trigger: rejectJobChangeRequest } = useRejectJobChangeRequest({
-    jobChangeRequestId: selectedChangeRequest?.id,
+    jobChangeRequestId: pendingRequest?.id,
+    workSessionId: workSession?.id,
   });
 
   const handleCloseDialog = () => {
@@ -300,16 +302,27 @@ export default function JobDetail({ params }: PageProps) {
   const renderWorkStatusButton = () => {
     if (!workSession) return null;
 
+    if (pendingRequest) {
+      return (
+        <Button
+          className="w-full bg-chefdom-orange hover:bg-chefdom-orange-dark"
+          onClick={() => {
+            setIsChangeRequestModalOpen(true);
+          }}
+        >
+          <AlertCircle className="h-4 w-4 mr-2" />
+          変更リクエスト
+        </Button>
+      )
+    }
+
     switch (workSession.status) {
       case "SCHEDULED":
         return (
           <Button
-            className="w-full"
-            onClick={() => {
-              console.log("Button clicked");
-              handleStartWork();
-            }}
-            style={{ backgroundColor: "#DB3F1C" }}>
+            className="w-full bg-chefdom-orange hover:bg-chefdom-orange-dark"
+            onClick={handleStartWork}
+          >
             勤務開始
           </Button>
         );
@@ -321,8 +334,11 @@ export default function JobDetail({ params }: PageProps) {
         );
       case "VERIFY_REJECTED":
         return (
-          <Button className="w-full" onClick={() => setIsReviewModalOpen(true)}>
-            差し戻し
+          <Button
+            className="w-full bg-chefdom-orange hover:bg-chefdom-orange-dark"
+            onClick={() => setIsReviewModalOpen(true)}
+          >
+            再申請
           </Button>
         );
       case "COMPLETED":
@@ -396,7 +412,7 @@ export default function JobDetail({ params }: PageProps) {
   const handleChangeRequestResponse = async (
     status: "APPROVED" | "REJECTED"
   ) => {
-    if (!selectedChangeRequest || !workSession) return;
+    if (!pendingRequest || !workSession) return;
 
     try {
       if (status === "APPROVED") {
@@ -411,16 +427,16 @@ export default function JobDetail({ params }: PageProps) {
       }】
 以下の変更リクエストを${status === "APPROVED" ? "承認" : "拒否"}しました：
 
-日付: ${selectedChangeRequest.proposed_changes.work_date}
+日付: ${pendingRequest.proposed_changes.work_date}
 時間: ${format(
-        new Date(selectedChangeRequest.proposed_changes.start_time),
+        new Date(pendingRequest.proposed_changes.start_time),
         "HH:mm"
       )}〜${format(
-        new Date(selectedChangeRequest.proposed_changes.end_time),
+        new Date(pendingRequest.proposed_changes.end_time),
         "HH:mm"
       )}
-業務内容: ${selectedChangeRequest.proposed_changes.task}
-報酬: ¥${selectedChangeRequest.proposed_changes.fee}`;
+業務内容: ${pendingRequest.proposed_changes.task}
+報酬: ¥${pendingRequest.proposed_changes.fee}`;
 
       await sendMessage(message);
 
@@ -435,7 +451,6 @@ export default function JobDetail({ params }: PageProps) {
       });
 
       setIsChangeRequestModalOpen(false);
-      setSelectedChangeRequest(null);
     } catch (error) {
       toast({
         title: "エラー",
@@ -445,7 +460,7 @@ export default function JobDetail({ params }: PageProps) {
     }
   };
 
-  if (jobDetailError || workSessionsError || unreadMessagesError || changeRequestsError) {
+  if (jobDetailError || workSessionsError || unreadMessagesError || changeRequestError) {
     return (
       <div className="flex px-4">
         <ErrorPage />
@@ -453,8 +468,8 @@ export default function JobDetail({ params }: PageProps) {
     );
   }
 
-  if (isJobDetailLoading || isWorkSessionsLoading || isUnreadMessagesLoading || isChangeRequestsLoading
-    || !job || !workSessions || !unreadMessagesData || !changeRequests
+  if (isJobDetailLoading || isWorkSessionsLoading || isUnreadMessagesLoading || ischangeRequestLoading
+    || !job || !workSessions || !unreadMessagesData || !changeRequest
   ) {
     return (
       <LoadingScreen
@@ -514,18 +529,9 @@ export default function JobDetail({ params }: PageProps) {
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <div className="inline-block border rounded-md">
-            <div className="flex items-center">
-              <div className="px-4 py-2 border-r">
-                <span className="font-medium">{shortWorkDate}</span>
-              </div>
-              <div className="px-4 py-2">
-                <span>
-                  {startTime} 〜 {endTime}
-                </span>
-              </div>
-            </div>
+        <div className="flex justify-between items-center mb-4 gap-3">
+          <div className="w-full">
+            {renderWorkStatusButton()}
           </div>
           {workSession && (
             <Button
@@ -545,21 +551,6 @@ export default function JobDetail({ params }: PageProps) {
 
         <h2 className="text-lg font-bold mb-4">{restaurant?.name}</h2>
 
-        {pendingRequest && (
-          <div className="mb-6">
-            <Button
-              variant="outline"
-              className="w-full bg-red-50 text-red-800 border-red-200 hover:bg-red-100"
-              onClick={() => {
-                setSelectedChangeRequest(pendingRequest);
-                setIsChangeRequestModalOpen(true);
-              }}>
-              <AlertCircle className="h-4 w-4 mr-2" />
-              変更リクエスト
-            </Button>
-          </div>
-        )}
-
         {job.image && (
           <Image
             src={job.image}
@@ -570,45 +561,13 @@ export default function JobDetail({ params }: PageProps) {
           />
         )}
 
-        <div className="space-y-4">
-          <div className="flex items-start gap-3">
-            <Calendar className="h-5 w-5 text-red-500 mt-0.5" />
-            <div>
-              <h4 className="font-medium">勤務日</h4>
-              <p className="text-sm">{workDate}</p>
-            </div>
-          </div>
+        <h3 className="font-bold mb-2">{job.title}</h3>
 
-          <div className="flex items-start gap-3">
-            <Clock className="h-5 w-5 text-red-500 mt-0.5" />
-            <div>
-              <h4 className="font-medium">勤務時間</h4>
-              <p className="text-sm">
-                {startTime} 〜 {endTime}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <MapPin className="h-5 w-5 text-red-500 mt-0.5" />
-            <div>
-              <h4 className="font-medium">勤務場所</h4>
-              <p className="text-sm">{restaurant?.address}</p>
-              <p className="text-sm">
-                {job.transportation_type === "NONE"
-                  ? "交通費なし"
-                  : job.transportation_type === "MAX"
-                  ? `上限${job.transportation_amount.toLocaleString()}円`
-                  : `${job.transportation_amount.toLocaleString()}円`}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="px-2 py-4 border-r">{renderWorkStatusButton()}</div>
-
-        <h3 className="text-lg font-bold mb-2">{job.title}</h3>
-        <p className="text-sm text-gray-700 mb-6">{job.description}</p>
+        <Button variant="outline" className="w-full mb-5">
+          <Link href={`/job/${job.id}`} className="flex items-center gap-2">
+            求人の詳細はこちら<ChevronRight className="h-5 w-5 text-gray-400" />
+          </Link>
+        </Button>
 
         <div className="space-y-4">
           <div className="flex items-start gap-3">
@@ -653,11 +612,12 @@ export default function JobDetail({ params }: PageProps) {
             <span>¥{job.fee.toLocaleString()}</span>
           </div>
           {workSession?.status == "SCHEDULED" && (
-            <button
-              onClick={handleCancelClick}
-              className="text-sm text-gray-500 hover:text-red-500 transition-colors">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleCancelClick}>
               お仕事をキャンセルする
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -865,35 +825,35 @@ export default function JobDetail({ params }: PageProps) {
               以下の変更リクエストを承認または拒否してください。
             </DialogDescription>
           </DialogHeader>
-          {selectedChangeRequest && (
+          {pendingRequest && (
             <div className="space-y-4">
               <div className="bg-muted p-4 rounded-lg">
                 <h4 className="font-medium mb-2">変更内容</h4>
                 <div className="space-y-2 text-sm">
                   <p>
-                    日付: {selectedChangeRequest.proposed_changes.work_date}
+                    日付: {pendingRequest.proposed_changes.work_date}
                   </p>
                   <p>
                     時間:{" "}
                     {format(
                       new Date(
-                        selectedChangeRequest.proposed_changes.start_time
+                        pendingRequest.proposed_changes.start_time
                       ),
                       "HH:mm"
                     )}
                     〜
                     {format(
-                      new Date(selectedChangeRequest.proposed_changes.end_time),
+                      new Date(pendingRequest.proposed_changes.end_time),
                       "HH:mm"
                     )}
                   </p>
-                  <p>業務内容: {selectedChangeRequest.proposed_changes.task}</p>
-                  <p>報酬: ¥{selectedChangeRequest.proposed_changes.fee}</p>
+                  <p>業務内容: {pendingRequest.proposed_changes.task}</p>
+                  <p>報酬: ¥{pendingRequest.proposed_changes.fee}</p>
                 </div>
               </div>
               <div className="space-y-2">
                 <h4 className="font-medium">変更理由</h4>
-                <p className="text-sm">{selectedChangeRequest.reason}</p>
+                <p className="text-sm">{pendingRequest.reason}</p>
               </div>
               <DialogFooter>
                 <Button
