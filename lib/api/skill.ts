@@ -6,9 +6,9 @@ export interface Skill {
   created_at: number;
 }
 
-export interface SkillResponse {
-  skills: Skill[];
-}
+// export interface SkillResponse {
+//   skills: Skill[];
+// }
 
 const BASE_URL = API_CONFIG.baseURLs.skill;
 
@@ -27,61 +27,61 @@ export const getSkills = async (): Promise<Skill[]> => {
   return response.json();
 };
 
-export const createSkill = async (params: Skill): Promise<Skill> => {
-  const response = await fetch(`${BASE_URL}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(params),
-  });
+// export const createSkill = async (params: Skill): Promise<Skill> => {
+//   const response = await fetch(`${BASE_URL}`, {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: JSON.stringify(params),
+//   });
 
-  if (!response.ok) {
-    throw new Error("Failed to create job");
-  }
+//   if (!response.ok) {
+//     throw new Error("Failed to create job");
+//   }
 
-  return response.json();
-};
+//   return response.json();
+// };
 
-export const deleteSkill = async (skill: Skill): Promise<Skill> => {
-  const response = await fetch(`${BASE_URL}/${skill.id}`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+// export const deleteSkill = async (skill: Skill): Promise<Skill> => {
+//   const response = await fetch(`${BASE_URL}/${skill.id}`, {
+//     method: "DELETE",
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//   });
 
-  if (!response.ok) {
-    throw new Error("Failed to delete job");
-  }
+//   if (!response.ok) {
+//     throw new Error("Failed to delete job");
+//   }
 
-  return response.json();
-};
+//   return response.json();
+// };
 
-export const updateSkill = async (skill: Skill): Promise<Skill> => {
-  const response = await fetch(`${BASE_URL}/${skill.id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(skill),
-  });
+// export const updateSkill = async (skill: Skill): Promise<Skill> => {
+//   const response = await fetch(`${BASE_URL}/${skill.id}`, {
+//     method: "PUT",
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: JSON.stringify(skill),
+//   });
 
-  if (!response.ok) {
-    throw new Error("Failed to update job");
-  }
+//   if (!response.ok) {
+//     throw new Error("Failed to update job");
+//   }
 
-  return response.json();
-};
+//   return response.json();
+// };
 
-export const getSkill = async (id: string): Promise<Skill> => {
-  const response = await fetch(`${BASE_URL}/${id}`, {
-    method: "GET",
-  });
+// export const getSkill = async (id: string): Promise<Skill> => {
+//   const response = await fetch(`${BASE_URL}/${id}`, {
+//     method: "GET",
+//   });
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch job");
-  }
+//   if (!response.ok) {
+//     throw new Error("Failed to fetch job");
+//   }
 
-  return response.json();
-};
+//   return response.json();
+// };

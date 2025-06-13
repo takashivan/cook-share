@@ -49,6 +49,7 @@ import { useCreateCompanyUserByCompanyId } from "@/hooks/api/companyuser/company
 import { ErrorPage } from "@/components/layout/ErrorPage";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { useGetCompany } from "@/hooks/api/companyuser/companies/useGetCompany";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function StaffPage() {
   const { user } = useCompanyAuth();
@@ -118,6 +119,16 @@ export default function StaffPage() {
         description: `${deleteTargetStaff.name || deleteTargetStaff.email}を削除しました。`,
       });
     } catch (error) {
+      if ((error as any).response?.data?.payload?.code === "cannot_delete_logged_user") {
+        toast({
+          title: "エラーが発生しました",
+          description: "ログイン中のユーザーは削除できません。",
+          variant: "destructive",
+        });
+
+        return;
+      }
+
       toast({
         title: "エラーが発生しました",
         description: "スタッフの削除に失敗しました。もう一度お試しください。",
@@ -238,13 +249,30 @@ export default function StaffPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem
-                                className="text-red-600"
-                                onClick={() => setDeleteTargetStaff(staff)}
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                削除
-                              </DropdownMenuItem>
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div>
+                                      <DropdownMenuItem
+                                        className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
+                                        onClick={() => setDeleteTargetStaff(staff)}
+                                        disabled={staff.id === user?.id}
+                                      >
+                                        <Trash2 className="h-4 w-4 mr-2" />
+                                        削除
+                                      </DropdownMenuItem>
+                                    </div>
+                                  </TooltipTrigger>
+                                  {staff.id === user?.id ? (
+                                    <TooltipContent>
+                                      <p>
+                                        ログイン中のユーザーは削除できません。
+                                      </p>
+                                    </TooltipContent>
+                                  ) : null}
+                                </Tooltip>
+                              </TooltipProvider>
+                              
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>

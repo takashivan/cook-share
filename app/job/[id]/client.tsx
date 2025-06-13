@@ -131,10 +131,56 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
     );
   });
 
-  console.log("Overlapping Job:", overlappingJob);
+  const closedApplyReasonCode = workSessions?.some(
+      (session) => session.job_id === jobDetail.job.id
+    )
+    ? "already_applied" as const
+    : jobDetail.job.number_of_spots === 0
+    ? "max_spots_reached" as const
+    : jobDetail.job.expiry_date != null &&
+      new Date(jobDetail.job.expiry_date) <= new Date()
+    ? "expired" as const
+    : null;
+
+  const cannotApplyReasonCode = closedApplyReasonCode
+    ? closedApplyReasonCode
+    : !user
+    ? "not_logged_in" as const
+    : overlappingJob != null
+    ? "overlapping_job" as const
+    : !user.stripe_verified
+    ? "not_stripe_verified" as const
+    : !user.is_approved
+    ? "not_approved" as const
+    : null;
+
+  const applyButtonText = cannotApplyReasonCode === "not_logged_in"
+    ? "シェフとしてログインして応募する"
+    : cannotApplyReasonCode === "not_stripe_verified"
+    ? "Stripeアカウントの登録が完了していません"
+    : cannotApplyReasonCode === "not_approved"
+    ? "シェフとしての審査が完了していません"
+    : cannotApplyReasonCode === "already_applied"
+    ? "応募済み"
+    : cannotApplyReasonCode === "max_spots_reached"
+    ? "募集人数が上限に達しました"
+    : cannotApplyReasonCode === "expired"
+    ? "募集期間が終了しました"
+    : cannotApplyReasonCode === "overlapping_job"
+    ? `この時間帯には${overlappingJob?.job.restaurant.name}の仕事が入っています`
+    : "応募する";
+
+  const handleApplyButtonClick = () => {
+    if (cannotApplyReasonCode === "not_logged_in") {
+      router.push("/login?redirect=/job/" + jobDetail.job.id);
+      return;
+    }
+
+    setIsApplyModalOpen(true);
+  }
 
   const applyToJob = async () => {
-    if (!user) {
+    if (user == null || cannotApplyReasonCode === "not_logged_in") {
       toast({
         variant: "destructive",
         description: "ログインしてください",
@@ -142,7 +188,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
       return;
     }
 
-    if (!user.is_approved) {
+    if (cannotApplyReasonCode === "not_approved") {
       toast({
         variant: "destructive",
         description:
@@ -151,11 +197,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
       return;
     }
 
-    const workSession = workSessions?.find(
-      (session) => session.job_id === jobDetail.job.id
-    );
-
-    if (workSession) {
+    if (cannotApplyReasonCode === "already_applied") {
       toast({
         variant: "destructive",
         description: "すでに応募済みです",
@@ -163,7 +205,23 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
       return;
     }
 
-    if (overlappingJob) {
+    if (cannotApplyReasonCode === "max_spots_reached") {
+      toast({
+        variant: "destructive",
+        description: "募集人数が上限に達しました",
+      });
+      return;
+    }
+
+    if (cannotApplyReasonCode === "expired") {
+      toast({
+        variant: "destructive",
+        description: "募集期間が終了しました",
+      });
+      return;
+    }
+
+    if (cannotApplyReasonCode === "overlapping_job") {
       toast({
         variant: "destructive",
         description: "この時間帯にはすでに他の仕事が入っています",
@@ -326,21 +384,11 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                     <Badge
                       variant="secondary"
                       className={`text-sm ${
-                        jobDetail.job.number_of_spots > 0 &&
-                        !workSessions?.some(
-                          (session) => session.job_id === jobDetail.job.id
-                        ) &&
-                        jobDetail.job.expiry_date &&
-                        new Date(jobDetail.job.expiry_date) > new Date()
+                        closedApplyReasonCode == null
                           ? "bg-black text-white"
                           : "bg-gray-500 text-white"
                       }`}>
-                      {jobDetail.job.number_of_spots > 0 &&
-                      !workSessions?.some(
-                        (session) => session.job_id === jobDetail.job.id
-                      ) &&
-                      jobDetail.job.expiry_date &&
-                      new Date(jobDetail.job.expiry_date) > new Date()
+                      {closedApplyReasonCode == null
                         ? `募集中`
                         : "締め切りました"}
                     </Badge>
@@ -363,46 +411,14 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                     </div>
 
                     <Button
-                      onClick={() => setIsApplyModalOpen(true)}
-                      disabled={
-                        !user ||
-                        !user.is_approved ||
-                        jobDetail.job.number_of_spots === 0 ||
-                        workSessions?.some(
-                          (session) => session.job_id === jobDetail.job.id
-                        ) ||
-                        (jobDetail.job.expiry_date != null &&
-                          new Date(jobDetail.job.expiry_date) <= new Date()) ||
-                        overlappingJob != null
-                      }
+                      onClick={handleApplyButtonClick}
+                      disabled={cannotApplyReasonCode != null && cannotApplyReasonCode !== "not_logged_in"}
                       className={`w-full py-2 text-sm font-medium transition-all duration-300 transform hover:scale-[1.02] ${
-                        user &&
-                        jobDetail.job.number_of_spots > 0 &&
-                        !workSessions?.some(
-                          (session) => session.job_id === jobDetail.job.id
-                        ) &&
-                        jobDetail.job.expiry_date != null &&
-                        new Date(jobDetail.job.expiry_date) > new Date() &&
-                        overlappingJob == null
+                        cannotApplyReasonCode == null || cannotApplyReasonCode === "not_logged_in"
                           ? "bg-orange-600 hover:bg-orange-700 text-white"
                           : "bg-gray-300 text-gray-500 cursor-not-allowed"
                       }`}>
-                      {!user
-                        ? "シェフとしてログインして応募する"
-                        : !user.is_approved
-                        ? "シェフとしての審査が完了していません"
-                        : workSessions?.some(
-                            (session) => session.job_id === jobDetail.job.id
-                          )
-                        ? "応募済み"
-                        : jobDetail.job.number_of_spots === 0
-                        ? "募集人数が上限に達しました"
-                        : jobDetail.job.expiry_date != null &&
-                          new Date(jobDetail.job.expiry_date) <= new Date()
-                        ? "募集期間が終了しました"
-                        : overlappingJob != null
-                        ? `この時間帯には${overlappingJob.job.restaurant.name}の仕事が入っています`
-                        : "応募する"}
+                      {applyButtonText}
                     </Button>
                   </div>
                 </motion.div>
@@ -642,23 +658,13 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
                     <Badge
                       variant="secondary"
                       className={`${
-                        jobDetail.job.number_of_spots > 0 &&
-                        !workSessions?.some(
-                          (session) => session.job_id === jobDetail.job.id
-                        ) &&
-                        jobDetail.job.expiry_date &&
-                        new Date(jobDetail.job.expiry_date) > new Date()
+                        closedApplyReasonCode == null
                           ? "bg-black text-white"
                           : "bg-gray-500 text-white"
                       }`}>
-                      {jobDetail.job.number_of_spots > 0 &&
-                      !workSessions?.some(
-                        (session) => session.job_id === jobDetail.job.id
-                      ) &&
-                      jobDetail.job.expiry_date &&
-                      new Date(jobDetail.job.expiry_date) > new Date()
+                      {closedApplyReasonCode == null
                         ? `募集中`
-                        : "締め切り"}
+                        : "締め切りました"}
                     </Badge>
                   </div>
 
@@ -694,46 +700,14 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
 
                 {/* Apply Button */}
                 <Button
-                  onClick={() => setIsApplyModalOpen(true)}
-                  disabled={
-                    !user ||
-                    !user.is_approved ||
-                    jobDetail.job.number_of_spots === 0 ||
-                    workSessions?.some(
-                      (session) => session.job_id === jobDetail.job.id
-                    ) ||
-                    (jobDetail.job.expiry_date != null &&
-                      new Date(jobDetail.job.expiry_date) <= new Date()) ||
-                    overlappingJob != null
-                  }
+                  onClick={handleApplyButtonClick}
+                  disabled={cannotApplyReasonCode != null && cannotApplyReasonCode !== "not_logged_in"}
                   className={`w-full py-2 text-sm font-medium transition-all duration-300 transform hover:scale-[1.02] ${
-                    user &&
-                    jobDetail.job.number_of_spots > 0 &&
-                    !workSessions?.some(
-                      (session) => session.job_id === jobDetail.job.id
-                    ) &&
-                    jobDetail.job.expiry_date &&
-                    new Date(jobDetail.job.expiry_date) > new Date() &&
-                    overlappingJob == null
+                    cannotApplyReasonCode == null || cannotApplyReasonCode === "not_logged_in"
                       ? "bg-orange-600 hover:bg-orange-700 text-white"
                       : "bg-gray-300 text-gray-500 cursor-not-allowed"
                   }`}>
-                  {!user
-                    ? "シェフとしてログインして応募する"
-                    : !user.is_approved
-                    ? "シェフとしての審査が完了していません"
-                    : workSessions?.some(
-                        (session) => session.job_id === jobDetail.job.id
-                      )
-                    ? "応募済み"
-                    : jobDetail.job.number_of_spots === 0
-                    ? "募集人数が上限に達しました"
-                    : jobDetail.job.expiry_date != null &&
-                      new Date(jobDetail.job.expiry_date) <= new Date()
-                    ? "募集期間が終了しました"
-                    : overlappingJob != null
-                    ? `この時間帯には${overlappingJob.job.restaurant.name}の仕事が入っています`
-                    : "応募する"}
+                  {applyButtonText}
                 </Button>
               </div>
             </motion.div>

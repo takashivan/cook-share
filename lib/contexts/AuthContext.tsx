@@ -27,7 +27,7 @@ export interface AuthContextType {
   user: LoginCreateData["user"] | null;
   isAuthenticated: boolean;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<LoginCreateData["user"]>;
   logout: () => void;
   register: (data: SignupCreatePayload) => Promise<void>;
   createProfile: (data: ProfilePartialUpdatePayload) => Promise<{
@@ -43,22 +43,7 @@ export interface AuthContextType {
   reloadUser: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  isAuthenticated: false,
-  loading: true,
-  login: async () => {},
-  logout: () => {},
-  register: async () => {},
-  createProfile: async () => ({ status: "error" as const, error: "Not implemented" }),
-  update: async () => {},
-  changeEmail: async () => {},
-  confirmEmail: async () => {},
-  changePassword: async () => {},
-  deleteAccount: async () => {},
-  setUser: () => {},
-  reloadUser: async () => {},
-});
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<LoginCreateData["user"] | null>(null);
@@ -146,6 +131,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         password,
       });
       setAuth(data.sessionToken, data.user);
+      return data.user;
     } catch (error) {
       console.error("Login error:", error);
       throw error;
