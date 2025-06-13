@@ -53,6 +53,7 @@ import { ErrorPage } from "@/components/layout/ErrorPage";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import Link from "next/link";
 import { ChefJobCancelModal } from "@/components/modals/ChefJobCancelModal";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type PageProps = {
   params: Promise<{
@@ -147,7 +148,21 @@ export default function JobDetail({ params }: PageProps) {
   } = useGetJobChangeRequest({
     worksessionsId: workSession?.id,
   });
+
   const pendingRequest = changeRequest?.status === "PENDING" ? changeRequest : null;
+
+  const isTodayOrBefore = (targetDate: string) => {
+    const today = new Date();
+    // 時刻を無視して「日付だけ」で比較するために00:00:00にリセット
+    today.setHours(0, 0, 0, 0);
+
+    const inputDate = new Date(targetDate);
+    inputDate.setHours(0, 0, 0, 0);
+
+    return inputDate <= today;
+  }
+  // work_dateの日付が、今日か今日より前の場合のみtrueになるようにする
+  const canStartWork = job?.work_date && isTodayOrBefore(job.work_date);
 
   const { trigger: acceptJobChangeRequest } = useAcceptJobChangeRequest({
     jobChangeRequestId: pendingRequest?.id,
@@ -311,12 +326,28 @@ export default function JobDetail({ params }: PageProps) {
     switch (workSession.status) {
       case "SCHEDULED":
         return (
-          <Button
-            className="w-full bg-chefdom-orange hover:bg-chefdom-orange-dark"
-            onClick={handleStartWork}
-          >
-            勤務開始
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  <Button
+                    className="w-full bg-chefdom-orange hover:bg-chefdom-orange-dark"
+                    onClick={handleStartWork}
+                    disabled={!canStartWork}
+                  >
+                    勤務開始
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {!canStartWork ? (
+                <TooltipContent>
+                  <p>
+                    勤務開始は当日から可能です
+                  </p>
+                </TooltipContent>
+              ) : null}
+            </Tooltip>
+          </TooltipProvider>
         );
       case "IN_PROGRESS":
         return (
