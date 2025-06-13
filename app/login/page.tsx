@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import { ForgotPasswordModal } from "@/components/modals/ForgotPasswordModal";
@@ -21,8 +21,12 @@ import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { user, login } = useAuth();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get("redirect");
+
+  const { login } = useAuth();
   const { user: companyUser, logout: companyUserLogout } = useCompanyAuth();
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] =
     useState(false);
@@ -43,17 +47,26 @@ export default function LoginPage() {
         password: formData.get("password") as string,
       };
 
-      await login(data.email, data.password);
+      const loggedinUser = await login(data.email, data.password);
 
-      toast({
-        title: "ログインしました",
-        description: "ダッシュボードに移動します。",
-      });
-
-      if (!user?.profile_completed) {
+      if (!loggedinUser?.profile_completed) {
         router.push("/register/chef-profile");
+        toast({
+          title: "ログインしました",
+          description: "シェフプロフィールを登録してください。",
+        });
+      } else if (redirectUrl) {
+        // リダイレクトURLが指定されている場合はそこにリダイレクト
+        router.push(redirectUrl);
+        toast({
+          title: "ログインしました",
+        });
       } else {
-        router.push("/");
+        router.push("/chef/dashboard");
+        toast({
+          title: "ログインしました",
+          description: "ダッシュボードに移動します。",
+        });
       }
     } catch (error) {
       console.error("Login failed:", error);

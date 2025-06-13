@@ -43,17 +43,20 @@ export default function CompanyLoginPage() {
         password: formData.get("password") as string,
       };
 
-      await login(data.email, data.password);
+      const loggedinUser = await login(data.email, data.password);
 
-      toast({
-        title: "ログインしました",
-        description: "ダッシュボードに移動します。",
-      });
-
-      if (user?.companies_id == null) {
+      if (loggedinUser?.companies_id == null) {
         router.push("/register/company-profile");
+        toast({
+          title: "ログインしました",
+          description: "会社プロフィールを登録してください",
+        });
       } else {
         router.push("/admin");
+        toast({
+          title: "ログインしました",
+          description: "ダッシュボードに移動します。",
+        });
       }
     } catch (error) {
       console.error("Login failed:", error);

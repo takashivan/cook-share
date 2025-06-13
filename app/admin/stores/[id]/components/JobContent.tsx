@@ -86,7 +86,24 @@ export function JobContent({
 
   // 求人を状態ごとにフィルタリング
   const filteredJobsList = {
-    // マッチング済み、かつ、未チェックインorチェックイン済or勤務完了 の求人
+    // 進行中（募集中、下書き、一時停止中）
+    inProgress: jobWithWorkSessions.filter((job) => {
+      const isPublished =
+        job.status === "PUBLISHED" &&
+        (!job.expiry_date || job.expiry_date > Date.now()) &&
+        job.workSessionCount === 0;
+      const isDraft = job.status === "DRAFT";
+      const isPending = job.status === "PENDING";
+      return isPublished || isDraft || isPending;
+    }).sort((a, b) => {
+      // ソート１：jobのexpiry_dateの昇順
+      // ソート２：jobのcreated_atの降順
+      return (
+        (a.expiry_date ? new Date(a.expiry_date).getTime() : 0) - (b.expiry_date ? new Date(b.expiry_date).getTime() : 0) ||
+        (b.created_at ? new Date(b.created_at).getTime() : 0) - (a.created_at ? new Date(a.created_at).getTime() : 0)
+      );
+    }),
+    // マッチング済み（未チェックイン、チェックイン済、勤務完了）
     filled: jobWithWorkSessions.filter((job) => {
       const lastWorksessionStatus = job.lastWorksession?.status;
 
@@ -106,26 +123,7 @@ export function JobContent({
         (a.lastWorksession?.created_at ? new Date(a.lastWorksession.created_at).getTime() : 0)
       );
     }),
-    // 未マッチング、かつ、掲載期限より前、かつ、応募が１回も無い求人
-    published: jobWithWorkSessions.filter((job) => {
-      return (
-        job.status === "PUBLISHED" &&
-        (!job.expiry_date || job.expiry_date > Date.now()) &&
-        job.workSessionCount === 0
-      );
-    }).sort((a, b) => {
-      // ソート１：jobのexpiry_dateの昇順
-      // ソート２：jobのcreated_atの降順
-      return (
-        (a.expiry_date ? new Date(a.expiry_date).getTime() : 0) - (b.expiry_date ? new Date(b.expiry_date).getTime() : 0) ||
-        (b.created_at ? new Date(b.created_at).getTime() : 0) - (a.created_at ? new Date(a.created_at).getTime() : 0)
-      );
-    }),
-    // 下書きの求人
-    draft: jobWithWorkSessions.filter((job) => job.status === "DRAFT"),
-    // 一時停止中の求人
-    pending: jobWithWorkSessions.filter((job) => job.status === "PENDING"),
-    // 未マッチングかつ掲載期限が過ぎた求人、または、マッチング済みかつ勤務完了報告承認済みまたはキャンセル済みの求人
+    // 過去（未マッチングかつ掲載期限が過ぎた求人、または、マッチング済みかつ勤務完了報告承認済み、または、キャンセル済みの求人）
     expired: jobWithWorkSessions.filter((job) => {
       return (
         (job.status === "PUBLISHED" &&
@@ -217,47 +215,31 @@ export function JobContent({
           }}
         />
       ) : (
-        <Tabs defaultValue="filled" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+        <Tabs defaultValue="inProgress" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="inProgress">進行中</TabsTrigger>
             <TabsTrigger value="filled">マッチング済</TabsTrigger>
-            <TabsTrigger value="published">未マッチング</TabsTrigger>
-            <TabsTrigger value="draft">下書き</TabsTrigger>
-            <TabsTrigger value="pending">一時停止中</TabsTrigger>
-            <TabsTrigger value="expired">過去の求人</TabsTrigger>
+            <TabsTrigger value="expired">過去（終了）</TabsTrigger>
           </TabsList>
 
+          <TabsContent value={"inProgress"}>
+            <JobList
+              jobWithWorkSessions={filteredJobsList.inProgress}
+              statusText="進行中"
+              onCopyJobAction={handleCopyJob}
+            />
+          </TabsContent>
           <TabsContent value={"filled"}>
             <JobList
               jobWithWorkSessions={filteredJobsList.filled}
-              statusText="マッチング済み"
-              onCopyJobAction={handleCopyJob}
-            />
-          </TabsContent>
-          <TabsContent value={"published"}>
-            <JobList
-              jobWithWorkSessions={filteredJobsList.published}
-              statusText="未マッチング"
-              onCopyJobAction={handleCopyJob}
-            />
-          </TabsContent>
-          <TabsContent value={"draft"}>
-            <JobList
-              jobWithWorkSessions={filteredJobsList.draft}
-              statusText="下書き"
-              onCopyJobAction={handleCopyJob}
-            />
-          </TabsContent>
-          <TabsContent value={"pending"}>
-            <JobList
-              jobWithWorkSessions={filteredJobsList.pending}
-              statusText="一時停止中"
+              statusText="マッチング済"
               onCopyJobAction={handleCopyJob}
             />
           </TabsContent>
           <TabsContent value={"expired"}>
             <JobList
               jobWithWorkSessions={filteredJobsList.expired}
-              statusText="過去"
+              statusText="過去（終了）"
               onCopyJobAction={handleCopyJob}
             />
           </TabsContent>

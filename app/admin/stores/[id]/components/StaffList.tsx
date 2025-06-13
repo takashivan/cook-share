@@ -26,6 +26,8 @@ import { CompanyusersCreateInput } from "@/api/__generated__/base/data-contracts
 import { useCreateCompanyUserByRestaurantId } from "@/hooks/api/companyuser/companyUsers/useCreateCompanyUserByRestaurantId";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { ErrorPage } from "@/components/layout/ErrorPage";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 
 interface StaffListProps {
   restaurantId?: number;
@@ -38,6 +40,8 @@ export function StaffList({
   restaurantName,
   companyId,
 }: StaffListProps) {
+  const { user } = useCompanyAuth();
+
   const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
 
   const [isDeleting, setIsDeleting] = useState(false);
@@ -118,6 +122,16 @@ export function StaffList({
         }をスタッフから削除しました。`,
       });
     } catch (error) {
+      if ((error as any).response?.data?.payload?.code === "cannot_delete_logged_user") {
+        toast({
+          title: "エラーが発生しました",
+          description: "ログイン中のユーザーは削除できません。",
+          variant: "destructive",
+        });
+
+        return;
+      }
+      
       toast({
         title: "エラーが発生しました",
         description: "スタッフの削除に失敗しました。",
@@ -183,19 +197,35 @@ export function StaffList({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            className="text-red-600"
-                            onClick={() =>
-                              setDeleteTargetStaff({
-                                id: staff.id,
-                                companyuser: {
-                                  name: staff.name,
-                                  email: staff.email,
-                                },
-                              })
-                            }>
-                            削除
-                          </DropdownMenuItem>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div>
+                                  <DropdownMenuItem
+                                    className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
+                                    disabled={staff.id === user?.id}
+                                    onClick={() =>
+                                      setDeleteTargetStaff({
+                                        id: staff.id,
+                                        companyuser: {
+                                          name: staff.name,
+                                          email: staff.email,
+                                        },
+                                      })
+                                    }>
+                                    削除
+                                  </DropdownMenuItem>
+                                </div>
+                              </TooltipTrigger>
+                              {staff.id === user?.id ? (
+                                <TooltipContent>
+                                  <p>
+                                    ログイン中のユーザーは削除できません。
+                                  </p>
+                                </TooltipContent>
+                              ) : null}
+                            </Tooltip>
+                          </TooltipProvider>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

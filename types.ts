@@ -65,22 +65,22 @@ export interface User {
   address?: string;
 }
 
-export interface WorkSession {
-  id: number;
-  application_id: string;
-  user_id: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-  check_in_time: number;
-  check_out_time: number;
-  restaurant_name: string;
-}
+// export interface WorkSession {
+//   id: number;
+//   application_id: string;
+//   user_id: string;
+//   status: string;
+//   created_at: string;
+//   updated_at: string;
+//   check_in_time: number;
+//   check_out_time: number;
+//   restaurant_name: string;
+// }
 
-export interface WorkSessionWithUser extends WorkSession {
-  user: User;
-  job: Job;
-}
+// export interface WorkSessionWithUser extends WorkSession {
+//   user: User;
+//   job: Job;
+// }
 
 export interface CuisineCategory {
   id: number;
@@ -90,33 +90,33 @@ export interface CuisineCategory {
   is_primary: boolean;
 }
 
-export interface ChefReview {
-  id: number;
-  created_at: string;
-  updated_at: string;
-  rating: number;
-  comment: string;
-  worksession_id: number;
-  reviewer_id: string;
-  reviewee_id: number;
-  user: User;
-  restaurant: Restaurant;
-  worksession: WorkSession;
-}
+// export interface ChefReview {
+//   id: number;
+//   created_at: string;
+//   updated_at: string;
+//   rating: number;
+//   comment: string;
+//   worksession_id: number;
+//   reviewer_id: string;
+//   reviewee_id: number;
+//   user: User;
+//   restaurant: Restaurant;
+//   worksession: WorkSession;
+// }
 
-export interface RestaurantReview {
-  id: number;
-  created_at: string;
-  updated_at: string;
-  rating: number;
-  comment: string;
-  worksession_id: number;
-  reviewer_id: number;
-  reviewee_id: string;
-  user: User;
-  restaurant: Restaurant;
-  worksession: WorkSession;
-}
+// export interface RestaurantReview {
+//   id: number;
+//   created_at: string;
+//   updated_at: string;
+//   rating: number;
+//   comment: string;
+//   worksession_id: number;
+//   reviewer_id: number;
+//   reviewee_id: string;
+//   user: User;
+//   restaurant: Restaurant;
+//   worksession: WorkSession;
+// }
 
 export interface Restaurant {
   id: string;

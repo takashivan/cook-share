@@ -55,7 +55,10 @@ export const CreateJobModal = ({
       work_date: new Date().toISOString().split("T")[0],
       start_time: "10:00",
       end_time: "18:00",
-      fee: 12000,
+      expiry_date: formatDateToLocalISOStringForDatetimeLocal(
+        new Date(new Date().setHours(10, 0, 0, 0))
+      ),
+      fee: 14800,
       transportation_type: "NONE",
       transportation_amount: undefined,
     },
@@ -64,7 +67,6 @@ export const CreateJobModal = ({
   // initialDataが変更されたときにフォームの値を更新
   useEffect(() => {
     if (initialData) {
-      console.log("initialData:", initialData);
       Object.entries(initialData).forEach(([key, value]) => {
         if (key === "start_time" || key === "end_time") {
           // 時間のフォーマットを調整
@@ -382,7 +384,7 @@ export const CreateJobModal = ({
                             },
                           })}
                           className="mt-1"
-                          placeholder="例：12000"
+                          placeholder="例：14800"
                         />
                         {errors.fee && (
                           <p className="mt-1 text-sm text-red-600">
@@ -474,7 +476,6 @@ export const CreateJobModal = ({
                       <Controller
                         name="transportation_type"
                         control={control}
-                        defaultValue="NONE"
                         render={({ field: { onChange, value } }) => (
                           <RadioGroup
                             value={value}
