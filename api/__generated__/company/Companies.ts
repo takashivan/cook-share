@@ -37,11 +37,11 @@ export class Companies<
   SecurityDataType = unknown,
 > extends HttpClient<SecurityDataType> {
   /**
-   * @description Add Companies record <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH]特殊：company=companyIdではなく、companyUserAuthだけ <br /><br /> <b>Authentication:</b> not required
    *
    * @tags companies
    * @name InitialCreate
-   * @summary Add Companies record
+   * @summary [AUTH]特殊：company=companyIdではなく、companyUserAuthだけ
    * @request POST:/companies/initial
    */
   initialCreate = (data: InitialCreatePayload, params: RequestParams = {}) =>

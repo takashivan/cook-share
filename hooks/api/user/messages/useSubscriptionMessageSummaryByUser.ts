@@ -109,10 +109,14 @@ export const useSubscriptionMessageSummaryByUser = (
               } else {
                 getRequest.mutate();
 
+                // TODO: メッセージでworkSessionIdをもらわないといけない
                 // jobの変更リクエストの再取得
-                const jobChangeRequestsApi = getApi(JobChangeRequests);
-                const jobChangeRequestsKey = jobChangeRequestsApi.jobChangeRequestsListQueryArgs()[0];
-                mutate(jobChangeRequestsKey)
+                // if (params.workSessionId) {
+                //   const worksessionsApi = getApi(Worksessions);
+                //   const jobChangeRequestsKey =
+                //     worksessionsApi.jobChangeRequestChefListQueryArgs(params.workSessionId)[0];
+                //   mutate(jobChangeRequestsKey);
+                // }
 
                 next();
               }

@@ -115,20 +115,7 @@ export default function ChefProfilePage() {
       const dateofbirth = data.dateofbirth ? format(data.dateofbirth, "yyyy-MM-dd") : '';
       
       const newData = {
-        last_name: data.last_name,
-        given_name: data.given_name,
-        last_name_kana: data.last_name_kana,
-        given_name_kana: data.given_name_kana,
-        phone: data.phone,
-        postal_code: data.postal_code,
-        prefecture: data.prefecture,
-        city: data.city,
-        town: data.town,
-        street: data.street,
-        address2: data.address2,
-        bio: data.bio,
-        experience_level: data.experience_level,
-        position_level: data.position_level,
+        ...data,
         photo: data.photo || null,
         skills: data.skills || [],
         email: user.email,

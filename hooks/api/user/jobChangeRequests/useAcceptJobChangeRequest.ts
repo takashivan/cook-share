@@ -2,12 +2,14 @@ import { getApi } from "@/api/api-factory";
 import useSWRMutation from "swr/mutation";
 import { JobChangeRequests } from "@/api/__generated__/base/JobChangeRequests";
 import { useSWRConfig } from "swr";
-import { JobChangeRequestsListData, JobsDetailData } from "@/api/__generated__/base/data-contracts";
+import { JobChangeRequestChefListData, JobChangeRequestsListData, JobsDetailData } from "@/api/__generated__/base/data-contracts";
 import { Jobs } from "@/api/__generated__/base/Jobs";
 import { Users } from "@/api/__generated__/base/Users";
+import { Worksessions } from "@/api/__generated__/base/Worksessions";
 export interface Params {
   jobChangeRequestId?: string;
   userId?: string;
+  workSessionId?: number;
 }
 
 export const useAcceptJobChangeRequest = (params: Params) => {
@@ -25,22 +27,17 @@ export const useAcceptJobChangeRequest = (params: Params) => {
     ), {
       throwOnError: true,
       onSuccess: (data) => {
-        // Job変更リクエストのリストのキャッシュを更新
-        const jobChangeRequestsKey =
-          jobChangeRequests.jobChangeRequestsListQueryArgs()[0];
-        mutate(jobChangeRequestsKey, async (currentItems: JobChangeRequestsListData | undefined) => {
-          if (!currentItems) return currentItems;
+        if (params.workSessionId) {
+          // Job変更リクエストのリストのキャッシュを更新
+          const worksessionsApi = getApi(Worksessions);
+          const jobChangeRequestsKey =
+            worksessionsApi.jobChangeRequestChefListQueryArgs(params.workSessionId)[0];
+          mutate(jobChangeRequestsKey, async (currentItem: JobChangeRequestChefListData | undefined) => {
+            if (!currentItem) return currentItem;
 
-          const updatedItems = currentItems.map((item) => {
-            if (item.id !== data.job_change_request.id) {
-              return item;
-            }
-            // レスポンスのidと一致するJob変更リクエストを見つけたら、更新されたデータで上書き
             return data.job_change_request;
-          });
-
-          return updatedItems;
-        }, { revalidate: false });
+          }, { revalidate: false });
+        }
 
         // 該当のJobのキャッシュを更新
         const jobId = data.job.id;

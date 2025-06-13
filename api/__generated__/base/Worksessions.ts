@@ -18,7 +18,9 @@ import {
   ChefReviewListResult,
   FinishPartialUpdateBody,
   FinishPartialUpdateResult,
+  JobChangeRequestChefListData,
   JobChangeRequestListData,
+  JobChangeRequestRestaurantListData,
   MessagesListResult,
   NoShowPartialUpdateData,
   RejectPartialUpdateInput,
@@ -146,10 +148,11 @@ export class Worksessions<
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH]User <br /><br /> <b>Authentication:</b> not required
    *
    * @tags worksessions
    * @name FinishPartialUpdate
+   * @summary [AUTH]User
    * @request PATCH:/worksessions/{worksession_id}/finish
    */
   finishPartialUpdate = (
@@ -177,6 +180,72 @@ export class Worksessions<
       { arg }: { arg: FinishPartialUpdateBody },
     ) => Promise<FinishPartialUpdateResult> = (_, { arg }) =>
       this.finishPartialUpdate(worksessionId, arg, params).then(
+        (res) => res.data,
+      );
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags worksessions
+   * @name JobChangeRequestChefList
+   * @request GET:/worksessions/{worksession_id}/job-change-request/chef
+   */
+  jobChangeRequestChefList = (
+    worksessionId: number,
+    params: RequestParams = {},
+  ) =>
+    this.request<JobChangeRequestChefListData, void>({
+      path: `/worksessions/${worksessionId}/job-change-request/chef`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  jobChangeRequestChefListQueryArgs = (
+    worksessionId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled
+      ? [`/worksessions/${worksessionId}/job-change-request/chef`]
+      : null;
+    const fetcher = () =>
+      this.jobChangeRequestChefList(worksessionId, params).then(
+        (res) => res.data,
+      );
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags worksessions
+   * @name JobChangeRequestRestaurantList
+   * @request GET:/worksessions/{worksession_id}/job-change-request/restaurant
+   */
+  jobChangeRequestRestaurantList = (
+    worksessionId: number,
+    params: RequestParams = {},
+  ) =>
+    this.request<JobChangeRequestRestaurantListData, void>({
+      path: `/worksessions/${worksessionId}/job-change-request/restaurant`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  jobChangeRequestRestaurantListQueryArgs = (
+    worksessionId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled
+      ? [`/worksessions/${worksessionId}/job-change-request/restaurant`]
+      : null;
+    const fetcher = () =>
+      this.jobChangeRequestRestaurantList(worksessionId, params).then(
         (res) => res.data,
       );
     return [key, fetcher] as const;
@@ -237,10 +306,11 @@ export class Worksessions<
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH-CompanyUser]レストランのスタッフしかキャンセルできない <br /><br /> <b>Authentication:</b> not required
    *
    * @tags worksessions
    * @name NoShowPartialUpdate
+   * @summary [AUTH-CompanyUser]レストランのスタッフしかキャンセルできない
    * @request PATCH:/worksessions/{worksession_id}/no-show
    */
   noShowPartialUpdate = (worksessionId: number, params: RequestParams = {}) =>
@@ -263,10 +333,11 @@ export class Worksessions<
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH]restaurantの権限 <br /><br /> <b>Authentication:</b> not required
    *
    * @tags worksessions
    * @name RejectPartialUpdate
+   * @summary [AUTH]restaurantの権限
    * @request PATCH:/worksessions/{worksession_id}/reject
    */
   rejectPartialUpdate = (
@@ -366,10 +437,11 @@ export class Worksessions<
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH]restaurantの権限 <br /><br /> <b>Authentication:</b> not required
    *
    * @tags worksessions
    * @name VerifyPartialUpdate
+   * @summary [AUTH]restaurantの権限
    * @request PATCH:/worksessions/{worksession_id}/verify
    */
   verifyPartialUpdate = (

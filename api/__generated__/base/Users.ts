@@ -299,10 +299,11 @@ export class Users<
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH]User <br /><br /> <b>Authentication:</b> not required
    *
    * @tags users
    * @name PayoutLogsList
+   * @summary [AUTH]User
    * @request GET:/users/{user_id}/payout-logs
    */
   payoutLogsList = (userId: string, params: RequestParams = {}) =>
@@ -351,10 +352,11 @@ export class Users<
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH]User <br /><br /> <b>Authentication:</b> not required
    *
    * @tags users
    * @name ReviewsList
+   * @summary [AUTH]User
    * @request GET:/users/{user_id}/reviews
    */
   reviewsList = (userId: string, params: RequestParams = {}) =>
@@ -377,10 +379,11 @@ export class Users<
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH]User <br /><br /> <b>Authentication:</b> not required
    *
    * @tags users
    * @name SessionHistoryCurrentList
+   * @summary [AUTH]User
    * @request GET:/users/{user_id}/sessionHistory/current
    */
   sessionHistoryCurrentList = (userId: string, params: RequestParams = {}) =>
@@ -519,10 +522,11 @@ export class Users<
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH]User <br /><br /> <b>Authentication:</b> not required
    *
    * @tags users
    * @name WorksessionsList
+   * @summary [AUTH]User
    * @request GET:/users/{user_id}/worksessions
    */
   worksessionsList = (userId: string, params: RequestParams = {}) =>

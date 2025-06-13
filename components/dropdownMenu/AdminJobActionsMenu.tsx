@@ -131,6 +131,7 @@ export function AdminJobActionsMenu({
             onCloseAction={() => setIsCancelModalOpen(false)}
             job={job}
             workSession={workSession}
+            sendMessageAction={sendMessageAction}
           />
           <JobChangeRequestModal
             isOpen={isChangeRequestModalOpen}

@@ -7,6 +7,7 @@ import realTimeClient from "@/api/xano";
 import { Companyusers } from "@/api/__generated__/base/Companyusers";
 import { XanoRealtimeChannel } from "@xano/js-sdk/lib/models/realtime-channel";
 import { JobChangeRequests } from "@/api/__generated__/base/JobChangeRequests";
+import { Worksessions } from "@/api/__generated__/base/Worksessions";
 
 export interface Params {
   companyUserId?: string;
@@ -56,9 +57,12 @@ export const useSubscriptionMessagesByCompanyUserId = (params: Params) => {
                   getRequest.mutate();
 
                   // jobの変更リクエストの再取得
-                  const jobChangeRequestsApi = getApi(JobChangeRequests);
-                  const jobChangeRequestsKey = jobChangeRequestsApi.jobChangeRequestsListQueryArgs()[0];
-                  mutate(jobChangeRequestsKey)
+                  if (params.workSessionId) {
+                    const worksessionsApi = getApi(Worksessions);
+                    const jobChangeRequestsKey =
+                      worksessionsApi.jobChangeRequestRestaurantListQueryArgs(params.workSessionId)[0];
+                    mutate(jobChangeRequestsKey);
+                  }
 
                   next();
                 }

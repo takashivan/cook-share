@@ -17,7 +17,7 @@ import { toast } from "@/hooks/use-toast";
 import { useCreateJobChangeRequest } from "@/hooks/api/companyuser/jobChangeRequests/useCreateJobChangeRequest";
 import { useForm } from "react-hook-form";
 import { JobsDetailData, WorksessionsRestaurantTodosListData } from "@/api/__generated__/base/data-contracts";
-import { useGetJobChangeRequests } from "@/hooks/api/companyuser/jobChangeRequests/useGetJobChangeRequests";
+import { useGetJobChangeRequest } from "@/hooks/api/companyuser/jobChangeRequests/useGetJobChangeRequest";
 import { useDeleteJobChangeRequest } from "@/hooks/api/companyuser/jobChangeRequests/useDeleteJobChangeRequest";
 import { ErrorPage } from "../layout/ErrorPage";
 import { LoadingSpinner } from "../LoadingSpinner";
@@ -53,11 +53,10 @@ export function JobChangeRequestModal({
     data: existingChangeRequest,
     error: changeRequestError,
     isLoading: changeRequestLoading,
-  } = useGetJobChangeRequests();
-  const pendingRequest = existingChangeRequest?.find(
-    (req) =>
-      req.worksession_id === worksession.id && req.status === "PENDING"
-  );
+  } = useGetJobChangeRequest({
+    worksessionsId: worksession.id,
+  });
+  const pendingRequest = existingChangeRequest?.status === "PENDING" ? existingChangeRequest : null;
 
   const {
     register,
@@ -85,10 +84,13 @@ export function JobChangeRequestModal({
     onCloseAction();
   }
 
-  const { trigger: createJobChangeRequest } = useCreateJobChangeRequest();
+  const { trigger: createJobChangeRequest } = useCreateJobChangeRequest({
+    worksessionsId: worksession.id,
+  });
 
   const { trigger: deleteJobChangeRequest } = useDeleteJobChangeRequest({
     jobChangeRequestId: pendingRequest?.id,
+    worksessionsId: worksession.id,
   });
 
   const handleChangeRequestSubmit = async (data: CreateJobChangeRequestData) => {
@@ -183,13 +185,7 @@ ${data.reason}
         throw new Error("変更リクエストの詳細が見つかりません");
       }
 
-      const changes = pendingRequest.proposed_changes as {
-        work_date: string;
-        start_time: number;
-        end_time: number;
-        task: string;
-        fee: number;
-      };
+      const changes = pendingRequest.proposed_changes;
 
       // メッセージとして変更リクエストのキャンセルを送信
       const message = `【変更リクエストのキャンセル】
@@ -239,11 +235,12 @@ ${data.reason}
               </DialogTitle>
               <DialogDescription>
                 {pendingRequest
-                  ? pendingRequest.status === "REJECTED"
-                    ? "変更リクエストが拒否されました。新しいリクエストを作成するには、既存のリクエストを削除してください。"
-                    : pendingRequest.status === "APPROVED"
-                    ? "変更リクエストが承認されています。新しいリクエストを作成するには、既存のリクエストを削除してください。"
-                    : "既存の変更リクエストが存在します。新しいリクエストを作成するには、既存のリクエストを削除してください。"
+                  // ? pendingRequest.status === "REJECTED"
+                  //   ? "変更リクエストが拒否されました。新しいリクエストを作成するには、既存のリクエストを削除してください。"
+                  //   : pendingRequest.status === "APPROVED"
+                  //   ? "変更リクエストが承認されています。新しいリクエストを作成するには、既存のリクエストを削除してください。"
+                  //   : "既存の変更リクエストが存在します。新しいリクエストを作成するには、既存のリクエストを削除してください。"
+                  ? "既存の変更リクエストが存在します。新しいリクエストを作成するには、既存のリクエストを削除してください。"
                   : "シェフに業務内容の変更をリクエストします。変更はシェフの承認が必要です。"}
               </DialogDescription>
             </DialogHeader>
@@ -253,13 +250,7 @@ ${data.reason}
                   <h4 className="font-medium mb-2">現在の変更リクエスト</h4>
                   <div className="space-y-2 text-sm">
                     {(() => {
-                      const changes = pendingRequest.proposed_changes as {
-                        work_date: string;
-                        start_time: number;
-                        end_time: number;
-                        task: string;
-                        fee: number;
-                      };
+                      const changes = pendingRequest.proposed_changes;
                       return (
                         <>
                           <p>日付: {changes.work_date}</p>
@@ -270,12 +261,12 @@ ${data.reason}
                           <p>業務内容: {changes.task}</p>
                           <p>報酬: ¥{changes.fee}</p>
                           <p>
-                            ステータス:{" "}
-                            {pendingRequest.status === "PENDING"
+                            ステータス:{" "}承認待ち
+                            {/* {pendingRequest.status === "PENDING"
                               ? "承認待ち"
                               : pendingRequest.status === "APPROVED"
                               ? "承認済み"
-                              : "拒否済み"}
+                              : "拒否済み"} */}
                           </p>
                         </>
                       );
@@ -293,9 +284,10 @@ ${data.reason}
                     onClick={handleDeleteChangeRequest}
                     // disabled={pendingRequest.status === "PENDING"}
                   >
-                    {pendingRequest.status === "PENDING"
+                    変更リクエストを削除
+                    {/* {pendingRequest.status === "PENDING"
                       ? "変更リクエストを削除"
-                      : "既存のリクエストを削除して新規作成"}
+                      : "既存のリクエストを削除して新規作成"} */}
                   </Button>
                 </DialogFooter>
               </div>
