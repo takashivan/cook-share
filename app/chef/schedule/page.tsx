@@ -188,6 +188,15 @@ export default function SchedulePage() {
             {workSession.job.restaurant.address}
           </div>
           <div className="font-medium">{workSession.job.title}</div>
+          {(workSession.cancel_bychef_log || workSession.cancel_byrestaurant_log) && (
+            <div className="font-medium mt-2">
+              <div className="text-xs text-gray-400">
+                キャンセル理由:
+              </div>
+              {workSession.cancel_bychef_log?.reason || workSession.cancel_byrestaurant_log?.reason}
+            </div>
+          )}
+          
           {review &&
             <div
               className="border rounded-lg p-4 hover:bg-gray-50 transition-colors mt-4">
