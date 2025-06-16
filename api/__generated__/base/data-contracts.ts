@@ -878,7 +878,8 @@ export type ByUserDetailData = {
     | "new_message"
     | "review"
     | "operator"
-    | "payment";
+    | "payment"
+    | "system";
   content: string;
   /** @default "false" */
   is_read: boolean;
@@ -908,7 +909,8 @@ export type MarkReadAllPartialUpdateData = {
     | "new_message"
     | "review"
     | "operator"
-    | "payment";
+    | "payment"
+    | "system";
   content: string;
   /** @default "false" */
   is_read: boolean;
@@ -934,7 +936,8 @@ export interface ReadPartialUpdateData {
     | "new_message"
     | "review"
     | "operator"
-    | "payment";
+    | "payment"
+    | "system";
   content: string;
   /** @default "false" */
   is_read: boolean;
@@ -6998,7 +7001,8 @@ export type ChefNotificationsListData = {
     | "new_message"
     | "review"
     | "operator"
-    | "payment";
+    | "payment"
+    | "system";
   content: string;
   /** @default "false" */
   is_read: boolean;
