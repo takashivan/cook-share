@@ -7668,6 +7668,56 @@ export type WorksessionsListResult = {
       status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
     };
   };
+  cancel_bychef_log: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format timestamptz */
+    canceled_datetime: number | null;
+    /** @format int64 */
+    job_id: number;
+    /** @format uuid */
+    user_id: string | null;
+    /** @format int64 */
+    restaurant_id: number;
+    category:
+      | "cancelled_by_chef_late"
+      | "cancelled_by_chef_same_day"
+      | "no_show"
+      | "cancelled_by_chef";
+    /** @format int64 */
+    cancel_fee: number;
+    reason: string;
+    /** @format int64 */
+    worksession_id: number;
+  };
+  cancel_byrestaurant_log: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format timestamptz */
+    canceled_datetime: number | null;
+    /** @format int64 */
+    job_id: number;
+    /** @format uuid */
+    user_id: string | null;
+    /** @format int64 */
+    restaurant_id: number;
+    category: "cancelled_by_restaurant" | "cancelled_by_restaurant_late";
+    /** @format int64 */
+    cancel_fee: number;
+    reason: string;
+    /** @format int64 */
+    worksession_id: number;
+  };
 }[];
 
 export type UsersDeleteData = object;
