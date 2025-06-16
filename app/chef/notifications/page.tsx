@@ -11,23 +11,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import {
-  Bell,
-  User,
-  MessageSquare,
-  Calendar,
-  CreditCard,
-  AlertTriangle,
-} from "lucide-react";
-import { format } from "date-fns";
-import { ja } from "date-fns/locale";
 import { useSubscriptionChefNotificationsByUserId } from "@/hooks/api/user/chefNotifications/useSubscriptionChefNotificationsByUserId";
-import { ChefMarkAsReadButton } from "@/components/notifications/chefMarkAsReadButton/ChefMarkAsReadButton";
 import { useMarkReadAllChefNotifications } from "@/hooks/api/user/chefNotifications/useMarkReadAllChefNotifications";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { ErrorPage } from "@/components/layout/ErrorPage";
 import { toast } from "@/hooks/use-toast";
 import { ByUserDetailData } from "@/api/__generated__/base/data-contracts";
+import { NotificationItem } from "./component/NotificationItem";
 
 type ChefNotificationType = ByUserDetailData[number]["type"];
 type ChefNotificationFilterType = ChefNotificationType | "all";
@@ -62,67 +52,6 @@ export default function ChefNotificationsPage() {
         description: "通知の既読処理に失敗しました",
         variant: "destructive",
       });
-    }
-  };
-
-  // 通知タイプに応じたアイコンを返す関数
-  const getNotificationIcon = (notificationType: ChefNotificationType) => {
-    switch (notificationType) {
-      case "new_job":
-        return <User className="h-5 w-5" />;
-      case "application_status":
-        return <User className="h-5 w-5" />;
-      case "new_message":
-        return <MessageSquare className="h-5 w-5" />;
-      case "review":
-        return <Calendar className="h-5 w-5" />;
-      case "payment":
-        return <CreditCard className="h-5 w-5" />;
-      case "operator":
-        return <AlertTriangle className="h-5 w-5" />;
-      default:
-        return <Bell className="h-5 w-5" />;
-    }
-  };
-
-  // 通知タイプに応じた色を返す関数
-  const getNotificationColor = (notificationType: ChefNotificationType) => {
-    switch (notificationType) {
-      case "new_job":
-        return "bg-blue-100 text-blue-600";
-      case "application_status":
-        return "bg-green-100 text-green-600";
-      case "new_message":
-        return "bg-purple-100 text-purple-600";
-      case "review":
-        return "bg-yellow-100 text-yellow-600";
-      case "payment":
-        return "bg-emerald-100 text-emerald-600";
-      case "operator":
-        return "bg-red-100 text-red-600";
-      default:
-        return "bg-gray-100 text-gray-600";
-    }
-  };
-
-  // 通知タイプの日本語表示
-  const getNotificationTypeLabel = (notificationType: ChefNotificationFilterType) => {
-    if (notificationType === "all") return "すべて";
-    switch (notificationType) {
-      case "new_job":
-        return "新着求人";
-      case "application_status":
-        return "応募状況";
-      case "new_message":
-        return "メッセージ";
-      case "review":
-        return "レビュー";
-      case "payment":
-        return "お支払い";
-      case "operator":
-        return "システム";
-      default:
-        return "その他";
     }
   };
 
@@ -181,53 +110,25 @@ export default function ChefNotificationsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">すべて</SelectItem>
-                <SelectItem value="new_job">新着求人</SelectItem>
+                {/* <SelectItem value="new_job">新着求人</SelectItem> */}
                 <SelectItem value="application_status">応募状況</SelectItem>
                 <SelectItem value="new_message">メッセージ</SelectItem>
-                <SelectItem value="review">レビュー</SelectItem>
+                {/* <SelectItem value="review">レビュー</SelectItem> */}
                 <SelectItem value="payment">お支払い</SelectItem>
-                <SelectItem value="operator">システム</SelectItem>
+                <SelectItem value="operator">運営からのお知らせ</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-4">
-            {filteredNotifications.map((notification) => (
-              <div
-                key={notification.id}
-                className={`p-4 rounded-lg border ${
-                  !notification.is_read ? "bg-blue-50" : ""
-                }`}>
-                <div className="flex items-start gap-4">
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center ${getNotificationColor(
-                      notification.type
-                    )}`}>
-                    {getNotificationIcon(notification.type)}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start">
-                      <h3 className="font-medium">{notification.content}</h3>
-                      {!notification.is_read && (
-                        <ChefMarkAsReadButton
-                          notificationId={notification.id}
-                        />
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {format(
-                        new Date(notification.created_at),
-                        "yyyy年MM月dd日 HH:mm",
-                        {
-                          locale: ja,
-                        }
-                      )}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-            {filteredNotifications.length === 0 && (
+            {filteredNotifications.length > 0 ? (
+              filteredNotifications.map((notification) => (
+                <NotificationItem
+                  key={notification.id}
+                  notification={notification}
+                />
+              ))
+            ) : (
               <div className="text-center py-8 text-gray-500">
                 通知はありません
               </div>
