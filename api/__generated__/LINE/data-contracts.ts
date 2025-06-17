@@ -80,6 +80,7 @@ export interface ConnectLineAccountCreateData {
   /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
+  invoice_number: string | null;
   magic_link: {
     token: string;
     /**
@@ -155,6 +156,7 @@ export interface LineDisconnectCreateData {
   /** @default "false" */
   profile_completed: boolean;
   position_level: "1" | "2" | "3" | "4";
+  invoice_number: string | null;
   magic_link: {
     token: string;
     /**

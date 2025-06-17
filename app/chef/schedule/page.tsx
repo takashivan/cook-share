@@ -18,11 +18,18 @@ import { useGetReviewsByUserId } from "@/hooks/api/user/reviews/useGetReviewsByU
 import { ErrorPage } from "@/components/layout/ErrorPage";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { toast } from "@/hooks/use-toast";
+import { useSearchParams } from "next/navigation";
 
 export default function SchedulePage() {
   const { user } = useAuth();
+
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab") || "upcoming";
+  const initialSubTab = searchParams.get("subTab") || "cancelledByUser";
+
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState("upcoming");
+  const [activeTab, setActiveTab] = useState(initialTab);
+  const [activeCanceledTab, setActiveCanceledTab] = useState(initialSubTab);
 
   // ワークセッション一覧の取得
   const {
@@ -188,6 +195,15 @@ export default function SchedulePage() {
             {workSession.job.restaurant.address}
           </div>
           <div className="font-medium">{workSession.job.title}</div>
+          {(workSession.cancel_bychef_log || workSession.cancel_byrestaurant_log) && (
+            <div className="font-medium mt-2">
+              <div className="text-xs text-gray-400">
+                キャンセル理由:
+              </div>
+              {workSession.cancel_bychef_log?.reason || workSession.cancel_byrestaurant_log?.reason}
+            </div>
+          )}
+          
           {review &&
             <div
               className="border rounded-lg p-4 hover:bg-gray-50 transition-colors mt-4">
@@ -233,7 +249,6 @@ export default function SchedulePage() {
       <h1 className="text-2xl font-bold mb-6">お仕事スケジュール</h1>
 
       <Tabs
-        defaultValue="upcoming"
         value={activeTab}
         onValueChange={setActiveTab}>
         <TabsList className="grid grid-cols-3 w-full">
@@ -263,7 +278,10 @@ export default function SchedulePage() {
         </TabsContent>
 
         <TabsContent value="others" className="mt-6">
-          <Tabs defaultValue="cancelledByUser" className="w-full">
+          <Tabs
+            value={activeCanceledTab}
+            onValueChange={setActiveCanceledTab}
+            className="w-full">
             <TabsList className="grid grid-cols-2 w-full mb-4">
               <TabsTrigger value="cancelledByUser">
                 キャンセルしたお仕事

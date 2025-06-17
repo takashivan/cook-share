@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { Bell } from "lucide-react";
+import {
+  Bell,
+  Store,
+  MessageSquare,
+  Calendar,
+  CreditCard,
+  AlertTriangle,
+} from "lucide-react";
 import { formatToJapanDateTime } from "@/lib/functions";
 import {
   DropdownMenuItem,
@@ -27,9 +34,7 @@ export function ChefNotificationDropdownItem({
     chefNotificationId: notification.id,
   });
   
-  const handleNotificationClick = async (
-    notification: ByUserDetailData[number]
-  ) => {
+  const handleNotificationClick = async () => {
     if (!notification.is_read) {
       try {
         await markReadTrigger();
@@ -46,40 +51,46 @@ export function ChefNotificationDropdownItem({
     }
   };
 
-  // 通知アイコンの色を決定する関数
-  const getNotificationColor = (type: string) => {
-    switch (type) {
-      case "new_job":
-        return "bg-blue-100 text-blue-600";
-      case "application_status":
-        return "bg-green-100 text-green-600";
-      case "new_message":
-        return "bg-purple-100 text-purple-600";
-      case "review":
-        return "bg-yellow-100 text-yellow-600";
-      case "payment":
-        return "bg-emerald-100 text-emerald-600";
-      case "operator":
-        return "bg-red-100 text-red-600";
-      default:
-        return "bg-gray-100 text-gray-600";
-    }
-  };
+  // 通知タイプに応じたアイコンを決定する
+  const notificationIcon = notification.type === "new_job" ||
+    notification.type === "application_status"
+    ? <Store className="h-4 w-4" />
+    : notification.type === "new_message"
+    ? <MessageSquare className="h-4 w-4" />
+    : notification.type === "review"
+    ? <Calendar className="h-4 w-4" />
+    : notification.type === "payment"
+    ? <CreditCard className="h-4 w-4" />
+    : notification.type === "operator"
+    ? <AlertTriangle className="h-4 w-4" />
+    : <Bell className="h-4 w-4" />;
+
+  // 通知アイコンの色を決定する
+  const notificationColor = notification.type === "new_job" ||
+    notification.type === "application_status"
+    ? "bg-green-100 text-green-600"
+    : notification.type === "new_message"
+    ? "bg-blue-100 text-blue-600"
+    : notification.type === "review"
+    ? "bg-purple-100 text-purple-600"
+    : notification.type === "payment"
+    ? "bg-amber-100 text-amber-600"
+    : notification.type === "operator"
+    ? "bg-red-100 text-red-600"
+    : "bg-gray-100 text-gray-600";
 
   return (
     <DropdownMenuItem
       className={`p-3 cursor-pointer ${
         !notification.is_read ? "bg-muted/50" : ""
       }`}
-      onClick={() => handleNotificationClick(notification)}
+      onClick={handleNotificationClick}
       asChild>
       <Link href={notification.related_link}>
         <div className="flex gap-3 w-full">
           <div
-            className={`w-9 h-9 rounded-full flex items-center justify-center ${getNotificationColor(
-              notification.type
-            )}`}>
-            <Bell className="h-4 w-4" />
+            className={`w-9 h-9 rounded-full flex items-center justify-center ${notificationColor}`}>
+            {notificationIcon}
           </div>
           <div className="flex-1 space-y-1">
             <p className="text-sm font-medium leading-none">

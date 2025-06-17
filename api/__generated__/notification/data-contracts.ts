@@ -24,7 +24,8 @@ export type ByUserDetailData = {
     | "new_message"
     | "review"
     | "operator"
-    | "payment";
+    | "payment"
+    | "system";
   content: string;
   /** @default "false" */
   is_read: boolean;
@@ -54,7 +55,8 @@ export type MarkReadAllPartialUpdateData = {
     | "new_message"
     | "review"
     | "operator"
-    | "payment";
+    | "payment"
+    | "system";
   content: string;
   /** @default "false" */
   is_read: boolean;
@@ -80,7 +82,8 @@ export interface ReadPartialUpdateData {
     | "new_message"
     | "review"
     | "operator"
-    | "payment";
+    | "payment"
+    | "system";
   content: string;
   /** @default "false" */
   is_read: boolean;
@@ -106,7 +109,8 @@ export type ByUserDetailResult = {
     | "new_message"
     | "review"
     | "operator"
-    | "payment";
+    | "payment"
+    | "system";
   content: string;
   /** @default "false" */
   is_read: boolean;
@@ -136,7 +140,8 @@ export type MarkReadAllPartialUpdateResult = {
     | "new_message"
     | "review"
     | "operator"
-    | "payment";
+    | "payment"
+    | "system";
   content: string;
   /** @default "false" */
   is_read: boolean;
@@ -162,7 +167,8 @@ export interface ReadPartialUpdateResult {
     | "new_message"
     | "review"
     | "operator"
-    | "payment";
+    | "payment"
+    | "system";
   content: string;
   /** @default "false" */
   is_read: boolean;
@@ -259,7 +265,7 @@ export interface MarkReadPartialUpdateData {
   restaurant_id: number | null;
 }
 
-export type ByUserDetailOutput1 = {
+export type ByUserDetailResult1 = {
   /** @format uuid */
   id: string;
   /**
@@ -290,7 +296,7 @@ export interface MarkReadAllPartialUpdatePayload1 {
   user_id: string;
 }
 
-export type MarkReadAllPartialUpdateResult1 = {
+export type MarkReadAllPartialUpdateData1 = {
   /** @format uuid */
   id: string;
   /**
