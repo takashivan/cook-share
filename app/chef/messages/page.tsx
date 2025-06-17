@@ -14,6 +14,7 @@ import {
 import { ErrorPage } from "@/components/layout/ErrorPage";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { toast } from "@/hooks/use-toast";
+import { WorksessionsListResult } from "@/api/__generated__/base/data-contracts";
 
 export default function MessagesPage() {
   const { user } = useAuth();
@@ -143,7 +144,7 @@ export default function MessagesPage() {
           <ChatSheet
             isOpen={selectedWorkSession !== null}
             onClose={closeChat}
-            worksession={selectedWorkSession ?? undefined}
+            worksession={(selectedWorkSession as unknown as WorksessionsListResult[number]) ?? undefined}
             messagesData={messagesData}
             isMessagesDataLoading={isMessagesLoading}
             messagesDataError={messagesError}

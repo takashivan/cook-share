@@ -135,10 +135,14 @@ export const useSubscriptionUnreadMessagesByUser = (
               } else {
                 getRequest.mutate();
 
-                // jobの変更リクエストの再取得
-                const jobChangeRequestsApi = getApi(JobChangeRequests);
-                const jobChangeRequestsKey = jobChangeRequestsApi.jobChangeRequestsListQueryArgs()[0];
-                mutate(jobChangeRequestsKey)
+                // TODO: メッセージでworkSessionIdをもらわないといけない
+                // // jobの変更リクエストの再取得
+                // if (params.workSessionId) {
+                //   const worksessionsApi = getApi(Worksessions);
+                //   const jobChangeRequestsKey =
+                //     worksessionsApi.jobChangeRequestChefListQueryArgs(params.workSessionId)[0];
+                //   mutate(jobChangeRequestsKey);
+                // }
 
                 next();
               }

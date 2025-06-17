@@ -50,42 +50,32 @@ export function RestaurantNotificationDropdownItem({
   };
 
   // 通知タイプに応じたアイコンを返す関数
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case "new_job":
-      case "application_status":
-        return <User className="h-4 w-4" />;
-      case "new_message":
-        return <MessageSquare className="h-4 w-4" />;
-      case "review":
-        return <Calendar className="h-4 w-4" />;
-      case "payment":
-        return <CreditCard className="h-4 w-4" />;
-      case "operator":
-        return <AlertTriangle className="h-4 w-4" />;
-      default:
-        return <Bell className="h-4 w-4" />;
-    }
-  };
+  const notificationIcon = notification.type === "new_job" ||
+    notification.type === "application_status"
+    ? <User className="h-4 w-4" />
+    : notification.type === "new_message"
+    ? <MessageSquare className="h-4 w-4" />
+    : notification.type === "review"
+    ? <Calendar className="h-4 w-4" />
+    : notification.type === "payment"
+    ? <CreditCard className="h-4 w-4" />
+    : notification.type === "operator"
+    ? <AlertTriangle className="h-4 w-4" />
+    : <Bell className="h-4 w-4" />;
 
   // 通知アイコンの色を決定する関数
-  const getNotificationColor = (type: string) => {
-    switch (type) {
-      case "new_job":
-      case "application_status":
-        return "bg-green-100 text-green-600";
-      case "new_message":
-        return "bg-blue-100 text-blue-600";
-      case "review":
-        return "bg-purple-100 text-purple-600";
-      case "payment":
-        return "bg-amber-100 text-amber-600";
-      case "operator":
-        return "bg-red-100 text-red-600";
-      default:
-        return "bg-gray-100 text-gray-600";
-    }
-  };
+  const notificationColor = notification.type === "new_job" ||
+    notification.type === "application_status"
+    ? "bg-green-100 text-green-600"
+    : notification.type === "new_message"
+    ? "bg-blue-100 text-blue-600"
+    : notification.type === "review"
+    ? "bg-purple-100 text-purple-600"
+    : notification.type === "payment"
+    ? "bg-amber-100 text-amber-600"
+    : notification.type === "operator"
+    ? "bg-red-100 text-red-600"
+    : "bg-gray-100 text-gray-600";
 
   return(
     <DropdownMenuItem
@@ -94,13 +84,11 @@ export function RestaurantNotificationDropdownItem({
       }`}
       onClick={() => handleNotificationClick(notification)}
       asChild>
-      <Link href="#">
+      <Link href={notification.related_link}>
         <div className="flex gap-3 w-full">
           <div
-            className={`w-9 h-9 rounded-full flex items-center justify-center ${getNotificationColor(
-              notification.type
-            )}`}>
-            {getNotificationIcon(notification.type)}
+            className={`w-9 h-9 rounded-full flex items-center justify-center ${notificationColor}`}>
+            {notificationIcon}
           </div>
           <div className="flex-1 space-y-1">
             <p className="text-sm font-medium leading-none">

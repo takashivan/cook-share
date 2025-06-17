@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { WorksessionsListResult, WorksessionsMessagesListResult } from "@/api/__generated__/base/data-contracts";
 import { useUpdateReadMessageByUser } from "@/hooks/api/user/messages/useUpdateReadMessageByUser";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { useGetJobChangeRequests } from "@/hooks/api/user/jobChangeRequests/useGetJobChangeRequests";
+import { useGetJobChangeRequest } from "@/hooks/api/user/jobChangeRequests/useGetJobChangeRequest";
 import { useAcceptJobChangeRequest } from "@/hooks/api/user/jobChangeRequests/useAcceptJobChangeRequest";
 import { useRejectJobChangeRequest } from "@/hooks/api/user/jobChangeRequests/useRejectJobChangeRequest";
 import {
@@ -85,18 +85,17 @@ export function ChatSheet({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isChangeRequestModalOpen, setIsChangeRequestModalOpen] =
     useState(false);
-  const [selectedChangeRequest, setSelectedChangeRequest] = useState<any>(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   // 変更リクエスト取得
   const {
-    data: changeRequests,
-    isLoading: isChangeRequestsLoading,
-    error: changeRequestsError,
-  } = useGetJobChangeRequests();
-  const pendingRequest = changeRequests?.find(
-    (req) => req.worksession_id === worksession?.id && req.status === "PENDING"
-  );
+    data: changeRequest,
+    isLoading: isChangeRequestLoading,
+    error: changeRequestError,
+  } = useGetJobChangeRequest({
+    worksessionsId: worksession?.id,
+  });
+  const pendingRequest = changeRequest?.status === "PENDING" ? changeRequest : null;
   
   const { trigger: updateReadMessageTrigger } = useUpdateReadMessageByUser({
     userId: user?.id,
@@ -104,12 +103,14 @@ export function ChatSheet({
   });
 
   const { trigger: acceptJobChangeRequest } = useAcceptJobChangeRequest({
-    jobChangeRequestId: selectedChangeRequest?.id,
+    jobChangeRequestId: pendingRequest?.id,
     userId: user?.id,
+    workSessionId: worksession?.id,
   });
 
   const { trigger: rejectJobChangeRequest } = useRejectJobChangeRequest({
-    jobChangeRequestId: selectedChangeRequest?.id,
+    jobChangeRequestId: pendingRequest?.id,
+    workSessionId: worksession?.id,
   });
 
   const scrollToBottom = () => {
@@ -177,7 +178,7 @@ export function ChatSheet({
   const handleChangeRequestResponse = async (
     status: "APPROVED" | "REJECTED"
   ) => {
-    if (!selectedChangeRequest) return;
+    if (!pendingRequest) return;
     try {
       if (status === "APPROVED") {
         await acceptJobChangeRequest();
@@ -189,21 +190,21 @@ export function ChatSheet({
       }】\n以下の変更リクエストを${
         status === "APPROVED" ? "承認" : "拒否"
       }しました：\n\n日付: ${
-        selectedChangeRequest.proposed_changes.work_date
+        pendingRequest.proposed_changes.work_date
       }\n時間: ${format(
         new Date(
-          selectedChangeRequest.proposed_changes.start_time
+          pendingRequest.proposed_changes.start_time
         ),
         "HH:mm"
       )}〜${
         format(
           new Date(
-            selectedChangeRequest.proposed_changes.end_time
+            pendingRequest.proposed_changes.end_time
           ),
           "HH:mm"
         )
-      }\n業務内容: ${selectedChangeRequest.proposed_changes.task}\n報酬: ¥${
-        selectedChangeRequest.proposed_changes.fee
+      }\n業務内容: ${pendingRequest.proposed_changes.task}\n報酬: ¥${
+        pendingRequest.proposed_changes.fee
       }`;
       onSendMessage(message);
       toast({
@@ -216,7 +217,6 @@ export function ChatSheet({
             : "変更は適用されませんでした。",
       });
       setIsChangeRequestModalOpen(false);
-      setSelectedChangeRequest(null);
     } catch (error) {
       toast({
         title: "エラー",
@@ -266,10 +266,8 @@ export function ChatSheet({
               {/* 変更リクエスト通知ボタン */}
               {pendingRequest && (
                 <Button
-                  variant="outline"
-                  className="bg-red-50 text-red-800 border-red-200 hover:bg-red-100 ml-auto"
+                  className="bg-chefdom-orange hover:bg-chefdom-orange-dark ml-auto"
                   onClick={() => {
-                    setSelectedChangeRequest(pendingRequest);
                     setIsChangeRequestModalOpen(true);
                   }}>
                   <AlertCircle className="h-4 w-4 mr-2" />
@@ -279,8 +277,7 @@ export function ChatSheet({
               {/* 差し戻し通知ボタン */}
               {worksession?.status === "VERIFY_REJECTED" && (
                 <Button
-                  variant="outline"
-                  className="bg-red-50 text-red-800 border-red-200 hover:bg-red-100 ml-auto"
+                  className="bg-chefdom-orange hover:bg-chefdom-orange-dark ml-auto"
                   onClick={() => setIsReviewModalOpen(true)}
                 >
                   <AlertCircle className="h-4 w-4 mr-2" />
@@ -290,11 +287,11 @@ export function ChatSheet({
             </div>
           </div>
 
-          {messagesDataError || changeRequestsError ? (
+          {messagesDataError || changeRequestError ? (
             <div className="flex flex-1 justify-center w-full">
               <ErrorPage />
             </div>
-          ) : isMessagesDataLoading || isChangeRequestsLoading ? (
+          ) : isMessagesDataLoading || isChangeRequestLoading ? (
             <LoadingSpinner />
           ): (
             <>
@@ -446,39 +443,39 @@ export function ChatSheet({
                 以下の変更リクエストを承認または拒否してください。
               </DialogDescription>
             </DialogHeader>
-            {selectedChangeRequest && (
+            {pendingRequest && (
               <div className="space-y-4">
                 <div className="bg-muted p-4 rounded-lg">
                   <h4 className="font-medium mb-2">変更内容</h4>
                   <div className="space-y-2 text-sm">
                     <p>
-                      日付: {selectedChangeRequest.proposed_changes.work_date}
+                      日付: {pendingRequest.proposed_changes.work_date}
                     </p>
                     <p>
                       時間:{" "}
                       {format(
                         new Date(
-                          selectedChangeRequest.proposed_changes.start_time
+                          pendingRequest.proposed_changes.start_time
                         ),
                         "HH:mm"
                       )}
                       〜
                       {format(
                         new Date(
-                          selectedChangeRequest.proposed_changes.end_time
+                          pendingRequest.proposed_changes.end_time
                         ),
                         "HH:mm"
                       )}
                     </p>
                     <p>
-                      業務内容: {selectedChangeRequest.proposed_changes.task}
+                      業務内容: {pendingRequest.proposed_changes.task}
                     </p>
-                    <p>報酬: ¥{selectedChangeRequest.proposed_changes.fee}</p>
+                    <p>報酬: ¥{pendingRequest.proposed_changes.fee}</p>
                   </div>
                 </div>
                 <div className="space-y-2">
                   <h4 className="font-medium">変更理由</h4>
-                  <p className="text-sm">{selectedChangeRequest.reason}</p>
+                  <p className="text-sm">{pendingRequest.reason}</p>
                 </div>
                 <DialogFooter>
                   <Button

@@ -132,10 +132,11 @@ export class Restaurants<
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH]restrauntのアクセス権限 <br /><br /> <b>Authentication:</b> not required
    *
    * @tags restaurants
    * @name CompanyusersDelete
+   * @summary [AUTH]restrauntのアクセス権限
    * @request DELETE:/restaurants/{restaurant_id}/companyusers/{companyUser_Id}
    */
   companyusersDelete = (
@@ -171,10 +172,11 @@ export class Restaurants<
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH]restrauntのアクセス権限 <br /><br /> <b>Authentication:</b> not required
    *
    * @tags restaurants
    * @name CompanyusersList
+   * @summary [AUTH]restrauntのアクセス権限
    * @request GET:/restaurants/{restaurant_id}/companyusers
    */
   companyusersList = (restaurantId: number, params: RequestParams = {}) =>
@@ -197,10 +199,11 @@ export class Restaurants<
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTH]restrauntのアクセス権限 <br /><br /> <b>Authentication:</b> not required
    *
    * @tags restaurants
    * @name CompanyusersCreate
+   * @summary [AUTH]restrauntのアクセス権限
    * @request POST:/restaurants/{restaurant_id}/companyusers
    */
   companyusersCreate = (
