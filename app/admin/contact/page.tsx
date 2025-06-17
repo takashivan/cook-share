@@ -12,8 +12,9 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { contactApi } from "@/lib/api/contact";
 import { useToast } from "@/hooks/use-toast";
+import { getApi } from "@/api/api-factory";
+import { Contact } from "@/api/__generated__/base/Contact";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -31,9 +32,10 @@ export default function ContactPage() {
     setIsSubmitting(true);
 
     try {
-      await contactApi.createContact({
+      const contactApi = getApi(Contact);
+      await contactApi.contactCreate({
         ...formData,
-        type: "general",
+        type: "restaurant",
       });
 
       setIsThanksModalOpen(true);

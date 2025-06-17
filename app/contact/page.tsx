@@ -7,7 +7,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Send, Mail } from "lucide-react";
 import Link from "next/link";
-import { contactApi } from "@/lib/api/contact";
 import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/layout/header";
 import {
@@ -16,6 +15,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { getApi } from "@/api/api-factory";
+import { Contact } from "@/api/__generated__/base/Contact";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -33,7 +34,8 @@ export default function ContactPage() {
     setIsSubmitting(true);
 
     try {
-      await contactApi.createContact({
+      const contactApi = getApi(Contact);
+      await contactApi.contactCreate({
         ...formData,
         title: formData.subject,
         type: "general",
