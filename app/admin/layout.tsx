@@ -22,6 +22,7 @@ import {
   ChevronDown,
   Mail,
   HelpCircle,
+  Grip,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -580,7 +581,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               )}
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Link href="/">
+              <Button variant="ghost" className="flex items-center gap-2">
+                <Grip className="h-5 w-5" />
+                <span className="text-sm text-muted-foreground hidden sm:block">求人検索</span>
+              </Button>
+            </Link>
             <RestaurantNotificationDropdown
               notifications={notifications ?? []}
               userId={user?.id?.toString() || ""}

@@ -73,7 +73,7 @@ export function RestaurantNotificationDropdown({
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <Badge className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[1.25rem] h-5 flex items-center justify-center bg-red-500 text-white">
+            <Badge className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[1.25rem] h-5 flex items-center justify-center bg-red-500 text-white hover:bg-red-500">
               {unreadCount > 9 ? "9+" : unreadCount}
             </Badge>
           )}

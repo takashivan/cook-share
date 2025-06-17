@@ -575,12 +575,12 @@ ${cancelReason}`;
         )}
 
         <h3 className="font-bold mb-2">{job.title}</h3>
-
-        <Button variant="outline" className="w-full mb-5">
-          <Link href={`/job/${job.id}`} className="flex items-center gap-2">
-            求人の詳細はこちら<ChevronRight className="h-5 w-5 text-gray-400" />
-          </Link>
-        </Button>
+       
+        <Link href={`/job/${job.id}`} className="block mb-5">
+          <Button type="button" variant="outline" className="w-full">
+          求人の詳細はこちら<ChevronRight className="h-5 w-5 text-gray-400" />
+          </Button>
+        </Link>
 
         <div className="space-y-4">
           <div className="flex items-start gap-3">

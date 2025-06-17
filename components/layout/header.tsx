@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { PanelsTopLeft } from "lucide-react";
 
 export function Header() {
   const { user: chefUser, logout: chefLogout } = useAuth();
@@ -39,64 +40,75 @@ export function Header() {
 
         <div className="flex items-center gap-4">
           {isAuthenticated && user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    className="relative h-10 w-10 rounded-full">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage
-                        src={
-                          (chefUser && (chefUser as any).profile_image) || ""
-                        }
-                        alt={user.name}
-                      />
-                      <AvatarFallback>
-                        {user.name?.slice(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
+            <>
+              {userType === "company" && (
+                <Link href="/admin">
+                  <Button variant="ghost" className="flex items-center gap-2">
+                    <PanelsTopLeft className="h-6 w-6" />
+                    <span className="text-sm text-muted-foreground hidden sm:block">ダッシュボード</span>
                   </Button>
-                  <div
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      userType === "company"
-                        ? "bg-blue-100 text-blue-800"
-                        : "bg-green-100 text-green-800"
-                    }`}>
-                    {userType === "company"
-                      ? "企業アカウント"
-                      : "シェフアカウント"}
-                    {userType === "chef" &&
-                      (user as any).is_approved === false &&
-                      " 審査中"}
+                </Link>
+              )}
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      className="relative h-10 w-10 rounded-full">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage
+                          src={
+                            (chefUser && (chefUser as any).profile_image) || ""
+                          }
+                          alt={user.name}
+                        />
+                        <AvatarFallback>
+                          {user.name?.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                    <div
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        userType === "company"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-green-100 text-green-800"
+                      }`}>
+                      {userType === "company"
+                        ? "企業アカウント"
+                        : "シェフアカウント"}
+                      {userType === "chef" &&
+                        (user as any).is_approved === false &&
+                        " 審査中"}
+                    </div>
                   </div>
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end">
-                <DropdownMenuItem className="font-semibold">
-                  {user.name}
-                </DropdownMenuItem>
-                <DropdownMenuItem className="text-sm text-muted-foreground">
-                  {user.email}
-                </DropdownMenuItem>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end">
+                  <DropdownMenuItem className="font-semibold hover:bg-white focus:bg-white">
+                    {user.name}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="text-sm text-muted-foreground hover:bg-white hover:text-muted-foreground focus:bg-white focus:text-muted-foreground">
+                    {user.email}
+                  </DropdownMenuItem>
 
-                <DropdownMenuItem
-                  className="text-sm text-muted-foreground"
-                  asChild>
-                  <Link
-                    href={
-                      userType === "company" ? "/admin" : "/chef/dashboard"
-                    }>
-                    {userType === "company" ? "管理画面" : "マイページ"}
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="text-red-600 cursor-pointer"
-                  onClick={logout}>
-                  ログアウト
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <DropdownMenuItem
+                    className="text-sm text-muted-foreground cursor-pointer"
+                    asChild>
+                    <Link
+                      href={
+                        userType === "company" ? "/admin" : "/chef/dashboard"
+                      }>
+                      {userType === "company" ? "ダッシュボード" : "マイページ"}
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="text-red-600 hover:text-red-600 focus:text-red-600 cursor-pointer"
+                    onClick={logout}>
+                    ログアウト
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
           ) : (
             <div className="flex gap-2">
               <Button variant="ghost" asChild>
