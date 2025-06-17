@@ -84,48 +84,60 @@ export function NotificationItem({
     }
   };
 
+  const NotificationCard = () => (
+    <Card
+      className={`${!notification.is_read ? "bg-gray-50" : ""}`}>
+      <CardContent className="p-4">
+        <div className="flex gap-3">
+          <div
+            className={`w-10 h-10 rounded-full flex items-center justify-center ${notificationColor}`}>
+            {notificationIcon}
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="font-medium">
+                {notification.content}
+              </h3>
+              <span className="text-sm text-muted-foreground">
+                {new Date(
+                  notification.created_at
+                ).toLocaleDateString("ja-JP", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                  weekday: "short",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
+            </div>
+            <Badge
+              variant="outline"
+              className={`text-xs ${notificationColor}`}>
+              {notificationTypeLabel}
+            </Badge>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
 
   return (
-    <Link
-      href={notification.related_link}
-      className="block mt-2"
-      onClick={handleNotificationClick}
-    >
-      <Card
-        className={`${!notification.is_read ? "bg-gray-50" : ""}`}>
-        <CardContent className="p-4">
-          <div className="flex gap-3">
-            <div
-              className={`w-10 h-10 rounded-full flex items-center justify-center ${notificationColor}`}>
-              {notificationIcon}
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-1">
-                <h3 className="font-medium">
-                  {notification.content}
-                </h3>
-                <span className="text-sm text-muted-foreground">
-                  {new Date(
-                    notification.created_at
-                  ).toLocaleDateString("ja-JP", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                    weekday: "short",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
-              </div>
-              <Badge
-                variant="outline"
-                className={`text-xs ${notificationColor}`}>
-                {notificationTypeLabel}
-              </Badge>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
+    notification.related_link !== "" ? (
+      <Link
+        href={notification.related_link}
+        className="block mt-2"
+        onClick={handleNotificationClick}
+      >
+        <NotificationCard />
+      </Link>
+    ) : (
+      <div
+        className="block mt-2 cursor-pointer"
+        onClick={handleNotificationClick}
+      >
+        <NotificationCard />
+      </div>
+    )
   )
 }
