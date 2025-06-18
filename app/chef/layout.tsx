@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { Home, Calendar, Wallet, MessageSquare, ListTodo } from "lucide-react";
+import { Home, Calendar, Wallet, MessageSquare, ListTodo, Mail } from "lucide-react";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { ChefNotificationDropdown } from "@/components/notifications/chefNotificationDropdown/ChefNotificationDropdown";
 import { useSubscriptionChefNotificationsByUserId } from "@/hooks/api/user/chefNotifications/useSubscriptionChefNotificationsByUserId";
@@ -157,6 +157,12 @@ export default function ChefLayout({
                     <span>よくある質問</span>
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/chef/contact" className="flex items-center">
+                    <Mail className="mr-2 h-4 w-4" />
+                    <span>お問い合わせ</span>
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={handleLogout}
                   className="text-red-600">
@@ -174,7 +180,7 @@ export default function ChefLayout({
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t">
-        <div className="container mx-auto">
+        <div className="px-1 mx-auto">
           <div className="grid grid-cols-5 h-16">
             <Link
               href="/chef/dashboard"

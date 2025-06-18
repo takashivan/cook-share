@@ -12,10 +12,13 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { contactApi } from "@/lib/api/contact";
 import { useToast } from "@/hooks/use-toast";
+import { getApi } from "@/api/api-factory";
+import { Contact } from "@/api/__generated__/base/Contact";
+import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 
 export default function ContactPage() {
+  const { user } = useCompanyAuth();
   const [formData, setFormData] = useState({
     title: "",
     message: "",
@@ -31,9 +34,11 @@ export default function ContactPage() {
     setIsSubmitting(true);
 
     try {
-      await contactApi.createContact({
+      const contactApi = getApi(Contact);
+      await contactApi.contactCreate({
         ...formData,
-        type: "general",
+        type: "restaurant",
+        company_id: user?.companies_id ?? null,
       });
 
       setIsThanksModalOpen(true);

@@ -2778,6 +2778,8 @@ export interface ContactCreatePayload {
   message: string;
   title: string;
   type: string;
+  /** @format uuid */
+  company_id: string | null;
 }
 
 export type ContactCreateData = object;
