@@ -79,6 +79,27 @@ export function ChefNotificationDropdownItem({
     ? "bg-red-100 text-red-600"
     : "bg-gray-100 text-gray-600";
 
+  const NotificationContent = () => (
+    <div className="flex gap-3 w-full">
+      <div
+        className={`w-9 h-9 rounded-full flex items-center justify-center ${notificationColor}`}>
+        {notificationIcon}
+      </div>
+      <div className="flex-1 space-y-1">
+        <p className="text-sm font-medium leading-none">
+          {notification.content}
+        </p>
+
+        <p className="text-xs text-muted-foreground">
+          {formatToJapanDateTime(notification.created_at)}
+        </p>
+      </div>
+      {!notification.is_read && (
+        <div className="w-2 h-2 rounded-full bg-blue-600 self-start mt-2"></div>
+      )}
+    </div>
+  )
+
   return (
     <DropdownMenuItem
       className={`p-3 cursor-pointer ${
@@ -86,26 +107,15 @@ export function ChefNotificationDropdownItem({
       }`}
       onClick={handleNotificationClick}
       asChild>
-      <Link href={notification.related_link}>
-        <div className="flex gap-3 w-full">
-          <div
-            className={`w-9 h-9 rounded-full flex items-center justify-center ${notificationColor}`}>
-            {notificationIcon}
-          </div>
-          <div className="flex-1 space-y-1">
-            <p className="text-sm font-medium leading-none">
-              {notification.content}
-            </p>
-
-            <p className="text-xs text-muted-foreground">
-              {formatToJapanDateTime(notification.created_at)}
-            </p>
-          </div>
-          {!notification.is_read && (
-            <div className="w-2 h-2 rounded-full bg-blue-600 self-start mt-2"></div>
-          )}
+      {notification.related_link !== "" ? (
+        <Link href={notification.related_link}>
+          <NotificationContent />
+        </Link>
+      ) : (
+        <div>
+          <NotificationContent />
         </div>
-      </Link>
+      )}
     </DropdownMenuItem>
   )
 }

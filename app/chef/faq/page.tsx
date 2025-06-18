@@ -2,13 +2,8 @@
 
 import React from "react";
 import { useState } from "react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function ChefFaqPage() {
   const [activeTab, setActiveTab] = useState("general");
@@ -227,6 +222,18 @@ export default function ChefFaqPage() {
             A:CHEFDOMは雇用契約ではなく業務委託契約です。このため報酬に対して源泉徴収は発生しません。
           </p>
         </div>
+      </div>
+      <div className="mt-6">
+        <p className="text-sm mb-4">
+          こちらをご覧いただいても解決しない場合は、下記よりお問い合わせください。
+        </p>
+        <Link href="/chef/contact">
+          <Button
+            variant="outline"
+            className="w-full">
+            お問い合わせ
+          </Button>
+        </Link>
       </div>
     </div>
   );

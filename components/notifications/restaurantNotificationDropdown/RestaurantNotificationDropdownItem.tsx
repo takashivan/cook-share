@@ -34,9 +34,7 @@ export function RestaurantNotificationDropdownItem({
     companyUserNotificationId: notification.id ?? undefined,
   });
 
-  const handleNotificationClick = async (
-    notification: ByUserDetailOutput[number]
-  ) => {
+  const handleNotificationClick = async () => {
     if (!notification.is_read) {
       try {
         await markReadTrigger();
@@ -77,42 +75,52 @@ export function RestaurantNotificationDropdownItem({
     ? "bg-red-100 text-red-600"
     : "bg-gray-100 text-gray-600";
 
+  const NotificationContent = () => (
+    <div className="flex gap-3 w-full">
+      <div
+        className={`w-9 h-9 rounded-full flex items-center justify-center ${notificationColor}`}>
+        {notificationIcon}
+      </div>
+      <div className="flex-1 space-y-1">
+        <p className="text-sm font-medium leading-none">
+          {notification.content}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {new Date(notification.created_at).toLocaleDateString(
+            "ja-JP",
+            {
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+              weekday: "short",
+              hour: "2-digit",
+              minute: "2-digit",
+            }
+          )}
+        </p>
+      </div>
+      {!notification.is_read && (
+        <div className="w-2 h-2 rounded-full bg-blue-600 self-start mt-2"></div>
+      )}
+    </div>
+  );
+
   return(
     <DropdownMenuItem
       className={`p-3 cursor-pointer ${
         !notification.is_read ? "bg-muted/50" : ""
       }`}
-      onClick={() => handleNotificationClick(notification)}
+      onClick={handleNotificationClick}
       asChild>
-      <Link href={notification.related_link}>
-        <div className="flex gap-3 w-full">
-          <div
-            className={`w-9 h-9 rounded-full flex items-center justify-center ${notificationColor}`}>
-            {notificationIcon}
-          </div>
-          <div className="flex-1 space-y-1">
-            <p className="text-sm font-medium leading-none">
-              {notification.content}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {new Date(notification.created_at).toLocaleDateString(
-                "ja-JP",
-                {
-                  year: "numeric",
-                  month: "2-digit",
-                  day: "2-digit",
-                  weekday: "short",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }
-              )}
-            </p>
-          </div>
-          {!notification.is_read && (
-            <div className="w-2 h-2 rounded-full bg-blue-600 self-start mt-2"></div>
-          )}
+      {notification.related_link !== "" ? (
+        <Link href={notification.related_link}>
+          <NotificationContent />
+        </Link>
+      ) : (
+        <div>
+          <NotificationContent />
         </div>
-      </Link>
+      )}
     </DropdownMenuItem>
   );
 }

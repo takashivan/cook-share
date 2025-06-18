@@ -112,13 +112,13 @@ export function ChefReviewModal({
   } = useForm<ChefReviewForm>({
     defaultValues: {
       check_out_time: timeOptions[timeOptions.length - 1] || "",
-      rating: review?.rating || 3,
+      rating: review?.rating || 5,
       feedback: review?.comment || "",
       transportation_expenses: initialExpenses ?? "",
     },
     values: {
       check_out_time: timeOptions[timeOptions.length - 1] || "",
-      rating: review?.rating || 3,
+      rating: review?.rating || 5,
       feedback: review?.comment || "",
       transportation_expenses: initialExpenses ?? "",
     }
