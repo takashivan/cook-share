@@ -45,10 +45,15 @@ export default function ChefDashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col mb-6">
         <h1 className="text-2xl font-bold">
           ようこそ、{user?.name || "ゲスト"}さん
         </h1>
+        <Link href="/" className="mt-6">
+          <Button className="w-full py-3 text-base font-bold bg-[#DB3F1C] hover:bg-[#B83214] text-white rounded-lg transition shadow-md">
+            お仕事を探す
+          </Button>
+        </Link>
       </div>
 
       <div className="space-y-4">
@@ -83,21 +88,7 @@ export default function ChefDashboard() {
           ))
         ) : (
           <div className="bg-gray-50 rounded-lg p-8 text-center space-y-4">
-            <motion.div className="flex justify-center">
-              <Image
-                src="/chef_illust/chef_search_image.png"
-                alt="No jobs"
-                width={80}
-                height={80}
-              />
-            </motion.div>
-            <p className="text-gray-500 text-sm">次のお仕事は未定です</p>
-
-            <Link href="/">
-              <Button className="w-full py-3 text-base font-bold bg-[#DB3F1C] hover:bg-[#B83214] text-white rounded-lg transition shadow-md">
-                お仕事を探す
-              </Button>
-            </Link>
+            <p className="text-gray-500">次のお仕事は未定です</p>
           </div>
         )}
         {/* 追加: 連携促進カード */}
