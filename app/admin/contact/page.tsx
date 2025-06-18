@@ -15,8 +15,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { getApi } from "@/api/api-factory";
 import { Contact } from "@/api/__generated__/base/Contact";
+import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 
 export default function ContactPage() {
+  const { user } = useCompanyAuth();
   const [formData, setFormData] = useState({
     title: "",
     message: "",
@@ -36,6 +38,7 @@ export default function ContactPage() {
       await contactApi.contactCreate({
         ...formData,
         type: "restaurant",
+        company_id: user?.companies_id ?? null,
       });
 
       setIsThanksModalOpen(true);

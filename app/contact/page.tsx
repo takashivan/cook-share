@@ -39,6 +39,7 @@ export default function ContactPage() {
         ...formData,
         title: formData.subject,
         type: "general",
+        company_id: null,
       });
 
       setIsThanksModalOpen(true);

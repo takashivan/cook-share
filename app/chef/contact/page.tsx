@@ -38,6 +38,7 @@ export default function ContactPage() {
         ...formData,
         title: formData.subject,
         type: "chef",
+        company_id: null,
       });
 
       setIsThanksModalOpen(true);
