@@ -351,7 +351,10 @@ export default function JobDetail({ params }: PageProps) {
         );
       case "IN_PROGRESS":
         return (
-          <Button className="w-full" onClick={() => setIsReviewModalOpen(true)}>
+          <Button
+            className="w-full bg-chefdom-orange hover:bg-chefdom-orange-dark"
+            onClick={() => setIsReviewModalOpen(true)}
+          >
             勤務終了・完了報告
           </Button>
         );
