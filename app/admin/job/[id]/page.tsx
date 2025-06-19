@@ -487,13 +487,6 @@ export default function JobDetail({ params }: PageParams) {
                           restaurantName: restaurant?.name ?? "",
                         }}
                       />
-                      {job && (
-                        <AdminJobActionsMenu
-                          job={job}
-                          workSession={selectedWorkSession}
-                          sendMessageAction={sendMessage}
-                        />
-                      )}
                     </>
                   )}
 
@@ -511,6 +504,14 @@ export default function JobDetail({ params }: PageParams) {
                         完了報告を確認
                       </span>
                     </Button>
+                  )}
+
+                  {job && ["SCHEDULED", "IN_PROGRESS", "COMPLETED", "VERIFY_REJECTED"].includes(selectedWorkSession.status) && (
+                    <AdminJobActionsMenu
+                      job={job}
+                      workSession={selectedWorkSession}
+                      sendMessageAction={sendMessage}
+                    />
                   )}
                 </div>
               </CardHeader>

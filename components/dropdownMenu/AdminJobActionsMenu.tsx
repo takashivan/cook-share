@@ -98,21 +98,23 @@ export function AdminJobActionsMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            onClick={() => {
-              handleCancelClick();
-            }}
-            className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer">
-            <XCircle className="h-4 w-4 mr-2" />
-            キャンセル
-          </DropdownMenuItem>
+          {workSession.status === "SCHEDULED" && (
+            <DropdownMenuItem
+              onClick={() => {
+                handleCancelClick();
+              }}
+              className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer">
+              <XCircle className="h-4 w-4 mr-2" />
+              キャンセル
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem
             onClick={handleOpenChangeRequestModal}
             className="cursor-pointer">
             <Pencil className="h-4 w-4 mr-2" />
             シェフに業務内容の変更を依頼する
           </DropdownMenuItem>
-          {shouldShowNoShowOption() && (
+          {workSession.status === "SCHEDULED" && shouldShowNoShowOption() && (
             <DropdownMenuItem
               onClick={() => {
                 handleNoShowClick();
