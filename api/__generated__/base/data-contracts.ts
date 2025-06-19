@@ -2459,6 +2459,43 @@ export interface DashboardListData {
   to_be_verified_worksessions: string;
 }
 
+export interface MessagesCreatePayload {
+  content: string;
+  /** @format int64 */
+  worksession_id: number;
+  /** @default "1" */
+  shouldNotify: boolean | null;
+}
+
+export interface MessagesCreateData {
+  /** @format int64 */
+  id: number;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  content: string;
+  /** @default "false" */
+  is_read: boolean;
+  /** @format timestamptz */
+  updated_at: number;
+  /** @format uuid */
+  application_id: string | null;
+  /** @format uuid */
+  chef_id: string;
+  sender_type: "chef" | "restaurant";
+  /** @format int64 */
+  restaurant_id: number | null;
+  /** @format int64 */
+  worksession_id: number;
+  /**
+   * ルームごとのmessage number
+   * @format int64
+   */
+  message_seq: number;
+}
+
 export type RestaurantsListResult = {
   /** @format int64 */
   id: number;
@@ -4642,14 +4679,14 @@ export type MessagesListData = {
   message_seq: number;
 }[];
 
-export interface MessagesCreatePayload {
+export interface MessagesCreateBody {
   content: string;
   sender_type: "chef" | "restaurant";
   /** @format int64 */
   worksession_id: number;
 }
 
-export interface MessagesCreateData {
+export interface MessagesCreateResult {
   /** @format int64 */
   id: number;
   /**
@@ -7094,6 +7131,62 @@ export type ChefReviewsListResult = {
     status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   };
 }[];
+
+export interface MessagesCreateInput {
+  content: string;
+  /** @format int64 */
+  worksession_id: number;
+  /** @default "1" */
+  shouldNotify: boolean | null;
+}
+
+export interface MessagesCreateOutput {
+  /** @format int64 */
+  id: number;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  content: string;
+  /** @default "false" */
+  is_read: boolean;
+  /** @format timestamptz */
+  updated_at: number;
+  /** @format uuid */
+  application_id: string | null;
+  /** @format uuid */
+  chef_id: string;
+  sender_type: "chef" | "restaurant";
+  /** @format int64 */
+  restaurant_id: number | null;
+  /** @format int64 */
+  worksession_id: number;
+  /**
+   * ルームごとのmessage number
+   * @format int64
+   */
+  message_seq: number;
+}
+
+export interface NotifyCreatePayload {
+  image_url: string;
+  subject: string;
+  /** @default "false" */
+  is_email: boolean;
+  type:
+    | "new_job"
+    | "application_status"
+    | "new_message"
+    | "review"
+    | "operator"
+    | "payment"
+    | "system";
+  content: string;
+  related_link: string;
+}
+
+export type NotifyCreateData = object;
 
 export type PayoutLogsListData = {
   /** @format uuid */

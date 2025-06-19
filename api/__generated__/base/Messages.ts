@@ -11,8 +11,8 @@
  */
 
 import {
-  MessagesCreateData,
-  MessagesCreatePayload,
+  MessagesCreateBody,
+  MessagesCreateResult,
   MessagesDeleteData,
   MessagesDetailData,
   MessagesListData,
@@ -149,8 +149,8 @@ export class Messages<
    * @summary Add message record
    * @request POST:/messages
    */
-  messagesCreate = (data: MessagesCreatePayload, params: RequestParams = {}) =>
-    this.request<MessagesCreateData, void>({
+  messagesCreate = (data: MessagesCreateBody, params: RequestParams = {}) =>
+    this.request<MessagesCreateResult, void>({
       path: `/messages`,
       method: "POST",
       body: data,
@@ -166,8 +166,8 @@ export class Messages<
     const key = enabled ? [`/messages`] : null;
     const fetcher: (
       url: string[],
-      { arg }: { arg: MessagesCreatePayload },
-    ) => Promise<MessagesCreateData> = (_, { arg }) =>
+      { arg }: { arg: MessagesCreateBody },
+    ) => Promise<MessagesCreateResult> = (_, { arg }) =>
       this.messagesCreate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
