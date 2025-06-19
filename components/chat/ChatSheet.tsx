@@ -508,8 +508,6 @@ export function ChatSheet({
           <ChefReviewModal
             isOpen={isReviewModalOpen}
             workSessionId={worksession.id}
-            workSessionStart={worksession.check_in_time}
-            workSessionEnd={worksession.job.end_time}
             jobFee={worksession.job.fee || 0}
             onCloseAction={() => setIsReviewModalOpen(false)}
             storeName={restaurantName}

@@ -713,8 +713,6 @@ ${cancelReason}`;
         <ChefReviewModal
           isOpen={isReviewModalOpen}
           workSessionId={workSession.id}
-          workSessionStart={workSession.check_in_time}
-          workSessionEnd={job.end_time}
           jobFee={job.fee || 0}
           onCloseAction={() => setIsReviewModalOpen(false)}
           storeName={restaurant?.name || ""}

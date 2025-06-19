@@ -11,14 +11,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Star } from "lucide-react";
-import { format } from "date-fns";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useFinishWorksession } from "@/hooks/api/user/worksessions/useFinishWorksession";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useRouter } from "next/navigation";
@@ -30,7 +22,6 @@ import { useGetMyReviews } from "@/hooks/api/user/reviews/useGetMyReviews";
 
 type ChefReviewForm = Omit<FinishPartialUpdateBody, 'transportation_expenses' | 'check_out_time'> & {
   transportation_expenses: number | "" | null;
-  check_out_time: string;
 };
 interface ChefReviewModalProps {
   isOpen: boolean;
@@ -42,8 +33,6 @@ interface ChefReviewModalProps {
   transportation_amount: number;
   transportation_expenses?: number | null;
   workSessionId: number;
-  workSessionStart: number;
-  workSessionEnd: number;
   jobFee: number;
 }
 
@@ -54,9 +43,7 @@ export function ChefReviewModal({
   jobTitle,
   jobDate,
   workSessionId,
-  workSessionStart,
   jobFee,
-  workSessionEnd,
   transportation_type,
   transportation_amount,
   transportation_expenses: initialExpenses = null,
@@ -75,33 +62,6 @@ export function ChefReviewModal({
   );
   const hasReviewed = review !== undefined;
 
-  // 時間選択肢の生成（30分間隔）
-  const generateTimeOptions = (
-    workSessionStart: number,
-    workSessionEnd: number,
-  ): string[] => {
-    const options: string[] = [];
-
-    const startDate = new Date(workSessionStart);
-    const endDate = new Date(workSessionEnd);
-
-    // 入力チェック：無効な日付、逆転している日付を除外
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || startDate > endDate) {
-      return options;
-    }
-
-    const maxEndTime = startDate.getTime() + 24 * 60 * 60 * 1000;
-    let time = new Date(startDate);
-
-    while (time.getTime() <= endDate.getTime() && time.getTime() < maxEndTime) {
-      options.push(format(time, "HH:mm"));
-      time = new Date(time.getTime() + 30 * 60 * 1000); // 30分加算（ミリ秒単位）
-    }
-
-    return options;
-  };
-  const timeOptions = generateTimeOptions(workSessionStart, workSessionEnd);
-
   const {
     register,
     handleSubmit,
@@ -111,13 +71,11 @@ export function ChefReviewModal({
     control,
   } = useForm<ChefReviewForm>({
     defaultValues: {
-      check_out_time: timeOptions[timeOptions.length - 1] || "",
       rating: review?.rating || 5,
       feedback: review?.comment || "",
       transportation_expenses: initialExpenses ?? "",
     },
     values: {
-      check_out_time: timeOptions[timeOptions.length - 1] || "",
       rating: review?.rating || 5,
       feedback: review?.comment || "",
       transportation_expenses: initialExpenses ?? "",
@@ -134,36 +92,12 @@ export function ChefReviewModal({
     userId: user?.id,
   });
 
-  // 勤怠終了時間を計算する
-  function getEndDateTime(startTime: number, endTime: string): Date {
-    const startDate = new Date(startTime);
-
-    // endTime を HH:mm から hour, minute に分解
-    const [endHour, endMinute] = endTime.split(":").map(Number);
-
-    // startDate と同じ日付で初期化
-    const endDate = new Date(
-      startDate.getFullYear(),
-      startDate.getMonth(),
-      startDate.getDate(),
-      endHour,
-      endMinute
-    );
-
-    // endTime が startTime よりも早い（または同時）なら、翌日にする
-    if (endDate.getTime() <= startDate.getTime()) {
-      endDate.setDate(endDate.getDate() + 1);
-    }
-
-    return endDate;
-  }
-
   const submit = async (data: ChefReviewForm) => {
     if (data.rating === 0 || (transportation_type !== "NONE" && data.transportation_expenses === "")) return;
 
     const submitData: FinishPartialUpdateBody = {
       ...data,
-      check_out_time: getEndDateTime(workSessionStart, data.check_out_time).getTime(),
+      check_out_time: Date.now(),
       transportation_expenses:
         // 型変換: transportation_expensesが空文字の場合はnull、そうでなければnumber型に変換
         (data.transportation_expenses === "" ? null : Number(data.transportation_expenses)),
@@ -208,42 +142,8 @@ export function ChefReviewModal({
                 : `${transportation_amount.toLocaleString()}円`}
             </div>
             <div className="mt-2 text-sm">
-              <span className="font-semibold">勤務開始時間：</span>
-              {format(new Date(workSessionStart), "HH:mm")}
-            </div>
-            <div className="mt-2 text-sm">
-              <div className="flex items-center gap-2">
-                <span className="font-semibold">勤務終了時間：</span>
-                <Controller
-                  name="check_out_time"
-                  control={control}
-                  rules={{
-                    required: "勤務終了時間を選択してください",
-                  }}
-                  render={({ field }) => (
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    >
-                      <SelectTrigger className="w-[120px]">
-                        <SelectValue placeholder="時間を選択" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {timeOptions.map((time, i) => (
-                          <SelectItem key={`time_${time}_${i}`} value={time}>
-                            {time}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
-              {errors.check_out_time && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.check_out_time.message}
-                </p>
-              )}
+              <span className="font-semibold">チェックイン：</span>
+              済
             </div>
             <div className="mt-2 text-sm">
               <span className="font-semibold">報酬：</span>
