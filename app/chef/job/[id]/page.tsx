@@ -351,7 +351,10 @@ export default function JobDetail({ params }: PageProps) {
         );
       case "IN_PROGRESS":
         return (
-          <Button className="w-full" onClick={() => setIsReviewModalOpen(true)}>
+          <Button
+            className="w-full bg-chefdom-orange hover:bg-chefdom-orange-dark"
+            onClick={() => setIsReviewModalOpen(true)}
+          >
             勤務終了・完了報告
           </Button>
         );
@@ -405,7 +408,11 @@ export default function JobDetail({ params }: PageProps) {
 キャンセル理由:
 ${cancelReason}`;
 
-      await sendMessage(message);
+      await sendMessage({
+        message,
+        // このチャットのnotificationは不要
+        shouldNotify: false,
+      });
 
       toast({
         title: "キャンセル完了",
@@ -448,10 +455,12 @@ ${cancelReason}`;
         new Date(pendingRequest.proposed_changes.end_time),
         "HH:mm"
       )}
-業務内容: ${pendingRequest.proposed_changes.task}
+業務内容: ${job?.title}
 報酬: ¥${pendingRequest.proposed_changes.fee}`;
 
-      await sendMessage(message);
+      await sendMessage({
+        message,
+      });
 
       toast({
         title: `変更リクエストを${
@@ -713,8 +722,6 @@ ${cancelReason}`;
         <ChefReviewModal
           isOpen={isReviewModalOpen}
           workSessionId={workSession.id}
-          workSessionStart={workSession.check_in_time}
-          workSessionEnd={job.end_time}
           jobFee={job.fee || 0}
           onCloseAction={() => setIsReviewModalOpen(false)}
           storeName={restaurant?.name || ""}

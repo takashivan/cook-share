@@ -36,6 +36,14 @@ export function JobStatusBadgeForAdmin({
     )
   }
 
+  if (job.status === "FILLED" && lastWorksession?.status === "VERIFY_REJECTED") {
+    return (
+      <Badge className="bg-yellow-500 hover:bg-yellow-500">
+        完了報告差し戻し
+      </Badge>
+    )
+  }
+
   if (job.status === "PUBLISHED" && job.expiry_date && job.expiry_date > Date.now() && lastWorksession == null) {
     return (
       <Badge className="bg-blue-500 hover:bg-blue-500">

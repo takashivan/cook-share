@@ -244,7 +244,9 @@ export default function JobDetail({ params }: PageParams) {
     if (!messageInput.trim() || !selectedWorkSession) return;
 
     try {
-      await sendMessage(messageInput);
+      await sendMessage({
+        message: messageInput,
+      });
       setMessageInput("");
     } catch (error) {
       console.error("Failed to send message:", error);
@@ -487,13 +489,6 @@ export default function JobDetail({ params }: PageParams) {
                           restaurantName: restaurant?.name ?? "",
                         }}
                       />
-                      {job && (
-                        <AdminJobActionsMenu
-                          job={job}
-                          workSession={selectedWorkSession}
-                          sendMessageAction={sendMessage}
-                        />
-                      )}
                     </>
                   )}
 
@@ -511,6 +506,14 @@ export default function JobDetail({ params }: PageParams) {
                         完了報告を確認
                       </span>
                     </Button>
+                  )}
+
+                  {job && ["SCHEDULED", "IN_PROGRESS", "COMPLETED", "VERIFY_REJECTED"].includes(selectedWorkSession.status) && (
+                    <AdminJobActionsMenu
+                      job={job}
+                      workSession={selectedWorkSession}
+                      sendMessageAction={sendMessage}
+                    />
                   )}
                 </div>
               </CardHeader>
@@ -709,6 +712,8 @@ export default function JobDetail({ params }: PageParams) {
             onCloseAction={() => setIsReviewModalOpen(false)}
             worksessionData={{
               id: selectedWorkSession.id,
+              transportation_type:
+                selectedWorkSession.transportation_type,
               transportation_expenses:
                 selectedWorkSession.transportation_expenses ?? undefined,
               user: {
@@ -722,6 +727,7 @@ export default function JobDetail({ params }: PageParams) {
                 work_date: selectedWorkSession.job.work_date,
                 start_time: selectedWorkSession.job.start_time,
                 end_time: selectedWorkSession.job.end_time,
+                fee: selectedWorkSession.job.fee,
               },
               restaurant: {
                 name: restaurant?.name || "",

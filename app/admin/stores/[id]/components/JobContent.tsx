@@ -108,8 +108,8 @@ export function JobContent({
       const lastWorksessionStatus = job.lastWorksession?.status;
 
       return (
-        job.status === "FILLED" &&
-          (lastWorksessionStatus === "SCHEDULED" || lastWorksessionStatus === "IN_PROGRESS" || lastWorksessionStatus === "COMPLETED")
+        job.status === "FILLED" && lastWorksessionStatus &&
+          (["SCHEDULED", "IN_PROGRESS", "COMPLETED", "VERIFY_REJECTED"].includes(lastWorksessionStatus))
       )
     }).sort((a, b) => {
       // ソート１：jobのstart_timeの昇順

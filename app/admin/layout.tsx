@@ -64,7 +64,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [isStoreListOpen, setIsStoreListOpen] = useState(false);
   const { toast } = useToast();
 
-  const { data: restaurants } = useGetRestaurantsByCompanyUserId({
+  const {
+    data: restaurants,
+    isLoading: restaurantsLoading
+  } = useGetRestaurantsByCompanyUserId({
     companyuserId: user?.id,
   });
 
@@ -125,7 +128,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }, [isLoading, isAuthenticated, user, pathname, router]);
 
   // 認証確認中は何も表示しない（一瞬で終わるのでローディングは表示しない）
-  if (isLoading) {
+  if (isLoading || restaurantsLoading) {
     return null;
   }
 
@@ -182,7 +185,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           },
         ]
       : []),
-    {
+    restaurants && restaurants.length > 0 ? {
       title: "店舗管理",
       items: [
         {
@@ -226,8 +229,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               };
             })
           : []),
-      ],
-    },
+      ].filter(Boolean) as NavigationItem[],
+    } : null,
     // {
     //   title: "求人管理",
     //   items: [
@@ -275,7 +278,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         },
       ],
     },
-  ];
+  ].filter(Boolean) as NavigationGroup[];
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -595,7 +598,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             />
           </div>
         </header>
-        <main className="p-4 md:p-6 flex-1">{children}</main>
+        <main className="p-4 md:p-6 flex-1 relative">
+          {restaurants && restaurants.length === 0 &&
+            !pathname.includes("/settings") && !pathname.includes("/notifications") && !pathname.includes("/contact") && !pathname.includes("/faq") && (
+            <div className="absolute inset-0 backdrop-blur-sm z-50 flex items-center justify-center pointer-events-auto">
+              <div className="text-center p-6 bg-white/90 rounded-xl shadow-md border">
+                <h2 className="text-xl font-semibold text-gray-800">所属店舗がありません。管理者にお問い合わせください。</h2>
+              </div>
+            </div>
+          )}
+          {children}
+        </main>
       </div>
     </div>
   );

@@ -69,11 +69,13 @@ export default function MessagesPage() {
     setSelectedWorkSession(null);
   };
 
-  const handleSendMessage = async (message: string) => {
-    if (!message.trim() || !selectedWorkSession) return;
+  const handleSendMessage: ReturnType<typeof useSubscriptionMessagesByUserId>["sendMessage"] = async (params) => {
+    if (!params.message.trim() || !selectedWorkSession) return;
 
     try {
-      sendMessage(message);
+      sendMessage({
+        message: params.message,
+      });
     } catch (error) {
       toast({
         title: "エラー",

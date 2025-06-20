@@ -22,11 +22,12 @@ import { useNoShowWorksessionByRestaurant } from "@/hooks/api/companyuser/workse
 import { JobsDetailData, WorksessionsRestaurantTodosListData } from "@/api/__generated__/base/data-contracts";
 import { JobChangeRequestModal } from "../modals/JobChangeRequestModal";
 import { AdminJobCancelModal } from "../modals/AdminJobCancelModal";
+import { useSubscriptionMessagesByCompanyUserId } from "@/hooks/api/companyuser/messages/useSubscriptionMessagesByCompanyUserId";
 
-interface AdminJobActionsMenuProps {
+export interface AdminJobActionsMenuProps {
   job: JobsDetailData["job"];
   workSession: WorksessionsRestaurantTodosListData[number];
-  sendMessageAction: (message: string) => Promise<void>;
+  sendMessageAction: ReturnType<typeof useSubscriptionMessagesByCompanyUserId>["sendMessage"];
 }
 
 export function AdminJobActionsMenu({
@@ -98,21 +99,23 @@ export function AdminJobActionsMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            onClick={() => {
-              handleCancelClick();
-            }}
-            className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer">
-            <XCircle className="h-4 w-4 mr-2" />
-            キャンセル
-          </DropdownMenuItem>
+          {workSession.status === "SCHEDULED" && (
+            <DropdownMenuItem
+              onClick={() => {
+                handleCancelClick();
+              }}
+              className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer">
+              <XCircle className="h-4 w-4 mr-2" />
+              キャンセル
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem
             onClick={handleOpenChangeRequestModal}
             className="cursor-pointer">
             <Pencil className="h-4 w-4 mr-2" />
             シェフに業務内容の変更を依頼する
           </DropdownMenuItem>
-          {shouldShowNoShowOption() && (
+          {workSession.status === "SCHEDULED" && shouldShowNoShowOption() && (
             <DropdownMenuItem
               onClick={() => {
                 handleNoShowClick();

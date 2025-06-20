@@ -697,10 +697,12 @@ export default function AdminDashboard() {
                 work_date: selectedPendingWorksession.job.work_date,
                 start_time: selectedPendingWorksession.job.start_time,
                 end_time: selectedPendingWorksession.job.end_time,
+                fee: selectedPendingWorksession.job.fee || 0,
               },
               restaurant: {
                 name: selectedPendingWorksession.restaurant?.name || "",
               },
+              transportation_type: selectedPendingWorksession.transportation_type,
               transportation_expenses: selectedPendingWorksession.transportation_expenses || 0,
             }}
             handleSuccessAction={(status) => {

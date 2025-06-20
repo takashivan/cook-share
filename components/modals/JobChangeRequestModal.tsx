@@ -22,6 +22,7 @@ import { useDeleteJobChangeRequest } from "@/hooks/api/companyuser/jobChangeRequ
 import { ErrorPage } from "../layout/ErrorPage";
 import { LoadingSpinner } from "../LoadingSpinner";
 import { useRouter } from "next/navigation";
+import { AdminJobActionsMenuProps } from "../dropdownMenu/AdminJobActionsMenu";
 
 interface CreateJobChangeRequestData {
   work_date: string;
@@ -37,7 +38,7 @@ interface JobChangeRequestModalProps {
   onCloseAction: () => void;
   job: JobsDetailData['job'];
   worksession: WorksessionsRestaurantTodosListData[number];
-  sendMessageAction: (message: string) => Promise<void>;
+  sendMessageAction: AdminJobActionsMenuProps["sendMessageAction"];
 }
 
 export function JobChangeRequestModal({
@@ -136,7 +137,7 @@ export function JobChangeRequestModal({
       const message = `【業務内容変更リクエスト】
 日付: ${data.work_date}
 時間: ${data.start_time}〜${data.end_time}
-業務内容: ${data.task}
+業務内容: ${job.title}
 報酬: ¥${data.fee}
 
 変更理由:
@@ -144,7 +145,11 @@ ${data.reason}
 
 ※この変更はシェフの承認が必要です。`;
 
-      await sendMessageAction(message);
+      await sendMessageAction({
+        message,
+        // このチャットのnotificationは不要
+        shouldNotify: false,
+      });
 
       toast({
         title: "変更リクエストを送信しました",
@@ -196,10 +201,12 @@ ${data.reason}
         new Date(changes.end_time),
         "HH:mm"
       )}
-業務内容: ${changes.task}
+業務内容: ${job.title}
 報酬: ¥${changes.fee}`;
 
-      await sendMessageAction(message);
+      await sendMessageAction({
+        message,
+      });
 
       toast({
         title: "変更リクエストを削除しました",
