@@ -303,11 +303,11 @@ export class Users<
   };
 
   /**
-   * @description Add message record <br /><br /> <b>Authentication:</b> not required
+   * @description [Auth]User <br /><br /> <b>Authentication:</b> not required
    *
    * @tags users
    * @name MessagesCreate
-   * @summary Add message record
+   * @summary [Auth]User
    * @request POST:/users/{user_id}/messages
    */
   messagesCreate = (

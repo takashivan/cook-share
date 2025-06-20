@@ -1920,6 +1920,8 @@ export type CompanyusersListData = {
   pending_email: string;
   email_change_token: string;
   password_reset_token: string;
+  /** @format int64 */
+  restaurantaccess_count: number;
 }[];
 
 export interface JobsListData {

@@ -126,11 +126,11 @@ export class Companyusers<
   };
 
   /**
-   * @description Add message record <br /><br /> <b>Authentication:</b> not required
+   * @description [Auth]restaurantの権限 <br /><br /> <b>Authentication:</b> not required
    *
    * @tags companyusers
    * @name MessagesCreate
-   * @summary Add message record
+   * @summary [Auth]restaurantの権限
    * @request POST:/companyusers/{companyuser_id}/messages
    */
   messagesCreate = (
