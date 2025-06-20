@@ -408,7 +408,11 @@ export default function JobDetail({ params }: PageProps) {
 キャンセル理由:
 ${cancelReason}`;
 
-      await sendMessage(message);
+      await sendMessage({
+        message,
+        // このチャットのnotificationは不要
+        shouldNotify: false,
+      });
 
       toast({
         title: "キャンセル完了",
@@ -451,10 +455,12 @@ ${cancelReason}`;
         new Date(pendingRequest.proposed_changes.end_time),
         "HH:mm"
       )}
-業務内容: ${pendingRequest.proposed_changes.task}
+業務内容: ${job?.title}
 報酬: ¥${pendingRequest.proposed_changes.fee}`;
 
-      await sendMessage(message);
+      await sendMessage({
+        message,
+      });
 
       toast({
         title: `変更リクエストを${

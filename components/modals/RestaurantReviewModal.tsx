@@ -19,6 +19,8 @@ import { useVerifyWorksession } from "@/hooks/api/companyuser/worksessions/useVe
 import { toast } from "@/hooks/use-toast";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { useRejectWorksession } from "@/hooks/api/companyuser/worksessions/useRejectWorksession";
+import { WorksessionsRestaurantTodosListData } from "@/api/__generated__/base/data-contracts";
+import { useSendMessageByCompanyUserId } from "@/hooks/api/companyuser/messages/useSendMessageByCompanyUserId";
 
 interface RestaurantReviewModalProps {
   isOpen: boolean;
@@ -33,13 +35,15 @@ interface RestaurantReviewModalProps {
       id: number;
       title: string;
       restaurant_id: number;
-      work_date: string | null;
-      start_time: number | null;
-      end_time: number | null;
+      work_date: string;
+      start_time: number;
+      end_time: number;
+      fee: number;
     };
     restaurant: {
       name: string;
     };
+    transportation_type: WorksessionsRestaurantTodosListData[number]["transportation_type"];
     transportation_expenses?: number;
   };
   handleSuccessAction: (status: 'verify' | 'reject') => void;
@@ -70,6 +74,11 @@ export function RestaurantReviewModal({
   const { trigger: rejectWorksessionTrigger } = useRejectWorksession({
     worksessionId: worksessionData?.id,
     jobId: worksessionData?.job.id,
+  });
+
+  const { trigger: sendMessageTrigger } = useSendMessageByCompanyUserId({
+    companyUserId: user?.id,
+    workSessionId: worksessionData?.id,
   });
 
   const handleClose = () => {
@@ -104,11 +113,33 @@ export function RestaurantReviewModal({
   };
 
   const handleReject = async () => {
+
     try {
       await rejectWorksessionTrigger({
         reason: rejectReason,
       });
-      
+
+      // メッセージとして変更リクエストのキャンセルを送信
+      const message = `【差し戻し】
+以下の完了報告を差し戻しました：
+
+日付: ${worksessionData.job.work_date}
+時間: ${format(new Date(worksessionData.job.start_time), "HH:mm")}〜${format(
+        new Date(worksessionData.job.end_time),
+        "HH:mm"
+      )}
+業務内容: ${worksessionData.job.title}
+報酬: ¥${worksessionData.job.fee}
+${worksessionData.transportation_type !== "NONE" ? `実際にかかった交通費: ¥${worksessionData.transportation_expenses || 0}` : ""}
+差し戻し理由: ${rejectReason}`;
+
+      await sendMessageTrigger({
+        content: message,
+        worksession_id: worksessionData.id,
+        // このチャットのnotificationは不要
+        shouldNotify: false,
+      });
+
       setIsRejectModalOpen(false);
       setRejectReason("");
 

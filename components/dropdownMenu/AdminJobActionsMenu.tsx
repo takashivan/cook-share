@@ -22,11 +22,12 @@ import { useNoShowWorksessionByRestaurant } from "@/hooks/api/companyuser/workse
 import { JobsDetailData, WorksessionsRestaurantTodosListData } from "@/api/__generated__/base/data-contracts";
 import { JobChangeRequestModal } from "../modals/JobChangeRequestModal";
 import { AdminJobCancelModal } from "../modals/AdminJobCancelModal";
+import { useSubscriptionMessagesByCompanyUserId } from "@/hooks/api/companyuser/messages/useSubscriptionMessagesByCompanyUserId";
 
-interface AdminJobActionsMenuProps {
+export interface AdminJobActionsMenuProps {
   job: JobsDetailData["job"];
   workSession: WorksessionsRestaurantTodosListData[number];
-  sendMessageAction: (message: string) => Promise<void>;
+  sendMessageAction: ReturnType<typeof useSubscriptionMessagesByCompanyUserId>["sendMessage"];
 }
 
 export function AdminJobActionsMenu({

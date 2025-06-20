@@ -1,5 +1,5 @@
 import { getApi } from "@/api/api-factory";
-import useSWR, { useSWRConfig } from "swr";
+import useSWR from "swr";
 import { Chat } from "@/api/__generated__/base/Chat";
 import { UnreadMessage } from "@/hooks/api/companyuser/messages/useSubscriptionUnreadMessagesByRestaurantId";
 import useSWRSubscription from "swr/subscription";
@@ -94,8 +94,6 @@ export interface Params {
 export const useSubscriptionUnreadMessagesByUser = (
   params: Params,
 ) => {
-  const { mutate } = useSWRConfig();
-
   const chatApi = getApi(Chat);
   const channelKey = `user_chat/${params.userId}`;
 
@@ -103,7 +101,7 @@ export const useSubscriptionUnreadMessagesByUser = (
     headers: {
       "X-User-Type": "chef",
     },
-  });
+  }, params.userId != null);
 
   const getRequest = useSWR(
     key,
@@ -124,7 +122,7 @@ export const useSubscriptionUnreadMessagesByUser = (
             channel = realTimeClient.channel(channelKey);
             // チャンネルが作成されたら、メッセージの購読を開始
             channel.on((message: any) => {
-              console.log("Received message:", message);
+              console.log("Received message テスト:", message);
               if (message.action === "error") {
                 console.error("Channel error:", message.payload);
                 // エラーが発生した場合、一定時間後に再試行
@@ -132,6 +130,8 @@ export const useSubscriptionUnreadMessagesByUser = (
                   console.log("Retrying channel setup...");
                   getRequest.mutate();
                 }, 5000);
+              } else if (message.action === "connection_status") {
+                return;
               } else {
                 getRequest.mutate();
 
@@ -153,7 +153,7 @@ export const useSubscriptionUnreadMessagesByUser = (
           }
         }
 
-        console.log("Channel setup for key:", channelKey);
+        console.log("Channel setup for unread messages key:", channelKey);
 
         // クリーンアップ関数を設定
         cleanup = () => {

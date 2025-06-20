@@ -38,6 +38,7 @@ import { useRouter } from "next/navigation";
 import { ErrorPage } from "../layout/ErrorPage";
 import { LoadingSpinner } from "../LoadingSpinner";
 import { ChefReviewModal } from "../modals/ChefReviewModal";
+import { useSubscriptionMessagesByUserId } from "@/hooks/api/user/messages/useSubscriptionMessagesByUserId";
 
 interface ChatSheetProps {
   isOpen: boolean;
@@ -46,7 +47,7 @@ interface ChatSheetProps {
   messagesData: WorksessionsMessagesListResult | undefined;
   isMessagesDataLoading: boolean;
   messagesDataError: any;
-  onSendMessage: (message: string) => void;
+  onSendMessage: ReturnType<typeof useSubscriptionMessagesByUserId>["sendMessage"];
   restaurantName: string;
   restaurantImage?: string;
   workDate: string | Date;
@@ -168,7 +169,9 @@ export function ChatSheet({
 
   const handleSendMessage = () => {
     try {
-      onSendMessage(messageInput);
+      onSendMessage({
+        message: messageInput,
+      });
       setMessageInput("");
     } catch (error) {
       console.error("Error sending message:", error);
@@ -203,10 +206,12 @@ export function ChatSheet({
           ),
           "HH:mm"
         )
-      }\n業務内容: ${pendingRequest.proposed_changes.task}\n報酬: ¥${
+      }\n業務内容: ${jobTitle}\n報酬: ¥${
         pendingRequest.proposed_changes.fee
       }`;
-      onSendMessage(message);
+      onSendMessage({
+        message,
+      });
       toast({
         title: `変更リクエストを${
           status === "APPROVED" ? "承認" : "拒否"
@@ -263,8 +268,8 @@ export function ChatSheet({
                   </div>
                 </div>
               </div>
-              {/* 変更リクエスト通知ボタン */}
-              {pendingRequest && (
+              {pendingRequest ? (
+                // 変更リクエスト通知ボタン
                 <Button
                   className="bg-chefdom-orange hover:bg-chefdom-orange-dark ml-auto"
                   onClick={() => {
@@ -273,9 +278,8 @@ export function ChatSheet({
                   <AlertCircle className="h-4 w-4 mr-2" />
                   変更リクエストが届いています
                 </Button>
-              )}
-              {/* 差し戻し通知ボタン */}
-              {worksession?.status === "VERIFY_REJECTED" && (
+              ) : worksession?.status === "VERIFY_REJECTED" ? (
+                // 差し戻し通知ボタン
                 <Button
                   className="bg-chefdom-orange hover:bg-chefdom-orange-dark ml-auto"
                   onClick={() => setIsReviewModalOpen(true)}
@@ -283,7 +287,7 @@ export function ChatSheet({
                   <AlertCircle className="h-4 w-4 mr-2" />
                   完了報告に差し戻しがありました
                 </Button>
-              )}
+              ) : null}
             </div>
           </div>
 
