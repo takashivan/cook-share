@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CreditCard, MessageSquare, Store } from "lucide-react";
+import { CreditCard, MessageSquare, Store, Users } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -194,7 +194,7 @@ export function CompanyDashboard() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">スタッフ</CardTitle>
-              <MessageSquare className="h-4 w-4 text-muted-foreground" />
+              <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{companyUsers.length}</div>
