@@ -6,6 +6,8 @@ import { useState } from "react";
 import { ChatSheet, ChatSheetProps } from "./ChatSheet";
 import { ErrorPage } from "@/components/layout/ErrorPage";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { format } from "date-fns";
+import { ja } from "date-fns/locale";
 
 interface MessageListProps {
   restaurantId: number;
@@ -84,11 +86,22 @@ export function MessageList({
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-1">
-                  <h3 className="font-medium truncate">
-                    {`${messageSummary.worksession.user.name} シェフ(${messageSummary.worksession.job.title})`}
+                <div className="flex items-start justify-between gap-1 mb-1 sm:items-center">
+                  <h3 className="truncate">
+                    {(() => {
+                      const formattedDate = format(new Date(messageSummary.worksession.job.work_date), "yyyy年MM月dd日", { locale: ja });
+                      const formattedStartTime = format(new Date(messageSummary.worksession.job.start_time), "HH:mm");
+                      const formattedEndTime = format(new Date(messageSummary.worksession.job.end_time), "HH:mm");
+                      return (
+                        <div className="flex items-start flex-col gap-0 sm:flex-row sm:items-center sm:gap-3">
+                          <span>{messageSummary.worksession.user.name}</span>
+                          <span>{formattedDate}</span>
+                          <span>{formattedStartTime}-{formattedEndTime}</span>
+                        </div>
+                      );
+                    })()}
                   </h3>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-gray-500 shrink-0">
                     {(() => {
                       const createdAt = messageSummary.first_message?.created_at;
                       if (!createdAt) return null;
