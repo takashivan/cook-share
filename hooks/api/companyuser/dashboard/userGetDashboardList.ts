@@ -153,6 +153,8 @@ export interface DashboardListData {
       end_time: number;
       /** @format int64 */
       restaurant_id: number;
+      /** @format int64 */
+      fee: number;
     } | null;
     restaurant: {
       /** @format int64 */

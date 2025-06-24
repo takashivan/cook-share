@@ -45,7 +45,7 @@ export const useSubscriptionChefNotificationsByUserId = (params: Params) => {
                   console.log("Retrying channel setup...");
                   getRequest.mutate();
                 }, 5000);
-              } if (message.action === "connection_status") {
+              } else if (message.action === "connection_status") {
                 return;
               } else {
                 getRequest.mutate();
@@ -61,7 +61,7 @@ export const useSubscriptionChefNotificationsByUserId = (params: Params) => {
           }
         }
 
-        console.log("Channel setup for key:", channelKey);
+        console.log("Channel setup for notification key:", channelKey);
 
         // クリーンアップ関数を設定
         cleanup = () => {

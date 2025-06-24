@@ -1,5 +1,5 @@
 import { getApi } from "@/api/api-factory";
-import useSWR, { useSWRConfig } from "swr";
+import useSWR from "swr";
 import { Chat } from "@/api/__generated__/base/Chat";
 import useSWRSubscription from "swr/subscription";
 import realTimeClient from "@/api/xano";
@@ -66,8 +66,6 @@ export interface Params {
 export const useSubscriptionMessageSummaryByUser = (
   params: Params,
 ) => {
-  const { mutate } = useSWRConfig();
-
   const chatApi = getApi(Chat);
   const channelKey = `user_chat/${params.userId}`;
 
@@ -106,6 +104,8 @@ export const useSubscriptionMessageSummaryByUser = (
                   console.log("Retrying channel setup...");
                   getRequest.mutate();
                 }, 5000);
+              } else if (message.action === "connection_status") {
+                return;
               } else {
                 getRequest.mutate();
 
@@ -127,7 +127,7 @@ export const useSubscriptionMessageSummaryByUser = (
           }
         }
 
-        console.log("Channel setup for key:", channelKey);
+        console.log("Channel setup for message summary key:", channelKey);
 
         // クリーンアップ関数を設定
         cleanup = () => {

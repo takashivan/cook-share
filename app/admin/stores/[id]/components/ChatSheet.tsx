@@ -79,7 +79,9 @@ export function ChatSheet({
 
   const handleSendMessage = async () => {
     try {
-      await sendMessage(messageInput);
+      await sendMessage({
+        message: messageInput,
+      });
       setMessageInput("");
     } catch (error) {
       console.error("Error sending message:", error);

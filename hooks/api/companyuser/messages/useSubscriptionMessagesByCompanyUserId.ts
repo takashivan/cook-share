@@ -1,12 +1,10 @@
 import { getApi } from "@/api/api-factory";
 import useSWR, { useSWRConfig } from "swr";
 import useSWRSubscription from 'swr/subscription';
-import { Messages } from "@/api/__generated__/base/Messages";
 import { MessagesCreatePayload } from "@/api/__generated__/base/data-contracts";
 import realTimeClient from "@/api/xano";
 import { Companyusers } from "@/api/__generated__/base/Companyusers";
 import { XanoRealtimeChannel } from "@xano/js-sdk/lib/models/realtime-channel";
-import { JobChangeRequests } from "@/api/__generated__/base/JobChangeRequests";
 import { Worksessions } from "@/api/__generated__/base/Worksessions";
 
 export interface Params {
@@ -18,7 +16,6 @@ export const useSubscriptionMessagesByCompanyUserId = (params: Params) => {
   const { mutate } = useSWRConfig();
 
   const companyusersApi = getApi(Companyusers);
-  const messagesApi = getApi(Messages);
   const channelKey = `worksession/${params.workSessionId}`;
 
   const [key, fetcher] = companyusersApi.worksessionsMessagesListQueryArgs(params.companyUserId ?? '', params.workSessionId ?? -1, {
@@ -53,6 +50,8 @@ export const useSubscriptionMessagesByCompanyUserId = (params: Params) => {
                     console.log("Retrying channel setup...");
                     getRequest.mutate();
                   }, 5000);
+                } else if (message.action === "connection_status") {
+                  return;
                 } else {
                   getRequest.mutate();
 
@@ -98,24 +97,27 @@ export const useSubscriptionMessagesByCompanyUserId = (params: Params) => {
     },
   )
 
-  const sendMessage = async (message: string) => {
-    if (!message.trim() || !key || !params.workSessionId) return;
+  const sendMessage = async ({
+    message,
+    shouldNotify = true,
+  }: {
+    message: string,
+    shouldNotify?: boolean;
+  }) => {
+    if (!message.trim() || !key || !params.workSessionId || !params.companyUserId) return;
 
     try {
       const messageParams: MessagesCreatePayload = {
         content: message,
         worksession_id: params.workSessionId,
-        sender_type: "restaurant",
+        shouldNotify,
       };
 
-      await messagesApi.messagesCreate(messageParams, {
+      await companyusersApi.messagesCreate(params.companyUserId, messageParams, {
         headers: {
           "X-User-Type": "company"
         }
       });
-
-      const channel = realTimeClient.channel(channelKey);
-      channel.message(messageParams);
 
       getRequest.mutate();
     } catch (error) {

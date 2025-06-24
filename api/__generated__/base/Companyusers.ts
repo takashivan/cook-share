@@ -23,6 +23,8 @@ import {
   EmailChangeCreatePayload,
   EmailConfirmCreateData,
   EmailConfirmCreatePayload,
+  MessagesCreateData,
+  MessagesCreatePayload,
   RestaurantsListResult,
   WorksessionsMessagesListData,
 } from "./data-contracts";
@@ -120,6 +122,42 @@ export class Companyusers<
     const key = enabled ? [`/companyusers/${companyuserId}/dashboard`] : null;
     const fetcher = () =>
       this.dashboardList(companyuserId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description [Auth]restaurantの権限 <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags companyusers
+   * @name MessagesCreate
+   * @summary [Auth]restaurantの権限
+   * @request POST:/companyusers/{companyuser_id}/messages
+   */
+  messagesCreate = (
+    companyuserId: string,
+    data: MessagesCreatePayload,
+    params: RequestParams = {},
+  ) =>
+    this.request<MessagesCreateData, void>({
+      path: `/companyusers/${companyuserId}/messages`,
+      method: "POST",
+      body: data,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+
+  messagesCreateQueryArgs = (
+    companyuserId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/companyusers/${companyuserId}/messages`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: MessagesCreatePayload },
+    ) => Promise<MessagesCreateData> = (_, { arg }) =>
+      this.messagesCreate(companyuserId, arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 
