@@ -15,13 +15,14 @@ import { useUserCancelWorksessionByRestaurant } from "@/hooks/api/companyuser/wo
 import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Textarea } from "@/components/ui/textarea";
+import { AdminJobActionsMenuProps } from "../dropdownMenu/AdminJobActionsMenu";
 
 interface CancellationPenalty {
   isOpen: boolean;
   onCloseAction: () => void;
   job: JobsDetailData["job"];
   workSession: WorksessionsRestaurantTodosListData[number];
-  sendMessageAction: (message: string) => Promise<void>;
+  sendMessageAction: AdminJobActionsMenuProps["sendMessageAction"];
 }
 
 export function AdminJobCancelModal({
@@ -92,7 +93,11 @@ export function AdminJobCancelModal({
 キャンセル理由:
 ${cancelReason}`;
       
-      await sendMessageAction(message);
+      await sendMessageAction({
+        message,
+        // このチャットのnotificationは不要
+        shouldNotify: false,
+      });
 
       toast({
         title: "キャンセル完了",

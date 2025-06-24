@@ -69,6 +69,8 @@ export const useSubscriptionUnreadMessagesByRestaurantId = (params: Params) => {
                     console.log("Retrying channel setup...");
                     getRequest.mutate();
                   }, 5000);
+                } else if (message.action === "connection_status") {
+                  return;
                 } else {
                   getRequest.mutate();
                   next();

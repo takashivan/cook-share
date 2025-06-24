@@ -216,7 +216,6 @@ export default function StaffPage() {
                   <TableRow>
                     <TableHead>名前</TableHead>
                     <TableHead>メールアドレス</TableHead>
-                    <TableHead>ステータス</TableHead>
                     <TableHead className="w-[100px]"></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -235,11 +234,6 @@ export default function StaffPage() {
                           </div>
                         </TableCell>
                         <TableCell>{staff.email}</TableCell>
-                        <TableCell>
-                          <div className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800">
-                            アクティブ
-                          </div>
-                        </TableCell>
                         <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -305,7 +299,7 @@ export default function StaffPage() {
                   <TableRow>
                     <TableHead>名前</TableHead>
                     <TableHead>メールアドレス</TableHead>
-                    <TableHead>ステータス</TableHead>
+                    <TableHead>所属店舗数</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -323,11 +317,7 @@ export default function StaffPage() {
                           </div>
                         </TableCell>
                         <TableCell>{staff.email}</TableCell>
-                        <TableCell>
-                          <div className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800">
-                            アクティブ
-                          </div>
-                        </TableCell>
+                        <TableCell>{staff.restaurantaccess_count}</TableCell>
                       </TableRow>
                     ))
                     : (
@@ -389,16 +379,6 @@ export default function StaffPage() {
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
-                    <div className="mt-3">
-                      <div>
-                        <p className="text-muted-foreground text-sm">
-                          ステータス
-                        </p>
-                        <div className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800">
-                          アクティブ
-                        </div>
-                      </div>
-                    </div>
                   </CardContent>
                 </Card>
               ))
@@ -441,11 +421,8 @@ export default function StaffPage() {
                     <div className="mt-3">
                       <div>
                         <p className="text-muted-foreground text-sm">
-                          ステータス
+                          所属店舗数 {staff.restaurantaccess_count}
                         </p>
-                        <div className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800">
-                          アクティブ
-                        </div>
                       </div>
                     </div>
                   </CardContent>

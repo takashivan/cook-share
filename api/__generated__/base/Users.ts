@@ -19,6 +19,10 @@ import {
   EmailChangeCreateOutput,
   EmailConfirmCreateInput,
   EmailConfirmCreateOutput,
+  MessagesCreateInput,
+  MessagesCreateOutput,
+  NotifyCreateData,
+  NotifyCreatePayload,
   PayoutLogsListData,
   RestaurantReviewsListOutput,
   ReviewsListResult,
@@ -295,6 +299,78 @@ export class Users<
     const key = enabled ? [`/users/${userId}/chef-reviews`] : null;
     const fetcher = () =>
       this.chefReviewsList(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description [Auth]User <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags users
+   * @name MessagesCreate
+   * @summary [Auth]User
+   * @request POST:/users/{user_id}/messages
+   */
+  messagesCreate = (
+    userId: string,
+    data: MessagesCreateInput,
+    params: RequestParams = {},
+  ) =>
+    this.request<MessagesCreateOutput, void>({
+      path: `/users/${userId}/messages`,
+      method: "POST",
+      body: data,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+
+  messagesCreateQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/users/${userId}/messages`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: MessagesCreateInput },
+    ) => Promise<MessagesCreateOutput> = (_, { arg }) =>
+      this.messagesCreate(userId, arg, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description ユーザーへの通知を追加し、通知を送信する <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags users
+   * @name NotifyCreate
+   * @summary ユーザーへの通知を追加し、通知を送信する
+   * @request POST:/users/{user_id}/notify
+   */
+  notifyCreate = (
+    userId: string,
+    data: NotifyCreatePayload,
+    params: RequestParams = {},
+  ) =>
+    this.request<NotifyCreateData, void>({
+      path: `/users/${userId}/notify`,
+      method: "POST",
+      body: data,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+
+  notifyCreateQueryArgs = (
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/users/${userId}/notify`] : null;
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: NotifyCreatePayload },
+    ) => Promise<NotifyCreateData> = (_, { arg }) =>
+      this.notifyCreate(userId, arg, params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 

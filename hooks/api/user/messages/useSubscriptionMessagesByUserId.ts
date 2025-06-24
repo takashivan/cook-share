@@ -1,7 +1,6 @@
 import { getApi } from "@/api/api-factory";
 import useSWR from "swr";
 import useSWRSubscription from "swr/subscription";
-import { Messages } from "@/api/__generated__/base/Messages";
 import { MessagesCreatePayload } from "@/api/__generated__/base/data-contracts";
 import realTimeClient from "@/api/xano";
 import { Users } from "@/api/__generated__/base/Users";
@@ -16,7 +15,6 @@ export const useSubscriptionMessagesByUserId = (
   params: Params,
 ) => {
   const usersApi = getApi(Users);
-  const messagesApi = getApi(Messages);
   const channelKey = `worksession/${params.workSessionId}`;
 
   const [key, fetcher] = usersApi.worksessionsMessagesListQueryArgs(
@@ -54,6 +52,8 @@ export const useSubscriptionMessagesByUserId = (
                   console.log("Retrying channel setup...");
                   getRequest.mutate();
                 }, 5000);
+              } else if (message.action === "connection_status") {
+                return;
               } else {
                 getRequest.mutate();
                 next();
@@ -65,7 +65,7 @@ export const useSubscriptionMessagesByUserId = (
           }
         }
 
-        console.log("Channel setup for key:", channelKey);
+        console.log("Channel setup for messages key:", channelKey);
 
         // クリーンアップ関数を設定
         cleanup = () => {
@@ -89,11 +89,18 @@ export const useSubscriptionMessagesByUserId = (
     return cleanup;
   });
 
-  const sendMessage = async (message: string) => {
+  const sendMessage = async ({
+    message,
+    shouldNotify = true,
+  }: {
+    message: string,
+    shouldNotify?: boolean;
+  }) => {
     if (
       !message.trim() ||
       !key ||
-      !params.workSessionId
+      !params.workSessionId ||
+      !params.userId
     )
       return;
 
@@ -101,17 +108,14 @@ export const useSubscriptionMessagesByUserId = (
       const messageParams: MessagesCreatePayload = {
         content: message,
         worksession_id: params.workSessionId,
-        sender_type: "chef",
+        shouldNotify
       };
 
-      await messagesApi.messagesCreate(messageParams, {
+      await usersApi.messagesCreate(params.userId, messageParams, {
         headers: {
           "X-User-Type": "chef",
         },
       });
-
-      const channel = realTimeClient.channel(channelKey);
-      channel.message(messageParams);
 
       getRequest.mutate();
     } catch (error) {

@@ -68,7 +68,9 @@ function MessagesPage({ profile }: { profile: any }) {
 
   const handleSendMessage = async () => {
     try {
-      sendMessage(messageInput);
+      sendMessage({
+        message: messageInput,
+      });
       setMessageInput("");
     } catch (error) {
       console.error("Failed to send message:", error);
