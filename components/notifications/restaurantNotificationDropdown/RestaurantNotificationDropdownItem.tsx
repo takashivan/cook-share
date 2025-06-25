@@ -12,9 +12,9 @@ import {
 import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { ByUserDetailOutput } from "@/api/__generated__/base/data-contracts";
 import { useMarkReadCompanyUserNotifications } from "@/hooks/api/companyuser/companyUserNotifications/useMarkReadCompanyUserNotifications";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
+import { ByUserDetailOutput } from "@/hooks/api/companyuser/companyUserNotifications/useGetCompanyUserNotificationsByUserId";
 
 interface RestaurantNotificationDropdownItemProps {
   notification: ByUserDetailOutput[number];

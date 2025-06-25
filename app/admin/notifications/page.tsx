@@ -10,8 +10,8 @@ import { Button } from "@/components/ui/button";
 import { useMarkReadAllCompanyUserNotifications } from "@/hooks/api/companyuser/companyUserNotifications/useMarkReadAllCompanyUserNotifications";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { ErrorPage } from "@/components/layout/ErrorPage";
-import { ByUserDetailOutput } from "@/api/__generated__/base/data-contracts";
 import { NotificationItem } from "./component/NotificationItem";
+import { ByUserDetailOutput } from "@/hooks/api/companyuser/companyUserNotifications/useGetCompanyUserNotificationsByUserId";
 
 export type CompanyUserNotificationType = ByUserDetailOutput[number]["type"];
 type CompanyUserNotificationFilterType = CompanyUserNotificationType | "all";

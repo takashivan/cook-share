@@ -3,7 +3,7 @@ import useSWR from "swr";
 import { CompanyuserNotifications } from "@/api/__generated__/base/CompanyuserNotifications";
 
 // XANOから生成されるSwaggerの定義が不完全なため、レスポンスの型を手動で定義する
-type ByUserDetailOutput = {
+export type ByUserDetailOutput = {
   /** @format uuid */
   id: string;
   /**
