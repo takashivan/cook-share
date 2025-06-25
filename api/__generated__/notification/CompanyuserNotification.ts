@@ -11,7 +11,7 @@
  */
 
 import {
-  ByUserDetailData1,
+  ByUserDetailResult1,
   MarkReadAllPartialUpdateInput1,
   MarkReadAllPartialUpdateResult1,
   MarkReadPartialUpdateResult,
@@ -30,7 +30,7 @@ export class CompanyuserNotification<
    * @request GET:/companyuser_notification/byUser/{user_id}
    */
   byUserDetail = (userId: string, params: RequestParams = {}) =>
-    this.request<ByUserDetailData1, void>({
+    this.request<ByUserDetailResult1, void>({
       path: `/companyuser_notification/byUser/${userId}`,
       method: "GET",
       format: "json",
