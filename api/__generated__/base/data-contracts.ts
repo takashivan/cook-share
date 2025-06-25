@@ -6163,6 +6163,27 @@ export type ReviewsListData = {
   reviewee_id: number;
 }[];
 
+export interface WorksessionsChefReviewListData {
+  /** @format int64 */
+  id: number;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format int64 */
+  rating: number;
+  comment: string;
+  /** @format timestamptz */
+  updated_at: number;
+  /** @format int64 */
+  session_id: number;
+  /** @format uuid */
+  reviewer_id: string;
+  /** @format int64 */
+  reviewee_id: number;
+}
+
 export interface RestaurantsDeleteData {
   /** @format int64 */
   id: number;
@@ -7594,6 +7615,27 @@ export type WorksessionsUserTodosListData = {
     };
   };
 }[];
+
+export interface WorksessionsChefReviewListResult {
+  /** @format int64 */
+  id: number;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format int64 */
+  rating: number;
+  comment: string;
+  /** @format timestamptz */
+  updated_at: number;
+  /** @format int64 */
+  session_id: number;
+  /** @format uuid */
+  reviewer_id: string;
+  /** @format int64 */
+  reviewee_id: number;
+}
 
 export interface WorksessionsMessagesListResult {
   messages: {
