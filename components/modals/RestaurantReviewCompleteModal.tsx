@@ -9,23 +9,27 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useGetRestaurantReviewByWorksessionId } from "@/hooks/api/companyuser/reviews/useGetRestaurantReviewByWorksessionId";
 import { FaStar } from "react-icons/fa";
+import { useGetChefReviewByWorksessionId } from "@/hooks/api/companyuser/chefReviews/useGetChefReviewByWorksessionId";
 
 interface RestaurantReviewCompleteModalProps {
   isOpen: boolean;
   onCloseAction: () => void;
   worksessionId: number;
+  restaurantId?: number;
 }
 
 export function RestaurantReviewCompleteModal({
   isOpen,
   onCloseAction,
   worksessionId,
+  restaurantId,
 }: RestaurantReviewCompleteModalProps) {
   // シェフからのレビューを取得
-  const { data: restaurantReview, isLoading: restaurantReviewLoading } = useGetRestaurantReviewByWorksessionId({
+  const { data: restaurantReview, isLoading: restaurantReviewLoading } = useGetChefReviewByWorksessionId({
     worksessionId,
+    restaurantId,
+    enabled: true,
   });
 
   return (

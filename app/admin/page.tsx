@@ -713,14 +713,17 @@ export default function AdminDashboard() {
               }
             }}
           />
-          <RestaurantReviewCompleteModal
-            isOpen={isChefReviewModalOpen}
-            onCloseAction={() => {
-              setIsChefReviewModalOpen(false)
-              setSelectedPendingWorksession(null)
-            }}
-            worksessionId={selectedPendingWorksession?.id}
-          />
+          {isChefReviewModalOpen &&
+            <RestaurantReviewCompleteModal
+              isOpen={isChefReviewModalOpen}
+              onCloseAction={() => {
+                setIsChefReviewModalOpen(false)
+                setSelectedPendingWorksession(null)
+              }}
+              worksessionId={selectedPendingWorksession.id}
+              restaurantId={selectedPendingWorksession.restaurant.id}
+            />
+          }
           <RestaurantRejectWorksessionModal
             isOpen={isRestaurantRejectWorksessionModalOpen}
             onCloseAction={() => {

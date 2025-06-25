@@ -25,7 +25,6 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { GoogleMap } from "@/components/maps/GoogleMap";
-import { useGetRestaurantReviewByRestaurantId } from "@/hooks/api/companyuser/reviews/useGetRestaurantReviewByRestaurantId";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ja } from "date-fns/locale";
 import { useGetWorksessionsByUserId } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserId";
@@ -38,6 +37,7 @@ import { useApplyJob } from "@/hooks/api/user/jobs/useApplyJob";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { getApi } from "@/api/api-factory";
 import { Users } from "@/api/__generated__/base/Users";
+import { useGetChefReviewsByRestaurantId } from "@/hooks/api/companyuser/chefReviews/useGetChefReviewsByRestaurantId";
 
 // 時間のフォーマット関数を追加
 const formatTime = (timestamp: number) => {
@@ -58,7 +58,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
     userId: user?.id,
   });
 
-  const { data: restaurantReview } = useGetRestaurantReviewByRestaurantId({
+  const { data: restaurantReview } = useGetChefReviewsByRestaurantId({
     restaurantId: Number(jobDetail.restaurant.id),
   });
 

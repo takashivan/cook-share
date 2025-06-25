@@ -12,11 +12,11 @@ import { useSubscriptionUnreadMessagesByUser } from "@/hooks/api/user/messages/u
 import { Badge } from "@/components/ui/badge";
 import { formatJapanHHMM } from "@/lib/functions";
 import { Star } from "lucide-react";
-import { useGetReviewsByUserId } from "@/hooks/api/user/reviews/useGetReviewsByUserId";
 import { ErrorPage } from "@/components/layout/ErrorPage";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useGetRestaurantReviewsByUserId } from "@/hooks/api/user/restaurantReviews/useGetRestaurantReviewsByUserId";
 
 export default function SchedulePage() {
   const { user } = useAuth();
@@ -42,7 +42,7 @@ export default function SchedulePage() {
     data: reviews,
     isLoading: isReviewsLoading,
     error: reviewsError,
-  } = useGetReviewsByUserId({
+  } = useGetRestaurantReviewsByUserId({
     userId: user?.id,
   });
 

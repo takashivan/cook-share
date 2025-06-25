@@ -1,12 +1,12 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useGetRestaurantReviewByRestaurantId } from "@/hooks/api/companyuser/reviews/useGetRestaurantReviewByRestaurantId";
 import { Star } from "lucide-react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { ErrorPage } from "@/components/layout/ErrorPage";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { useGetChefReviewsByRestaurantId } from "@/hooks/api/companyuser/chefReviews/useGetChefReviewsByRestaurantId";
 
 interface ReviewListProps {
   restaurantId: number;
@@ -19,7 +19,7 @@ export function ReviewList({
     data: restaurantReviews,
     isLoading: isReviewsLoading,
     error: reviewsError,
-  } = useGetRestaurantReviewByRestaurantId({
+  } = useGetChefReviewsByRestaurantId({
     restaurantId,
   });
 
