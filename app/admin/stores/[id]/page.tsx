@@ -7,7 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useGetRestaurant } from "@/hooks/api/companyuser/restaurants/useGetRestaurant";
 import Image from "next/image";
-import { useGetRestaurantReviewByRestaurantId } from "@/hooks/api/companyuser/reviews/useGetRestaurantReviewByRestaurantId";
 import { MessageList } from "./components/MessageList";
 import { RestaurantDetail } from "./components/RestaurantDetail";
 import { ReviewList } from "./components/ReviewList";
@@ -17,6 +16,7 @@ import { ErrorPage } from "@/components/layout/ErrorPage";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { RestaurantStatusBadgeForAdmin } from "@/components/badge/RestaurantStatusBadgeForAdmin";
 import { useGetRestaurantCuisines } from "@/hooks/api/all/restaurantCuisines/useGetRestaurantCuisines";
+import { useGetChefReviewsByRestaurantId } from "@/hooks/api/companyuser/chefReviews/useGetChefReviewsByRestaurantId";
 
 // interface EditStaffPermissions {
 //   canEdit: boolean;
@@ -50,7 +50,7 @@ export default function RestaurantDetailPage(props: {
     data: restaurantReview,
     error: reviewError,
     isLoading: reviewLoading,
-  } = useGetRestaurantReviewByRestaurantId({
+  } = useGetChefReviewsByRestaurantId({
     restaurantId: Number(params.id),
   });
 

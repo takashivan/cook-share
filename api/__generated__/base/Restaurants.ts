@@ -30,6 +30,7 @@ import {
   ReviewsListData,
   StaffInviteCreateInput,
   StaffInviteCreateOutput,
+  WorksessionsChefReviewListData,
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
 
@@ -313,6 +314,43 @@ export class Restaurants<
     const key = enabled ? [`/restaurants/${restaurantId}/reviews`] : null;
     const fetcher = () =>
       this.reviewsList(restaurantId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags restaurants
+   * @name WorksessionsChefReviewList
+   * @request GET:/restaurants/{restaurant_id}/worksessions/{worksession_id}/chef-review
+   */
+  worksessionsChefReviewList = (
+    worksessionId: number,
+    restaurantId: number,
+    params: RequestParams = {},
+  ) =>
+    this.request<WorksessionsChefReviewListData, void>({
+      path: `/restaurants/${restaurantId}/worksessions/${worksessionId}/chef-review`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  worksessionsChefReviewListQueryArgs = (
+    worksessionId: number,
+    restaurantId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled
+      ? [
+          `/restaurants/${restaurantId}/worksessions/${worksessionId}/chef-review`,
+        ]
+      : null;
+    const fetcher = () =>
+      this.worksessionsChefReviewList(worksessionId, restaurantId, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 

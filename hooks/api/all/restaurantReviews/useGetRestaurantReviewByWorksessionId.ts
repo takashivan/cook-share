@@ -6,18 +6,15 @@ interface Params {
   worksessionId?: number;
 }
 
+// シェフ→レストランのレビュー一覧を取得
 export const useGetRestaurantReviewByWorksessionId = (
   params: Params,
 ) => {
   const worksessionsApi = getApi(Worksessions);
   return useSWR(
-    ...worksessionsApi.chefReviewListQueryArgs(
+    ...worksessionsApi.restaurantReviewListQueryArgs(
       params.worksessionId ?? -1,
-      {
-        headers: {
-          "X-User-Type": "company",
-        },
-      },
+      {},
       params.worksessionId != null,
     ),
   );

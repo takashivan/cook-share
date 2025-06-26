@@ -42,6 +42,7 @@ import {
   UsersListData,
   UsersPartialUpdateData,
   UsersPartialUpdatePayload,
+  WorksessionsChefReviewListResult,
   WorksessionsListResult,
   WorksessionsMessagesListResult,
   WorksessionsUserTodosListData,
@@ -558,6 +559,41 @@ export class Users<
     const key = enabled ? [`/users/${userId}/worksessions/user_todos`] : null;
     const fetcher = () =>
       this.worksessionsUserTodosList(userId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description <br /><br /> <b>Authentication:</b> not required
+   *
+   * @tags users
+   * @name WorksessionsChefReviewList
+   * @request GET:/users/{user_id}/worksessions/{worksession_id}/chef-review
+   */
+  worksessionsChefReviewList = (
+    worksessionId: number,
+    userId: string,
+    params: RequestParams = {},
+  ) =>
+    this.request<WorksessionsChefReviewListResult, void>({
+      path: `/users/${userId}/worksessions/${worksessionId}/chef-review`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  worksessionsChefReviewListQueryArgs = (
+    worksessionId: number,
+    userId: string,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled
+      ? [`/users/${userId}/worksessions/${worksessionId}/chef-review`]
+      : null;
+    const fetcher = () =>
+      this.worksessionsChefReviewList(worksessionId, userId, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 

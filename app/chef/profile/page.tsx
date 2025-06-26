@@ -8,7 +8,6 @@ import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { ChefProfileEditModal } from "@/components/modals/ChefProfileEditModal";
-import { useGetReviewsByUserId } from "@/hooks/api/user/reviews/useGetReviewsByUserId";
 import {
   Card,
   CardHeader,
@@ -23,6 +22,7 @@ import { EXPERIENCE_LEVELS, POSITION_LEVEL } from "@/lib/const/chef-profile";
 import { ErrorPage } from "@/components/layout/ErrorPage";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { useGetRestaurantCuisines } from "@/hooks/api/all/restaurantCuisines/useGetRestaurantCuisines";
+import { useGetRestaurantReviewsByUserId } from "@/hooks/api/user/restaurantReviews/useGetRestaurantReviewsByUserId";
 
 export default function ChefProfile() {
   const { user, logout } = useAuth();
@@ -38,7 +38,7 @@ export default function ChefProfile() {
     data: reviewsData,
     isLoading: isReviewsLoading,
     error: reviewsError,
-  } = useGetReviewsByUserId({
+  } = useGetRestaurantReviewsByUserId({
     userId: user?.id ?? undefined,
   });
   console.log("reviewsData", reviewsData);

@@ -4,6 +4,7 @@ import useSWRSubscription from 'swr/subscription';
 import realTimeClient from "@/api/xano";
 import { XanoRealtimeChannel } from "@xano/js-sdk/lib/models/realtime-channel";
 import { CompanyuserNotifications } from "@/api/__generated__/base/CompanyuserNotifications";
+import { ByUserDetailOutput } from "./useGetCompanyUserNotificationsByUserId";
 
 export interface Params {
   userId?: string;
@@ -21,7 +22,7 @@ export const useSubscriptionCompanyUserNotificationsByUserId = (params: Params) 
     }
   }, params.userId != null);
 
-  const getRequest = useSWR(key, fetcher);
+  const getRequest = useSWR(key, fetcher as unknown as () => Promise<ByUserDetailOutput>);
 
   useSWRSubscription(key, ([_key], { next }) => {
     if (!key) return () => {};

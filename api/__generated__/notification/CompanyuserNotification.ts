@@ -12,7 +12,7 @@
 
 import {
   ByUserDetailResult1,
-  MarkReadAllPartialUpdateBody1,
+  MarkReadAllPartialUpdateInput1,
   MarkReadAllPartialUpdateResult1,
   MarkReadPartialUpdateResult,
 } from "./data-contracts";
@@ -57,7 +57,7 @@ export class CompanyuserNotification<
    * @request PATCH:/companyuser_notification/mark-read/all
    */
   markReadAllPartialUpdate = (
-    data: MarkReadAllPartialUpdateBody1,
+    data: MarkReadAllPartialUpdateInput1,
     params: RequestParams = {},
   ) =>
     this.request<MarkReadAllPartialUpdateResult1, void>({
@@ -76,7 +76,7 @@ export class CompanyuserNotification<
     const key = enabled ? [`/companyuser_notification/mark-read/all`] : null;
     const fetcher: (
       url: string[],
-      { arg }: { arg: MarkReadAllPartialUpdateBody1 },
+      { arg }: { arg: MarkReadAllPartialUpdateInput1 },
     ) => Promise<MarkReadAllPartialUpdateResult1> = (_, { arg }) =>
       this.markReadAllPartialUpdate(arg, params).then((res) => res.data);
     return [key, fetcher] as const;

@@ -23,6 +23,7 @@ import { JobsDetailData, WorksessionsRestaurantTodosListData } from "@/api/__gen
 import { JobChangeRequestModal } from "../modals/JobChangeRequestModal";
 import { AdminJobCancelModal } from "../modals/AdminJobCancelModal";
 import { useSubscriptionMessagesByCompanyUserId } from "@/hooks/api/companyuser/messages/useSubscriptionMessagesByCompanyUserId";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export interface AdminJobActionsMenuProps {
   job: JobsDetailData["job"];
@@ -109,12 +110,26 @@ export function AdminJobActionsMenu({
               キャンセル
             </DropdownMenuItem>
           )}
-          <DropdownMenuItem
-            onClick={handleOpenChangeRequestModal}
-            className="cursor-pointer">
-            <Pencil className="h-4 w-4 mr-2" />
-            シェフに業務内容の変更を依頼する
-          </DropdownMenuItem>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <DropdownMenuItem
+                    onClick={handleOpenChangeRequestModal}
+                    disabled={workSession.status === "COMPLETED"}
+                    className="cursor-pointer">
+                    <Pencil className="h-4 w-4 mr-2" />
+                    シェフに業務内容の変更を依頼する
+                  </DropdownMenuItem>
+                </div>
+              </TooltipTrigger>
+              {workSession.status === "COMPLETED" && (
+                <TooltipContent>
+                  <p>完了報告を差し戻ししてください</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
           {workSession.status === "SCHEDULED" && shouldShowNoShowOption() && (
             <DropdownMenuItem
               onClick={() => {
