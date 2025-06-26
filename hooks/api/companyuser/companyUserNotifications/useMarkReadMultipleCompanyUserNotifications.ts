@@ -1,8 +1,9 @@
 import { CompanyuserNotifications } from "@/api/__generated__/base/CompanyuserNotifications";
-import { ByUserDetailOutput, MarkReadPartialUpdateData } from "@/api/__generated__/base/data-contracts";
+import { MarkReadPartialUpdateData } from "@/api/__generated__/base/data-contracts";
 import { getApi } from "@/api/api-factory";
 import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
+import { ByUserDetailOutput } from "./useGetCompanyUserNotificationsByUserId";
 
 export interface Params {
   companyUserNotificationIds: string[];

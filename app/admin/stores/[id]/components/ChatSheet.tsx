@@ -29,6 +29,7 @@ import { JobStatusBadgeForAdmin } from "@/components/badge/JobStatusBadgeForAdmi
 import { useGetWorksessionsByJobId } from "@/hooks/api/companyuser/worksessions/useGetWorksessionsByJobId";
 import { ChefProfileForAdminModal } from "@/components/modals/ChefProfileForAdminModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useGetRestaurantReviewByWorksessionId } from "@/hooks/api/all/restaurantReviews/useGetRestaurantReviewByWorksessionId";
 
 export interface ChatSheetProps {
   restaurantId: number;
@@ -60,6 +61,15 @@ export function ChatSheet({
   const { data: workSessions, error: workSessionsError, isLoading: workSessionsLoading } =
     useGetWorksessionsByJobId({ jobId:selectedChat?.jobId });
   const selectedWorkSession = workSessions?.[0];
+
+  // この求人に対する、レストランからシェフへのレビューを取得
+  const {
+    data: restaurantReview,
+    error: restaurantReviewError,
+    isLoading: restaurantReviewLoading,
+  } = useGetRestaurantReviewByWorksessionId({
+    worksessionId: selectedWorkSession?.id,
+  })
 
   const {
     messagesData,
@@ -259,9 +269,9 @@ export function ChatSheet({
           </SheetHeader>
 
           <div className="flex flex-col h-[calc(100vh-8rem)]">
-            {messagesError || workSessionsError ? (
+            {messagesError || workSessionsError || restaurantReviewError ? (
               <ErrorPage />
-            ) : isMessagesLoading || !messagesData || workSessionsLoading ? (
+            ) : isMessagesLoading || !messagesData || workSessionsLoading || restaurantReviewLoading ? (
               <LoadingSpinner />
             ) : (
               <>
@@ -310,105 +320,108 @@ export function ChatSheet({
                   )}
                   <div ref={messagesEndRef} />
                 </div>
-
-                <div className="border-t">
-                  <div className="px-4 py-3 border-b">
-                    <p className="text-sm text-muted-foreground mb-2">
-                      クイックメッセージ
-                    </p>
-                    <div className="flex flex-wrap gap-2">
+                {/* レストラン→シェフのレビューが完了した時間から72時間以上経過している場合、メッセージの入力を非表示にする */}
+                {(!restaurantReview ||
+                  (new Date(restaurantReview.created_at).getTime() + 72 * 60 * 60 * 1000 > Date.now())) && (
+                  <div className="border-t">
+                    <div className="px-4 py-3 border-b">
+                      <p className="text-sm text-muted-foreground mb-2">
+                        クイックメッセージ
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            setMessageInput(
+                              "はじめまして！ご応募ありがとうございます。"
+                            )
+                          }>
+                          👋 はじめまして
+                        </Button>
+                        {selectedWorkSession?.job.whattotake && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              setMessageInput(
+                                `当日の持ち物について確認させていただきます。\n\n以下の持ち物をご準備ください：\n${selectedWorkSession.job.whattotake}`
+                              )
+                            }>
+                            📋 持ち物の確認
+                          </Button>
+                        )}
+                        {selectedWorkSession?.job.work_date && selectedWorkSession?.job.start_time && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              setMessageInput(
+                                `当日の集合時間と場所の確認をさせていただきます。\n\n日時：${format(
+                                  new Date(selectedWorkSession.job.work_date),
+                                  "MM月dd日"
+                                )} ${formatJapanHHMM(
+                                  selectedWorkSession.job.start_time
+                                )}\n場所：${restaurantAddress || ""}`
+                              )
+                            }>
+                            🕒 集合時間の確認
+                          </Button>
+                        )}
+                        {selectedWorkSession?.job.note && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              setMessageInput(
+                                `その他の注意事項について確認させていただきます。\n\n${selectedWorkSession.job.note}`
+                              )
+                            }>
+                            ℹ️ 注意事項の確認
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-2 pt-4">
+                      <TextareaAutosize
+                        value={messageInput}
+                        onChange={(e) => setMessageInput(e.target.value)}
+                        placeholder="メッセージを入力..."
+                        minRows={1}
+                        maxRows={6}
+                        className="flex-1 resize-none bg-white px-3 py-2 border rounded-md text-base focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
+                        onKeyDown={(
+                          e: React.KeyboardEvent<HTMLTextAreaElement>
+                        ) => {
+                          // PC: Enterで送信、Shift+Enterで改行
+                          if (
+                            e.key === "Enter" &&
+                            !e.shiftKey &&
+                            !e.nativeEvent.isComposing &&
+                            !isMobile()
+                          ) {
+                            e.preventDefault();
+                            handleSendMessage();
+                          }
+                          // Shift+Enterで改行
+                          if (e.key === "Enter" && e.shiftKey) {
+                            setMessageInput((prev) => prev + "\n");
+                          }
+                          // モバイル: Enterは常に改行
+                          if (e.key === "Enter" && isMobile()) {
+                            setMessageInput((prev) => prev + "\n");
+                          }
+                        }}
+                      />
                       <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          setMessageInput(
-                            "はじめまして！ご応募ありがとうございます。"
-                          )
-                        }>
-                        👋 はじめまして
+                        size="icon"
+                        onClick={handleSendMessage}
+                        disabled={!messageInput.trim()}>
+                        <Send className="h-4 w-4" />
                       </Button>
-                      {selectedWorkSession?.job.whattotake && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            setMessageInput(
-                              `当日の持ち物について確認させていただきます。\n\n以下の持ち物をご準備ください：\n${selectedWorkSession.job.whattotake}`
-                            )
-                          }>
-                          📋 持ち物の確認
-                        </Button>
-                      )}
-                      {selectedWorkSession?.job.work_date && selectedWorkSession?.job.start_time && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            setMessageInput(
-                              `当日の集合時間と場所の確認をさせていただきます。\n\n日時：${format(
-                                new Date(selectedWorkSession.job.work_date),
-                                "MM月dd日"
-                              )} ${formatJapanHHMM(
-                                selectedWorkSession.job.start_time
-                              )}\n場所：${restaurantAddress || ""}`
-                            )
-                          }>
-                          🕒 集合時間の確認
-                        </Button>
-                      )}
-                      {selectedWorkSession?.job.note && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            setMessageInput(
-                              `その他の注意事項について確認させていただきます。\n\n${selectedWorkSession.job.note}`
-                            )
-                          }>
-                          ℹ️ 注意事項の確認
-                        </Button>
-                      )}
                     </div>
                   </div>
-                  <div className="flex gap-2 pt-4">
-                    <TextareaAutosize
-                      value={messageInput}
-                      onChange={(e) => setMessageInput(e.target.value)}
-                      placeholder="メッセージを入力..."
-                      minRows={1}
-                      maxRows={6}
-                      className="flex-1 resize-none bg-white px-3 py-2 border rounded-md text-base focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
-                      onKeyDown={(
-                        e: React.KeyboardEvent<HTMLTextAreaElement>
-                      ) => {
-                        // PC: Enterで送信、Shift+Enterで改行
-                        if (
-                          e.key === "Enter" &&
-                          !e.shiftKey &&
-                          !e.nativeEvent.isComposing &&
-                          !isMobile()
-                        ) {
-                          e.preventDefault();
-                          handleSendMessage();
-                        }
-                        // Shift+Enterで改行
-                        if (e.key === "Enter" && e.shiftKey) {
-                          setMessageInput((prev) => prev + "\n");
-                        }
-                        // モバイル: Enterは常に改行
-                        if (e.key === "Enter" && isMobile()) {
-                          setMessageInput((prev) => prev + "\n");
-                        }
-                      }}
-                    />
-                    <Button
-                      size="icon"
-                      onClick={handleSendMessage}
-                      disabled={!messageInput.trim()}>
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
+                )}
               </>
             )}
           </div>

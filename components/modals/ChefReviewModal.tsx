@@ -18,7 +18,7 @@ import { toast } from "@/hooks/use-toast";
 import { Controller, useForm } from "react-hook-form";
 import { FinishPartialUpdateBody } from "@/api/__generated__/base/data-contracts";
 import { Input } from "@/components/ui/input";
-import { useGetMyReviews } from "@/hooks/api/user/reviews/useGetMyReviews";
+import { useGetChefReviewByWorksessionId } from "@/hooks/api/user/chefReviews/useGetChefReviewByWorksessionId";
 
 type ChefReviewForm = Omit<FinishPartialUpdateBody, 'transportation_expenses' | 'check_out_time'> & {
   transportation_expenses: number | "" | null;
@@ -53,13 +53,12 @@ export function ChefReviewModal({
 
   const [hoverRating, setHoverRating] = useState(0);
   const {
-    data: myReviewsData,
-  } = useGetMyReviews({
+    data: review,
+  } = useGetChefReviewByWorksessionId({
     userId: user?.id,
+    worksessionId: workSessionId,
   });
-  const review = myReviewsData?.find(
-    (review) => review.session_id === workSessionId,
-  );
+
   const hasReviewed = review !== undefined;
 
   const {

@@ -6,19 +6,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChatSheet } from "@/components/chat/ChatSheet";
 import { useGetWorksessionsByUserId } from "@/hooks/api/user/worksessions/useGetWorksessionsByUserId";
 import { WorksessionsListResult } from "@/api/__generated__/base/data-contracts";
-import { useSubscriptionMessagesByUserId } from "@/hooks/api/user/messages/useSubscriptionMessagesByUserId";
 import { useSubscriptionUnreadMessagesByUser } from "@/hooks/api/user/messages/useSubscriptionUnreadMessagesByUser";
 import { Badge } from "@/components/ui/badge";
 import { formatJapanHHMM } from "@/lib/functions";
 import { Star } from "lucide-react";
-import { useGetReviewsByUserId } from "@/hooks/api/user/reviews/useGetReviewsByUserId";
 import { ErrorPage } from "@/components/layout/ErrorPage";
 import { LoadingScreen } from "@/components/LoadingScreen";
-import { toast } from "@/hooks/use-toast";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { useGetRestaurantReviewsByUserId } from "@/hooks/api/user/restaurantReviews/useGetRestaurantReviewsByUserId";
 
 export default function SchedulePage() {
   const { user } = useAuth();
@@ -27,7 +25,6 @@ export default function SchedulePage() {
   const initialTab = searchParams.get("tab") || "upcoming";
   const initialSubTab = searchParams.get("subTab") || "cancelledByUser";
 
-  const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState(initialTab);
   const [activeCanceledTab, setActiveCanceledTab] = useState(initialSubTab);
 
@@ -40,29 +37,13 @@ export default function SchedulePage() {
     userId: user?.id,
   });
 
-  // 選択されたワークセッション
-  const selectedWorkSession = workSessions?.find(
-    (ws) => ws?.job?.id === selectedJobId
-  );
-
   // レビューの取得
   const {
     data: reviews,
     isLoading: isReviewsLoading,
     error: reviewsError,
-  } = useGetReviewsByUserId({
+  } = useGetRestaurantReviewsByUserId({
     userId: user?.id,
-  });
-
-  // メッセージの取得
-  const {
-    messagesData,
-    sendMessage,
-    isLoading: isMessagesLoading,
-    error: messagesError,
-  } = useSubscriptionMessagesByUserId({
-    userId: user?.id,
-    workSessionId: selectedWorkSession?.id,
   });
 
   // 未読メッセージの取得
@@ -73,30 +54,6 @@ export default function SchedulePage() {
   } = useSubscriptionUnreadMessagesByUser({
     userId: user?.id,
   });
-
-  const handleSendMessage: ReturnType<typeof useSubscriptionMessagesByUserId>["sendMessage"] = async (params) => {
-    if (!params.message.trim() || !selectedWorkSession) return;
-
-    try {
-      sendMessage({
-        message: params.message
-      });
-    } catch (error) {
-      toast({
-        title: "エラー",
-        description: "メッセージの送信に失敗しました。",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const openChat = (jobId: number) => {
-    setSelectedJobId(jobId);
-  };
-
-  const closeChat = () => {
-    setSelectedJobId(null);
-  };
 
   const sortedWorkSessions = workSessions?.slice().sort((a, b) => {
     // 日付の降順にソート
@@ -166,15 +123,8 @@ export default function SchedulePage() {
 
     return (
       <Card
-        key={workSession.id}
         className="mb-4 hover:bg-gray-50 transition-colors"
-        onClick={() => {
-          if (workSession.status === "CANCELED_BY_CHEF" || workSession.status === "CANCELED_BY_RESTAURANT") {
-            return;
-          }
-          openChat(workSession.job.id);
-          console.log("Card clicked");
-        }}>
+      >
         <CardContent className="p-4">
           <div className="flex justify-between items-start mb-2 relative">
             <div className="flex items-center gap-2">
@@ -261,7 +211,15 @@ export default function SchedulePage() {
 
         <TabsContent value="upcoming" className="mt-6">
           {filteredWorkSessions.upcoming.length > 0 ? (
-            filteredWorkSessions.upcoming.map(renderWorkSessionCard)
+            filteredWorkSessions.upcoming.map((workSession) => (
+              <Link
+                key={workSession.id}
+                href={`/chef/job/${workSession.job.id}`}
+                className="block"
+              >
+                {renderWorkSessionCard(workSession)}
+              </Link>
+            ))
           ) : (
             <p className="text-center text-gray-500 py-8">
               予定されているお仕事はありません
@@ -271,7 +229,15 @@ export default function SchedulePage() {
 
         <TabsContent value="completed" className="mt-6">
           {filteredWorkSessions.completed.length > 0 ? (
-            filteredWorkSessions.completed.map(renderWorkSessionCard)
+            filteredWorkSessions.completed.map((workSession) => (
+              <Link
+                key={workSession.id}
+                href={`/chef/job/${workSession.job.id}`}
+                className="block"
+              >
+                {renderWorkSessionCard(workSession)}
+              </Link>
+            ))
           ) : (
             <p className="text-center text-gray-500 py-8">
               完了したお仕事はありません
@@ -315,25 +281,6 @@ export default function SchedulePage() {
           </Tabs>
         </TabsContent>
       </Tabs>
-
-      <ChatSheet
-        isOpen={selectedJobId !== null}
-        onClose={closeChat}
-        worksession={selectedWorkSession}
-        messagesData={messagesData}
-        isMessagesDataLoading={isMessagesLoading}
-        messagesDataError={messagesError}
-        onSendMessage={handleSendMessage}
-        restaurantName={selectedWorkSession?.job?.restaurant.name || ""}
-        restaurantImage={
-          selectedWorkSession?.job?.restaurant.profile_image || ""
-        }
-        workDate={selectedWorkSession?.job?.work_date || ""}
-        startTime={selectedWorkSession?.job?.start_time || 0}
-        endTime={selectedWorkSession?.job?.end_time || 0}
-        jobId={selectedWorkSession?.job?.id || 0}
-        jobTitle={selectedWorkSession?.job?.title || ""}
-      />
     </div>
   );
 }

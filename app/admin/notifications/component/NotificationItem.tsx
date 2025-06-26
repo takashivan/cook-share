@@ -1,4 +1,3 @@
-import { ByUserDetailOutput } from "@/api/__generated__/base/data-contracts";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -13,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { useMarkReadCompanyUserNotifications } from "@/hooks/api/companyuser/companyUserNotifications/useMarkReadCompanyUserNotifications";
 import { toast } from "@/hooks/use-toast";
+import { ByUserDetailOutput } from "@/hooks/api/companyuser/companyUserNotifications/useGetCompanyUserNotificationsByUserId";
 
 interface NotificationItemProps {
   notification: ByUserDetailOutput[number];

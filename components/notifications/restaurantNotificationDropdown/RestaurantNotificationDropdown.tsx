@@ -18,8 +18,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useMarkReadAllCompanyUserNotifications } from "@/hooks/api/companyuser/companyUserNotifications/useMarkReadAllCompanyUserNotifications";
-import { ByUserDetailOutput } from "@/api/__generated__/base/data-contracts";
 import { RestaurantNotificationDropdownItem } from "./RestaurantNotificationDropdownItem";
+import { ByUserDetailOutput } from "@/hooks/api/companyuser/companyUserNotifications/useGetCompanyUserNotificationsByUserId";
 
 interface RestaurantNotificationDropdownProps {
   restaurantId: number;

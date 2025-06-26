@@ -13,9 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import { FaStar } from "react-icons/fa";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import { useGetReviewsByUserId } from "@/hooks/api/user/reviews/useGetReviewsByUserId";
 import { WorksessionsRestaurantTodosListData } from "@/api/__generated__/base/data-contracts";
 import { Button } from "@/components/ui/button";
+import { useGetRestaurantReviewsByUserId } from "@/hooks/api/companyuser/restaurantReviews/useGetRestaurantReviewsByUserId";
 
 interface ChefProfileForAdminModalProps {
   isOpen: boolean;
@@ -29,7 +29,7 @@ export function ChefProfileForAdminModal({
   worksession,
 }: ChefProfileForAdminModalProps) {
   // シェフのこれまでのレビュー一覧を取得
-  const { data: reviewsData } = useGetReviewsByUserId({
+  const { data: reviewsData } = useGetRestaurantReviewsByUserId({
     userId: worksession.user_id ?? undefined,
   });
 

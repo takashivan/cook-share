@@ -6,18 +6,15 @@ interface Params {
   restaurantId?: number;
 }
 
-export const useGetRestaurantReviewByRestaurantId = (
+// シェフ→レストランのレビュー一覧を取得
+export const useGetChefReviewsByRestaurantId = (
   params: Params,
 ) => {
-  const restaurants = getApi(Restaurants);
+  const restaurantApi = getApi(Restaurants);
   return useSWR(
-    ...restaurants.chefReviewsListQueryArgs(
+    ...restaurantApi.chefReviewsListQueryArgs(
       params.restaurantId ?? -1,
-      {
-        headers: {
-          "X-User-Type": "company",
-        },
-      },
+      {},
       params.restaurantId != null,
     ),
   );

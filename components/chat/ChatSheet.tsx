@@ -39,6 +39,7 @@ import { ErrorPage } from "../layout/ErrorPage";
 import { LoadingSpinner } from "../LoadingSpinner";
 import { ChefReviewModal } from "../modals/ChefReviewModal";
 import { useSubscriptionMessagesByUserId } from "@/hooks/api/user/messages/useSubscriptionMessagesByUserId";
+import { useGetRestaurantReviewByWorksessionId } from "@/hooks/api/all/restaurantReviews/useGetRestaurantReviewByWorksessionId";
 
 interface ChatSheetProps {
   isOpen: boolean;
@@ -97,7 +98,16 @@ export function ChatSheet({
     worksessionsId: worksession?.id,
   });
   const pendingRequest = changeRequest?.status === "PENDING" ? changeRequest : null;
-  
+
+  // この求人に対する、レストランからシェフへのレビューを取得
+  const {
+    data: restaurantReview,
+    error: restaurantReviewError,
+    isLoading: restaurantReviewLoading,
+  } = useGetRestaurantReviewByWorksessionId({
+    worksessionId: worksession?.id,
+  });
+
   const { trigger: updateReadMessageTrigger } = useUpdateReadMessageByUser({
     userId: user?.id,
     workSessionId: worksession?.id,
@@ -291,11 +301,11 @@ export function ChatSheet({
             </div>
           </div>
 
-          {messagesDataError || changeRequestError ? (
+          {messagesDataError || changeRequestError || restaurantReviewError ? (
             <div className="flex flex-1 justify-center w-full">
               <ErrorPage />
             </div>
-          ) : isMessagesDataLoading || isChangeRequestLoading ? (
+          ) : isMessagesDataLoading || isChangeRequestLoading || restaurantReviewLoading ? (
             <LoadingSpinner />
           ): (
             <>
@@ -351,87 +361,91 @@ export function ChatSheet({
               </div>
 
               {/* 入力エリア */}
-              <div className="border-t bg-background">
-                <div className="px-4 py-3 border-b">
-                  <p className="text-sm text-muted-foreground mb-2">
-                    クイックメッセージ
-                  </p>
-                  <div className="flex flex-wrap gap-2">
+              {/* レストラン→シェフのレビューが完了した時間から72時間以上経過している場合、メッセージの入力を非表示にする */}
+              {(!restaurantReview ||
+                (new Date(restaurantReview.created_at).getTime() + 72 * 60 * 60 * 1000 > Date.now())) && (
+                <div className="border-t bg-background">
+                  <div className="px-4 py-3 border-b">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      クイックメッセージ
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          setMessageInput(
+                            "はじめまして！この度は採用いただき、ありがとうございます。"
+                          )
+                        }>
+                        👋 はじめまして
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          setMessageInput(
+                            `集合時間・場所の確認をさせていただきます。\n\n${format(
+                              new Date(workDate),
+                              "MM月dd日"
+                            )} ${formatJapanHHMM(
+                              startTime
+                            )}に${restaurantName}に伺えばよろしいでしょうか？`
+                          )
+                        }>
+                        🕒 集合時間の確認
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          setMessageInput(
+                            "持ち物について確認させていただきたいのですが、必要な物はありますでしょうか？"
+                          )
+                        }>
+                        📋 持ち物の確認
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="border-t p-4 flex gap-2">
+                    <TextareaAutosize
+                      minRows={1}
+                      maxRows={6}
+                      placeholder="メッセージを入力..."
+                      value={messageInput}
+                      onChange={(e) => setMessageInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        // PC: Enterで送信、Shift+Enterで改行
+                        if (
+                          e.key === "Enter" &&
+                          !e.shiftKey &&
+                          !e.nativeEvent.isComposing &&
+                          !isMobile()
+                        ) {
+                          e.preventDefault();
+                          handleSendMessage();
+                        }
+                        // Shift+Enterで改行
+                        if (e.key === "Enter" && e.shiftKey) {
+                          setMessageInput((prev) => prev + "\n");
+                        }
+                        // モバイル: Enterは常に改行
+                        if (e.key === "Enter" && isMobile()) {
+                          setMessageInput((prev) => prev + "\n");
+                        }
+                      }}
+                      className="flex-1 resize-none px-3 py-2 border rounded-md text-base bg-white focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
+                      enterKeyHint="enter"
+                    />
                     <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        setMessageInput(
-                          "はじめまして！この度は採用いただき、ありがとうございます。"
-                        )
-                      }>
-                      👋 はじめまして
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        setMessageInput(
-                          `集合時間・場所の確認をさせていただきます。\n\n${format(
-                            new Date(workDate),
-                            "MM月dd日"
-                          )} ${formatJapanHHMM(
-                            startTime
-                          )}に${restaurantName}に伺えばよろしいでしょうか？`
-                        )
-                      }>
-                      🕒 集合時間の確認
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        setMessageInput(
-                          "持ち物について確認させていただきたいのですが、必要な物はありますでしょうか？"
-                        )
-                      }>
-                      📋 持ち物の確認
+                      size="icon"
+                      onClick={handleSendMessage}
+                      disabled={!messageInput.trim()}>
+                      <Send className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
-                <div className="border-t p-4 flex gap-2">
-                  <TextareaAutosize
-                    minRows={1}
-                    maxRows={6}
-                    placeholder="メッセージを入力..."
-                    value={messageInput}
-                    onChange={(e) => setMessageInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      // PC: Enterで送信、Shift+Enterで改行
-                      if (
-                        e.key === "Enter" &&
-                        !e.shiftKey &&
-                        !e.nativeEvent.isComposing &&
-                        !isMobile()
-                      ) {
-                        e.preventDefault();
-                        handleSendMessage();
-                      }
-                      // Shift+Enterで改行
-                      if (e.key === "Enter" && e.shiftKey) {
-                        setMessageInput((prev) => prev + "\n");
-                      }
-                      // モバイル: Enterは常に改行
-                      if (e.key === "Enter" && isMobile()) {
-                        setMessageInput((prev) => prev + "\n");
-                      }
-                    }}
-                    className="flex-1 resize-none px-3 py-2 border rounded-md text-base bg-white focus:border-orange-500 focus:ring-1 focus:ring-orange-200 focus:outline-none transition"
-                    enterKeyHint="enter"
-                  />
-                  <Button
-                    size="icon"
-                    onClick={handleSendMessage}
-                    disabled={!messageInput.trim()}>
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
+              )}
             </>
           )}
         </div>

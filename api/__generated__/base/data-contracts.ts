@@ -2134,32 +2134,7 @@ export interface CompaniesCreateData {
   };
 }
 
-export type ByUserDetailOutput = {
-  /** @format uuid */
-  id: string;
-  /**
-   * @format timestamptz
-   * @default "now"
-   */
-  created_at: number;
-  /** @format uuid */
-  companyuser_id: string | null;
-  type:
-    | "new_job"
-    | "application_status"
-    | "new_message"
-    | "review"
-    | "operator"
-    | "payment";
-  related_link: string;
-  /** @default "false" */
-  is_read: boolean;
-  content: string;
-  /** @format int64 */
-  job_id: number | null;
-  /** @format int64 */
-  restaurant_id: number | null;
-}[];
+export type ByUserDetailOutput = object;
 
 export interface MarkReadAllPartialUpdateBody {
   user_id: string;
@@ -6163,6 +6138,27 @@ export type ReviewsListData = {
   reviewee_id: number;
 }[];
 
+export interface WorksessionsChefReviewListData {
+  /** @format int64 */
+  id: number;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format int64 */
+  rating: number;
+  comment: string;
+  /** @format timestamptz */
+  updated_at: number;
+  /** @format int64 */
+  session_id: number;
+  /** @format uuid */
+  reviewer_id: string;
+  /** @format int64 */
+  reviewee_id: number;
+}
+
 export interface RestaurantsDeleteData {
   /** @format int64 */
   id: number;
@@ -7594,6 +7590,27 @@ export type WorksessionsUserTodosListData = {
     };
   };
 }[];
+
+export interface WorksessionsChefReviewListResult {
+  /** @format int64 */
+  id: number;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format int64 */
+  rating: number;
+  comment: string;
+  /** @format timestamptz */
+  updated_at: number;
+  /** @format int64 */
+  session_id: number;
+  /** @format uuid */
+  reviewer_id: string;
+  /** @format int64 */
+  reviewee_id: number;
+}
 
 export interface WorksessionsMessagesListResult {
   messages: {
@@ -9841,162 +9858,6 @@ export interface RestaurantReviewListResult {
   reviewer_id: number;
   /** @format uuid */
   reviewee_id: string;
-  worksession: {
-    /** @format int64 */
-    id: number;
-    /**
-     * @format timestamptz
-     * @default "now"
-     */
-    created_at: number;
-    /** @format timestamptz */
-    check_in_time: number;
-    /** @format timestamptz */
-    check_out_time: number;
-    total_hours: number;
-    location_data: string;
-    status:
-      | "SCHEDULED"
-      | "IN_PROGRESS"
-      | "CANCELED_BY_CHEF"
-      | "CANCELED_BY_RESTAURANT"
-      | "COMPLETED"
-      | "VERIFIED"
-      | "DISPUTE"
-      | "ESCALATED"
-      | "PAID"
-      | "CANCELED"
-      | "VERIFY_REJECTED";
-    /** @format timestamptz */
-    updated_at: number;
-    /** @format uuid */
-    application_id: string | null;
-    /** @format uuid */
-    user_id: string | null;
-    /** @format int64 */
-    restaurant_id: number;
-    /** @format int64 */
-    job_id: number;
-    /** @format int64 */
-    paid_amount: number;
-    chef_feedback: string;
-    restaurant_feedback: string;
-    /** @format int64 */
-    chef_rating: number;
-    /** @format int64 */
-    restaurant_rating: number;
-    /** @format timestamptz */
-    start_time: number | null;
-    /** @format int64 */
-    check_in_code: number | null;
-    /** @format int64 */
-    transportation_expenses: number | null;
-    /** @format int64 */
-    actual_fee: number;
-    transportation_type: "FIXED" | "NONE" | "MAX";
-  };
-  user: {
-    /** @format uuid */
-    id: string;
-    /**
-     * @format timestamptz
-     * @default "now"
-     */
-    created_at: number;
-    name: string;
-    /** @format email */
-    email: string;
-    user_type: string;
-    status: string;
-    /** @format date */
-    last_login_at: string | null;
-    /** @format date */
-    updated_at: string | null;
-    skills: string[];
-    experience_level: string;
-    bio: string;
-    certifications: string[];
-    /** @format date */
-    dateofbirth: string | null;
-    profile_image: string;
-    /** @default "false" */
-    is_approved: boolean;
-    line_user_id: string;
-    line_display_name: string;
-    /** @default "false" */
-    line_notification_enabled: boolean;
-    /** @default "false" */
-    is_verified: boolean;
-    verify_token: string;
-    stripe_account_id: string;
-    /** @format email */
-    pending_email: string;
-    email_change_token: string;
-    password_reset_token: string;
-    /** @default "false" */
-    stripe_verified: boolean;
-    stripe_requirements: object;
-    address: string;
-    phone: string;
-    last_name: string;
-    given_name: string;
-    last_name_kana: string;
-    given_name_kana: string;
-    categories: number[];
-    postal_code: string;
-    prefecture: string;
-    address2: string;
-    city: string;
-    town: string;
-    street: string;
-    /** @default "false" */
-    profile_completed: boolean;
-    position_level: "1" | "2" | "3" | "4";
-    invoice_number: string | null;
-    magic_link: {
-      token: string;
-      /**
-       * Time the token expires
-       * @format timestamptz
-       */
-      expiration: number;
-      /** @default "false" */
-      used: boolean;
-    } | null;
-  };
-  restaurant: {
-    /** @format int64 */
-    id: number;
-    /**
-     * @format timestamptz
-     * @default "now"
-     */
-    created_at: number;
-    name: string;
-    address: string;
-    cuisine_type: string;
-    business_hours: string;
-    contact_info: string;
-    profile_image: string;
-    /** @format timestamptz */
-    updated_at: number;
-    /**
-     * Whether the restaurant is active.
-     * @default "false"
-     */
-    is_active: boolean;
-    /** @format uuid */
-    companies_id: string | null;
-    station: string;
-    access: string;
-    rating: number;
-    /** @default "1" */
-    is_approved: boolean;
-    restaurant_cuisine_id: number[];
-    description: string;
-    phone: string;
-    status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
-  };
 }
 
 export interface StartPartialUpdateBody {
