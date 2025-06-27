@@ -129,9 +129,6 @@ export function ChatSheet({
   };
 
   useEffect(() => {
-    // メッセージが更新されたらスクロール
-    scrollToBottom();
-
     const updateReadStatus = async () => {
       if (
         !messagesData ||
@@ -174,8 +171,12 @@ export function ChatSheet({
       }
     };
 
-    updateReadStatus();
-  }, [messagesData, worksession?.id, scrollToBottom, updateReadMessageTrigger]);
+    if (isOpen) {
+      // メッセージが更新されたらスクロール
+      scrollToBottom();
+      updateReadStatus();
+    }
+  }, [messagesData, worksession?.id, scrollToBottom, updateReadMessageTrigger, isOpen]);
 
   const handleSendMessage = () => {
     try {
