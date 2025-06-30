@@ -59,7 +59,7 @@ export function ChefReviewModal({
     worksessionId: workSessionId,
   });
 
-  const hasReviewed = review !== undefined;
+  const hasReviewed = review != null;
 
   const {
     register,
