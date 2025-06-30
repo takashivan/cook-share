@@ -126,7 +126,7 @@ export default function ChefProfilePage() {
       }
 
       const res = await createProfile(newData);
-      if (res.error) {
+      if (res?.error) {
         setError(res.error);
         return;
       }
