@@ -22,13 +22,15 @@ import { Companyusers } from "@/api/__generated__/base/Companyusers";
 import { Auth } from "@/api/__generated__/company/Auth";
 import { LoginCreateData, SignupCreatePayload } from "@/api/__generated__/company/data-contracts";
 import { useSWRConfig } from "swr";
+import { useRouter } from "next/navigation";
+import { toast } from "@/hooks/use-toast";
 
 export interface CompanyAuthContextType {
   user: LoginCreateData["user"] | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<LoginCreateData["user"]>;
-  logout: () => void;
+  logout: () => Promise<void>;
   register: (data: CompanyUserData) => Promise<void>;
   update: (data: Partial<CompanyusersPartialUpdatePayload>) => Promise<void>;
   changeEmail: (email: string) => Promise<void>;
@@ -48,14 +50,28 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const { mutate } = useSWRConfig()
+  const router = useRouter();
+
+  const { mutate, cache } = useSWRConfig()
+
+  const unauthorizedErrorHandler = async () => {
+    await handleLogout();
+    router.push("/login/company");
+    toast({
+      title: "ログインが必要です",
+      description: "再度ログインしてください。",
+      variant: "destructive",
+    });
+  }
 
   useEffect(() => {
     const currentUser = getCurrentUser("company");
     if (currentUser) {
+      console.log("Current user found:", currentUser);
       setUser(currentUser);
       setIsAuthenticated(true);
     }
+    console.log("CompanyAuthProvider mounted, user:", currentUser);
     setIsLoading(false);
   }, []);
 
@@ -86,18 +102,19 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
       return userData.data;
     } catch (error) {
       console.error("Error reloading user:", error);
-      setUser(null);
-      setCurrentUser(null, "company");
+      unauthorizedErrorHandler();
     }
   };
 
   const setAuth = (token: string,  userData: LoginCreateData["user"]) => {
+    console.log("Setting auth token and user data:", token, userData);
     setAuthToken(token, "company");
     saveUser(userData);
     setIsAuthenticated(true);
   };
 
   const handleLogin = async (email: string, password: string) => {
+    setIsLoading(true);
     try {
       const authApi = getApi(Auth);
       const { data } = await authApi.loginCreate({
@@ -109,21 +126,23 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Login error:", error);
       throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleLogout = () => {
-    clearAuthToken("company");
-    clearCurrentUser("company");
-    setUser(null);
-    setIsAuthenticated(false);
-    setIsLoading(false);
-    // SWRで管理するすべてのキャッシュをクリア
-    mutate(
-      key => true,
-      undefined,
-      { revalidate: false }
-    )
+  const handleLogout = async () => {
+    try {
+      clearAuthToken("company");
+      clearCurrentUser("company");
+      setUser(null);
+      setIsAuthenticated(false);
+      setIsLoading(false);
+      return Promise.resolve();
+    } catch (error) {
+      console.error("Logout error:", error);
+      throw error;
+    }
   };
 
   const handleRegister = async (data: SignupCreatePayload) => {
@@ -153,9 +172,13 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
       if (response) {
         saveUser(response.data);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Update error:", error);
-      throw error;
+      if (error.status === 401) {
+        unauthorizedErrorHandler();
+      } else {
+        throw error;
+      }
     }
   };
 
@@ -176,7 +199,11 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
     }
     catch (error: any) {
       console.error("Change email error:", error);
-      throw error;
+      if (error.status === 401) {
+        unauthorizedErrorHandler();
+      } else {
+        throw error;
+      }
     }
   };
 
@@ -194,9 +221,13 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
       if (response) {
         saveUser(response.data);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Confirm email error:", error);
-      throw error;
+      if (error.status === 401) {
+        unauthorizedErrorHandler();
+      } else {
+        throw error;
+      }
     }
   };
 
@@ -212,9 +243,13 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
       if (response) {
         saveUser(response.data.user);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Change password error:", error);
-      throw error;
+      if (error.status === 401) {
+        unauthorizedErrorHandler();
+      } else {
+        throw error;
+      }
     }
   };
 
@@ -241,9 +276,13 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
         }
       });
       handleLogout();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Delete account error:", error);
-      throw error;
+      if (error.status === 401) {
+        unauthorizedErrorHandler();
+      } else {
+        throw error;
+      }
     }
   };
 
