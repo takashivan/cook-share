@@ -185,7 +185,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           },
         ]
       : []),
-    restaurants && restaurants.length > 0 ? {
+    {
       title: "店舗管理",
       items: [
         {
@@ -195,15 +195,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           active: pathname === "/admin/stores",
           show: true,
         },
-        {
-          title: "店舗詳細",
-          href: "#",
-          icon: Store,
-          active: pathname.startsWith("/admin/stores/"),
-          show: true,
-          onClick: () => setIsStoreListOpen(!isStoreListOpen),
-          isOpen: isStoreListOpen,
-        },
+        restaurants && restaurants.length > 0 ? 
+          {
+            title: "店舗詳細",
+            href: "#",
+            icon: Store,
+            active: pathname.startsWith("/admin/stores/"),
+            show: true,
+            onClick: () => setIsStoreListOpen(!isStoreListOpen),
+            isOpen: isStoreListOpen,
+          }
+        : null,
         ...(isStoreListOpen
           ? (restaurants ?? []).map((restaurant) => {
               const notificationCount =
@@ -230,7 +232,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             })
           : []),
       ].filter(Boolean) as NavigationItem[],
-    } : null,
+    },
     // {
     //   title: "求人管理",
     //   items: [
@@ -599,7 +601,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </div>
         </header>
         <main className="p-4 md:p-6 flex-1 relative">
-          {restaurants && restaurants.length === 0 &&
+          {/* 企業管理者で無い、かつ、所属店舗が存在しない場合、所属店舗が無い旨を表示。 */}
+          {user?.is_admin === false && restaurants && restaurants.length === 0 &&
             !pathname.includes("/settings") && !pathname.includes("/notifications") && !pathname.includes("/contact") && !pathname.includes("/faq") && (
             <div className="absolute inset-0 backdrop-blur-sm z-50 flex items-center justify-center pointer-events-auto">
               <div className="text-center p-6 bg-white/90 rounded-xl shadow-md border">

@@ -2,20 +2,25 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { LinkLineId } from "@/lib/api/line";
+import { getApi } from "@/api/api-factory";
+import { LinkLineId } from "@/api/__generated__/LINE/LinkLineId";
 
 export default function LinkAccountPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const doLink = async () => {
       try {
+        // ユーザー読み込み前、または、LINEアカウントが既に連携されている場合は何もしない
+        if (!user || user.line_user_id !== '') {
+          return;
+        }
+
         const liff = (await import("@line/liff")).default;
         await liff.init({
           liffId: "2007239287-yqkpjQBl",
@@ -23,25 +28,28 @@ export default function LinkAccountPage() {
         });
         const profile = await liff.getProfile();
         // LinkLineIdを使ってAPI連携
-        const response = await LinkLineId(
-          user?.id || "",
-          profile.userId,
-          profile.displayName,
-          profile.pictureUrl || ""
-        );
-        if (response.user) {
+        const linkLineIdApi = getApi(LinkLineId);
+        const response = await linkLineIdApi.linkLineIdCreate({
+          user_id: user?.id || "",
+          line_user_id: profile.userId,
+          name: profile.displayName,
+          picture: profile.pictureUrl || ""
+        });
+
+        if (response.data) {
           router.push("/chef/dashboard");
+          setUser(response.data);
         } else {
-          setError(response.message || "連携に失敗しました");
+          setError("連携に失敗しました");
         }
-      } catch (e) {
-        setError("エラーが発生しました。もう一度お試しください。");
+      } catch (error: any) {
+        setError(error.response?.data.message || "エラーが発生しました。もう一度お試しください。");
       } finally {
         setIsLoading(false);
       }
     };
     doLink();
-  }, [router, user]);
+  }, [router, user, setUser]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">

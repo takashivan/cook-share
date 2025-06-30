@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { ErrorPage } from "@/components/layout/ErrorPage";
 import { LoadingScreen } from "@/components/LoadingScreen";
+import { LineConnectCard } from "@/components/cards/LineConnectCard";
 
 export default function TodosPage() {
   const { user } = useAuth();
@@ -124,36 +125,9 @@ export default function TodosPage() {
             </motion.div>
           )}
           {/* LINE未連携カード */}
-          {!user.line_user_id && (
-            <motion.div
-              whileHover={{
-                y: -4,
-                boxShadow: "0 8px 32px rgba(0,200,100,0.10)",
-              }}
-              className="flex items-center bg-white rounded-lg shadow p-4 mb-4 transition">
-              <div className="flex-shrink-0 mr-4">
-                <Image
-                  src="/logos/LINE.png"
-                  alt="LINE"
-                  width={40}
-                  height={40}
-                />
-              </div>
-              <div className="flex-1">
-                <div className="font-semibold text-gray-900 mb-1">
-                  LINE連携で通知を受け取ろう
-                </div>
-                <div className="text-gray-500 text-sm mb-2">
-                  LINE連携でお仕事の通知が届きます。
-                </div>
-                <Link href="/chef/line-connect/liff">
-                  <button className="px-4 py-2 rounded bg-green-500 text-white hover:bg-green-600 transition">
-                    連携する
-                  </button>
-                </Link>
-              </div>
-            </motion.div>
-          )}
+          <LineConnectCard
+            user={user}
+          />
         </div>
       )}
     </div>
