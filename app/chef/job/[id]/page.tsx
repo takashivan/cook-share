@@ -312,7 +312,7 @@ export default function JobDetail({ params }: PageProps) {
     if (pendingRequest) {
       return (
         <Button
-          className="w-full bg-chefdom-orange hover:bg-chefdom-orange-dark"
+          className="mb-4 w-full bg-chefdom-orange hover:bg-chefdom-orange-dark"
           onClick={() => {
             setIsChangeRequestModalOpen(true);
           }}
@@ -331,7 +331,7 @@ export default function JobDetail({ params }: PageProps) {
               <TooltipTrigger asChild>
                 <span>
                   <Button
-                    className="w-full bg-chefdom-orange hover:bg-chefdom-orange-dark"
+                    className="mb-4 w-full bg-chefdom-orange hover:bg-chefdom-orange-dark"
                     onClick={handleStartWork}
                     disabled={!canStartWork}
                   >
@@ -352,7 +352,7 @@ export default function JobDetail({ params }: PageProps) {
       case "IN_PROGRESS":
         return (
           <Button
-            className="w-full bg-chefdom-orange hover:bg-chefdom-orange-dark"
+            className="mb-4 w-full bg-chefdom-orange hover:bg-chefdom-orange-dark"
             onClick={() => setIsReviewModalOpen(true)}
           >
             勤務終了・完了報告
@@ -361,7 +361,7 @@ export default function JobDetail({ params }: PageProps) {
       case "VERIFY_REJECTED":
         return (
           <Button
-            className="w-full bg-chefdom-orange hover:bg-chefdom-orange-dark"
+            className="mb-4 w-full bg-chefdom-orange hover:bg-chefdom-orange-dark"
             onClick={() => setIsReviewModalOpen(true)}
           >
             再申請
@@ -369,7 +369,7 @@ export default function JobDetail({ params }: PageProps) {
         );
       case "COMPLETED":
         return (
-          <Button className="w-full" disabled>
+          <Button className="mb-4 w-full" disabled>
             {restaurant?.name}さんの確認をお待ちください
           </Button>
         );
@@ -551,16 +551,17 @@ ${cancelReason}`;
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <div className="flex justify-between items-center mb-4 gap-3">
-          <div className="w-full">
-            {renderWorkStatusButton()}
-          </div>
+        {renderWorkStatusButton()}
+
+        <div className="flex items-baseline justify-between mb-4 gap-2">
+          <h2 className="text-lg font-bold">{restaurant?.name}</h2>
           {workSession && (
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setIsChatOpen(true)}
-              className="relative">
+              className="relative shrink-0 flex items-center justify-center bg-gray-100 hover:bg-gray-300 border border-gray-200 transition-colors rounded-full h-10 w-10"
+            >
               <MessageSquare className="h-6 w-6 text-gray-700" />
               {unreadCount > 0 && (
                 <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -570,8 +571,6 @@ ${cancelReason}`;
             </Button>
           )}
         </div>
-
-        <h2 className="text-lg font-bold mb-4">{restaurant?.name}</h2>
 
         {job.image && (
           <Image

@@ -22,18 +22,20 @@ import { ProfilePartialUpdatePayload, UsersPartialUpdatePayload } from "@/api/__
 import { User } from "@/api/__generated__/base/User";
 import { LoginCreateData, SignupCreatePayload } from "@/api/__generated__/authentication/data-contracts";
 import { useSWRConfig } from "swr";
+import { useRouter } from "next/navigation";
+import { toast } from "@/hooks/use-toast";
 
 export interface AuthContextType {
   user: LoginCreateData["user"] | null;
   isAuthenticated: boolean;
   loading: boolean;
   login: (email: string, password: string) => Promise<LoginCreateData["user"]>;
-  logout: () => void;
+  logout: () => Promise<void>;
   register: (data: SignupCreatePayload) => Promise<void>;
   createProfile: (data: ProfilePartialUpdatePayload) => Promise<{
     status: "success" | "error";
     error?: string;
-  }>;
+  } | undefined>;
   update: (data: Partial<UsersPartialUpdatePayload>) => Promise<void>;
   changeEmail: (email: string) => Promise<void>;
   confirmEmail: (token: string) => Promise<void>;
@@ -50,7 +52,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const router = useRouter();
+
   const { mutate } = useSWRConfig()
+
+  const unauthorizedErrorHandler = async () => {
+    await handleLogout();
+    router.push("/login");
+    toast({
+      title: "ログインが必要です",
+      description: "再度ログインしてください。",
+      variant: "destructive",
+    });
+  }
 
   const saveUser = (userData: LoginCreateData["user"] | null) => {
     setUser(userData);
@@ -75,10 +89,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       saveUser(userData.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error reloading user:", error);
-      setUser(null);
-      setCurrentUser(null, "chef");
+      unauthorizedErrorHandler();
     }
   };
 
@@ -104,16 +117,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           saveUser(user.data);
           setIsAuthenticated(true);
         } else {
-          clearAuthToken();
-          setIsAuthenticated(false);
+          unauthorizedErrorHandler();
         }
       } else {
         setIsAuthenticated(false);
       }
     } catch (error) {
       console.error("Auth initialization error:", error);
-      clearAuthToken();
-      setIsAuthenticated(false);
+      unauthorizedErrorHandler();
     } finally {
       setLoading(false);
     }
@@ -138,17 +149,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const handleLogout = () => {
-    clearAuthToken("chef");
-    clearCurrentUser("chef");
-    setUser(null);
-    setIsAuthenticated(false);
-    // SWRで管理するすべてのキャッシュをクリア
-    mutate(
-      key => true,
-      undefined,
-      { revalidate: false }
-    )
+  const handleLogout = async () => {
+    try {
+      clearAuthToken("chef");
+      clearCurrentUser("chef");
+      setUser(null);
+      setIsAuthenticated(false);
+      return Promise.resolve();
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
   const handleRegister = async (data: SignupCreatePayload) => {
@@ -165,7 +175,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   /**
    * ユーザー登録直後の、プロフィールの更新を行う関数
    */
-  const handleCreateProfile = async (data: ProfilePartialUpdatePayload): Promise<{ status: "success" | "error"; error?: string }> => {
+  const handleCreateProfile = async (data: ProfilePartialUpdatePayload): Promise<{ status: "success" | "error"; error?: string } | undefined> => {
     try {
       const userId = user?.id;
       if (!userId) {
@@ -196,7 +206,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
     } catch (error: any) {
       console.error("Update profile error:", error);
-      throw error;
+      if (error.status === 401) {
+        unauthorizedErrorHandler();
+      } else {
+        throw error;
+      }
     }
   }
 
@@ -220,9 +234,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (response) {
         saveUser(response.data.result1 as unknown as LoginCreateData["user"]);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Update error:", error);
-      throw error;
+      if (error.status === 401) {
+        unauthorizedErrorHandler();
+      } else {
+        throw error;
+      }
     }
   };
 
@@ -243,7 +261,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     catch (error: any) {
       console.error("Change email error:", error);
-      throw error;
+      if (error.status === 401) {
+        unauthorizedErrorHandler();
+      } else {
+        throw error;
+      }
     }
   };
 
@@ -262,9 +284,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         saveUser(response.data);
       }
     }
-    catch (error) {
+    catch (error: any) {
       console.error("Confirm email error:", error);
-      throw error;
+      if (error.status === 401) {
+        unauthorizedErrorHandler();
+      } else {
+        throw error;
+      }
     }
   }
 
@@ -280,9 +306,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (response) {
         saveUser(response.data.result1);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Change password error:", error);
-      throw error;
+      if (error.status === 401) {
+        unauthorizedErrorHandler();
+      } else {
+        throw error;
+      }
     }
   };
 
@@ -309,9 +339,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       });
       handleLogout();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Delete account error:", error);
-      throw error;
+      if (error.status === 401) {
+        unauthorizedErrorHandler();
+      } else {
+        throw error;
+      }
     }
   };
 
