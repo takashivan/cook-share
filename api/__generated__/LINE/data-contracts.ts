@@ -10,6 +10,8 @@
  * ---------------------------------------------------------------
  */
 
+export type CheckLineFriendshipStatusDetailData = object;
+
 export interface CheckLineUserDetailData {
   count: string;
 }
