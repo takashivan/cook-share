@@ -5,21 +5,21 @@ const BASIC_AUTH_USER = process.env.BASIC_AUTH_USER;
 const BASIC_AUTH_PASS = process.env.BASIC_AUTH_PASS;
 
 // 認証をかけたいドメイン（例: 本番）
-const protectedDomains = ["chefdom.jp", "www.chefdom.jp"];
+// const protectedDomains = ["staging.chefdom.jp"];
 
 export function middleware(req: NextRequest) {
-  // 本番環境でのみ認証をかける
-  if (process.env.VERCEL_ENV !== "production") {
+  // VERCEL上のproduction環境、ローカル環境は認証をかけない。それ以外に認証をかける
+  if (process.env.VERCEL_ENV !== "preview" && process.env.VERCEL_ENV !== "development") {
     return NextResponse.next();
   }
 
-  const hostname = req.headers.get("host") || "";
+  // const hostname = req.headers.get("host") || "";
 
-  const isProtected = protectedDomains.includes(hostname);
+  // const isProtected = protectedDomains.includes(hostname);
 
-  if (!isProtected) {
-    return NextResponse.next();
-  }
+  // if (!isProtected) {
+  //   return NextResponse.next();
+  // }
 
   const auth = req.headers.get("authorization");
   if (auth) {
