@@ -9,7 +9,7 @@ import { Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/contexts/AuthContext";
 
 export default function VerifyEmailPage() {
-  const { reloadUser } = useAuth();
+  const { reloadUser, loading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -21,6 +21,11 @@ export default function VerifyEmailPage() {
 
   useEffect(() => {
     const verifyingEmail = async () => {
+      if (loading) {
+        // 認証状態の初期化中は何もしない
+        return;
+      }
+
       if (!token || !user_id) {
         setStatus("error");
         setErrorMessage("無効な認証情報です");
@@ -39,7 +44,7 @@ export default function VerifyEmailPage() {
     };
 
     verifyingEmail();
-  }, [token, user_id]);
+  }, [token, user_id, loading]);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-md">

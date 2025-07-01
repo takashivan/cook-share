@@ -59,7 +59,7 @@ export function ChefReviewModal({
     worksessionId: workSessionId,
   });
 
-  const hasReviewed = review !== undefined;
+  const hasReviewed = review != null;
 
   const {
     register,
@@ -162,13 +162,13 @@ export function ChefReviewModal({
                   {...register("transportation_expenses", {
                     required: "交通費を入力してください",
                     validate: (value) => {
-                      if (value == null || value === "") {
+                      if (value == null || value === "" || isNaN(Number(value))) {
                         return "交通費を入力してください";
                       }
-                      if (transportation_type === "MAX" && value > transportation_amount) {
+                      if (transportation_type === "MAX" && Number(value) > transportation_amount) {
                         return `交通費は上限${transportation_amount.toLocaleString()}円までです`;
                       }
-                      if (transportation_type === "FIXED" && value !== transportation_amount) {
+                      if (transportation_type === "FIXED" && Number(value) !== transportation_amount) {
                         return `交通費は${transportation_amount.toLocaleString()}円で入力してください`;
                       }
                       return true;

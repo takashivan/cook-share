@@ -10,7 +10,7 @@ import { motion } from "framer-motion";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 
 export default function VerifyEmailPage() {
-  const { reloadUser } = useCompanyAuth();
+  const { reloadUser, isLoading } = useCompanyAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -22,6 +22,11 @@ export default function VerifyEmailPage() {
 
   useEffect(() => {
     const verifyingEmail = async () => {
+      if (isLoading) {
+        // 認証状態の初期化中は何もしない
+        return;
+      }
+
       if (!token || !user_id) {
         setStatus("error");
         setErrorMessage("無効な認証情報です");
@@ -54,7 +59,7 @@ export default function VerifyEmailPage() {
     };
 
     verifyingEmail();
-  }, [token, user_id, router]);
+  }, [token, user_id, router, isLoading, reloadUser]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-chefdom-orange/5 to-white">
