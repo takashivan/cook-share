@@ -344,7 +344,7 @@ export default function ChefProfilePage() {
                     type="button"
                     asChild
                     className="border-gray-200 text-gray-700 hover:bg-gray-50 text-sm md:text-base">
-                    <Link href="/register">戻る</Link>
+                    <Link href="/register/chef">戻る</Link>
                   </Button>
                 )}
                 {currentStep < STEPS.length ? (
