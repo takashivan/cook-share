@@ -1,4 +1,5 @@
 import { Companyusers } from '@/api/__generated__/base/Companyusers';
+import { WorksessionsRestaurantTodosListData } from '@/api/__generated__/base/data-contracts';
 import { Jobs } from '@/api/__generated__/base/Jobs';
 import { Restaurants } from '@/api/__generated__/base/Restaurants';
 import { Worksessions } from '@/api/__generated__/base/Worksessions';
@@ -14,7 +15,7 @@ export interface Params {
 }
 
 export const useVerifyWorksession = (params: Params) => {
-  const { mutate } = useSWRConfig();
+  const { mutate, cache } = useSWRConfig();
 
   const worksessions = getApi(Worksessions);
   return useSWRMutation(...worksessions.verifyPartialUpdateQueryArgs(params.worksessionId ?? -1, {
@@ -23,12 +24,33 @@ export const useVerifyWorksession = (params: Params) => {
     }
   }, params.worksessionId != null), {
     throwOnError: true,
-    onSuccess: () => {
+    onSuccess: (newData) => {
       // 更新したWorksessionが属する求人のWorksessionリストのキャッシュを更新
       if (params.jobId) {
         const jobs = getApi(Jobs);
         const worksessionsByJobIdKey = jobs.worksessionsRestaurantTodosListQueryArgs(params.jobId)[0];
         mutate(worksessionsByJobIdKey);
+      }
+
+      for (const key of cache.keys()) {
+        if (key.includes("MultipleWorksessionsByJobId")) {
+          mutate(key, async (currentItems: WorksessionsRestaurantTodosListData[] | undefined) => {
+            if (!currentItems) return currentItems;
+
+            const newList = currentItems.map((item) => {
+              return item.map((worksession) => {
+                if (worksession.id === newData.result1.id) {
+                  return {
+                    ...worksession,
+                    ...newData.result1,
+                  };
+                }
+                return worksession;
+              });
+            });
+            return newList;
+          }, { revalidate: false })
+        }
       }
 
       // レビューのキャッシュを更新

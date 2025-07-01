@@ -106,10 +106,12 @@ export default function StoresPage() {
             店舗の追加、編集、情報管理を行えます
           </p>
         </div>
-        <Button onClick={handleCreateRestaurantModal}>
-          <Plus className="mr-2 h-4 w-4" />
-          店舗を追加
-        </Button>
+        {user?.is_admin && (
+          <Button onClick={handleCreateRestaurantModal}>
+            <Plus className="mr-2 h-4 w-4" />
+            店舗を追加
+          </Button>
+        )}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

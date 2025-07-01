@@ -25,7 +25,7 @@ export const useGetMultipleWorksessionsByJobId = (params: Params) => {
   }
 
   return useSWR(
-    keys.length > 0 ? keys : null,
+    keys.length > 0 ? ['MultipleWorksessionsByJobId', ...keys] : null,
     () => Promise.all(fetchers.map((fetcher) => fetcher())),
   );
 }
