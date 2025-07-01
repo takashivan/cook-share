@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/card";
 import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { SignupCreatePayload } from "@/api/__generated__/authentication/data-contracts";
+import { REGISTER_COMPANY_PAGE } from "@/lib/const/consts";
 
 export default function ChefRegisterPage() {
   const router = useRouter();
@@ -154,7 +155,7 @@ export default function ChefRegisterPage() {
             </div>
             <div className="mt-4 text-center">
               <Link
-                href="/register/company"
+                href={REGISTER_COMPANY_PAGE}
                 className="text-sm text-primary hover:underline">
                 企業アカウントの登録はこちら
               </Link>
