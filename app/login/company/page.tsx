@@ -18,6 +18,7 @@ import { useCompanyAuth } from "@/lib/contexts/CompanyAuthContext";
 import { toast } from "@/hooks/use-toast";
 import { CompanyForgotPasswordModal } from "@/components/modals/CompanyForgotPasswordModal";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { REGISTER_COMPANY_PAGE } from "@/lib/const/consts";
 
 export default function CompanyLoginPage() {
   const router = useRouter();
@@ -90,7 +91,7 @@ export default function CompanyLoginPage() {
               className="text-orange-500"
             />
           </Link>
-          <Link href="/register/company">
+          <Link href={REGISTER_COMPANY_PAGE}>
             <Button variant="outline" size="sm" className="border-gray-300">
               企業登録
             </Button>
@@ -136,7 +137,7 @@ export default function CompanyLoginPage() {
               <div className="text-center text-sm text-muted-foreground">
                 企業アカウントをお持ちでないですか？{" "}
                 <Link
-                  href="/register/company"
+                  href={REGISTER_COMPANY_PAGE}
                   className="text-primary underline underline-offset-4">
                   企業登録
                 </Link>

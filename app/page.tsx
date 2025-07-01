@@ -14,6 +14,7 @@ import { motion } from "framer-motion";
 import { SearchFields, SearchId } from "@/components/jobs/SearchFields";
 import { QueryUpcomingListResult } from "@/api/__generated__/base/data-contracts";
 import { DateSelector } from "@/components/jobs/DateSelector";
+import { REGISTER_COMPANY_PAGE } from "@/lib/const/consts";
 
 export default function Home() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -316,7 +317,7 @@ export default function Home() {
                   </Button>
                 </Link>
 
-                <Link href="/register/company">
+                <Link href={REGISTER_COMPANY_PAGE}>
                   <Button
                     variant="outline"
                     className="border rounded-md py-2 px-4 text-center">
