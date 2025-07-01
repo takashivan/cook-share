@@ -45,7 +45,14 @@ export default function CompanyLoginPage() {
 
       const loggedinUser = await login(data.email, data.password);
 
-      if (loggedinUser?.companies_id == null) {
+      if (!loggedinUser?.is_verified) {
+        // ユーザーが未認証の場合はメール認証ページにリダイレクト
+        router.push("/register/company-verify-email");
+        toast({
+          title: "ログインしました",
+          description: "メール認証を完了してください。",
+        });
+      } else if (loggedinUser?.companies_id == null) {
         router.push("/register/company-profile");
         toast({
           title: "ログインしました",

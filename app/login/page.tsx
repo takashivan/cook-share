@@ -49,7 +49,14 @@ export default function LoginPage() {
 
       const loggedinUser = await login(data.email, data.password);
 
-      if (!loggedinUser?.profile_completed) {
+      if (!loggedinUser?.is_verified) {
+        // ユーザーが未認証の場合はメール認証ページにリダイレクト
+        router.push("/register/chef-verify-email");
+        toast({
+          title: "ログインしました",
+          description: "メール認証を完了してください。",
+        });
+      } else if (!loggedinUser?.profile_completed) {
         router.push("/register/chef-profile");
         toast({
           title: "ログインしました",
