@@ -352,17 +352,19 @@ export class Companies<
   };
 
   /**
-   * @description Query all Companies records <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTHED-Operator]運営者だけが見られる、企業一覧 <br /><br /> <b>Authentication:</b> required
    *
    * @tags companies
    * @name CompaniesList
-   * @summary Query all Companies records
+   * @summary [AUTHED-Operator]運営者だけが見られる、企業一覧
    * @request GET:/companies
+   * @secure
    */
   companiesList = (params: RequestParams = {}) =>
     this.request<CompaniesListData, void>({
       path: `/companies`,
       method: "GET",
+      secure: true,
       format: "json",
       ...params,
     });

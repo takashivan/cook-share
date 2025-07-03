@@ -217,6 +217,29 @@ export interface SignupCreateData {
   };
 }
 
+export type CompaniesListData = {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  name: string;
+  address: string;
+  phone: string;
+  website: string;
+  description: string;
+  status: "pending" | "approved" | "banned" | "rejected";
+  /** @format timestamptz */
+  updated_at: number | null;
+  business_registration_number: string;
+  logo_url: string;
+  stripe_customer_id: string;
+  /** @format email */
+  company_email: string;
+}[];
+
 export type DailyMetricsDeleteData = object;
 
 export interface DailyMetricsDetailData {
