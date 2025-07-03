@@ -6,12 +6,33 @@ import { getCuisines } from "@/lib/api/cuisines";
 import { getSkills } from "@/lib/api/skill";
 import { getRestaurants, Restaurant } from "@/lib/api/restaurant";
 import { JobWithRestaurant } from "@/types";
+import { getApi } from "@/api/api-factory";
+import { CompaniesListData } from "@/api/__generated__/base/data-contracts";
+import { Companies } from "@/api/__generated__/operator/Companies";
+
 // Async Thunks
+// XANOから生成されるSwaggerの定義が不完全なため、レスポンスの型を手動で定義する
+type CompaniesListResponse = CompaniesListData[number] & {
+  restaurantCount: number;
+  jobCount: number;
+  worksessionCount: number;
+  worksessionCanceledByRestaurantCount: number;
+};
 export const fetchCompanies = createAsyncThunk(
   "operator/fetchCompanies",
-  async () => {
-    const response = await operatorApi.getCompanies();
-    return response;
+  async (_, { rejectWithValue }) => {
+    try {
+      console.log("Fetching companies...");
+      const companiesApi = getApi(Companies);
+      const response = await companiesApi.companiesList({
+        headers: {
+          "X-User-Type": "operator",
+        }
+      });
+      return response.data as CompaniesListResponse[];
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
   }
 );
 
@@ -203,7 +224,11 @@ interface DashboardQuery {
 }
 
 interface OperatorState {
-  companies: any[];
+  companies: {
+    data: CompaniesListResponse[],
+    loading: boolean;
+    error: string | null;
+  };
   chefs: {
     data: UserProfile[];
     loading: boolean;
@@ -259,7 +284,11 @@ interface OperatorState {
 }
 
 const initialState: OperatorState = {
-  companies: [],
+  companies: {
+    data: [],
+    loading: false,
+    error: null,
+  },
   chefs: {
     data: [],
     loading: false,
@@ -322,16 +351,16 @@ const operatorSlice = createSlice({
     // Companies
     builder
       .addCase(fetchCompanies.pending, (state) => {
-        state.loading.companies = true;
-        state.error.companies = null;
+        state.companies.loading = true;
+        state.companies.error = null;
       })
       .addCase(fetchCompanies.fulfilled, (state, action) => {
-        state.companies = action.payload;
-        state.loading.companies = false;
+        state.companies.data = action.payload;
+        state.companies.loading = false;
       })
       .addCase(fetchCompanies.rejected, (state, action) => {
-        state.loading.companies = false;
-        state.error.companies = action.error.message || "エラーが発生しました";
+        state.companies.loading = false;
+        state.companies.error = action.error.message || "エラーが発生しました";
       });
 
     // Chefs
