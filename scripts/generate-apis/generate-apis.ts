@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import path from "path";
 import { generateApi } from "swagger-typescript-api";
 
@@ -9,33 +10,28 @@ type ApiDefinition = {
 const aPIs: ApiDefinition[] = [
   {
     outputDir: "base",
-    url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:Mv5jTolf?type=json&token=",
+    url: process.env.XANO_BASE_API_URL || "",
   },
   {
     outputDir: "authentication",
-    url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:xaJlLYDj?type=json&token=",
+    url: process.env.XANO_AUTHENTICATION_API_URL || "",
   },
   {
     outputDir: "company",
-    url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:3LZoUG6X?type=json&token=",
+    url: process.env.XANO_COMPANY_API_URL || "",
   },
   {
     outputDir: "LINE",
-    url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:iG6oGWEP?type=json&token=",
-  },
-  {
-    outputDir: "notification",
-    url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:1k5jblUW?type=json&token=",
+    url: process.env.XANO_LINE_API_URL || "",
   },
   {
     outputDir: "operator",
-    url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:grw3Vlqa?type=json&token=",
+    url: process.env.XANO_OPERATOR_API_URL || "",
   },
   {
     outputDir: "stripe",
-    url: "https://xcti-onox-8bdw.n7e.xano.io/apispec:WNb8GgKn?type=json&token=",
+    url: process.env.XANO_STRIPE_API_URL || "",
   },
-  // シェフ側のauth、Operator、Stripe、LINE
 ];
 
 const baseConfig = {
