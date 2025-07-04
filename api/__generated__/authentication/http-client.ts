@@ -73,7 +73,7 @@ export class HttpClient<SecurityDataType = unknown> {
   }: ApiConfig<SecurityDataType>) {
     this.instance = axiosInstance;
     this.instance.defaults.baseURL =
-      "https://xcti-onox-8bdw.n7e.xano.io/api:xaJlLYDj";
+      "https://xcti-onox-8bdw.n7e.xano.io/api:VcDEw31B";
     this.secure = secure;
     this.format = format;
     this.securityWorker = securityWorker;
