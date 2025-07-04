@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "npm run generate_apis && next build",
     "start": "next start",
     "lint": "next lint",
     "generate_apis": "tsx scripts/generate-apis/generate-apis.ts"
@@ -41,6 +41,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "dotenv": "^17.0.1",
     "framer-motion": "^12.7.4",
     "glob": "^11.0.1",
     "html5-qrcode": "^2.3.8",

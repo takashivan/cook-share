@@ -1,5 +1,5 @@
 import { ChefNotifications } from '@/api/__generated__/base/ChefNotifications';
-import { ByUserDetailOutput } from '@/api/__generated__/notification/data-contracts';
+import { ByUserDetailData } from '@/api/__generated__/base/data-contracts';
 import { getApi } from '@/api/api-factory';
 import { useSWRConfig } from 'swr';
 import useSWRMutation from 'swr/mutation'
@@ -22,7 +22,7 @@ export const useMarkReadAllChefNotifications = (params: Params) => {
       // Notificationsリストのキャッシュを更新
       if (params.userId) {
         const notificationsByUserIdKey = notificationsApi.byUserDetailQueryArgs(params.userId)[0];
-        mutate(notificationsByUserIdKey, async (currentItems: ByUserDetailOutput | undefined) => {
+        mutate(notificationsByUserIdKey, async (currentItems: ByUserDetailData | undefined) => {
           if (!currentItems) return currentItems;
 
           return currentItems.map((notification) => ({

@@ -4,33 +4,29 @@
 export const API_CONFIG = {
   // Xanoの各APIカテゴリのベースURL
   baseURLs: {
-    user: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/user",
-    auth: "https://xcti-onox-8bdw.n7e.xano.io/api:xaJlLYDj/auth", // シェフユーザー用
-    companyAuth: "https://xcti-onox-8bdw.n7e.xano.io/api:3LZoUG6X/auth", // 会社ユーザー用
-    companyUser: "https://xcti-onox-8bdw.n7e.xano.io/api:3LZoUG6X/companyuser",
-    company: "https://xcti-onox-8bdw.n7e.xano.io/api:3LZoUG6X/companies",
-    workSession: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/worksession",
-    job: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/job",
-    application: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/application",
-    restaurant: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/restaurant",
-    restaurantReview:
-      "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/restaurant_review",
-    companyUserNotification:
-      "https://xcti-onox-8bdw.n7e.xano.io/api:1k5jblUW/companyuser_notification",
-    chefNotification:
-      "https://xcti-onox-8bdw.n7e.xano.io/api:1k5jblUW/chef_notification",
-    chefReview: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/chef_review",
-    message: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/message",
-    operator: "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/operator",
-    operatorGetUser: "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/users",
+    user: `${process.env.NEXT_PUBLIC_BASE_API_URL}/user`,
+    auth: `${process.env.NEXT_PUBLIC_AUTHENTICATION_API_URL}/auth`, // シェフユーザー用
+    companyAuth: `${process.env.NEXT_PUBLIC_COMPANY_API_URL}/auth`, // 会社ユーザー用
+    companyUser: `${process.env.NEXT_PUBLIC_COMPANY_API_URL}/companyuser`,
+    company: `${process.env.NEXT_PUBLIC_COMPANY_API_URL}/companies`,
+    // workSession: `${process.env.NEXT_PUBLIC_BASE_API_URL}/worksession`,
+    job: `${process.env.NEXT_PUBLIC_BASE_API_URL}/job`,
+    application: `${process.env.NEXT_PUBLIC_BASE_API_URL}/application`,
+    restaurant: `${process.env.NEXT_PUBLIC_BASE_API_URL}/restaurant`,
+    // restaurantReview:
+    //   `${process.env.NEXT_PUBLIC_BASE_API_URL}/restaurant_review`,
+    // chefReview: `${process.env.NEXT_PUBLIC_BASE_API_URL}/chef_review`,
+    // message: `${process.env.NEXT_PUBLIC_BASE_API_URL}/message`,
+    operator: `${process.env.NEXT_PUBLIC_OPERATOR_API_URL}/operator`,
+    operatorGetUser: `${process.env.NEXT_PUBLIC_OPERATOR_API_URL}/users`,
     cuisines:
-      "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/restaurant_cuisine",
+      `${process.env.NEXT_PUBLIC_OPERATOR_API_URL}/restaurant_cuisine`,
 
-    skill: "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/chef_skill",
-    operatorAuth: "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/auth",
-    line: "https://xcti-onox-8bdw.n7e.xano.io/api:iG6oGWEP/",
-    alert: "https://xcti-onox-8bdw.n7e.xano.io/api:grw3Vlqa/alert",
-    contact: "https://xcti-onox-8bdw.n7e.xano.io/api:Mv5jTolf/contact",
+    skill: `${process.env.NEXT_PUBLIC_OPERATOR_API_URL}/chef_skill`,
+    operatorAuth: `${process.env.NEXT_PUBLIC_OPERATOR_API_URL}/auth`,
+    line: `${process.env.NEXT_PUBLIC_LINE_API_URL}/`,
+    alert: `${process.env.NEXT_PUBLIC_OPERATOR_API_URL}/alert`,
+    // contact: `${process.env.NEXT_PUBLIC_BASE_API_URL}/contact`,
   },
   // 共通ヘッダー
   headers: {
