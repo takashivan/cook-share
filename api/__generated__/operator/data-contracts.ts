@@ -1624,6 +1624,40 @@ export interface RestaurantCuisineCreateData {
   category: string;
 }
 
+export type RestaurantsListData = {
+  /** @format int64 */
+  id: number;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  name: string;
+  address: string;
+  cuisine_type: string;
+  business_hours: string;
+  contact_info: string;
+  profile_image: string;
+  /** @format timestamptz */
+  updated_at: number;
+  /**
+   * Whether the restaurant is active.
+   * @default "false"
+   */
+  is_active: boolean;
+  /** @format uuid */
+  companies_id: string | null;
+  station: string;
+  access: string;
+  rating: number;
+  /** @default "1" */
+  is_approved: boolean;
+  restaurant_cuisine_id: number[];
+  description: string;
+  phone: string;
+  status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
+}[];
+
 export interface DashboardQueryListData {
   /** @format int64 */
   total_users_count: number;
