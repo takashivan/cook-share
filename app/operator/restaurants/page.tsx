@@ -7,8 +7,9 @@ import {
   fetchRestaurants,
   banRestaurant,
   approveRestaurant,
+  RestaurantsListResponse,
+  fetchCuisines,
 } from "@/lib/redux/slices/operatorSlice";
-import { Restaurant } from "@/types/restaurant";
 import {
   Table,
   TableBody,
@@ -23,25 +24,26 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Search } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Download, Search, SlidersHorizontal } from "lucide-react";
+import { RestaurantStatusBadgeForAdmin } from "@/components/badge/RestaurantStatusBadgeForAdmin";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function RestaurantsPage() {
   const dispatch = useDispatch<AppDispatch>();
-  const { restaurants, loading, error } = useSelector((state: RootState) => ({
-    restaurants: state.operator.restaurants.data,
-    loading: state.operator.restaurants.loading,
-    error: state.operator.restaurants.error,
-  }));
+
+  const restaurants = useSelector((state: RootState) => state.operator.restaurants.data);
+  const loading = useSelector((state: RootState) => state.operator.restaurants.loading);
+  const error = useSelector((state: RootState) => state.operator.restaurants.error);
+  const cuisines = useSelector((state: RootState) => state.operator.cuisines);
+
   const [selectedRestaurant, setSelectedRestaurant] =
-    useState<Restaurant | null>(null);
+    useState<RestaurantsListResponse | null>(null);
   const [banReason, setBanReason] = useState("");
   const [showSuspendedOnly, setShowSuspendedOnly] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -49,18 +51,19 @@ export default function RestaurantsPage() {
 
   useEffect(() => {
     dispatch(fetchRestaurants());
+    dispatch(fetchCuisines());
   }, [dispatch]);
 
-  const handleBan = async () => {
-    if (!selectedRestaurant || !banReason) return;
+  const handleBan = async (restaurant: RestaurantsListResponse) => {
+    if (!banReason) return;
 
     try {
       await dispatch(
-        banRestaurant({ id: selectedRestaurant.id, reason: banReason })
+        banRestaurant({ id: restaurant.id, reason: banReason })
       ).unwrap();
       toast({
         title: "レストランをBANしました",
-        description: `${selectedRestaurant.name}をBANしました。`,
+        description: `${restaurant.name}をBANしました。`,
       });
       setSelectedRestaurant(null);
       setBanReason("");
@@ -74,7 +77,7 @@ export default function RestaurantsPage() {
     }
   };
 
-  const handleApprove = async (restaurant: Restaurant) => {
+  const handleApprove = async (restaurant: RestaurantsListResponse) => {
     try {
       await dispatch(
         approveRestaurant({ id: restaurant.id, reason: "承認" })
@@ -96,8 +99,7 @@ export default function RestaurantsPage() {
   const filteredRestaurants = restaurants.filter((restaurant) => {
     const matchesSearch =
       searchQuery === "" ||
-      restaurant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      restaurant.email.toLowerCase().includes(searchQuery.toLowerCase());
+      restaurant.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = !showSuspendedOnly || restaurant.status !== "APPROVED";
     return matchesSearch && matchesStatus;
   });
@@ -111,10 +113,26 @@ export default function RestaurantsPage() {
   }
 
   return (
-    <div className="p-4">
-      <div className="flex flex-col gap-4 mb-4">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">レストラン一覧</h1>
+    <>
+      <div className="space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">レストラン一覧</h2>
+            <p className="text-muted-foreground">登録されているレストランの一覧です</p>
+          </div>
+        </div>
+
+        <div className="flex flex-col md:flex-row items-center gap-4">
+          <div className="relative w-full md:w-80 mr-auto">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="店舗名で検索..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-8"
+            />
+          </div>
           <div className="flex items-center space-x-2">
             <Switch
               id="suspended-filter"
@@ -123,141 +141,145 @@ export default function RestaurantsPage() {
             />
             <Label htmlFor="suspended-filter">一時停止中のみ表示</Label>
           </div>
+          <Button variant="outline" size="sm">
+            <Download className="mr-2 h-4 w-4" />
+            エクスポート
+          </Button>
+          <Button variant="outline" size="sm">
+            <SlidersHorizontal className="mr-2 h-4 w-4" />
+            フィルター
+          </Button>
         </div>
-        <div className="relative">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="店舗名やメールアドレスで検索..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8"
-          />
-        </div>
-      </div>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[50px]"></TableHead>
-              <TableHead>店舗名</TableHead>
-              <TableHead>メール</TableHead>
-              <TableHead>住所</TableHead>
-              <TableHead>ステータス</TableHead>
-              <TableHead>操作</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredRestaurants.map((restaurant: Restaurant) => (
-              <TableRow key={restaurant.id}>
-                <TableCell>
-                  <Avatar>
-                    {restaurant.image_url ? (
-                      <AvatarImage
-                        src={restaurant.image_url}
-                        alt={restaurant.name}
+
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>会社ID</TableHead>
+                  <TableHead>会社名</TableHead>
+                  <TableHead>店舗ID</TableHead>
+                  <TableHead>店舗名</TableHead>
+                  <TableHead>カテゴリ</TableHead>
+                  <TableHead>住所</TableHead>
+                  <TableHead>スタッフ数</TableHead>
+                  <TableHead>求人数</TableHead>
+                  <TableHead>マッチング数</TableHead>
+                  <TableHead>キャンセル数</TableHead>
+                  <TableHead>キャンセル率</TableHead>
+                  <TableHead>ステータス</TableHead>
+                  <TableHead>点数</TableHead>
+                  <TableHead>操作</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredRestaurants.map((restaurant) => (
+                  <TableRow key={restaurant.id}>
+                    <TableCell>{restaurant.companies_id}</TableCell>
+                    <TableCell>{restaurant.company.name}</TableCell>
+                    <TableCell>{restaurant.id}</TableCell>
+                    <TableCell>{restaurant.name}</TableCell>
+                    <TableCell>
+                      {restaurant.restaurant_cuisine_id.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {cuisines?.filter((cuisine) => restaurant.restaurant_cuisine_id.includes(cuisine.id)).map((cuisine) => (
+                            <Badge key={cuisine.id} variant="secondary">
+                              {cuisine.category}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell>{restaurant.address || "-"}</TableCell>
+                    <TableCell>{restaurant.companyUserCount}</TableCell>
+                    <TableCell>{restaurant.jobCount}</TableCell>
+                    <TableCell>{restaurant.worksessionCount}</TableCell>
+                    <TableCell>{restaurant.worksessionCanceledByRestaurantCount}</TableCell>
+                    <TableCell>
+                      {restaurant.worksessionCanceledByRestaurantCount > 0
+                        ? `${(
+                            (restaurant.worksessionCanceledByRestaurantCount /
+                              restaurant.worksessionCount) *
+                            100
+                          ).toFixed(2)}%`
+                        : "0%"}
+                    </TableCell>
+                    <TableCell>
+                      <RestaurantStatusBadgeForAdmin
+                        status={restaurant.status}
                       />
-                    ) : (
-                      <AvatarFallback>{restaurant.name[0]}</AvatarFallback>
-                    )}
-                  </Avatar>
-                </TableCell>
-                <TableCell>{restaurant.name}</TableCell>
-                <TableCell>{restaurant.email}</TableCell>
-                <TableCell>{restaurant.address || "-"}</TableCell>
-                <TableCell>
-                  {restaurant.status === "APPROVED" ? (
-                    <Badge variant="default">承認済み</Badge>
-                  ) : restaurant.status === "BANNED" ? (
-                    <Badge variant="destructive">一時停止中</Badge>
-                  ) : restaurant.status === "PENDING" ? (
-                    <Badge variant="secondary">承認待ち</Badge>
-                  ) : restaurant.status === "DELETED" ? (
-                    <Badge variant="outline">削除済み</Badge>
-                  ) : (
-                    <Badge variant="outline">不明</Badge>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <Dialog>
-                    <DialogTrigger asChild>
+                    </TableCell>
+                    <TableCell>{restaurant.rating}</TableCell>
+                    <TableCell>
                       <Button
                         variant="outline"
                         onClick={() => setSelectedRestaurant(restaurant)}>
                         詳細
                       </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>レストラン詳細</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div className="flex items-center space-x-4">
-                          <Avatar className="h-20 w-20">
-                            {restaurant.image_url ? (
-                              <AvatarImage
-                                src={restaurant.image_url}
-                                alt={restaurant.name}
-                              />
-                            ) : (
-                              <AvatarFallback>
-                                {restaurant.name[0]}
-                              </AvatarFallback>
-                            )}
-                          </Avatar>
-                          <div>
-                            <h3 className="font-semibold">基本情報</h3>
-                            <p>店舗名: {restaurant.name}</p>
-                            <p>メール: {restaurant.email}</p>
-                            <p>住所: {restaurant.address || "-"}</p>
-                            <p>
-                              ステータス:{" "}
-                              {restaurant.status === "APPROVED"
-                                ? "承認済み"
-                                : restaurant.status === "BANNED"
-                                ? "一時停止中"
-                                : restaurant.status === "PENDING"
-                                ? "承認待ち"
-                                : restaurant.status === "DELETED"
-                                ? "削除済み"
-                                : "不明"}
-                            </p>
-                          </div>
-                        </div>
-                        {restaurant.status === "BANNED" || restaurant.status === "PENDING" ? (
-                          <div>
-                            <h3 className="font-semibold mb-2">承認</h3>
-                            <Button
-                              variant="default"
-                              className="w-full"
-                              onClick={() => handleApprove(restaurant)}>
-                              承認する
-                            </Button>
-                          </div>
-                        ) : restaurant.status === "APPROVED" ? (
-                          <div>
-                            <h3 className="font-semibold mb-2">BAN</h3>
-                            <Input
-                              placeholder="BAN理由を入力"
-                              value={banReason}
-                              onChange={(e) => setBanReason(e.target.value)}
-                            />
-                            <Button
-                              variant="destructive"
-                              className="mt-2 w-full"
-                              onClick={handleBan}>
-                              BANする
-                            </Button>
-                          </div>
-                        ): null}
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       </div>
-    </div>
+      {selectedRestaurant && (
+        <Dialog open={!!selectedRestaurant} onOpenChange={() => setSelectedRestaurant(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>レストラン詳細</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center space-x-4">
+                <div>
+                  <h3 className="font-semibold">基本情報</h3>
+                  <p>店舗名: {selectedRestaurant.name}</p>
+                  <p>住所: {selectedRestaurant.address || "-"}</p>
+                  <p>
+                    ステータス:{" "}
+                    {selectedRestaurant.status === "APPROVED"
+                      ? "承認済み"
+                      : selectedRestaurant.status === "BANNED"
+                      ? "一時停止中"
+                      : selectedRestaurant.status === "PENDING"
+                      ? "承認待ち"
+                      : selectedRestaurant.status === "DELETED"
+                      ? "削除済み"
+                      : "不明"}
+                  </p>
+                </div>
+              </div>
+              {selectedRestaurant.status === "BANNED" || selectedRestaurant.status === "PENDING" ? (
+                <div>
+                  <h3 className="font-semibold mb-2">承認</h3>
+                  <Button
+                    variant="default"
+                    className="w-full"
+                    onClick={() => handleApprove(selectedRestaurant)}>
+                    承認する
+                  </Button>
+                </div>
+              ) : selectedRestaurant.status === "APPROVED" ? (
+                <div>
+                  <h3 className="font-semibold mb-2">BAN</h3>
+                  <Input
+                    placeholder="BAN理由を入力"
+                    value={banReason}
+                    onChange={(e) => setBanReason(e.target.value)}
+                  />
+                  <Button
+                    variant="destructive"
+                    className="mt-2 w-full"
+                    onClick={() => handleBan(selectedRestaurant)}>
+                    BANする
+                  </Button>
+                </div>
+              ): null}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
   );
 }

@@ -7,11 +7,13 @@ import { getSkills } from "@/lib/api/skill";
 import { getRestaurants, Restaurant } from "@/lib/api/restaurant";
 import { JobWithRestaurant } from "@/types";
 import { getApi } from "@/api/api-factory";
-import { CompaniesListData } from "@/api/__generated__/base/data-contracts";
+import { CompaniesDetailData, CompaniesListData } from "@/api/__generated__/base/data-contracts";
 import { Companies } from "@/api/__generated__/operator/Companies";
-import { UsersListData } from "@/api/__generated__/operator/data-contracts";
+import { RestaurantsListData, UsersListData } from "@/api/__generated__/operator/data-contracts";
 import { Users } from "@/api/__generated__/operator/Users";
 import { Operator } from "@/api/__generated__/operator/Operator";
+import { Restaurants } from "@/api/__generated__/operator/Restaurants";
+import { RestaurantCuisines } from "@/api/__generated__/base/RestaurantCuisines";
 
 // Async Thunks
 // XANOから生成されるSwaggerの定義が不完全なため、レスポンスの型を手動で定義する
@@ -85,8 +87,9 @@ export const fetchChefsToBeReviewed = createAsyncThunk(
 export const fetchCuisines = createAsyncThunk(
   "operator/fetchCuisines",
   async () => {
-    const response = await getCuisines();
-    return response;
+    const restaurantCuisinesApi = getApi(RestaurantCuisines);
+    const response = await restaurantCuisinesApi.restaurantCuisinesList();
+    return response.data;
   }
 );
 
@@ -158,28 +161,49 @@ export const approveChef = createAsyncThunk(
   }
 );
 
-export const fetchRestaurants = createAsyncThunk<
-  Restaurant[],
-  void,
-  { rejectValue: string }
->("operator/fetchRestaurants", async (_, { rejectWithValue }) => {
-  try {
-    const response = await getRestaurants();
-    return response;
-  } catch (error) {
-    return rejectWithValue((error as Error).message);
+// Async Thunks
+// XANOから生成されるSwaggerの定義が不完全なため、レスポンスの型を手動で定義する
+export type RestaurantsListResponse = RestaurantsListData[number] & {
+  company: CompaniesDetailData;
+  companyUserCount: number;
+  jobCount: number;
+  worksessionCount: number;
+  worksessionCanceledByRestaurantCount: number;
+  rating: number;
+};
+export const fetchRestaurants = createAsyncThunk(
+  "operator/fetchRestaurants",
+  async (_, { rejectWithValue }) => {
+    try {
+      const restaurantsApi = getApi(Restaurants);
+      const response = await restaurantsApi.restaurantsList({
+        headers: {
+          "X-User-Type": "operator",
+        }
+      });
+      return response.data as RestaurantsListResponse[];
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
   }
-});
+);
 
 export const banRestaurant = createAsyncThunk(
   "operator/banRestaurant",
   async (
-    { id, reason }: { id: string; reason: string },
+    { id, reason }: { id: number; reason: string },
     { rejectWithValue }
   ) => {
     try {
-      const response = await operatorApi.banRestaurant(id, reason);
-      return response;
+      const operatorApi = getApi(Operator);
+      const response = await operatorApi.restaurantsBanPartialUpdate(id, {
+        reason
+      }, {
+        headers: {
+          "X-User-Type": "operator",
+        }
+      });
+      return response.data;
     } catch (error) {
       return rejectWithValue((error as Error).message);
     }
@@ -189,12 +213,15 @@ export const banRestaurant = createAsyncThunk(
 export const approveRestaurant = createAsyncThunk(
   "operator/approveRestaurant",
   async (
-    { id, reason }: { id: string; reason: string },
+    { id, reason }: { id: number; reason: string },
     { rejectWithValue }
   ) => {
     try {
-      const response = await operatorApi.approveRestaurant(id, reason);
-      return response;
+      const operatorApi = getApi(Operator);
+      const response = await operatorApi.restaurantsApprovePartialUpdate(id, {
+        reason
+      });
+      return response.data;
     } catch (error) {
       return rejectWithValue((error as Error).message);
     }
@@ -299,7 +326,7 @@ interface OperatorState {
     skills: string | null;
   };
   restaurants: {
-    data: Restaurant[];
+    data: RestaurantsListResponse[];
     loading: boolean;
     error: string | null;
   };
@@ -515,7 +542,7 @@ const operatorSlice = createSlice({
       })
       .addCase(fetchRestaurants.fulfilled, (state, action) => {
         state.restaurants.loading = false;
-        state.restaurants.data = action.payload as Restaurant[];
+        state.restaurants.data = action.payload;
       })
       .addCase(fetchRestaurants.rejected, (state, action) => {
         state.restaurants.loading = false;
