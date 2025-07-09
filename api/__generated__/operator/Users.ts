@@ -10,7 +10,11 @@
  * ---------------------------------------------------------------
  */
 
-import { DashboardQueryListData, ToBeReviewedListData } from "./data-contracts";
+import {
+  DashboardQueryListData,
+  ToBeReviewedListData,
+  UsersListData,
+} from "./data-contracts";
 import { HttpClient, RequestParams } from "./http-client";
 
 export class Users<
@@ -66,6 +70,33 @@ export class Users<
   ) => {
     const key = enabled ? [`/users/to-be-reviewed`] : null;
     const fetcher = () => this.toBeReviewedList(params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
+  /**
+   * @description [AUTHED-Operator]運営者だけが見られる、シェフ一覧 <br /><br /> <b>Authentication:</b> required
+   *
+   * @tags users
+   * @name UsersList
+   * @summary [AUTHED-Operator]運営者だけが見られる、シェフ一覧
+   * @request GET:/users
+   * @secure
+   */
+  usersList = (params: RequestParams = {}) =>
+    this.request<UsersListData, void>({
+      path: `/users`,
+      method: "GET",
+      secure: true,
+      format: "json",
+      ...params,
+    });
+
+  usersListQueryArgs = (
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/users`] : null;
+    const fetcher = () => this.usersList(params).then((res) => res.data);
     return [key, fetcher] as const;
   };
 }

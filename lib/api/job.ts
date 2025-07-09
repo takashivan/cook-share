@@ -2,7 +2,7 @@
 
 import { API_CONFIG, apiRequest } from "./config";
 import type { JobWithRestaurant } from "@/types";
-import { GetJobData } from "@/api/__generated__/chef-connect/data-contracts";
+// import { GetJobData } from "@/api/__generated__/chef-connect/data-contracts";
 
 const BASE_URL = API_CONFIG.baseURLs.job;
 
@@ -356,7 +356,7 @@ export const getAllJobs = async (): Promise<JobWithRestaurant[]> => {
 
 // export type UpdateJobParams = Partial<CreateJobParams>;
 
-export type GetJobResponse = GetJobData;
+// export type GetJobResponse = GetJobData;
 // export type CreateJobResponse = Job;
 // export type UpdateJobResponse = Job;
 // export type DeleteJobResponse = void;
@@ -377,20 +377,20 @@ export const jobApi = {
   //   return response.json();
   // },
 
-  getJob: async (id: string): Promise<GetJobResponse> => {
-    const response = await fetch(`${BASE_URL}/${id}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+  // getJob: async (id: string): Promise<GetJobResponse> => {
+  //   const response = await fetch(`${BASE_URL}/${id}`, {
+  //     method: "GET",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //   });
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch job");
-    }
+  //   if (!response.ok) {
+  //     throw new Error("Failed to fetch job");
+  //   }
 
-    return response.json();
-  },
+  //   return response.json();
+  // },
 
   // getJobsByRestaurant: async (
   //   restaurantId: string

@@ -65,21 +65,21 @@ export const fetchJobsByCompanyId = createAsyncThunk(
   }
 );
 
-export const fetchJobById = createAsyncThunk(
-  "jobs/fetchById",
-  async (jobId: string, { getState }) => {
-    const state = getState() as { jobs: JobState };
-    if (!shouldFetch(state.jobs.lastFetch.job)) {
-      return state.jobs.selectedJob;
-    }
-    if (state.jobs.isFetching.job) {
-      return state.jobs.selectedJob;
-    }
-    await delay(RATE_LIMIT_DELAY);
-    const response = await jobApi.getJob(jobId);
-    return response;
-  }
-);
+// export const fetchJobById = createAsyncThunk(
+//   "jobs/fetchById",
+//   async (jobId: string, { getState }) => {
+//     const state = getState() as { jobs: JobState };
+//     if (!shouldFetch(state.jobs.lastFetch.job)) {
+//       return state.jobs.selectedJob;
+//     }
+//     if (state.jobs.isFetching.job) {
+//       return state.jobs.selectedJob;
+//     }
+//     await delay(RATE_LIMIT_DELAY);
+//     const response = await jobApi.getJob(jobId);
+//     return response;
+//   }
+// );
 
 export const fetchApplicationsByJob = createAsyncThunk(
   "jobs/fetchApplicationsByJob",
@@ -123,24 +123,24 @@ const jobSlice = createSlice({
         state.error = action.error.message || "Failed to fetch jobs";
         state.isFetching.jobs = false;
       })
-      .addCase(fetchJobById.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-        state.isFetching.job = true;
-      })
-      .addCase(fetchJobById.fulfilled, (state, action) => {
-        state.loading = false;
-        state.selectedJob = action.payload
-          ? JSON.parse(JSON.stringify(action.payload))
-          : null;
-        state.lastFetch.job = Date.now();
-        state.isFetching.job = false;
-      })
-      .addCase(fetchJobById.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || "Failed to fetch job";
-        state.isFetching.job = false;
-      })
+      // .addCase(fetchJobById.pending, (state) => {
+      //   state.loading = true;
+      //   state.error = null;
+      //   state.isFetching.job = true;
+      // })
+      // .addCase(fetchJobById.fulfilled, (state, action) => {
+      //   state.loading = false;
+      //   state.selectedJob = action.payload
+      //     ? JSON.parse(JSON.stringify(action.payload))
+      //     : null;
+      //   state.lastFetch.job = Date.now();
+      //   state.isFetching.job = false;
+      // })
+      // .addCase(fetchJobById.rejected, (state, action) => {
+      //   state.loading = false;
+      //   state.error = action.error.message || "Failed to fetch job";
+      //   state.isFetching.job = false;
+      // })
       .addCase(fetchApplicationsByJob.pending, (state) => {
         state.loading = true;
         state.error = null;

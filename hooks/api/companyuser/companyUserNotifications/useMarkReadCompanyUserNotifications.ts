@@ -1,8 +1,8 @@
 import { CompanyuserNotifications } from '@/api/__generated__/base/CompanyuserNotifications';
-import { ByUserDetailOutput } from '@/api/__generated__/notification/data-contracts';
 import { getApi } from '@/api/api-factory';
 import { useSWRConfig } from 'swr';
 import useSWRMutation from 'swr/mutation'
+import { ByUserDetailOutput } from './useGetCompanyUserNotificationsByUserId';
 
 export interface Params {
   companyUserNotificationId?: string;

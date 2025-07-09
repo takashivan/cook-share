@@ -9,6 +9,9 @@ import { JobWithRestaurant } from "@/types";
 import { getApi } from "@/api/api-factory";
 import { CompaniesListData } from "@/api/__generated__/base/data-contracts";
 import { Companies } from "@/api/__generated__/operator/Companies";
+import { UsersListData } from "@/api/__generated__/operator/data-contracts";
+import { Users } from "@/api/__generated__/operator/Users";
+import { Operator } from "@/api/__generated__/operator/Operator";
 
 // Async Thunks
 // XANOから生成されるSwaggerの定義が不完全なため、レスポンスの型を手動で定義する
@@ -36,12 +39,24 @@ export const fetchCompanies = createAsyncThunk(
   }
 );
 
+// Async Thunks
+// XANOから生成されるSwaggerの定義が不完全なため、レスポンスの型を手動で定義する
+export type UsersListResponse = UsersListData[number] & {
+  worksessionCount: number;
+  worksessionCanceledByChefCount: number;
+  rating: number;
+};
 export const fetchChefs = createAsyncThunk(
   "operator/fetchChefs",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await operatorApi.getChefs();
-      return response;
+      const usersApi = getApi(Users);
+      const response = await usersApi.usersList({
+        headers: {
+          "X-User-Type": "operator",
+        }
+      });
+      return response.data as UsersListResponse[];
     } catch (error) {
       return rejectWithValue((error as Error).message);
     }
@@ -111,8 +126,15 @@ export const banChef = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await operatorApi.banChef(id, reason);
-      return response;
+      const operatorApi = getApi(Operator);
+      const response = await operatorApi.usersBanPartialUpdate(id, {
+        reason
+      }, {
+        headers: {
+          "X-User-Type": "operator",
+        }
+      });
+      return response.data;
     } catch (error) {
       return rejectWithValue((error as Error).message);
     }
@@ -123,8 +145,13 @@ export const approveChef = createAsyncThunk(
   "operator/approveChef",
   async (id: string, { rejectWithValue }) => {
     try {
-      const response = await operatorApi.approveChef(id);
-      return response;
+      const operatorApi = getApi(Operator);
+      const response = await operatorApi.usersApprovePartialUpdate(id, {
+        headers: {
+          "X-User-Type": "operator",
+        }
+      });
+      return response.data;
     } catch (error) {
       return rejectWithValue((error as Error).message);
     }
@@ -230,7 +257,7 @@ interface OperatorState {
     error: string | null;
   };
   chefs: {
-    data: UserProfile[];
+    data: UsersListResponse[];
     loading: boolean;
     error: string | null;
   };
