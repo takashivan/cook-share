@@ -323,7 +323,7 @@ export class Operator<
    * @secure
    */
   restaurantsApprovePartialUpdate = (
-    restaurantId: string,
+    restaurantId: number,
     data: RestaurantsApprovePartialUpdatePayload,
     params: RequestParams = {},
   ) =>
@@ -338,7 +338,7 @@ export class Operator<
     });
 
   restaurantsApprovePartialUpdateQueryArgs = (
-    restaurantId: string,
+    restaurantId: number,
     params: RequestParams = {},
     enabled: boolean = true,
   ) => {
@@ -364,7 +364,7 @@ export class Operator<
    * @secure
    */
   restaurantsBanPartialUpdate = (
-    restaurantId: string,
+    restaurantId: number,
     data: RestaurantsBanPartialUpdatePayload,
     params: RequestParams = {},
   ) =>
@@ -379,7 +379,7 @@ export class Operator<
     });
 
   restaurantsBanPartialUpdateQueryArgs = (
-    restaurantId: string,
+    restaurantId: number,
     params: RequestParams = {},
     enabled: boolean = true,
   ) => {

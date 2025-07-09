@@ -900,12 +900,11 @@ export interface RestaurantBanPartialUpdateData {
 }
 
 export interface RestaurantsApprovePartialUpdatePayload {
-  job_id: string;
   reason: string;
 }
 
 export interface RestaurantsApprovePartialUpdateData {
-  job: {
+  restaurant: {
     /** @format int64 */
     id: number;
     /**
@@ -913,46 +912,30 @@ export interface RestaurantsApprovePartialUpdateData {
      * @default "now"
      */
     created_at: number;
-    title: string;
-    description: string;
-    /** @format date */
-    work_date: string;
-    /** @format timestamptz */
-    start_time: number;
-    /** @format timestamptz */
-    end_time: number;
-    hourly_rate: number;
-    required_skills: string[];
-    status:
-      | "DRAFT"
-      | "PUBLISHED"
-      | "EXPIRED"
-      | "PENDING"
-      | "DELETED"
-      | "FILLED"
-      | "COMPLETED";
+    name: string;
+    address: string;
+    cuisine_type: string;
+    business_hours: string;
+    contact_info: string;
+    profile_image: string;
     /** @format timestamptz */
     updated_at: number;
-    /** @format int64 */
-    restaurant_id: number;
-    image: string;
-    task: string;
-    skill: string;
-    whattotake: string;
-    note: string;
-    point: string;
-    transportation: string;
+    /**
+     * Whether the restaurant is active.
+     * @default "false"
+     */
+    is_active: boolean;
+    /** @format uuid */
+    companies_id: string | null;
+    station: string;
+    access: string;
+    rating: number;
     /** @default "1" */
     is_approved: boolean;
-    /** @format int64 */
-    number_of_spots: number;
-    /** @format int64 */
-    fee: number;
-    /** @format timestamptz */
-    expiry_date: number | null;
-    transportation_type: "NONE" | "MAX" | "FIXED";
-    /** @format int64 */
-    transportation_amount: number;
+    restaurant_cuisine_id: number[];
+    description: string;
+    phone: string;
+    status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   };
   adminlog: {
     /** @format int64 */
