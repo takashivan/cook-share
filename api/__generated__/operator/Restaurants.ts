@@ -10,12 +10,41 @@
  * ---------------------------------------------------------------
  */
 
-import { RestaurantsListData } from "./data-contracts";
+import { RestaurantsDetailData, RestaurantsListData } from "./data-contracts";
 import { HttpClient, RequestParams } from "./http-client";
 
 export class Restaurants<
   SecurityDataType = unknown,
 > extends HttpClient<SecurityDataType> {
+  /**
+   * @description [AUTHED-Operator]運営者だけが見られる、店舗の詳細 <br /><br /> <b>Authentication:</b> required
+   *
+   * @tags restaurants
+   * @name RestaurantsDetail
+   * @summary [AUTHED-Operator]運営者だけが見られる、店舗の詳細
+   * @request GET:/restaurants/{restaurant_id}
+   * @secure
+   */
+  restaurantsDetail = (restaurantId: number, params: RequestParams = {}) =>
+    this.request<RestaurantsDetailData, void>({
+      path: `/restaurants/${restaurantId}`,
+      method: "GET",
+      secure: true,
+      format: "json",
+      ...params,
+    });
+
+  restaurantsDetailQueryArgs = (
+    restaurantId: number,
+    params: RequestParams = {},
+    enabled: boolean = true,
+  ) => {
+    const key = enabled ? [`/restaurants/${restaurantId}`] : null;
+    const fetcher = () =>
+      this.restaurantsDetail(restaurantId, params).then((res) => res.data);
+    return [key, fetcher] as const;
+  };
+
   /**
    * @description [AUTHED-Operator]運営者だけが見られる、店舗一覧 <br /><br /> <b>Authentication:</b> required
    *
