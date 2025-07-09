@@ -69,14 +69,14 @@ export const operatorApi = {
   },
 
   // 会社管理
-  getCompanies: async (): Promise<any[]> => {
-    return apiRequest(
-      `${API_CONFIG.baseURLs.operator}/companies`,
-      "GET",
-      undefined,
-      "operator"
-    );
-  },
+  // getCompanies: async (): Promise<any[]> => {
+  //   return apiRequest(
+  //     `${API_CONFIG.baseURLs.operator}/companies`,
+  //     "GET",
+  //     undefined,
+  //     "operator"
+  //   );
+  // },
 
   getCompany: async (id: string): Promise<any> => {
     return apiRequest(
@@ -88,23 +88,23 @@ export const operatorApi = {
   },
 
   // シェフ管理
-  getChefs: async (): Promise<any[]> => {
-    return apiRequest(
-      `${API_CONFIG.baseURLs.user}`,
-      "GET",
-      undefined,
-      "operator"
-    );
-  },
+  // getChefs: async (): Promise<any[]> => {
+  //   return apiRequest(
+  //     `${API_CONFIG.baseURLs.user}`,
+  //     "GET",
+  //     undefined,
+  //     "operator"
+  //   );
+  // },
 
-  getChef: async (id: string): Promise<any> => {
-    return apiRequest(
-      `${API_CONFIG.baseURLs.operator}/chefs/${id}`,
-      "GET",
-      undefined,
-      "operator"
-    );
-  },
+  // getChef: async (id: string): Promise<any> => {
+  //   return apiRequest(
+  //     `${API_CONFIG.baseURLs.operator}/chefs/${id}`,
+  //     "GET",
+  //     undefined,
+  //     "operator"
+  //   );
+  // },
 
   getAllBilling: async (): Promise<any[]> => {
     return apiRequest(
