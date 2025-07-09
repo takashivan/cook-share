@@ -217,6 +217,8 @@ export interface SignupCreateData {
   };
 }
 
+export type CompaniesDetailData = object;
+
 export type CompaniesListData = {
   /** @format uuid */
   id: string;
@@ -1622,6 +1624,40 @@ export interface RestaurantCuisineCreateData {
   category: string;
 }
 
+export type RestaurantsListData = {
+  /** @format int64 */
+  id: number;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  name: string;
+  address: string;
+  cuisine_type: string;
+  business_hours: string;
+  contact_info: string;
+  profile_image: string;
+  /** @format timestamptz */
+  updated_at: number;
+  /**
+   * Whether the restaurant is active.
+   * @default "false"
+   */
+  is_active: boolean;
+  /** @format uuid */
+  companies_id: string | null;
+  station: string;
+  access: string;
+  rating: number;
+  /** @default "1" */
+  is_approved: boolean;
+  restaurant_cuisine_id: number[];
+  description: string;
+  phone: string;
+  status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
+}[];
+
 export interface DashboardQueryListData {
   /** @format int64 */
   total_users_count: number;
@@ -1648,6 +1684,78 @@ export interface DashboardQueryListData {
 }
 
 export type ToBeReviewedListData = {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  name: string;
+  /** @format email */
+  email: string;
+  /** @format password */
+  password: string;
+  user_type: string;
+  status: string;
+  /** @format date */
+  last_login_at: string | null;
+  /** @format date */
+  updated_at: string | null;
+  skills: string[];
+  experience_level: string;
+  bio: string;
+  certifications: string[];
+  /** @format date */
+  dateofbirth: string | null;
+  profile_image: string;
+  /** @default "false" */
+  is_approved: boolean;
+  line_user_id: string;
+  line_display_name: string;
+  /** @default "false" */
+  line_notification_enabled: boolean;
+  /** @default "false" */
+  is_verified: boolean;
+  verify_token: string;
+  stripe_account_id: string;
+  /** @format email */
+  pending_email: string;
+  email_change_token: string;
+  password_reset_token: string;
+  /** @default "false" */
+  stripe_verified: boolean;
+  stripe_requirements: object;
+  address: string;
+  phone: string;
+  last_name: string;
+  given_name: string;
+  last_name_kana: string;
+  given_name_kana: string;
+  categories: number[];
+  postal_code: string;
+  prefecture: string;
+  address2: string;
+  city: string;
+  town: string;
+  street: string;
+  /** @default "false" */
+  profile_completed: boolean;
+  position_level: "1" | "2" | "3" | "4";
+  invoice_number: string | null;
+  magic_link: {
+    token: string;
+    /**
+     * Time the token expires
+     * @format timestamptz
+     */
+    expiration: number;
+    /** @default "false" */
+    used: boolean;
+  } | null;
+}[];
+
+export type UsersListData = {
   /** @format uuid */
   id: string;
   /**
