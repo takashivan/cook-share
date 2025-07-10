@@ -1,16 +1,31 @@
 "use client";
 
-import { use, useEffect } from "react";
+import { use, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/lib/redux/store";
-import { fetchCuisines, fetchRestaurantDetail } from "@/lib/redux/slices/operatorSlice";
-import { useRouter } from "next/navigation";
+import { approveRestaurant, banRestaurant, fetchCuisines, fetchRestaurantDetail } from "@/lib/redux/slices/operatorSlice";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { RestaurantStatusBadgeForAdmin } from "@/components/badge/RestaurantStatusBadgeForAdmin";
 import { ja } from "date-fns/locale";
 import { format } from "date-fns";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { RestaurantsDetailData } from "@/api/__generated__/operator/data-contracts";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export default function RestaurantDetailPage(props: {
   params: Promise<{ id: string }>;
@@ -24,12 +39,57 @@ export default function RestaurantDetailPage(props: {
   const error = useSelector((state: RootState) => state.operator.restaurantDetail.error);
   const cuisines = useSelector((state: RootState) => state.operator.cuisines);
 
+  const { toast } = useToast();
+
+  const [banReason, setBanReason] = useState("");
+
   useEffect(() => {
     if (id) {
       dispatch(fetchRestaurantDetail(Number(id)));
     }
     dispatch(fetchCuisines());
   }, [dispatch, id]);
+
+  const handleBan = async (restaurant: RestaurantsDetailData['restaurant']) => {
+    if (!banReason) return;
+
+    try {
+      await dispatch(
+        banRestaurant({ id: restaurant.id, reason: banReason })
+      ).unwrap();
+      toast({
+        title: "レストランをBANしました",
+        description: `${restaurant.name}をBANしました。`,
+      });
+      setBanReason("");
+      dispatch(fetchRestaurantDetail(restaurant.id));
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "BANに失敗しました。",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const handleApprove = async (restaurant:  RestaurantsDetailData['restaurant']) => {
+    try {
+      await dispatch(
+        approveRestaurant({ id: restaurant.id, reason: "承認" })
+      ).unwrap();
+      toast({
+        title: "レストランを承認しました",
+        description: `${restaurant.name}を承認しました。`,
+      });
+      dispatch(fetchRestaurantDetail(restaurant.id));
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: "承認に失敗しました。",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (loading) {
     return <div className="p-4">Loading...</div>;
@@ -186,6 +246,74 @@ export default function RestaurantDetailPage(props: {
                   ))}
                 </TableBody>
               </Table>
+            </div>
+            <div>
+              {restaurantDetail.restaurant.status === "BANNED" || restaurantDetail.restaurant.status === "PENDING" ? (
+                <div>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="default"
+                        className="w-full"
+                      >
+                        承認する
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>店舗の承認</DialogTitle>
+                      </DialogHeader>
+                      <DialogDescription>
+                        店舗を承認しますか？
+                      </DialogDescription>
+                      <DialogFooter className="gap-2">
+                        <DialogClose>キャンセル</DialogClose>
+                        <Button
+                          variant="default"
+                          onClick={() => handleApprove(restaurantDetail.restaurant)}>
+                          承認する
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              ) : restaurantDetail.restaurant.status === "APPROVED" ? (
+                <div>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="destructive"
+                        className="mt-2 w-full"
+                      >
+                        BANする
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          店舗のBAN
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          <span className="mb-2">店舗をBANしますか？</span>
+                          <Input
+                            placeholder="BAN理由を入力"
+                            value={banReason}
+                            onChange={(e) => setBanReason(e.target.value)}
+                          />
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleBan(restaurantDetail.restaurant)}
+                          className="bg-red-600 hover:bg-red-700">
+                          削除する
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              ): null}
             </div>
           </div>
         </CardContent>

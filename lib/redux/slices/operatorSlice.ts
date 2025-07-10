@@ -237,6 +237,10 @@ export const approveRestaurant = createAsyncThunk(
       const operatorApi = getApi(Operator);
       const response = await operatorApi.restaurantsApprovePartialUpdate(id, {
         reason
+      }, {
+        headers: {
+          "X-User-Type": "operator",
+        }
       });
       return response.data;
     } catch (error) {
