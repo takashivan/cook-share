@@ -90,7 +90,7 @@ function OperatorLayout({ children }: { children: React.ReactNode }) {
             href="/operator/restaurants"
             className={cn(
               "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
-              pathname === "/operator/restaurants"
+              pathname.includes("restaurants")
                 ? "bg-orange-50 text-orange-600"
                 : "text-gray-600 hover:bg-gray-50"
             )}>
@@ -157,7 +157,7 @@ function OperatorLayout({ children }: { children: React.ReactNode }) {
             className={cn(
               "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
               pathname === "/operator/categories"
-                ? "bg-orange-50 text-orange-50 text-orange-600"
+                ? "bg-orange-50 text-orange-600"
                 : "text-gray-600 hover:bg-gray-50"
             )}>
             <Utensils className="w-5 h-5 mr-3" />

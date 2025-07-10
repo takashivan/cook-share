@@ -9,7 +9,7 @@ import { JobWithRestaurant } from "@/types";
 import { getApi } from "@/api/api-factory";
 import { CompaniesDetailData, CompaniesListData } from "@/api/__generated__/base/data-contracts";
 import { Companies } from "@/api/__generated__/operator/Companies";
-import { RestaurantsListData, UsersListData } from "@/api/__generated__/operator/data-contracts";
+import { RestaurantsDetailData, RestaurantsListData, UsersListData } from "@/api/__generated__/operator/data-contracts";
 import { Users } from "@/api/__generated__/operator/Users";
 import { Operator } from "@/api/__generated__/operator/Operator";
 import { Restaurants } from "@/api/__generated__/operator/Restaurants";
@@ -188,6 +188,23 @@ export const fetchRestaurants = createAsyncThunk(
   }
 );
 
+export const fetchRestaurantDetail = createAsyncThunk(
+  "operator/fetchRestaurant",
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const restaurantsApi = getApi(Restaurants);
+      const response = await restaurantsApi.restaurantsDetail(id, {
+        headers: {
+          "X-User-Type": "operator",
+        }
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
 export const banRestaurant = createAsyncThunk(
   "operator/banRestaurant",
   async (
@@ -330,6 +347,11 @@ interface OperatorState {
     loading: boolean;
     error: string | null;
   };
+  restaurantDetail: {
+    data: RestaurantsDetailData | null;
+    loading: boolean;
+    error: string | null;
+  };
   alerts: {
     data: Alert[];
     loading: boolean;
@@ -382,6 +404,11 @@ const initialState: OperatorState = {
   },
   restaurants: {
     data: [],
+    loading: false,
+    error: null,
+  },
+  restaurantDetail: {
+    data: null,
     loading: false,
     error: null,
   },
@@ -547,6 +574,21 @@ const operatorSlice = createSlice({
       .addCase(fetchRestaurants.rejected, (state, action) => {
         state.restaurants.loading = false;
         state.restaurants.error = action.payload as string;
+      });
+    
+    // Fetch Restaurant Detail
+    builder
+      .addCase(fetchRestaurantDetail.pending, (state) => {
+        state.restaurantDetail.loading = true;
+        state.restaurantDetail.error = null;
+      })
+      .addCase(fetchRestaurantDetail.fulfilled, (state, action) => {
+        state.restaurantDetail.loading = false;
+        state.restaurantDetail.data = action.payload;
+      })
+      .addCase(fetchRestaurantDetail.rejected, (state, action) => {
+        state.restaurantDetail.loading = false;
+        state.restaurantDetail.error = action.payload as string;
       });
 
     // Ban Restaurant

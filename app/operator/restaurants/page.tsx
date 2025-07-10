@@ -19,12 +19,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
@@ -33,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Download, Search, SlidersHorizontal } from "lucide-react";
 import { RestaurantStatusBadgeForAdmin } from "@/components/badge/RestaurantStatusBadgeForAdmin";
 import { Card, CardContent } from "@/components/ui/card";
+import Link from "next/link";
 
 export default function RestaurantsPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -160,7 +155,7 @@ export default function RestaurantsPage() {
                   <TableHead>会社名</TableHead>
                   <TableHead>店舗ID</TableHead>
                   <TableHead>店舗名</TableHead>
-                  <TableHead>カテゴリ</TableHead>
+                  <TableHead>ジャンル</TableHead>
                   <TableHead>住所</TableHead>
                   <TableHead>スタッフ数</TableHead>
                   <TableHead>求人数</TableHead>
@@ -211,11 +206,13 @@ export default function RestaurantsPage() {
                     </TableCell>
                     <TableCell>{restaurant.rating}</TableCell>
                     <TableCell>
-                      <Button
-                        variant="outline"
-                        onClick={() => setSelectedRestaurant(restaurant)}>
-                        詳細
-                      </Button>
+                      <Link href={`/operator/restaurants/${restaurant.id}`}>
+                        <Button
+                          variant="outline"
+                        >
+                          詳細
+                        </Button>
+                      </Link>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -224,7 +221,7 @@ export default function RestaurantsPage() {
           </CardContent>
         </Card>
       </div>
-      {selectedRestaurant && (
+      {/* {selectedRestaurant && (
         <Dialog open={!!selectedRestaurant} onOpenChange={() => setSelectedRestaurant(null)}>
           <DialogContent>
             <DialogHeader>
@@ -279,7 +276,7 @@ export default function RestaurantsPage() {
             </div>
           </DialogContent>
         </Dialog>
-      )}
+      )} */}
     </>
   );
 }
