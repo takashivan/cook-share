@@ -217,7 +217,98 @@ export interface SignupCreateData {
   };
 }
 
-export type CompaniesDetailData = object;
+export interface CompaniesDetailData {
+  company: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    name: string;
+    address: string;
+    phone: string;
+    website: string;
+    description: string;
+    status: "pending" | "approved" | "banned" | "rejected";
+    /** @format timestamptz */
+    updated_at: number | null;
+    business_registration_number: string;
+    logo_url: string;
+    stripe_customer_id: string;
+    /** @format email */
+    company_email: string;
+  };
+  restaurants: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    name: string;
+    address: string;
+    cuisine_type: string;
+    business_hours: string;
+    contact_info: string;
+    profile_image: string;
+    /** @format timestamptz */
+    updated_at: number;
+    /**
+     * Whether the restaurant is active.
+     * @default "false"
+     */
+    is_active: boolean;
+    /** @format uuid */
+    companies_id: string | null;
+    station: string;
+    access: string;
+    rating: number;
+    /** @default "1" */
+    is_approved: boolean;
+    restaurant_cuisine_id: number[];
+    description: string;
+    phone: string;
+    status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
+  }[];
+  company_users: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format uuid */
+    companies_id: string | null;
+    name: string;
+    /** @format email */
+    email: string;
+    phone: string | null;
+    /** @format password */
+    password: string;
+    /** @default "false" */
+    is_admin: boolean;
+    /** @default "1" */
+    is_active: boolean;
+    /** @default "false" */
+    is_verified: boolean;
+    /** @format timestamptz */
+    updated_at: number | null;
+    magic_link: object;
+    verify_token: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
+    password_reset_token: string;
+  }[];
+  total_paid_amount: string;
+  jobCount: string;
+  worksessionCount: string;
+  worksessionCanceledByRestaurantCount: string;
+}
 
 export type CompaniesListData = {
   /** @format uuid */

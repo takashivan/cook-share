@@ -17,16 +17,19 @@ export class Companies<
   SecurityDataType = unknown,
 > extends HttpClient<SecurityDataType> {
   /**
-   * @description <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTHED-Operator]運営者だけが見られる、企業情報詳細 <br /><br /> <b>Authentication:</b> required
    *
    * @tags companies
    * @name CompaniesDetail
+   * @summary [AUTHED-Operator]運営者だけが見られる、企業情報詳細
    * @request GET:/companies/{company_id}
+   * @secure
    */
   companiesDetail = (companyId: string, params: RequestParams = {}) =>
     this.request<CompaniesDetailData, void>({
       path: `/companies/${companyId}`,
       method: "GET",
+      secure: true,
       format: "json",
       ...params,
     });
