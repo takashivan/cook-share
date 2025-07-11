@@ -513,6 +513,56 @@ export interface DailyMetricsCreateData {
   total_jobs: number;
 }
 
+export type JobsListData = {
+  /** @format int64 */
+  id: number;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  title: string;
+  description: string;
+  /** @format date */
+  work_date: string;
+  /** @format timestamptz */
+  start_time: number;
+  /** @format timestamptz */
+  end_time: number;
+  hourly_rate: number;
+  required_skills: string[];
+  status:
+    | "DRAFT"
+    | "PUBLISHED"
+    | "EXPIRED"
+    | "PENDING"
+    | "DELETED"
+    | "FILLED"
+    | "COMPLETED";
+  /** @format timestamptz */
+  updated_at: number;
+  /** @format int64 */
+  restaurant_id: number;
+  image: string;
+  task: string;
+  skill: string;
+  whattotake: string;
+  note: string;
+  point: string;
+  transportation: string;
+  /** @default "1" */
+  is_approved: boolean;
+  /** @format int64 */
+  number_of_spots: number;
+  /** @format int64 */
+  fee: number;
+  /** @format timestamptz */
+  expiry_date: number | null;
+  transportation_type: "NONE" | "MAX" | "FIXED";
+  /** @format int64 */
+  transportation_amount: number;
+}[];
+
 export type BillingsAllListData = {
   /** @format uuid */
   id: string;
