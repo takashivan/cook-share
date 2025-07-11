@@ -561,6 +561,60 @@ export type JobsListData = {
   transportation_type: "NONE" | "MAX" | "FIXED";
   /** @format int64 */
   transportation_amount: number;
+  worksession: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format timestamptz */
+    check_in_time: number;
+    /** @format timestamptz */
+    check_out_time: number;
+    total_hours: number;
+    location_data: string;
+    status:
+      | "SCHEDULED"
+      | "IN_PROGRESS"
+      | "CANCELED_BY_CHEF"
+      | "CANCELED_BY_RESTAURANT"
+      | "COMPLETED"
+      | "VERIFIED"
+      | "DISPUTE"
+      | "ESCALATED"
+      | "PAID"
+      | "CANCELED"
+      | "VERIFY_REJECTED";
+    /** @format timestamptz */
+    updated_at: number;
+    /** @format uuid */
+    application_id: string | null;
+    /** @format uuid */
+    user_id: string | null;
+    /** @format int64 */
+    restaurant_id: number;
+    /** @format int64 */
+    job_id: number;
+    /** @format int64 */
+    paid_amount: number;
+    chef_feedback: string;
+    restaurant_feedback: string;
+    /** @format int64 */
+    chef_rating: number;
+    /** @format int64 */
+    restaurant_rating: number;
+    /** @format timestamptz */
+    start_time: number | null;
+    /** @format int64 */
+    check_in_code: number | null;
+    /** @format int64 */
+    transportation_expenses: number | null;
+    /** @format int64 */
+    actual_fee: number;
+    transportation_type: "FIXED" | "NONE" | "MAX";
+  };
 }[];
 
 export type BillingsAllListData = {
