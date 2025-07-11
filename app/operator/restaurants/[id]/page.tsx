@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { RestaurantStatusBadgeForAdmin } from "@/components/badge/RestaurantStatusBadgeForAdmin";
 import { ja } from "date-fns/locale";
 import { format } from "date-fns";
-import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -223,7 +223,7 @@ export default function RestaurantDetailPage(props: {
               </div>
             </div>
             <div>
-              <h3 className="font-semibold">店舗担当者のメールアドレス</h3>
+              <h3 className="font-semibold">スタッフ一覧</h3>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -236,12 +236,12 @@ export default function RestaurantDetailPage(props: {
                 <TableBody>
                   {restaurantDetail.companyUsers.map((user) => (
                     <TableRow key={user.id}>
-                      <TableHead>{user.id}</TableHead>
-                      <TableHead>{user.name}</TableHead>
-                      <TableHead>
+                      <TableCell>{user.id}</TableCell>
+                      <TableCell>{user.name}</TableCell>
+                      <TableCell>
                         {user.is_admin ? "管理者" : "店舗スタッフ"}
-                      </TableHead>
-                      <TableHead>{user.email}</TableHead>
+                      </TableCell>
+                      <TableCell>{user.email}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

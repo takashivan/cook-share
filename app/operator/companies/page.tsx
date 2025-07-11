@@ -120,94 +120,13 @@ export default function CompaniesList() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">メニューを開く</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <Link
-                            href={`/operator/companies/${company.id}`}
-                            className="w-full">
-                            詳細を表示
-                          </Link>
-                        </DropdownMenuItem>
-                        {/* {company.status === "未承認" && (
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <DropdownMenuItem
-                                onSelect={(e) => e.preventDefault()}>
-                                会社を承認
-                              </DropdownMenuItem>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>会社承認の確認</DialogTitle>
-                                <DialogDescription>
-                                  {company.name}
-                                  を承認しますか？承認すると、会社はプラットフォームで店舗と求人を登録できるようになります。
-                                </DialogDescription>
-                              </DialogHeader>
-                              <DialogFooter>
-                                <Button variant="outline">キャンセル</Button>
-                                <Button>承認する</Button>
-                              </DialogFooter>
-                            </DialogContent>
-                          </Dialog>
-                        )}
-                        {company.status === "承認済み" ? (
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <DropdownMenuItem
-                                onSelect={(e) => e.preventDefault()}
-                                className="text-red-600">
-                                会社を停止
-                              </DropdownMenuItem>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>会社停止の確認</DialogTitle>
-                                <DialogDescription>
-                                  {company.name}
-                                  を停止しますか？停止中は全ての店舗と求人が非表示になり、新しい求人を掲載できなくなります。
-                                </DialogDescription>
-                              </DialogHeader>
-                              <DialogFooter>
-                                <Button variant="outline">キャンセル</Button>
-                                <Button variant="destructive">停止する</Button>
-                              </DialogFooter>
-                            </DialogContent>
-                          </Dialog>
-                        ) : (
-                          company.status === "停止中" && (
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <DropdownMenuItem
-                                  onSelect={(e) => e.preventDefault()}>
-                                  会社を再開
-                                </DropdownMenuItem>
-                              </DialogTrigger>
-                              <DialogContent>
-                                <DialogHeader>
-                                  <DialogTitle>会社再開の確認</DialogTitle>
-                                  <DialogDescription>
-                                    {company.name}
-                                    を再開しますか？再開すると、会社は再びプラットフォームで活動できるようになります。
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <DialogFooter>
-                                  <Button variant="outline">キャンセル</Button>
-                                  <Button>再開する</Button>
-                                </DialogFooter>
-                              </DialogContent>
-                            </Dialog>
-                          )
-                        )} */}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <Link href={`/operator/companies/${company.id}`}>
+                      <Button
+                        variant="outline"
+                      >
+                        詳細
+                      </Button>
+                    </Link>
                   </TableCell>
                 </TableRow>
               ))}

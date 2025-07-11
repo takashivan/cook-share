@@ -9,7 +9,7 @@ import { JobWithRestaurant } from "@/types";
 import { getApi } from "@/api/api-factory";
 import { CompaniesDetailData, CompaniesListData } from "@/api/__generated__/base/data-contracts";
 import { Companies } from "@/api/__generated__/operator/Companies";
-import { RestaurantsDetailData, RestaurantsListData, UsersListData } from "@/api/__generated__/operator/data-contracts";
+import { RestaurantsDetailData, RestaurantsListData, UsersListData, CompaniesDetailData as CompaniesDetailDataForOperator, CompaniesDetailData as CompaniesDetailDataDorOperator } from "@/api/__generated__/operator/data-contracts";
 import { Users } from "@/api/__generated__/operator/Users";
 import { Operator } from "@/api/__generated__/operator/Operator";
 import { Restaurants } from "@/api/__generated__/operator/Restaurants";
@@ -35,6 +35,35 @@ export const fetchCompanies = createAsyncThunk(
         }
       });
       return response.data as CompaniesListResponse[];
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
+// Async Thunks
+// XANOから生成されるSwaggerの定義が不完全なため、レスポンスの型を手動で定義する
+type CompanyDetailResponse = Omit<CompaniesDetailDataDorOperator, "restaurants"> & {
+  restaurants: Array<CompaniesDetailDataDorOperator["restaurants"][number] & {
+    companyUserCount: number;
+    jobCount: number;
+    worksessionCount: number;
+    worksessionCanceledByRestaurantCount: number;
+    rating: number;
+  }>;
+};
+
+export const fetchCompanyDetail = createAsyncThunk(
+  "operator/fetchCompanyDetail",
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const companiesApi = getApi(Companies);
+      const response = await companiesApi.companiesDetail(id, {
+        headers: {
+          "X-User-Type": "operator",
+        }
+      });
+      return response.data as CompanyDetailResponse;
     } catch (error) {
       return rejectWithValue((error as Error).message);
     }
@@ -304,6 +333,11 @@ interface OperatorState {
     loading: boolean;
     error: string | null;
   };
+  companyDetail: {
+    data: CompanyDetailResponse | null,
+    loading: boolean;
+    error: string | null;
+  };
   chefs: {
     data: UsersListResponse[];
     loading: boolean;
@@ -366,6 +400,11 @@ interface OperatorState {
 const initialState: OperatorState = {
   companies: {
     data: [],
+    loading: false,
+    error: null,
+  },
+  companyDetail: {
+    data: null,
     loading: false,
     error: null,
   },
@@ -448,6 +487,21 @@ const operatorSlice = createSlice({
         state.companies.error = action.error.message || "エラーが発生しました";
       });
 
+    // Company Detail
+    builder
+      .addCase(fetchCompanyDetail.pending, (state) => {
+        state.companyDetail.loading = true;
+        state.companyDetail.error = null;
+      })
+      .addCase(fetchCompanyDetail.fulfilled, (state, action) => {
+        state.companyDetail.data = action.payload;
+        state.companyDetail.loading = false;
+      })
+      .addCase(fetchCompanyDetail.rejected, (state, action) => {
+        state.companyDetail.loading = false;
+        state.companyDetail.error = action.error.message || "エラーが発生しました";
+      });
+      
     // Chefs
     builder
       .addCase(fetchChefs.pending, (state) => {

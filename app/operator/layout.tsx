@@ -79,7 +79,7 @@ function OperatorLayout({ children }: { children: React.ReactNode }) {
             href="/operator/companies"
             className={cn(
               "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
-              pathname === "/operator/companies"
+              pathname.includes("companies")
                 ? "bg-orange-50 text-orange-600"
                 : "text-gray-600 hover:bg-gray-50"
             )}>
