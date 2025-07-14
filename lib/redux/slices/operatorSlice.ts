@@ -1,19 +1,16 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { operatorApi } from "@/lib/api/operator";
-import { getAllChefs, UserProfile } from "@/lib/api/user";
-import { getAllJobs } from "@/lib/api/job";
-import { getCuisines } from "@/lib/api/cuisines";
+import { UserProfile } from "@/lib/api/user";
 import { getSkills } from "@/lib/api/skill";
-import { getRestaurants, Restaurant } from "@/lib/api/restaurant";
-import { JobWithRestaurant } from "@/types";
 import { getApi } from "@/api/api-factory";
-import { CompaniesDetailData, CompaniesListData } from "@/api/__generated__/base/data-contracts";
+import { CompaniesDetailData, CompaniesListData, QueryUpcomingListResult } from "@/api/__generated__/base/data-contracts";
 import { Companies } from "@/api/__generated__/operator/Companies";
-import { RestaurantsDetailData, RestaurantsListData, UsersListData, CompaniesDetailData as CompaniesDetailDataForOperator, CompaniesDetailData as CompaniesDetailDataDorOperator } from "@/api/__generated__/operator/data-contracts";
+import { RestaurantsDetailData, RestaurantsListData, UsersListData, CompaniesDetailData as CompaniesDetailDataForOperator, CompaniesDetailData as CompaniesDetailDataDorOperator, JobsListData } from "@/api/__generated__/operator/data-contracts";
 import { Users } from "@/api/__generated__/operator/Users";
 import { Operator } from "@/api/__generated__/operator/Operator";
 import { Restaurants } from "@/api/__generated__/operator/Restaurants";
 import { RestaurantCuisines } from "@/api/__generated__/base/RestaurantCuisines";
+import { Jobs } from "@/api/__generated__/operator/Jobs";
 
 // Async Thunks
 // XANOから生成されるSwaggerの定義が不完全なため、レスポンスの型を手動で定義する
@@ -125,8 +122,13 @@ export const fetchCuisines = createAsyncThunk(
 export const fetchOperatorJobs = createAsyncThunk(
   "operator/fetchJobs",
   async () => {
-    const response = await getAllJobs();
-    return response;
+    const jobsApi = getApi(Jobs);
+    const response = await jobsApi.jobsList({
+      headers: {
+        "X-User-Type": "operator",
+      }
+    });
+    return response.data;
   }
 );
 
@@ -356,7 +358,7 @@ interface OperatorState {
   cuisines: any[];
   skills: any[];
   jobs: {
-    data: JobWithRestaurant[];
+    data: JobsListData;
     loading: boolean;
     error: string | null;
   };

@@ -139,7 +139,7 @@ export default function CompanyDetailPage(props: {
               </div>
               <div className="flex">
                 <div className="w-32 flex-shrink-0">累計報酬金額</div>
-                <div>{`${companyDetail.total_paid_amount.toLocaleString()}円`}</div>
+                <div>{`¥${companyDetail.total_paid_amount.toLocaleString()}`}</div>
               </div>
             </div>
             <div>
