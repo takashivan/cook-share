@@ -25,17 +25,19 @@ export class Operators<
   SecurityDataType = unknown,
 > extends HttpClient<SecurityDataType> {
   /**
-   * @description Delete Operator record. <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTHED-Operator]運営者だけが削除できる <br /><br /> <b>Authentication:</b> required
    *
    * @tags operators
    * @name OperatorsDelete
-   * @summary Delete Operator record.
+   * @summary [AUTHED-Operator]運営者だけが削除できる
    * @request DELETE:/operators/{operator_id}
+   * @secure
    */
   operatorsDelete = (operatorId: string, params: RequestParams = {}) =>
     this.request<OperatorsDeleteData, void>({
       path: `/operators/${operatorId}`,
       method: "DELETE",
+      secure: true,
       format: "json",
       ...params,
     });

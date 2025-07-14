@@ -217,6 +217,54 @@ export interface SignupCreateData {
   };
 }
 
+export type BillingSummariesListData = {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format uuid */
+  companies_id: string | null;
+  month: string;
+  /** @format int64 */
+  amount: number;
+  /** stripe invoice id */
+  invoice_id: string;
+  status: "PENDING" | "PAID" | "FAILED";
+  fee_rate: number;
+  /** @format int64 */
+  session_count: number;
+  start_date: string;
+  end_date: string;
+  hosted_invoice_url: string;
+  invoice_pdf: string;
+  invoice_number: string;
+  company: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    name: string;
+    address: string;
+    phone: string;
+    website: string;
+    description: string;
+    status: "pending" | "approved" | "banned" | "rejected";
+    /** @format timestamptz */
+    updated_at: number | null;
+    business_registration_number: string;
+    logo_url: string;
+    stripe_customer_id: string;
+    /** @format email */
+    company_email: string;
+  };
+}[];
+
 export type ChefReviewsListData = {
   /** @format int64 */
   id: number;
