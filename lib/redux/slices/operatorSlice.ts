@@ -1,16 +1,17 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { operatorApi } from "@/lib/api/operator";
-import { UserProfile } from "@/lib/api/user";
 import { getSkills } from "@/lib/api/skill";
 import { getApi } from "@/api/api-factory";
 import { CompaniesDetailData, CompaniesListData, QueryUpcomingListResult } from "@/api/__generated__/base/data-contracts";
 import { Companies } from "@/api/__generated__/operator/Companies";
-import { RestaurantsDetailData, RestaurantsListData, UsersListData, CompaniesDetailData as CompaniesDetailDataForOperator, CompaniesDetailData as CompaniesDetailDataDorOperator, JobsListData } from "@/api/__generated__/operator/data-contracts";
+import { RestaurantsDetailData, RestaurantsListData, UsersListData, CompaniesDetailData as CompaniesDetailDataForOperator, CompaniesDetailData as CompaniesDetailDataDorOperator, JobsListData, ChefReviewsListData, RestaurantReviewsListData } from "@/api/__generated__/operator/data-contracts";
 import { Users } from "@/api/__generated__/operator/Users";
 import { Operator } from "@/api/__generated__/operator/Operator";
 import { Restaurants } from "@/api/__generated__/operator/Restaurants";
 import { RestaurantCuisines } from "@/api/__generated__/base/RestaurantCuisines";
 import { Jobs } from "@/api/__generated__/operator/Jobs";
+import { ChefReviews } from "@/api/__generated__/operator/ChefReviews";
+import { RestaurantReviews } from "@/api/__generated__/operator/RestaurantReviews";
 
 // Async Thunks
 // XANOから生成されるSwaggerの定義が不完全なため、レスポンスの型を手動で定義する
@@ -99,17 +100,40 @@ export const fetchDashboardQuery = createAsyncThunk(
   }
 );
 
-export const fetchChefsToBeReviewed = createAsyncThunk(
-  "operator/fetchChefsToBeReviewed",
+export const fetchChefReviews = createAsyncThunk(
+  "operator/fetchChefReviews",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await operatorApi.getChefsToBeReviewed();
-      return response;
+      const chefReviewsApi = getApi(ChefReviews);
+      const response = await chefReviewsApi.chefReviewsList({
+        headers: {
+          "X-User-Type": "operator",
+        }
+      });
+      return response.data;
     } catch (error) {
       return rejectWithValue((error as Error).message);
     }
   }
 );
+
+export const fetchRestaurantReviews = createAsyncThunk(
+  "operator/fetchRestaurantReviews",
+  async (_, { rejectWithValue }) => {
+    try {
+      const restaurantReviewsApi = getApi(RestaurantReviews);
+      const response = await restaurantReviewsApi.restaurantReviewsList({
+        headers: {
+          "X-User-Type": "operator",
+        }
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
 export const fetchCuisines = createAsyncThunk(
   "operator/fetchCuisines",
   async () => {
@@ -345,8 +369,13 @@ interface OperatorState {
     loading: boolean;
     error: string | null;
   };
-  chefsToBeReviewed: {
-    data: UserProfile[];
+  chefReviews: {
+    data: ChefReviewsListData;
+    loading: boolean;
+    error: string | null;
+  };
+  restaurantReviews: {
+    data: RestaurantReviewsListData;
     loading: boolean;
     error: string | null;
   };
@@ -415,7 +444,12 @@ const initialState: OperatorState = {
     loading: false,
     error: null,
   },
-  chefsToBeReviewed: {
+  chefReviews: {
+    data: [],
+    loading: false,
+    error: null,
+  },
+  restaurantReviews: {
     data: [],
     loading: false,
     error: null,
@@ -722,19 +756,34 @@ const operatorSlice = createSlice({
         state.alerts.error = action.error.message || "Failed to fetch alerts";
       });
 
-    // Chefs to be reviewed
+    // Chef Reviews
     builder
-      .addCase(fetchChefsToBeReviewed.pending, (state) => {
-        state.chefsToBeReviewed.loading = true;
-        state.chefsToBeReviewed.error = null;
+      .addCase(fetchChefReviews.pending, (state) => {
+        state.chefReviews.loading = true;
+        state.chefReviews.error = null;
       })
-      .addCase(fetchChefsToBeReviewed.fulfilled, (state, action) => {
-        state.chefsToBeReviewed.loading = false;
-        state.chefsToBeReviewed.data = action.payload;
+      .addCase(fetchChefReviews.fulfilled, (state, action) => {
+        state.chefReviews.data = action.payload;
+        state.chefReviews.loading = false;
       })
-      .addCase(fetchChefsToBeReviewed.rejected, (state, action) => {
-        state.chefsToBeReviewed.loading = false;
-        state.chefsToBeReviewed.error = action.payload as string;
+      .addCase(fetchChefReviews.rejected, (state, action) => {
+        state.chefReviews.loading = false;
+        state.chefReviews.error = action.error.message || "Failed to fetch chef reviews";
+      });
+
+    // Restaurant Reviews
+    builder
+      .addCase(fetchRestaurantReviews.pending, (state) => {
+        state.restaurantReviews.loading = true;
+        state.restaurantReviews.error = null;
+      })
+      .addCase(fetchRestaurantReviews.fulfilled, (state, action) => {
+        state.restaurantReviews.data = action.payload;
+        state.restaurantReviews.loading = false;
+      })
+      .addCase(fetchRestaurantReviews.rejected, (state, action) => {
+        state.restaurantReviews.loading = false;
+        state.restaurantReviews.error = action.error.message || "Failed to fetch restaurant reviews";
       });
 
     // Dashboard Query

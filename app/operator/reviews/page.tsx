@@ -4,11 +4,9 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/lib/redux/store";
 import {
-  fetchChefsToBeReviewed,
-  banChef,
-  approveChef,
+  fetchChefReviews,
+  fetchRestaurantReviews,
 } from "@/lib/redux/slices/operatorSlice";
-import { UserProfile } from "@/types/user";
 import {
   Table,
   TableBody,
@@ -17,110 +15,58 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
 import { Search } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import { format } from "date-fns";
+import { ja } from "date-fns/locale";
 
 export default function ChefsPage() {
   const dispatch = useDispatch<AppDispatch>();
-  const {
-    data: chefs,
-    loading,
-    error,
-  } = useSelector((state: RootState) => state.operator.chefsToBeReviewed);
-  const [selectedChef, setSelectedChef] = useState<UserProfile | null>(null);
-  const [banReason, setBanReason] = useState("");
+  
+  const chefReviews = useSelector((state: RootState) => state.operator.chefReviews.data);
+  const chefReviewsLoading = useSelector((state: RootState) => state.operator.chefReviews.loading);
+  const chefReviewsError = useSelector((state: RootState) => state.operator.chefReviews.error);
+  
+  const restaurantReviews = useSelector((state: RootState) => state.operator.restaurantReviews.data);
+  const restaurantReviewsLoading = useSelector((state: RootState) => state.operator.restaurantReviews.loading);
+  const restaurantReviewsError = useSelector((state: RootState) => state.operator.restaurantReviews.error);
+
   const [showSuspendedOnly, setShowSuspendedOnly] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const { toast } = useToast();
+  const [selectedTab, setSelectedTab] = useState("chefReviews");
 
   useEffect(() => {
-    dispatch(fetchChefsToBeReviewed());
+    dispatch(fetchChefReviews());
+    dispatch(fetchRestaurantReviews());
   }, [dispatch]);
 
-  const handleBan = async () => {
-    if (!selectedChef || !banReason) return;
-
-    try {
-      await dispatch(
-        banChef({ id: selectedChef.id, reason: banReason })
-      ).unwrap();
-      toast({
-        title: "シェフをBANしました",
-        description: `${selectedChef.name}をBANしました。`,
-      });
-      setSelectedChef(null);
-      setBanReason("");
-      dispatch(fetchChefsToBeReviewed());
-    } catch (error) {
-      toast({
-        title: "エラー",
-        description: "BANに失敗しました。",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleApprove = async (chef: UserProfile) => {
-    try {
-      await dispatch(approveChef(chef.id)).unwrap();
-      toast({
-        title: "シェフを承認しました",
-        description: `${chef.name}を承認しました。`,
-      });
-      dispatch(fetchChefsToBeReviewed());
-    } catch (error) {
-      toast({
-        title: "エラー",
-        description: "承認に失敗しました。",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const filteredChefs =
-    chefs?.filter((chef) => {
+  const filteredReviews =
+    (selectedTab === "chefReviews" ? chefReviews : restaurantReviews)?.filter((review) => {
       // フィルター条件を組み合わせる
       const matchesSearch =
         searchQuery === "" ||
-        chef.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        chef.email.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus = !showSuspendedOnly || !chef.is_approved;
+        review.user.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus = !showSuspendedOnly;
       return matchesSearch && matchesStatus;
     }) || [];
 
-  if (loading) {
+  if (chefReviewsLoading || restaurantReviewsLoading) {
     return <div className="p-4">Loading...</div>;
   }
 
-  if (error) {
-    return <div className="p-4 text-red-500">{error}</div>;
+  if (chefReviewsError || restaurantReviewsError) {
+    return <div className="p-4 text-red-500">{chefReviewsError || restaurantReviewsError}</div>;
   }
 
   return (
     <div className="p-4">
       <div className="flex flex-col gap-4 mb-4">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">シェフ一覧</h1>
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="suspended-filter"
-              checked={showSuspendedOnly}
-              onCheckedChange={setShowSuspendedOnly}
-            />
-            <Label htmlFor="suspended-filter">一時停止中のみ表示</Label>
-          </div>
+          <h1 className="text-2xl font-bold">レビュー一覧</h1>
         </div>
         <div className="relative">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -132,101 +78,42 @@ export default function ChefsPage() {
           />
         </div>
       </div>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>名前</TableHead>
-              <TableHead>メール</TableHead>
-              <TableHead>経験レベル</TableHead>
-              <TableHead>ステータス</TableHead>
-              <TableHead>操作</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredChefs.map((chef: UserProfile) => (
-              <TableRow key={chef.id}>
-                <TableCell>{chef.name}</TableCell>
-                <TableCell>{chef.email}</TableCell>
-                <TableCell>{chef.experience_level || "-"}</TableCell>
-                <TableCell>
-                  {chef.is_approved ? (
-                    <Badge variant="default">承認済み</Badge>
-                  ) : (
-                    <Badge variant="destructive">一時停止中</Badge>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="outline"
-                        onClick={() => setSelectedChef(chef)}>
-                        詳細
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>シェフ詳細</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div>
-                          <h3 className="font-semibold">基本情報</h3>
-                          <p>名前: {chef.name}</p>
-                          <p>メール: {chef.email}</p>
-                          <p>経験レベル: {chef.experience_level || "-"}</p>
-                          <p>
-                            ステータス:{" "}
-                            {chef.is_approved ? "承認済み" : "一時停止中"}
-                          </p>
-                        </div>
-                        <div>
-                          <h3 className="font-semibold">スキル</h3>
-                          <div className="flex flex-wrap gap-2">
-                            {chef.skills?.map((skill: string) => (
-                              <span
-                                key={skill}
-                                className="px-2 py-1 bg-gray-100 rounded">
-                                {skill}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                        {!chef.is_approved ? (
-                          <div>
-                            <h3 className="font-semibold mb-2">承認</h3>
-                            <Button
-                              variant="default"
-                              className="w-full"
-                              onClick={() => handleApprove(chef)}>
-                              承認する
-                            </Button>
-                          </div>
-                        ) : (
-                          <div>
-                            <h3 className="font-semibold mb-2">BAN</h3>
-                            <Input
-                              placeholder="BAN理由を入力"
-                              value={banReason}
-                              onChange={(e) => setBanReason(e.target.value)}
-                            />
-                            <Button
-                              variant="destructive"
-                              className="mt-2 w-full"
-                              onClick={handleBan}>
-                              BANする
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </TableCell>
+
+      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mb-1">
+        <TabsList>
+          <TabsTrigger value="chefReviews">シェフレビュー</TabsTrigger>
+          <TabsTrigger value="restaurantReviews">店舗レビュー</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      <Card>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID</TableHead>
+                <TableHead>{selectedTab === "chefReviews" ? "シェフ名" : "店舗名"}</TableHead>
+                <TableHead>{selectedTab === "chefReviews" ? "勤務店舗名" : "勤務シェフ名"}</TableHead>
+                <TableHead>勤務日</TableHead>
+                <TableHead>点数（★の数）</TableHead>
+                <TableHead>レビュー内容</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+            </TableHeader>
+            <TableBody>
+              {filteredReviews.map((review) => (
+                <TableRow key={review.id}>
+                  <TableCell>{review.id}</TableCell>
+                  <TableCell>{selectedTab === "chefReviews" ? review.user.name : review.restaurant.name}</TableCell>
+                  <TableCell>{selectedTab === "chefReviews" ? review.restaurant.name : review.user.name}</TableCell>
+                  <TableCell>{format(new Date(review.worksession.check_in_time), "yyyy/MM/dd", { locale: ja })}</TableCell>
+                  <TableCell>{review.rating}</TableCell>
+                  <TableCell>{review.comment}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 }
