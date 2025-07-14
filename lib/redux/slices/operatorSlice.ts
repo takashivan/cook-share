@@ -2,9 +2,9 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { operatorApi } from "@/lib/api/operator";
 import { getSkills } from "@/lib/api/skill";
 import { getApi } from "@/api/api-factory";
-import { CompaniesDetailData, CompaniesListData, QueryUpcomingListResult } from "@/api/__generated__/base/data-contracts";
+import { CompaniesDetailData, CompaniesListData } from "@/api/__generated__/base/data-contracts";
 import { Companies } from "@/api/__generated__/operator/Companies";
-import { RestaurantsDetailData, RestaurantsListData, UsersListData, CompaniesDetailData as CompaniesDetailDataForOperator, CompaniesDetailData as CompaniesDetailDataDorOperator, JobsListData, ChefReviewsListData, RestaurantReviewsListData } from "@/api/__generated__/operator/data-contracts";
+import { RestaurantsDetailData, RestaurantsListData, UsersListData, CompaniesDetailData as CompaniesDetailDataForOperator, CompaniesDetailData as CompaniesDetailDataDorOperator, JobsListData, ChefReviewsListData, RestaurantReviewsListData, OperatorsListData } from "@/api/__generated__/operator/data-contracts";
 import { Users } from "@/api/__generated__/operator/Users";
 import { Operator } from "@/api/__generated__/operator/Operator";
 import { Restaurants } from "@/api/__generated__/operator/Restaurants";
@@ -12,6 +12,7 @@ import { RestaurantCuisines } from "@/api/__generated__/base/RestaurantCuisines"
 import { Jobs } from "@/api/__generated__/operator/Jobs";
 import { ChefReviews } from "@/api/__generated__/operator/ChefReviews";
 import { RestaurantReviews } from "@/api/__generated__/operator/RestaurantReviews";
+import { Operators } from "@/api/__generated__/operator/Operators";
 
 // Async Thunks
 // XANOから生成されるSwaggerの定義が不完全なため、レスポンスの型を手動で定義する
@@ -328,6 +329,57 @@ export const fetchOperatorAlerts = createAsyncThunk(
   }
 );
 
+export const fetchOperators = createAsyncThunk(
+  "operator/fetchOperators",
+  async () => {
+    const operatorsApi = getApi(Operators);
+    const response = await operatorsApi.operatorsList({
+      headers: {
+        "X-User-Type": "operator",
+      }
+    });
+    return response.data;
+  }
+);
+
+export const createOperator = createAsyncThunk(
+  "operator/createOperator",
+  async (data: { name: string; email: string; password: string }, { rejectWithValue }) => {
+    try {
+      const operatorsApi = getApi(Operators);
+      const response = await operatorsApi.operatorsCreate({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      }, {
+        headers: {
+          "X-User-Type": "operator",
+        }
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
+export const deleteOperator = createAsyncThunk(
+  "operator/deleteOperator",
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const operatorsApi = getApi(Operators);
+      await operatorsApi.operatorsDelete(id, {
+        headers: {
+          "X-User-Type": "operator",
+        }
+      });
+      return id; // Return the ID of the deleted operator
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
 interface Alert {
   id: number;
   created_at: number;
@@ -426,6 +478,11 @@ interface OperatorState {
     loading: boolean;
     error: string | null;
   };
+  operators: {
+    data: OperatorsListData;
+    loading: boolean;
+    error: string | null;
+  };
 }
 
 const initialState: OperatorState = {
@@ -501,6 +558,11 @@ const initialState: OperatorState = {
     loading: false,
     error: null,
   },
+  operators: {
+    data: [],
+    loading: false,
+    error: null,
+  }
 };
 
 const operatorSlice = createSlice({
@@ -800,6 +862,51 @@ const operatorSlice = createSlice({
         state.dashboardQuery.loading = false;
         state.dashboardQuery.error =
           action.error.message || "Failed to fetch dashboard query";
+      });
+
+    // Fetch Operators
+    builder
+      .addCase(fetchOperators.pending, (state) => {
+        state.operators.loading = true;
+        state.operators.error = null;
+      })
+      .addCase(fetchOperators.fulfilled, (state, action) => {
+        state.operators.data = action.payload;
+        state.operators.loading = false;
+      })
+      .addCase(fetchOperators.rejected, (state, action) => {
+        state.operators.loading = false;
+        state.operators.error = action.error.message || "Failed to fetch operators";
+      });
+
+    // Create Operator
+    builder
+      .addCase(createOperator.pending, (state) => {
+        state.operators.loading = true;
+        state.operators.error = null;
+      })
+      .addCase(createOperator.fulfilled, (state, action) => {
+        state.operators.data.push(action.payload);
+        state.operators.loading = false;
+      })
+      .addCase(createOperator.rejected, (state, action) => {
+        state.operators.loading = false;
+        state.operators.error = action.error.message || "Failed to create operator";
+      });
+
+    // Delete Operator
+    builder
+      .addCase(deleteOperator.pending, (state) => {
+        state.operators.loading = true;
+        state.operators.error = null;
+      })
+      .addCase(deleteOperator.fulfilled, (state, action) => {
+        state.operators.data = state.operators.data.filter(operator => operator.id !== action.payload);
+        state.operators.loading = false;
+      })
+      .addCase(deleteOperator.rejected, (state, action) => {
+        state.operators.loading = false;
+        state.operators.error = action.error.message || "Failed to delete operator";
       });
   },
 });
