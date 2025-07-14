@@ -1814,6 +1814,8 @@ export type OperatorsListData = {
 export interface OperatorsCreatePayload {
   /** @format email */
   email: string;
+  /** @format password */
+  password: string;
   name: string;
 }
 

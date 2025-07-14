@@ -117,17 +117,19 @@ export class Operators<
   };
 
   /**
-   * @description Query all Operator records <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTHED-Operator]運営者だけが見られる、運営者一覧 <br /><br /> <b>Authentication:</b> required
    *
    * @tags operators
    * @name OperatorsList
-   * @summary Query all Operator records
+   * @summary [AUTHED-Operator]運営者だけが見られる、運営者一覧
    * @request GET:/operators
+   * @secure
    */
   operatorsList = (params: RequestParams = {}) =>
     this.request<OperatorsListData, void>({
       path: `/operators`,
       method: "GET",
+      secure: true,
       format: "json",
       ...params,
     });
@@ -142,12 +144,13 @@ export class Operators<
   };
 
   /**
-   * @description Add Operator record <br /><br /> <b>Authentication:</b> not required
+   * @description [AUTHED-Operator]運営者だけが追加できる <br /><br /> <b>Authentication:</b> required
    *
    * @tags operators
    * @name OperatorsCreate
-   * @summary Add Operator record
+   * @summary [AUTHED-Operator]運営者だけが追加できる
    * @request POST:/operators
+   * @secure
    */
   operatorsCreate = (
     data: OperatorsCreatePayload,
@@ -157,6 +160,7 @@ export class Operators<
       path: `/operators`,
       method: "POST",
       body: data,
+      secure: true,
       type: ContentType.Json,
       format: "json",
       ...params,
