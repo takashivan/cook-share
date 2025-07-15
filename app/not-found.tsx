@@ -8,8 +8,9 @@ import { Footer } from "@/components/layout/Footer";
 
 export default function NotFound({ error }: { error: Error & { digest?: string } }) {
   useEffect(() => {
-    Sentry.captureException(error);
-  }, [error]);
+    const errortest = new Error("ページが存在しません（404 Not Found）");
+    Sentry.captureException(errortest);
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col">
