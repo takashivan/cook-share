@@ -69,6 +69,8 @@ export default function ContactPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  throw new Error("Staging→Sentryテスト");
+
   return (
     <div>
       <Header />
