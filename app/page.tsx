@@ -15,6 +15,7 @@ import { SearchFields, SearchId } from "@/components/jobs/SearchFields";
 import { QueryUpcomingListResult } from "@/api/__generated__/base/data-contracts";
 import { DateSelector } from "@/components/jobs/DateSelector";
 import { REGISTER_COMPANY_PAGE } from "@/lib/const/consts";
+import { Footer } from "@/components/layout/Footer";
 
 export default function Home() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -330,65 +331,7 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="bg-black text-white py-8">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-center mb-6">
-            <div className="flex items-center gap-2">
-              <Image
-                src="/chef_illust/chef_logo.png?height=200&width=400"
-                alt="CHEFDOM Logo"
-                width={120}
-                height={30}
-                className="text-white"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-4 text-xs text-gray-400 mb-4">
-            <Link href="#" className="hover:underline">
-              運営会社
-            </Link>
-            <span>|</span>
-            <Link href="/terms" className="hover:underline">
-              利用規約
-            </Link>
-
-            <span>|</span>
-            <Link
-              href="https://corp.cookbiz.co.jp/privacy-policy/"
-              className="hover:underline">
-              プライバシーポリシー
-            </Link>
-
-            <span>|</span>
-            <Link
-              href="https://corp.cookbiz.co.jp/privacy-policy-treatment/ "
-              className="hover:underline">
-              個人情報の取扱いについて
-            </Link>
-            <span>|</span>
-            <Link
-              href="https://corp.cookbiz.co.jp/privacy-policy-publication/"
-              className="hover:underline">
-              個人情報に関する公表文
-            </Link>
-            <span>|</span>
-            <Link
-              href="https://corp.cookbiz.co.jp/tokushoho"
-              className="hover:underline">
-              特定商取引法に基づく表記
-            </Link>
-            <span>|</span>
-            <Link href="/contact" className="hover:underline">
-              お問い合わせ
-            </Link>
-            <span>|</span>
-            <Link href="/faq" className="hover:underline">
-              よくある質問
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

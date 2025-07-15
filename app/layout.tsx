@@ -20,7 +20,7 @@ export default function RootLayout({
   return (
     // next-themesはhtml要素を直接更新するため、Reactのhydrationエラーが出る。
     // それを避けるためにsuppressHydrationWarningを使用（下層には影響しない）
-    <html lang="en" suppressHydrationWarning>
+    <html lang="ja" suppressHydrationWarning>
       <body className={inter.className}>
         <StoreProvider>
           <AuthProviders>
