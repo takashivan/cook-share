@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "npm run generate_apis && next build",
     "start": "next start",
     "lint": "next lint",
@@ -34,6 +34,7 @@
     "@radix-ui/react-toast": "^1.2.6",
     "@radix-ui/react-tooltip": "^1.2.4",
     "@reduxjs/toolkit": "^2.6.1",
+    "@sentry/nextjs": "^9.38.0",
     "@types/axios": "^0.9.36",
     "@types/google.maps": "^3.58.1",
     "@xano/js-sdk": "^2.0.1",

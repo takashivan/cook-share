@@ -38,6 +38,7 @@ import { LoadingScreen } from "@/components/LoadingScreen";
 import { getApi } from "@/api/api-factory";
 import { Users } from "@/api/__generated__/base/Users";
 import { useGetChefReviewsByRestaurantId } from "@/hooks/api/companyuser/chefReviews/useGetChefReviewsByRestaurantId";
+import { Footer } from "@/components/layout/Footer";
 
 // 時間のフォーマット関数を追加
 const formatTime = (timestamp: number) => {
@@ -732,64 +733,7 @@ export function JobDetailClient({ jobDetail }: { jobDetail: JobsDetailData }) {
         </main>
       )}
 
-      <footer className="bg-black text-white py-8">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-center mb-6">
-            <div className="flex items-center gap-2">
-              <Image
-                src="/chef_illust/chef_logo.png"
-                alt="CHEFDOM Logo"
-                width={120}
-                height={30}
-                className="text-white"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-4 text-xs text-gray-400 mb-4">
-            <Link href="#" className="hover:underline">
-              運営会社
-            </Link>
-            <span>|</span>
-            <Link href="/terms" className="hover:underline">
-              利用規約
-            </Link>
-
-            <span>|</span>
-            <Link
-              href="https://corp.cookbiz.co.jp/privacy-policy/"
-              className="hover:underline">
-              プライバシーポリシー
-            </Link>
-            <span>|</span>
-            <Link
-              href="https://corp.cookbiz.co.jp/privacy-policy-treatment/"
-              className="hover:underline">
-              個人情報保護方針
-            </Link>
-            <span>|</span>
-            <Link
-              href="https://corp.cookbiz.co.jp/privacy-policy-treatment/"
-              className="hover:underline">
-              個人情報の取扱いについて
-            </Link>
-            <span>|</span>
-            <Link
-              href="https://corp.cookbiz.co.jp/tokushoho"
-              className="hover:underline">
-              特定商取引法に基づく表記
-            </Link>
-            <span>|</span>
-            <Link href="/contact" className="hover:underline">
-              お問い合わせ
-            </Link>
-          </div>
-
-          <div className="text-center text-xs text-gray-400">
-            © CHEFDOM Co.,Ltd.
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       <ApplyJobModal
         isOpen={isApplyModalOpen}
