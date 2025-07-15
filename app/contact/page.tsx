@@ -33,33 +33,35 @@ export default function ContactPage() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    try {
-      const contactApi = getApi(Contact);
-      await contactApi.contactCreate({
-        ...formData,
-        title: formData.subject,
-        type: "general",
-        company_id: null,
-      });
+    throw new Error("This is a test error for Sentry");
 
-      setIsThanksModalOpen(true);
-      // Reset form
-      setFormData({
-        name: "",
-        email: "",
-        subject: "",
-        message: "",
-      });
-    } catch (error) {
-      toast({
-        title: "エラーが発生しました",
-        description:
-          "お問い合わせの送信に失敗しました。もう一度お試しください。",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    // try {
+    //   const contactApi = getApi(Contact);
+    //   await contactApi.contactCreate({
+    //     ...formData,
+    //     title: formData.subject,
+    //     type: "general",
+    //     company_id: null,
+    //   });
+
+    //   setIsThanksModalOpen(true);
+    //   // Reset form
+    //   setFormData({
+    //     name: "",
+    //     email: "",
+    //     subject: "",
+    //     message: "",
+    //   });
+    // } catch (error) {
+    //   toast({
+    //     title: "エラーが発生しました",
+    //     description:
+    //       "お問い合わせの送信に失敗しました。もう一度お試しください。",
+    //     variant: "destructive",
+    //   });
+    // } finally {
+    //   setIsSubmitting(false);
+    // }
   };
 
   const handleChange = (
@@ -68,8 +70,6 @@ export default function ContactPage() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
-  throw new Error("Staging→Sentryテスト");
 
   return (
     <div>
