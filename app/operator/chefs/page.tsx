@@ -41,7 +41,7 @@ export default function ChefsPage() {
   const error = useSelector((state: RootState) => state.operator.chefs.error);
 
   const [selectedChef, setSelectedChef] = useState<UsersListResponse | null>(null);
-  const [banReason, setBanReason] = useState("");
+  const [reason, setReason] = useState("");
   const [showSuspendedOnly, setShowSuspendedOnly] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -52,18 +52,18 @@ export default function ChefsPage() {
   }, [dispatch]);
 
   const handleBan = async (chef: UsersListResponse) => {
-    if (!banReason) return;
+    if (!reason) return;
 
     try {
       await dispatch(
-        banChef({ id: chef.id, reason: banReason })
+        banChef({ id: chef.id, reason })
       ).unwrap();
       toast({
         title: "シェフをBANしました",
         description: `${chef.name}をBANしました。`,
       });
       setSelectedChef(null);
-      setBanReason("");
+      setReason("");
       dispatch(fetchChefs());
     } catch (error) {
       toast({
@@ -75,13 +75,16 @@ export default function ChefsPage() {
   };
 
   const handleApprove = async (chef: UsersListResponse) => {
+    if (!reason) return;
+
     try {
-      await dispatch(approveChef(chef.id)).unwrap();
+      await dispatch(approveChef({ id: chef.id, reason })).unwrap();
       toast({
         title: "シェフを承認しました",
         description: `${chef.name}を承認しました。`,
       });
       setSelectedChef(null);
+      setReason("");
       dispatch(fetchChefs());
     } catch (error) {
       toast({
@@ -264,9 +267,14 @@ export default function ChefsPage() {
               {!selectedChef.is_approved ? (
                 <div>
                   <h3 className="font-semibold mb-2">承認</h3>
+                  <Input
+                    placeholder="承認理由を入力"
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                  />
                   <Button
                     variant="default"
-                    className="w-full"
+                    className="mt-2 w-full"
                     onClick={() => handleApprove(selectedChef)}>
                     承認する
                   </Button>
@@ -276,8 +284,8 @@ export default function ChefsPage() {
                   <h3 className="font-semibold mb-2">BAN</h3>
                   <Input
                     placeholder="BAN理由を入力"
-                    value={banReason}
-                    onChange={(e) => setBanReason(e.target.value)}
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
                   />
                   <Button
                     variant="destructive"

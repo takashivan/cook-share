@@ -41,7 +41,7 @@ export default function RestaurantDetailPage(props: {
 
   const { toast } = useToast();
 
-  const [banReason, setBanReason] = useState("");
+  const [reason, setReason] = useState("");
 
   useEffect(() => {
     if (id) {
@@ -51,17 +51,17 @@ export default function RestaurantDetailPage(props: {
   }, [dispatch, id]);
 
   const handleBan = async (restaurant: RestaurantsDetailData['restaurant']) => {
-    if (!banReason) return;
+    if (!reason) return;
 
     try {
       await dispatch(
-        banRestaurant({ id: restaurant.id, reason: banReason })
+        banRestaurant({ id: restaurant.id, reason })
       ).unwrap();
       toast({
         title: "レストランをBANしました",
         description: `${restaurant.name}をBANしました。`,
       });
-      setBanReason("");
+      setReason("");
       dispatch(fetchRestaurantDetail(restaurant.id));
     } catch (error) {
       toast({
@@ -73,14 +73,17 @@ export default function RestaurantDetailPage(props: {
   };
   
   const handleApprove = async (restaurant:  RestaurantsDetailData['restaurant']) => {
+    if (!reason) return;
+
     try {
       await dispatch(
-        approveRestaurant({ id: restaurant.id, reason: "承認" })
+        approveRestaurant({ id: restaurant.id, reason })
       ).unwrap();
       toast({
         title: "レストランを承認しました",
         description: `${restaurant.name}を承認しました。`,
       });
+      setReason("");
       dispatch(fetchRestaurantDetail(restaurant.id));
     } catch (error) {
       toast({
@@ -264,7 +267,12 @@ export default function RestaurantDetailPage(props: {
                         <DialogTitle>店舗の承認</DialogTitle>
                       </DialogHeader>
                       <DialogDescription>
-                        店舗を承認しますか？
+                        <span className="block mb-2">店舗を承認しますか？</span>
+                        <Input
+                          placeholder="承認理由を入力"
+                          value={reason}
+                          onChange={(e) => setReason(e.target.value)}
+                        />
                       </DialogDescription>
                       <DialogFooter className="gap-2">
                         <DialogClose>キャンセル</DialogClose>
@@ -294,11 +302,11 @@ export default function RestaurantDetailPage(props: {
                           店舗のBAN
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                          <span className="mb-2">店舗をBANしますか？</span>
+                          <span className="block mb-2">店舗をBANしますか？</span>
                           <Input
                             placeholder="BAN理由を入力"
-                            value={banReason}
-                            onChange={(e) => setBanReason(e.target.value)}
+                            value={reason}
+                            onChange={(e) => setReason(e.target.value)}
                           />
                         </AlertDialogDescription>
                       </AlertDialogHeader>
@@ -307,7 +315,7 @@ export default function RestaurantDetailPage(props: {
                         <AlertDialogAction
                           onClick={() => handleBan(restaurantDetail.restaurant)}
                           className="bg-red-600 hover:bg-red-700">
-                          削除する
+                          BANする
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>

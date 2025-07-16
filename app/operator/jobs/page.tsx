@@ -56,8 +56,8 @@ export default function JobsPage() {
     null
   );
   const [selectedAlert, setSelectedAlert] = useState<any>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  
+  const [reason, setReason] = useState("");
+
   const { toast } = useToast();
 
   useEffect(() => {
@@ -78,13 +78,16 @@ export default function JobsPage() {
   };
 
   const handleBan = async (id: number) => {
+    if (!reason) return;
+
     try {
-      await dispatch(banJob({ id, reason: "運営判断による停止" })).unwrap();
+      await dispatch(banJob({ id, reason })).unwrap();
       toast({
         title: "求人が停止されました",
         description: "求人の停止に成功しました",
       });
       setSelectedJob(null);
+      setReason("");
       dispatch(fetchOperatorJobs());
     } catch (error) {
       toast({
@@ -96,13 +99,16 @@ export default function JobsPage() {
   };
 
   const handleApprove = async (id: number) => {
+    if (!reason) return;
+
     try {
-      await dispatch(approveJob({ id, reason: "承認" })).unwrap();
+      await dispatch(approveJob({ id, reason })).unwrap();
       toast({
         title: "求人が承認されました",
         description: "求人の承認に成功しました",
       });
       setSelectedJob(null);
+      setReason("");
       dispatch(fetchOperatorJobs());
     } catch (error) {
       toast({
@@ -209,7 +215,6 @@ export default function JobsPage() {
                           variant="outline"
                           onClick={() => {
                             setSelectedJob(job);
-                            setIsModalOpen(true);
                           }}
                         >
                           詳細
@@ -349,7 +354,12 @@ export default function JobsPage() {
                         <DialogTitle>求人の承認</DialogTitle>
                       </DialogHeader>
                       <DialogDescription>
-                        求人を承認しますか？
+                        <span className="block mb-2">求人を承認しますか？</span>
+                        <Input
+                          placeholder="承認理由を入力"
+                          value={reason}
+                          onChange={(e) => setReason(e.target.value)}
+                        />
                       </DialogDescription>
                       <DialogFooter className="gap-2">
                         <DialogClose>キャンセル</DialogClose>
@@ -379,7 +389,12 @@ export default function JobsPage() {
                           求人のBAN
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                          求人をBANしますか？
+                          <span className="block mb-2">求人をBANしますか？</span>
+                          <Input
+                            placeholder="BAN理由を入力"
+                            value={reason}
+                            onChange={(e) => setReason(e.target.value)}
+                          />
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>

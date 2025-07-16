@@ -195,10 +195,15 @@ export const banChef = createAsyncThunk(
 
 export const approveChef = createAsyncThunk(
   "operator/approveChef",
-  async (id: string, { rejectWithValue }) => {
+  async (
+    { id, reason }: { id: string; reason: string },
+    { rejectWithValue }
+  ) => {
     try {
       const operatorApi = getApi(Operator);
       const response = await operatorApi.usersApprovePartialUpdate(id, {
+        reason
+      },{
         headers: {
           "X-User-Type": "operator",
         }
