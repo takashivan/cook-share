@@ -163,17 +163,6 @@ function OperatorLayout({ children }: { children: React.ReactNode }) {
             <Utensils className="w-5 h-5 mr-3" />
             カテゴリ管理
           </Link>
-          <Link
-            href="/operator/skills"
-            className={cn(
-              "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
-              pathname === "/operator/skills"
-                ? "bg-orange-50 text-orange-600"
-                : "text-gray-600 hover:bg-gray-50"
-            )}>
-            <Award className="w-5 h-5 mr-3" />
-            スキル管理
-          </Link>
         </nav>
         <div className="sticky bottom-0 bg-white p-4 border-t">
           <Button
