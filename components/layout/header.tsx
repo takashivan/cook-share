@@ -35,6 +35,7 @@ export function Header() {
             width={120}
             height={30}
             className="text-orange-500"
+            priority
           />
         </Link>
 
