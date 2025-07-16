@@ -75,7 +75,7 @@ export default function ContactPage() {
     <div>
       <Header />
       <div className="max-w-3xl mx-auto mt-16">
-        <h1 className="text-3xl font-bold mb-8 text-center">お問い合わせ</h1>
+        <h1 className="text-3xl font-bold mb-8 text-center">お問い合わせ {process.env.NEXT_PUBLIC_SENTRY_DSN}</h1>
 
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-lg font-bold mb-4">お問い合わせフォーム</h2>
