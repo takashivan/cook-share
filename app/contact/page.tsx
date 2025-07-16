@@ -33,35 +33,33 @@ export default function ContactPage() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    throw new Error("This is a test error for Sentry");
+    try {
+      const contactApi = getApi(Contact);
+      await contactApi.contactCreate({
+        ...formData,
+        title: formData.subject,
+        type: "general",
+        company_id: null,
+      });
 
-    // try {
-    //   const contactApi = getApi(Contact);
-    //   await contactApi.contactCreate({
-    //     ...formData,
-    //     title: formData.subject,
-    //     type: "general",
-    //     company_id: null,
-    //   });
-
-    //   setIsThanksModalOpen(true);
-    //   // Reset form
-    //   setFormData({
-    //     name: "",
-    //     email: "",
-    //     subject: "",
-    //     message: "",
-    //   });
-    // } catch (error) {
-    //   toast({
-    //     title: "エラーが発生しました",
-    //     description:
-    //       "お問い合わせの送信に失敗しました。もう一度お試しください。",
-    //     variant: "destructive",
-    //   });
-    // } finally {
-    //   setIsSubmitting(false);
-    // }
+      setIsThanksModalOpen(true);
+      // Reset form
+      setFormData({
+        name: "",
+        email: "",
+        subject: "",
+        message: "",
+      });
+    } catch (error) {
+      toast({
+        title: "エラーが発生しました",
+        description:
+          "お問い合わせの送信に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (
@@ -75,7 +73,7 @@ export default function ContactPage() {
     <div>
       <Header />
       <div className="max-w-3xl mx-auto mt-16">
-        <h1 className="text-3xl font-bold mb-8 text-center">お問い合わせ {process.env.NEXT_PUBLIC_SENTRY_DSN}</h1>
+        <h1 className="text-3xl font-bold mb-8 text-center">お問い合わせ</h1>
 
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-lg font-bold mb-4">お問い合わせフォーム</h2>
