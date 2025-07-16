@@ -131,10 +131,10 @@ function OperatorLayout({ children }: { children: React.ReactNode }) {
             求人管理
           </Link>
           <Link
-            href="/operator/billing"
+            href="/operator/billings"
             className={cn(
               "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
-              pathname === "/operator/billing"
+              pathname === "/operator/billings"
                 ? "bg-orange-50 text-orange-600"
                 : "text-gray-600 hover:bg-gray-50"
             )}>

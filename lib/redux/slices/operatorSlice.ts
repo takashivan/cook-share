@@ -4,7 +4,7 @@ import { getSkills } from "@/lib/api/skill";
 import { getApi } from "@/api/api-factory";
 import { CompaniesDetailData, CompaniesListData } from "@/api/__generated__/base/data-contracts";
 import { Companies } from "@/api/__generated__/operator/Companies";
-import { RestaurantsDetailData, RestaurantsListData, UsersListData, CompaniesDetailData as CompaniesDetailDataForOperator, CompaniesDetailData as CompaniesDetailDataDorOperator, JobsListData, ChefReviewsListData, RestaurantReviewsListData, OperatorsListData } from "@/api/__generated__/operator/data-contracts";
+import { RestaurantsDetailData, RestaurantsListData, UsersListData, CompaniesDetailData as CompaniesDetailDataDorOperator, JobsListData, ChefReviewsListData, RestaurantReviewsListData, OperatorsListData, BillingSummariesListData } from "@/api/__generated__/operator/data-contracts";
 import { Users } from "@/api/__generated__/operator/Users";
 import { Operator } from "@/api/__generated__/operator/Operator";
 import { Restaurants } from "@/api/__generated__/operator/Restaurants";
@@ -13,6 +13,7 @@ import { Jobs } from "@/api/__generated__/operator/Jobs";
 import { ChefReviews } from "@/api/__generated__/operator/ChefReviews";
 import { RestaurantReviews } from "@/api/__generated__/operator/RestaurantReviews";
 import { Operators } from "@/api/__generated__/operator/Operators";
+import { BillingSummaries } from "@/api/__generated__/operator/BillingSummaries";
 
 // Async Thunks
 // XANOから生成されるSwaggerの定義が不完全なため、レスポンスの型を手動で定義する
@@ -154,14 +155,6 @@ export const fetchOperatorJobs = createAsyncThunk(
       }
     });
     return response.data;
-  }
-);
-
-export const fetchBilling = createAsyncThunk(
-  "operator/fetchBilling",
-  async () => {
-    const response = await operatorApi.getBilling();
-    return response;
   }
 );
 
@@ -321,6 +314,19 @@ export const approveJob = createAsyncThunk(
   }
 );
 
+export const fetchBillings = createAsyncThunk(
+  "operator/fetchBillings",
+  async () => {
+    const billingsApi = getApi(BillingSummaries);
+    const response = await billingsApi.billingSummariesList({
+      headers: {
+        "X-User-Type": "operator",
+      }
+    });
+    return response.data;
+  }
+);
+
 export const fetchOperatorAlerts = createAsyncThunk(
   "operator/fetchAlerts",
   async () => {
@@ -443,7 +449,11 @@ interface OperatorState {
     loading: boolean;
     error: string | null;
   };
-  billing: any;
+  billingSummaries: {
+    data: BillingSummariesListData;
+    loading: boolean;
+    error: string | null;
+  };
   staff: any[];
   loading: {
     companies: boolean;
@@ -518,7 +528,11 @@ const initialState: OperatorState = {
   },
   cuisines: [],
   skills: [],
-  billing: null,
+  billingSummaries: {
+    data: [],
+    loading: false,
+    error: null,
+  },
   staff: [],
   loading: {
     companies: false,
@@ -658,20 +672,6 @@ const operatorSlice = createSlice({
       .addCase(fetchSkills.rejected, (state, action) => {
         state.loading.skills = false;
         state.error.skills = action.error.message || "エラーが発生しました";
-      });
-    // Billing
-    builder
-      .addCase(fetchBilling.pending, (state) => {
-        state.loading.billing = true;
-        state.error.billing = null;
-      })
-      .addCase(fetchBilling.fulfilled, (state, action) => {
-        state.billing = action.payload;
-        state.loading.billing = false;
-      })
-      .addCase(fetchBilling.rejected, (state, action) => {
-        state.loading.billing = false;
-        state.error.billing = action.error.message || "エラーが発生しました";
       });
 
     // Staff
@@ -816,6 +816,21 @@ const operatorSlice = createSlice({
       .addCase(fetchOperatorAlerts.rejected, (state, action) => {
         state.alerts.loading = false;
         state.alerts.error = action.error.message || "Failed to fetch alerts";
+      });
+
+    // Billing Summaries
+    builder
+      .addCase(fetchBillings.pending, (state) => {
+        state.billingSummaries.loading = true;
+        state.billingSummaries.error = null;
+      })
+      .addCase(fetchBillings.fulfilled, (state, action) => {
+        state.billingSummaries.data = action.payload;
+        state.billingSummaries.loading = false;
+      })
+      .addCase(fetchBillings.rejected, (state, action) => {
+        state.billingSummaries.loading = false;
+        state.billingSummaries.error = action.error.message || "Failed to fetch billing summaries";
       });
 
     // Chef Reviews

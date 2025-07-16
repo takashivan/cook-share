@@ -25,49 +25,37 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { operatorApi } from "@/lib/api/operator";
-import useSWR from "swr";
-
-interface Billing {
-  id: string;
-  created_at: number;
-  companies_id: string;
-  month: string;
-  amount: number;
-  invoice_id: string;
-  status: string;
-  fee_rate: number;
-  session_count: number;
-  start_date?: string;
-  end_date?: string;
-  hosted_invoice_url: string;
-  invoice_pdf: string;
-  invoice_number: string;
-  companies?: {
-    name: string;
-  };
-}
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/lib/redux/store";
+import { useEffect } from "react";
+import { fetchBillings } from "@/lib/redux/slices/operatorSlice";
 
 export default function BillingList() {
-  const { data: billings, isLoading } = useSWR<Billing[]>(
-    "/api/operator/billings",
-    operatorApi.getAllBilling
+  const dispatch = useDispatch<AppDispatch>();
+
+  const billingSummaries = useSelector(
+    (state: RootState) => state.operator.billingSummaries.data
   );
+  const isLoading = useSelector(
+    (state: RootState) => state.operator.billingSummaries.loading
+  );
+  const error = useSelector(
+    (state: RootState) => state.operator.billingSummaries.error
+  );
+
+  useEffect(() => {
+    dispatch(fetchBillings());
+  }, [dispatch]);
 
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  if (!billings) {
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  if (!billingSummaries) {
     return <div>No billings found</div>;
   }
 
@@ -99,29 +87,29 @@ export default function BillingList() {
         </Button>
       </div>
 
-      {/* Desktop View */}
-      <Card className="hidden md:block">
+      <Card>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>請求番号</TableHead>
                 <TableHead>会社ID</TableHead>
+                <TableHead>会社名</TableHead>
                 <TableHead>発行日</TableHead>
                 <TableHead>期間</TableHead>
                 <TableHead>金額</TableHead>
                 <TableHead>ステータス</TableHead>
-                <TableHead>セッション数</TableHead>
-                <TableHead className="w-[100px]"></TableHead>
+                <TableHead>操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {billings.map((billing) => (
+              {billingSummaries.map((billing) => (
                 <TableRow key={billing.id}>
                   <TableCell className="font-medium">
                     {billing.invoice_number}
                   </TableCell>
-                  <TableCell>{billing.companies?.name || "---"}</TableCell>
+                  <TableCell>{billing.company.id}</TableCell>
+                  <TableCell>{billing.company.name}</TableCell>
                   <TableCell>
                     {new Date(billing.created_at).toLocaleDateString()}
                   </TableCell>
@@ -134,12 +122,19 @@ export default function BillingList() {
                           ? "bg-green-100 text-green-800"
                           : billing.status === "PENDING"
                           ? "bg-amber-100 text-amber-800"
-                          : "bg-red-100 text-red-800"
+                          : billing.status === "FAILED"
+                          ? "bg-red-100 text-red-800"
+                          : "bg-gray-100 text-gray-800"
                       }`}>
-                      {billing.status}
+                      {billing.status === "PAID"
+                        ? "支払い済み"
+                        : billing.status === "PENDING"
+                        ? "未払い"
+                        : billing.status === "FAILED"
+                        ? "失敗"
+                        : "不明"}
                     </div>
                   </TableCell>
-                  <TableCell>{billing.session_count}</TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -149,7 +144,7 @@ export default function BillingList() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
+                        <DropdownMenuItem disabled={!billing.hosted_invoice_url}>
                           <a
                             href={billing.hosted_invoice_url}
                             target="_blank"
@@ -158,7 +153,7 @@ export default function BillingList() {
                             請求書を表示
                           </a>
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem disabled={!billing.invoice_pdf}>
                           <a
                             href={billing.invoice_pdf}
                             target="_blank"
@@ -176,81 +171,6 @@ export default function BillingList() {
           </Table>
         </CardContent>
       </Card>
-
-      {/* Mobile View */}
-      <div className="grid gap-4 md:hidden">
-        {billings.map((billing) => (
-          <Card key={billing.id}>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">{billing.invoice_number}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {billing.companies_id}
-                  </p>
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <MoreHorizontal className="h-4 w-4" />
-                      <span className="sr-only">メニューを開く</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
-                      <a
-                        href={billing.hosted_invoice_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full">
-                        請求書を表示
-                      </a>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <a
-                        href={billing.invoice_pdf}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full">
-                        PDFをダウンロード
-                      </a>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-              <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <p className="text-muted-foreground">発行日</p>
-                  <p>{new Date(billing.created_at).toLocaleDateString()}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">期間</p>
-                  <p>{billing.month}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">金額</p>
-                  <p className="font-medium">
-                    ¥{billing.amount.toLocaleString()}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">ステータス</p>
-                  <div
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      billing.status === "PAID"
-                        ? "bg-green-100 text-green-800"
-                        : billing.status === "PENDING"
-                        ? "bg-amber-100 text-amber-800"
-                        : "bg-red-100 text-red-800"
-                    }`}>
-                    {billing.status}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
     </div>
   );
 }
