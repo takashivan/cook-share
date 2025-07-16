@@ -1602,6 +1602,10 @@ export interface UserBanPartialUpdateData {
   };
 }
 
+export interface UsersApprovePartialUpdatePayload {
+  reason: string;
+}
+
 export interface UsersApprovePartialUpdateData {
   /** @format uuid */
   id: string;

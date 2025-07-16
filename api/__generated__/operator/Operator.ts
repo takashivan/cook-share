@@ -41,6 +41,7 @@ import {
   UserBanPartialUpdateData,
   UserBanPartialUpdatePayload,
   UsersApprovePartialUpdateData,
+  UsersApprovePartialUpdatePayload,
   UsersBanPartialUpdateData,
   UsersBanPartialUpdatePayload,
 } from "./data-contracts";
@@ -146,10 +147,11 @@ export class Operator<
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> required
+   * @description [AUTHED-Operator]運営者だけが操作できる。求人の承認 <br /><br /> <b>Authentication:</b> required
    *
    * @tags operator
    * @name JobsApprovePartialUpdate
+   * @summary [AUTHED-Operator]運営者だけが操作できる。求人の承認
    * @request PATCH:/operator/jobs/{job_id}/approve
    * @secure
    */
@@ -183,10 +185,11 @@ export class Operator<
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> required
+   * @description [AUTHED-Operator]運営者だけが操作できる。求人のBAN <br /><br /> <b>Authentication:</b> required
    *
    * @tags operator
    * @name JobsBanPartialUpdate
+   * @summary [AUTHED-Operator]運営者だけが操作できる。求人のBAN
    * @request PATCH:/operator/jobs/{job_id}/ban
    * @secure
    */
@@ -315,10 +318,11 @@ export class Operator<
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> required
+   * @description [AUTHED-Operator]運営者だけが操作できる。レストランの承認 <br /><br /> <b>Authentication:</b> required
    *
    * @tags operator
    * @name RestaurantsApprovePartialUpdate
+   * @summary [AUTHED-Operator]運営者だけが操作できる。レストランの承認
    * @request PATCH:/operator/restaurants/{restaurant_id}/approve
    * @secure
    */
@@ -356,10 +360,11 @@ export class Operator<
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> required
+   * @description [AUTHED-Operator]運営者だけが操作できる。レストランのBAN <br /><br /> <b>Authentication:</b> required
    *
    * @tags operator
    * @name RestaurantsBanPartialUpdate
+   * @summary [AUTHED-Operator]運営者だけが操作できる。レストランのBAN
    * @request PATCH:/operator/restaurants/{restaurant_id}/ban
    * @secure
    */
@@ -465,18 +470,25 @@ export class Operator<
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> required
+   * @description [AUTHED-Operator]運営者だけが操作できる。シェフの承認 <br /><br /> <b>Authentication:</b> required
    *
    * @tags operator
    * @name UsersApprovePartialUpdate
+   * @summary [AUTHED-Operator]運営者だけが操作できる。シェフの承認
    * @request PATCH:/operator/users/{user_id}/approve
    * @secure
    */
-  usersApprovePartialUpdate = (userId: string, params: RequestParams = {}) =>
+  usersApprovePartialUpdate = (
+    userId: string,
+    data: UsersApprovePartialUpdatePayload,
+    params: RequestParams = {},
+  ) =>
     this.request<UsersApprovePartialUpdateData, void>({
       path: `/operator/users/${userId}/approve`,
       method: "PATCH",
+      body: data,
       secure: true,
+      type: ContentType.Json,
       format: "json",
       ...params,
     });
@@ -487,17 +499,22 @@ export class Operator<
     enabled: boolean = true,
   ) => {
     const key = enabled ? [`/operator/users/${userId}/approve`] : null;
-    const fetcher: (url: string[]) => Promise<UsersApprovePartialUpdateData> = (
-      _,
-    ) => this.usersApprovePartialUpdate(userId, params).then((res) => res.data);
+    const fetcher: (
+      url: string[],
+      { arg }: { arg: UsersApprovePartialUpdatePayload },
+    ) => Promise<UsersApprovePartialUpdateData> = (_, { arg }) =>
+      this.usersApprovePartialUpdate(userId, arg, params).then(
+        (res) => res.data,
+      );
     return [key, fetcher] as const;
   };
 
   /**
-   * @description <br /><br /> <b>Authentication:</b> required
+   * @description [AUTHED-Operator]運営者だけが操作できる。シェフのBAN <br /><br /> <b>Authentication:</b> required
    *
    * @tags operator
    * @name UsersBanPartialUpdate
+   * @summary [AUTHED-Operator]運営者だけが操作できる。シェフのBAN
    * @request PATCH:/operator/users/{user_id}/ban
    * @secure
    */
