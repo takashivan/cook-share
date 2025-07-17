@@ -202,11 +202,19 @@ export default function BillingList() {
   }, [dispatch]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-red-500">エラーが発生しました: {error}</div>
+      </div>
+    );
   }
 
   if (!billingSummaries) {

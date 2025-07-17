@@ -36,6 +36,8 @@ import { exportCsv } from "@/lib/utils";
 export default function CompaniesList() {
   const dispatch = useDispatch<AppDispatch>();
   const companies = useSelector((state: RootState) => state.operator.companies.data);
+  const isLoading = useSelector((state: RootState) => state.operator.companies.loading);
+  const error = useSelector((state: RootState) => state.operator.companies.error);
 
   // 検索用state追加
   const [searchQuery, setSearchQuery] = useState("");
@@ -182,6 +184,22 @@ export default function CompaniesList() {
     // utilのexportCsv関数でダウンロード
     exportCsv(csv, "companies.csv");
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-red-500">エラーが発生しました: {error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
