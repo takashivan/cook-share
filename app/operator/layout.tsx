@@ -63,7 +63,7 @@ function OperatorLayout({ children }: { children: React.ReactNode }) {
           <h1 className="text-xl font-bold text-gray-900">運営管理画面</h1>
         </div>
         <Separator className="mb-4" />
-        <nav className="px-4 space-y-1">
+        <nav className="px-4 pb-4 space-y-1">
           <Link
             href="/operator/dashboard"
             className={cn(
@@ -176,8 +176,8 @@ function OperatorLayout({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 bg-gray-50 pl-64">
-        <div className="container mx-auto p-8">{children}</div>
+      <div className="flex-1 bg-gray-50 pl-64 w-full">
+        <div className="p-8">{children}</div>
       </div>
     </div>
   );

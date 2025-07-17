@@ -179,30 +179,30 @@ export default function ChefsPage() {
   }
 
   return (
-    <div className="p-4">
-      <div className="flex flex-col gap-4 mb-4">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">レビュー一覧</h1>
+    <div className="space-y-4">
+      <div className="flex flex-col gap-1">
+        <h2 className="text-2xl font-bold tracking-tight">レビュー一覧</h2>
+        <p className="text-muted-foreground">登録されているレビューの一覧です</p>
+      </div>
+
+      <div className="flex items-center gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="ID・シェフ名・店舗名・レビュー内容で検索..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-8 bg-white"
+          />
         </div>
-        <div className="flex items-center gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="ID・シェフ名・店舗名・レビュー内容で検索..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8"
-            />
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setFilterOpen(true)}
-          >
-            <SlidersHorizontal className="mr-2 h-4 w-4" />
-            フィルター
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setFilterOpen(true)}
+        >
+          <SlidersHorizontal className="mr-2 h-4 w-4" />
+          フィルター
+        </Button>
       </div>
 
       {/* フィルターダイアログ */}
@@ -253,51 +253,90 @@ export default function ChefsPage() {
         </DialogContent>
       </Dialog>
 
-      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mb-1">
-        <TabsList>
-          <TabsTrigger value="chefReviews">シェフレビュー</TabsTrigger>
-          <TabsTrigger value="restaurantReviews">店舗レビュー</TabsTrigger>
-        </TabsList>
-      </Tabs>
-
       <Card>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead onClick={() => handleSort("id")} className="cursor-pointer">
-                  ID {renderSortIcon("id")}
-                </TableHead>
-                <TableHead onClick={() => handleSort("userName")} className="cursor-pointer">
-                  {selectedTab === "chefReviews" ? "シェフ名" : "店舗名"} {renderSortIcon("userName")}
-                </TableHead>
-                <TableHead onClick={() => handleSort("restaurantName")} className="cursor-pointer">
-                  {selectedTab === "chefReviews" ? "勤務店舗名" : "勤務シェフ名"} {renderSortIcon("restaurantName")}
-                </TableHead>
-                <TableHead onClick={() => handleSort("workDate")} className="cursor-pointer">
-                  勤務日 {renderSortIcon("workDate")}
-                </TableHead>
-                <TableHead onClick={() => handleSort("rating")} className="cursor-pointer">
-                  点数（★の数） {renderSortIcon("rating")}
-                </TableHead>
-                <TableHead onClick={() => handleSort("comment")} className="cursor-pointer">
-                  レビュー内容 {renderSortIcon("comment")}
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedReviews.map((review) => (
-                <TableRow key={review.id}>
-                  <TableCell>{review.id}</TableCell>
-                  <TableCell>{selectedTab === "chefReviews" ? review.user.name : review.restaurant.name}</TableCell>
-                  <TableCell>{selectedTab === "chefReviews" ? review.restaurant.name : review.user.name}</TableCell>
-                  <TableCell>{format(new Date(review.worksession.check_in_time), "yyyy/MM/dd", { locale: ja })}</TableCell>
-                  <TableCell>{review.rating}</TableCell>
-                  <TableCell>{review.comment}</TableCell>
+          <Tabs value={selectedTab} onValueChange={setSelectedTab} className="m-2">
+            <TabsList>
+              <TabsTrigger value="chefReviews">シェフレビュー</TabsTrigger>
+              <TabsTrigger value="restaurantReviews">店舗レビュー</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <div className="w-full overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead
+                    style={{ minWidth: "6em", width: "6em" }}
+                    onClick={() => handleSort("id")}
+                    className="cursor-pointer"
+                  >
+                    ID {renderSortIcon("id")}
+                  </TableHead>
+                  <TableHead
+                    style={{ minWidth: "12em", width: "12em" }}
+                    onClick={() => handleSort("userName")}
+                    className="cursor-pointer"
+                  >
+                    {selectedTab === "chefReviews" ? "シェフ名" : "店舗名"} {renderSortIcon("userName")}
+                  </TableHead>
+                  <TableHead
+                    style={{ minWidth: "12em", width: "12em" }}
+                    onClick={() => handleSort("restaurantName")}
+                    className="cursor-pointer"
+                  >
+                    {selectedTab === "chefReviews" ? "勤務店舗名" : "勤務シェフ名"} {renderSortIcon("restaurantName")}
+                  </TableHead>
+                  <TableHead
+                    style={{ minWidth: "10em", width: "10em" }}
+                    onClick={() => handleSort("workDate")}
+                    className="cursor-pointer"
+                  >
+                    勤務日 {renderSortIcon("workDate")}
+                  </TableHead>
+                  <TableHead
+                    style={{ minWidth: "8em", width: "8em" }}
+                    onClick={() => handleSort("rating")}
+                    className="cursor-pointer"
+                  >
+                    点数（★の数） {renderSortIcon("rating")}
+                  </TableHead>
+                  <TableHead
+                    style={{ minWidth: "20em", width: "20em" }}
+                    onClick={() => handleSort("comment")}
+                    className="cursor-pointer"
+                  >
+                    レビュー内容 {renderSortIcon("comment")}
+                  </TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {sortedReviews.map((review) => (
+                  <TableRow key={review.id}>
+                    <TableCell>{review.id}</TableCell>
+                    <TableCell>
+                      {selectedTab === "chefReviews"
+                        ? review.user.name
+                        : review.restaurant.name}
+                    </TableCell>
+                    <TableCell>
+                      {selectedTab === "chefReviews"
+                        ? review.restaurant.name
+                        : review.user.name}
+                    </TableCell>
+                    <TableCell>
+                      {format(
+                        new Date(review.worksession.check_in_time),
+                        "yyyy/MM/dd",
+                        { locale: ja }
+                      )}
+                    </TableCell>
+                    <TableCell>{review.rating}</TableCell>
+                    <TableCell>{review.comment}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>

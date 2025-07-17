@@ -175,32 +175,30 @@ export default function RestaurantsPage() {
 
   return (
     <>
-      <div className="space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">レストラン一覧</h2>
-            <p className="text-muted-foreground">登録されているレストランの一覧です</p>
-          </div>
+      <div className="space-y-4">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-2xl font-bold tracking-tight">レストラン一覧</h2>
+          <p className="text-muted-foreground">登録されているレストランの一覧です</p>
         </div>
 
-        <div className="flex flex-col md:flex-row items-center gap-4">
-          <div className="relative w-full mr-auto">
+        <div className="flex items-center gap-4">
+          <div className="relative flex-1">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
               placeholder="会社ID・会社名・店舗ID・店舗名・ジャンル・住所で検索..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8"
+              className="w-full pl-8 bg-white"
             />
           </div>
-          <Button variant="outline" size="sm">
-            <Download className="mr-2 h-4 w-4" />
-            エクスポート
-          </Button>
           <Button variant="outline" size="sm" onClick={() => setFilterOpen(true)}>
             <SlidersHorizontal className="mr-2 h-4 w-4" />
             フィルター
+          </Button>
+          <Button variant="outline" size="sm">
+            <Download className="mr-2 h-4 w-4" />
+            エクスポート
           </Button>
         </div>
 
@@ -302,100 +300,144 @@ export default function RestaurantsPage() {
 
         <Card>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead onClick={() => handleSort("companies_id")} className="cursor-pointer">
-                    会社ID {renderSortIcon("companies_id")}
-                  </TableHead>
-                  <TableHead onClick={() => handleSort("company")} className="cursor-pointer">
-                    会社名 {renderSortIcon("company")}
-                  </TableHead>
-                  <TableHead onClick={() => handleSort("id")} className="cursor-pointer">
-                    店舗ID {renderSortIcon("id")}
-                  </TableHead>
-                  <TableHead onClick={() => handleSort("name")} className="cursor-pointer">
-                    店舗名 {renderSortIcon("name")}
-                  </TableHead>
-                  <TableHead>ジャンル</TableHead>
-                  <TableHead onClick={() => handleSort("address")} className="cursor-pointer">
-                    住所 {renderSortIcon("address")}
-                  </TableHead>
-                  <TableHead onClick={() => handleSort("companyUserCount")} className="cursor-pointer">
-                    スタッフ数 {renderSortIcon("companyUserCount")}
-                  </TableHead>
-                  <TableHead onClick={() => handleSort("jobCount")} className="cursor-pointer">
-                    求人数 {renderSortIcon("jobCount")}
-                  </TableHead>
-                  <TableHead onClick={() => handleSort("worksessionCount")} className="cursor-pointer">
-                    マッチング数 {renderSortIcon("worksessionCount")}
-                  </TableHead>
-                  <TableHead onClick={() => handleSort("worksessionCanceledByRestaurantCount")} className="cursor-pointer">
-                    キャンセル数 {renderSortIcon("worksessionCanceledByRestaurantCount")}
-                  </TableHead>
-                  <TableHead className="cursor-pointer">
-                    キャンセル率
-                  </TableHead>
-                  <TableHead onClick={() => handleSort("status")} className="cursor-pointer">
-                    ステータス {renderSortIcon("status")}
-                  </TableHead>
-                  <TableHead onClick={() => handleSort("rating")} className="cursor-pointer">
-                    点数 {renderSortIcon("rating")}
-                  </TableHead>
-                  <TableHead>操作</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sortedRestaurants.map((restaurant) => (
-                  <TableRow key={restaurant.id}>
-                    <TableCell>{restaurant.companies_id}</TableCell>
-                    <TableCell>{restaurant.company.name}</TableCell>
-                    <TableCell>{restaurant.id}</TableCell>
-                    <TableCell>{restaurant.name}</TableCell>
-                    <TableCell>
-                      {restaurant.restaurant_cuisine_id.length > 0 && (
-                        <div className="flex flex-wrap gap-2">
-                          {cuisines?.filter((cuisine) => restaurant.restaurant_cuisine_id.includes(cuisine.id)).map((cuisine) => (
-                            <Badge key={cuisine.id} variant="secondary">
-                              {cuisine.category}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell>{restaurant.address || "-"}</TableCell>
-                    <TableCell>{restaurant.companyUserCount}</TableCell>
-                    <TableCell>{restaurant.jobCount}</TableCell>
-                    <TableCell>{restaurant.worksessionCount}</TableCell>
-                    <TableCell>{restaurant.worksessionCanceledByRestaurantCount}</TableCell>
-                    <TableCell>
-                      {restaurant.worksessionCanceledByRestaurantCount > 0
-                        ? `${(
-                            (restaurant.worksessionCanceledByRestaurantCount /
-                              restaurant.worksessionCount) *
-                            100
-                          ).toFixed(2)}%`
-                        : "0%"}
-                    </TableCell>
-                    <TableCell>
-                      <RestaurantStatusBadgeForAdmin
-                        status={restaurant.status}
-                      />
-                    </TableCell>
-                    <TableCell>{restaurant.rating}</TableCell>
-                    <TableCell>
-                      <Link href={`/operator/restaurants/${restaurant.id}`}>
-                        <Button
-                          variant="outline"
-                        >
-                          詳細
-                        </Button>
-                      </Link>
-                    </TableCell>
+            <div className="w-full overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead
+                      style={{ minWidth: "10em", width: "10em" }}
+                      onClick={() => handleSort("companies_id")}
+                      className="cursor-pointer"
+                    >
+                      会社ID {renderSortIcon("companies_id")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "10em", width: "10em" }}
+                      onClick={() => handleSort("company")}
+                      className="cursor-pointer"
+                    >
+                      会社名 {renderSortIcon("company")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "5em", width: "5em" }}
+                      onClick={() => handleSort("id")}
+                      className="cursor-pointer"
+                    >
+                      店舗ID {renderSortIcon("id")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "12em", width: "12em" }}
+                      onClick={() => handleSort("name")}
+                      className="cursor-pointer"
+                    >
+                      店舗名 {renderSortIcon("name")}
+                    </TableHead>
+                    <TableHead style={{ minWidth: "7em", width: "7em" }}>
+                      ジャンル
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "12em", width: "12em" }}
+                      onClick={() => handleSort("address")}
+                      className="cursor-pointer"
+                    >
+                      住所 {renderSortIcon("address")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "7em", width: "7em" }}
+                      onClick={() => handleSort("companyUserCount")}
+                      className="cursor-pointer"
+                    >
+                      スタッフ数 {renderSortIcon("companyUserCount")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "5em", width: "5em" }}
+                      onClick={() => handleSort("jobCount")}
+                      className="cursor-pointer"
+                    >
+                      求人数 {renderSortIcon("jobCount")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "8em", width: "8em" }}
+                      onClick={() => handleSort("worksessionCount")}
+                      className="cursor-pointer"
+                    >
+                      マッチング数 {renderSortIcon("worksessionCount")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "8em", width: "8em" }}
+                      onClick={() => handleSort("worksessionCanceledByRestaurantCount")}
+                      className="cursor-pointer"
+                    >
+                      キャンセル数 {renderSortIcon("worksessionCanceledByRestaurantCount")}
+                    </TableHead>
+                    <TableHead style={{ minWidth: "8em", width: "8em" }}>
+                      キャンセル率
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "8em", width: "8em" }}
+                      onClick={() => handleSort("status")}
+                      className="cursor-pointer"
+                    >
+                      ステータス {renderSortIcon("status")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "4em", width: "4em" }}
+                      onClick={() => handleSort("rating")}
+                      className="cursor-pointer"
+                    >
+                      点数 {renderSortIcon("rating")}
+                    </TableHead>
+                    <TableHead style={{ minWidth: "5em", width: "5em" }}>
+                      操作
+                    </TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {sortedRestaurants.map((restaurant) => (
+                    <TableRow key={restaurant.id}>
+                      <TableCell>{restaurant.companies_id}</TableCell>
+                      <TableCell>{restaurant.company.name}</TableCell>
+                      <TableCell>{restaurant.id}</TableCell>
+                      <TableCell>{restaurant.name}</TableCell>
+                      <TableCell>
+                        {restaurant.restaurant_cuisine_id.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {cuisines?.filter((cuisine) => restaurant.restaurant_cuisine_id.includes(cuisine.id)).map((cuisine) => (
+                              <Badge key={cuisine.id} variant="secondary">
+                                {cuisine.category}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>{restaurant.address || "-"}</TableCell>
+                      <TableCell>{restaurant.companyUserCount}</TableCell>
+                      <TableCell>{restaurant.jobCount}</TableCell>
+                      <TableCell>{restaurant.worksessionCount}</TableCell>
+                      <TableCell>{restaurant.worksessionCanceledByRestaurantCount}</TableCell>
+                      <TableCell>
+                        {restaurant.worksessionCanceledByRestaurantCount > 0
+                          ? `${(
+                              (restaurant.worksessionCanceledByRestaurantCount /
+                                restaurant.worksessionCount) *
+                              100
+                            ).toFixed(2)}%`
+                          : "0%"}
+                      </TableCell>
+                      <TableCell>
+                        <RestaurantStatusBadgeForAdmin status={restaurant.status} />
+                      </TableCell>
+                      <TableCell>{restaurant.rating}</TableCell>
+                      <TableCell>
+                        <Link href={`/operator/restaurants/${restaurant.id}`}>
+                          <Button variant="outline">詳細</Button>
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       </div>

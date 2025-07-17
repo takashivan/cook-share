@@ -223,29 +223,23 @@ export default function BillingList() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">請求一覧</h2>
-          <p className="text-muted-foreground">会社への請求情報一覧です</p>
-        </div>
+    <div className="space-y-4">
+      <div className="flex flex-col gap-1">
+        <h2 className="text-2xl font-bold tracking-tight">請求一覧</h2>
+        <p className="text-muted-foreground">会社への請求情報一覧です</p>
       </div>
 
-      <div className="flex flex-col md:flex-row items-center gap-4">
-        <div className="relative w-full">
+      <div className="flex items-center gap-4">
+        <div className="relative flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
             placeholder="請求番号・会社ID・会社名で検索..."
-            className="w-full pl-8"
+            className="w-full pl-8 bg-white"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <Button variant="outline" size="sm" className="ml-auto">
-          <Download className="mr-2 h-4 w-4" />
-          エクスポート
-        </Button>
         <Button
           variant="outline"
           size="sm"
@@ -253,6 +247,10 @@ export default function BillingList() {
         >
           <SlidersHorizontal className="mr-2 h-4 w-4" />
           フィルター
+        </Button>
+        <Button variant="outline" size="sm">
+          <Download className="mr-2 h-4 w-4" />
+          エクスポート
         </Button>
       </div>
 
@@ -373,100 +371,132 @@ export default function BillingList() {
 
       <Card>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead onClick={() => handleSort("invoice_number")} className="cursor-pointer">
-                  請求番号 {renderSortIcon("invoice_number")}
-                </TableHead>
-                <TableHead onClick={() => handleSort("company_id")} className="cursor-pointer">
-                  会社ID {renderSortIcon("company_id")}
-                </TableHead>
-                <TableHead onClick={() => handleSort("company_name")} className="cursor-pointer">
-                  会社名 {renderSortIcon("company_name")}
-                </TableHead>
-                <TableHead onClick={() => handleSort("created_at")} className="cursor-pointer">
-                  発行日 {renderSortIcon("created_at")}
-                </TableHead>
-                <TableHead onClick={() => handleSort("month")} className="cursor-pointer">
-                  期間 {renderSortIcon("month")}
-                </TableHead>
-                <TableHead onClick={() => handleSort("amount")} className="cursor-pointer">
-                  金額 {renderSortIcon("amount")}
-                </TableHead>
-                <TableHead onClick={() => handleSort("status")} className="cursor-pointer">
-                  ステータス {renderSortIcon("status")}
-                </TableHead>
-                <TableHead>操作</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedBillings.map((billing) => (
-                <TableRow key={billing.id}>
-                  <TableCell className="font-medium">
-                    {billing.invoice_number}
-                  </TableCell>
-                  <TableCell>{billing.company.id}</TableCell>
-                  <TableCell>{billing.company.name}</TableCell>
-                  <TableCell>
-                    {new Date(billing.created_at).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>{billing.month}</TableCell>
-                  <TableCell>¥{billing.amount.toLocaleString()}</TableCell>
-                  <TableCell>
-                    <div
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        billing.status === "PAID"
-                          ? "bg-green-100 text-green-800"
-                          : billing.status === "PENDING"
-                          ? "bg-amber-100 text-amber-800"
-                          : billing.status === "FAILED"
-                          ? "bg-red-100 text-red-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}>
-                      {billing.status === "PAID"
-                        ? "支払い済み"
-                        : billing.status === "PENDING"
-                        ? "未払い"
-                        : billing.status === "FAILED"
-                        ? "失敗"
-                        : "不明"}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">メニューを開く</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem disabled={!billing.hosted_invoice_url}>
-                          <a
-                            href={billing.hosted_invoice_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-full">
-                            請求書を表示
-                          </a>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem disabled={!billing.invoice_pdf}>
-                          <a
-                            href={billing.invoice_pdf}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-full">
-                            PDFをダウンロード
-                          </a>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+          <div className="w-full overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead
+                    style={{ minWidth: "10em", width: "10em" }}
+                    onClick={() => handleSort("invoice_number")}
+                    className="cursor-pointer"
+                  >
+                    請求番号 {renderSortIcon("invoice_number")}
+                  </TableHead>
+                  <TableHead
+                    style={{ minWidth: "10em", width: "10em" }}
+                    onClick={() => handleSort("company_id")}
+                    className="cursor-pointer"
+                  >
+                    会社ID {renderSortIcon("company_id")}
+                  </TableHead>
+                  <TableHead
+                    style={{ minWidth: "10em", width: "10em" }}
+                    onClick={() => handleSort("company_name")}
+                    className="cursor-pointer"
+                  >
+                    会社名 {renderSortIcon("company_name")}
+                  </TableHead>
+                  <TableHead
+                    style={{ minWidth: "7em", width: "7em" }}
+                    onClick={() => handleSort("created_at")}
+                    className="cursor-pointer"
+                  >
+                    発行日 {renderSortIcon("created_at")}
+                  </TableHead>
+                  <TableHead
+                    style={{ minWidth: "5em", width: "5em" }}
+                    onClick={() => handleSort("month")}
+                    className="cursor-pointer"
+                  >
+                    期間 {renderSortIcon("month")}
+                  </TableHead>
+                  <TableHead
+                    style={{ minWidth: "6em", width: "6em" }}
+                    onClick={() => handleSort("amount")}
+                    className="cursor-pointer"
+                  >
+                    金額 {renderSortIcon("amount")}
+                  </TableHead>
+                  <TableHead
+                    style={{ minWidth: "8em", width: "8em" }}
+                    onClick={() => handleSort("status")}
+                    className="cursor-pointer"
+                  >
+                    ステータス {renderSortIcon("status")}
+                  </TableHead>
+                  <TableHead style={{ minWidth: "4em", width: "4em" }}>
+                    操作
+                  </TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {sortedBillings.map((billing) => (
+                  <TableRow key={billing.id}>
+                    <TableCell className="font-medium">
+                      {billing.invoice_number}
+                    </TableCell>
+                    <TableCell>{billing.company.id}</TableCell>
+                    <TableCell>{billing.company.name}</TableCell>
+                    <TableCell>
+                      {new Date(billing.created_at).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>{billing.month}</TableCell>
+                    <TableCell>¥{billing.amount.toLocaleString()}</TableCell>
+                    <TableCell>
+                      <div
+                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                          billing.status === "PAID"
+                            ? "bg-green-100 text-green-800"
+                            : billing.status === "PENDING"
+                            ? "bg-amber-100 text-amber-800"
+                            : billing.status === "FAILED"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}>
+                        {billing.status === "PAID"
+                          ? "支払い済み"
+                          : billing.status === "PENDING"
+                          ? "未払い"
+                          : billing.status === "FAILED"
+                          ? "失敗"
+                          : "不明"}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">メニューを開く</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem disabled={!billing.hosted_invoice_url}>
+                            <a
+                              href={billing.hosted_invoice_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="w-full">
+                              請求書を表示
+                            </a>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem disabled={!billing.invoice_pdf}>
+                            <a
+                              href={billing.invoice_pdf}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="w-full">
+                              PDFをダウンロード
+                            </a>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>

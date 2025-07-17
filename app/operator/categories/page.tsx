@@ -27,8 +27,12 @@ export default function CategoriesPage() {
   }
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">カテゴリ一覧</h1>
+    <div className="space-y-4">
+      <div className="flex flex-col gap-1">
+        <h2 className="text-2xl font-bold tracking-tight">カテゴリ一覧</h2>
+        <p className="text-muted-foreground">登録されているカテゴリの一覧です</p>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {cuisines.map((cuisine: Cuisine) => (
           <Card key={cuisine.id}>

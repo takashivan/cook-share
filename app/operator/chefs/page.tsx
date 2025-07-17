@@ -201,30 +201,31 @@ export default function ChefsPage() {
 
   return (
     <>
-      <div className="p-4">
-        <div className="flex flex-col gap-4 mb-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold">シェフ一覧</h1>
+      <div className="space-y-4">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-2xl font-bold tracking-tight">シェフ一覧</h2>
+          <p className="text-muted-foreground">登録されているシェフの一覧です</p>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="ID・名前・メールで検索..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-8 bg-white"
+            />
           </div>
-          <div className="mb-6 flex gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="ID・名前・メールで検索..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8"
-              />
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setFilterOpen(true)}
-            >
-              <SlidersHorizontal className="mr-2 h-4 w-4" />
-              フィルター
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setFilterOpen(true)}
+          >
+            <SlidersHorizontal className="mr-2 h-4 w-4" />
+            フィルター
+          </Button>
         </div>
 
         {/* フィルターダイアログ */}
@@ -355,88 +356,127 @@ export default function ChefsPage() {
 
         <Card>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead onClick={() => handleSort("id")} className="cursor-pointer">
-                    ID {renderSortIcon("id")}
-                  </TableHead>
-                  <TableHead onClick={() => handleSort("name")} className="cursor-pointer">
-                    名前 {renderSortIcon("name")}
-                  </TableHead>
-                  <TableHead onClick={() => handleSort("email")} className="cursor-pointer">
-                    メール {renderSortIcon("email")}
-                  </TableHead>
-                  <TableHead onClick={() => handleSort("worksessionCount")} className="cursor-pointer">
-                    マッチング数 {renderSortIcon("worksessionCount")}
-                  </TableHead>
-                  <TableHead onClick={() => handleSort("worksessionCanceledByChefCount")} className="cursor-pointer">
-                    キャンセル数 {renderSortIcon("worksessionCanceledByChefCount")}
-                  </TableHead>
-                  <TableHead className="cursor-pointer">
-                    キャンセル率
-                  </TableHead>
-                  <TableHead onClick={() => handleSort("stripe_verified")} className="cursor-pointer">
-                    Stripe連携状況 {renderSortIcon("stripe_verified")}
-                  </TableHead>
-                  <TableHead onClick={() => handleSort("is_approved")} className="cursor-pointer">
-                    ステータス {renderSortIcon("is_approved")}
-                  </TableHead>
-                  <TableHead onClick={() => handleSort("rating")} className="cursor-pointer">
-                    点数 {renderSortIcon("rating")}
-                  </TableHead>
-                  <TableHead>操作</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sortedChefs.map((chef) => (
-                  <TableRow key={chef.id}>
-                    <TableCell>{chef.id}</TableCell>
-                    <TableCell>{chef.name}</TableCell>
-                    <TableCell>{chef.email}</TableCell>
-                    <TableCell>{chef.worksessionCount}</TableCell>
-                    <TableCell>{chef.worksessionCanceledByChefCount}</TableCell>
-                    <TableCell>
-                      {chef.worksessionCanceledByChefCount > 0
-                        ? `${(
-                            (chef.worksessionCanceledByChefCount /
-                              chef.worksessionCount) *
-                            100
-                          ).toFixed(2)}%`
-                        : "0%"}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        className={`whitespace-nowrap ${
-                          chef.stripe_verified
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}>
-                        {chef.stripe_verified ? "連携済み" : "未連携"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        className={`whitespace-nowrap ${
-                          chef.is_approved
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}>
-                        {chef.is_approved ? "承認済み" : "一時停止中"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{chef.rating}</TableCell>
-                    <TableCell>
-                      <Button
-                        variant="outline"
-                        onClick={() => setSelectedChef(chef)}>
-                        詳細
-                      </Button>
-                    </TableCell>
+            <div className="w-full overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead
+                      style={{ minWidth: "10em", width: "10em" }}
+                      onClick={() => handleSort("id")}
+                      className="cursor-pointer"
+                    >
+                      ID {renderSortIcon("id")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "10em", width: "10em" }}
+                      onClick={() => handleSort("name")}
+                      className="cursor-pointer"
+                    >
+                      名前 {renderSortIcon("name")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "14em", width: "14em" }}
+                      onClick={() => handleSort("email")}
+                      className="cursor-pointer"
+                    >
+                      メール {renderSortIcon("email")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "8em", width: "8em" }}
+                      onClick={() => handleSort("worksessionCount")}
+                      className="cursor-pointer"
+                    >
+                      マッチング数 {renderSortIcon("worksessionCount")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "8em", width: "8em" }}
+                      onClick={() => handleSort("worksessionCanceledByChefCount")}
+                      className="cursor-pointer"
+                    >
+                      キャンセル数 {renderSortIcon("worksessionCanceledByChefCount")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "8em", width: "8em" }}
+                      className="cursor-pointer"
+                    >
+                      キャンセル率
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "10em", width: "10em" }}
+                      onClick={() => handleSort("stripe_verified")}
+                      className="cursor-pointer"
+                    >
+                      Stripe連携状況 {renderSortIcon("stripe_verified")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "8em", width: "8em" }}
+                      onClick={() => handleSort("is_approved")}
+                      className="cursor-pointer"
+                    >
+                      ステータス {renderSortIcon("is_approved")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "4em", width: "4em" }}
+                      onClick={() => handleSort("rating")}
+                      className="cursor-pointer"
+                    >
+                      点数 {renderSortIcon("rating")}
+                    </TableHead>
+                    <TableHead style={{ minWidth: "5em", width: "5em" }}>
+                      操作
+                    </TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {sortedChefs.map((chef) => (
+                    <TableRow key={chef.id}>
+                      <TableCell>{chef.id}</TableCell>
+                      <TableCell>{chef.name}</TableCell>
+                      <TableCell>{chef.email}</TableCell>
+                      <TableCell>{chef.worksessionCount}</TableCell>
+                      <TableCell>{chef.worksessionCanceledByChefCount}</TableCell>
+                      <TableCell>
+                        {chef.worksessionCanceledByChefCount > 0
+                          ? `${(
+                              (chef.worksessionCanceledByChefCount /
+                                chef.worksessionCount) *
+                              100
+                            ).toFixed(2)}%`
+                          : "0%"}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={`whitespace-nowrap ${
+                            chef.stripe_verified
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }`}>
+                          {chef.stripe_verified ? "連携済み" : "未連携"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={`whitespace-nowrap ${
+                            chef.is_approved
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }`}>
+                          {chef.is_approved ? "承認済み" : "一時停止中"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{chef.rating}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          onClick={() => setSelectedChef(chef)}>
+                          詳細
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       </div>

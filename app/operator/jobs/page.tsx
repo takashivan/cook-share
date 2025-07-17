@@ -11,7 +11,7 @@ import {
 } from "@/lib/redux/slices/operatorSlice";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Search } from "lucide-react";
 import { WorksessionsRestaurantTodosListData } from "@/api/__generated__/base/data-contracts";
 import {
   Table,
@@ -272,19 +272,23 @@ export default function JobsPage() {
 
   return (
     <>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">求人一覧</h1>
+      <div className="space-y-4">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-2xl font-bold tracking-tight">求人一覧</h2>
+          <p className="text-muted-foreground">登録されている求人の一覧です</p>
         </div>
 
-        <div className="mb-6 flex gap-4">
-          <Input
-            type="text"
-            placeholder="ID・タイトルで検索..."
-            className="flex-1 px-4 py-2 border rounded"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+        <div className="flex items-center gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="ID・タイトルで検索..."
+              className="w-full pl-8 bg-white"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
           <Button
             variant="outline"
             size="sm"
@@ -366,80 +370,104 @@ export default function JobsPage() {
 
         <Card>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead onClick={() => handleSort("id")} className="cursor-pointer">
-                    ID {renderSortIcon("id")}
-                  </TableHead>
-                  <TableHead onClick={() => handleSort("title")} className="cursor-pointer">
-                    タイトル {renderSortIcon("title")}
-                  </TableHead>
-                  <TableHead onClick={() => handleSort("work_date")} className="cursor-pointer">
-                    勤務日 {renderSortIcon("work_date")}
-                  </TableHead>
-                  <TableHead onClick={() => handleSort("fee")} className="cursor-pointer">
-                    報酬 {renderSortIcon("fee")}
-                  </TableHead>
-                  <TableHead onClick={() => handleSort("status")} className="cursor-pointer">
-                    ステータス {renderSortIcon("status")}
-                  </TableHead>
-                  <TableHead>操作</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sortedJobs?.map((job) => {
-                  const alert = getJobAlert(job.id);
-                  return (
-                    <TableRow key={job.id}>
-                      <TableCell>{job.id}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Link
-                            href={`/job/${job.id}`}
-                            className="text-blue-600 hover:underline"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {job.title}
-                          </Link>
-                          {alert && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => {
-                                setSelectedAlert(alert);
-                              }}
-                              className="text-red-500 hover:text-red-700"
+            <div className="w-full overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead
+                      style={{ minWidth: "4em", width: "4em" }}
+                      onClick={() => handleSort("id")}
+                      className="cursor-pointer"
+                    >
+                      ID {renderSortIcon("id")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "16em", width: "16em" }}
+                      onClick={() => handleSort("title")}
+                      className="cursor-pointer"
+                    >
+                      タイトル {renderSortIcon("title")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "9em", width: "9em" }}
+                      onClick={() => handleSort("work_date")}
+                      className="cursor-pointer"
+                    >
+                      勤務日 {renderSortIcon("work_date")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "8em", width: "8em" }}
+                      onClick={() => handleSort("fee")}
+                      className="cursor-pointer"
+                    >
+                      報酬 {renderSortIcon("fee")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "12em", width: "12em" }}
+                      onClick={() => handleSort("status")}
+                      className="cursor-pointer"
+                    >
+                      ステータス {renderSortIcon("status")}
+                    </TableHead>
+                    <TableHead style={{ minWidth: "5em", width: "5em" }}>
+                      操作
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sortedJobs?.map((job) => {
+                    const alert = getJobAlert(job.id);
+                    return (
+                      <TableRow key={job.id}>
+                        <TableCell>{job.id}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <Link
+                              href={`/job/${job.id}`}
+                              className="text-blue-600 hover:underline"
+                              target="_blank"
+                              rel="noopener noreferrer"
                             >
-                              <AlertCircle className="h-5 w-5" />
-                            </Button>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>{new Date(job.work_date).toLocaleDateString("ja-JP")}</TableCell>
-                      <TableCell>{`¥${job.fee.toLocaleString()}`}</TableCell>
-                      <TableCell>
-                        <JobStatusBadgeForAdmin
-                          job={job}
-                          lastWorksession={job.worksession as WorksessionsRestaurantTodosListData[number] ?? null}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            setSelectedJob(job);
-                          }}
-                        >
-                          詳細
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                              {job.title}
+                            </Link>
+                            {alert && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                  setSelectedAlert(alert);
+                                }}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <AlertCircle className="h-5 w-5" />
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>{new Date(job.work_date).toLocaleDateString("ja-JP")}</TableCell>
+                        <TableCell>{`¥${job.fee.toLocaleString()}`}</TableCell>
+                        <TableCell>
+                          <JobStatusBadgeForAdmin
+                            job={job}
+                            lastWorksession={job.worksession as WorksessionsRestaurantTodosListData[number] ?? null}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedJob(job);
+                            }}
+                          >
+                            詳細
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       </div>

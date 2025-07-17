@@ -146,32 +146,30 @@ export default function CompaniesList() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">会社一覧</h2>
-          <p className="text-muted-foreground">登録されている会社の一覧です</p>
-        </div>
+    <div className="space-y-4">
+      <div className="flex flex-col gap-1">
+        <h2 className="text-2xl font-bold tracking-tight">会社一覧</h2>
+        <p className="text-muted-foreground">登録されている会社の一覧です</p>
       </div>
 
-      <div className="flex flex-col md:flex-row items-center gap-4">
-        <div className="relative w-full">
+      <div className="flex items-center gap-4">
+        <div className="relative flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="会社を検索..."
-            className="w-full pl-8"
+            placeholder="ID・会社名で検索..."
+            className="w-full pl-8 bg-white"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <Button variant="outline" size="sm" className="ml-auto">
-          <Download className="mr-2 h-4 w-4" />
-          エクスポート
-        </Button>
         <Button variant="outline" size="sm" onClick={() => setFilterOpen(true)}>
           <SlidersHorizontal className="mr-2 h-4 w-4" />
           フィルター
+        </Button>
+        <Button variant="outline" size="sm">
+          <Download className="mr-2 h-4 w-4" />
+          エクスポート
         </Button>
       </div>
 
@@ -265,85 +263,116 @@ export default function CompaniesList() {
 
       <Card>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead onClick={() => handleSort("id")} className="cursor-pointer">
-                  ID {renderSortIcon("id")}
-                </TableHead>
-                <TableHead onClick={() => handleSort("name")} className="cursor-pointer">
-                  会社名 {renderSortIcon("name")}
-                </TableHead>
-                <TableHead onClick={() => handleSort("restaurantCount")} className="cursor-pointer">
-                  店舗数 {renderSortIcon("restaurantCount")}
-                </TableHead>
-                <TableHead onClick={() => handleSort("jobCount")} className="cursor-pointer">
-                  求人数 {renderSortIcon("jobCount")}
-                </TableHead>
-                <TableHead onClick={() => handleSort("worksessionCount")} className="cursor-pointer">
-                  マッチング数 {renderSortIcon("worksessionCount")}
-                </TableHead>
-                <TableHead onClick={() => handleSort("worksessionCanceledByRestaurantCount")} className="cursor-pointer">
-                  企業キャンセル数 {renderSortIcon("worksessionCanceledByRestaurantCount")}
-                </TableHead>
-                <TableHead className="cursor-pointer">
-                  企業キャンセル率
-                </TableHead>
-                <TableHead onClick={() => handleSort("status")} className="cursor-pointer">
-                  ステータス {renderSortIcon("status")}
-                </TableHead>
-                <TableHead className="w-[100px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedCompanies.map((company) => (
-                <TableRow key={company.id}>
-                  <TableCell>{company.id}</TableCell>
-                  <TableCell>{company.name}</TableCell>
-                  <TableCell>{company.restaurantCount}</TableCell>
-                  <TableCell>{company.jobCount}</TableCell>
-                  <TableCell>{company.worksessionCount}</TableCell>
-                  <TableCell>{company.worksessionCanceledByRestaurantCount}</TableCell>
-                  <TableCell>
-                    {company.worksessionCanceledByRestaurantCount > 0
-                      ? `${(
-                          (company.worksessionCanceledByRestaurantCount /
-                            company.worksessionCount) *
-                          100
-                        ).toFixed(2)}%`
-                      : "0%"}
-                  </TableCell>
-                  <TableCell>
-                    <div
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        company.status === "approved"
-                          ? "bg-green-100 text-green-800"
-                          : company.status === "pending"
-                          ? "bg-amber-100 text-amber-800"
-                          : "bg-red-100 text-red-800"
-                      }`}>
-                      {company.status === "approved"
-                        ? "承認済み"
-                        : company.status === "pending"
-                        ? "未承認"
-                        : company.status === "banned"
-                        ? "一時停止中"
-                        : "拒否"}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Link href={`/operator/companies/${company.id}`}>
-                      <Button
-                        variant="outline"
-                      >
-                        詳細
-                      </Button>
-                    </Link>
-                  </TableCell>
+          <div className="w-full overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead
+                    style={{ minWidth: "10em", width: "10em" }}
+                    onClick={() => handleSort("id")}
+                    className="cursor-pointer"
+                  >
+                    ID {renderSortIcon("id")}
+                  </TableHead>
+                  <TableHead
+                    style={{ minWidth: "10em", width: "10em" }}
+                    onClick={() => handleSort("name")}
+                    className="cursor-pointer"
+                  >
+                    会社名 {renderSortIcon("name")}
+                  </TableHead>
+                  <TableHead
+                    style={{ minWidth: "5em", width: "5em" }}
+                    onClick={() => handleSort("restaurantCount")}
+                    className="cursor-pointer"
+                  >
+                    店舗数 {renderSortIcon("restaurantCount")}
+                  </TableHead>
+                  <TableHead
+                    style={{ minWidth: "5em", width: "5em" }}
+                    onClick={() => handleSort("jobCount")}
+                    className="cursor-pointer"
+                  >
+                    求人数 {renderSortIcon("jobCount")}
+                  </TableHead>
+                  <TableHead
+                    style={{ minWidth: "8em", width: "8em" }}
+                    onClick={() => handleSort("worksessionCount")}
+                    className="cursor-pointer"
+                  >
+                    マッチング数 {renderSortIcon("worksessionCount")}
+                  </TableHead>
+                  <TableHead
+                    style={{ minWidth: "10em", width: "10em" }}
+                    onClick={() => handleSort("worksessionCanceledByRestaurantCount")}
+                    className="cursor-pointer"
+                  >
+                    企業キャンセル数 {renderSortIcon("worksessionCanceledByRestaurantCount")}
+                  </TableHead>
+                  <TableHead
+                    style={{ minWidth: "10em", width: "10em" }}
+                    className="cursor-pointer"
+                  >
+                    企業キャンセル率
+                  </TableHead>
+                  <TableHead
+                    style={{ minWidth: "8em", width: "8em" }}
+                    onClick={() => handleSort("status")}
+                    className="cursor-pointer"
+                  >
+                    ステータス {renderSortIcon("status")}
+                  </TableHead>
+                  <TableHead style={{ minWidth: "5em", width: "5em" }}>
+                    操作
+                  </TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {sortedCompanies.map((company) => (
+                  <TableRow key={company.id}>
+                    <TableCell>{company.id}</TableCell>
+                    <TableCell>{company.name}</TableCell>
+                    <TableCell>{company.restaurantCount}</TableCell>
+                    <TableCell>{company.jobCount}</TableCell>
+                    <TableCell>{company.worksessionCount}</TableCell>
+                    <TableCell>{company.worksessionCanceledByRestaurantCount}</TableCell>
+                    <TableCell>
+                      {company.worksessionCanceledByRestaurantCount > 0
+                        ? `${(
+                            (company.worksessionCanceledByRestaurantCount /
+                              company.worksessionCount) *
+                            100
+                          ).toFixed(2)}%`
+                        : "0%"}
+                    </TableCell>
+                    <TableCell>
+                      <div
+                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                          company.status === "approved"
+                            ? "bg-green-100 text-green-800"
+                            : company.status === "pending"
+                            ? "bg-amber-100 text-amber-800"
+                            : "bg-red-100 text-red-800"
+                        }`}>
+                        {company.status === "approved"
+                          ? "承認済み"
+                          : company.status === "pending"
+                          ? "未承認"
+                          : company.status === "banned"
+                          ? "一時停止中"
+                          : "拒否"}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Link href={`/operator/companies/${company.id}`}>
+                        <Button variant="outline">詳細</Button>
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>
