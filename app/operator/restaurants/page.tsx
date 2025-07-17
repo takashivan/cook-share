@@ -32,6 +32,8 @@ import {
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RestaurantStatus } from "@/lib/const/restaurant";
+import Papa from "papaparse";
+import { exportCsv } from "@/lib/utils";
 
 export default function RestaurantsPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -165,6 +167,46 @@ export default function RestaurantsPage() {
     return 0;
   });
 
+  // エクスポート関数
+  const handleExportCSV = () => {
+    if (!sortedRestaurants.length) return;
+
+    const data = sortedRestaurants.map((restaurant) => ({
+      会社ID: restaurant.companies_id,
+      会社名: restaurant.company.name,
+      店舗ID: restaurant.id,
+      店舗名: restaurant.name,
+      ジャンル: (cuisines
+        ?.filter((cuisine) => restaurant.restaurant_cuisine_id.includes(cuisine.id))
+        .map((cuisine) => cuisine.category)
+        .join("、")) || "",
+      住所: restaurant.address || "-",
+      スタッフ数: restaurant.companyUserCount,
+      求人数: restaurant.jobCount,
+      マッチング数: restaurant.worksessionCount,
+      キャンセル数: restaurant.worksessionCanceledByRestaurantCount,
+      キャンセル率:
+        restaurant.worksessionCanceledByRestaurantCount > 0
+          ? (
+              (restaurant.worksessionCanceledByRestaurantCount / restaurant.worksessionCount) *
+              100
+            ).toFixed(2) + "%"
+          : "0%",
+      ステータス:
+        restaurant.status === "APPROVED"
+          ? "公開中"
+          : restaurant.status === "PENDING"
+          ? "審査中"
+          : restaurant.status === "BANNED"
+          ? "運用停止"
+          : "削除済み",
+      点数: restaurant.rating,
+    }));
+
+    const csv = Papa.unparse(data);
+    exportCsv(csv, "restaurants.csv");
+  };
+
   if (loading) {
     return <div className="p-4">Loading...</div>;
   }
@@ -196,7 +238,7 @@ export default function RestaurantsPage() {
             <SlidersHorizontal className="mr-2 h-4 w-4" />
             フィルター
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleExportCSV}>
             <Download className="mr-2 h-4 w-4" />
             エクスポート
           </Button>

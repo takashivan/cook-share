@@ -11,7 +11,7 @@ import {
 } from "@/lib/redux/slices/operatorSlice";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
-import { AlertCircle, Search } from "lucide-react";
+import { AlertCircle, Search, Download } from "lucide-react";
 import { WorksessionsRestaurantTodosListData } from "@/api/__generated__/base/data-contracts";
 import {
   Table,
@@ -52,6 +52,8 @@ import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { SlidersHorizontal } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import Papa from "papaparse";
+import { exportCsv } from "@/lib/utils";
 
 // ステータス選択肢（JobStatusBadgeForAdmin.tsxに合わせて全て列挙）
 const STATUS_OPTIONS = [
@@ -254,6 +256,45 @@ export default function JobsPage() {
     setStatusFilter(STATUS_OPTIONS.map(opt => opt.value));
   };
 
+  // エクスポート関数
+  const handleExportCSV = () => {
+    if (!sortedJobs.length) return;
+
+    const data = sortedJobs.map((job) => {
+      // ステータス表示名
+      const statusKey = getJobStatusKey(job);
+      const statusLabel =
+        STATUS_OPTIONS.find((opt) => opt.value === statusKey)?.label ?? "";
+
+      return {
+        ID: job.id,
+        タイトル: job.title,
+        ステータス: statusLabel,
+        求人詳細: job.description,
+        勤務日: job.work_date ? new Date(job.work_date).toLocaleDateString("ja-JP") : "",
+        開始時間: job.start_time ? new Date(job.start_time).toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" }) : "",
+        終了時間: job.end_time ? new Date(job.end_time).toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" }) : "",
+        報酬: job.fee != null ? `¥${job.fee.toLocaleString()}` : "",
+        締め切り: job.expiry_date ? new Date(job.expiry_date).toLocaleString("ja-JP") : "",
+        業務内容: job.task,
+        必要なスキル: job.skill,
+        持ち物: job.whattotake,
+        交通費:
+          job.transportation_type === "NONE"
+            ? "交通費なし"
+            : job.transportation_type === "MAX"
+            ? `上限 | ¥${job.transportation_amount?.toLocaleString() ?? "-"}`
+            : `一律 | ¥${job.transportation_amount?.toLocaleString() ?? "-"}`,
+        備考: job.note,
+        ポイント: job.point,
+        作成日時: job.created_at ? new Date(job.created_at).toLocaleString("ja-JP") : "",
+      };
+    });
+
+    const csv = Papa.unparse(data);
+    exportCsv(csv, "jobs.csv");
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -296,6 +337,14 @@ export default function JobsPage() {
           >
             <SlidersHorizontal className="mr-2 h-4 w-4" />
             フィルター
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportCSV}
+          >
+            <Download className="mr-2 h-4 w-4" />
+            エクスポート
           </Button>
         </div>
 

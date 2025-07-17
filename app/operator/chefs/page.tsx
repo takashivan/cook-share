@@ -28,11 +28,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, Download } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { EXPERIENCE_LEVELS } from "@/lib/const/chef-profile";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import Papa from "papaparse";
+import { exportCsv } from "@/lib/utils";
 
 export default function ChefsPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -191,6 +193,29 @@ export default function ChefsPage() {
     return 0;
   });
 
+  // エクスポート関数
+  const handleExportCSV = () => {
+    if (!sortedChefs.length) return;
+
+    const data = sortedChefs.map((chef) => ({
+      ID: chef.id,
+      名前: chef.name,
+      メール: chef.email,
+      マッチング数: chef.worksessionCount,
+      キャンセル数: chef.worksessionCanceledByChefCount,
+      キャンセル率:
+        chef.worksessionCount > 0
+          ? ((chef.worksessionCanceledByChefCount / chef.worksessionCount) * 100).toFixed(2) + "%"
+          : "0%",
+      Stripe連携状況: chef.stripe_verified ? "連携済み" : "未連携",
+      ステータス: chef.is_approved ? "承認済み" : "一時停止中",
+      点数: chef.rating,
+    }));
+
+    const csv = Papa.unparse(data);
+    exportCsv(csv, "chefs.csv");
+  };
+
   if (loading) {
     return <div className="p-4">Loading...</div>;
   }
@@ -225,6 +250,14 @@ export default function ChefsPage() {
           >
             <SlidersHorizontal className="mr-2 h-4 w-4" />
             フィルター
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportCSV}
+          >
+            <Download className="mr-2 h-4 w-4" />
+            エクスポート
           </Button>
         </div>
 

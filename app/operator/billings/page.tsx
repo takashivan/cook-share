@@ -29,6 +29,8 @@ import { useEffect, useState } from "react";
 import { fetchBillings } from "@/lib/redux/slices/operatorSlice";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import Papa from "papaparse";
+import { exportCsv } from "@/lib/utils";
 
 export default function BillingList() {
   const dispatch = useDispatch<AppDispatch>();
@@ -222,6 +224,31 @@ export default function BillingList() {
     setStatusFilter(["PAID", "PENDING", "FAILED"]);
   };
 
+  // エクスポート関数
+  const handleExportCSV = () => {
+    if (!sortedBillings.length) return;
+
+    const data = sortedBillings.map((billing) => ({
+      請求番号: billing.invoice_number,
+      会社ID: billing.company.id,
+      会社名: billing.company.name,
+      発行日: new Date(billing.created_at).toLocaleDateString(),
+      期間: billing.month,
+      金額: billing.amount,
+      ステータス:
+        billing.status === "PAID"
+          ? "支払い済み"
+          : billing.status === "PENDING"
+          ? "未払い"
+          : billing.status === "FAILED"
+          ? "失敗"
+          : "不明",
+    }));
+
+    const csv = Papa.unparse(data);
+    exportCsv(csv, "billings.csv");
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-1">
@@ -248,7 +275,11 @@ export default function BillingList() {
           <SlidersHorizontal className="mr-2 h-4 w-4" />
           フィルター
         </Button>
-        <Button variant="outline" size="sm">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleExportCSV}
+        >
           <Download className="mr-2 h-4 w-4" />
           エクスポート
         </Button>

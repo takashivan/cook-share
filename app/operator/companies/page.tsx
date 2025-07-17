@@ -30,6 +30,8 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import Papa from "papaparse";
+import { exportCsv } from "@/lib/utils";
 
 export default function CompaniesList() {
   const dispatch = useDispatch<AppDispatch>();
@@ -145,6 +147,42 @@ export default function CompaniesList() {
     return sortOrder === "asc" ? "▲" : "▼";
   };
 
+  // CSVエクスポート関数
+  const handleExportCSV = () => {
+    if (!sortedCompanies.length) return;
+
+    // データをオブジェクト配列で用意
+    const data = sortedCompanies.map((company) => ({
+      ID: company.id,
+      会社名: company.name,
+      店舗数: company.restaurantCount,
+      求人数: company.jobCount,
+      マッチング数: company.worksessionCount,
+      企業キャンセル数: company.worksessionCanceledByRestaurantCount,
+      企業キャンセル率:
+        company.worksessionCanceledByRestaurantCount > 0
+          ? (
+              (company.worksessionCanceledByRestaurantCount / company.worksessionCount) *
+              100
+            ).toFixed(2) + "%"
+          : "0%",
+      ステータス:
+        company.status === "approved"
+          ? "承認済み"
+          : company.status === "pending"
+          ? "未承認"
+          : company.status === "banned"
+          ? "一時停止中"
+          : "拒否",
+    }));
+
+    // CSV文字列生成
+    const csv = Papa.unparse(data);
+
+    // utilのexportCsv関数でダウンロード
+    exportCsv(csv, "companies.csv");
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-1">
@@ -167,7 +205,7 @@ export default function CompaniesList() {
           <SlidersHorizontal className="mr-2 h-4 w-4" />
           フィルター
         </Button>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" onClick={handleExportCSV}>
           <Download className="mr-2 h-4 w-4" />
           エクスポート
         </Button>

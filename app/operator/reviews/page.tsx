@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, Download } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { format } from "date-fns";
@@ -30,6 +30,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import Papa from "papaparse";
+import { exportCsv } from "@/lib/utils";
 
 export default function ChefsPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -170,6 +172,29 @@ export default function ChefsPage() {
     return 0;
   });
 
+  // エクスポート関数
+  const handleExportCSV = () => {
+    if (!sortedReviews.length) return;
+
+    const data = sortedReviews.map((review) => ({
+      ID: review.id,
+      [selectedTab === "chefReviews" ? "シェフ名" : "店舗名"]:
+        selectedTab === "chefReviews" ? review.user.name : review.restaurant.name,
+      [selectedTab === "chefReviews" ? "勤務店舗名" : "勤務シェフ名"]:
+        selectedTab === "chefReviews" ? review.restaurant.name : review.user.name,
+      勤務日: format(
+        new Date(review.worksession.check_in_time),
+        "yyyy/MM/dd",
+        { locale: ja }
+      ),
+      点数: review.rating,
+      レビュー内容: review.comment,
+    }));
+
+    const csv = Papa.unparse(data);
+    exportCsv(csv, selectedTab === "chefReviews" ? "chef_reviews.csv" : "restaurant_reviews.csv");
+  };
+
   if (chefReviewsLoading || restaurantReviewsLoading) {
     return <div className="p-4">Loading...</div>;
   }
@@ -202,6 +227,14 @@ export default function ChefsPage() {
         >
           <SlidersHorizontal className="mr-2 h-4 w-4" />
           フィルター
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleExportCSV}
+        >
+          <Download className="mr-2 h-4 w-4" />
+          エクスポート
         </Button>
       </div>
 
