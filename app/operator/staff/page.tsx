@@ -59,6 +59,52 @@ export default function StaffList() {
 
   const [isOpen, setIsOpen] = useState(false);
 
+  // ソート状態管理
+  const [sortKey, setSortKey] = useState<"name" | "email" | null>(null);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
+  // 検索クエリ状態管理
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // ソート関数
+  const handleSort = (key: "name" | "email") => {
+    if (sortKey === key) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setSortOrder("asc");
+    }
+  };
+
+  // ソートアイコン
+  const renderSortIcon = (key: "name" | "email") => {
+    if (sortKey !== key) return null;
+    return sortOrder === "asc" ? "▲" : "▼";
+  };
+
+  // フィルタリングされたデータ
+  const filteredOperators = operators.filter((operator) => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return true;
+    return (
+      operator.name.toLowerCase().includes(query) ||
+      operator.email.toLowerCase().includes(query)
+    );
+  });
+
+  // ソート済みデータ
+  const sortedOperators = [...filteredOperators].sort((a, b) => {
+    if (!sortKey) return 0;
+    const aValue = a[sortKey];
+    const bValue = b[sortKey];
+    if (typeof aValue === "string" && typeof bValue === "string") {
+      return sortOrder === "asc"
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    }
+    return 0;
+  });
+
   useEffect(() => {
     dispatch(fetchOperators());
   }, [dispatch]);
@@ -212,8 +258,10 @@ export default function StaffList() {
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="スタッフを検索..."
+            placeholder="名前・メールアドレスで検索..."
             className="w-full pl-8"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
       </div>
@@ -224,13 +272,17 @@ export default function StaffList() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>名前</TableHead>
-                <TableHead>メールアドレス</TableHead>
+                <TableHead onClick={() => handleSort("name")} className="cursor-pointer">
+                  名前 {renderSortIcon("name")}
+                </TableHead>
+                <TableHead onClick={() => handleSort("email")} className="cursor-pointer">
+                  メールアドレス {renderSortIcon("email")}
+                </TableHead>
                 <TableHead>操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {operators.map((operator) => (
+              {sortedOperators.map((operator) => (
                 <TableRow key={operator.id}>
                   <TableCell>{operator.name}</TableCell>
                   <TableCell>{operator.email}</TableCell>

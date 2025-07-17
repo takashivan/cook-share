@@ -10,11 +10,9 @@ import { Cuisine } from "@/lib/api/cuisines";
 
 export default function CategoriesPage() {
   const dispatch = useDispatch<AppDispatch>();
-  const { cuisines, loading, error } = useSelector((state: RootState) => ({
-    cuisines: state.operator.cuisines,
-    loading: state.operator.loading.cuisines,
-    error: state.operator.error.cuisines,
-  }));
+  const cuisines = useSelector((state: RootState) => state.operator.cuisines);
+  const loading = useSelector((state: RootState) => state.operator.loading.cuisines);
+  const error = useSelector((state: RootState) => state.operator.error.cuisines);
 
   useEffect(() => {
     dispatch(fetchCuisines());

@@ -18,12 +18,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Download, Search, SlidersHorizontal } from "lucide-react";
 import { RestaurantStatusBadgeForAdmin } from "@/components/badge/RestaurantStatusBadgeForAdmin";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RestaurantStatus } from "@/lib/const/restaurant";
 
 export default function RestaurantsPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -34,19 +42,127 @@ export default function RestaurantsPage() {
   const cuisines = useSelector((state: RootState) => state.operator.cuisines);
 
   const [showSuspendedOnly, setShowSuspendedOnly] = useState(false);
+
+  // 検索用state追加
   const [searchQuery, setSearchQuery] = useState("");
+
+  // ソート状態管理
+  const [sortKey, setSortKey] = useState<keyof typeof restaurants[0] | null>(null);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
+  // フィルター状態管理
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [staffCountMin, setStaffCountMin] = useState("");
+  const [staffCountMax, setStaffCountMax] = useState("");
+  const [jobCountMin, setJobCountMin] = useState("");
+  const [jobCountMax, setJobCountMax] = useState("");
+  const [worksessionCountMin, setWorksessionCountMin] = useState("");
+  const [worksessionCountMax, setWorksessionCountMax] = useState("");
+  const [canceledCountMin, setCanceledCountMin] = useState("");
+  const [canceledCountMax, setCanceledCountMax] = useState("");
+  const [ratingMin, setRatingMin] = useState("");
+  const [ratingMax, setRatingMax] = useState("");
+  // ステータス複数選択
+  const [statusFilter, setStatusFilter] = useState<RestaurantStatus['value'][]>(["APPROVED", "PENDING", "BANNED", "DELETED"]);
+
+  // ソート関数
+  const handleSort = (key: keyof typeof restaurants[0]) => {
+    if (sortKey === key) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setSortOrder("asc");
+    }
+  };
+
+  // ソートアイコン
+  const renderSortIcon = (key: keyof typeof restaurants[0]) => {
+    if (sortKey !== key) return null;
+    return sortOrder === "asc" ? "▲" : "▼";
+  };
 
   useEffect(() => {
     dispatch(fetchRestaurants());
     dispatch(fetchCuisines());
   }, [dispatch]);
 
+  // ステータスチェックボックスのハンドラ
+  const handleStatusChange = (status: RestaurantStatus['value']) => {
+    setStatusFilter((prev) =>
+      prev.includes(status)
+        ? prev.filter((s) => s !== status)
+        : [...prev, status]
+    );
+  };
+
+  // フィルターリセット関数
+  const handleFilterReset = () => {
+    setStaffCountMin("");
+    setStaffCountMax("");
+    setJobCountMin("");
+    setJobCountMax("");
+    setWorksessionCountMin("");
+    setWorksessionCountMax("");
+    setCanceledCountMin("");
+    setCanceledCountMax("");
+    setRatingMin("");
+    setRatingMax("");
+    setStatusFilter(["APPROVED", "PENDING", "BANNED", "DELETED"]);
+  };
+
   const filteredRestaurants = restaurants.filter((restaurant) => {
+    const query = searchQuery.trim().toLowerCase();
+
+    // ジャンル名リスト取得
+    const genreNames = cuisines
+      ?.filter((cuisine) => restaurant.restaurant_cuisine_id.includes(cuisine.id))
+      .map((cuisine) => cuisine.category.toLowerCase()) ?? [];
+
+    // 検索フィルタ
     const matchesSearch =
-      searchQuery === "" ||
-      restaurant.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = !showSuspendedOnly || restaurant.status !== "APPROVED";
-    return matchesSearch && matchesStatus;
+      !query ||
+      (restaurant.companies_id != null && restaurant.companies_id.toString().includes(query)) ||
+      restaurant.company.name.toLowerCase().includes(query) ||
+      restaurant.id.toString().includes(query) ||
+      restaurant.name.toLowerCase().includes(query) ||
+      genreNames.some((genre) => genre.includes(query)) ||
+      (restaurant.address ?? "").toLowerCase().includes(query);
+
+    // 数値範囲フィルタ
+    const matchesNumber =
+      (!staffCountMin || restaurant.companyUserCount >= Number(staffCountMin)) &&
+      (!staffCountMax || restaurant.companyUserCount <= Number(staffCountMax)) &&
+      (!jobCountMin || restaurant.jobCount >= Number(jobCountMin)) &&
+      (!jobCountMax || restaurant.jobCount <= Number(jobCountMax)) &&
+      (!worksessionCountMin || restaurant.worksessionCount >= Number(worksessionCountMin)) &&
+      (!worksessionCountMax || restaurant.worksessionCount <= Number(worksessionCountMax)) &&
+      (!canceledCountMin || restaurant.worksessionCanceledByRestaurantCount >= Number(canceledCountMin)) &&
+      (!canceledCountMax || restaurant.worksessionCanceledByRestaurantCount <= Number(canceledCountMax)) &&
+      (!ratingMin || restaurant.rating >= Number(ratingMin)) &&
+      (!ratingMax || restaurant.rating <= Number(ratingMax));
+
+    // ステータス複数選択フィルタ
+    const matchesStatus =
+      statusFilter.length > 0 && statusFilter.includes(restaurant.status);
+
+    // すべての条件を満たすものだけ表示
+    return matchesSearch && matchesNumber && matchesStatus;
+  });
+
+  // ソート済みデータ
+  const sortedRestaurants = [...filteredRestaurants].sort((a, b) => {
+    if (!sortKey) return 0;
+    const aValue = a[sortKey];
+    const bValue = b[sortKey];
+    if (typeof aValue === "number" && typeof bValue === "number") {
+      return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
+    }
+    if (typeof aValue === "string" && typeof bValue === "string") {
+      return sortOrder === "asc"
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    }
+    return 0;
   });
 
   if (loading) {
@@ -68,57 +184,169 @@ export default function RestaurantsPage() {
         </div>
 
         <div className="flex flex-col md:flex-row items-center gap-4">
-          <div className="relative w-full md:w-80 mr-auto">
+          <div className="relative w-full mr-auto">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="店舗名で検索..."
+              placeholder="会社ID・会社名・店舗ID・店舗名・ジャンル・住所で検索..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-8"
             />
           </div>
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="suspended-filter"
-              checked={showSuspendedOnly}
-              onCheckedChange={setShowSuspendedOnly}
-            />
-            <Label htmlFor="suspended-filter">一時停止中のみ表示</Label>
-          </div>
           <Button variant="outline" size="sm">
             <Download className="mr-2 h-4 w-4" />
             エクスポート
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => setFilterOpen(true)}>
             <SlidersHorizontal className="mr-2 h-4 w-4" />
             フィルター
           </Button>
         </div>
+
+        {/* フィルターダイアログ */}
+        <Dialog open={filterOpen} onOpenChange={setFilterOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>レストランフィルター</DialogTitle>
+            </DialogHeader>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>スタッフ数（最小）</Label>
+                <Input type="number" value={staffCountMin} onChange={e => setStaffCountMin(e.target.value)} />
+              </div>
+              <div>
+                <Label>スタッフ数（最大）</Label>
+                <Input type="number" value={staffCountMax} onChange={e => setStaffCountMax(e.target.value)} />
+              </div>
+              <div>
+                <Label>求人数（最小）</Label>
+                <Input type="number" value={jobCountMin} onChange={e => setJobCountMin(e.target.value)} />
+              </div>
+              <div>
+                <Label>求人数（最大）</Label>
+                <Input type="number" value={jobCountMax} onChange={e => setJobCountMax(e.target.value)} />
+              </div>
+              <div>
+                <Label>マッチング数（最小）</Label>
+                <Input type="number" value={worksessionCountMin} onChange={e => setWorksessionCountMin(e.target.value)} />
+              </div>
+              <div>
+                <Label>マッチング数（最大）</Label>
+                <Input type="number" value={worksessionCountMax} onChange={e => setWorksessionCountMax(e.target.value)} />
+              </div>
+              <div>
+                <Label>キャンセル数（最小）</Label>
+                <Input type="number" value={canceledCountMin} onChange={e => setCanceledCountMin(e.target.value)} />
+              </div>
+              <div>
+                <Label>キャンセル数（最大）</Label>
+                <Input type="number" value={canceledCountMax} onChange={e => setCanceledCountMax(e.target.value)} />
+              </div>
+              <div>
+                <Label>点数（最小）</Label>
+                <Input type="number" value={ratingMin} onChange={e => setRatingMin(e.target.value)} />
+              </div>
+              <div>
+                <Label>点数（最大）</Label>
+                <Input type="number" value={ratingMax} onChange={e => setRatingMax(e.target.value)} />
+              </div>
+              <div className="col-span-2">
+                <Label>ステータス</Label>
+                <div className="flex gap-4 flex-wrap">
+                  <label className="flex items-center gap-1">
+                    <Checkbox
+                      checked={statusFilter.includes("APPROVED")}
+                      onCheckedChange={() => handleStatusChange("APPROVED")}
+                    />
+                    公開中
+                  </label>
+                  <label className="flex items-center gap-1">
+                    <Checkbox
+                      checked={statusFilter.includes("PENDING")}
+                      onCheckedChange={() => handleStatusChange("PENDING")}
+                    />
+                    審査中
+                  </label>
+                  <label className="flex items-center gap-1">
+                    <Checkbox
+                      checked={statusFilter.includes("BANNED")}
+                      onCheckedChange={() => handleStatusChange("BANNED")}
+                    />
+                    運用停止
+                  </label>
+                  <label className="flex items-center gap-1">
+                    <Checkbox
+                      checked={statusFilter.includes("DELETED")}
+                      onCheckedChange={() => handleStatusChange("DELETED")}
+                    />
+                    削除済み
+                  </label>
+                </div>
+              </div>
+            </div>
+            <DialogFooter className="flex flex-row gap-2 justify-end">
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={handleFilterReset}
+              >
+                フィルターリセット
+              </Button>
+              <Button variant="outline" onClick={() => setFilterOpen(false)}>
+                閉じる
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <Card>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>会社ID</TableHead>
-                  <TableHead>会社名</TableHead>
-                  <TableHead>店舗ID</TableHead>
-                  <TableHead>店舗名</TableHead>
+                  <TableHead onClick={() => handleSort("companies_id")} className="cursor-pointer">
+                    会社ID {renderSortIcon("companies_id")}
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("company")} className="cursor-pointer">
+                    会社名 {renderSortIcon("company")}
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("id")} className="cursor-pointer">
+                    店舗ID {renderSortIcon("id")}
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("name")} className="cursor-pointer">
+                    店舗名 {renderSortIcon("name")}
+                  </TableHead>
                   <TableHead>ジャンル</TableHead>
-                  <TableHead>住所</TableHead>
-                  <TableHead>スタッフ数</TableHead>
-                  <TableHead>求人数</TableHead>
-                  <TableHead>マッチング数</TableHead>
-                  <TableHead>キャンセル数</TableHead>
-                  <TableHead>キャンセル率</TableHead>
-                  <TableHead>ステータス</TableHead>
-                  <TableHead>点数</TableHead>
+                  <TableHead onClick={() => handleSort("address")} className="cursor-pointer">
+                    住所 {renderSortIcon("address")}
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("companyUserCount")} className="cursor-pointer">
+                    スタッフ数 {renderSortIcon("companyUserCount")}
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("jobCount")} className="cursor-pointer">
+                    求人数 {renderSortIcon("jobCount")}
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("worksessionCount")} className="cursor-pointer">
+                    マッチング数 {renderSortIcon("worksessionCount")}
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("worksessionCanceledByRestaurantCount")} className="cursor-pointer">
+                    キャンセル数 {renderSortIcon("worksessionCanceledByRestaurantCount")}
+                  </TableHead>
+                  <TableHead className="cursor-pointer">
+                    キャンセル率
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("status")} className="cursor-pointer">
+                    ステータス {renderSortIcon("status")}
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("rating")} className="cursor-pointer">
+                    点数 {renderSortIcon("rating")}
+                  </TableHead>
                   <TableHead>操作</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredRestaurants.map((restaurant) => (
+                {sortedRestaurants.map((restaurant) => (
                   <TableRow key={restaurant.id}>
                     <TableCell>{restaurant.companies_id}</TableCell>
                     <TableCell>{restaurant.company.name}</TableCell>

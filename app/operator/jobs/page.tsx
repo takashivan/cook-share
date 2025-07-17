@@ -11,7 +11,6 @@ import {
 } from "@/lib/redux/slices/operatorSlice";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import { AlertCircle } from "lucide-react";
 import { WorksessionsRestaurantTodosListData } from "@/api/__generated__/base/data-contracts";
 import {
@@ -26,7 +25,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { JobStatusBadgeForAdmin } from "@/components/badge/JobStatusBadgeForAdmin";
 import { JobsListData } from "@/api/__generated__/operator/data-contracts";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 import {
   AlertDialog,
@@ -42,6 +50,23 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
+import { SlidersHorizontal } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+
+// ステータス選択肢（JobStatusBadgeForAdmin.tsxに合わせて全て列挙）
+const STATUS_OPTIONS = [
+  { value: "RECRUITING", label: "募集中" }, // job.status === "PUBLISHED" && job.expiry_date > now && !lastWorksession
+  { value: "DRAFT", label: "下書き" }, // job.status === "DRAFT"
+  { value: "SUSPENDED", label: "一時停止中" }, // job.status === "PENDING"
+  { value: "CLOSED", label: "募集終了" }, // job.status === "PUBLISHED" && job.expiry_date <= now
+  { value: "FILLED_SCHEDULED", label: "未チェックイン" }, // job.status === "FILLED" && lastWorksession?.status === "SCHEDULED"
+  { value: "FILLED_IN_PROGRESS", label: "完了報告待ち" }, // job.status === "FILLED" && lastWorksession?.status === "IN_PROGRESS"
+  { value: "FILLED_COMPLETED", label: "完了報告承認待ち" }, // job.status === "FILLED" && lastWorksession?.status === "COMPLETED"
+  { value: "FILLED_VERIFY_REJECTED", label: "完了報告差し戻し" }, // job.status === "FILLED" && lastWorksession?.status === "VERIFY_REJECTED"
+  { value: "FILLED_VERIFIED", label: "完了報告承認済" }, // job.status === "FILLED" && lastWorksession?.status === "VERIFIED"
+  { value: "FILLED_CANCELED_BY_CHEF", label: "シェフキャンセル" }, // job.status === "FILLED" && lastWorksession?.status === "CANCELED_BY_CHEF"
+  { value: "FILLED_CANCELED_BY_RESTAURANT", label: "レストランキャンセル" }, // job.status === "FILLED" && lastWorksession?.status === "CANCELED_BY_RESTAURANT"
+];
 
 export default function JobsPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -57,6 +82,14 @@ export default function JobsPage() {
   );
   const [selectedAlert, setSelectedAlert] = useState<any>(null);
   const [reason, setReason] = useState("");
+  const [sortKey, setSortKey] = useState<keyof JobsListData[number] | null>(null);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [workDateMin, setWorkDateMin] = useState("");
+  const [workDateMax, setWorkDateMax] = useState("");
+  const [feeMin, setFeeMin] = useState("");
+  const [feeMax, setFeeMax] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string[]>(STATUS_OPTIONS.map(opt => opt.value));
 
   const { toast } = useToast();
 
@@ -65,12 +98,105 @@ export default function JobsPage() {
     dispatch(fetchOperatorAlerts());
   }, [dispatch]);
 
+  // ソート関数
+  const handleSort = (key: keyof JobsListData[number]) => {
+    if (sortKey === key) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setSortOrder("asc");
+    }
+  };
+
+  // ソートアイコン
+  const renderSortIcon = (key: keyof JobsListData[number]) => {
+    if (sortKey !== key) return null;
+    return sortOrder === "asc" ? "▲" : "▼";
+  };
+
+  // ステータス判定関数
+  const getJobStatusKey = (job: JobsListData[number]) => {
+    const now = Date.now();
+    const lastWorksession = job.worksession as WorksessionsRestaurantTodosListData[number] | null;
+    if (job.status === "FILLED" && lastWorksession?.status === "SCHEDULED") return "FILLED_SCHEDULED";
+    if (job.status === "FILLED" && lastWorksession?.status === "IN_PROGRESS") return "FILLED_IN_PROGRESS";
+    if (job.status === "FILLED" && lastWorksession?.status === "COMPLETED") return "FILLED_COMPLETED";
+    if (job.status === "FILLED" && lastWorksession?.status === "VERIFY_REJECTED") return "FILLED_VERIFY_REJECTED";
+    if (job.status === "FILLED" && lastWorksession?.status === "VERIFIED") return "FILLED_VERIFIED";
+    if (job.status === "FILLED" && lastWorksession?.status === "CANCELED_BY_CHEF") return "FILLED_CANCELED_BY_CHEF";
+    if (job.status === "FILLED" && lastWorksession?.status === "CANCELED_BY_RESTAURANT") return "FILLED_CANCELED_BY_RESTAURANT";
+    if (job.status === "PUBLISHED" && job.expiry_date && new Date(job.expiry_date).getTime() > now && !lastWorksession) return "RECRUITING";
+    if (job.status === "DRAFT") return "DRAFT";
+    if (job.status === "PENDING") return "SUSPENDED";
+    if (job.status === "PUBLISHED" && job.expiry_date && new Date(job.expiry_date).getTime() <= now) return "CLOSED";
+    return ""; // 該当なし
+  };
+
+  // ステータスチェックボックスのハンドラ
+  const handleStatusChange = (status: string) => {
+    setStatusFilter((prev) =>
+      prev.includes(status)
+        ? prev.filter((s) => s !== status)
+        : [...prev, status]
+    );
+  };
+
   const filteredJobs = jobs?.filter((job) => {
-    const matchesSearch =
-      job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      job.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = showSuspendedOnly ? !job.is_approved : true;
-    return matchesSearch && matchesStatus;
+    const query = searchTerm.trim().toLowerCase();
+    if (
+      query &&
+      !(
+        job.id.toString().includes(query) ||
+        job.title.toLowerCase().includes(query)
+      )
+    ) {
+      return false;
+    }
+    // 勤務日フィルタ
+    if (
+      (workDateMin && new Date(job.work_date) < new Date(workDateMin)) ||
+      (workDateMax && new Date(job.work_date) > new Date(workDateMax))
+    ) {
+      return false;
+    }
+    // 報酬フィルタ
+    if (
+      (feeMin && job.fee < Number(feeMin)) ||
+      (feeMax && job.fee > Number(feeMax))
+    ) {
+      return false;
+    }
+    // ステータスフィルタ
+    const statusKey = getJobStatusKey(job);
+    if (statusFilter.length === 0 || !statusFilter.includes(statusKey)) {
+      return false;
+    }
+    // 一時停止中のみ
+    if (showSuspendedOnly && statusKey !== "SUSPENDED") {
+      return false;
+    }
+    return true;
+  });
+
+  // ソート済みデータ
+  const sortedJobs = [...(filteredJobs ?? [])].sort((a, b) => {
+    if (!sortKey) return 0;
+    const aValue = a[sortKey];
+    const bValue = b[sortKey];
+    if (typeof aValue === "number" && typeof bValue === "number") {
+      return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
+    }
+    if (typeof aValue === "string" && typeof bValue === "string") {
+      return sortOrder === "asc"
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    }
+    if (aValue instanceof Date && bValue instanceof Date) {
+      return sortOrder === "asc"
+        ? aValue.getTime() - bValue.getTime()
+        : bValue.getTime() - aValue.getTime();
+    }
+    return 0;
   });
 
   const getJobAlert = (jobId: number) => {
@@ -119,6 +245,15 @@ export default function JobsPage() {
     }
   };
 
+  // フィルターリセット関数
+  const handleFilterReset = () => {
+    setWorkDateMin("");
+    setWorkDateMax("");
+    setFeeMin("");
+    setFeeMax("");
+    setStatusFilter(STATUS_OPTIONS.map(opt => opt.value));
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -145,35 +280,115 @@ export default function JobsPage() {
         <div className="mb-6 flex gap-4">
           <Input
             type="text"
-            placeholder="求人を検索..."
+            placeholder="ID・タイトルで検索..."
             className="flex-1 px-4 py-2 border rounded"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <label className="flex items-center gap-2">
-            <Switch
-              checked={showSuspendedOnly}
-              onCheckedChange={(checked) => setShowSuspendedOnly(checked)}
-            />
-            一時停止中の求人のみ表示
-          </label>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setFilterOpen(true)}
+          >
+            <SlidersHorizontal className="mr-2 h-4 w-4" />
+            フィルター
+          </Button>
         </div>
+
+        {/* フィルターダイアログ */}
+        <Dialog open={filterOpen} onOpenChange={setFilterOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>求人フィルター</DialogTitle>
+            </DialogHeader>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label>勤務日（開始）</label>
+                <Input
+                  type="date"
+                  value={workDateMin}
+                  onChange={e => setWorkDateMin(e.target.value)}
+                />
+              </div>
+              <div>
+                <label>勤務日（終了）</label>
+                <Input
+                  type="date"
+                  value={workDateMax}
+                  onChange={e => setWorkDateMax(e.target.value)}
+                />
+              </div>
+              <div>
+                <label>報酬（最小）</label>
+                <Input
+                  type="number"
+                  value={feeMin}
+                  onChange={e => setFeeMin(e.target.value)}
+                />
+              </div>
+              <div>
+                <label>報酬（最大）</label>
+                <Input
+                  type="number"
+                  value={feeMax}
+                  onChange={e => setFeeMax(e.target.value)}
+                />
+              </div>
+              <div className="col-span-2">
+                <label>ステータス</label>
+                <div className="flex gap-4 mt-1 flex-wrap">
+                  {STATUS_OPTIONS.map(opt => (
+                    <label key={opt.value} className="flex items-center gap-1">
+                      <Checkbox
+                        checked={statusFilter.includes(opt.value)}
+                        onCheckedChange={() => handleStatusChange(opt.value)}
+                      />
+                      {opt.label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter className="flex flex-row gap-2 justify-end">
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={handleFilterReset}
+              >
+                フィルターリセット
+              </Button>
+              <Button variant="outline" onClick={() => setFilterOpen(false)}>
+                閉じる
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <Card>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>タイトル</TableHead>
-                  <TableHead>勤務日</TableHead>
-                  <TableHead>報酬</TableHead>
-                  <TableHead>ステータス</TableHead>
+                  <TableHead onClick={() => handleSort("id")} className="cursor-pointer">
+                    ID {renderSortIcon("id")}
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("title")} className="cursor-pointer">
+                    タイトル {renderSortIcon("title")}
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("work_date")} className="cursor-pointer">
+                    勤務日 {renderSortIcon("work_date")}
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("fee")} className="cursor-pointer">
+                    報酬 {renderSortIcon("fee")}
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("status")} className="cursor-pointer">
+                    ステータス {renderSortIcon("status")}
+                  </TableHead>
                   <TableHead>操作</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredJobs?.map((job) => {
+                {sortedJobs?.map((job) => {
                   const alert = getJobAlert(job.id);
                   return (
                     <TableRow key={job.id}>
