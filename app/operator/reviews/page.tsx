@@ -106,10 +106,10 @@ export default function ChefsPage() {
           return false;
         }
         // 勤務日フィルタ
-        const workDate = new Date(review.worksession.check_in_time);
+        const workDate = review.worksession.check_in_time != null ? new Date(review.worksession.check_in_time) : null;
         if (
-          (workDateMin && workDate < new Date(workDateMin)) ||
-          (workDateMax && workDate > new Date(workDateMax))
+          (workDateMin && workDate && workDate < new Date(workDateMin)) ||
+          (workDateMax && workDate && workDate > new Date(workDateMax))
         ) {
           return false;
         }
@@ -142,8 +142,8 @@ export default function ChefsPage() {
         bValue = selectedTab === "chefReviews" ? b.restaurant.name : b.user.name;
         break;
       case "workDate":
-        aValue = new Date(a.worksession.check_in_time);
-        bValue = new Date(b.worksession.check_in_time);
+        aValue = a.worksession.check_in_time != null ? new Date(a.worksession.check_in_time) : null;
+        bValue = b.worksession.check_in_time != null ? new Date(b.worksession.check_in_time) : null;
         break;
       case "rating":
         aValue = a.rating;
@@ -182,11 +182,11 @@ export default function ChefsPage() {
         selectedTab === "chefReviews" ? review.user.name : review.restaurant.name,
       [selectedTab === "chefReviews" ? "勤務店舗名" : "勤務シェフ名"]:
         selectedTab === "chefReviews" ? review.restaurant.name : review.user.name,
-      勤務日: format(
+      勤務日: review.worksession.check_in_time != null ? format(
         new Date(review.worksession.check_in_time),
         "yyyy/MM/dd",
         { locale: ja }
-      ),
+      ) : "未設定",
       点数: review.rating,
       レビュー内容: review.comment,
     }));
@@ -365,11 +365,13 @@ export default function ChefsPage() {
                         : review.user.name}
                     </TableCell>
                     <TableCell>
-                      {format(
-                        new Date(review.worksession.check_in_time),
-                        "yyyy/MM/dd",
-                        { locale: ja }
-                      )}
+                      {review.worksession.check_in_time != null
+                        ? format(
+                            new Date(review.worksession.check_in_time),
+                            "yyyy/MM/dd",
+                            { locale: ja }
+                          )
+                        : "未設定"}
                     </TableCell>
                     <TableCell>{review.rating}</TableCell>
                     <TableCell>{review.comment}</TableCell>
