@@ -6,13 +6,12 @@ import { AppDispatch, RootState } from "@/lib/redux/store";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { fetchCuisines } from "@/lib/redux/slices/operatorSlice";
-import { Cuisine } from "@/lib/api/cuisines";
 
 export default function CategoriesPage() {
   const dispatch = useDispatch<AppDispatch>();
-  const cuisines = useSelector((state: RootState) => state.operator.cuisines);
-  const loading = useSelector((state: RootState) => state.operator.loading.cuisines);
-  const error = useSelector((state: RootState) => state.operator.error.cuisines);
+  const cuisines = useSelector((state: RootState) => state.operator.cuisines.data);
+  const loading = useSelector((state: RootState) => state.operator.cuisines.loading);
+  const error = useSelector((state: RootState) => state.operator.cuisines.error);
 
   useEffect(() => {
     dispatch(fetchCuisines());
@@ -42,7 +41,7 @@ export default function CategoriesPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {cuisines.map((cuisine: Cuisine) => (
+        {cuisines.map((cuisine) => (
           <Card key={cuisine.id}>
             <CardContent className="p-4">
               <div className="flex items-center space-x-4">

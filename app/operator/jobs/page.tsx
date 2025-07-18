@@ -5,9 +5,10 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/lib/redux/store";
 import {
   fetchOperatorJobs,
-  fetchOperatorAlerts,
   banJob,
   approveJob,
+  JobsListResponse,
+  fetchOperators,
 } from "@/lib/redux/slices/operatorSlice";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
@@ -24,7 +25,6 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { JobStatusBadgeForAdmin } from "@/components/badge/JobStatusBadgeForAdmin";
-import { JobsListData } from "@/api/__generated__/operator/data-contracts";
 import {
   Dialog,
   DialogClose,
@@ -35,7 +35,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
 import {
   AlertDialog,
   AlertDialogAction,
@@ -75,16 +74,16 @@ export default function JobsPage() {
   const jobs = useSelector((state: RootState) => state.operator.jobs.data);
   const loading = useSelector((state: RootState) => state.operator.jobs.loading);
   const error = useSelector((state: RootState) => state.operator.jobs.error);
-  const alerts = useSelector((state: RootState) => state.operator.alerts.data);
+  const operators = useSelector((state: RootState) => state.operator.operators.data);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [showSuspendedOnly, setShowSuspendedOnly] = useState(false);
-  const [selectedJob, setSelectedJob] = useState<JobsListData[number] | null>(
+  const [selectedJob, setSelectedJob] = useState<JobsListResponse | null>(
     null
   );
   const [selectedAlert, setSelectedAlert] = useState<any>(null);
   const [reason, setReason] = useState("");
-  const [sortKey, setSortKey] = useState<keyof JobsListData[number] | null>(null);
+  const [sortKey, setSortKey] = useState<keyof JobsListResponse | null>(null);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [filterOpen, setFilterOpen] = useState(false);
   const [workDateMin, setWorkDateMin] = useState("");
@@ -97,11 +96,11 @@ export default function JobsPage() {
 
   useEffect(() => {
     dispatch(fetchOperatorJobs());
-    dispatch(fetchOperatorAlerts());
+    dispatch(fetchOperators());
   }, [dispatch]);
 
   // ソート関数
-  const handleSort = (key: keyof JobsListData[number]) => {
+  const handleSort = (key: keyof JobsListResponse) => {
     if (sortKey === key) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
@@ -111,13 +110,13 @@ export default function JobsPage() {
   };
 
   // ソートアイコン
-  const renderSortIcon = (key: keyof JobsListData[number]) => {
+  const renderSortIcon = (key: keyof JobsListResponse) => {
     if (sortKey !== key) return null;
     return sortOrder === "asc" ? "▲" : "▼";
   };
 
   // ステータス判定関数
-  const getJobStatusKey = (job: JobsListData[number]) => {
+  const getJobStatusKey = (job: JobsListResponse) => {
     const now = Date.now();
     const lastWorksession = job.worksession as WorksessionsRestaurantTodosListData[number] | null;
     if (job.status === "FILLED" && lastWorksession?.status === "SCHEDULED") return "FILLED_SCHEDULED";
@@ -200,10 +199,6 @@ export default function JobsPage() {
     }
     return 0;
   });
-
-  const getJobAlert = (jobId: number) => {
-    return alerts?.find((alert) => alert.job_id === jobId);
-  };
 
   const handleBan = async (id: number) => {
     if (!reason) return;
@@ -465,7 +460,6 @@ export default function JobsPage() {
                 </TableHeader>
                 <TableBody>
                   {sortedJobs?.map((job) => {
-                    const alert = getJobAlert(job.id);
                     return (
                       <TableRow key={job.id}>
                         <TableCell>{job.id}</TableCell>
@@ -479,12 +473,12 @@ export default function JobsPage() {
                             >
                               {job.title}
                             </Link>
-                            {alert && (
+                            {job.alert && (
                               <Button
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => {
-                                  setSelectedAlert(alert);
+                                  setSelectedAlert(job.alert);
                                 }}
                                 className="text-red-500 hover:text-red-700"
                               >
@@ -541,21 +535,18 @@ export default function JobsPage() {
                   <div className="w-32 flex-shrink-0">タイトル</div>
                   <span className="flex items-center gap-1">
                     {selectedJob.title}
-                    {(() => {
-                      const alert = getJobAlert(selectedJob.id);
-                      return alert ? (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setSelectedAlert(alert);
-                          }}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <AlertCircle className="h-5 w-5" />
-                        </Button>
-                      ) : null;
-                    })()}
+                    {selectedJob.alert && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setSelectedAlert(selectedJob.alert);
+                        }}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <AlertCircle className="h-5 w-5" />
+                      </Button>
+                    )}
                   </span>
                 </div>
                 <div className="flex">
@@ -628,6 +619,38 @@ export default function JobsPage() {
                 <div className="flex">
                   <div className="w-32 flex-shrink-0">作成日時</div>
                   <div>{format(new Date(selectedJob.created_at), "yyyy/MM/dd HH:mm", { locale: ja })}</div>
+                </div>
+              </div>
+              <div>
+                <h3 className="font-semibold">管理操作ログ</h3>
+                <div>
+                  {selectedJob.adminlogs.length > 0 ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>日時</TableHead>
+                          <TableHead>操作</TableHead>
+                          <TableHead>操作理由</TableHead>
+                          <TableHead>担当者</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {selectedJob.adminlogs.map((log) => (
+                          <TableRow key={log.id}>
+                            <TableCell>
+                              {format(new Date(log.created_at), "yyyy/MM/dd HH:mm", { locale: ja })}
+                            </TableCell>
+                            <TableCell>{log.action}</TableCell>
+                            <TableCell>{log.reason || "-"}</TableCell>
+                            <TableCell>
+                              {operators.find((op) => op.id === log.operator_id)?.name || "-"}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  ) : <div className="text-gray-500">管理操作ログはありません。</div>
+                }
                 </div>
               </div>
               {selectedJob.status === "PENDING" ? (

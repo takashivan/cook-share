@@ -8,6 +8,7 @@ import {
   banChef,
   approveChef,
   UsersListResponse,
+  fetchOperators,
 } from "@/lib/redux/slices/operatorSlice";
 import {
   Table,
@@ -18,13 +19,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
@@ -35,6 +29,29 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import Papa from "papaparse";
 import { exportCsv } from "@/lib/utils";
+import { format } from "date-fns";
+import { ja } from "date-fns/locale";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function ChefsPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -42,10 +59,11 @@ export default function ChefsPage() {
   const chefs = useSelector((state: RootState) => state.operator.chefs.data);
   const loading = useSelector((state: RootState) => state.operator.chefs.loading);
   const error = useSelector((state: RootState) => state.operator.chefs.error);
+  const operators = useSelector((state: RootState) => state.operator.operators.data);
 
   const [selectedChef, setSelectedChef] = useState<UsersListResponse | null>(null);
   const [reason, setReason] = useState("");
-  const [showSuspendedOnly, setShowSuspendedOnly] = useState(false);
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [sortKey, setSortKey] = useState<keyof typeof chefs[0] | null>(null);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
@@ -63,6 +81,7 @@ export default function ChefsPage() {
 
   useEffect(() => {
     dispatch(fetchChefs());
+    dispatch(fetchOperators());
   }, [dispatch]);
 
   const handleBan = async (chef: UsersListResponse) => {
@@ -578,35 +597,107 @@ export default function ChefsPage() {
                 </p>
                 <p>点数: {selectedChef.rating}</p>
               </div>
+              <div>
+                <h3 className="font-semibold">管理操作ログ</h3>
+                <div>
+                  {selectedChef.adminlogs.length > 0 ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>日時</TableHead>
+                          <TableHead>操作</TableHead>
+                          <TableHead>操作理由</TableHead>
+                          <TableHead>担当者</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {selectedChef.adminlogs.map((log) => (
+                          <TableRow key={log.id}>
+                            <TableCell>
+                              {format(new Date(log.created_at), "yyyy/MM/dd HH:mm", { locale: ja })}
+                            </TableCell>
+                            <TableCell>{log.action}</TableCell>
+                            <TableCell>{log.reason || "-"}</TableCell>
+                            <TableCell>
+                              {operators.find((op) => op.id === log.operator_id)?.name || "-"}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  ) : <div className="text-gray-500">管理操作ログはありません。</div>
+                }
+                </div>
+              </div>
               {!selectedChef.is_approved ? (
                 <div>
                   <h3 className="font-semibold mb-2">承認</h3>
-                  <Input
-                    placeholder="承認理由を入力"
-                    value={reason}
-                    onChange={(e) => setReason(e.target.value)}
-                  />
-                  <Button
-                    variant="default"
-                    className="mt-2 w-full"
-                    onClick={() => handleApprove(selectedChef)}>
-                    承認する
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="default"
+                      >
+                        承認する
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>求人の承認</DialogTitle>
+                      </DialogHeader>
+                      <DialogDescription>
+                        <span className="block mb-2">求人を承認しますか？</span>
+                        <Input
+                          placeholder="承認理由を入力"
+                          value={reason}
+                          onChange={(e) => setReason(e.target.value)}
+                        />
+                      </DialogDescription>
+                      <DialogFooter className="gap-2">
+                        <DialogClose>キャンセル</DialogClose>
+                        <Button
+                          variant="default"
+                          onClick={() => handleApprove(selectedChef)}>
+                          承認する
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               ) : (
                 <div>
                   <h3 className="font-semibold mb-2">BAN</h3>
-                  <Input
-                    placeholder="BAN理由を入力"
-                    value={reason}
-                    onChange={(e) => setReason(e.target.value)}
-                  />
-                  <Button
-                    variant="destructive"
-                    className="mt-2 w-full"
-                    onClick={() => handleBan(selectedChef)}>
-                    BANする
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="destructive"
+                      >
+                        BANする
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          求人のBAN
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          <span className="block mb-2">求人をBANしますか？</span>
+                          <Input
+                            placeholder="BAN理由を入力"
+                            value={reason}
+                            onChange={(e) => setReason(e.target.value)}
+                          />
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleBan(selectedChef)}
+                          className="bg-red-600 hover:bg-red-700">
+                          BANする
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               )}
             </div>

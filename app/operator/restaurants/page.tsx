@@ -41,9 +41,7 @@ export default function RestaurantsPage() {
   const restaurants = useSelector((state: RootState) => state.operator.restaurants.data);
   const loading = useSelector((state: RootState) => state.operator.restaurants.loading);
   const error = useSelector((state: RootState) => state.operator.restaurants.error);
-  const cuisines = useSelector((state: RootState) => state.operator.cuisines);
-
-  const [showSuspendedOnly, setShowSuspendedOnly] = useState(false);
+  const cuisines = useSelector((state: RootState) => state.operator.cuisines.data);
 
   // 検索用state追加
   const [searchQuery, setSearchQuery] = useState("");

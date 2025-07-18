@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/lib/redux/store";
-import { approveRestaurant, banRestaurant, fetchCuisines, fetchRestaurantDetail } from "@/lib/redux/slices/operatorSlice";
+import { approveRestaurant, banRestaurant, fetchCuisines, fetchOperators, fetchRestaurantDetail } from "@/lib/redux/slices/operatorSlice";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { RestaurantStatusBadgeForAdmin } from "@/components/badge/RestaurantStatusBadgeForAdmin";
@@ -37,7 +37,8 @@ export default function RestaurantDetailPage(props: {
   const restaurantDetail = useSelector((state: RootState) => state.operator.restaurantDetail.data);
   const loading = useSelector((state: RootState) => state.operator.restaurantDetail.loading);
   const error = useSelector((state: RootState) => state.operator.restaurantDetail.error);
-  const cuisines = useSelector((state: RootState) => state.operator.cuisines);
+  const cuisines = useSelector((state: RootState) => state.operator.cuisines.data);
+  const operators = useSelector((state: RootState) => state.operator.operators.data);
 
   const { toast } = useToast();
 
@@ -48,6 +49,7 @@ export default function RestaurantDetailPage(props: {
       dispatch(fetchRestaurantDetail(Number(id)));
     }
     dispatch(fetchCuisines());
+    dispatch(fetchOperators());
   }, [dispatch, id]);
 
   const handleBan = async (restaurant: RestaurantsDetailData['restaurant']) => {
@@ -233,6 +235,37 @@ export default function RestaurantDetailPage(props: {
                 <div>{restaurantDetail.rating}</div>
               </div>
             </div>
+            
+            <div>
+              <h3 className="font-semibold">管理操作ログ</h3>
+              {restaurantDetail.adminlogs.length > 0 ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>日時</TableHead>
+                        <TableHead>操作</TableHead>
+                        <TableHead>操作理由</TableHead>
+                        <TableHead>担当者</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {restaurantDetail.adminlogs.map((log) => (
+                        <TableRow key={log.id}>
+                          <TableCell>
+                            {format(new Date(log.created_at), "yyyy/MM/dd HH:mm", { locale: ja })}
+                          </TableCell>
+                          <TableCell>{log.action}</TableCell>
+                          <TableCell>{log.reason || "-"}</TableCell>
+                          <TableCell>
+                            {operators.find((op) => op.id === log.operator_id)?.name || "-"}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : <div className="text-gray-500">管理操作ログはありません。</div>
+              }
+            </div>
             <div>
               <h3 className="font-semibold">スタッフ一覧</h3>
               <Table>
@@ -265,7 +298,6 @@ export default function RestaurantDetailPage(props: {
                     <DialogTrigger asChild>
                       <Button
                         variant="default"
-                        className="w-full"
                       >
                         承認する
                       </Button>
@@ -299,7 +331,6 @@ export default function RestaurantDetailPage(props: {
                     <AlertDialogTrigger asChild>
                       <Button
                         variant="destructive"
-                        className="mt-2 w-full"
                       >
                         BANする
                       </Button>

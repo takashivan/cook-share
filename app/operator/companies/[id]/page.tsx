@@ -23,7 +23,7 @@ export default function CompanyDetailPage(props: {
   const companyDetail = useSelector((state: RootState) => state.operator.companyDetail.data);
   const loading = useSelector((state: RootState) => state.operator.companyDetail.loading);
   const error = useSelector((state: RootState) => state.operator.companyDetail.error);
-  const cuisines = useSelector((state: RootState) => state.operator.cuisines);
+  const cuisines = useSelector((state: RootState) => state.operator.cuisines.data);
 
   useEffect(() => {
     if (id) {
