@@ -840,6 +840,19 @@ export type JobsListData = {
     actual_fee: number;
     transportation_type: "FIXED" | "NONE" | "MAX";
   };
+  alert: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format int64 */
+    job_id: number;
+    messages: string;
+    status: "OK" | "NG";
+  } | null;
 }[];
 
 export type BillingsAllListData = {
