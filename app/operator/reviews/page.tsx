@@ -4,11 +4,9 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/lib/redux/store";
 import {
-  fetchChefsToBeReviewed,
-  banChef,
-  approveChef,
+  fetchChefReviews,
+  fetchRestaurantReviews,
 } from "@/lib/redux/slices/operatorSlice";
-import { UserProfile } from "@/types/user";
 import {
   Table,
   TableBody,
@@ -17,216 +15,371 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Search, SlidersHorizontal, Download } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import { format } from "date-fns";
+import { ja } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { Search } from "lucide-react";
+import Papa from "papaparse";
+import { exportCsv } from "@/lib/utils";
 
 export default function ChefsPage() {
   const dispatch = useDispatch<AppDispatch>();
-  const {
-    data: chefs,
-    loading,
-    error,
-  } = useSelector((state: RootState) => state.operator.chefsToBeReviewed);
-  const [selectedChef, setSelectedChef] = useState<UserProfile | null>(null);
-  const [banReason, setBanReason] = useState("");
+
+  const chefReviews = useSelector(
+    (state: RootState) => state.operator.chefReviews.data
+  );
+  const chefReviewsLoading = useSelector(
+    (state: RootState) => state.operator.chefReviews.loading
+  );
+  const chefReviewsError = useSelector(
+    (state: RootState) => state.operator.chefReviews.error
+  );
+
+  const restaurantReviews = useSelector(
+    (state: RootState) => state.operator.restaurantReviews.data
+  );
+  const restaurantReviewsLoading = useSelector(
+    (state: RootState) => state.operator.restaurantReviews.loading
+  );
+  const restaurantReviewsError = useSelector(
+    (state: RootState) => state.operator.restaurantReviews.error
+  );
+
   const [showSuspendedOnly, setShowSuspendedOnly] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const { toast } = useToast();
+  const [selectedTab, setSelectedTab] = useState("chefReviews");
+  const [sortKey, setSortKey] = useState<
+    "id" | "userName" | "restaurantName" | "workDate" | "rating" | "comment" | null
+  >(null);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [workDateMin, setWorkDateMin] = useState("");
+  const [workDateMax, setWorkDateMax] = useState("");
+  const [ratingMin, setRatingMin] = useState("");
+  const [ratingMax, setRatingMax] = useState("");
 
   useEffect(() => {
-    dispatch(fetchChefsToBeReviewed());
+    dispatch(fetchChefReviews());
+    dispatch(fetchRestaurantReviews());
   }, [dispatch]);
 
-  const handleBan = async () => {
-    if (!selectedChef || !banReason) return;
-
-    try {
-      await dispatch(
-        banChef({ id: selectedChef.id, reason: banReason })
-      ).unwrap();
-      toast({
-        title: "シェフをBANしました",
-        description: `${selectedChef.name}をBANしました。`,
-      });
-      setSelectedChef(null);
-      setBanReason("");
-      dispatch(fetchChefsToBeReviewed());
-    } catch (error) {
-      toast({
-        title: "エラー",
-        description: "BANに失敗しました。",
-        variant: "destructive",
-      });
+  // ソート関数
+  const handleSort = (key: typeof sortKey) => {
+    if (sortKey === key) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setSortOrder("asc");
     }
   };
 
-  const handleApprove = async (chef: UserProfile) => {
-    try {
-      await dispatch(approveChef(chef.id)).unwrap();
-      toast({
-        title: "シェフを承認しました",
-        description: `${chef.name}を承認しました。`,
-      });
-      dispatch(fetchChefsToBeReviewed());
-    } catch (error) {
-      toast({
-        title: "エラー",
-        description: "承認に失敗しました。",
-        variant: "destructive",
-      });
-    }
+  // ソートアイコン
+  const renderSortIcon = (key: typeof sortKey) => {
+    if (sortKey !== key) return null;
+    return sortOrder === "asc" ? "▲" : "▼";
   };
 
-  const filteredChefs =
-    chefs?.filter((chef) => {
-      // フィルター条件を組み合わせる
-      const matchesSearch =
-        searchQuery === "" ||
-        chef.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        chef.email.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus = !showSuspendedOnly || !chef.is_approved;
-      return matchesSearch && matchesStatus;
-    }) || [];
+  const filteredReviews =
+    (selectedTab === "chefReviews" ? chefReviews : restaurantReviews)?.filter(
+      (review) => {
+        const query = searchQuery.trim().toLowerCase();
+        if (
+          query &&
+          !(
+            review.id.toString().includes(query) ||
+            review.user.name.toLowerCase().includes(query) ||
+            review.restaurant.name.toLowerCase().includes(query) ||
+            review.comment.toLowerCase().includes(query)
+          )
+        ) {
+          return false;
+        }
+        // 勤務日フィルタ
+        const workDate = new Date(review.worksession.check_in_time);
+        if (
+          (workDateMin && workDate < new Date(workDateMin)) ||
+          (workDateMax && workDate > new Date(workDateMax))
+        ) {
+          return false;
+        }
+        // 点数フィルタ
+        if (
+          (ratingMin && review.rating < Number(ratingMin)) ||
+          (ratingMax && review.rating > Number(ratingMax))
+        ) {
+          return false;
+        }
+        return true;
+      }
+    ) || [];
 
-  if (loading) {
-    return <div className="p-4">Loading...</div>;
+  // ソート済みデータ
+  const sortedReviews = [...filteredReviews].sort((a, b) => {
+    if (!sortKey) return 0;
+    let aValue, bValue;
+    switch (sortKey) {
+      case "id":
+        aValue = a.id;
+        bValue = b.id;
+        break;
+      case "userName":
+        aValue = selectedTab === "chefReviews" ? a.user.name : a.restaurant.name;
+        bValue = selectedTab === "chefReviews" ? b.user.name : b.restaurant.name;
+        break;
+      case "restaurantName":
+        aValue = selectedTab === "chefReviews" ? a.restaurant.name : a.user.name;
+        bValue = selectedTab === "chefReviews" ? b.restaurant.name : b.user.name;
+        break;
+      case "workDate":
+        aValue = new Date(a.worksession.check_in_time);
+        bValue = new Date(b.worksession.check_in_time);
+        break;
+      case "rating":
+        aValue = a.rating;
+        bValue = b.rating;
+        break;
+      case "comment":
+        aValue = a.comment;
+        bValue = b.comment;
+        break;
+      default:
+        return 0;
+    }
+    if (typeof aValue === "number" && typeof bValue === "number") {
+      return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
+    }
+    if (typeof aValue === "string" && typeof bValue === "string") {
+      return sortOrder === "asc"
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    }
+    if (aValue instanceof Date && bValue instanceof Date) {
+      return sortOrder === "asc"
+        ? aValue.getTime() - bValue.getTime()
+        : bValue.getTime() - aValue.getTime();
+    }
+    return 0;
+  });
+
+  // エクスポート関数
+  const handleExportCSV = () => {
+    if (!sortedReviews.length) return;
+
+    const data = sortedReviews.map((review) => ({
+      ID: review.id,
+      [selectedTab === "chefReviews" ? "シェフ名" : "店舗名"]:
+        selectedTab === "chefReviews" ? review.user.name : review.restaurant.name,
+      [selectedTab === "chefReviews" ? "勤務店舗名" : "勤務シェフ名"]:
+        selectedTab === "chefReviews" ? review.restaurant.name : review.user.name,
+      勤務日: format(
+        new Date(review.worksession.check_in_time),
+        "yyyy/MM/dd",
+        { locale: ja }
+      ),
+      点数: review.rating,
+      レビュー内容: review.comment,
+    }));
+
+    const csv = Papa.unparse(data);
+    exportCsv(csv, selectedTab === "chefReviews" ? "chef_reviews.csv" : "restaurant_reviews.csv");
+  };
+
+  if (chefReviewsLoading || restaurantReviewsLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    );
   }
 
-  if (error) {
-    return <div className="p-4 text-red-500">{error}</div>;
+  if (chefReviewsError || restaurantReviewsError) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-red-500">エラーが発生しました: {chefReviewsError || restaurantReviewsError}</div>
+      </div>
+    );
   }
 
   return (
-    <div className="p-4">
-      <div className="flex flex-col gap-4 mb-4">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">シェフ一覧</h1>
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="suspended-filter"
-              checked={showSuspendedOnly}
-              onCheckedChange={setShowSuspendedOnly}
-            />
-            <Label htmlFor="suspended-filter">一時停止中のみ表示</Label>
-          </div>
-        </div>
-        <div className="relative">
+    <div className="space-y-4">
+      <div className="flex flex-col gap-1">
+        <h2 className="text-2xl font-bold tracking-tight">レビュー一覧</h2>
+        <p className="text-muted-foreground">登録されているレビューの一覧です</p>
+      </div>
+
+      <div className="flex items-center gap-4">
+        <div className="relative flex-1">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="名前やメールアドレスで検索..."
+            placeholder="ID・シェフ名・店舗名・レビュー内容で検索..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8"
+            className="w-full pl-8 bg-white"
           />
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setFilterOpen(true)}
+        >
+          <SlidersHorizontal className="mr-2 h-4 w-4" />
+          フィルター
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleExportCSV}
+        >
+          <Download className="mr-2 h-4 w-4" />
+          エクスポート
+        </Button>
       </div>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>名前</TableHead>
-              <TableHead>メール</TableHead>
-              <TableHead>経験レベル</TableHead>
-              <TableHead>ステータス</TableHead>
-              <TableHead>操作</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredChefs.map((chef: UserProfile) => (
-              <TableRow key={chef.id}>
-                <TableCell>{chef.name}</TableCell>
-                <TableCell>{chef.email}</TableCell>
-                <TableCell>{chef.experience_level || "-"}</TableCell>
-                <TableCell>
-                  {chef.is_approved ? (
-                    <Badge variant="default">承認済み</Badge>
-                  ) : (
-                    <Badge variant="destructive">一時停止中</Badge>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="outline"
-                        onClick={() => setSelectedChef(chef)}>
-                        詳細
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>シェフ詳細</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div>
-                          <h3 className="font-semibold">基本情報</h3>
-                          <p>名前: {chef.name}</p>
-                          <p>メール: {chef.email}</p>
-                          <p>経験レベル: {chef.experience_level || "-"}</p>
-                          <p>
-                            ステータス:{" "}
-                            {chef.is_approved ? "承認済み" : "一時停止中"}
-                          </p>
-                        </div>
-                        <div>
-                          <h3 className="font-semibold">スキル</h3>
-                          <div className="flex flex-wrap gap-2">
-                            {chef.skills?.map((skill: string) => (
-                              <span
-                                key={skill}
-                                className="px-2 py-1 bg-gray-100 rounded">
-                                {skill}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                        {!chef.is_approved ? (
-                          <div>
-                            <h3 className="font-semibold mb-2">承認</h3>
-                            <Button
-                              variant="default"
-                              className="w-full"
-                              onClick={() => handleApprove(chef)}>
-                              承認する
-                            </Button>
-                          </div>
-                        ) : (
-                          <div>
-                            <h3 className="font-semibold mb-2">BAN</h3>
-                            <Input
-                              placeholder="BAN理由を入力"
-                              value={banReason}
-                              onChange={(e) => setBanReason(e.target.value)}
-                            />
-                            <Button
-                              variant="destructive"
-                              className="mt-2 w-full"
-                              onClick={handleBan}>
-                              BANする
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+
+      {/* フィルターダイアログ */}
+      <Dialog open={filterOpen} onOpenChange={setFilterOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>レビュー フィルター</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>勤務日（開始）</Label>
+              <Input
+                type="date"
+                value={workDateMin}
+                onChange={(e) => setWorkDateMin(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>勤務日（終了）</Label>
+              <Input
+                type="date"
+                value={workDateMax}
+                onChange={(e) => setWorkDateMax(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>点数（最小）</Label>
+              <Input
+                type="number"
+                value={ratingMin}
+                onChange={(e) => setRatingMin(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>点数（最大）</Label>
+              <Input
+                type="number"
+                value={ratingMax}
+                onChange={(e) => setRatingMax(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setFilterOpen(false)}>
+              閉じる
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Card>
+        <CardContent className="p-0">
+          <Tabs value={selectedTab} onValueChange={setSelectedTab} className="m-2">
+            <TabsList>
+              <TabsTrigger value="chefReviews">シェフレビュー</TabsTrigger>
+              <TabsTrigger value="restaurantReviews">店舗レビュー</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <div className="w-full overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead
+                    style={{ minWidth: "6em", width: "6em" }}
+                    onClick={() => handleSort("id")}
+                    className="cursor-pointer"
+                  >
+                    ID {renderSortIcon("id")}
+                  </TableHead>
+                  <TableHead
+                    style={{ minWidth: "12em", width: "12em" }}
+                    onClick={() => handleSort("userName")}
+                    className="cursor-pointer"
+                  >
+                    {selectedTab === "chefReviews" ? "シェフ名" : "店舗名"} {renderSortIcon("userName")}
+                  </TableHead>
+                  <TableHead
+                    style={{ minWidth: "12em", width: "12em" }}
+                    onClick={() => handleSort("restaurantName")}
+                    className="cursor-pointer"
+                  >
+                    {selectedTab === "chefReviews" ? "勤務店舗名" : "勤務シェフ名"} {renderSortIcon("restaurantName")}
+                  </TableHead>
+                  <TableHead
+                    style={{ minWidth: "10em", width: "10em" }}
+                    onClick={() => handleSort("workDate")}
+                    className="cursor-pointer"
+                  >
+                    勤務日 {renderSortIcon("workDate")}
+                  </TableHead>
+                  <TableHead
+                    style={{ minWidth: "8em", width: "8em" }}
+                    onClick={() => handleSort("rating")}
+                    className="cursor-pointer"
+                  >
+                    点数（★の数） {renderSortIcon("rating")}
+                  </TableHead>
+                  <TableHead
+                    style={{ minWidth: "20em", width: "20em" }}
+                    onClick={() => handleSort("comment")}
+                    className="cursor-pointer"
+                  >
+                    レビュー内容 {renderSortIcon("comment")}
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sortedReviews.map((review) => (
+                  <TableRow key={review.id}>
+                    <TableCell>{review.id}</TableCell>
+                    <TableCell>
+                      {selectedTab === "chefReviews"
+                        ? review.user.name
+                        : review.restaurant.name}
+                    </TableCell>
+                    <TableCell>
+                      {selectedTab === "chefReviews"
+                        ? review.restaurant.name
+                        : review.user.name}
+                    </TableCell>
+                    <TableCell>
+                      {format(
+                        new Date(review.worksession.check_in_time),
+                        "yyyy/MM/dd",
+                        { locale: ja }
+                      )}
+                    </TableCell>
+                    <TableCell>{review.rating}</TableCell>
+                    <TableCell>{review.comment}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -5,64 +5,289 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/lib/redux/store";
 import {
   fetchOperatorJobs,
-  fetchOperatorAlerts,
   banJob,
   approveJob,
+  JobsListResponse,
+  fetchOperators,
 } from "@/lib/redux/slices/operatorSlice";
-import { JobWithRestaurant } from "@/types";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Search, Download } from "lucide-react";
+import { WorksessionsRestaurantTodosListData } from "@/api/__generated__/base/data-contracts";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { JobStatusBadgeForAdmin } from "@/components/badge/JobStatusBadgeForAdmin";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
+import { ja } from "date-fns/locale";
+import { SlidersHorizontal } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import Papa from "papaparse";
+import { exportCsv } from "@/lib/utils";
+
+// ステータス選択肢（JobStatusBadgeForAdmin.tsxに合わせて全て列挙）
+const STATUS_OPTIONS = [
+  { value: "RECRUITING", label: "募集中" }, // job.status === "PUBLISHED" && job.expiry_date > now && !lastWorksession
+  { value: "DRAFT", label: "下書き" }, // job.status === "DRAFT"
+  { value: "SUSPENDED", label: "一時停止中" }, // job.status === "PENDING"
+  { value: "CLOSED", label: "募集終了" }, // job.status === "PUBLISHED" && job.expiry_date <= now
+  { value: "FILLED_SCHEDULED", label: "未チェックイン" }, // job.status === "FILLED" && lastWorksession?.status === "SCHEDULED"
+  { value: "FILLED_IN_PROGRESS", label: "完了報告待ち" }, // job.status === "FILLED" && lastWorksession?.status === "IN_PROGRESS"
+  { value: "FILLED_COMPLETED", label: "完了報告承認待ち" }, // job.status === "FILLED" && lastWorksession?.status === "COMPLETED"
+  { value: "FILLED_VERIFY_REJECTED", label: "完了報告差し戻し" }, // job.status === "FILLED" && lastWorksession?.status === "VERIFY_REJECTED"
+  { value: "FILLED_VERIFIED", label: "完了報告承認済" }, // job.status === "FILLED" && lastWorksession?.status === "VERIFIED"
+  { value: "FILLED_CANCELED_BY_CHEF", label: "シェフキャンセル" }, // job.status === "FILLED" && lastWorksession?.status === "CANCELED_BY_CHEF"
+  { value: "FILLED_CANCELED_BY_RESTAURANT", label: "レストランキャンセル" }, // job.status === "FILLED" && lastWorksession?.status === "CANCELED_BY_RESTAURANT"
+];
 
 export default function JobsPage() {
   const dispatch = useDispatch<AppDispatch>();
-  const { jobs, alerts, loading, error } = useSelector((state: RootState) => ({
-    jobs: state.operator.jobs.data,
-    alerts: state.operator.alerts.data,
-    loading: state.operator.jobs.loading || state.operator.alerts.loading,
-    error: state.operator.jobs.error || state.operator.alerts.error,
-  }));
+  const jobs = useSelector((state: RootState) => state.operator.jobs.data);
+  const loading = useSelector((state: RootState) => state.operator.jobs.loading);
+  const error = useSelector((state: RootState) => state.operator.jobs.error);
+  const operators = useSelector((state: RootState) => state.operator.operators.data);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [showSuspendedOnly, setShowSuspendedOnly] = useState(false);
-  const [selectedJob, setSelectedJob] = useState<JobWithRestaurant | null>(
+  const [selectedJob, setSelectedJob] = useState<JobsListResponse | null>(
     null
   );
   const [selectedAlert, setSelectedAlert] = useState<any>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
+  const [reason, setReason] = useState("");
+  const [sortKey, setSortKey] = useState<keyof JobsListResponse | null>(null);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [workDateMin, setWorkDateMin] = useState("");
+  const [workDateMax, setWorkDateMax] = useState("");
+  const [feeMin, setFeeMin] = useState("");
+  const [feeMax, setFeeMax] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string[]>(STATUS_OPTIONS.map(opt => opt.value));
+
+  const { toast } = useToast();
 
   useEffect(() => {
     dispatch(fetchOperatorJobs());
-    dispatch(fetchOperatorAlerts());
+    dispatch(fetchOperators());
   }, [dispatch]);
 
-  const filteredJobs = jobs?.filter((job) => {
-    const matchesSearch =
-      job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      job.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = showSuspendedOnly ? !job.is_approved : true;
-    return matchesSearch && matchesStatus;
-  });
-
-  const getJobAlert = (jobId: number) => {
-    return alerts?.find((alert) => alert.job_id === jobId);
+  // ソート関数
+  const handleSort = (key: keyof JobsListResponse) => {
+    if (sortKey === key) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setSortOrder("asc");
+    }
   };
 
+  // ソートアイコン
+  const renderSortIcon = (key: keyof JobsListResponse) => {
+    if (sortKey !== key) return null;
+    return sortOrder === "asc" ? "▲" : "▼";
+  };
+
+  // ステータス判定関数
+  const getJobStatusKey = (job: JobsListResponse) => {
+    const now = Date.now();
+    const lastWorksession = job.worksession as WorksessionsRestaurantTodosListData[number] | null;
+    if (job.status === "FILLED" && lastWorksession?.status === "SCHEDULED") return "FILLED_SCHEDULED";
+    if (job.status === "FILLED" && lastWorksession?.status === "IN_PROGRESS") return "FILLED_IN_PROGRESS";
+    if (job.status === "FILLED" && lastWorksession?.status === "COMPLETED") return "FILLED_COMPLETED";
+    if (job.status === "FILLED" && lastWorksession?.status === "VERIFY_REJECTED") return "FILLED_VERIFY_REJECTED";
+    if (job.status === "FILLED" && lastWorksession?.status === "VERIFIED") return "FILLED_VERIFIED";
+    if (job.status === "FILLED" && lastWorksession?.status === "CANCELED_BY_CHEF") return "FILLED_CANCELED_BY_CHEF";
+    if (job.status === "FILLED" && lastWorksession?.status === "CANCELED_BY_RESTAURANT") return "FILLED_CANCELED_BY_RESTAURANT";
+    if (job.status === "PUBLISHED" && job.expiry_date && new Date(job.expiry_date).getTime() > now && !lastWorksession) return "RECRUITING";
+    if (job.status === "DRAFT") return "DRAFT";
+    if (job.status === "PENDING") return "SUSPENDED";
+    if (job.status === "PUBLISHED" && job.expiry_date && new Date(job.expiry_date).getTime() <= now) return "CLOSED";
+    return ""; // 該当なし
+  };
+
+  // ステータスチェックボックスのハンドラ
+  const handleStatusChange = (status: string) => {
+    setStatusFilter((prev) =>
+      prev.includes(status)
+        ? prev.filter((s) => s !== status)
+        : [...prev, status]
+    );
+  };
+
+  const filteredJobs = jobs?.filter((job) => {
+    const query = searchTerm.trim().toLowerCase();
+    if (
+      query &&
+      !(
+        job.id.toString().includes(query) ||
+        job.title.toLowerCase().includes(query)
+      )
+    ) {
+      return false;
+    }
+    // 勤務日フィルタ
+    if (
+      (workDateMin && new Date(job.work_date) < new Date(workDateMin)) ||
+      (workDateMax && new Date(job.work_date) > new Date(workDateMax))
+    ) {
+      return false;
+    }
+    // 報酬フィルタ
+    if (
+      (feeMin && job.fee < Number(feeMin)) ||
+      (feeMax && job.fee > Number(feeMax))
+    ) {
+      return false;
+    }
+    // ステータスフィルタ
+    const statusKey = getJobStatusKey(job);
+    if (statusFilter.length === 0 || !statusFilter.includes(statusKey)) {
+      return false;
+    }
+    // 一時停止中のみ
+    if (showSuspendedOnly && statusKey !== "SUSPENDED") {
+      return false;
+    }
+    return true;
+  });
+
+  // ソート済みデータ
+  const sortedJobs = [...(filteredJobs ?? [])].sort((a, b) => {
+    if (!sortKey) return 0;
+    const aValue = a[sortKey];
+    const bValue = b[sortKey];
+    if (typeof aValue === "number" && typeof bValue === "number") {
+      return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
+    }
+    if (typeof aValue === "string" && typeof bValue === "string") {
+      return sortOrder === "asc"
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    }
+    if (aValue instanceof Date && bValue instanceof Date) {
+      return sortOrder === "asc"
+        ? aValue.getTime() - bValue.getTime()
+        : bValue.getTime() - aValue.getTime();
+    }
+    return 0;
+  });
+
   const handleBan = async (id: number) => {
-    if (window.confirm("この求人を停止しますか？")) {
-      await dispatch(banJob({ id, reason: "運営判断による停止" }));
+    if (!reason) return;
+
+    try {
+      await dispatch(banJob({ id, reason })).unwrap();
+      toast({
+        title: "求人が停止されました",
+        description: "求人の停止に成功しました",
+      });
+      setSelectedJob(null);
+      setReason("");
       dispatch(fetchOperatorJobs());
-      setIsModalOpen(false);
+    } catch (error) {
+      toast({
+        title: "エラーが発生しました",
+        description: "求人の停止に失敗しました",
+        variant: "destructive",
+      });
     }
   };
 
   const handleApprove = async (id: number) => {
-    await dispatch(approveJob({ id, reason: "承認" }));
-    dispatch(fetchOperatorJobs());
-    setIsModalOpen(false);
+    if (!reason) return;
+
+    try {
+      await dispatch(approveJob({ id, reason })).unwrap();
+      toast({
+        title: "求人が承認されました",
+        description: "求人の承認に成功しました",
+      });
+      setSelectedJob(null);
+      setReason("");
+      dispatch(fetchOperatorJobs());
+    } catch (error) {
+      toast({
+        title: "エラーが発生しました",
+        description: "求人の承認に失敗しました",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // フィルターリセット関数
+  const handleFilterReset = () => {
+    setWorkDateMin("");
+    setWorkDateMax("");
+    setFeeMin("");
+    setFeeMax("");
+    setStatusFilter(STATUS_OPTIONS.map(opt => opt.value));
+  };
+
+  // エクスポート関数
+  const handleExportCSV = () => {
+    if (!sortedJobs.length) return;
+
+    const data = sortedJobs.map((job) => {
+      // ステータス表示名
+      const statusKey = getJobStatusKey(job);
+      const statusLabel =
+        STATUS_OPTIONS.find((opt) => opt.value === statusKey)?.label ?? "";
+
+      return {
+        ID: job.id,
+        タイトル: job.title,
+        ステータス: statusLabel,
+        求人詳細: job.description,
+        勤務日: job.work_date ? new Date(job.work_date).toLocaleDateString("ja-JP") : "",
+        開始時間: job.start_time ? new Date(job.start_time).toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" }) : "",
+        終了時間: job.end_time ? new Date(job.end_time).toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" }) : "",
+        報酬: job.fee != null ? `¥${job.fee.toLocaleString()}` : "",
+        締め切り: job.expiry_date ? new Date(job.expiry_date).toLocaleString("ja-JP") : "",
+        業務内容: job.task,
+        必要なスキル: job.skill,
+        持ち物: job.whattotake,
+        交通費:
+          job.transportation_type === "NONE"
+            ? "交通費なし"
+            : job.transportation_type === "MAX"
+            ? `上限 | ¥${job.transportation_amount?.toLocaleString() ?? "-"}`
+            : `一律 | ¥${job.transportation_amount?.toLocaleString() ?? "-"}`,
+        備考: job.note,
+        ポイント: job.point,
+        作成日時: job.created_at ? new Date(job.created_at).toLocaleString("ja-JP") : "",
+      };
+    });
+
+    const csv = Papa.unparse(data);
+    exportCsv(csv, "jobs.csv");
   };
 
   if (loading) {
@@ -82,196 +307,463 @@ export default function JobsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">求人一覧</h1>
-      </div>
+    <>
+      <div className="space-y-4">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-2xl font-bold tracking-tight">求人一覧</h2>
+          <p className="text-muted-foreground">登録されている求人の一覧です</p>
+        </div>
 
-      <div className="mb-6 flex gap-4">
-        <Input
-          type="text"
-          placeholder="求人を検索..."
-          className="flex-1 px-4 py-2 border rounded"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <label className="flex items-center gap-2">
-          <Switch
-            checked={showSuspendedOnly}
-            onCheckedChange={(checked) => setShowSuspendedOnly(checked)}
-          />
-          一時停止中の求人のみ表示
-        </label>
-      </div>
+        <div className="flex items-center gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="ID・タイトルで検索..."
+              className="w-full pl-8 bg-white"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setFilterOpen(true)}
+          >
+            <SlidersHorizontal className="mr-2 h-4 w-4" />
+            フィルター
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportCSV}
+          >
+            <Download className="mr-2 h-4 w-4" />
+            エクスポート
+          </Button>
+        </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="w-1/3 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                タイトル
-              </th>
-              <th className="w-1/6 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                勤務日
-              </th>
-              <th className="w-1/6 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                時給
-              </th>
-              <th className="w-1/6 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                ステータス
-              </th>
-              <th className="w-1/6 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                操作
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredJobs?.map((job: JobWithRestaurant) => {
-              const alert = getJobAlert(job.id);
-              return (
-                <tr key={job.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-4">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => {
-                          setSelectedJob(job);
-                          setIsModalOpen(true);
-                        }}
-                        className="text-blue-600 hover:text-blue-800 truncate max-w-[200px]">
-                        {job.title}
-                      </button>
-                      {alert && (
-                        <button
-                          onClick={() => {
-                            setSelectedAlert(alert);
-                            setIsAlertModalOpen(true);
-                          }}
-                          className="text-red-500 hover:text-red-700">
-                          <AlertCircle className="h-5 w-5" />
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    {new Date(job.work_date).toLocaleDateString("ja-JP")}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    ¥{job.hourly_rate?.toLocaleString() || "未設定"}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    {job.is_approved ? (
-                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                        公開中
-                      </span>
-                    ) : (
-                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                        停止中
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
-                    <button
-                      onClick={() => {
-                        setSelectedJob(job);
-                        setIsModalOpen(true);
-                      }}
-                      className="text-blue-600 hover:text-blue-900">
-                      詳細
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      {isModalOpen && selectedJob && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full">
-            <h2 className="text-xl font-bold mb-4">{selectedJob.title}</h2>
-            <div className="space-y-4">
+        {/* フィルターダイアログ */}
+        <Dialog open={filterOpen} onOpenChange={setFilterOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>求人フィルター</DialogTitle>
+            </DialogHeader>
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <h3 className="font-semibold">説明</h3>
-                <p className="text-gray-600">{selectedJob.description}</p>
+                <label>勤務日（開始）</label>
+                <Input
+                  type="date"
+                  value={workDateMin}
+                  onChange={e => setWorkDateMin(e.target.value)}
+                />
               </div>
               <div>
-                <h3 className="font-semibold">勤務日</h3>
-                <p className="text-gray-600">
-                  {new Date(selectedJob.work_date).toLocaleDateString("ja-JP")}
-                </p>
+                <label>勤務日（終了）</label>
+                <Input
+                  type="date"
+                  value={workDateMax}
+                  onChange={e => setWorkDateMax(e.target.value)}
+                />
               </div>
               <div>
-                <h3 className="font-semibold">時給</h3>
-                <p className="text-gray-600">
-                  ¥{selectedJob.hourly_rate?.toLocaleString() || "未設定"}
-                </p>
+                <label>報酬（最小）</label>
+                <Input
+                  type="number"
+                  value={feeMin}
+                  onChange={e => setFeeMin(e.target.value)}
+                />
               </div>
-              {selectedJob.transportation && (
-                <div>
-                  <h3 className="font-semibold">交通費</h3>
-                  <p className="text-gray-600">{selectedJob.transportation}</p>
+              <div>
+                <label>報酬（最大）</label>
+                <Input
+                  type="number"
+                  value={feeMax}
+                  onChange={e => setFeeMax(e.target.value)}
+                />
+              </div>
+              <div className="col-span-2">
+                <label>ステータス</label>
+                <div className="flex gap-4 mt-1 flex-wrap">
+                  {STATUS_OPTIONS.map(opt => (
+                    <label key={opt.value} className="flex items-center gap-1">
+                      <Checkbox
+                        checked={statusFilter.includes(opt.value)}
+                        onCheckedChange={() => handleStatusChange(opt.value)}
+                      />
+                      {opt.label}
+                    </label>
+                  ))}
                 </div>
-              )}
-              <div className="flex justify-end gap-4 mt-6">
-                {selectedJob.is_approved ? (
-                  <button
-                    onClick={() => handleBan(selectedJob.id)}
-                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
-                    停止
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleApprove(selectedJob.id)}
-                    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                    公開
-                  </button>
-                )}
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
-                  閉じる
-                </button>
               </div>
             </div>
-          </div>
-        </div>
+            <DialogFooter className="flex flex-row gap-2 justify-end">
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={handleFilterReset}
+              >
+                フィルターリセット
+              </Button>
+              <Button variant="outline" onClick={() => setFilterOpen(false)}>
+                閉じる
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Card>
+          <CardContent className="p-0">
+            <div className="w-full overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead
+                      style={{ minWidth: "4em", width: "4em" }}
+                      onClick={() => handleSort("id")}
+                      className="cursor-pointer"
+                    >
+                      ID {renderSortIcon("id")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "16em", width: "16em" }}
+                      onClick={() => handleSort("title")}
+                      className="cursor-pointer"
+                    >
+                      タイトル {renderSortIcon("title")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "9em", width: "9em" }}
+                      onClick={() => handleSort("work_date")}
+                      className="cursor-pointer"
+                    >
+                      勤務日 {renderSortIcon("work_date")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "8em", width: "8em" }}
+                      onClick={() => handleSort("fee")}
+                      className="cursor-pointer"
+                    >
+                      報酬 {renderSortIcon("fee")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "12em", width: "12em" }}
+                      onClick={() => handleSort("status")}
+                      className="cursor-pointer"
+                    >
+                      ステータス {renderSortIcon("status")}
+                    </TableHead>
+                    <TableHead style={{ minWidth: "5em", width: "5em" }}>
+                      操作
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sortedJobs?.map((job) => {
+                    return (
+                      <TableRow key={job.id}>
+                        <TableCell>{job.id}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <Link
+                              href={`/job/${job.id}`}
+                              className="text-blue-600 hover:underline"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {job.title}
+                            </Link>
+                            {job.alert && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                  setSelectedAlert(job.alert);
+                                }}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <AlertCircle className="h-5 w-5" />
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>{new Date(job.work_date).toLocaleDateString("ja-JP")}</TableCell>
+                        <TableCell>{`¥${job.fee.toLocaleString()}`}</TableCell>
+                        <TableCell>
+                          <JobStatusBadgeForAdmin
+                            job={job}
+                            lastWorksession={job.worksession as WorksessionsRestaurantTodosListData[number] ?? null}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedJob(job);
+                            }}
+                          >
+                            詳細
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {selectedJob && (
+        <Dialog open={!!selectedJob} onOpenChange={() => setSelectedJob(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>求人詳細</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-semibold">基本情報</h3>
+                <div className="flex">
+                  <div className="w-32 flex-shrink-0">ID</div>
+                  <div>
+                    {selectedJob.id}
+                  </div>
+                </div>
+
+                <div className="flex">
+                  <div className="w-32 flex-shrink-0">タイトル</div>
+                  <span className="flex items-center gap-1">
+                    {selectedJob.title}
+                    {selectedJob.alert && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setSelectedAlert(selectedJob.alert);
+                        }}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <AlertCircle className="h-5 w-5" />
+                      </Button>
+                    )}
+                  </span>
+                </div>
+                <div className="flex">
+                  <div className="w-32 flex-shrink-0">ステータス</div>
+                  <div>
+                    <JobStatusBadgeForAdmin
+                      job={selectedJob}
+                      lastWorksession={selectedJob.worksession as WorksessionsRestaurantTodosListData[number] ?? null}
+                    />
+                  </div>
+                </div>
+                <div className="flex">
+                  <div className="w-32 flex-shrink-0">求人詳細</div>
+                  <div>{selectedJob.description}</div>
+                </div>
+                <div className="flex">
+                  <div className="w-32 flex-shrink-0">勤務日</div>
+                  <div>{format(new Date(selectedJob.work_date), "yyyy/MM/dd", { locale: ja })}</div>
+                </div>
+                <div className="flex">
+                  <div className="w-32 flex-shrink-0">開始時間</div>
+                  <div>{format(new Date(selectedJob.start_time), "HH:mm", { locale: ja })}</div>
+                </div>
+                <div className="flex">
+                  <div className="w-32 flex-shrink-0">終了時間</div>
+                  <div>{format(new Date(selectedJob.end_time), "HH:mm", { locale: ja })}</div>
+                </div>
+                <div className="flex">
+                  <div className="w-32 flex-shrink-0">報酬</div>
+                  <div>¥{selectedJob.fee.toLocaleString()}</div>
+                </div>
+                <div className="flex">
+                  <div className="w-32 flex-shrink-0">締め切り</div>
+                  <div>{selectedJob.expiry_date ? format(new Date(selectedJob.expiry_date), "yyyy/MM/dd HH:mm", { locale: ja }) : "未設定"}</div>
+                </div>
+                <div className="flex">
+                  <div className="w-32 flex-shrink-0">業務内容</div>
+                  <div>{selectedJob.task}</div>
+                </div>
+                <div className="flex">
+                  <div className="w-32 flex-shrink-0">必要なスキル</div>
+                  <div>{selectedJob.skill}</div>
+                </div>
+                <div className="flex">
+                  <div className="w-32 flex-shrink-0">持ち物</div>
+                  <div>{selectedJob.whattotake}</div>
+                </div>
+                <div className="flex">
+                  <div className="w-32 flex-shrink-0">交通費</div>
+                  <div>
+                    {selectedJob.transportation_type === "NONE"
+                      ? "交通費なし"
+                      : selectedJob.transportation_type === "MAX"
+                      ? "上限"
+                      : "一律"}{" "}
+                    |{" "}
+                    {selectedJob.transportation_type !== "NONE"
+                      ? `¥${selectedJob.transportation_amount.toLocaleString()}`
+                      : '-'}
+                  </div>
+                </div>
+                <div className="flex">
+                  <div className="w-32 flex-shrink-0">備考</div>
+                  <div>{selectedJob.note}</div>
+                </div>
+                <div className="flex">
+                  <div className="w-32 flex-shrink-0">ポイント</div>
+                  <div>{selectedJob.point}</div>
+                </div>
+                <div className="flex">
+                  <div className="w-32 flex-shrink-0">作成日時</div>
+                  <div>{format(new Date(selectedJob.created_at), "yyyy/MM/dd HH:mm", { locale: ja })}</div>
+                </div>
+              </div>
+              <div>
+                <h3 className="font-semibold">管理操作ログ</h3>
+                <div>
+                  {selectedJob.adminlogs.length > 0 ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>日時</TableHead>
+                          <TableHead>操作</TableHead>
+                          <TableHead>操作理由</TableHead>
+                          <TableHead>担当者</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {selectedJob.adminlogs.map((log) => (
+                          <TableRow key={log.id}>
+                            <TableCell>
+                              {format(new Date(log.created_at), "yyyy/MM/dd HH:mm", { locale: ja })}
+                            </TableCell>
+                            <TableCell>{log.action}</TableCell>
+                            <TableCell>{log.reason || "-"}</TableCell>
+                            <TableCell>
+                              {operators.find((op) => op.id === log.operator_id)?.name || "-"}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  ) : <div className="text-gray-500">管理操作ログはありません。</div>
+                }
+                </div>
+              </div>
+              {selectedJob.status === "PENDING" ? (
+                <div>
+                  <h3 className="font-semibold mb-2">承認</h3>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="default"
+                      >
+                        承認する
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>求人の承認</DialogTitle>
+                      </DialogHeader>
+                      <DialogDescription>
+                        <span className="block mb-2">求人を承認しますか？</span>
+                        <Input
+                          placeholder="承認理由を入力"
+                          value={reason}
+                          onChange={(e) => setReason(e.target.value)}
+                        />
+                      </DialogDescription>
+                      <DialogFooter className="gap-2">
+                        <DialogClose>キャンセル</DialogClose>
+                        <Button
+                          variant="default"
+                          onClick={() => handleApprove(selectedJob.id)}>
+                          承認する
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              ) : selectedJob.status === "PUBLISHED" ? (
+                <div>
+                  <h3 className="font-semibold mb-2">BAN</h3>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="destructive"
+                      >
+                        BANする
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          求人のBAN
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          <span className="block mb-2">求人をBANしますか？</span>
+                          <Input
+                            placeholder="BAN理由を入力"
+                            value={reason}
+                            onChange={(e) => setReason(e.target.value)}
+                          />
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleBan(selectedJob.id)}
+                          className="bg-red-600 hover:bg-red-700">
+                          BANする
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              ) : null}
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
 
-      {isAlertModalOpen && selectedAlert && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full">
-            <h2 className="text-xl font-bold mb-4 text-red-600">
-              アラート情報
-            </h2>
+      {selectedAlert && (
+        <Dialog open={!!selectedAlert} onOpenChange={() => setSelectedAlert(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>アラート情報</DialogTitle>
+            </DialogHeader>
             <div className="space-y-4">
               <div>
                 <h3 className="font-semibold">ステータス</h3>
-                <p className="text-gray-600">{selectedAlert.status}</p>
+                <p>{selectedAlert.status}</p>
               </div>
               <div>
                 <h3 className="font-semibold">メッセージ</h3>
-                <p className="text-gray-600 whitespace-pre-line">
+                <p className="whitespace-pre-line">
                   {selectedAlert.messages}
                 </p>
               </div>
               <div>
                 <h3 className="font-semibold">作成日時</h3>
-                <p className="text-gray-600">
+                <p>
                   {new Date(selectedAlert.created_at).toLocaleString("ja-JP")}
                 </p>
               </div>
               <div className="flex justify-end mt-6">
-                <button
-                  onClick={() => setIsAlertModalOpen(false)}
-                  className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                <Button
+                  onClick={() => setSelectedAlert(null)}
+                  variant="outline"
+                >
                   閉じる
-                </button>
+                </Button>
               </div>
             </div>
-          </div>
-        </div>
-      )}
-    </div>
+          </DialogContent>
+        </Dialog>
+      )}  
+    </>
   );
-}
+};

@@ -63,7 +63,7 @@ function OperatorLayout({ children }: { children: React.ReactNode }) {
           <h1 className="text-xl font-bold text-gray-900">運営管理画面</h1>
         </div>
         <Separator className="mb-4" />
-        <nav className="px-4 space-y-1">
+        <nav className="px-4 pb-4 space-y-1">
           <Link
             href="/operator/dashboard"
             className={cn(
@@ -79,7 +79,7 @@ function OperatorLayout({ children }: { children: React.ReactNode }) {
             href="/operator/companies"
             className={cn(
               "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
-              pathname === "/operator/companies"
+              pathname.includes("companies")
                 ? "bg-orange-50 text-orange-600"
                 : "text-gray-600 hover:bg-gray-50"
             )}>
@@ -90,7 +90,7 @@ function OperatorLayout({ children }: { children: React.ReactNode }) {
             href="/operator/restaurants"
             className={cn(
               "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
-              pathname === "/operator/restaurants"
+              pathname.includes("restaurants")
                 ? "bg-orange-50 text-orange-600"
                 : "text-gray-600 hover:bg-gray-50"
             )}>
@@ -109,17 +109,6 @@ function OperatorLayout({ children }: { children: React.ReactNode }) {
             シェフ管理
           </Link>
           <Link
-            href="/operator/reviews"
-            className={cn(
-              "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
-              pathname === "/operator/reviews"
-                ? "bg-orange-50 text-orange-600"
-                : "text-gray-600 hover:bg-gray-50"
-            )}>
-            <UserRoundCheck className="w-5 h-5 mr-3" />
-            レビュー管理
-          </Link>
-          <Link
             href="/operator/jobs"
             className={cn(
               "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
@@ -131,10 +120,21 @@ function OperatorLayout({ children }: { children: React.ReactNode }) {
             求人管理
           </Link>
           <Link
-            href="/operator/billing"
+            href="/operator/reviews"
             className={cn(
               "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
-              pathname === "/operator/billing"
+              pathname === "/operator/reviews"
+                ? "bg-orange-50 text-orange-600"
+                : "text-gray-600 hover:bg-gray-50"
+            )}>
+            <UserRoundCheck className="w-5 h-5 mr-3" />
+            レビュー管理
+          </Link>
+          <Link
+            href="/operator/billings"
+            className={cn(
+              "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
+              pathname === "/operator/billings"
                 ? "bg-orange-50 text-orange-600"
                 : "text-gray-600 hover:bg-gray-50"
             )}>
@@ -157,22 +157,11 @@ function OperatorLayout({ children }: { children: React.ReactNode }) {
             className={cn(
               "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
               pathname === "/operator/categories"
-                ? "bg-orange-50 text-orange-50 text-orange-600"
+                ? "bg-orange-50 text-orange-600"
                 : "text-gray-600 hover:bg-gray-50"
             )}>
             <Utensils className="w-5 h-5 mr-3" />
             カテゴリ管理
-          </Link>
-          <Link
-            href="/operator/skills"
-            className={cn(
-              "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
-              pathname === "/operator/skills"
-                ? "bg-orange-50 text-orange-600"
-                : "text-gray-600 hover:bg-gray-50"
-            )}>
-            <Award className="w-5 h-5 mr-3" />
-            スキル管理
           </Link>
         </nav>
         <div className="sticky bottom-0 bg-white p-4 border-t">
@@ -187,8 +176,8 @@ function OperatorLayout({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 bg-gray-50 pl-64">
-        <div className="container mx-auto p-8">{children}</div>
+      <div className="flex-1 bg-gray-50 pl-64 w-full">
+        <div className="p-8">{children}</div>
       </div>
     </div>
   );

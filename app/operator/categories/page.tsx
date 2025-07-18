@@ -6,33 +6,42 @@ import { AppDispatch, RootState } from "@/lib/redux/store";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { fetchCuisines } from "@/lib/redux/slices/operatorSlice";
-import { Cuisine } from "@/lib/api/cuisines";
 
 export default function CategoriesPage() {
   const dispatch = useDispatch<AppDispatch>();
-  const { cuisines, loading, error } = useSelector((state: RootState) => ({
-    cuisines: state.operator.cuisines,
-    loading: state.operator.loading.cuisines,
-    error: state.operator.error.cuisines,
-  }));
+  const cuisines = useSelector((state: RootState) => state.operator.cuisines.data);
+  const loading = useSelector((state: RootState) => state.operator.cuisines.loading);
+  const error = useSelector((state: RootState) => state.operator.cuisines.error);
 
   useEffect(() => {
     dispatch(fetchCuisines());
   }, [dispatch]);
 
   if (loading) {
-    return <div className="p-4">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="p-4 text-red-500">{error}</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-red-500">エラーが発生しました: {error}</div>
+      </div>
+    );
   }
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">カテゴリ一覧</h1>
+    <div className="space-y-4">
+      <div className="flex flex-col gap-1">
+        <h2 className="text-2xl font-bold tracking-tight">カテゴリ一覧</h2>
+        <p className="text-muted-foreground">登録されているカテゴリの一覧です</p>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {cuisines.map((cuisine: Cuisine) => (
+        {cuisines.map((cuisine) => (
           <Card key={cuisine.id}>
             <CardContent className="p-4">
               <div className="flex items-center space-x-4">

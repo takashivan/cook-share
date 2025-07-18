@@ -217,7 +217,323 @@ export interface SignupCreateData {
   };
 }
 
-export type CompaniesDetailData = object;
+export type BillingSummariesListData = {
+  /** @format uuid */
+  id: string;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format uuid */
+  companies_id: string | null;
+  month: string;
+  /** @format int64 */
+  amount: number;
+  /** stripe invoice id */
+  invoice_id: string;
+  status: "PENDING" | "PAID" | "FAILED";
+  fee_rate: number;
+  /** @format int64 */
+  session_count: number;
+  start_date: string;
+  end_date: string;
+  hosted_invoice_url: string;
+  invoice_pdf: string;
+  invoice_number: string;
+  company: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    name: string;
+    address: string;
+    phone: string;
+    website: string;
+    description: string;
+    status: "pending" | "approved" | "banned" | "rejected";
+    /** @format timestamptz */
+    updated_at: number | null;
+    business_registration_number: string;
+    logo_url: string;
+    stripe_customer_id: string;
+    /** @format email */
+    company_email: string;
+  };
+}[];
+
+export type ChefReviewsListData = {
+  /** @format int64 */
+  id: number;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format int64 */
+  rating: number;
+  comment: string;
+  /** @format timestamptz */
+  updated_at: number;
+  /** @format int64 */
+  session_id: number;
+  /** @format uuid */
+  reviewer_id: string;
+  /** @format int64 */
+  reviewee_id: number;
+  restaurant: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    name: string;
+    address: string;
+    cuisine_type: string;
+    business_hours: string;
+    contact_info: string;
+    profile_image: string;
+    /** @format timestamptz */
+    updated_at: number;
+    /**
+     * Whether the restaurant is active.
+     * @default "false"
+     */
+    is_active: boolean;
+    /** @format uuid */
+    companies_id: string | null;
+    station: string;
+    access: string;
+    rating: number;
+    /** @default "1" */
+    is_approved: boolean;
+    restaurant_cuisine_id: number[];
+    description: string;
+    phone: string;
+    status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
+  };
+  user: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    name: string;
+    /** @format email */
+    email: string;
+    user_type: string;
+    status: string;
+    /** @format date */
+    last_login_at: string | null;
+    /** @format date */
+    updated_at: string | null;
+    skills: string[];
+    experience_level: string;
+    bio: string;
+    certifications: string[];
+    /** @format date */
+    dateofbirth: string | null;
+    profile_image: string;
+    /** @default "false" */
+    is_approved: boolean;
+    line_user_id: string;
+    line_display_name: string;
+    /** @default "false" */
+    line_notification_enabled: boolean;
+    /** @default "false" */
+    is_verified: boolean;
+    verify_token: string;
+    stripe_account_id: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
+    password_reset_token: string;
+    /** @default "false" */
+    stripe_verified: boolean;
+    stripe_requirements: object;
+    address: string;
+    phone: string;
+    last_name: string;
+    given_name: string;
+    last_name_kana: string;
+    given_name_kana: string;
+    categories: number[];
+    postal_code: string;
+    prefecture: string;
+    address2: string;
+    city: string;
+    town: string;
+    street: string;
+    /** @default "false" */
+    profile_completed: boolean;
+    position_level: "1" | "2" | "3" | "4";
+    invoice_number: string | null;
+    magic_link: {
+      token: string;
+      /**
+       * Time the token expires
+       * @format timestamptz
+       */
+      expiration: number;
+      /** @default "false" */
+      used: boolean;
+    } | null;
+  };
+  worksession: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format timestamptz */
+    check_in_time: number;
+    /** @format timestamptz */
+    check_out_time: number;
+    total_hours: number;
+    location_data: string;
+    status:
+      | "SCHEDULED"
+      | "IN_PROGRESS"
+      | "CANCELED_BY_CHEF"
+      | "CANCELED_BY_RESTAURANT"
+      | "COMPLETED"
+      | "VERIFIED"
+      | "DISPUTE"
+      | "ESCALATED"
+      | "PAID"
+      | "CANCELED"
+      | "VERIFY_REJECTED";
+    /** @format timestamptz */
+    updated_at: number;
+    /** @format uuid */
+    application_id: string | null;
+    /** @format uuid */
+    user_id: string | null;
+    /** @format int64 */
+    restaurant_id: number;
+    /** @format int64 */
+    job_id: number;
+    /** @format int64 */
+    paid_amount: number;
+    chef_feedback: string;
+    restaurant_feedback: string;
+    /** @format int64 */
+    chef_rating: number;
+    /** @format int64 */
+    restaurant_rating: number;
+    /** @format timestamptz */
+    start_time: number | null;
+    /** @format int64 */
+    check_in_code: number | null;
+    /** @format int64 */
+    transportation_expenses: number | null;
+    /** @format int64 */
+    actual_fee: number;
+    transportation_type: "FIXED" | "NONE" | "MAX";
+  };
+}[];
+
+export interface CompaniesDetailData {
+  company: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    name: string;
+    address: string;
+    phone: string;
+    website: string;
+    description: string;
+    status: "pending" | "approved" | "banned" | "rejected";
+    /** @format timestamptz */
+    updated_at: number | null;
+    business_registration_number: string;
+    logo_url: string;
+    stripe_customer_id: string;
+    /** @format email */
+    company_email: string;
+  };
+  restaurants: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    name: string;
+    address: string;
+    cuisine_type: string;
+    business_hours: string;
+    contact_info: string;
+    profile_image: string;
+    /** @format timestamptz */
+    updated_at: number;
+    /**
+     * Whether the restaurant is active.
+     * @default "false"
+     */
+    is_active: boolean;
+    /** @format uuid */
+    companies_id: string | null;
+    station: string;
+    access: string;
+    rating: number;
+    /** @default "1" */
+    is_approved: boolean;
+    restaurant_cuisine_id: number[];
+    description: string;
+    phone: string;
+    status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
+  }[];
+  company_users: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format uuid */
+    companies_id: string | null;
+    name: string;
+    /** @format email */
+    email: string;
+    phone: string | null;
+    /** @format password */
+    password: string;
+    /** @default "false" */
+    is_admin: boolean;
+    /** @default "1" */
+    is_active: boolean;
+    /** @default "false" */
+    is_verified: boolean;
+    /** @format timestamptz */
+    updated_at: number | null;
+    magic_link: object;
+    verify_token: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
+    password_reset_token: string;
+  }[];
+  total_paid_amount: string;
+  jobCount: string;
+  worksessionCount: string;
+  worksessionCanceledByRestaurantCount: string;
+}
 
 export type CompaniesListData = {
   /** @format uuid */
@@ -422,6 +738,123 @@ export interface DailyMetricsCreateData {
   total_jobs: number;
 }
 
+export type JobsListData = {
+  /** @format int64 */
+  id: number;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  title: string;
+  description: string;
+  /** @format date */
+  work_date: string;
+  /** @format timestamptz */
+  start_time: number;
+  /** @format timestamptz */
+  end_time: number;
+  hourly_rate: number;
+  required_skills: string[];
+  status:
+    | "DRAFT"
+    | "PUBLISHED"
+    | "EXPIRED"
+    | "PENDING"
+    | "DELETED"
+    | "FILLED"
+    | "COMPLETED";
+  /** @format timestamptz */
+  updated_at: number;
+  /** @format int64 */
+  restaurant_id: number;
+  image: string;
+  task: string;
+  skill: string;
+  whattotake: string;
+  note: string;
+  point: string;
+  transportation: string;
+  /** @default "1" */
+  is_approved: boolean;
+  /** @format int64 */
+  number_of_spots: number;
+  /** @format int64 */
+  fee: number;
+  /** @format timestamptz */
+  expiry_date: number | null;
+  transportation_type: "NONE" | "MAX" | "FIXED";
+  /** @format int64 */
+  transportation_amount: number;
+  worksession: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format timestamptz */
+    check_in_time: number;
+    /** @format timestamptz */
+    check_out_time: number;
+    total_hours: number;
+    location_data: string;
+    status:
+      | "SCHEDULED"
+      | "IN_PROGRESS"
+      | "CANCELED_BY_CHEF"
+      | "CANCELED_BY_RESTAURANT"
+      | "COMPLETED"
+      | "VERIFIED"
+      | "DISPUTE"
+      | "ESCALATED"
+      | "PAID"
+      | "CANCELED"
+      | "VERIFY_REJECTED";
+    /** @format timestamptz */
+    updated_at: number;
+    /** @format uuid */
+    application_id: string | null;
+    /** @format uuid */
+    user_id: string | null;
+    /** @format int64 */
+    restaurant_id: number;
+    /** @format int64 */
+    job_id: number;
+    /** @format int64 */
+    paid_amount: number;
+    chef_feedback: string;
+    restaurant_feedback: string;
+    /** @format int64 */
+    chef_rating: number;
+    /** @format int64 */
+    restaurant_rating: number;
+    /** @format timestamptz */
+    start_time: number | null;
+    /** @format int64 */
+    check_in_code: number | null;
+    /** @format int64 */
+    transportation_expenses: number | null;
+    /** @format int64 */
+    actual_fee: number;
+    transportation_type: "FIXED" | "NONE" | "MAX";
+  };
+  alert: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format int64 */
+    job_id: number;
+    messages: string;
+    status: "OK" | "NG";
+  } | null;
+}[];
+
 export type BillingsAllListData = {
   /** @format uuid */
   id: string;
@@ -533,8 +966,7 @@ export interface JobApprovePartialUpdateData {
      * @default "now"
      */
     created_at: number;
-    /** @format int64 */
-    target_id: number;
+    target_id: string;
     target_type: string;
     action: string;
     reason: string;
@@ -606,8 +1038,7 @@ export interface JobBanPartialUpdateData {
      * @default "now"
      */
     created_at: number;
-    /** @format int64 */
-    target_id: number;
+    target_id: string;
     target_type: string;
     action: string;
     reason: string;
@@ -678,8 +1109,7 @@ export interface JobsApprovePartialUpdateData {
      * @default "now"
      */
     created_at: number;
-    /** @format int64 */
-    target_id: number;
+    target_id: string;
     target_type: string;
     action: string;
     reason: string;
@@ -750,8 +1180,7 @@ export interface JobsBanPartialUpdateData {
      * @default "now"
      */
     created_at: number;
-    /** @format int64 */
-    target_id: number;
+    target_id: string;
     target_type: string;
     action: string;
     reason: string;
@@ -832,8 +1261,7 @@ export interface RestaurantApprovePartialUpdateData {
      * @default "now"
      */
     created_at: number;
-    /** @format int64 */
-    target_id: number;
+    target_id: string;
     target_type: string;
     action: string;
     reason: string;
@@ -889,8 +1317,7 @@ export interface RestaurantBanPartialUpdateData {
      * @default "now"
      */
     created_at: number;
-    /** @format int64 */
-    target_id: number;
+    target_id: string;
     target_type: string;
     action: string;
     reason: string;
@@ -900,12 +1327,11 @@ export interface RestaurantBanPartialUpdateData {
 }
 
 export interface RestaurantsApprovePartialUpdatePayload {
-  job_id: string;
   reason: string;
 }
 
 export interface RestaurantsApprovePartialUpdateData {
-  job: {
+  restaurant: {
     /** @format int64 */
     id: number;
     /**
@@ -913,46 +1339,30 @@ export interface RestaurantsApprovePartialUpdateData {
      * @default "now"
      */
     created_at: number;
-    title: string;
-    description: string;
-    /** @format date */
-    work_date: string;
-    /** @format timestamptz */
-    start_time: number;
-    /** @format timestamptz */
-    end_time: number;
-    hourly_rate: number;
-    required_skills: string[];
-    status:
-      | "DRAFT"
-      | "PUBLISHED"
-      | "EXPIRED"
-      | "PENDING"
-      | "DELETED"
-      | "FILLED"
-      | "COMPLETED";
+    name: string;
+    address: string;
+    cuisine_type: string;
+    business_hours: string;
+    contact_info: string;
+    profile_image: string;
     /** @format timestamptz */
     updated_at: number;
-    /** @format int64 */
-    restaurant_id: number;
-    image: string;
-    task: string;
-    skill: string;
-    whattotake: string;
-    note: string;
-    point: string;
-    transportation: string;
+    /**
+     * Whether the restaurant is active.
+     * @default "false"
+     */
+    is_active: boolean;
+    /** @format uuid */
+    companies_id: string | null;
+    station: string;
+    access: string;
+    rating: number;
     /** @default "1" */
     is_approved: boolean;
-    /** @format int64 */
-    number_of_spots: number;
-    /** @format int64 */
-    fee: number;
-    /** @format timestamptz */
-    expiry_date: number | null;
-    transportation_type: "NONE" | "MAX" | "FIXED";
-    /** @format int64 */
-    transportation_amount: number;
+    restaurant_cuisine_id: number[];
+    description: string;
+    phone: string;
+    status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
   };
   adminlog: {
     /** @format int64 */
@@ -962,8 +1372,7 @@ export interface RestaurantsApprovePartialUpdateData {
      * @default "now"
      */
     created_at: number;
-    /** @format int64 */
-    target_id: number;
+    target_id: string;
     target_type: string;
     action: string;
     reason: string;
@@ -1018,8 +1427,7 @@ export interface RestaurantsBanPartialUpdateData {
      * @default "now"
      */
     created_at: number;
-    /** @format int64 */
-    target_id: number;
+    target_id: string;
     target_type: string;
     action: string;
     reason: string;
@@ -1189,14 +1597,17 @@ export interface UserBanPartialUpdateData {
      * @default "now"
      */
     created_at: number;
-    /** @format int64 */
-    target_id: number;
+    target_id: string;
     target_type: string;
     action: string;
     reason: string;
     /** @format uuid */
     operator_id: string | null;
   };
+}
+
+export interface UsersApprovePartialUpdatePayload {
+  reason: string;
 }
 
 export interface UsersApprovePartialUpdateData {
@@ -1355,8 +1766,7 @@ export interface UsersBanPartialUpdateData {
      * @default "now"
      */
     created_at: number;
-    /** @format int64 */
-    target_id: number;
+    target_id: string;
     target_type: string;
     action: string;
     reason: string;
@@ -1459,6 +1869,8 @@ export type OperatorsListData = {
 export interface OperatorsCreatePayload {
   /** @format email */
   email: string;
+  /** @format password */
+  password: string;
   name: string;
 }
 
@@ -1622,6 +2034,294 @@ export interface RestaurantCuisineCreateData {
    */
   is_primary: boolean;
   category: string;
+}
+
+export type RestaurantReviewsListData = {
+  /** @format int64 */
+  id: number;
+  /**
+   * @format timestamptz
+   * @default "now"
+   */
+  created_at: number;
+  /** @format int64 */
+  rating: number;
+  comment: string;
+  /** @format timestamptz */
+  updated_at: number;
+  /** @format int64 */
+  session_id: number;
+  /** @format int64 */
+  reviewer_id: number;
+  /** @format uuid */
+  reviewee_id: string;
+  restaurant: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    name: string;
+    address: string;
+    cuisine_type: string;
+    business_hours: string;
+    contact_info: string;
+    profile_image: string;
+    /** @format timestamptz */
+    updated_at: number;
+    /**
+     * Whether the restaurant is active.
+     * @default "false"
+     */
+    is_active: boolean;
+    /** @format uuid */
+    companies_id: string | null;
+    station: string;
+    access: string;
+    rating: number;
+    /** @default "1" */
+    is_approved: boolean;
+    restaurant_cuisine_id: number[];
+    description: string;
+    phone: string;
+    status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
+  };
+  user: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    name: string;
+    /** @format email */
+    email: string;
+    user_type: string;
+    status: string;
+    /** @format date */
+    last_login_at: string | null;
+    /** @format date */
+    updated_at: string | null;
+    skills: string[];
+    experience_level: string;
+    bio: string;
+    certifications: string[];
+    /** @format date */
+    dateofbirth: string | null;
+    profile_image: string;
+    /** @default "false" */
+    is_approved: boolean;
+    line_user_id: string;
+    line_display_name: string;
+    /** @default "false" */
+    line_notification_enabled: boolean;
+    /** @default "false" */
+    is_verified: boolean;
+    verify_token: string;
+    stripe_account_id: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
+    password_reset_token: string;
+    /** @default "false" */
+    stripe_verified: boolean;
+    stripe_requirements: object;
+    address: string;
+    phone: string;
+    last_name: string;
+    given_name: string;
+    last_name_kana: string;
+    given_name_kana: string;
+    categories: number[];
+    postal_code: string;
+    prefecture: string;
+    address2: string;
+    city: string;
+    town: string;
+    street: string;
+    /** @default "false" */
+    profile_completed: boolean;
+    position_level: "1" | "2" | "3" | "4";
+    invoice_number: string | null;
+    magic_link: {
+      token: string;
+      /**
+       * Time the token expires
+       * @format timestamptz
+       */
+      expiration: number;
+      /** @default "false" */
+      used: boolean;
+    } | null;
+  };
+  worksession: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format timestamptz */
+    check_in_time: number;
+    /** @format timestamptz */
+    check_out_time: number;
+    total_hours: number;
+    location_data: string;
+    status:
+      | "SCHEDULED"
+      | "IN_PROGRESS"
+      | "CANCELED_BY_CHEF"
+      | "CANCELED_BY_RESTAURANT"
+      | "COMPLETED"
+      | "VERIFIED"
+      | "DISPUTE"
+      | "ESCALATED"
+      | "PAID"
+      | "CANCELED"
+      | "VERIFY_REJECTED";
+    /** @format timestamptz */
+    updated_at: number;
+    /** @format uuid */
+    application_id: string | null;
+    /** @format uuid */
+    user_id: string | null;
+    /** @format int64 */
+    restaurant_id: number;
+    /** @format int64 */
+    job_id: number;
+    /** @format int64 */
+    paid_amount: number;
+    chef_feedback: string;
+    restaurant_feedback: string;
+    /** @format int64 */
+    chef_rating: number;
+    /** @format int64 */
+    restaurant_rating: number;
+    /** @format timestamptz */
+    start_time: number | null;
+    /** @format int64 */
+    check_in_code: number | null;
+    /** @format int64 */
+    transportation_expenses: number | null;
+    /** @format int64 */
+    actual_fee: number;
+    transportation_type: "FIXED" | "NONE" | "MAX";
+  };
+}[];
+
+export interface RestaurantsDetailData {
+  restaurant: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    name: string;
+    address: string;
+    cuisine_type: string;
+    business_hours: string;
+    contact_info: string;
+    profile_image: string;
+    /** @format timestamptz */
+    updated_at: number;
+    /**
+     * Whether the restaurant is active.
+     * @default "false"
+     */
+    is_active: boolean;
+    /** @format uuid */
+    companies_id: string | null;
+    station: string;
+    access: string;
+    rating: number;
+    /** @default "1" */
+    is_approved: boolean;
+    restaurant_cuisine_id: number[];
+    description: string;
+    phone: string;
+    status: "BANNED" | "PENDING" | "DELETED" | "APPROVED";
+  };
+  company: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    name: string;
+    address: string;
+    phone: string;
+    website: string;
+    description: string;
+    status: "pending" | "approved" | "banned" | "rejected";
+    /** @format timestamptz */
+    updated_at: number | null;
+    business_registration_number: string;
+    logo_url: string;
+    stripe_customer_id: string;
+    /** @format email */
+    company_email: string;
+  };
+  companyUsers: {
+    /** @format uuid */
+    id: string;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    /** @format uuid */
+    companies_id: string | null;
+    name: string;
+    /** @format email */
+    email: string;
+    phone: string | null;
+    /** @format password */
+    password: string;
+    /** @default "false" */
+    is_admin: boolean;
+    /** @default "1" */
+    is_active: boolean;
+    /** @default "false" */
+    is_verified: boolean;
+    /** @format timestamptz */
+    updated_at: number | null;
+    magic_link: object;
+    verify_token: string;
+    /** @format email */
+    pending_email: string;
+    email_change_token: string;
+    password_reset_token: string;
+  }[];
+  /** @format int64 */
+  jobCount: number;
+  /** @format int64 */
+  worksessionCount: number;
+  /** @format int64 */
+  worksessionCanceledByRestaurantCount: number;
+  rating: string;
+  adminlogs: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    target_id: string;
+    target_type: string;
+    action: string;
+    reason: string;
+    /** @format uuid */
+    operator_id: string | null;
+  }[];
 }
 
 export type RestaurantsListData = {

@@ -8,6 +8,7 @@ import {
   banChef,
   approveChef,
   UsersListResponse,
+  fetchOperators,
 } from "@/lib/redux/slices/operatorSlice";
 import {
   Table,
@@ -18,20 +19,39 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Search } from "lucide-react";
+import { Search, SlidersHorizontal, Download } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { EXPERIENCE_LEVELS } from "@/lib/const/chef-profile";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import Papa from "papaparse";
+import { exportCsv } from "@/lib/utils";
+import { format } from "date-fns";
+import { ja } from "date-fns/locale";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function ChefsPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -39,31 +59,44 @@ export default function ChefsPage() {
   const chefs = useSelector((state: RootState) => state.operator.chefs.data);
   const loading = useSelector((state: RootState) => state.operator.chefs.loading);
   const error = useSelector((state: RootState) => state.operator.chefs.error);
+  const operators = useSelector((state: RootState) => state.operator.operators.data);
 
   const [selectedChef, setSelectedChef] = useState<UsersListResponse | null>(null);
-  const [banReason, setBanReason] = useState("");
-  const [showSuspendedOnly, setShowSuspendedOnly] = useState(false);
+  const [reason, setReason] = useState("");
+  
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortKey, setSortKey] = useState<keyof typeof chefs[0] | null>(null);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [worksessionCountMin, setWorksessionCountMin] = useState("");
+  const [worksessionCountMax, setWorksessionCountMax] = useState("");
+  const [canceledCountMin, setCanceledCountMin] = useState("");
+  const [canceledCountMax, setCanceledCountMax] = useState("");
+  const [ratingMin, setRatingMin] = useState("");
+  const [ratingMax, setRatingMax] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string[]>(["approved", "banned"]);
+  const [stripeFilter, setStripeFilter] = useState<string[]>(["linked", "not_linked"]);
 
   const { toast } = useToast();
 
   useEffect(() => {
     dispatch(fetchChefs());
+    dispatch(fetchOperators());
   }, [dispatch]);
 
   const handleBan = async (chef: UsersListResponse) => {
-    if (!banReason) return;
+    if (!reason) return;
 
     try {
       await dispatch(
-        banChef({ id: chef.id, reason: banReason })
+        banChef({ id: chef.id, reason })
       ).unwrap();
       toast({
         title: "シェフをBANしました",
         description: `${chef.name}をBANしました。`,
       });
       setSelectedChef(null);
-      setBanReason("");
+      setReason("");
       dispatch(fetchChefs());
     } catch (error) {
       toast({
@@ -75,13 +108,16 @@ export default function ChefsPage() {
   };
 
   const handleApprove = async (chef: UsersListResponse) => {
+    if (!reason) return;
+
     try {
-      await dispatch(approveChef(chef.id)).unwrap();
+      await dispatch(approveChef({ id: chef.id, reason })).unwrap();
       toast({
         title: "シェフを承認しました",
         description: `${chef.name}を承認しました。`,
       });
       setSelectedChef(null);
+      setReason("");
       dispatch(fetchChefs());
     } catch (error) {
       toast({
@@ -92,115 +128,415 @@ export default function ChefsPage() {
     }
   };
 
+  // ソート関数
+  const handleSort = (key: keyof typeof chefs[0]) => {
+    if (sortKey === key) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setSortOrder("asc");
+    }
+  };
+
+  // ソートアイコン
+  const renderSortIcon = (key: keyof typeof chefs[0]) => {
+    if (sortKey !== key) return null;
+    return sortOrder === "asc" ? "▲" : "▼";
+  };
+
+  // フィルタリング
   const filteredChefs = chefs.filter((chef) => {
-    // フィルター条件を組み合わせる
-    const matchesSearch =
-      searchQuery === "" ||
-      chef.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      chef.email.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = !showSuspendedOnly || !chef.is_approved;
-    return matchesSearch && matchesStatus;
+    const query = searchQuery.trim().toLowerCase();
+    if (
+      query &&
+      !(
+        chef.id.toString().includes(query) ||
+        chef.name.toLowerCase().includes(query) ||
+        chef.email.toLowerCase().includes(query)
+      )
+    ) {
+      return false;
+    }
+    // マッチング数
+    if (
+      (worksessionCountMin && chef.worksessionCount < Number(worksessionCountMin)) ||
+      (worksessionCountMax && chef.worksessionCount > Number(worksessionCountMax))
+    ) {
+      return false;
+    }
+    // キャンセル数
+    if (
+      (canceledCountMin && chef.worksessionCanceledByChefCount < Number(canceledCountMin)) ||
+      (canceledCountMax && chef.worksessionCanceledByChefCount > Number(canceledCountMax))
+    ) {
+      return false;
+    }
+    // 点数
+    if (
+      (ratingMin && chef.rating < Number(ratingMin)) ||
+      (ratingMax && chef.rating > Number(ratingMax))
+    ) {
+      return false;
+    }
+    // ステータス
+    const status = chef.is_approved ? "approved" : "banned";
+    if (statusFilter.length === 0 || !statusFilter.includes(status)) {
+      return false;
+    }
+    // Stripe連携
+    const stripe = chef.stripe_verified ? "linked" : "not_linked";
+    if (stripeFilter.length === 0 || !stripeFilter.includes(stripe)) {
+      return false;
+    }
+    return true;
   });
 
+  // ソート済みデータ
+  const sortedChefs = [...filteredChefs].sort((a, b) => {
+    if (!sortKey) return 0;
+    const aValue = a[sortKey];
+    const bValue = b[sortKey];
+    if (typeof aValue === "number" && typeof bValue === "number") {
+      return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
+    }
+    if (typeof aValue === "string" && typeof bValue === "string") {
+      return sortOrder === "asc"
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    }
+    if (typeof aValue === "boolean" && typeof bValue === "boolean") {
+      return sortOrder === "asc"
+        ? Number(aValue) - Number(bValue)
+        : Number(bValue) - Number(aValue);
+    }
+    return 0;
+  });
+
+  // エクスポート関数
+  const handleExportCSV = () => {
+    if (!sortedChefs.length) return;
+
+    const data = sortedChefs.map((chef) => ({
+      ID: chef.id,
+      名前: chef.name,
+      メール: chef.email,
+      マッチング数: chef.worksessionCount,
+      キャンセル数: chef.worksessionCanceledByChefCount,
+      キャンセル率:
+        chef.worksessionCount > 0
+          ? ((chef.worksessionCanceledByChefCount / chef.worksessionCount) * 100).toFixed(2) + "%"
+          : "0%",
+      Stripe連携状況: chef.stripe_verified ? "連携済み" : "未連携",
+      ステータス: chef.is_approved ? "承認済み" : "一時停止中",
+      点数: chef.rating,
+    }));
+
+    const csv = Papa.unparse(data);
+    exportCsv(csv, "chefs.csv");
+  };
+
   if (loading) {
-    return <div className="p-4">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="p-4 text-red-500">{error}</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-red-500">エラーが発生しました: {error}</div>
+      </div>
+    );
   }
 
   return (
-     <>
-      <div className="p-4">
-        <div className="flex flex-col gap-4 mb-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold">シェフ一覧</h1>
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="suspended-filter"
-                checked={showSuspendedOnly}
-                onCheckedChange={setShowSuspendedOnly}
-              />
-              <Label htmlFor="suspended-filter">一時停止中のみ表示</Label>
-            </div>
-          </div>
-          <div className="relative">
+    <>
+      <div className="space-y-4">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-2xl font-bold tracking-tight">シェフ一覧</h2>
+          <p className="text-muted-foreground">登録されているシェフの一覧です</p>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="relative flex-1">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="名前やメールアドレスで検索..."
+              type="search"
+              placeholder="ID・名前・メールで検索..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8"
+              className="w-full pl-8 bg-white"
             />
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setFilterOpen(true)}
+          >
+            <SlidersHorizontal className="mr-2 h-4 w-4" />
+            フィルター
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportCSV}
+          >
+            <Download className="mr-2 h-4 w-4" />
+            エクスポート
+          </Button>
         </div>
+
+        {/* フィルターダイアログ */}
+        <Dialog open={filterOpen} onOpenChange={setFilterOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>シェフフィルター</DialogTitle>
+            </DialogHeader>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>マッチング数（最小）</Label>
+                <Input
+                  type="number"
+                  value={worksessionCountMin}
+                  onChange={e => setWorksessionCountMin(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label>マッチング数（最大）</Label>
+                <Input
+                  type="number"
+                  value={worksessionCountMax}
+                  onChange={e => setWorksessionCountMax(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label>キャンセル数（最小）</Label>
+                <Input
+                  type="number"
+                  value={canceledCountMin}
+                  onChange={e => setCanceledCountMin(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label>キャンセル数（最大）</Label>
+                <Input
+                  type="number"
+                  value={canceledCountMax}
+                  onChange={e => setCanceledCountMax(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label>点数（最小）</Label>
+                <Input
+                  type="number"
+                  value={ratingMin}
+                  onChange={e => setRatingMin(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label>点数（最大）</Label>
+                <Input
+                  type="number"
+                  value={ratingMax}
+                  onChange={e => setRatingMax(e.target.value)}
+                />
+              </div>
+              <div className="col-span-2">
+                <Label>ステータス</Label>
+                <div className="flex gap-4 mt-1">
+                  <label className="flex items-center gap-1">
+                    <Checkbox
+                      checked={statusFilter.includes("approved")}
+                      onCheckedChange={checked => {
+                        setStatusFilter(prev =>
+                          checked
+                            ? [...prev, "approved"]
+                            : prev.filter(v => v !== "approved")
+                        );
+                      }}
+                    />
+                    承認済み
+                  </label>
+                  <label className="flex items-center gap-1">
+                    <Checkbox
+                      checked={statusFilter.includes("banned")}
+                      onCheckedChange={checked => {
+                        setStatusFilter(prev =>
+                          checked
+                            ? [...prev, "banned"]
+                            : prev.filter(v => v !== "banned")
+                        );
+                      }}
+                    />
+                    一時停止中
+                  </label>
+                </div>
+              </div>
+              <div className="col-span-2">
+                <Label>Stripe連携状況</Label>
+                <div className="flex gap-4 mt-1">
+                  <label className="flex items-center gap-1">
+                    <Checkbox
+                      checked={stripeFilter.includes("linked")}
+                      onCheckedChange={checked => {
+                        setStripeFilter(prev =>
+                          checked
+                            ? [...prev, "linked"]
+                            : prev.filter(v => v !== "linked")
+                        );
+                      }}
+                    />
+                    連携済み
+                  </label>
+                  <label className="flex items-center gap-1">
+                    <Checkbox
+                      checked={stripeFilter.includes("not_linked")}
+                      onCheckedChange={checked => {
+                        setStripeFilter(prev =>
+                          checked
+                            ? [...prev, "not_linked"]
+                            : prev.filter(v => v !== "not_linked")
+                        );
+                      }}
+                    />
+                    未連携
+                  </label>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setFilterOpen(false)}>
+                閉じる
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         <Card>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>名前</TableHead>
-                  <TableHead>メール</TableHead>
-                  <TableHead>マッチング数</TableHead>
-                  <TableHead>キャンセル数</TableHead>
-                  <TableHead>キャンセル率</TableHead>
-                  <TableHead>Stripe連携状況</TableHead>
-                  <TableHead>ステータス</TableHead>
-                  <TableHead>点数</TableHead>
-                  <TableHead>操作</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredChefs.map((chef) => (
-                  <TableRow key={chef.id}>
-                    <TableCell>{chef.id}</TableCell>
-                    <TableCell>{chef.name}</TableCell>
-                    <TableCell>{chef.email}</TableCell>
-                    <TableCell>{chef.worksessionCount}</TableCell>
-                    <TableCell>{chef.worksessionCanceledByChefCount}</TableCell>
-                    <TableCell>
-                      {chef.worksessionCanceledByChefCount > 0
-                        ? `${(
-                            (chef.worksessionCanceledByChefCount /
-                              chef.worksessionCount) *
-                            100
-                          ).toFixed(2)}%`
-                        : "0%"}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        className={`whitespace-nowrap ${
-                          chef.stripe_verified
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}>
-                        {chef.stripe_verified ? "連携済み" : "未連携"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        className={`whitespace-nowrap ${
-                          chef.is_approved
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}>
-                        {chef.is_approved ? "承認済み" : "一時停止中"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{chef.rating}</TableCell>
-                    <TableCell>
-                      <Button
-                        variant="outline"
-                        onClick={() => setSelectedChef(chef)}>
-                        詳細
-                      </Button>
-                    </TableCell>
+            <div className="w-full overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead
+                      style={{ minWidth: "10em", width: "10em" }}
+                      onClick={() => handleSort("id")}
+                      className="cursor-pointer"
+                    >
+                      ID {renderSortIcon("id")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "10em", width: "10em" }}
+                      onClick={() => handleSort("name")}
+                      className="cursor-pointer"
+                    >
+                      名前 {renderSortIcon("name")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "14em", width: "14em" }}
+                      onClick={() => handleSort("email")}
+                      className="cursor-pointer"
+                    >
+                      メール {renderSortIcon("email")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "8em", width: "8em" }}
+                      onClick={() => handleSort("worksessionCount")}
+                      className="cursor-pointer"
+                    >
+                      マッチング数 {renderSortIcon("worksessionCount")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "8em", width: "8em" }}
+                      onClick={() => handleSort("worksessionCanceledByChefCount")}
+                      className="cursor-pointer"
+                    >
+                      キャンセル数 {renderSortIcon("worksessionCanceledByChefCount")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "8em", width: "8em" }}
+                      className="cursor-pointer"
+                    >
+                      キャンセル率
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "10em", width: "10em" }}
+                      onClick={() => handleSort("stripe_verified")}
+                      className="cursor-pointer"
+                    >
+                      Stripe連携状況 {renderSortIcon("stripe_verified")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "8em", width: "8em" }}
+                      onClick={() => handleSort("is_approved")}
+                      className="cursor-pointer"
+                    >
+                      ステータス {renderSortIcon("is_approved")}
+                    </TableHead>
+                    <TableHead
+                      style={{ minWidth: "4em", width: "4em" }}
+                      onClick={() => handleSort("rating")}
+                      className="cursor-pointer"
+                    >
+                      点数 {renderSortIcon("rating")}
+                    </TableHead>
+                    <TableHead style={{ minWidth: "5em", width: "5em" }}>
+                      操作
+                    </TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {sortedChefs.map((chef) => (
+                    <TableRow key={chef.id}>
+                      <TableCell>{chef.id}</TableCell>
+                      <TableCell>{chef.name}</TableCell>
+                      <TableCell>{chef.email}</TableCell>
+                      <TableCell>{chef.worksessionCount}</TableCell>
+                      <TableCell>{chef.worksessionCanceledByChefCount}</TableCell>
+                      <TableCell>
+                        {chef.worksessionCanceledByChefCount > 0
+                          ? `${(
+                              (chef.worksessionCanceledByChefCount /
+                                chef.worksessionCount) *
+                              100
+                            ).toFixed(2)}%`
+                          : "0%"}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={`whitespace-nowrap ${
+                            chef.stripe_verified
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }`}>
+                          {chef.stripe_verified ? "連携済み" : "未連携"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={`whitespace-nowrap ${
+                            chef.is_approved
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }`}>
+                          {chef.is_approved ? "承認済み" : "一時停止中"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{chef.rating}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          onClick={() => setSelectedChef(chef)}>
+                          詳細
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -261,30 +597,107 @@ export default function ChefsPage() {
                 </p>
                 <p>点数: {selectedChef.rating}</p>
               </div>
+              <div>
+                <h3 className="font-semibold">管理操作ログ</h3>
+                <div>
+                  {selectedChef.adminlogs.length > 0 ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>日時</TableHead>
+                          <TableHead>操作</TableHead>
+                          <TableHead>操作理由</TableHead>
+                          <TableHead>担当者</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {selectedChef.adminlogs.map((log) => (
+                          <TableRow key={log.id}>
+                            <TableCell>
+                              {format(new Date(log.created_at), "yyyy/MM/dd HH:mm", { locale: ja })}
+                            </TableCell>
+                            <TableCell>{log.action}</TableCell>
+                            <TableCell>{log.reason || "-"}</TableCell>
+                            <TableCell>
+                              {operators.find((op) => op.id === log.operator_id)?.name || "-"}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  ) : <div className="text-gray-500">管理操作ログはありません。</div>
+                }
+                </div>
+              </div>
               {!selectedChef.is_approved ? (
                 <div>
                   <h3 className="font-semibold mb-2">承認</h3>
-                  <Button
-                    variant="default"
-                    className="w-full"
-                    onClick={() => handleApprove(selectedChef)}>
-                    承認する
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="default"
+                      >
+                        承認する
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>求人の承認</DialogTitle>
+                      </DialogHeader>
+                      <DialogDescription>
+                        <span className="block mb-2">求人を承認しますか？</span>
+                        <Input
+                          placeholder="承認理由を入力"
+                          value={reason}
+                          onChange={(e) => setReason(e.target.value)}
+                        />
+                      </DialogDescription>
+                      <DialogFooter className="gap-2">
+                        <DialogClose>キャンセル</DialogClose>
+                        <Button
+                          variant="default"
+                          onClick={() => handleApprove(selectedChef)}>
+                          承認する
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               ) : (
                 <div>
                   <h3 className="font-semibold mb-2">BAN</h3>
-                  <Input
-                    placeholder="BAN理由を入力"
-                    value={banReason}
-                    onChange={(e) => setBanReason(e.target.value)}
-                  />
-                  <Button
-                    variant="destructive"
-                    className="mt-2 w-full"
-                    onClick={() => handleBan(selectedChef)}>
-                    BANする
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="destructive"
+                      >
+                        BANする
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          求人のBAN
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          <span className="block mb-2">求人をBANしますか？</span>
+                          <Input
+                            placeholder="BAN理由を入力"
+                            value={reason}
+                            onChange={(e) => setReason(e.target.value)}
+                          />
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleBan(selectedChef)}
+                          className="bg-red-600 hover:bg-red-700">
+                          BANする
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               )}
             </div>

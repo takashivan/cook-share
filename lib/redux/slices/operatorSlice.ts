@@ -1,19 +1,29 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { operatorApi } from "@/lib/api/operator";
-import { getAllChefs, UserProfile } from "@/lib/api/user";
-import { getAllJobs } from "@/lib/api/job";
-import { getCuisines } from "@/lib/api/cuisines";
-import { getSkills } from "@/lib/api/skill";
-import { getRestaurants, Restaurant } from "@/lib/api/restaurant";
-import { JobWithRestaurant } from "@/types";
 import { getApi } from "@/api/api-factory";
-import { CompaniesListData } from "@/api/__generated__/base/data-contracts";
+import { CompaniesDetailData, CompaniesListData, RestaurantCuisinesListData } from "@/api/__generated__/base/data-contracts";
 import { Companies } from "@/api/__generated__/operator/Companies";
-import { UsersListData } from "@/api/__generated__/operator/data-contracts";
+import { RestaurantsDetailData, RestaurantsListData, UsersListData, CompaniesDetailData as CompaniesDetailDataDorOperator, JobsListData, ChefReviewsListData, RestaurantReviewsListData, OperatorsListData, BillingSummariesListData } from "@/api/__generated__/operator/data-contracts";
 import { Users } from "@/api/__generated__/operator/Users";
 import { Operator } from "@/api/__generated__/operator/Operator";
+import { Restaurants } from "@/api/__generated__/operator/Restaurants";
+import { RestaurantCuisines } from "@/api/__generated__/base/RestaurantCuisines";
+import { Jobs } from "@/api/__generated__/operator/Jobs";
+import { ChefReviews } from "@/api/__generated__/operator/ChefReviews";
+import { RestaurantReviews } from "@/api/__generated__/operator/RestaurantReviews";
+import { Operators } from "@/api/__generated__/operator/Operators";
+import { BillingSummaries } from "@/api/__generated__/operator/BillingSummaries";
 
-// Async Thunks
+// ダッシュボード
+export const fetchDashboardQuery = createAsyncThunk(
+  "operator/fetchDashboardQuery",
+  async () => {
+    const response = await operatorApi.getDashboardQuery();
+    return response;
+  }
+);
+
+// 会社一覧
 // XANOから生成されるSwaggerの定義が不完全なため、レスポンスの型を手動で定義する
 type CompaniesListResponse = CompaniesListData[number] & {
   restaurantCount: number;
@@ -25,7 +35,6 @@ export const fetchCompanies = createAsyncThunk(
   "operator/fetchCompanies",
   async (_, { rejectWithValue }) => {
     try {
-      console.log("Fetching companies...");
       const companiesApi = getApi(Companies);
       const response = await companiesApi.companiesList({
         headers: {
@@ -39,12 +48,183 @@ export const fetchCompanies = createAsyncThunk(
   }
 );
 
-// Async Thunks
+// 会社詳細
+// XANOから生成されるSwaggerの定義が不完全なため、レスポンスの型を手動で定義する
+type CompanyDetailResponse = Omit<CompaniesDetailDataDorOperator, "restaurants"> & {
+  restaurants: Array<CompaniesDetailDataDorOperator["restaurants"][number] & {
+    companyUserCount: number;
+    jobCount: number;
+    worksessionCount: number;
+    worksessionCanceledByRestaurantCount: number;
+    rating: number;
+  }>;
+};
+
+export const fetchCompanyDetail = createAsyncThunk(
+  "operator/fetchCompanyDetail",
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const companiesApi = getApi(Companies);
+      const response = await companiesApi.companiesDetail(id, {
+        headers: {
+          "X-User-Type": "operator",
+        }
+      });
+      return response.data as CompanyDetailResponse;
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
+// レストラン一覧
+// XANOから生成されるSwaggerの定義が不完全なため、レスポンスの型を手動で定義する
+export type RestaurantsListResponse = RestaurantsListData[number] & {
+  company: CompaniesDetailData;
+  companyUserCount: number;
+  jobCount: number;
+  worksessionCount: number;
+  worksessionCanceledByRestaurantCount: number;
+  rating: number;
+};
+export const fetchRestaurants = createAsyncThunk(
+  "operator/fetchRestaurants",
+  async (_, { rejectWithValue }) => {
+    try {
+      const restaurantsApi = getApi(Restaurants);
+      const response = await restaurantsApi.restaurantsList({
+        headers: {
+          "X-User-Type": "operator",
+        }
+      });
+      return response.data as RestaurantsListResponse[];
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
+// レストラン詳細
+export const fetchRestaurantDetail = createAsyncThunk(
+  "operator/fetchRestaurant",
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const restaurantsApi = getApi(Restaurants);
+      const response = await restaurantsApi.restaurantsDetail(id, {
+        headers: {
+          "X-User-Type": "operator",
+        }
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
+// レストランのBAN
+export const banRestaurant = createAsyncThunk(
+  "operator/banRestaurant",
+  async (
+    { id, reason }: { id: number; reason: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const operatorApi = getApi(Operator);
+      const response = await operatorApi.restaurantsBanPartialUpdate(id, {
+        reason
+      }, {
+        headers: {
+          "X-User-Type": "operator",
+        }
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
+// レストランの承認
+export const approveRestaurant = createAsyncThunk(
+  "operator/approveRestaurant",
+  async (
+    { id, reason }: { id: number; reason: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const operatorApi = getApi(Operator);
+      const response = await operatorApi.restaurantsApprovePartialUpdate(id, {
+        reason
+      }, {
+        headers: {
+          "X-User-Type": "operator",
+        }
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
+// 求人一覧
+// XANOから生成されるSwaggerの定義が不完全なため、レスポンスの型を手動で定義する
+export type JobsListResponse = JobsListData[number] & {
+  adminlogs: RestaurantsDetailData["adminlogs"];
+};
+export const fetchOperatorJobs = createAsyncThunk(
+  "operator/fetchJobs",
+  async () => {
+    const jobsApi = getApi(Jobs);
+    const response = await jobsApi.jobsList({
+      headers: {
+        "X-User-Type": "operator",
+      }
+    });
+    return response.data as JobsListResponse[];
+  }
+);
+
+// 求人のBAN
+export const banJob = createAsyncThunk(
+  "operator/banJob",
+  async ({ id, reason }: { id: number; reason: string }) => {
+    const operatorApi = getApi(Operator);
+    const response = await operatorApi.jobsBanPartialUpdate(id, {
+      reason
+    }, {
+      headers: {
+        "X-User-Type": "operator",
+      }
+    });
+    return response.data;
+  }
+);
+
+// 求人の承認
+export const approveJob = createAsyncThunk(
+  "operator/approveJob",
+  async ({ id, reason }: { id: number; reason: string }) => {
+  const operatorApi = getApi(Operator);
+    const response = await operatorApi.jobsApprovePartialUpdate(id, {
+      reason
+    }, {
+      headers: {
+        "X-User-Type": "operator",
+      }
+    });
+    return response.data;
+  }
+);
+
+// シェフ一覧
 // XANOから生成されるSwaggerの定義が不完全なため、レスポンスの型を手動で定義する
 export type UsersListResponse = UsersListData[number] & {
   worksessionCount: number;
   worksessionCanceledByChefCount: number;
   rating: number;
+  adminlogs: RestaurantsDetailData["adminlogs"];
 };
 export const fetchChefs = createAsyncThunk(
   "operator/fetchChefs",
@@ -63,62 +243,7 @@ export const fetchChefs = createAsyncThunk(
   }
 );
 
-export const fetchDashboardQuery = createAsyncThunk(
-  "operator/fetchDashboardQuery",
-  async () => {
-    const response = await operatorApi.getDashboardQuery();
-    return response;
-  }
-);
-
-export const fetchChefsToBeReviewed = createAsyncThunk(
-  "operator/fetchChefsToBeReviewed",
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await operatorApi.getChefsToBeReviewed();
-      return response;
-    } catch (error) {
-      return rejectWithValue((error as Error).message);
-    }
-  }
-);
-export const fetchCuisines = createAsyncThunk(
-  "operator/fetchCuisines",
-  async () => {
-    const response = await getCuisines();
-    return response;
-  }
-);
-
-export const fetchOperatorJobs = createAsyncThunk(
-  "operator/fetchJobs",
-  async () => {
-    const response = await getAllJobs();
-    return response;
-  }
-);
-
-export const fetchBilling = createAsyncThunk(
-  "operator/fetchBilling",
-  async () => {
-    const response = await operatorApi.getBilling();
-    return response;
-  }
-);
-
-export const fetchStaff = createAsyncThunk("operator/fetchStaff", async () => {
-  const response = await operatorApi.getStaff();
-  return response;
-});
-
-export const fetchSkills = createAsyncThunk(
-  "operator/fetchSkills",
-  async () => {
-    const response = await getSkills();
-    return response;
-  }
-);
-
+// シェフのBAN
 export const banChef = createAsyncThunk(
   "operator/banChef",
   async (
@@ -141,12 +266,18 @@ export const banChef = createAsyncThunk(
   }
 );
 
+// シェフの承認
 export const approveChef = createAsyncThunk(
   "operator/approveChef",
-  async (id: string, { rejectWithValue }) => {
+  async (
+    { id, reason }: { id: string; reason: string },
+    { rejectWithValue }
+  ) => {
     try {
       const operatorApi = getApi(Operator);
       const response = await operatorApi.usersApprovePartialUpdate(id, {
+        reason
+      },{
         headers: {
           "X-User-Type": "operator",
         }
@@ -158,82 +289,119 @@ export const approveChef = createAsyncThunk(
   }
 );
 
-export const fetchRestaurants = createAsyncThunk<
-  Restaurant[],
-  void,
-  { rejectValue: string }
->("operator/fetchRestaurants", async (_, { rejectWithValue }) => {
-  try {
-    const response = await getRestaurants();
-    return response;
-  } catch (error) {
-    return rejectWithValue((error as Error).message);
-  }
-});
-
-export const banRestaurant = createAsyncThunk(
-  "operator/banRestaurant",
-  async (
-    { id, reason }: { id: string; reason: string },
-    { rejectWithValue }
-  ) => {
+// シェフレビュー一覧
+export const fetchChefReviews = createAsyncThunk(
+  "operator/fetchChefReviews",
+  async (_, { rejectWithValue }) => {
     try {
-      const response = await operatorApi.banRestaurant(id, reason);
-      return response;
+      const chefReviewsApi = getApi(ChefReviews);
+      const response = await chefReviewsApi.chefReviewsList({
+        headers: {
+          "X-User-Type": "operator",
+        }
+      });
+      return response.data;
     } catch (error) {
       return rejectWithValue((error as Error).message);
     }
   }
 );
 
-export const approveRestaurant = createAsyncThunk(
-  "operator/approveRestaurant",
-  async (
-    { id, reason }: { id: string; reason: string },
-    { rejectWithValue }
-  ) => {
+// レストランレビュー一覧
+export const fetchRestaurantReviews = createAsyncThunk(
+  "operator/fetchRestaurantReviews",
+  async (_, { rejectWithValue }) => {
     try {
-      const response = await operatorApi.approveRestaurant(id, reason);
-      return response;
+      const restaurantReviewsApi = getApi(RestaurantReviews);
+      const response = await restaurantReviewsApi.restaurantReviewsList({
+        headers: {
+          "X-User-Type": "operator",
+        }
+      });
+      return response.data;
     } catch (error) {
       return rejectWithValue((error as Error).message);
     }
   }
 );
 
-export const banJob = createAsyncThunk(
-  "operator/banJob",
-  async ({ id, reason }: { id: number; reason: string }) => {
-    const response = await operatorApi.banJob(id, reason);
-    return response;
-  }
-);
-
-export const approveJob = createAsyncThunk(
-  "operator/approveJob",
-  async ({ id, reason }: { id: number; reason: string }) => {
-    const response = await operatorApi.approveJob(id, reason);
-    return response;
-  }
-);
-
-export const fetchOperatorAlerts = createAsyncThunk(
-  "operator/fetchAlerts",
+// 請求一覧
+export const fetchBillings = createAsyncThunk(
+  "operator/fetchBillings",
   async () => {
-    const response = await operatorApi.getAlert();
-    return response;
+    const billingsApi = getApi(BillingSummaries);
+    const response = await billingsApi.billingSummariesList({
+      headers: {
+        "X-User-Type": "operator",
+      }
+    });
+    return response.data;
   }
 );
 
-interface Alert {
-  id: number;
-  created_at: number;
-  message: string;
-  job_id: number;
-  messages: string;
-  json: string;
-  status: string;
-}
+// ジャンル一覧
+export const fetchCuisines = createAsyncThunk(
+  "operator/fetchCuisines",
+  async () => {
+    const restaurantCuisinesApi = getApi(RestaurantCuisines);
+    const response = await restaurantCuisinesApi.restaurantCuisinesList();
+    return response.data;
+  }
+);
+
+// 運営管理者一覧
+export const fetchOperators = createAsyncThunk(
+  "operator/fetchOperators",
+  async () => {
+    const operatorsApi = getApi(Operators);
+    const response = await operatorsApi.operatorsList({
+      headers: {
+        "X-User-Type": "operator",
+      }
+    });
+    return response.data;
+  }
+);
+
+// 運営管理者の作成
+export const createOperator = createAsyncThunk(
+  "operator/createOperator",
+  async (data: { name: string; email: string; password: string }, { rejectWithValue }) => {
+    try {
+      const operatorsApi = getApi(Operators);
+      const response = await operatorsApi.operatorsCreate({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      }, {
+        headers: {
+          "X-User-Type": "operator",
+        }
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
+// 運営管理者の削除
+export const deleteOperator = createAsyncThunk(
+  "operator/deleteOperator",
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const operatorsApi = getApi(Operators);
+      await operatorsApi.operatorsDelete(id, {
+        headers: {
+          "X-User-Type": "operator",
+        }
+      });
+      return id; // Return the ID of the deleted operator
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
 
 interface DashboardQuery {
   total_users_count: number;
@@ -251,8 +419,33 @@ interface DashboardQuery {
 }
 
 interface OperatorState {
+  dashboardQuery: {
+    data: DashboardQuery | null;
+    loading: boolean;
+    error: string | null;
+  };
   companies: {
     data: CompaniesListResponse[],
+    loading: boolean;
+    error: string | null;
+  };
+  companyDetail: {
+    data: CompanyDetailResponse | null,
+    loading: boolean;
+    error: string | null;
+  };
+  restaurants: {
+    data: RestaurantsListResponse[];
+    loading: boolean;
+    error: string | null;
+  };
+  restaurantDetail: {
+    data: RestaurantsDetailData | null;
+    loading: boolean;
+    error: string | null;
+  };
+  jobs: {
+    data: JobsListResponse[];
     loading: boolean;
     error: string | null;
   };
@@ -261,57 +454,60 @@ interface OperatorState {
     loading: boolean;
     error: string | null;
   };
-  chefsToBeReviewed: {
-    data: UserProfile[];
+  chefReviews: {
+    data: ChefReviewsListData;
     loading: boolean;
     error: string | null;
   };
-  dashboardQuery: {
-    data: DashboardQuery | null;
+  restaurantReviews: {
+    data: RestaurantReviewsListData;
     loading: boolean;
     error: string | null;
   };
-  cuisines: any[];
-  skills: any[];
-  jobs: {
-    data: JobWithRestaurant[];
+  cuisines: {
+    data: RestaurantCuisinesListData;
     loading: boolean;
     error: string | null;
   };
-  billing: any;
-  staff: any[];
-  loading: {
-    companies: boolean;
-    chefs: boolean;
-    jobs: boolean;
-    billing: boolean;
-    staff: boolean;
-    cuisines: boolean;
-    skills: boolean;
-  };
-  error: {
-    companies: string | null;
-    chefs: string | null;
-    jobs: string | null;
-    billing: string | null;
-    staff: string | null;
-    cuisines: string | null;
-    skills: string | null;
-  };
-  restaurants: {
-    data: Restaurant[];
+  billingSummaries: {
+    data: BillingSummariesListData;
     loading: boolean;
     error: string | null;
   };
-  alerts: {
-    data: Alert[];
+  operators: {
+    data: OperatorsListData;
     loading: boolean;
     error: string | null;
   };
 }
 
 const initialState: OperatorState = {
+  dashboardQuery: {
+    data: null,
+    loading: false,
+    error: null,
+  },
   companies: {
+    data: [],
+    loading: false,
+    error: null,
+  },
+  companyDetail: {
+    data: null,
+    loading: false,
+    error: null,
+  },
+  restaurants: {
+    data: [],
+    loading: false,
+    error: null,
+  },
+  restaurantDetail: {
+    data: null,
+    loading: false,
+    error: null,
+  },
+  jobs: {
     data: [],
     loading: false,
     error: null,
@@ -321,53 +517,31 @@ const initialState: OperatorState = {
     loading: false,
     error: null,
   },
-  chefsToBeReviewed: {
+  chefReviews: {
     data: [],
     loading: false,
     error: null,
   },
-  jobs: {
+  restaurantReviews: {
     data: [],
     loading: false,
     error: null,
   },
-  cuisines: [],
-  skills: [],
-  billing: null,
-  staff: [],
-  loading: {
-    companies: false,
-    chefs: false,
-    jobs: false,
-    billing: false,
-    staff: false,
-    cuisines: false,
-    skills: false,
-  },
-  error: {
-    companies: null,
-    chefs: null,
-    jobs: null,
-    billing: null,
-    staff: null,
-    cuisines: null,
-    skills: null,
-  },
-  restaurants: {
+  cuisines: {
     data: [],
     loading: false,
     error: null,
   },
-  alerts: {
+  billingSummaries: {
     data: [],
     loading: false,
     error: null,
   },
-  dashboardQuery: {
-    data: null,
+  operators: {
+    data: [],
     loading: false,
     error: null,
-  },
+  }
 };
 
 const operatorSlice = createSlice({
@@ -375,6 +549,22 @@ const operatorSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
+    // Dashboard Query
+    builder
+      .addCase(fetchDashboardQuery.pending, (state) => {
+        state.dashboardQuery.loading = true;
+        state.dashboardQuery.error = null;
+      })
+      .addCase(fetchDashboardQuery.fulfilled, (state, action) => {
+        state.dashboardQuery.loading = false;
+        state.dashboardQuery.data = action.payload;
+      })
+      .addCase(fetchDashboardQuery.rejected, (state, action) => {
+        state.dashboardQuery.loading = false;
+        state.dashboardQuery.error =
+          action.error.message || "Failed to fetch dashboard query";
+      });
+
     // Companies
     builder
       .addCase(fetchCompanies.pending, (state) => {
@@ -390,121 +580,19 @@ const operatorSlice = createSlice({
         state.companies.error = action.error.message || "エラーが発生しました";
       });
 
-    // Chefs
+    // Company Detail
     builder
-      .addCase(fetchChefs.pending, (state) => {
-        state.chefs.loading = true;
-        state.chefs.error = null;
+      .addCase(fetchCompanyDetail.pending, (state) => {
+        state.companyDetail.loading = true;
+        state.companyDetail.error = null;
       })
-      .addCase(fetchChefs.fulfilled, (state, action) => {
-        state.chefs.loading = false;
-        state.chefs.data = action.payload;
+      .addCase(fetchCompanyDetail.fulfilled, (state, action) => {
+        state.companyDetail.data = action.payload;
+        state.companyDetail.loading = false;
       })
-      .addCase(fetchChefs.rejected, (state, action) => {
-        state.chefs.loading = false;
-        state.chefs.error = action.payload as string;
-      });
-
-    // Jobs
-    builder
-      .addCase(fetchOperatorJobs.pending, (state) => {
-        state.jobs.loading = true;
-        state.jobs.error = null;
-      })
-      .addCase(fetchOperatorJobs.fulfilled, (state, action) => {
-        state.jobs.data = action.payload;
-        state.jobs.loading = false;
-      })
-      .addCase(fetchOperatorJobs.rejected, (state, action) => {
-        state.jobs.loading = false;
-        state.jobs.error = action.error.message || "Failed to fetch jobs";
-      });
-
-    // Cuisines
-    builder
-      .addCase(fetchCuisines.pending, (state) => {
-        state.loading.cuisines = true;
-        state.error.cuisines = null;
-      })
-      .addCase(fetchCuisines.fulfilled, (state, action) => {
-        state.cuisines = action.payload;
-        state.loading.cuisines = false;
-      })
-      .addCase(fetchCuisines.rejected, (state, action) => {
-        state.loading.cuisines = false;
-        state.error.cuisines = action.error.message || "エラーが発生しました";
-      });
-
-    // Skills
-    builder
-      .addCase(fetchSkills.pending, (state) => {
-        state.loading.skills = true;
-        state.error.skills = null;
-      })
-      .addCase(fetchSkills.fulfilled, (state, action) => {
-        state.skills = action.payload;
-        state.loading.skills = false;
-      })
-      .addCase(fetchSkills.rejected, (state, action) => {
-        state.loading.skills = false;
-        state.error.skills = action.error.message || "エラーが発生しました";
-      });
-    // Billing
-    builder
-      .addCase(fetchBilling.pending, (state) => {
-        state.loading.billing = true;
-        state.error.billing = null;
-      })
-      .addCase(fetchBilling.fulfilled, (state, action) => {
-        state.billing = action.payload;
-        state.loading.billing = false;
-      })
-      .addCase(fetchBilling.rejected, (state, action) => {
-        state.loading.billing = false;
-        state.error.billing = action.error.message || "エラーが発生しました";
-      });
-
-    // Staff
-    builder
-      .addCase(fetchStaff.pending, (state) => {
-        state.loading.staff = true;
-        state.error.staff = null;
-      })
-      .addCase(fetchStaff.fulfilled, (state, action) => {
-        state.staff = action.payload;
-        state.loading.staff = false;
-      })
-      .addCase(fetchStaff.rejected, (state, action) => {
-        state.loading.staff = false;
-        state.error.staff = action.error.message || "エラーが発生しました";
-      });
-
-    // Ban Chef
-    builder
-      .addCase(banChef.pending, (state) => {
-        state.chefs.loading = true;
-        state.chefs.error = null;
-      })
-      .addCase(banChef.fulfilled, (state) => {
-        state.chefs.loading = false;
-      })
-      .addCase(banChef.rejected, (state, action) => {
-        state.chefs.loading = false;
-        state.chefs.error = action.payload as string;
-      });
-
-    // Approve Chef
-    builder
-      .addCase(approveChef.pending, (state) => {
-        state.chefs.loading = true;
-        state.chefs.error = null;
-      })
-      .addCase(approveChef.fulfilled, (state) => {
-        state.chefs.loading = false;
-      })
-      .addCase(approveChef.rejected, (state, action) => {
-        state.chefs.loading = false;
-        state.chefs.error = action.payload as string;
+      .addCase(fetchCompanyDetail.rejected, (state, action) => {
+        state.companyDetail.loading = false;
+        state.companyDetail.error = action.error.message || "エラーが発生しました";
       });
 
     // Fetch Restaurants
@@ -515,11 +603,26 @@ const operatorSlice = createSlice({
       })
       .addCase(fetchRestaurants.fulfilled, (state, action) => {
         state.restaurants.loading = false;
-        state.restaurants.data = action.payload as Restaurant[];
+        state.restaurants.data = action.payload;
       })
       .addCase(fetchRestaurants.rejected, (state, action) => {
         state.restaurants.loading = false;
         state.restaurants.error = action.payload as string;
+      });
+    
+    // Fetch Restaurant Detail
+    builder
+      .addCase(fetchRestaurantDetail.pending, (state) => {
+        state.restaurantDetail.loading = true;
+        state.restaurantDetail.error = null;
+      })
+      .addCase(fetchRestaurantDetail.fulfilled, (state, action) => {
+        state.restaurantDetail.loading = false;
+        state.restaurantDetail.data = action.payload;
+      })
+      .addCase(fetchRestaurantDetail.rejected, (state, action) => {
+        state.restaurantDetail.loading = false;
+        state.restaurantDetail.error = action.payload as string;
       });
 
     // Ban Restaurant
@@ -550,6 +653,21 @@ const operatorSlice = createSlice({
         state.restaurants.error = action.payload as string;
       });
 
+    // Jobs
+    builder
+      .addCase(fetchOperatorJobs.pending, (state) => {
+        state.jobs.loading = true;
+        state.jobs.error = null;
+      })
+      .addCase(fetchOperatorJobs.fulfilled, (state, action) => {
+        state.jobs.data = action.payload;
+        state.jobs.loading = false;
+      })
+      .addCase(fetchOperatorJobs.rejected, (state, action) => {
+        state.jobs.loading = false;
+        state.jobs.error = action.error.message || "Failed to fetch jobs";
+      });
+
     // Ban Job
     builder
       .addCase(banJob.pending, (state) => {
@@ -577,51 +695,153 @@ const operatorSlice = createSlice({
         state.jobs.loading = false;
         state.jobs.error = action.payload as string;
       });
-
-    // Fetch Alerts
+      
+    // Chefs
     builder
-      .addCase(fetchOperatorAlerts.pending, (state) => {
-        state.alerts.loading = true;
-        state.alerts.error = null;
+      .addCase(fetchChefs.pending, (state) => {
+        state.chefs.loading = true;
+        state.chefs.error = null;
       })
-      .addCase(fetchOperatorAlerts.fulfilled, (state, action) => {
-        state.alerts.loading = false;
-        state.alerts.data = action.payload;
+      .addCase(fetchChefs.fulfilled, (state, action) => {
+        state.chefs.loading = false;
+        state.chefs.data = action.payload;
       })
-      .addCase(fetchOperatorAlerts.rejected, (state, action) => {
-        state.alerts.loading = false;
-        state.alerts.error = action.error.message || "Failed to fetch alerts";
+      .addCase(fetchChefs.rejected, (state, action) => {
+        state.chefs.loading = false;
+        state.chefs.error = action.payload as string;
       });
 
-    // Chefs to be reviewed
+    // Ban Chef
     builder
-      .addCase(fetchChefsToBeReviewed.pending, (state) => {
-        state.chefsToBeReviewed.loading = true;
-        state.chefsToBeReviewed.error = null;
+      .addCase(banChef.pending, (state) => {
+        state.chefs.loading = true;
+        state.chefs.error = null;
       })
-      .addCase(fetchChefsToBeReviewed.fulfilled, (state, action) => {
-        state.chefsToBeReviewed.loading = false;
-        state.chefsToBeReviewed.data = action.payload;
+      .addCase(banChef.fulfilled, (state) => {
+        state.chefs.loading = false;
       })
-      .addCase(fetchChefsToBeReviewed.rejected, (state, action) => {
-        state.chefsToBeReviewed.loading = false;
-        state.chefsToBeReviewed.error = action.payload as string;
+      .addCase(banChef.rejected, (state, action) => {
+        state.chefs.loading = false;
+        state.chefs.error = action.payload as string;
       });
 
-    // Dashboard Query
+    // Approve Chef
     builder
-      .addCase(fetchDashboardQuery.pending, (state) => {
-        state.dashboardQuery.loading = true;
-        state.dashboardQuery.error = null;
+      .addCase(approveChef.pending, (state) => {
+        state.chefs.loading = true;
+        state.chefs.error = null;
       })
-      .addCase(fetchDashboardQuery.fulfilled, (state, action) => {
-        state.dashboardQuery.loading = false;
-        state.dashboardQuery.data = action.payload;
+      .addCase(approveChef.fulfilled, (state) => {
+        state.chefs.loading = false;
       })
-      .addCase(fetchDashboardQuery.rejected, (state, action) => {
-        state.dashboardQuery.loading = false;
-        state.dashboardQuery.error =
-          action.error.message || "Failed to fetch dashboard query";
+      .addCase(approveChef.rejected, (state, action) => {
+        state.chefs.loading = false;
+        state.chefs.error = action.payload as string;
+      });
+
+    // Chef Reviews
+    builder
+      .addCase(fetchChefReviews.pending, (state) => {
+        state.chefReviews.loading = true;
+        state.chefReviews.error = null;
+      })
+      .addCase(fetchChefReviews.fulfilled, (state, action) => {
+        state.chefReviews.data = action.payload;
+        state.chefReviews.loading = false;
+      })
+      .addCase(fetchChefReviews.rejected, (state, action) => {
+        state.chefReviews.loading = false;
+        state.chefReviews.error = action.error.message || "Failed to fetch chef reviews";
+      });
+
+    // Restaurant Reviews
+    builder
+      .addCase(fetchRestaurantReviews.pending, (state) => {
+        state.restaurantReviews.loading = true;
+        state.restaurantReviews.error = null;
+      })
+      .addCase(fetchRestaurantReviews.fulfilled, (state, action) => {
+        state.restaurantReviews.data = action.payload;
+        state.restaurantReviews.loading = false;
+      })
+      .addCase(fetchRestaurantReviews.rejected, (state, action) => {
+        state.restaurantReviews.loading = false;
+        state.restaurantReviews.error = action.error.message || "Failed to fetch restaurant reviews";
+      });
+
+    // Cuisines
+    builder
+      .addCase(fetchCuisines.pending, (state) => {
+        state.cuisines.loading = true;
+        state.cuisines.error = null;
+      })
+      .addCase(fetchCuisines.fulfilled, (state, action) => {
+        state.cuisines.data = action.payload;
+        state.cuisines.loading = false;
+      })
+      .addCase(fetchCuisines.rejected, (state, action) => {
+        state.cuisines.loading = false;
+        state.cuisines.error = action.error.message || "エラーが発生しました";
+      });
+
+    // Billing Summaries
+    builder
+      .addCase(fetchBillings.pending, (state) => {
+        state.billingSummaries.loading = true;
+        state.billingSummaries.error = null;
+      })
+      .addCase(fetchBillings.fulfilled, (state, action) => {
+        state.billingSummaries.data = action.payload;
+        state.billingSummaries.loading = false;
+      })
+      .addCase(fetchBillings.rejected, (state, action) => {
+        state.billingSummaries.loading = false;
+        state.billingSummaries.error = action.error.message || "Failed to fetch billing summaries";
+      });
+
+    // Fetch Operators
+    builder
+      .addCase(fetchOperators.pending, (state) => {
+        state.operators.loading = true;
+        state.operators.error = null;
+      })
+      .addCase(fetchOperators.fulfilled, (state, action) => {
+        state.operators.data = action.payload;
+        state.operators.loading = false;
+      })
+      .addCase(fetchOperators.rejected, (state, action) => {
+        state.operators.loading = false;
+        state.operators.error = action.error.message || "Failed to fetch operators";
+      });
+
+    // Create Operator
+    builder
+      .addCase(createOperator.pending, (state) => {
+        state.operators.loading = true;
+        state.operators.error = null;
+      })
+      .addCase(createOperator.fulfilled, (state, action) => {
+        state.operators.data.push(action.payload);
+        state.operators.loading = false;
+      })
+      .addCase(createOperator.rejected, (state, action) => {
+        state.operators.loading = false;
+        state.operators.error = action.error.message || "Failed to create operator";
+      });
+
+    // Delete Operator
+    builder
+      .addCase(deleteOperator.pending, (state) => {
+        state.operators.loading = true;
+        state.operators.error = null;
+      })
+      .addCase(deleteOperator.fulfilled, (state, action) => {
+        state.operators.data = state.operators.data.filter(operator => operator.id !== action.payload);
+        state.operators.loading = false;
+      })
+      .addCase(deleteOperator.rejected, (state, action) => {
+        state.operators.loading = false;
+        state.operators.error = action.error.message || "Failed to delete operator";
       });
   },
 });
