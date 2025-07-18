@@ -953,8 +953,7 @@ export interface JobApprovePartialUpdateData {
      * @default "now"
      */
     created_at: number;
-    /** @format int64 */
-    target_id: number;
+    target_id: string;
     target_type: string;
     action: string;
     reason: string;
@@ -1026,8 +1025,7 @@ export interface JobBanPartialUpdateData {
      * @default "now"
      */
     created_at: number;
-    /** @format int64 */
-    target_id: number;
+    target_id: string;
     target_type: string;
     action: string;
     reason: string;
@@ -1098,8 +1096,7 @@ export interface JobsApprovePartialUpdateData {
      * @default "now"
      */
     created_at: number;
-    /** @format int64 */
-    target_id: number;
+    target_id: string;
     target_type: string;
     action: string;
     reason: string;
@@ -1170,8 +1167,7 @@ export interface JobsBanPartialUpdateData {
      * @default "now"
      */
     created_at: number;
-    /** @format int64 */
-    target_id: number;
+    target_id: string;
     target_type: string;
     action: string;
     reason: string;
@@ -1252,8 +1248,7 @@ export interface RestaurantApprovePartialUpdateData {
      * @default "now"
      */
     created_at: number;
-    /** @format int64 */
-    target_id: number;
+    target_id: string;
     target_type: string;
     action: string;
     reason: string;
@@ -1309,8 +1304,7 @@ export interface RestaurantBanPartialUpdateData {
      * @default "now"
      */
     created_at: number;
-    /** @format int64 */
-    target_id: number;
+    target_id: string;
     target_type: string;
     action: string;
     reason: string;
@@ -1365,8 +1359,7 @@ export interface RestaurantsApprovePartialUpdateData {
      * @default "now"
      */
     created_at: number;
-    /** @format int64 */
-    target_id: number;
+    target_id: string;
     target_type: string;
     action: string;
     reason: string;
@@ -1421,8 +1414,7 @@ export interface RestaurantsBanPartialUpdateData {
      * @default "now"
      */
     created_at: number;
-    /** @format int64 */
-    target_id: number;
+    target_id: string;
     target_type: string;
     action: string;
     reason: string;
@@ -1592,8 +1584,7 @@ export interface UserBanPartialUpdateData {
      * @default "now"
      */
     created_at: number;
-    /** @format int64 */
-    target_id: number;
+    target_id: string;
     target_type: string;
     action: string;
     reason: string;
@@ -1762,8 +1753,7 @@ export interface UsersBanPartialUpdateData {
      * @default "now"
      */
     created_at: number;
-    /** @format int64 */
-    target_id: number;
+    target_id: string;
     target_type: string;
     action: string;
     reason: string;
@@ -2304,6 +2294,21 @@ export interface RestaurantsDetailData {
   /** @format int64 */
   worksessionCanceledByRestaurantCount: number;
   rating: string;
+  adminlogs: {
+    /** @format int64 */
+    id: number;
+    /**
+     * @format timestamptz
+     * @default "now"
+     */
+    created_at: number;
+    target_id: string;
+    target_type: string;
+    action: string;
+    reason: string;
+    /** @format uuid */
+    operator_id: string | null;
+  }[];
 }
 
 export type RestaurantsListData = {

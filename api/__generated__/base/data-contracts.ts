@@ -18,8 +18,7 @@ export interface AdminlogsDetailData {
    * @default "now"
    */
   created_at: number;
-  /** @format int64 */
-  target_id: number;
+  target_id: string;
   target_type: string;
   action: string;
   reason: string;
@@ -35,8 +34,7 @@ export type AdminlogsListData = {
    * @default "now"
    */
   created_at: number;
-  /** @format int64 */
-  target_id: number;
+  target_id: string;
   target_type: string;
   action: string;
   reason: string;
@@ -45,8 +43,7 @@ export type AdminlogsListData = {
 }[];
 
 export interface AdminlogsCreatePayload {
-  /** @format int64 */
-  target_id: number;
+  target_id: string;
   target_type: string;
   action: string;
   reason: string;
@@ -62,8 +59,7 @@ export interface AdminlogsCreateData {
    * @default "now"
    */
   created_at: number;
-  /** @format int64 */
-  target_id: number;
+  target_id: string;
   target_type: string;
   action: string;
   reason: string;
