@@ -156,7 +156,7 @@ export class Operator<
    * @secure
    */
   jobsApprovePartialUpdate = (
-    jobId: string,
+    jobId: number,
     data: JobsApprovePartialUpdatePayload,
     params: RequestParams = {},
   ) =>
@@ -171,7 +171,7 @@ export class Operator<
     });
 
   jobsApprovePartialUpdateQueryArgs = (
-    jobId: string,
+    jobId: number,
     params: RequestParams = {},
     enabled: boolean = true,
   ) => {
@@ -194,7 +194,7 @@ export class Operator<
    * @secure
    */
   jobsBanPartialUpdate = (
-    jobId: string,
+    jobId: number,
     data: JobsBanPartialUpdatePayload,
     params: RequestParams = {},
   ) =>
@@ -209,7 +209,7 @@ export class Operator<
     });
 
   jobsBanPartialUpdateQueryArgs = (
-    jobId: string,
+    jobId: number,
     params: RequestParams = {},
     enabled: boolean = true,
   ) => {
